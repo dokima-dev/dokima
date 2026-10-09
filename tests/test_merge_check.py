@@ -1,11 +1,11 @@
 """The merge check reads its criteria and their tests from the newest plan the reviewer approved (issue #168).
 
-Every test here runs the real command the "done-whens" workflow runs, `python3 -m dokima.checks matrix`, from the repo
+Every test here runs the real command the Acceptance criteria workflow runs, `python3 -m dokima.checks matrix`, from the repo
 root, with GitHub faked: a stub `gh` on PATH answers from a JSON file in a temp folder, and the pull request event is a
 temp file. The issue's records are real record comments, drawn by dokima.agent.render, so the check reads exactly what
 the bot posts. Nothing here touches the network.
 
-The last test reads the done-whens workflow itself (issue #168, the owner's later comment): the merge check must run
+The last test reads the Acceptance criteria workflow itself (issue #168, the owner's later comment): the merge check must run
 main's copy of its workflow and of Dokima's code, so a pull request can never change the check that judges it.
 """
 import json
@@ -137,7 +137,7 @@ def test_the_newest_plan_is_checked_only_once_approved_and_issue_text_is_ignored
     """The newest plan is the one checked, and only once the reviewer approved it; the issue's text is ignored.
 
     An older plan is approved, then a newer plan is approved: the checks follow the newer plan, even though the issue's
-    text holds criteria in the old done-when format. Then a newer plan is handed back and not yet reviewed: the merge
+    text holds criteria in an older format. Then a newer plan is handed back and not yet reviewed: the merge
     check fails with "No approved plan found for issue #168" until it is approved, never falling back to the older
     approved plan (the owner's answer, option B). A newer hand-back that code rejected is not a plan, so the approved
     plan still stands."""
@@ -172,7 +172,7 @@ def test_a_criterion_without_tests_gets_a_check_that_can_only_fail(record_proper
     assert by_id["168.2"]["name"] == "168.2 · Second thing works" and by_id["168.2"]["tests"] == "", \
         f"168.2: the untested criterion's check is not named for it or runs tests: {by_id['168.2']}"
     assert by_id["168.1"]["tests"] == "tests/test_a.py::test_one", f"168.2: the tested criterion lost its tests: {rows}"
-    workflow = open(os.path.join(ROOT, ".github/workflows/done-whens.yml")).read()
+    workflow = open(os.path.join(ROOT, ".github/workflows/acceptance-criteria.yml")).read()
     assert 'if [ -z "$TESTS" ]' in workflow and 'test "$RESULT" = "success"' in workflow, \
         "168.2: the workflow no longer fails an untested criterion or no longer gates on every criterion"
 
@@ -262,7 +262,7 @@ def permissions_read_only(inline, block):
 def test_the_merge_check_runs_mains_code_and_judges_the_pull_requests_code(record_property):
     """The merge check runs main's own copy of its workflow and of Dokima's code; only the tests come from the pull request.
 
-    Walks the done-whens workflow step by step. GitHub runs main's copy of a workflow only on `pull_request_target`, so
+    Walks the Acceptance criteria workflow step by step. GitHub runs main's copy of a workflow only on `pull_request_target`, so
     that must be its trigger, and never `pull_request`. Every checkout that names the pull request's head marks its
     folder as the pull request's; every other checkout is main's. Every `python3 -m dokima` step must run in one of
     main's folders, with no PYTHONPATH of its own, and the step that runs pytest must run in the pull request's folder,
@@ -271,7 +271,7 @@ def test_the_merge_check_runs_mains_code_and_judges_the_pull_requests_code(recor
     `permissions:` list of only read or none (without one, pull_request_target hands out the repo's default token, which
     can write), and any job's own `permissions:` may only say read or none."""
     record_property("proves", "168.5")
-    text = open(os.path.join(ROOT, ".github/workflows/done-whens.yml")).read()
+    text = open(os.path.join(ROOT, ".github/workflows/acceptance-criteria.yml")).read()
     on = re.split(r"(?m)^[a-z]", text.split("\non:\n", 1)[1], 1)[0]
     assert re.search(r"(?m)^  pull_request_target:", on), \
         "168.5: the merge check is not triggered by pull_request_target, so GitHub runs the pull request's copy of it"

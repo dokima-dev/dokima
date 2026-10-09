@@ -68,7 +68,7 @@ def run(name, status="completed", conclusion="success", n=7):
     return {"name": name, "status": status, "conclusion": conclusion, "html_url": job(n)}
 
 
-GREEN = [run("40.1 · First thing works", n=1), run("40.2 · Second thing works", n=2), run("all tests", n=4)]
+GREEN = [run("40.1 · First thing works", n=1), run("40.2 · Second thing works", n=2), run("All tests", n=4)]
 FOUND = {"recs": RECS, "pr": PR, "check_runs": GREEN, "reviews": [], "owners": {"boss"}, "tests": TESTS,
          "worker": DONE, "children": []}
 

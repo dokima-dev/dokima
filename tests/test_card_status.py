@@ -87,7 +87,7 @@ def run(name, status="completed", conclusion="success", n=7):
 
 
 GREEN = [run("40.1 · First thing works", n=1), run("40.2 · Second thing works", n=2),
-         run("40.3 · Nothing leaks out", n=3), run("all tests", n=4)]
+         run("40.3 · Nothing leaks out", n=3), run("All tests", n=4)]
 
 
 def comment(login, body, i):
@@ -533,8 +533,8 @@ NOT_READY = [
     ("a criterion's check was skipped", swap("40.2", conclusion="skipped")),
     ("a non-functional requirement has no check", without("40.3")),
     ("a non-functional requirement's check failed", swap("40.3", conclusion="failure")),
-    ("All tests failed", swap("all tests", conclusion="failure")),
-    ("All tests has not run", without("all tests")),
+    ("All tests failed", swap("All tests", conclusion="failure")),
+    ("All tests has not run", without("All tests")),
     ("no check ran at all", []),
 ]
 

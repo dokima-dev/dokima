@@ -39,7 +39,7 @@ def run(name, status="completed", conclusion="success", n=7):
             "html_url": f"https://github.com/o/r/actions/runs/2/job/{n}"}
 
 
-GREEN = [run("40.1 · first thing works", n=1), run("40.2 · second thing works", n=2), run("all tests", n=3)]
+GREEN = [run("40.1 · first thing works", n=1), run("40.2 · second thing works", n=2), run("All tests", n=3)]
 
 
 def render(checks=GREEN, worker=DONE, pr=PR, recs=APPROVED, page="issue"):

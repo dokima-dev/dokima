@@ -5,7 +5,7 @@ name: card
 # judged cannot change how it is reported.
 on:
   workflow_run:
-    workflows: [done-whens, full suite, worker]
+    workflows: [Acceptance criteria, All tests, worker]
     types: [completed]
   issues:
     types: [opened, edited]

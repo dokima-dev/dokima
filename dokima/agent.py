@@ -1392,6 +1392,8 @@ def on_autopilot(repo, number):
 
 WORKFLOWS = ".github/workflows/"
 PASSING = {"success", "neutral", "skipped"}
+# The checks autopilot requires by name on the head it merges: each must be there and must have succeeded.
+REQUIRED_CHECKS = ("All tests", "Acceptance criteria")
 
 
 def approves_work(rec):
@@ -1425,7 +1427,12 @@ def unproven(repo, sha):
                 for s in p.get("statuses") or []]
     if not runs and not statuses:
         return f"there are no checks on its head commit {sha[:7]}"
-    red = [f"{r['name']} ({r.get('conclusion')})" for r in runs if r.get("status") == "completed" and r.get("conclusion") not in PASSING]
+    missing = [n for n in REQUIRED_CHECKS if not any(r.get("name") == n for r in runs)]
+    if missing:
+        return (f"the check{'s' if len(missing) > 1 else ''} {' and '.join(missing)} "
+                f"{'are' if len(missing) > 1 else 'is'} missing on its head commit {sha[:7]}")
+    red = [f"{r['name']} ({r.get('conclusion')})" for r in runs if r.get("status") == "completed"
+           and r.get("conclusion") not in ({"success"} if r.get("name") in REQUIRED_CHECKS else PASSING)]
     red += [f"{s.get('context')} ({s.get('state')})" for s in statuses if s.get("state") not in ("success", "pending")]
     running = [r["name"] for r in runs if r.get("status") != "completed"]
     running += [s.get("context") for s in statuses if s.get("state") == "pending"]

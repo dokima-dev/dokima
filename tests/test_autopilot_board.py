@@ -317,7 +317,7 @@ def test_needs_you_replaces_autopilot_when_the_river_stops_and_autopilot_returns
 
     For #57 on autopilot with PR #60: the river stops (move_card with Needs you) and both cards show Needs you; it goes
     on (move_card without) and both show Autopilot again. The board sync does the same: a planner question shows Needs
-    you on #57, the work label after it shows Autopilot, and done-whens finishing on PR #60 shows Needs you on it."""
+    you on #57, the work label after it shows Autopilot, and the Acceptance criteria checks finishing on PR #60 shows Needs you on it."""
     record_property("proves", "210.3")
     w = make(labels={("issue", 57): {LABEL}, ("pr", 60): {LABEL}}, prs={57: 60})
     agent.move_card("o/r", "57", "Plan", True, "o/1")

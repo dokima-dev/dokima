@@ -5,7 +5,7 @@ sys.path.insert(0, os.path.join(os.path.dirname(__file__), ".."))
 from dokima import checks  # noqa: E402
 
 
-def test_long_done_whens_get_short_check_names(record_property):
+def test_long_criteria_get_short_check_names(record_property):
     record_property("proves", "29.1")
     assert checks.check_name("40.1", "x" * 100) == "40.1 · " + "x" * 57 + "..."
 
@@ -26,7 +26,6 @@ def test_full_suite_runs_every_test_on_every_pull_request(record_property):
     record_property("proves", "29.4")
     path = os.path.join(os.path.dirname(__file__), "..", ".github/workflows/full-suite.yml")
     lines = [line.strip() for line in open(path)]
-    assert "name: full suite" in lines
     assert "pull_request_target:" in lines
-    assert "name: all tests" in lines
+    assert "name: All tests" in lines
     assert any(line.startswith("- run: pytest") and line.endswith(" tests") for line in lines)

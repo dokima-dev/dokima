@@ -124,7 +124,7 @@ PR = {"number": 5, "merged": False, "state": "open", "body": "Closes #40"}
 DONE = {"status": "completed", "conclusion": "success", "html_url": "https://github.com/o/r/actions/runs/1"}
 GREEN = [{"name": n, "status": "completed", "conclusion": "success", "html_url": f"https://github.com/o/r/actions/runs/2/job/{i}"}
          for i, n in enumerate(["40.1 · First thing works", "40.2 · Second thing works", "40.3 · Nothing leaks out",
-                                "all tests"])]
+                                "All tests"])]
 OWNER_OK = [{"state": "APPROVED", "user": {"login": OWNER}, "html_url": "https://github.com/o/r/pull/5#review-1"}]
 
 

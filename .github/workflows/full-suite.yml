@@ -1,4 +1,4 @@
-name: full suite
+name: All tests
 # Every test in the repo, on every pull request and on main.
 # Runs main's copy of this workflow, so a pull request can't rewrite its own judge; only the code it tests comes from
 # the pull request, checked out with no token left behind, and the run holds no secret and only read access.
@@ -10,7 +10,7 @@ permissions:
   contents: read
 jobs:
   all-tests:
-    name: all tests
+    name: All tests
     runs-on: ubuntu-24.04
     steps:
       - uses: actions/checkout@v5

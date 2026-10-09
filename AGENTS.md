@@ -71,6 +71,11 @@ A command is the first word of an owner's comment on the issue or its PR, or of 
 
 Only the planner asks the owner, as a plain list inside its plan, and only where the owner's words allow two readings and no principle or earlier decision settles it. Each question says which reading it planned for, so the owner may skip answering. The worker and the reviewer never ask: the plan is the contract, and disagreements reach the owner by escalation. On autopilot the plan reviewer judges each question's assumption against the owner's words (see the flow).
 
+## The checks
+
+- A pull request's checks follow its Definition of Done, in order: All tests (every test in the repo), Acceptance criteria (passes only when every criterion's own check, named by its number and words, passed), then Acceptance test (the End-to-end test on a feature, once #233 adds it), then Code review and Owner approval.
+- main's branch rule requires the checks All tests and Acceptance criteria, and autopilot merges only when both passed on the pull request's head. When the rename to these names merges, the owner must switch the rule from all tests and all done-whens passed to All tests and Acceptance criteria.
+
 ## The board
 
 - Columns are stages: Backlog, Plan, Work, Review, Done. Every new item lands in Backlog.

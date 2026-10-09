@@ -45,11 +45,14 @@ from test_start import N, OWNER, PR, Ctx, evaluate, condition
 LABEL = "autopilot"
 HEAD = "a1" * 20
 LATER = "b2" * 20
-GREEN = [{"name": "pytest", "kind": "run", "state": "SUCCESS"}, {"name": "ci/lint", "kind": "status", "state": "SUCCESS"}]
+# The two checks autopilot requires by name (#291) sit green beside every set of checks below, so each set tests only
+# what its name says.
+REQUIRED = [{"name": "All tests", "kind": "run", "state": "SUCCESS"}, {"name": "Acceptance criteria", "kind": "run", "state": "SUCCESS"}]
+GREEN = REQUIRED + [{"name": "pytest", "kind": "run", "state": "SUCCESS"}, {"name": "ci/lint", "kind": "status", "state": "SUCCESS"}]
 RED_NAME = "pytest (3.12)"
-RED = [{"name": "ci/lint", "kind": "status", "state": "SUCCESS"}, {"name": RED_NAME, "kind": "run", "state": "FAILURE"}]
-PENDING = [{"name": "pytest", "kind": "run", "state": "PENDING"}]
-RED_STATUS = [{"name": "pytest", "kind": "run", "state": "SUCCESS"}, {"name": "ci/coverage", "kind": "status", "state": "FAILURE"}]
+RED = REQUIRED + [{"name": "ci/lint", "kind": "status", "state": "SUCCESS"}, {"name": RED_NAME, "kind": "run", "state": "FAILURE"}]
+PENDING = REQUIRED + [{"name": "pytest", "kind": "run", "state": "PENDING"}]
+RED_STATUS = REQUIRED + [{"name": "pytest", "kind": "run", "state": "SUCCESS"}, {"name": "ci/coverage", "kind": "status", "state": "FAILURE"}]
 CONFLICT = "the merge commit cannot be cleanly created"
 PROTECTED = "At least 1 approving review is required by reviewers with write access"
 WORKFLOW_FILE = ".github/workflows/ci.yml"

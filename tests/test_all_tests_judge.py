@@ -2,14 +2,14 @@
 
 These tests play GitHub's part when a pull request is opened or updated. GitHub runs a workflow from the pull
 request's own branch when that copy listens on `pull_request`, and main's copy when main's copy listens on
-`pull_request_target`; both can run at once. Every workflow of this repo with a job named "all tests" is copied into a
+`pull_request_target`; both can run at once. Every workflow of this repo with a job named "All tests" is copied into a
 temp "main" tree, next to a tiny project (app.py and its test). The pull request's tree holds the same project, its
-code fixed or broken, and its own copy of those workflows, kept, edited or deleted. Each "all tests" job GitHub would
+code fixed or broken, and its own copy of those workflows, kept, edited or deleted. Each "All tests" job GitHub would
 start is then run step by step: `actions/checkout` copies the tree its `ref` names (main's by default on
 pull_request_target, the pull request's on pull_request) and, unless told `persist-credentials: false`, leaves the token
 in the checkout's .git/config the way the real action does; other `uses:` steps are skipped; every `run:` script runs
 with bash, its `${{ }}` filled in, with a `pip` that does nothing. The check counts as passed only when every
-"all tests" run on the pull request passed or was skipped, the same rule autopilot reads before it merges
+"All tests" run on the pull request passed or was skipped, the same rule autopilot reads before it merges
 (dokima/agent.py, unproven()).
 """
 import json
@@ -22,7 +22,7 @@ import test_start as ts
 
 ROOT = ts.ROOT
 WORKFLOWS = os.path.join(ROOT, ".github", "workflows")
-CHECK = "all tests"
+CHECK = "All tests"
 HEAD_SHA = "1111111111111111111111111111111111111111"
 BASE_SHA = "2222222222222222222222222222222222222222"
 HEAD_REF = "work/issue-1"
@@ -61,14 +61,14 @@ def test_value():
 
 
 def judge_files():
-    """The names of this repo's workflow files that hold a job named "all tests"."""
+    """The names of this repo's workflow files that hold a job named "All tests"."""
     out = []
     for name in sorted(os.listdir(WORKFLOWS)):
         if name.endswith((".yml", ".yaml")):
             jobs = ts.load_yaml(open(os.path.join(WORKFLOWS, name)).read()).get("jobs") or {}
             if any(isinstance(j, dict) and j.get("name") == CHECK for j in jobs.values()):
                 out.append(name)
-    assert out, "the repo has no workflow with a job named 'all tests'"
+    assert out, "the repo has no workflow with a job named 'All tests'"
     return out
 
 

@@ -99,7 +99,7 @@ def job(n):
 
 
 GREEN = [run("40.1 · First thing works", n=1), run("40.2 · Second thing works", n=2),
-         run("40.3 · Nothing leaks out", n=3), run("all tests", n=4)]
+         run("40.3 · Nothing leaks out", n=3), run("All tests", n=4)]
 FOUND = {"recs": RECS, "pr": PR, "check_runs": GREEN, "reviews": [review("APPROVED")], "owners": {"boss"},
          "tests": TESTS, "worker": DONE}
 STATES = {"passed", "failed", "running", "not started"}
@@ -209,8 +209,8 @@ HEAD, OLD = "head1", "old0"
 HEAD_SOURCE = ('import os\n\n\ndef test_one(record_property):\n    """The first thing runs.\n\n    More words."""\n'
                '    assert True\n')
 MAIN_SOURCE = 'def test_one(record_property):\n    """An old sentence from main."""\n    assert True\n'
-HEAD_RUNS = [run("40.1 · First thing works", n=1), run("all tests", n=4)]
-OLD_RUNS = [run("40.1 · First thing works", conclusion="failure", n=91), run("all tests", conclusion="failure", n=94)]
+HEAD_RUNS = [run("40.1 · First thing works", n=1), run("All tests", n=4)]
+OLD_RUNS = [run("40.1 · First thing works", conclusion="failure", n=91), run("All tests", conclusion="failure", n=94)]
 
 
 def record_comment(login, r, at):
@@ -488,9 +488,9 @@ def test_all_tests_shows_the_state_github_reports(record_property):
     Draws the card with the all tests check missing, queued, in progress, passed and failed, and checks the row's first
     circle each time."""
     record_property("proves", "180.3")
-    cases = [(None, "not started"), (run("all tests", "queued", None, n=4), "not started"),
-             (run("all tests", "in_progress", None, n=4), "running"), (run("all tests", n=4), "passed"),
-             (run("all tests", conclusion="failure", n=4), "failed")]
+    cases = [(None, "not started"), (run("All tests", "queued", None, n=4), "not started"),
+             (run("All tests", "in_progress", None, n=4), "running"), (run("All tests", n=4), "passed"),
+             (run("All tests", conclusion="failure", n=4), "failed")]
     for check, want in cases:
         row = dod(draw(check_runs=[check] if check else []), "180.3")
         assert alts(row)[:1] == [want], f"180.3: All tests showed {alts(row)[:1]} for GitHub's {check and check['status']}, not {want}"
@@ -557,7 +557,7 @@ def test_definition_of_done_row_shows_all_tests_review_and_owner_approval(record
     assert alts(row) == ["passed", "failed", "passed"], f"180.4: wrong verdicts {alts(row)} for passed, blocked, approved"
     for url in (job(4), REVIEW_RUN, APPROVAL):
         assert url in row, f"180.4: the Definition of Done row does not link {url}"
-    row = dod(draw(check_runs=[run("all tests", conclusion="failure", n=4)], recs=RECS,
+    row = dod(draw(check_runs=[run("All tests", conclusion="failure", n=4)], recs=RECS,
                    reviews=[review("CHANGES_REQUESTED", url=CHANGES)]), "180.4")
     assert alts(row) == ["failed", "passed", "failed"], f"180.4: wrong verdicts {alts(row)} for failed, approved, changes asked"
     assert CHANGES in row and REVIEW_RUN in row, "180.4: a verdict in the row does not link to its proof"
@@ -598,7 +598,7 @@ def test_a_missing_or_failed_check_never_shows_as_passed(record_property):
     assert circle(draw(check_runs=[]), "First thing works", "180.6")[0] != "passed", "180.6: a missing check showed passed"
     assert alts(dod(draw(check_runs=[]), "180.6"))[0] != "passed", "180.6: a missing All tests showed passed"
     for end in ("failure", "neutral", "skipped", "cancelled", "timed_out", "action_required", "stale", None):
-        runs = [run("40.1 · First thing works", conclusion=end, n=1), run("all tests", conclusion=end, n=4)]
+        runs = [run("40.1 · First thing works", conclusion=end, n=1), run("All tests", conclusion=end, n=4)]
         assert circle(draw(check_runs=runs), "First thing works", "180.6")[0] == "failed", \
             f"180.6: a check that ended {end} did not show failed"
         assert alts(dod(draw(check_runs=runs), "180.6"))[0] == "failed", f"180.6: All tests that ended {end} did not show failed"

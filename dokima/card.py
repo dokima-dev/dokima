@@ -21,7 +21,7 @@ import sys
 sys.path.insert(0, os.path.join(os.path.dirname(os.path.abspath(__file__)), ".."))
 from dokima import body, plan  # noqa: E402
 
-ALL_TESTS = "all tests"
+ALL_TESTS = "All tests"
 TODO = {"questions": "Answer the questions with /plan, or say /review",
         "plan approved": "Say /work to build the plan",
         "three blocks": "Three blocks in a row: your call",
