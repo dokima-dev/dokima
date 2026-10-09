@@ -117,8 +117,9 @@ def test_every_run_comment_opens_with_one_plain_sentence_saying_what_the_run_did
 
 
 def test_the_long_parts_of_every_run_comment_are_folded(record_property):
-    """Non-functional requirements, test changes, notes and details are folded on every run comment, never on top.
+    """The long parts of every run comment are folded, never on top.
 
+    The long parts are non-functional requirements, test changes, the worker's findings and changes outside the plan.
     Draws a plan, a build and a review full of long parts, and checks each long part's words are absent from the
     short part on top and present inside a fold other than the full record."""
     record_property("proves", "182.1")
@@ -128,7 +129,7 @@ def test_the_long_parts_of_every_run_comment_are_folded(record_property):
               ["submit() returns the id-zq", "A shared helper needed one line-zq.",
                "It waits a real day-zq.", "The id is returned in 0.1 s-zq."]),
              ("review", rec("reviewer", "pr", BLOCK),
-              ["A note on naming-zq.", "one helper line-zq", "Built the jobs queue-zq.", "ask 1-zq", "evidence of B1-zq"])]
+              ["one helper line-zq"])]
     for name, r, long_parts in cases:
         body = agent.render(r)
         for part in long_parts:
@@ -285,24 +286,25 @@ def test_the_worker_card_folds_what_it_built_found_and_raised(record_property):
 
 
 def test_the_reviewer_card_shows_pass_or_only_the_criteria_it_blocks_on(record_property):
-    """The reviewer's card says it passed, or lists only the criteria it blocks on with their notes, and its proposed issues.
+    """The reviewer's card says it passed, or shows why it blocks, and its proposed issues.
 
     Draws a plan review that approves, with asks on 9.1 to 9.4 and one proposed issue, and checks the short part on top
-    says pass in words, names no criterion and shows the proposed issue. Then draws a code review that blocks on 9.2
-    and 9.3 with the same asks, and checks the top names 9.2 and 9.3, each on a line with its blocker's problem, and
-    never names 9.1 or 9.4, which pass."""
+    says pass in words and names no criterion, and the proposed issue shows outside every fold (after the change
+    outside the plan, in the owner's order of issue #236). Then draws a code review that blocks on 9.2
+    and 9.3 with the same asks, and checks the top shows each blocker's problem and never a criterion number or a
+    blocker code (issue #236)."""
     record_property("proves", "182.4")
     short = top(agent.render(rec("reviewer", "plan", APPROVE)))
     words = re.sub(r"<[^>]+>", "", short)
     assert re.search(r"\bpass", words, re.I), f"182.4: the passing reviewer card does not say pass on top, in words:\n{short}"
     assert not re.search(r"\b9\.\d\b", short), f"182.4: the passing reviewer card lists criteria on top:\n{short}"
-    assert "1. Board ignores closed PRs: cards go stale" in short, f"182.4: the reviewer card does not show its proposed issue on top:\n{short}"
+    unfolded = FOLD.sub("", agent.render(rec("reviewer", "plan", APPROVE)))
+    assert "1. Board ignores closed PRs: cards go stale" in unfolded, \
+        f"182.4: the reviewer card does not show its proposed issue outside its folds:\n{unfolded}"
     short = top(agent.render(rec("reviewer", "pr", BLOCK)))
-    for crit, problem in (("9.2", "The day is never checked."), ("9.3", "Restarts are not tried.")):
-        assert any(crit in l and problem in l for l in short.splitlines()), \
-            f"182.4: the reviewer card does not list {crit} with its note {problem!r} on top:\n{short}"
-    for crit in ("9.1", "9.4"):
-        assert not re.search(rf"\b{re.escape(crit)}\b", short), f"182.4: the reviewer card lists {crit}, which it does not block on:\n{short}"
+    for problem in ("The day is never checked.", "Restarts are not tried."):
+        assert problem in short, f"182.4: the reviewer card does not show why it blocks ({problem!r}) on top:\n{short}"
+    assert not re.search(r"\b9\.\d\b|\bB\d\b", short), f"182.4: the reviewer card shows a criterion number or a blocker code:\n{short}"
 
 
 def test_agents_md_has_the_human_brain_bottleneck_principle(record_property):

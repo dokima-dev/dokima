@@ -308,7 +308,7 @@ def test_the_card_shows_no_field_icon_where_the_field_is_not_shown(record_proper
 
 
 ROLES = [("planner", "", "planner", "Planner"), ("worker", "", "worker", "Worker"),
-         ("reviewer", "plan", "plan review", "Reviewer (plan)"), ("reviewer", "pr", "code review", "Reviewer (pr)")]
+         ("reviewer", "plan", "plan review", "Plan review"), ("reviewer", "pr", "code review", "Code review")]
 
 
 @pytest.mark.parametrize("role,stage,field,head", ROLES)
@@ -360,22 +360,21 @@ def test_the_plan_comment_shows_criteria_and_question_icons(record_property, env
     assert img("question") not in plain, f"234.2: a plan with no questions shows the question icon:\n{plain}"
 
 
-def test_the_review_comment_shows_blocker_note_outside_and_issue_icons(record_property, env):
-    """A review's comment shows the blocker icon on every blocker, and the note, outside the plan and issue found icons.
+def test_the_review_comment_shows_blocker_outside_and_issue_icons(record_property, env):
+    """A review's comment shows the blocker, outside the plan and issue found icons.
 
-    Draws a blocking review with two blockers, a note, a change outside the plan and an issue found, and checks
-    each blocker's id, the Notes and Outside the plan folds and Issues found outside this one have their icon right in
-    front; then an approving review with none of them, and checks none of those icons is shown."""
+    Draws a blocking review with two blockers, a change outside the plan and an issue found, and checks each
+    blocker's problem, the Outside the plan fold and Issues found outside this one have their icon right in front;
+    then an approving review with none of them, and checks none of those icons is shown."""
     record_property("proves", "234.2")
     body = agent.render(built("reviewer", "pr", REVIEW))
     for b in ("B1", "B2"):
-        shows(body, "blocker", f"{b}**", "234.2", "the review's comment")
-    shows(body, "note", "Notes", "234.2", "the review's comment")
+        shows(body, "blocker", f"problem {b}", "234.2", "the review's comment")
     shows(body, "outside the plan", "Outside the plan", "234.2", "the review's comment")
     shows(body, "issue found", "Issues found outside this one", "234.2", "the review's comment")
     clean = agent.render(built("reviewer", "pr", dict(REVIEW, verdict="approve", blockers=[], notes=[], outside_plan=[],
                                                       issues_found=[])))
-    for f in ("blocker", "note", "outside the plan", "issue found"):
+    for f in ("blocker", "outside the plan", "issue found"):
         assert img(f) not in clean, f"234.2: a review with no {f} shows the {f} icon:\n{clean}"
 
 
@@ -408,16 +407,18 @@ def test_the_split_comment_shows_the_blocked_by_icon(record_property, env):
 
 @pytest.mark.parametrize("role,stage", [("planner", ""), ("worker", ""), ("reviewer", "plan"), ("reviewer", "pr"),
                                         ("split", "")])
-def test_every_run_comments_footnote_starts_with_the_stats_icon(record_property, env, role, stage):
-    """The stats footnote under every run comment starts with the stats icon.
+def test_every_run_comments_stats_fold_starts_with_the_stats_icon(record_property, env, role, stage):
+    """The stats fold at the bottom of every run comment starts with the stats icon.
 
-    Draws the comment of each kind of run and checks its last line, the footnote with model, time, turns, tokens and
-    cost, opens with the stats icon right after <sub>."""
+    Draws the comment of each kind of run and checks the title of its last fold before the full record, the fold
+    with model, time, turns, tokens and cost, opens with the stats icon."""
     record_property("proves", "234.2")
     hb = {"planner": PLAN, "worker": WORK, "reviewer": REVIEW, "split": SPLIT}[role]
     body = agent.render(built(role, stage, hb))
-    last = [l for l in body.splitlines() if l.strip()][-1]
-    assert last.startswith("<sub>" + img("stats")), f"234.2: the {role} comment's footnote does not open with the stats icon: {last}"
+    titles = re.findall(r"<summary>(.*?)</summary>", body.split("<details><summary>Full record</summary>", 1)[0], re.S)
+    last = titles[-1] if titles else ""
+    assert re.match(r"(?:<b>|\*\*)?\s*" + re.escape(img("stats")), last), \
+        f"234.2: the {role} comment's stats fold does not open with the stats icon: {last}"
 
 
 # 234.3: no hand-back can choose, change or drop an icon

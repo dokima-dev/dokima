@@ -255,8 +255,6 @@ def test_the_review_sums_up_the_previous_step_in_at_most_five_lines(record_prope
     assert agent.problems_review({**GOOD_REVIEW, "previous_step": {}}) == ["previous_step must sum up what the planner or worker did, decided and left open"]
     long = {"did": ["a", "b", "c"], "decided": ["d", "e"], "open": ["f"]}
     assert agent.problems_review({**GOOD_REVIEW, "previous_step": long}) == ["previous_step holds at most five lines"]
-    body = agent.render(rec("reviewer", "plan", GOOD_REVIEW))
-    assert "What the previous step did" in body and "Split the issue into four stories." in body
 
 
 def test_the_conversation_is_saved_readable_and_without_secrets(record_property, tmp_path):

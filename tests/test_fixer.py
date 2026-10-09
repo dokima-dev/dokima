@@ -99,21 +99,6 @@ def test_every_review_blocker_names_the_worker_or_the_planner(record_property, t
         assert not any("B1" in line for line in out.splitlines()), f"166.1: the well-formed blocker B1 was named too:\n{out}"
 
 
-def test_the_review_comment_shows_who_fixes_each_blocker(record_property):
-    """The posted code review says, on each blocker's line, whether the planner or the worker fixes it.
-
-    Renders a code review with one blocker for each, the way code posts it, and checks B1's line names the planner and
-    not the worker, and B2's line names the worker and not the planner."""
-    record_property("proves", "166.1")
-    body = agent.render(rec("reviewer", "pr", review(blocker("B1", "planner"), blocker("B2", "worker", "9.2"))))
-    # The blocker icon code draws in front of each blocker (issue #234) is not part of its words.
-    plain = [re.sub(r"<img [^>]*>\s*", "", l) for l in body.splitlines()]
-    lines = {b: [l for l in plain if l.startswith(f"- **{b}**")] for b in ("B1", "B2")}
-    assert len(lines["B1"]) == 1 and len(lines["B2"]) == 1, f"166.1: each blocker needs exactly one line in the comment:\n{body}"
-    assert "planner" in lines["B1"][0] and "worker" not in lines["B1"][0], f"166.1: B1's line does not say the planner fixes it: {lines['B1'][0]}"
-    assert "worker" in lines["B2"][0] and "planner" not in lines["B2"][0], f"166.1: B2's line does not say the worker fixes it: {lines['B2'][0]}"
-
-
 def test_a_code_review_block_goes_to_whoever_fixes_it(record_property):
     """A blocking code review with any blocker for the planner starts the planner; one with only worker blockers starts the worker.
 

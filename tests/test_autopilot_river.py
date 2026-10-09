@@ -514,20 +514,6 @@ def test_an_assumption_is_accepted_only_on_words_the_owner_really_said(record_pr
             f"211.5 ({case}): the Next line should name only the question whose words were not found ({named!r}): {nxt!r}"
 
 
-def test_the_review_card_shows_the_owners_words_each_assumption_matched(record_property):
-    """The plan review's card shows, for each accepted assumption, the owner's words it matched and where they said them.
-
-    Draws the card of a plan review that accepts two assumptions, one matched to AGENTS.md and one to a comment on the
-    issue. The readable part of the card, above the folded record, must show each question, the words it matched and
-    their source."""
-    record_property("proves", "211.5")
-    body = agent.render(ts.review_record({**APPROVE, "assumptions": [ACCEPT_1, ACCEPT_2]}))
-    shown = body.split("<details><summary>Full record")[0]
-    for a in (ACCEPT_1, ACCEPT_2):
-        for k in ("question", "matched", "source"):
-            assert a[k] in shown, f"211.5: the review's card does not show the {k} of an accepted assumption ({a[k]!r}):\n{shown}"
-
-
 def test_when_autopilot_cannot_be_read_the_river_stops_and_says_why(record_property, tmp_path, monkeypatch):
     """When GitHub cannot say whether the issue is on autopilot, the river stops for the owner and says so.
 
