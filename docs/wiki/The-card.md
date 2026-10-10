@@ -1,54 +1,80 @@
 # The card
 
-Dokima's job is to move your attention from the work to the verification. The card is how it does that: every unit of work is reported the same way, twice.
+This page explains every part of the card on top of an issue and of the records each run posts below it.
 
-The same card sits at the top of the issue and at the top of its PR, so you see one status in both places.
+## Where you see it
 
-- **Before work starts:** each objective, its acceptance criteria, and how each check will be verified. Plus what is deliberately *not* checked.
-- **After work ends:** each check marked passed or failed, with a link to the proof.
+The card sits at the top of the issue and at the top of its pull request, so you see one status in both places. Code draws it from the run records and from GitHub's own checks and reviews, never from what an agent says.
 
-## Example
+## The status line
 
-**Before**
+Under the plan's summary, the card shows the stage the issue is in:
 
-```markdown
-Objective: nothing reaches main unless tests pass
-- ☐ A failing pull request can't merge. Verify: open one with a broken test, attempt the merge.
-- ☐ A passing pull request can merge. Verify: fix the test, show it green and mergeable.
+- **Backlog**: no agent has run yet.
+- **Plan**: the planner or the plan review is running or done.
+- **Work**: the worker is building, or a split's stories are filed.
+- **Review**: the code review is running or done.
+- **Merged**: the pull request merged, shown with the merged icon.
 
-Not checked: whether the tests themselves are good.
-```
+When it is your turn, the line adds Needs you and what you must do, for example "Say /work to build the plan".
 
-**After**
+Below it, a links row leads to the latest run, the issue, the pull request and its files changed.
 
-```markdown
-Objective: nothing reaches main unless tests pass
-- ✅ A failing pull request can't merge. Proof: <link to the red test run and blocked merge>
-- ✅ A passing pull request can merge. Proof: <link to the green test run>
+## Pills on the board
 
-Not checked: whether the tests themselves are good.
-```
+On the project board, a card can carry a pill:
 
-## Reading the card
+- **Needs you**: you must decide something.
+- **Autopilot**: the issue is on autopilot.
 
-Each criterion has a circle that shows GitHub's verdict on it. The words of the criterion link to the proof.
+A card never shows both. Needs you takes Autopilot's place while it waits for you.
 
-The Approve button means "approve the result to merge". It is for the finished work, not the plan; you approve the plan by adding the `work` label to the issue.
+## Links to other issues
 
-## What counts as proof
+- **Related**: issues that touch the same thing.
+- **Blocked by**: issues that must close first.
+- **Blocks**: issues waiting on this one.
 
-Proof is a link to GitHub's own record, so you never have to take the agent's word for it:
+## Acceptance criteria
 
-- a test run that went green or red,
-- a pull request showing a merge was blocked,
-- a setting as GitHub reports it back.
+Each acceptance criterion has a circle that shows GitHub's verdict on its check:
 
-A commit is rarely proof on its own: it shows what changed, not that it works. Where there is no page to link, GitHub's exact response is quoted.
+- **passed**: its check went green on the pull request's latest commit.
+- **failed**: its check went red.
+- **running**: its check is still running.
+- **not started**: no check has run yet.
 
-## Why you can trust it
+The words of the criterion link to its check. Under it, one Verified by line per test says in plain words what the test proves, and links to the test. A Source link leads to where you asked for it.
 
-Cards are not written by the AI. A script builds each card from the checks in the issue and from GitHub's record of which checks passed, and the workflow posts it. No session can skip a card, reword it, or report a pass that didn't happen. *Planned.*
+Non-functional requirements follow in a fold, drawn the same way.
 
-## "Not checked"
+## Definition of Done
 
-Every card says what it does not cover. A green card means the listed checks passed, nothing more. Making the gaps visible is what lets you decide where to look yourself.
+The last row shows three circles:
+
+- **All tests**: the whole test suite passed.
+- **Code review**: the reviewer's code review passed or failed.
+- **Owner approval**: a code owner approved the pull request, or merged it.
+
+You approve a plan by saying `/work`. You approve the result with Approve on the pull request, and merging it counts the same.
+
+## Run records
+
+Each run posts one comment below the issue. Its icon names who ran: the planner, the worker, the plan review or the code review. A passed or failed icon says whether code accepted the run's hand-back.
+
+Its first sentence says what the run did. Then comes the short version you need:
+
+- **Question**: what the planner asks you, with the reading it planned for.
+- **Blocker**: what a review blocks on, and who fixes it.
+- **Note**: what a review noticed that blocks nothing.
+- **Outside the plan**: a change no criterion asked for.
+- **Issue found**: a problem outside this issue, proposed for you to file.
+- **Still open**: what the run says the previous step left open.
+
+A step taken on autopilot posts no record. It posts one plain line in place of your command, such as "Autopilot: plan approved, starting work".
+
+The long parts sit in folds, with the full record in the last one.
+
+The **Next** line says what happens next, or what is yours to do.
+
+The footnote, marked with the stats icon, gives the model, time, turns, tokens and cost at API prices. It links to the run's whole conversation.
