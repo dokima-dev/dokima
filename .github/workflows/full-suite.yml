@@ -2,6 +2,7 @@ name: full suite
 # Every test in the repo, on every pull request, in the merge queue and on main.
 # Runs main's copy of this workflow, so a pull request can't rewrite its own judge; only the code it tests comes from
 # the pull request, checked out with no token left behind, and the run holds no secret and only read access.
+# Its tests run with main's conftest.py files and pytest settings, never the pull request's copies.
 on:
   pull_request_target:
   push:
@@ -13,13 +14,25 @@ jobs:
   all-tests:
     name: all tests
     runs-on: ubuntu-24.04
+    defaults:
+      run:
+        working-directory: pr
     steps:
       - uses: actions/checkout@v5
         with:
+          persist-credentials: false
+      - uses: actions/checkout@v5
+        with:
           ref: ${{ github.event.pull_request.head.sha || github.sha }}
+          path: pr
           persist-credentials: false
       - uses: actions/setup-python@v6
         with:
           python-version: "3.12"
       - run: pip install -q pytest
+      - name: Use main's test setup
+        run: |
+          setup=(\( -name conftest.py -o -name pytest.ini -o -name .pytest.ini -o -name pytest.toml -o -name .pytest.toml -o -name pyproject.toml -o -name setup.cfg -o -name tox.ini \))
+          find . -path ./.git -prune -o \( -type f -o -type l \) "${setup[@]}" -print0 | xargs -0 -r rm -f
+          (cd .. && find . -path ./pr -prune -o -path ./.git -prune -o -type f "${setup[@]}" -print0 | xargs -0 -r cp --parents -t pr)
       - run: pytest -q -p no:cacheprovider tests
