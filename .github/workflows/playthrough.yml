@@ -26,6 +26,9 @@ concurrency:
   cancel-in-progress: false
 jobs:
   play:
+    # A pull request from someone's own copy of the repo never opens the keys: only branches of this repo play on
+    # their own. The Run workflow button still plays any commit.
+    if: github.event_name != 'pull_request_target' || github.event.pull_request.head.repo.full_name == github.repository
     environment: keys
     runs-on: ubuntu-24.04
     steps:

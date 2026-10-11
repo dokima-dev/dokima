@@ -229,7 +229,7 @@ def playthrough_yml(k):
 def pr_target_event(action="opened"):
     """A pull_request_target event for PR #7, head headsha7, base basesha7."""
     pr = {"number": 7, "title": "A change", "state": "open", "merged": False,
-          "head": {"ref": "try/issue-6", "sha": "headsha7"}, "base": {"ref": "main", "sha": "basesha7"},
+          "head": {"ref": "try/issue-6", "sha": "headsha7", "repo": {"full_name": "o/r"}}, "base": {"ref": "main", "sha": "basesha7"},
           "user": {"login": BOT + "[bot]", "type": "Bot"}}
     return "pull_request_target", {"action": action, "number": 7, "pull_request": pr, "sender": sender("bot"),
                                    "repository": dict(REPOSITORY, full_name="dokima-dev/dokima")}
@@ -370,3 +370,14 @@ def test_a_pull_request_changing_card_board_or_workflow_code_runs_the_play_throu
         code, out, _ = run_module(tmp_path / f"card{k}", played, base, head)
         assert code == 1 and "FAIL: install" in out and "without playing" not in out, \
             f"438.3: a pull request changing {f} should be played (and fail at install with no key); it exited {code}: {out[-500:]}"
+
+
+def test_a_pull_request_from_another_copy_of_the_repo_runs_no_play_through():
+    """A pull request from someone's own copy of the repo runs no play-through job, so it never opens the keys (#503).
+
+    The same pull request from a branch of this repo runs one."""
+    wf = playthrough_yml("#503")
+    name, event = pr_target_event()
+    event["pull_request"]["head"]["repo"] = {"full_name": "stranger/r"}
+    assert jobs_for(wf, name, event, "#503") == [], "#503: a pull request from a stranger's copy runs the play-through"
+    assert len(jobs_for(wf, *pr_target_event(), "#503")) == 1, "#503: a pull request from this repo runs no play-through"
