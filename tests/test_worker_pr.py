@@ -21,7 +21,7 @@ def push_steps(change=None):
     steps = job["steps"]
     named = {s.get("name"): s for s in steps}
     app = next(i for i, s in enumerate(steps) if s.get("id") == "app")
-    end = next(i for i, s in enumerate(steps) if str(s.get("name", "")).startswith("Save the conversation"))
+    end = next(i for i, s in enumerate(steps) if s.get("name") == "Write this run's record")
     picked = [named["Copy the runtime from main before touching any branch"], named["Starting branch"]]
     if change:
         picked.append({"name": "The agent changes the code", "run": change})
