@@ -105,11 +105,11 @@ Two tiers of autonomy:
 
 Every spec, answer or scope change the owner gives lands on GitHub, never only in chat, so every session, human or agent, finds it there.
 
-- On an existing issue it goes in as a comment: a `/plan` comment when the planner should pick it up, a plain comment on a parked issue.
+- On an existing issue it goes in as a comment: a `/plan` comment when the planner should pick it up, a plain comment on an issue left for later.
 - An issue's original text is frozen: nobody edits it, and changes are comments. This is the owner's ask below the marker; code still redraws the card above it (see the issue body).
 - A new idea becomes a new issue, with the spec in its body.
 
-Example: the owner says in chat that a card's Next line should name the owner. On the open issue that becomes a comment `/plan The Next line names the owner`; on a parked issue, a plain comment saying the same; an unrelated idea from the same chat becomes a new issue with the spec in its body.
+Example: the owner says in chat that a card's Next line should name the owner. On the open issue that becomes a comment `/plan The Next line names the owner`; on an issue left for later, a plain comment saying the same; an unrelated idea from the same chat becomes a new issue with the spec in its body.
 
 ## The board
 
@@ -119,7 +119,7 @@ Example: the owner says in chat that a card's Next line should name the owner. O
 - "Autopilot" is a pill in the same place, on every card of an issue on autopilot and of its open pull request, set and cleared with the `autopilot` label; Needs you takes its place while the river stops for the owner, so a card never shows both. A pull request built for an issue on autopilot carries the label too.
 - One Autopilot view, a table filtered to `label:autopilot is:open`, lists every open issue and pull request on autopilot; merged and closed ones keep the label but leave the view. Code adds it the first time a tree goes on autopilot, from the board run of the tree's top issue only, and a refused view fails that run naming it. The board run of a merge changes an Autopilot view still filtered to the old `label:autopilot` to `label:autopilot is:open`, leaves any other filter alone, and fails naming the view if GitHub refuses. The Autopilot option of the Action field is a one-time step on the board, like Needs you; code never edits the field's options.
 - `DOKIMA_BOARD=org/number REPO=owner/name python3 -m dokima.scan` names every closed card outside Done or with a pill, every open card in the wrong column or in none, every issue or PR card that does not show the card Dokima draws for its issue now, and every card GitHub will not give, with its reason, and exits 1; otherwise it prints `All N cards on the board match their state.` and exits 0. It only reads, and never puts anything right.
-- Priority is a field (Blocker, High, Parked). Blocker is set by code, never by hand, on every open issue that blocks another open issue by GitHub's blocked-by links, read when an issue closes or reopens and every 15 minutes; otherwise the pill follows the issue's high or parked label, and with both, High wins. When GitHub cannot list an issue's links, its pill stays and the board run fails naming it.
+- Priority is a field (Blocker, High). Blocker is set by code, never by hand, on every open issue that blocks another open issue by GitHub's blocked-by links, read when an issue closes or reopens and every 15 minutes; otherwise the pill follows the issue's high label. An issue with no plan simply waits: filing it is enough to keep it for later. When GitHub cannot list an issue's links, its pill stays and the board run fails naming it.
 
 ## The issue body
 

@@ -65,10 +65,10 @@ def test_existing_issue_gets_a_comment(record_property):
     """AGENTS.md says words on an existing issue go in as a comment.
 
     Checks the section says "as a comment", names a `/plan` comment for when the planner should pick it up, and a
-    plain comment on a parked issue. Proves 336.3."""
+    plain comment on an issue left for later. Proves 336.3."""
     record_property("proves", "336.3")
     require("336.3", ["existing issue", "as a comment", "a `/plan` comment when the planner should pick it up",
-                      "a plain comment on a parked issue"])
+                      "a plain comment on an issue left for later"])
 
 
 def test_original_text_is_frozen(record_property):
