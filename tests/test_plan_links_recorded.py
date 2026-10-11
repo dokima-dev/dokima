@@ -351,6 +351,8 @@ class Hub:
         rec = review(verdict)
         said = self.next(rec)
         self.post(rec)
+        # card.yml redraws on the record's comment; the plan approval itself saves no card (#438).
+        self.redraw(N)
         return said
 
     def redraw(self, n):

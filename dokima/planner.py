@@ -1,7 +1,7 @@
 """The planner's hand-back: check its shape, then write it into the issue.
 
     python3 -m dokima.planner check N OUT   # fail loudly unless OUT holds a well-formed plan
-    python3 -m dokima.planner post N OUT    # write the plan into issue N, or post the proposed split
+    python3 -m dokima.planner post N OUT    # post the plan on issue N, or the proposed split
     python3 -m dokima.planner rejected N OUT  # say on issue N why the run was rejected
 
 The planner holds no GitHub key. It ends by writing one plan.json to OUT, of kind user_story or feature (see
@@ -603,13 +603,11 @@ def main(argv):
             gh("issue", "comment", number, "-R", repo, "--body", f"**Planner proposes a split**\n\n```json\n{result}\n```")
         else:
             older = sorted(t for t in tc["changed"] if not set(tc["changed"][t][0]) <= {f"{number}.{k}" for k in range(1, len(result["criteria"]) + 1)}) + sorted(tc["deleted"])
-            body = gh("issue", "view", number, "-R", repo, "--json", "body", "-q", ".body")
-            body = body[:-1] if body.endswith("\n") else body  # gh ends its output with a newline of its own
+            # Only card.yml writes the card above the marker, so the plan goes in this comment.
             tags = dict(proving(tc), **declared_by_test(result["declared"]))
-            if not issue_body.save(repo, number, body, plan_text(number, result, tags, older)):
-                return 1
             gh("issue", "comment", number, "-R", repo, "--body",
-               f"Plan written above, tests on `work/issue-{number}`. Add `work` to approve it.")
+               f"**Plan**\n\n{plan_text(number, result, tags, older)}\n\n"
+               f"Tests on `work/issue-{number}`. Add `work` to approve it.")
     print(kind)
     return 0
 

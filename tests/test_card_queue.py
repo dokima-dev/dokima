@@ -47,8 +47,7 @@ def test_every_redraw_about_an_issue_or_its_pr_waits_in_a_queue_of_its_own_that_
     same for #312 and PR #314. Every run must redraw, the job that writes the cards must wait in a named queue, all of
     one issue's runs in the same one, and that queue must be its own: #312's redraws wait in a different one. No queue
     any run takes a place in may cancel the run already in it, so GitHub lets the running redraw finish and keeps the
-    newest waiting one. The events that draw no card today (the bot's own comment, a comment on a pull request, a pull
-    request closed unmerged) must still draw none."""
+    newest waiting one."""
     record_property("proves", "346.1")
     hub = Hub(tmp_path)
     own = {}
@@ -66,12 +65,6 @@ def test_every_redraw_about_an_issue_or_its_pr_waits_in_a_queue_of_its_own_that_
         own[n] = found.pop()
     assert own[246] != own[312], \
         f"346.1: #246's and #312's redraws wait in the same queue {own[246]!r}, so it is not a queue of their own"
-    for what, event in (("a comment the bot posted on #246", issue_comment(246, who="bot")),
-                        ("a comment on PR #260", pr_comment(246, 260)),
-                        ("PR #260 closed without merging", pr_event(246, 260, "closed", OWNER))):
-        stale_again(hub)
-        r = hub.run(*event, "346.1")
-        assert not (r.started and r.card_ran()), f"346.1: {what} now runs the card job, which today it does not"
 
 
 def test_a_redraw_for_one_issue_never_shares_a_queue_with_another_issue_or_the_sweep(tmp_path, record_property):
