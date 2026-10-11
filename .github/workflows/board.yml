@@ -4,7 +4,7 @@ name: board
 # changed since the last sweep that succeeded); keeps its Priority Blocker on open
 # issues that block an open issue (from blocked-by links, read on close, reopen and
 # every 15 minutes, since GitHub sends no event for a link), and otherwise in step
-# with the high and parked labels. Every merge sweeps every card.
+# with the high label. Every merge sweeps every card.
 # An issue and its pull requests share one queue, so the newest recompute waits for the
 # running one and is never cancelled, while other issues' runs go on beside it.
 # Rules live in dokima/board.py. Does nothing unless the repo variable DOKIMA_BOARD

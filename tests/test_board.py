@@ -103,13 +103,13 @@ def other_field_calls(gh):
 
 
 def test_adding_a_priority_label_sets_the_matching_pill(record_property):
-    """Adding the high or parked label sets the matching pill, and nothing else.
+    """Adding the high label sets the High pill, and nothing else (the parked label is gone, #320).
 
-    Sends a labeled event for each of the two labels to the board sync with a fake board, and checks the one write
+    Sends a labeled event for the high label to the board sync with a fake board, and checks the one write
     to Priority is the matching option, while the card's Status and Needs you pill are left as they were. Then adds and
     removes bug and plan on an issue labeled high, and checks Priority is never written. (Blocker follows blocked-by links since #294, not a label.)"""
     record_property("proves", "202.1")
-    for label, option in (("high", "p-High"), ("parked", "p-Parked")):
+    for label, option in (("high", "p-High"),):
         gh = PriorityGitHub(on_board=True)
         board.sync("issues", label_event("labeled", label, [label]), "dokima-dev/1", "dokima-dev/dokima", q=gh)
         assert priority_calls(gh) == [option], f"202.1: adding the {label} label wrote {priority_calls(gh)} to Priority, not {option}"
@@ -127,28 +127,27 @@ def test_removing_the_priority_label_clears_the_pill(record_property):
     Sends an unlabeled event for each priority label, with no priority label left on the issue, and checks Priority
     is cleared and nothing else on the card changes."""
     record_property("proves", "202.1")
-    for label in ("high", "parked"):
+    for label in ("high",):
         gh = PriorityGitHub(on_board=True)
         board.sync("issues", label_event("unlabeled", label, ["bug"]), "dokima-dev/1", "dokima-dev/dokima", q=gh)
         assert priority_calls(gh) == [None], f"202.1: removing the {label} label wrote {priority_calls(gh)} to Priority instead of clearing it"
         assert other_field_calls(gh) == [], f"202.1: removing the {label} label also changed Status or Needs you"
 
 
-def test_two_priority_labels_show_the_highest(record_property):
-    """With two priority labels, the pill shows the higher one: High over Parked.
+def test_a_parked_label_left_on_an_issue_moves_no_pill(record_property):
+    """A parked label left on an old issue counts for nothing: only high moves the pill (#320).
 
-    Adds parked to an issue already labeled high (pill stays High), adds high to one labeled parked (pill becomes
-    High), then removes high while parked remains (pill becomes Parked). A blocker label left on the issue counts for
-    nothing since #294."""
+    Adds parked to an issue labeled high (pill stays High), and removes high while parked remains (pill clears).
+    A blocker label left on the issue counts for nothing since #294."""
     record_property("proves", "202.1")
-    cases = [(("labeled", "parked", ["high", "parked"]), "p-High"),
-             (("labeled", "high", ["parked", "high"]), "p-High"),
-             (("labeled", "parked", ["blocker", "parked"]), "p-Parked"),
-             (("unlabeled", "high", ["parked"]), "p-Parked")]
+    cases = [(("labeled", "high", ["parked", "high"]), "p-High"),
+             (("labeled", "parked", ["parked"]), None),
+             (("unlabeled", "high", ["parked", "blocker"]), None)]
     for (action, label, labels), option in cases:
         gh = PriorityGitHub(on_board=True)
         board.sync("issues", label_event(action, label, labels), "dokima-dev/1", "dokima-dev/dokima", q=gh)
-        assert priority_calls(gh) == [option], f"202.1: {action} {label} with labels {labels} wrote {priority_calls(gh)}, not {option}"
+        want = [option] if (action, label) != ("labeled", "parked") else []
+        assert priority_calls(gh) == want, f"202.1: {action} {label} with labels {labels} wrote {priority_calls(gh)}, not {want}"
 
 
 def test_workflow_runs_on_label_removal(record_property):

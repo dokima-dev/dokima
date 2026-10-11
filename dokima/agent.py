@@ -1623,6 +1623,9 @@ def first_sentence(text):
     return (m.group(1) if m else text)[:250]
 
 
+FILED_LABEL = "filed-by-dokima"  # every issue Dokima files itself carries it (#268)
+
+
 def file_issues(repo, number, rec, recs):
     """File every issue raise a passed review confirms as its own GitHub issue.
 
@@ -1642,9 +1645,12 @@ def file_issues(repo, number, rec, recs):
         by = x.get("raised_by") or "reviewer"
         who = "The reviewer found it" if by == "reviewer" else f"The {by} raised it and the reviewer confirmed it"
         body = [x.get("text") or ""] + (["", f"**Evidence:** {x['evidence']}"] if filled(x.get("evidence")) else [])
-        body += ["", f"{who} on #{number}."]
+        run = os.environ.get("GITHUB_RUN_ID")
+        where = f" ([run]({os.environ.get('GITHUB_SERVER_URL', 'https://github.com')}/{repo}/actions/runs/{run}))" if run else ""
+        body += ["", f"{who} on #{number}{where}."]
         try:
-            url = gh("issue", "create", "-R", repo, "--title", title, "--body", "\n".join(body)).strip()
+            url = gh("issue", "create", "-R", repo, "--title", title, "--body", "\n".join(body),
+                     "--label", FILED_LABEL).strip()
         except subprocess.CalledProcessError as e:
             lines.append(f"- Not filed: {card.escape(title)} GitHub refused it: {card.escape(gh_reason(e))}")
             continue

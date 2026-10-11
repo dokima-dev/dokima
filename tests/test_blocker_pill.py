@@ -201,16 +201,16 @@ def test_the_scheduled_sync_writes_only_pills_that_change(record_property, make)
 def test_closing_the_last_blocked_issue_clears_the_pill(record_property, make):
     """Closing the last open issue it blocks clears an issue's Blocker pill at once.
 
-    Proves 294.2. #30 blocks #31 only; #32 blocks #31 and #33; #34, labeled parked, blocks #31 only. #31 closes. Checks #30's pill
-    is cleared, #32 keeps Blocker (it still blocks open #33), and #34 falls back to Parked."""
+    Proves 294.2. #30 blocks #31 only; #32 blocks #31 and #33; #34, labeled high, blocks #31 only. #31 closes. Checks #30's pill
+    is cleared, #32 keeps Blocker (it still blocks open #33), and #34 falls back to High."""
     record_property("proves", "294.2")
-    w = make(issues={30: ("open", []), 31: ("closed", []), 32: ("open", []), 33: ("open", []), 34: ("open", ["parked"])},
+    w = make(issues={30: ("open", []), 31: ("closed", []), 32: ("open", []), 33: ("open", []), 34: ("open", ["high"])},
              links=[(31, 30), (31, 32), (33, 32), (31, 34)],
              cards={30: {"Priority": "Blocker"}, 32: {"Priority": "Blocker"}, 34: {"Priority": "Blocker"}})
     board.sync("issues", issue_event("closed", 31, w), SPEC, REPO)
     got = {n: w.pill(n) for n in (30, 32, 34)}
-    assert got == {30: None, 32: "Blocker", 34: "Parked"}, \
-        f"294.2: after #31 closed the pills are {got}; #30 should lose Blocker, #32 keep it and #34 fall back to Parked"
+    assert got == {30: None, 32: "Blocker", 34: "High"}, \
+        f"294.2: after #31 closed the pills are {got}; #30 should lose Blocker, #32 keep it and #34 fall back to High"
 
 
 def test_a_closed_issue_loses_its_own_blocker_pill(record_property, make):
@@ -343,12 +343,12 @@ def test_a_blocker_pill_set_by_hand_is_corrected(record_property, make):
 def test_dokima_no_longer_declares_a_blocker_label(record_property):
     """Dokima no longer declares a blocker label, and the board reads no label named blocker.
 
-    Proves 294.4. Checks the manifest's labels leave out blocker while keeping high and parked, and that blocker is not among the
+    Proves 294.4. Checks the manifest's labels leave out blocker while keeping high, and that blocker is not among the
     labels the board turns into a priority."""
     record_property("proves", "294.4")
     from dokima import manifest
     assert "blocker" not in manifest.LABELS, "294.4: the manifest still declares a blocker label to set by hand"
-    assert {"high", "parked"} <= set(manifest.LABELS), "294.4: the manifest dropped the high or parked label"
+    assert "high" in manifest.LABELS and "parked" not in manifest.LABELS, "294.4: the manifest dropped high or still has parked"
     assert "blocker" not in board.PRIORITY, f"294.4: the board still turns the blocker label into a pill: {board.PRIORITY}"
 
 

@@ -74,15 +74,15 @@ def workflow_job_names():
 # 282.1: one manifest module declares every setting Dokima needs
 
 def test_the_manifest_declares_every_label_dokima_uses(record_property):
-    """The manifest declares exactly the labels Dokima uses: plan, work, autopilot, high, parked.
+    """The manifest declares exactly the labels Dokima uses: plan, work, autopilot, high, filed-by-dokima.
 
     Proves 282.1. Each has a six-digit hex color and a description, and the board's own label names (autopilot and the priority
     labels) are among them."""
     record_property("proves", "282.1")
     m = manifest("282.1")
     from dokima import board
-    assert set(m.LABELS) == {"plan", "work", "autopilot", "high", "parked"}, \
-        f"282.1: the manifest declares the labels {sorted(m.LABELS)}, not plan, work, autopilot, high, parked"
+    assert set(m.LABELS) == {"plan", "work", "autopilot", "high", "filed-by-dokima"}, \
+        f"282.1: the manifest declares the labels {sorted(m.LABELS)}, not plan, work, autopilot, high, filed-by-dokima"
     for name, label in m.LABELS.items():
         color = label.get("color", "")
         assert len(color) == 6 and all(c in "0123456789abcdefABCDEF" for c in color), \
@@ -106,7 +106,7 @@ def test_the_manifest_declares_the_board_fields_and_their_options(record_propert
     assert list(m.FIELDS["Status"]) == ["Backlog", "Plan", "Work", "Review", "Done"], \
         f"282.1: Status has the options {list(m.FIELDS['Status'])}"
     assert set(m.FIELDS["Action"]) == {"Needs you", "Autopilot"}, f"282.1: Action has the options {list(m.FIELDS['Action'])}"
-    assert set(m.FIELDS["Priority"]) == set(board.PRIORITY.values()) | {"Blocker"} == {"Blocker", "High", "Parked"}, \
+    assert set(m.FIELDS["Priority"]) == set(board.PRIORITY.values()) | {"Blocker"} == {"Blocker", "High"}, \
         f"282.1: Priority has the options {list(m.FIELDS['Priority'])}"
     for field, options in m.FIELDS.items():
         for name, option in options.items():
