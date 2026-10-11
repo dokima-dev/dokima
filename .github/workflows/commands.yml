@@ -262,6 +262,17 @@ jobs:
           NUMBER: ${{ github.event.issue.number || github.event.pull_request.number }}
           CARD_ID: ${{ needs.queue.outputs.card }}
         run: |
+          # With GitHub's hourly request budget spent, nothing that reads the issue can run, so say so with the calls
+          # that still work, and when to try again (#368). Asking how much is left costs nothing.
+          read -r gq gq_reset core core_reset <<< "$(gh api rate_limit --jq '[.resources.graphql.remaining, .resources.graphql.reset, .resources.core.remaining, .resources.core.reset] | @tsv' 2>/dev/null || true)"
+          if [ "${gq:-1}" = 0 ] || [ "${core:-1}" = 0 ]; then
+            reset=$([ "${gq:-1}" = 0 ] && echo "$gq_reset" || echo "$core_reset")
+            msg="Nothing ran: Dokima used up GitHub's hourly request budget. It refills at $(date -u -d "@$reset" +%H:%M) UTC; give the command again then."
+            echo "::error title=Request budget used up::$msg"
+            [ -n "$CARD_ID" ] && gh api -X PATCH "repos/$GITHUB_REPOSITORY/issues/comments/$CARD_ID" -f body="$msg" --silent && exit 0
+            gh api "repos/$GITHUB_REPOSITORY/issues/$NUMBER/comments" -f body="$msg" --silent
+            exit 0
+          fi
           export OWNERS=$(python3 -m dokima.plan approvers)
           mkdir -p /tmp/out && printf '%s\n' "$WHY" > /tmp/why.txt
           python3 -m dokima.agent not-started "$ROLE" "$STAGE" /tmp/out /tmp/why.txt
