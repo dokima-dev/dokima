@@ -1,10 +1,19 @@
 name: playthrough
-run-name: "play-through of ${{ inputs.commit }}"
+run-name: "play-through of ${{ inputs.commit || github.event.pull_request.head.sha }}"
 # Plays one issue on the sandbox repo dokima-dev/card-gallery from opened to merged with the Dokima commit given, and
 # says after each step whether both cards showed what had just happened (dokima/playthrough.py). Stand-in agents
 # call no model. The play-through installs the commit on the sandbox with SANDBOX_TOKEN, its own key that can write
 # only to card-gallery; Dokima's app key is minted for card-gallery alone and never gets workflow write.
+# A pull request that changes card, board or workflow code plays its head by itself. pull_request_target runs main's
+# copy of this file and of dokima/playthrough.py, so the work being judged cannot change how it is played.
 on:
+  pull_request_target:
+    types: [opened, synchronize, reopened]
+    paths:
+      - ".github/workflows/**"
+      - dokima/card.py
+      - dokima/body.py
+      - dokima/board.py
   workflow_dispatch:
     inputs:
       commit:
@@ -26,7 +35,7 @@ jobs:
       - name: The Dokima commit to play, in a folder of its own
         uses: actions/checkout@v5
         with:
-          ref: ${{ inputs.commit }}
+          ref: ${{ inputs.commit || github.event.pull_request.head.sha }}
           path: played
           persist-credentials: false
       - uses: actions/setup-python@v6
@@ -45,5 +54,5 @@ jobs:
           GH_TOKEN: ${{ steps.app.outputs.token }}
           SANDBOX_TOKEN: ${{ secrets.SANDBOX_TOKEN }}
           PLAYED: ${{ github.workspace }}/played
-          PLAYED_COMMIT: ${{ inputs.commit }}
+          PLAYED_COMMIT: ${{ inputs.commit || github.event.pull_request.head.sha }}
         run: python3 -m dokima.playthrough
