@@ -59,6 +59,13 @@ jobs:
       # A card already up for this run: queued by the listener, or by the hand-off that started it.
       CARD_ID: ${{ (inputs.card || github.event.client_payload.card) }}
     steps:
+      - name: Count this run's GitHub calls
+        continue-on-error: true
+        # Every gh call this job makes goes through a counter, so its cost in GitHub's hourly budget is known (#426).
+        run: |
+          mkdir -p /tmp/ghcount && real=$(command -v gh)
+          printf '#!/bin/sh\necho "$*" | cut -c1-120 >> /tmp/ghcount/calls\nexec %s "$@"\n' "$real" > /tmp/ghcount/gh
+          chmod +x /tmp/ghcount/gh && { [ -z "$GITHUB_PATH" ] || echo /tmp/ghcount >> "$GITHUB_PATH"; } || true
       - uses: actions/checkout@v5
         with:
           fetch-depth: 0
@@ -448,3 +455,13 @@ jobs:
           [ "$STARTED" = true ] || { echo "::error title=Not started::$(cat /tmp/why.txt 2>/dev/null)"; exit 1; }
           python3 -c "import json,sys; r=json.load(open('$OUT/record.json')); m=r.get('models') or []; bad=[x for x in m if x!='$MODEL']; sys.exit(print('models:', m) or (1 if bad or not m else 0))"
           [ "$PASSED" = true ] || { echo "::error title=Hand-back rejected::$(paste -sd'; ' "$OUT/check.txt")"; exit 1; }
+      - name: Report this run's GitHub calls
+        if: always()
+        continue-on-error: true
+        run: |
+          [ -s /tmp/ghcount/calls ] || { echo "::notice title=GitHub calls::none"; exit 0; }
+          awk '{ k = ($1 == "api") ? (($2 == "graphql") ? "graphql" : "rest") : ($1 ~ /^(run|workflow|release|secret|variable|cache)$/ ? "rest" : "graphql")
+                 n[k]++; t[$1 " " (($1 == "api" && $2 != "graphql") ? "rest" : $2)]++ }
+               END { for (x in t) print t[x], x | "sort -rn | head -4 | paste -sd, - > /tmp/ghcount/top"; close("sort -rn | head -4 | paste -sd, - > /tmp/ghcount/top")
+                     getline top < "/tmp/ghcount/top"
+                     printf "::notice title=GitHub calls::graphql %d, rest %d; most: %s\n", n["graphql"], n["rest"], top }' /tmp/ghcount/calls || true
