@@ -13,7 +13,7 @@ import sys
 
 from dokima import agent, manifest, plan, retry
 
-PRIORITY = {"high": "High", "parked": "Parked"}  # highest first; Blocker comes from blocked-by links, not a label
+PRIORITY = {"high": "High"}  # highest first; Blocker comes from blocked-by links, not a label
 AUTOPILOT = "autopilot"
 DONE = ("Done", None)
 

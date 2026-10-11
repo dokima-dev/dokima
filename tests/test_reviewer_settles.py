@@ -533,6 +533,8 @@ def test_the_reviewers_own_issue_raise_is_filed_in_its_run_and_its_card_says_so(
         assert part in filed["body"], f"301.2: the filed issue's body lacks {what}: {filed['body']!r}"
     assert re.search(rf"#{N}\b|/issues/{N}\b", filed["body"]), \
         f"301.2: the filed issue does not say it was found on #{N}: {filed['body']!r}"
+    assert "filed-by-dokima" in filed["labels"], \
+        f"268: the filed issue is not labeled filed-by-dokima: {filed['labels']}"
     lines = filed_lines(text, n)
     assert lines, f"301.2: the reviewer's record does not name the filed issue #{n}:\n{text}"
     assert any("confirmed" in l.lower() for l in lines), \
