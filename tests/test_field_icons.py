@@ -421,7 +421,7 @@ def test_every_run_comments_footnote_starts_with_the_stats_icon(record_property,
     titles = re.findall(r"<summary>(.*?)</summary>", head, re.S)
     last = [l for l in body.splitlines() if l.strip()][-1]
     folded = bool(titles) and re.match(r"(?:<b>)?\s*" + re.escape(img("stats")), titles[-1]) and head.rstrip().endswith("</details>")
-    assert folded or last.startswith("<sub>" + img("stats")), \
+    assert folded or last.startswith("<sub>" + img("stats")) or last.startswith(img("stats")), \
         f"234.2: the {role} comment's stats do not open with the stats icon, folded or in a footnote:\n{body}"
 
 

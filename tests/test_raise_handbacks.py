@@ -263,7 +263,8 @@ def test_a_doubt_about_the_ask_reaches_you_as_a_question_with_its_evidence(recor
     assert len(kept) == 1 and kept[0].get("evidence") == DOUBT["evidence"] and kept[0].get("to") == "owner", \
         f"300.1: the record does not keep the doubt as a question for the owner with its evidence: {kept}"
     shown = (out / "comment.md").read_text().split("<details", 1)[0]
-    assert DOUBT["text"] in shown and "for you" in shown, \
+    # Since #470 a #N in a raise shows as a short plain link, so GitHub does not draw its title.
+    assert DOUBT["text"].replace("#339", "[#339](https://github.com/o/r/issues/339)") in shown and "for you" in shown, \
         f"300.1: the planner's comment does not show the doubt as a question for you:\n{shown}"
     assert DOUBT["evidence"] in shown, f"300.1: the planner's comment does not show the doubt's evidence:\n{shown}"
     step = agent.next_step([], rec_, [OWNER], autopilot=lambda: False)

@@ -44,7 +44,8 @@ def card_of(text):
     It is the first card block, else everything above the ask."""
     text = text or ""
     if "<!-- dokima-card -->" in text:
-        return text.split("<!-- dokima-card -->", 1)[1].split("<!-- /dokima-card -->", 1)[0]
+        done = text.rsplit("<!-- dokima-done -->", 1)[1].strip().split("\n")[0] if "<!-- dokima-done -->" in text else ""
+        return text.split("<!-- dokima-card -->", 1)[1].split("<!-- /dokima-card -->", 1)[0] + done
     return text.split("<!-- dokima-ask -->", 1)[0]
 
 

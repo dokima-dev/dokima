@@ -384,9 +384,17 @@ class Hub:
         found = {}
         for kind, label in LABELS.items():
             nums = set()
-            for line in top.splitlines():
+            lines = top.splitlines()
+            for i, line in enumerate(lines):
                 if f"**{label}:**" in line:
-                    nums |= {int(x) for x in re.findall(r"#(\d+)", line.split(f"**{label}:**", 1)[1])}
+                    # Since #416 each issue is a bullet of its own under the label.
+                    under = [line.split(f"**{label}:**", 1)[1]]
+                    for nxt in lines[i + 1:]:
+                        if nxt.startswith("- "):
+                            under.append(nxt)
+                        elif nxt.strip():
+                            break
+                    nums |= {int(x) for x in re.findall(r"(?:#|/issues/)(\d+)", " ".join(under))}
             found[kind] = nums
         return found
 

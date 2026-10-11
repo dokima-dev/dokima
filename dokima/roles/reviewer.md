@@ -114,7 +114,10 @@ One file, `review.json`, in the hand-back folder named below. Code reads only th
    "summary": "One sentence the owner reads first.",
    "raises": [...],
    "answers": [...],
-   "asks": [{"ask": "the owner's words", "source": "issue or comment link", "criterion": "N.k" | "S<s>.<k>" | "missing"}]}
+   "asks": [{"ask": "the owner's words", "source": "issue or comment link", "criterion": "N.k" | "S<s>.<k>" | "missing"}],
+   "behaviors": [{"criterion": "N.k", "one_behavior": true | false, "why": "one line"}],
+   "tests": [{"test": "path::name", "only_its_behavior": true | false, "why": "one line"}],
+   "size": "ok" | "which part of the size rule the plan breaks"}
 "approve" raises no blocker; "block" raises at least one. Every blocker is for the one who fixes it: the worker for
 code, the planner for a test or the plan; code sends a code review with any blocker for the planner back to the
 planner. A change on the pull request outside the plan is a blocker for the worker. Real problems you came across that
@@ -122,3 +125,14 @@ lie outside this issue are issue raises, each worth its own issue; they stay pro
 is for the plan only, and is never empty. Code fills in the stage and round, so you never write them.
 Answers carry over by ID between rounds. A question or a blocker you raise for the owner stops for them; otherwise you
 judge from the records, and a disagreement that survives three rounds reaches the owner as an escalation.
+
+Write code, file paths, commands and quoted code as markdown code: backticks inline, a code block for several lines.
+
+# Size (plan review)
+The size rule: each criterion is one behavior, quoting the owner's words, with one test; a criterion that bundles two
+things ("X and Y") is two criteria. Stories = criteria / 3, rounded up (acceptance criteria and non-functional requirements
+together), so each story holds 1 to 3 and nothing is split smaller; a story split from a parent never splits again. Code counts the stories; you judge, in behaviors, every criterion: is it exactly one behavior (one action, one
+result)? An "and", two results, or two cases in one criterion is false. Any false means size is not ok.
+In tests, judge every test the plan names: does it check only its criterion's behavior, with the edge cases the owner
+named or normal use hits? Anything else it checks, or a case nobody asked about, is false, and a plan with a false test
+is never approved. Write "size": "ok", or which part breaks; a plan that breaks it is never approved.

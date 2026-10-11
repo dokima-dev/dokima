@@ -16,6 +16,8 @@ FOLD_START = "\n<details><summary>Original issue</summary>\n\n"
 FOLD_END = "\n\n</details>"
 OPEN_START = "\n\n"
 DONE = "<!-- dokima-done -->"
+# In a planned card: the owner's part stays folded, with the Definition of Done after the fold.
+FOLDED = "<!-- dokima-folded -->"
 TRAILER = "\n\n" + DONE + "\n"
 # The head of a split's story, as agent.story_body quotes it from the parent's approved plan.
 STORY = re.compile(r"<!-- dokima-card -->\n<!-- /dokima-card -->\n\n<details open><summary>From the approved plan of #\d+, ")
@@ -60,7 +62,8 @@ def redraw(body, top):
     body = body or ""
     owner = ask(body)
     top, done = top.split(DONE, 1) if DONE in top else (top, None)
-    shown = OPEN_START + owner if done is not None and not STORY.match(owner) else FOLD_START + owner + FOLD_END
+    folded = STORY.match(owner) or FOLDED in top
+    shown = OPEN_START + owner if done is not None and not folded else FOLD_START + owner + FOLD_END
     below = shown + ("" if done is None else TRAILER + done.strip("\n"))
     new = top.rstrip("\n") + "\n\n" + MARKER + below
     if ask(new) != ask(body) or new.split(MARKER, 1)[1] != below or (done is not None and not trailer(below)[1]):

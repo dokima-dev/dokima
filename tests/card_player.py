@@ -435,7 +435,12 @@ def worker_record():
 def card_of(text):
     """The card block in a body, between its two marks; None when there is none."""
     m = re.search(r"<!-- dokima-card -->.*?<!-- /dokima-card -->", text or "", re.S)
-    return m.group(0) if m else None
+    if not m:
+        return None
+    # Since #416 the Definition of Done sits last, after the Original issue fold.
+    done = (text.rsplit("<!-- dokima-done -->", 1)[1].strip().split("\n")[0] if "<!-- dokima-done -->" in text[m.end():]
+            else "")
+    return m.group(0) + ("\n" + done if done else "")
 
 
 def without_issue_link(text, n):

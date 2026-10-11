@@ -106,7 +106,7 @@ def test_a_cancelled_run_says_so_on_its_card_and_mentions_no_one(record_property
         assert not MENTION.findall(body), f"188.1 ({name}): the cancelled run's card mentions {MENTION.findall(body)}:\n{body[-700:]}"
         assert "rejected" not in body.lower() and "failed" not in re.sub(r"<img[^>]*>", "", body).lower(), \
             f"188.1 ({name}): the cancelled run's card reads as a failure, not a cancel:\n{body[:900]}"
-        lines = [l for l in body.splitlines() if l.strip()]
+        lines = [l for l in body.split(agent.STATS)[0].splitlines() if l.strip()]
         assert lines and lines[-1].startswith("**Next:**"), \
             f"188.1 ({name}): the cancelled run's card does not end with a Next line:\n{body[-600:]}"
     for name in ("rejected", "no-tools", "blocked"):

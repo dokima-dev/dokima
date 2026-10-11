@@ -38,10 +38,12 @@ STORY = {"kind": "user_story", "summary": "Slow calls hand back a job id instead
          "test_changes": {}}
 FEATURE = {"kind": "feature", "summary": "Slow calls hand back a job id instead of timing out.", "feature": "Slow calls run as jobs.",
            "stories": [{"title": "Job ids", "user_story": "Slow calls return a job id.",
-                        "acceptance_criteria": [{"text": "A slow call returns a job id.", "source": ISSUE}],
+                        "acceptance_criteria": [{"text": "A slow call returns a job id.", "source": ISSUE},
+                                                {"text": "A fast call returns its result.", "source": ISSUE}],
                         "non_functional": [], "depends_on": []},
                        {"title": "Job status", "user_story": "Owners see each job's status.",
-                        "acceptance_criteria": [{"text": "A job's status is shown.", "source": ISSUE}],
+                        "acceptance_criteria": [{"text": "A job's status is shown.", "source": ISSUE},
+                                                {"text": "A finished job shows its result.", "source": ISSUE}],
                         "non_functional": [], "depends_on": [0]}]}
 
 

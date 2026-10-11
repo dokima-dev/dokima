@@ -118,13 +118,13 @@ def test_the_manifest_declares_the_board_fields_and_their_options(record_propert
 def test_the_manifest_declares_views_checks_and_branch_rules(record_property):
     """The manifest declares the Autopilot table view, the required checks and main's branch rule.
 
-    Proves 282.1. The required checks are the two Dokima's merge waits on, "all tests" and "all done-whens passed", each the name of
+    Proves 282.1. The required checks are the two Dokima's merge waits on, "all tests" and "Acceptance criteria", each the name of
     a real job in the repo's workflows, and main's branch rule requires exactly those checks."""
     record_property("proves", "282.1")
     m = manifest("282.1")
     assert set(m.VIEWS) == {"Autopilot"}, f"282.1: the manifest declares the views {sorted(m.VIEWS)}"
     assert m.VIEWS["Autopilot"]["layout"] == "table", f"282.1: the Autopilot view is {m.VIEWS['Autopilot']}"
-    assert set(m.CHECKS) == {"all tests", "all done-whens passed"}, f"282.1: the required checks are {m.CHECKS}"
+    assert set(m.CHECKS) == {"all tests", "Acceptance criteria"}, f"282.1: the required checks are {m.CHECKS}"
     jobs = workflow_job_names()
     for check in m.CHECKS:
         assert check in jobs, f"282.1: required check {check!r} is the name of no job in .github/workflows/"
@@ -360,7 +360,7 @@ def test_the_guard_passes_settings_the_manifest_declares(record_property, tmp_pa
 
     Proves 282.3. A workflow keyed on the label plan and asking an app token for issues write and administration read, and code
     setting Status to Done, adding the Autopilot view, adding the label autopilot both ways, looking up the checks
-    "all tests" and "all done-whens passed" by name and through a constant, and reading main's branch rule both ways,
+    "all tests" and "Acceptance criteria" by name and through a constant, and reading main's branch rule both ways,
     gets no line from the guard, and neither does the repo as it is."""
     record_property("proves", "282.3")
     m = manifest("282.3")
@@ -382,7 +382,7 @@ def test_the_guard_passes_settings_the_manifest_declares(record_property, tmp_pa
                   permission-administration: read
         """)
     write(str(tmp_path), "dokima/fine.py", """\
-        GATE = "all done-whens passed"
+        GATE = "Acceptance criteria"
 
 
         def fine(board, rest, gh, iid, path, runs, repo):

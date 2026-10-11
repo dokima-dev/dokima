@@ -193,14 +193,13 @@ def test_a_planned_issue_keeps_its_definition_of_done_in_the_card(record_propert
             saved = draw(monkeypatch, github, current, recs)
             assert saved is not None, "371.3: the card saved nothing on the planned issue"
             top, below = saved.split(body.MARKER, 1)
+            below = re.sub(r"\n\n<!-- dokima-done -->\n[^\n]*$", "", below)  # since #416 Done sits last, after the fold
             assert below == FOLD_START + ask + FOLD_END, \
                 f"371.3: with a plan, something other than the owner's fold sits below the card:\n{below!r}"
-            assert top.count(DOD) == 1 and saved.count(DOD) == ask.count(DOD) + 1, \
-                f"371.3: with a plan, the card does not show the Definition of Done exactly once above the owner's text"
-            card_lines = [ln for ln in top.split(plan.CARD_START, 1)[1].split(plan.CARD_END, 1)[0].splitlines()
-                          if ln.strip()]
-            assert card_lines[-1].startswith(DOD) and SUMMARY in top, \
-                f"371.3: with a plan, the Definition of Done is not the card's last line: {card_lines[-1]!r}"
+            # Since #416 the Definition of Done is the body's last line, once, below the Original issue fold.
+            last = saved.rstrip("\n").splitlines()[-1]
+            assert saved.count(DOD) == ask.count(DOD) + 1 and last.startswith(DOD) and SUMMARY in top, \
+                f"371.3: with a plan, the Definition of Done is not the body's last line once: {last!r}"
 
 
 # 371.4: the owner's text is never changed: kept byte for byte, or the save is refused and says why

@@ -32,7 +32,7 @@ SPLIT = {"kind": "feature", "feature": "f", "stories": [
 ASKS = [{"ask": "Paint the door blue", "source": "https://github.com/o/r/issues/9", "criterion": "9.1"},
         {"ask": "Oil the hinges", "source": "https://github.com/o/r/issues/9#issuecomment-12", "criterion": "9.2"}]
 APPROVE = {"previous_step": {"did": ["Wrote three criteria."], "decided": [], "open": []},
-           "verdict": "approve", "summary": "Every ask has a criterion and a test.", "asks": ASKS}
+           "verdict": "approve", "summary": "Every ask has a criterion and a test.", "asks": ASKS, "tests": [{"test": t, "only_its_behavior": True, "why": "one result"} for t in ("tests/test_x.py::test_a", "tests/test_x.py::test_b", "tests/test_x.py::test_c")], "size": "ok", "behaviors": [{"criterion": c, "one_behavior": True, "why": "one result"} for c in ("9.1", "9.2", "9.3", "57.1", "57.2", "57.3", "S1.1", "S1.2", "S1.3", "S2.1", "S2.2", "S2.3")]}
 BLOCK = {**APPROVE, "verdict": "block", "summary": "One ask has no criterion.",
          "raises": [{"kind": "blocker", "to": "planner", "label": "9.1", "text": "An ask is dropped.",
                      "evidence": "issue #9"}]}

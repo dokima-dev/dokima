@@ -440,7 +440,12 @@ def worker_record():
 def card_of(text):
     """The card block in a body, between its two marks; None when there is none."""
     m = re.search(r"<!-- dokima-card -->.*?<!-- /dokima-card -->", text or "", re.S)
-    return m.group(0) if m else None
+    if not m:
+        return None
+    # Since #416 the Definition of Done sits last, after the Original issue fold.
+    done = (text.rsplit("<!-- dokima-done -->", 1)[1].strip().split("\n")[0] if "<!-- dokima-done -->" in text[m.end():]
+            else "")
+    return m.group(0) + ("\n" + done if done else "")
 
 
 def without_issue_link(text, n):
@@ -954,8 +959,8 @@ def test_merging_a_pr_redraws_its_card_and_its_issues_card(tmp_path, record_prop
             f"345.1: after {what}, PR #246's card does not say Merged: {pr_card!r}"
         assert issue_card == without_issue_link(pr_card, 239) and pr_card != issue_card, \
             f"345.1: after {what}, issue #239 and PR #246 show different cards, besides the PR's link to #239"
-        assert hub.pr_body(246).rstrip().endswith("Closes https://github.com/o/r/issues/239"), \
-            f"345.1: after {what}, PR #246 lost its closing line: {hub.pr_body(246)[-200:]!r}"
+        assert "Closes" not in hub.pr_body(246), \
+            f"345.1: after {what}, PR #246 still carries a Closes line (#416 dropped it): {hub.pr_body(246)[-200:]!r}"
 
 
 def test_merging_one_pr_leaves_other_cards_alone(tmp_path, record_property):

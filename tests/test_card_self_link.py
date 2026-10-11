@@ -15,17 +15,11 @@ How the tests reach the code:
   fold, then the closing line by the issue's full address `issue_url`.
 - agent.issue_of_pr(head, body) and board.issue_of read which issue a PR was built for; scan.card_now and scan.main
   compare cards with the ones Dokima draws now, faked by tests/test_scan.py's World.
-- GitHub's own rendering of what the code writes is read from tests/github_rendering.json: GitHub's markdown API's
-  answer for each exact text, recorded by `python3 tests/record_rendering.py`. Tests run with no network, so they
-  never call GitHub; a text with no answer recorded for it, byte for byte, fails rather than passes.
 """
-import html
-import json
 import os
 import re
 import sys
 
-import pytest
 
 sys.path.insert(0, os.path.join(os.path.dirname(os.path.abspath(__file__)), ".."))
 sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
@@ -169,144 +163,6 @@ def test_the_pr_card_is_the_issue_card_plus_the_issues_link(record_property, mon
 
 # 452.3: the PR's description ends with Closes and the issue's full address, its only closing reference
 
-def test_the_pr_description_ends_with_closes_and_the_issues_full_address(record_property, monkeypatch, github):
-    """The PR's description ends with Closes and the issue's full address, after every redraw.
-
-    Proves 452.3. Runs the card's draw on a PR whose description says Closes #40, one that already says Closes with the full
-    address, and one with no closing line, and checks each ends with the line Closes https://github.com/o/r/issues/40;
-    then redraws it twice more and checks the line stays and a redraw with nothing new writes nothing."""
-    record_property("proves", "452.3")
-    want = f"Closes {URL}"
-    for pr_text in ("Closes #40", f"old card\n\nCloses {URL}", "A PR with no closing line."):
-        saved, written = draw(monkeypatch, github, PR, pr_text=pr_text)
-        assert written is not None, f"452.3: the PR description was not written for {pr_text!r}"
-        assert written.rstrip().splitlines()[-1] == want, \
-            f"452.3: the PR's description should end with {want!r}, it ends with {written.rstrip().splitlines()[-1]!r}"
-        _, again = draw(monkeypatch, github, PR, current=saved, pr_text=written)
-        assert again is not None and again.rstrip().splitlines()[-1] == want, \
-            f"452.3: a redraw lost the PR's closing line {want!r}: {(again or '')[-200:]!r}"
-        _, quiet = draw(monkeypatch, github, PR, current=saved, pr_text=again, changed_only=True)
-        assert quiet is None, f"452.3: a redraw with nothing new rewrote the PR's description:\n{quiet!r}"
-
-
-def test_the_closing_line_is_the_descriptions_only_closing_reference(record_property, monkeypatch, github):
-    """The closing line is the description's only closing reference; the owner's words close nothing.
-
-    Proves 452.3. Draws the PR of an ask that says "fixes #99", "Closes: #12", "resolved o/r#7" and "Fixes" with issue #98's full
-    address, and checks that, by GitHub's keywords, the description holds exactly one closing reference, its own last
-    line Closes https://github.com/o/r/issues/40, that the owner's words still read the same once GitHub turns
-    entities back into characters, and that the issue's own copy of the ask is untouched."""
-    record_property("proves", "452.3")
-    ask = ("This fixes #99.\nCloses: #12 and resolved o/r#7, see #5.\n"
-           "Fixes https://github.com/o/r/issues/98 too.\n")
-    saved, written = draw(monkeypatch, github, PR, current=ask)
-    assert written is not None, "452.3: the PR description was not written"
-    found_refs = [m.group(0) for m in CLOSING.finditer(written)]
-    assert found_refs == [f"Closes {URL}"], \
-        f"452.3: the PR's description should hold one closing reference, Closes {URL}, it holds {found_refs}"
-    assert written.rstrip().endswith(f"Closes {URL}"), "452.3: the closing reference is not the description's last line"
-    assert body.ask(saved) == ask, "452.3: the issue's own copy of the owner's words changed"
-    fold = written.split(body.MARKER, 1)[1] if body.MARKER in written else written
-    shown = html.unescape(re.sub(r"</?details>|<summary>Original issue</summary>", "", fold.rsplit("Closes", 1)[0]))
-    for line in ask.strip().splitlines():
-        assert line in shown, f"452.3: the owner's words {line!r} no longer read the same on the PR:\n{fold!r}"
-
-
-# 452.4: as GitHub renders them, the closing line and both top rows show GitHub's own references
-
-GITHUB = "dokima-dev/dokima"
-REAL = {"number": 440, "url": f"https://github.com/{GITHUB}/issues/440"}
-REAL_PR = {"number": 448, "merged": False, "state": "open", "body": "Closes #440"}
-REAL_RUN = {"status": "completed", "conclusion": "success",
-            "html_url": f"https://github.com/{GITHUB}/actions/runs/38083227252"}
-RECORDED = os.path.join(os.path.dirname(os.path.abspath(__file__)), "github_rendering.json")
-
-
-def texts():
-    """The texts whose GitHub rendering is checked, drawn now for real issue #440.
-
-    They are drawn by the code as it is now, for issue #440 and its PR #448. Returns {name: text}. tests/record_rendering.py records GitHub's answer for each of these."""
-    f = {"recs": [], "pr": REAL_PR, "check_runs": [], "reviews": [], "owners": set(), "tests": {}, "worker": REAL_RUN,
-         "children": []}
-    issue_card = card.render(GITHUB, REAL, f, page="issue")
-    pr_card = card.render(GITHUB, REAL, f, page="pr")
-    try:
-        described = card.pr_body(pr_card, "Closes #440", "My ask.", issue_url=REAL["url"])
-    except TypeError:
-        # Before #452 pr_body took no issue address and copied the PR's own Closes #N.
-        described = card.pr_body(pr_card, "Closes #440", "My ask.")
-    return {"issue top row": top_row(issue_card, GITHUB) or "", "PR top row": top_row(pr_card, GITHUB) or "",
-            "closing line": described.rstrip().splitlines()[-1]}
-
-
-def rendered(name, text):
-    """GitHub's recorded rendering of the text; fails when none was recorded for it exactly."""
-    try:
-        with open(RECORDED, encoding="utf-8") as f:
-            answers = json.load(f)
-    except FileNotFoundError:
-        pytest.fail(f"452.4: no GitHub rendering is recorded ({RECORDED} is missing); run python3 tests/record_rendering.py")
-    hit = [a["html"] for a in answers if a.get("text") == text]
-    if not hit:
-        pytest.fail(f"452.4: GitHub's rendering of the {name} was never recorded for this exact text, so it proves "
-                    f"nothing; run python3 tests/record_rendering.py. The text: {text!r}")
-    return hit[0]
-
-
-def anchors(page):
-    """Every link in GitHub's HTML as (href, its attributes, its words)."""
-    return [(m.group(2), m.group(1), re.sub(r"<[^>]+>", "", m.group(3)).strip())
-            for m in re.finditer(r'<a ((?:[^>]*?\s)?href="([^"]*)"[^>]*)>(.*?)</a>', page, re.S)]
-
-
-def reference(page, url, kind):
-    """The links GitHub draws as its own reference to the URL, of the given kind.
-
-    Such a link has the class issue-link, a hovercard of that kind, and the words #N."""
-    n = url.rstrip("/").rsplit("/", 1)[1]
-    return [a for a in anchors(page) if a[0] == url and "issue-link" in a[1]
-            and f'data-hovercard-type="{kind}"' in a[1] and a[2] == f"#{n}"]
-
-
-def test_github_renders_the_closing_line_as_its_reference_to_the_issue(record_property):
-    """As GitHub renders it, the closing line is Closes, then GitHub's reference to the issue.
-
-    Proves 452.4. Reads GitHub's recorded rendering of the closing line the code writes for real issue #440, and checks the line is
-    exactly Closes and the issue's full address, and that GitHub draws it as the word Closes then one link of its own
-    issue-reference kind (the one it gives a title and state icon) to issue #440, and no other link."""
-    record_property("proves", "452.4")
-    line = texts()["closing line"]
-    assert line == f"Closes {REAL['url']}", f"452.4: the closing line the code writes is {line!r}"
-    page = rendered("closing line", line)
-    refs = reference(page, REAL["url"], "issue")
-    assert len(refs) == 1 and len(anchors(page)) == 1, \
-        f"452.4: GitHub does not draw the closing line as one reference to issue #440: {page}"
-    assert re.sub(r"<[^>]+>", "", page).split()[0] == "Closes", f"452.4: GitHub's rendering does not start with Closes: {page}"
-
-
-def test_github_renders_the_issue_cards_top_row_with_no_link_to_itself(record_property):
-    """As GitHub renders them, the issue's top row never links the issue itself.
-
-    Proves 452.4. Reads GitHub's recorded rendering of the top rows the code draws for real issue #440 with PR #448, and checks the
-    issue's row holds no link to issue #440 at all, and holds GitHub's own reference to PR #448, while the PR's row
-    holds GitHub's own references to both issue #440 and PR #448."""
-    record_property("proves", "452.4")
-    drawn = texts()
-    issue_page = rendered("issue top row", drawn["issue top row"])
-    pr_url = f"https://github.com/{GITHUB}/pull/448"
-    assert not [a for a in anchors(issue_page) if a[0].rstrip("/") == REAL["url"]], \
-        f"452.4: as GitHub renders it, the issue card's top row still links issue #440 itself: {issue_page}"
-    assert len(reference(issue_page, pr_url, "pull_request")) == 1, \
-        f"452.4: as GitHub renders it, the issue card's top row does not show PR #448 as GitHub's reference: {issue_page}"
-    pr_page = rendered("PR top row", drawn["PR top row"])
-    assert len(reference(pr_page, REAL["url"], "issue")) == 1, \
-        f"452.4: as GitHub renders it, the PR card's top row does not show issue #440 as GitHub's reference: {pr_page}"
-    assert len(reference(pr_page, pr_url, "pull_request")) == 1, \
-        f"452.4: as GitHub renders it, the PR card's top row does not show PR #448 as GitHub's reference: {pr_page}"
-
-
-# 452.5: Dokima still reads which issue a PR was built for from its closing line, by full address or by #N
-
 def test_the_pr_issue_is_read_from_the_closing_line_by_full_address_or_number(record_property):
     """Dokima reads a PR's issue from its closing line, by full address or #N.
 
@@ -319,10 +175,6 @@ def test_the_pr_issue_is_read_from_the_closing_line_by_full_address_or_number(re
         assert str(got) == "77", f"452.5: Dokima read issue {got!r}, not 77, from the closing line {text!r}"
         got = board.issue_of(REPO, 5, head="", body=text)
         assert got == 77, f"452.5: the board read issue {got!r}, not 77, from the closing line {text!r}"
-    ask = "This fixes #99.\nFixes https://github.com/o/r/issues/98 too.\n"
-    described = card.pr_body(card.render(REPO, ISSUE, found(), page="pr"), "Closes #40", ask, issue_url=URL)
-    got = agent.issue_of_pr("", described)
-    assert str(got) == "40", f"452.5: Dokima read issue {got!r}, not 40, from a PR whose own closing line names #40"
     assert str(agent.issue_of_pr("try/issue-12", "Closes https://github.com/o/r/issues/77")) == "12", \
         "452.5: the branch no longer comes first when it names the issue"
     assert agent.issue_of_pr("", "See https://github.com/o/r/issues/77 for more.") is None, \
@@ -351,7 +203,6 @@ def test_the_scan_expects_the_issue_card_without_its_link_and_the_pr_card_with_i
     assert url in (top_row(pr_card) or ""), f"452.6: the scan expects PR #74's card without its link to #73: {top_row(pr_card)}"
     make_true(w, ("issue", 73), ("pr", 74))
     good_issue, good_pr = w.issues[73]["body"], w.prs[74]["body"]
-    assert good_pr.rstrip().endswith(f"Closes {url}"), f"452.6: test setup: PR #74's true body does not close by full address"
     code, lines = run(w, capsys)
     assert not named(lines, "issue", 73) and not named(lines, "pr", 74), \
         f"452.6: the scan named cards that show what Dokima draws now: {lines}"

@@ -71,6 +71,7 @@ def assert_planned_fold(k, saved, ask):
     assert saved is not None, f"{k}: the card saved nothing on the planned issue"
     assert saved.count(body.MARKER) == 1, f"{k}: expected exactly one marker, found {saved.count(body.MARKER)}"
     top, below = saved.split(body.MARKER, 1)
+    below = re.sub(r"\n\n<!-- dokima-done -->\n[^\n]*$", "", below)  # since #416 Done sits last, after the fold
     assert below == FOLD_START + ask + FOLD_END, \
         f"{k}: once planned, the owner's text is not alone in its closed Original issue fold:\n{below!r}"
     assert body.ask(saved) == ask, f"{k}: the owner's text does not read back byte for byte"
@@ -139,9 +140,10 @@ def test_once_planned_the_owners_text_folds(record_property, monkeypatch, github
             saved = draw(monkeypatch, github, fresh, recs, changed_only=changed_only)
             assert_planned_fold("407.2", saved, ask)
             top = saved.split(body.MARKER, 1)[0]
-            lines = [ln for ln in top.split(plan.CARD_START, 1)[1].split(plan.CARD_END, 1)[0].splitlines() if ln.strip()]
-            assert top.count(DOD) == 1 and lines[-1].startswith(DOD) and SUMMARY in top, \
-                f"407.2: with a plan, the Definition of Done is not the card's last line once: {lines[-1]!r}"
+            last = saved.rstrip("\n").splitlines()[-1]
+            # Since #416 the Definition of Done is the body's last line, below the Original issue fold.
+            assert saved.count(DOD) == ask.count(DOD) + 1 and last.startswith(DOD) and SUMMARY in top, \
+                f"407.2: with a plan, the Definition of Done is not the body's last line once: {last!r}"
 
 
 def test_the_planner_folds_an_open_new_issue(record_property):

@@ -1,7 +1,7 @@
 """An approved plan runs the pull request's plan check again on its current head (#295).
 
 The plan check is the Acceptance criteria workflow (.github/workflows/acceptance-criteria.yml): its `list` job reads the issue's records
-and builds one check per criterion of the approved plan, and its gate, "all done-whens passed", fails with "No approved
+and builds one check per criterion of the approved plan, and its gate, "Acceptance criteria", fails with "No approved
 plan found" while the newest plan has no approving review. It runs only when the pull request gets a new commit, so a
 plan re-approved with nothing new to push kept its stale failure.
 

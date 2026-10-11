@@ -88,10 +88,31 @@ def comment_for(handback):
     return FOLD.sub("", agent.render(r))
 
 
-def link_lines(text):
-    """Every line of `text` that carries one of the three link icons."""
+def link_blocks(text):
+    """Each link label of `text` with the bullets under it: (the label line and its bullets as one line, the raw lines).
+
+    Since #416 each linked issue is a bullet of its own under its label, so GitHub shows its title."""
     icons = [img(f) for f, _ in KINDS.values()]
-    return [l for l in text.splitlines() if any(i in l for i in icons)]
+    lines, out, i = text.splitlines(), [], 0
+    while i < len(lines):
+        if any(c in lines[i] for c in icons):
+            raw, j = [lines[i]], i + 1
+            while j < len(lines) and (not lines[j].strip() or lines[j].startswith("- ")):
+                if lines[j].startswith("- "):
+                    raw.append(lines[j])
+                elif j + 1 < len(lines) and not lines[j + 1].startswith("- "):
+                    break
+                j += 1
+            out.append((" ".join(raw), raw))
+            i = j
+        else:
+            i += 1
+    return out
+
+
+def link_lines(text):
+    """Every link label of `text`, with the bullets under it read as one line."""
+    return [joined for joined, _ in link_blocks(text)]
 
 
 @pytest.fixture
@@ -105,7 +126,8 @@ def without_link_lines(text):
     """`text` without its link lines and with blank runs collapsed.
 
     Used to compare a card that has links with one that has none."""
-    keep = [l for l in text.splitlines() if l not in link_lines(text)]
+    raw = {l for _, ls in link_blocks(text) for l in ls}
+    keep = [l for l in text.splitlines() if l not in raw]
     return re.sub(r"\n{3,}", "\n\n", "\n".join(keep)).strip()
 
 
@@ -127,7 +149,7 @@ def check_lines(text, links, k, where):
         assert files == [LINK_ICON[field]], \
             f"{k}: {where}'s {label} line draws the icons {files}, not only {LINK_ICON[field]}.svg: {line}"
         assert not VERDICT_ICONS & set(files), f"{k}: {where}'s {label} line carries a verdict or run icon: {line}"
-        numbers = sorted(int(x) for x in re.findall(r"#(\d+)\b", line))
+        numbers = sorted(int(x) for x in re.findall(r"/issues/(\d+)\b", line))
         assert numbers == sorted(links[kind]), \
             f"{k}: {where}'s {label} line shows issues {numbers}, not exactly {sorted(links[kind])}: {line}"
 

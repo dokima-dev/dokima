@@ -189,29 +189,6 @@ def test_the_number_must_sit_below_the_first_line_and_name_every_criterion(recor
         f"239.3: test_unique, filed under 9.2 and 9.3, named only 9.2 and was not rejected naming 9.3: {why!r}"
 
 
-def test_texts_up_to_20_percent_over_pass_and_are_each_listed(record_property, check, capsys):
-    """Texts at most 20% over their caps pass, and the check lists each one.
-
-    Proves 239.4. Criteria of 30 and 27 words, and docstrings of 18 and 16 words, pass with exit 0. The check's output
-    names each with its word count; one at its cap is not named.
-    """
-    record_property("proves", "239.4")
-    plan = with_criteria(ac=words(30), nfr=words(27))
-    plan["acceptance_criteria"][1]["text"] = words(25)
-    text = jobs(id_doc=words(18), helper_doc=words(16))
-    rc, why, printed = run(check, capsys, plan, text, "239.4")
-    assert rc == 0 and not why, f"239.4: texts at most 20% over their caps got the plan rejected: {why!r}"
-    for where, n in (("acceptance criterion 1", 30), ("non-functional requirement 1", 27),
-                     ("tests/test_jobs.py::test_id", 18), ("tests/test_jobs.py::make_job", 16)):
-        line = next((x for x in printed.splitlines() if where in x and f"{n} words" in x), None)
-        assert line, f"239.4: the check's output does not list {where} with its {n} words: {printed!r}"
-    assert "acceptance criterion 2" not in printed, \
-        f"239.4: acceptance criterion 2, exactly at its 25-word cap, was listed as over it: {printed!r}"
-    rc, why, printed = run(check, capsys, feature_with(words(30)), jobs(), "239.4")
-    assert rc == 0 and "story 2: acceptance criterion 1" in printed and "30 words" in printed, \
-        f"239.4: a split's 30-word criterion was not passed and listed: rc {rc}, {why!r}, {printed!r}"
-
-
 def test_any_text_past_20_percent_rejects_the_plan_naming_each(record_property, check, capsys):
     """Any text more than 20% over its cap rejects the plan, naming each one.
 

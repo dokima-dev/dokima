@@ -240,6 +240,7 @@ def test_the_card_never_changes_the_owner_part(record_property, monkeypatch, git
     record_property("proves", "179.2")
     body = helper("179.2")
     current = body.redraw(TRICKY, PLAN_TOP)
+    current = run_card(monkeypatch, github, current)  # the first real redraw moves Done below the fold (#416)
     below = current.split(body.MARKER, 1)[1]
     for k in range(3):
         # Every change now redraws (#438), so a run that finds the card current may save nothing and keeps the body.

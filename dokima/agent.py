@@ -535,7 +535,7 @@ def bullets(items, show):
 
 def pairs(d):
     """One line per key and value of a field that should be a dict; nothing when it is not."""
-    return [f"- {k}: {', '.join(map(str, v)) if isinstance(v, list) else v}" for k, v in d.items()] if isinstance(d, dict) else []
+    return [f"- `{k}`: {', '.join(map(str, v)) if isinstance(v, list) else v}" for k, v in d.items()] if isinstance(d, dict) else []
 
 
 def files_changed(base):
@@ -660,16 +660,27 @@ def answered_lines(repo, rec, earlier):
     found = {}
     for r in earlier or []:
         if isinstance(r, dict) and (r.get("check") or {}).get("passed"):
-            found.update({x["id"]: x for x in card.raises_of(r.get("handback")) if x.get("id")})
+            found.update({x["id"]: (x, r) for x in card.raises_of(r.get("handback")) if x.get("id")})
     lines = ["", "**Raised earlier:**", ""]
     for a in card.answers_of(h):
-        r = found.get(a["raise"])
-        lines.append(card.raise_line(repo, r) if r else "- A raise not found in this issue's earlier records")
+        r, by = found.get(a["raise"], (None, None))
+        lines.append(f"- {raised_by(by)} raised: {card.raise_line(repo, r)[2:]}" if r
+                     else "- A raise not found in this issue's earlier records")
         word = {"done": "Done", "disagree": "Disagree"}.get(a.get("answer"), escape_line(str(a.get("answer"))))
-        lines.append(f"  - {word}: {escape_line(a.get('why'))}")
+        lines.append(f"  - {word}: {card.short_refs(repo, escape_line(a.get('why')))}")
         if filled(a.get("words")) and filled(a.get("source")):
             lines.append(f"  - Your words: {said(a['words'], a['source'])}")
     return lines
+
+
+def raised_by(rec):
+    """Who raised an earlier record's raises and where, e.g. "Code review on [#462](link)".
+
+    The link is the comment the record was posted as; just "Planner" when that comment is not known."""
+    name = review_name(rec.get("stage")) if rec.get("role") == "reviewer" else \
+        {"planner": "Planner", "worker": "Worker"}.get(rec.get("role"), "Code")
+    m = re.fullmatch(r"https://[^\s()]+/(?:issues|pull)/(\d+)#issuecomment-\d+", str(rec.get("url") or ""))
+    return f"{name} on [#{m.group(1)}]({rec['url']})" if m else name
 
 
 def raised_lines(repo, rec, placed=()):
@@ -684,7 +695,7 @@ def raised_lines(repo, rec, placed=()):
     for r in raised:
         lines.append(card.raise_line(repo, r))
         if filled(r.get("evidence")):
-            lines.append(f"  - Evidence: {card.escape(escape_line(r['evidence']))}")
+            lines.append(f"  - Evidence: {card.short_refs(repo, card.escape(escape_line(r['evidence'])))}")
     return lines
 
 
@@ -712,7 +723,7 @@ def render(rec, pr=None, plan=None, earlier=None):
                 else f"{name} run was cancelled before its agent started.")
         lines = [MARK, f"{icon(repo, 'cancelled')} {role_icon(repo, a, rec.get('stage'))}{what}"]
         if rec.get("agent_started"):
-            lines += stats_fold(rec) + record_fold(rec)
+            lines += record_fold(rec) + stats_tail(rec)
         else:
             lines += record_fold(rec) + ["", f"<sub>No agent ran · [run]({rec.get('run', '')})</sub>"]
         return "\n".join(lines) + "\n"
@@ -747,7 +758,7 @@ def render(rec, pr=None, plan=None, earlier=None):
         lines += ["", "Each story now goes through the flow on its own: comment `/plan` on it to start."]
     if passed and role != "worker":
         lines += answered_lines(repo, rec, earlier) + raised_lines(repo, rec, placed)
-    lines += details(rec) + stats_fold(rec) + record_fold(rec)
+    lines += details(rec) + record_fold(rec) + stats_tail(rec)
     return "\n".join(lines) + "\n"
 
 
@@ -988,12 +999,21 @@ def run_report(path):
             "tokens_out": u.get("output_tokens")}
 
 
-def stats_fold(rec):
-    """The Stats fold right above the full record of every run comment.
+STATS = "<!-- dokima-stats -->"
 
-    Every run an agent ran in has one."""
+
+def stats_tail(rec):
+    """The stats line, the last line of every run comment; `with_next` puts Next right above it."""
     stats = field_icon(os.environ.get("GITHUB_REPOSITORY", ""), "stats")
-    return [""] + card.fold(f"{stats} Stats", [stats_line(rec)])
+    return ["", STATS, f"{stats} {stats_line(rec)}"]
+
+
+def with_next(text, line):
+    """The comment with the Next line right above its stats line, which stays last."""
+    i = text.rfind(STATS)
+    if i < 0:
+        return text.rstrip("\n") + "\n\n" + line + "\n"
+    return text[:i].rstrip("\n") + "\n\n" + line + "\n\n" + text[i:].rstrip("\n") + "\n"
 
 
 def short(n):
@@ -1098,6 +1118,23 @@ def pack_parent(*dirs):
     return None
 
 
+def owner_words(repo, number, d, items, owners):
+    """Where the owner said things, as {link: text}: the issue's own ask, each code owner's comment, and the same on
+    its parent issue. Every criterion of a plan must quote words found at its source link (#416)."""
+    from dokima.body import ask
+    mine = lambda c: (c.get("author") or {}).get("login") in owners and c.get("url")
+    from dokima.body import STORY
+    # A story split from a parent holds a planner's text, not the owner's: only the parent's ask counts as theirs.
+    own = ask(d.get("body") or "")
+    out = {} if STORY.match(own) else {issue_url(number): own}
+    out.update({c["url"]: c.get("body") or "" for c in items if mine(c)})
+    up = parent_words(repo, number)
+    if up:
+        out[issue_url(up["number"])] = ask(up["body"])
+        out.update({c["url"]: c.get("body") or "" for c in up["comments"] if mine(c)})
+    return out
+
+
 def pack(repo, number, role, stage, dest):
     """Build the starting pack from GitHub's records: the issue and its PRs' conversation, every agent record so far,
     the open raises this role must answer (open_blockers.json), the newest passed plan, the issue's parent on GitHub (parent.json, naming none when it has none or GitHub cannot
@@ -1109,11 +1146,17 @@ def pack(repo, number, role, stage, dest):
     json.dump({"number": parent_of(repo, number)}, open(os.path.join(dest, "parent.json"), "w"))
     if listed is not None:
         json.dump(listed, open(os.path.join(dest, "open_issues.json"), "w"), indent=1)
+        owners = [o for o in os.environ.get("OWNERS", "").split(",") if o]
+        json.dump(owner_words(repo, number, d, items, owners), open(os.path.join(dest, "owner_words.json"), "w"), indent=1)
     # The open raises this agent must answer; the file keeps the name the workflows give it.
     json.dump(raises_for(recs, role), open(os.path.join(dest, "open_blockers.json"), "w"), indent=1)
     open(os.path.join(dest, "issue.md"), "w").write(issue_text(d, items))
+    # Each record keeps the link of the comment it was posted as, so a later run can say where a raise came from.
+    urls = [c.get("url") for c in items if records([c])]
     for i, r in enumerate(recs, 1):
         name = name_of(r, i)
+        if len(urls) == len(recs) and isinstance(urls[i - 1], str):
+            r = {**r, "url": urls[i - 1]}
         json.dump(r, open(os.path.join(dest, "in", name), "w"), indent=1)
     plan = latest(recs, "planner")
     if role == "worker" and not approved(recs):
@@ -1146,6 +1189,46 @@ def problems_review(r):
     if r.get("verdict") == "block" and not blocks:
         bad.append("a block needs at least one blocker in raises")
     return bad
+
+
+def problems_tests(r, plan):
+    """A plan review must judge every test the plan names: does it check only its criterion's behavior, with the edge
+    cases the owner named or normal use hits? A false one never approves."""
+    named = sorted({t for ts in ((plan or {}).get("tests") or {}).values() if isinstance(ts, list) for t in ts})
+    rows = r.get("tests") if isinstance(r.get("tests"), list) else []
+    seen = {str(x.get("test")): x for x in rows if isinstance(x, dict)}
+    bad = [f"tests has no judgment of `{t}`: say only_its_behavior true or false, and why in one line"
+           for t in named if not (isinstance(seen.get(t, {}).get("only_its_behavior"), bool)
+                                  and str(seen.get(t, {}).get("why") or "").strip())]
+    wide = [t for t, x in seen.items() if x.get("only_its_behavior") is False]
+    if wide and r.get("verdict") == "approve":
+        bad.append(", ".join("`" + t + "`" for t in wide) + f" check more than their criterion's behavior, so the verdict cannot be approve")
+    return bad
+
+
+def problems_size(r, ids=()):
+    """A plan review must judge each criterion one behavior or not, in `behaviors`, and say whether the plan keeps the
+    size rule: size is "ok", or the rule it breaks. A criterion bundling two behaviors breaks it; a plan that breaks
+    it is never approved."""
+    bad = []
+    rows = r.get("behaviors") if isinstance(r.get("behaviors"), list) else []
+    seen = {str(b.get("criterion")): b for b in rows if isinstance(b, dict)}
+    for k in ids:
+        b = seen.get(str(k))
+        if not b or not isinstance(b.get("one_behavior"), bool) or not str(b.get("why") or "").strip():
+            bad.append(f"behaviors has no judgment of criterion {k}: say one_behavior true or false, and why in one line")
+    bundled = [k for k, b in seen.items() if b.get("one_behavior") is False]
+    size = str(r.get("size") or "").strip()
+    if bundled and size.lower() == "ok":
+        bad.append(f"criteria {', '.join(bundled)} bundle more than one behavior, so size cannot be ok")
+    if bad:
+        return bad
+    if not size:
+        return ['size is empty: write "ok" if every story holds 1 to 3 criteria, each one behavior, in as few stories as '
+                "the count needs; otherwise say which part breaks it"]
+    if size.lower() != "ok" and r.get("verdict") == "approve":
+        return [f"size says the plan breaks the size rule ({size}), so the verdict cannot be approve"]
+    return []
 
 
 def problems_asks(r, ids):
@@ -1303,6 +1386,8 @@ def check(kind, path, plan_path=None, number=None):
     if filled(data.get("summary")):
         listed, too_long = words.summary_caps(data["summary"])
         bad += too_long
+    more, too_long = words.style({k: v for k, v in data.items() if k != "summary"})
+    listed, bad = listed + more, bad + too_long
     if kind == "work" and os.environ.get("PLANNER_BASE"):
         more, too_long = worker_docstring_caps(os.environ["PLANNER_BASE"])
         listed, bad = listed + more, bad + too_long
@@ -1316,6 +1401,8 @@ def check(kind, path, plan_path=None, number=None):
             bad += problems_plan(kind, data, plan, number)
             if kind == "review" and os.environ.get("STAGE") == "plan":
                 bad += problems_asks(data, plan_criteria(plan, number))
+                bad += problems_size(data, plan_criteria(plan, number))
+                bad += problems_tests(data, plan)
     for line in listed + bad:
         print(line)
     return 1 if bad else 0
@@ -1563,7 +1650,7 @@ def file_issues(repo, number, rec, recs):
             lines.append(f"- Not filed: {card.escape(title)} GitHub refused it: {card.escape(gh_reason(e))}")
             continue
         n = url.rstrip("/").rsplit("/", 1)[-1]
-        lines.append(f"- #{n} {card.escape(title)} · the reviewer confirmed it")
+        lines.append(f"- {card.ref(os.environ.get('GITHUB_REPOSITORY', ''), n)} · the reviewer confirmed it")
     return ["", f"{field_icon(os.environ.get('GITHUB_REPOSITORY', ''), 'issue found')} **Filed as issues:**", ""] + lines \
         if lines else []
 
@@ -2122,6 +2209,10 @@ def clash_pending(recs):
     return at is not None and not any(r.get("role") == "worker" for r in recs[at + 1:])
 
 
+# More questions for the owner than this and a plan is not ready: it stops for the owner, whatever else says go.
+MAX_QUESTIONS = 3
+
+
 def next_step(items, rec, owners, rounds=3, autopilot=lambda: False, body="", number="", parent=lambda: None):
     """The river: what follows the run that just finished. ("start", role, stage) or ("stop", why), decided by code.
 
@@ -2146,6 +2237,10 @@ def next_step(items, rec, owners, rounds=3, autopilot=lambda: False, body="", nu
         stops = [r for r in owner_raises(h) if r.get("kind") == "blocker"]
         if stops:
             return ("stop", "The planner raised a blocker for you: " + quoted(stops) + " Answer with `/plan` and your words.")
+        many = [r for r in owner_raises(h) if r.get("kind") == "question"]
+        if len(many) > MAX_QUESTIONS:
+            return ("stop", f"The plan has {len(many)} questions for you, more than {MAX_QUESTIONS}: it is not ready. "
+                            "Answer them with `/plan` and your words; nothing goes on until you do.")
         if h.get("questions") or owner_raises(h):
             asked = "The plan has questions for you. Answer with `/plan` and your words, or say `/review` to go on with its assumptions."
             on = autopilot()
@@ -2168,6 +2263,9 @@ def next_step(items, rec, owners, rounds=3, autopilot=lambda: False, body="", nu
     verdict = h.get("verdict")
     plan = (latest(records(items), "planner") or {}).get("handback") or {}
     asked = [r for r in owner_raises(plan) if r.get("kind") == "question"]
+    if stage == "plan" and len(asked) > MAX_QUESTIONS:
+        return ("stop", f"The plan has {len(asked)} questions for you, more than {MAX_QUESTIONS}: it is not ready. "
+                        "Answer them with `/plan` and your words.")
     if stage == "plan" and verdict in ("approve", "block") and (plan.get("questions") or asked):
         on = autopilot()
         if on is None:
@@ -2531,8 +2629,9 @@ def main(argv):
             at = text.find(fold)
             at = len(text.rstrip("\n")) if at < 0 else at
             open(os.path.join(out, "comment.md"), "w").write(text[:at] + "\n".join(filed) + "\n" + text[at:])
-        with open(os.path.join(out, "comment.md"), "a") as f:
-            f.write("\n" + next_line(step, owners) + "\n")
+        path = os.path.join(out, "comment.md")
+        text = open(path).read() if os.path.exists(path) else ""
+        open(path, "w").write(with_next(text, next_line(step, owners)) if text else "\n" + next_line(step, owners) + "\n")
         if step[3:] == ("autopilot",):
             # The line the owner would have typed `/work` in place of; the workflow posts it on the issue.
             open(os.path.join(out, "autopilot.md"), "w").write(AUTOPILOT_LINES[step[1]] + "\n")

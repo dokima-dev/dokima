@@ -206,7 +206,7 @@ def test_an_issue_updated_since_the_last_sweep_gets_its_pr_card_redrawn_too(tmp_
     assert not stale(hub, 312), f"347.1: #312 was updated but the sweep left its old card: {hub.issue_body(312)!r}"
     assert without_issue_link(card_of(hub.pr_body(314)), 312) == card_of(hub.issue_body(312)), \
         f"347.1: #312 was updated but the sweep did not write its card on PR #314: {hub.pr_body(314)!r}"
-    assert hub.pr_body(314).rstrip().endswith("Closes https://github.com/o/r/issues/312"), "347.1: PR #314 lost its closing line"
+    assert "Closes" not in hub.pr_body(314), "347.1: PR #314 still carries a Closes line (#416 dropped it)"
 
 
 def test_a_card_that_already_shows_its_state_is_not_rewritten(tmp_path, record_property):

@@ -85,7 +85,7 @@ def test_a_feature_is_shown_as_handed_back(record_property, tmp_path):
     Hands back a feature with two stories and checks it is read; a feature with one story is rejected.
     """
     record_property("proves", "138.2")
-    story = {"title": "t", "user_story": "u", "acceptance_criteria": [{"text": "a", "source": SRC}], "depends_on": []}
+    story = {"title": "t", "user_story": "u", "acceptance_criteria": [{"text": "a", "source": SRC}] * 3, "depends_on": []}
     assert hand_back(tmp_path, {"kind": "feature", "summary": "s", "feature": "f", "stories": [story, story]})[0] == "feature", "138.2: feature not read"
     with pytest.raises(planner.Garbled, match="2 to 5"):
         hand_back(tmp_path, {"kind": "feature", "summary": "s", "feature": "f", "stories": [story]})

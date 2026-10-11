@@ -188,7 +188,7 @@ def clash(repo, base, sha, pr, rest=api, files=None, owners=None):
                         **({"why": why} if why else {})},
            "check": {"passed": True, "problems": []}}
     step = agent.next_step([], rec, set(who))
-    rest("POST", f"repos/{repo}/issues/{issue}/comments", body=agent.render(rec) + "\n" + agent.next_line(step, who) + "\n")
+    rest("POST", f"repos/{repo}/issues/{issue}/comments", body=agent.with_next(agent.render(rec), agent.next_line(step, who)))
     if step[0] == "start":
         rest("POST", f"repos/{repo}/dispatches", event_type="dokima-next", **{
             "client_payload[role]": "planner", "client_payload[stage]": "plan", "client_payload[issue]": str(issue)})

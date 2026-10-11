@@ -176,7 +176,7 @@ def test_each_difference_gets_one_line_saying_what_is_off_and_what_dokima_needs(
 
     Proves 283.1. The faked repo differs in seven ways: the plan label is missing, the work label's color is 000000, the Action field
     has no Autopilot option, the High priority option is RED, the Autopilot view filters on label:autopilot, main's
-    rule lacks the all done-whens passed check, and the app has issues: read. The audit returns seven single lines, one
+    rule lacks the Acceptance criteria check, and the app has issues: read. The audit returns seven single lines, one
     per difference, each naming the setting and the value Dokima needs (with the live value where there is one; a
     missing option's line gives the color Dokima needs)."""
     record_property("proves", "283.1")
@@ -188,7 +188,7 @@ def test_each_difference_gets_one_line_saying_what_is_off_and_what_dokima_needs(
     one_line(lines, "283.1", "the missing Autopilot option of the Action field", "Action", "Autopilot", "PURPLE")
     one_line(lines, "283.1", "the High option's color", "High", "RED", "ORANGE")
     one_line(lines, "283.1", "the Autopilot view's filter", "label:autopilot is:open")
-    one_line(lines, "283.1", "main's missing required check", "main", "all done-whens passed")
+    one_line(lines, "283.1", "main's missing required check", "main", "Acceptance criteria")
     one_line(lines, "283.1", "the app's issues permission", "issues", "read", "write")
     assert len(lines) == 7, f"283.1: seven differences gave {len(lines)} lines: {lines}"
 
@@ -203,7 +203,7 @@ def test_too_much_is_a_difference_too(record_property):
     g = GitHub()
     g.perms["administration"] = "write"
     del g.perms["workflows"]
-    g.rules["main"]["required_checks"] = ["all tests", "all done-whens passed", "lint"]
+    g.rules["main"]["required_checks"] = ["all tests", "Acceptance criteria", "lint"]
     lines = a.compare(g, REPO)
     one_line(lines, "283.1", "the broader administration permission", "administration", "write", "read")
     one_line(lines, "283.1", "the missing workflows permission", "workflows", "write")
@@ -222,7 +222,7 @@ def test_a_missing_branch_rule_and_a_missing_view_are_reported(record_property):
     del g.rules["main"]
     del g.view_map["Autopilot"]
     lines = a.compare(g, REPO)
-    one_line(lines, "283.1", "main's missing rule", "main", "all tests", "all done-whens passed")
+    one_line(lines, "283.1", "main's missing rule", "main", "all tests", "Acceptance criteria")
     one_line(lines, "283.1", "the missing Autopilot view", "Autopilot", "table", "label:autopilot is:open")
     assert len(lines) == 2, f"283.1: two differences gave {len(lines)} lines: {lines}"
 

@@ -58,8 +58,22 @@ def field_icon(repo, field):
     return icon(repo, FIELD_ICONS[field], alt=field)
 
 
+def ref(repo, n):
+    """Issue or PR `n` by its full address, so GitHub shows its icon, title and number."""
+    return f"{os.environ.get('GITHUB_SERVER_URL', 'https://github.com')}/{repo}/issues/{n}"
+
+
+SHORT_REF = re.compile(r"(?<![\w&/])#(\d+)\b")
+
+
+def full_refs(repo, text):
+    """`text` with every short #N written out as its full address."""
+    return SHORT_REF.sub(lambda m: ref(repo, m.group(1)), text or "")
+
+
 def link_lines(repo, links):
-    """One line per kind of link a plan has (Blocked by, Blocks, Relates to), each with its own icon; none for a kind
+    """One block per kind of link a plan has (Blocked by, Blocks, Relates to): its icon and label, then one bullet per
+    issue, since GitHub shows an issue's title and state only for a link that is a bullet of its own; none for a kind
     with no links or a plan with no links field."""
     links = links if isinstance(links, dict) else {}
     out = []
@@ -67,7 +81,7 @@ def link_lines(repo, links):
                                ("relates_to", "related", "Relates to")):
         numbers = links.get(kind) if isinstance(links.get(kind), list) else []
         if numbers:
-            out.append(f"{field_icon(repo, field)} **{label}:** " + ", ".join(f"#{n}" for n in numbers))
+            out.append(f"{field_icon(repo, field)} **{label}:**\n\n" + "\n".join(f"- {ref(repo, n)}" for n in numbers) + "\n")
     return out
 
 
@@ -216,8 +230,14 @@ def fold(title, lines):
     return [f"<details><summary><b>{title}</b></summary>", "", *lines, "", "</details>"]
 
 
+CODE = re.compile(r"((?:^|(?<=\n))```[^\n]*\n.*?\n```(?=\n|$)|(?<!\\)`[^`\n]+`)", re.S)
+
+
 def escape(text):
-    return html.escape(text or "", quote=False)
+    """`<`, `>` and `&` escaped so words draw no HTML, but left as written inside markdown code, where GitHub shows
+    them as written: an inline `span` on one line, or a fenced block."""
+    parts = CODE.split(text or "")
+    return "".join(p if i % 2 else html.escape(p, quote=False) for i, p in enumerate(parts))
 
 
 RAISE_ICON = {"question": "question", "blocker": "blocker", "issue": "issue found"}
@@ -235,11 +255,22 @@ def answers_of(h):
     return [a for a in v if isinstance(a, dict) and a.get("raise")] if isinstance(v, list) else []
 
 
+SHORT = re.compile(r"(?<![\w&/\[`])#(\d+)\b(?!\])")
+
+
+def short_refs(repo, text):
+    """Bare #N in prose written as a plain link, [#N](address): inside a bullet GitHub otherwise draws each one with its
+    title and icon, which buries the sentence (tested on card-gallery #40). Code spans are left alone."""
+    parts = re.split(r"(`[^`\n]*`)", text or "")
+    return "".join(p if i % 2 else SHORT.sub(lambda m: f"[#{m.group(1)}]({ref(repo, m.group(1))})", p)
+                   for i, p in enumerate(parts))
+
+
 def raise_line(repo, r):
     """One raise as a list item: icon, label, words and who it is for.
 
     Its ID is never drawn."""
-    words = lambda s: escape(" ".join(str(s).split()))
+    words = lambda s: short_refs(repo, escape(" ".join(str(s).split())))
     label = f"**{words(r['label'])}:** " if isinstance(r.get("label"), str) and r["label"].strip() else ""
     who = ("filed as an issue" if r["kind"] == "issue" else
            "for you" if r.get("to") == "owner" else f"for the {words(r.get('to') or 'no one')}")
@@ -395,7 +426,7 @@ def criterion_item(repo, label, c, check, tests):
             out.append(f'  - *<a href="{t["url"]}">{field_icon(repo, "verified by")} Verified by</a>: '
                        f'{escape(t["verified_by"])}*')
     if c.get("source"):
-        out.append(f'  - Source: {c["source"]}')
+        out.append(f'  - Source: {full_refs(repo, c["source"])}')
     return out
 
 
@@ -515,9 +546,9 @@ def render(repo, issue, found, page="issue"):
                                         plan_tests, by_key, tests)) + [""]
         lines += [" ".join(["**Scope:**", ", ".join(f"`{s}`" for s in h.get("scope") or [])]).rstrip(), ""]
         if h.get("out_of_scope"):
-            lines += fold("Out of scope", [f"- {escape(s)}" for s in h["out_of_scope"]]) + [""]
-    lines += [done_row(repo, found, all_tests), "", plan.CARD_END]
-    return "\n".join(lines)
+            lines += fold("Out of scope", [f"- {full_refs(repo, escape(s))}" for s in h["out_of_scope"]]) + [""]
+    # The Definition of Done goes last, below the Original issue fold: body.redraw puts it after the fold.
+    return "\n".join(lines + [body.FOLDED, plan.CARD_END, "", body.DONE, done_row(repo, found, all_tests)])
 
 
 def issue_body(card, notes):
@@ -526,17 +557,16 @@ def issue_body(card, notes):
 
 
 def pr_body(card, text, ask, issue_url=None):
-    """The PR's description: the card, the owner's Original issue fold, then the Closes line.
+    """The PR's description: the card, then the owner's Original issue fold, with no Closes line (#416).
 
-    The Closes line names the issue by its full address `issue_url`, so GitHub shows its title (#452); without one it
-    keeps the PR's own Closes #N. In the PR's copy a `#` after a closing keyword is written `&#35;`, and the `h` of a
-    full address after one `&#104;`, which show the same, so the owner's words never close or name another issue: the
-    PR's own Closes line stays the only closing reference (#373)."""
-    found = CLOSES.search(text or "")
-    closing = f"Closes {issue_url}" if issue_url else found.group(0) if found else None
+    The card links the issue, and card.yml closes it when the pull request merges. In the PR's copy a `#` after a
+    closing keyword is written `&#35;`, and the `h` of a full address after one `&#104;`, which show the same, so the
+    owner's words never close or name another issue (#373). `text` and `issue_url` are no longer read."""
+    closing = None
     shown = KEYWORD_URL.sub(r"\1&#104;", KEYWORD_HASH.sub(r"\1&#35;", ask or ""))
+    card, done = card.split(body.DONE, 1) if body.DONE in card else (card, "")
     return (card.rstrip("\n") + "\n\n" + body.MARKER + body.FOLD_START + shown + body.FOLD_END
-            + ("\n\n" + closing if closing else ""))
+            + (body.TRAILER + done.strip("\n") if done.strip() else "") + ("\n\n" + closing if closing else ""))
 
 
 def shows(current, top):

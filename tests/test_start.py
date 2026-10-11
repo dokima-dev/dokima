@@ -38,7 +38,7 @@ STORY = {"kind": "user_story", "user_story": "u", "acceptance_criteria": [{"text
 APPROVE = {"previous_step": {"did": ["Proposed a split into two stories."], "decided": [], "open": []},
            "stage": "plan", "round": 1, "verdict": "approve", "summary": "The split keeps every promise once.",
            "raises": [], "answers": [],
-           "asks": [{"ask": "Fix it.", "source": "https://github.com/o/r/issues/57", "criterion": "S1.1"}]}
+           "asks": [{"ask": "Fix it.", "source": "https://github.com/o/r/issues/57", "criterion": "S1.1"}], "tests": [{"test": t, "only_its_behavior": True, "why": "one result"} for t in ("tests/test_x.py::test_a", "tests/test_x.py::test_b", "tests/test_x.py::test_c")], "size": "ok", "behaviors": [{"criterion": c, "one_behavior": True, "why": "one result"} for c in ("9.1", "9.2", "9.3", "57.1", "57.2", "57.3", "S1.1", "S1.2", "S1.3", "S2.1", "S2.2", "S2.3")]}
 
 FAKE_GH = r'''#!/usr/bin/env python3
 """A stand-in for the GitHub CLI: answers from the fake issue, keeps every comment the run writes, records every call.

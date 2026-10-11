@@ -160,7 +160,7 @@ class HandHub(Hub):
 
 def numbers(line):
     """The issue numbers a line names."""
-    return {int(x) for x in re.findall(r"#(\d+)", line or "")}
+    return {int(x) for x in re.findall(r"(?:#|/issues/)(\d+)", line or "")}
 
 
 # 254.1 ---------------------------------------------------------------------------------------------------------------

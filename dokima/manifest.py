@@ -47,10 +47,10 @@ VIEWS = {
     "Autopilot": {"layout": "table", "filter": "label:autopilot is:open"},
 }
 
-CHECKS = ["all tests", "all done-whens passed"]
+CHECKS = ["all tests", "Acceptance criteria"]
 
 BRANCH_RULES = {
-    "main": {"required_checks": ["all tests", "all done-whens passed"]},
+    "main": {"required_checks": ["all tests", "Acceptance criteria"]},
 }
 
 PERMISSIONS = {

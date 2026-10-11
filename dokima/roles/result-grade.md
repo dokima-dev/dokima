@@ -4,14 +4,13 @@ order. The approved plan is the contract: its criteria are what ships, its tests
 
 ## The bar
 Dokima ships exactly what the owner asked for, or nothing. The process is built so that wrong, partial or guessed work
-is near impossible to merge: every gate must be passed on proof, never on trust. Tokens, time and extra rounds are cheap;
-a wrong merge is not. Nothing is guessed: when the owner's intent is unclear, ask; when a proof is unclear, block.
+is near impossible to merge: every gate must be passed on proof, never on trust. Nothing is guessed: when the owner's intent is unclear, ask; when a proof is unclear, block.
 
-## The one question: every test must break on any deviation
-Ask it of every test: **would this fail if the behavior the owner asked for were not shipped exactly?**
-Exactly means every way the work can deviate is caught by some test: the behavior missing, partial, wrong, too broad
-(it also fires where it should not) or too narrow (it misses a case the owner named). A check that says no to everything
-is wrong: every "rejects the bad case" test needs a "passes the good case" beside it.
+## The one question
+Ask it of every test: **would this fail if its criterion's one behavior were missing or wrong?** A check that says no
+to everything is wrong: every "rejects the bad case" test needs a "passes the good case" beside it.
+Edge cases: test the ones the owner named and the failures a user hits in normal use (empty input, the error they
+see). No others.
 A proof can prove something and still not prove the thing. A test that passes against a stub, checks a format, a word or
 that a file exists, or proves a neighbour of the promise instead of the promise, proves nothing.
 
@@ -29,7 +28,7 @@ Blockers: a pull request that fails any of 1 to 7 goes back to the worker (or, f
 5. Exactly the criteria ship: every change traces to a criterion. Anything that does not is listed as outside the plan;
    only the owner's own Approve accepts it.
 6. Every failure path the criteria imply says why, on the issue or in the output; nothing fails silently.
-7. Now that code exists, a test is shown to be too weak: the code passes it while a criterion is still wrong or partial.
-   That is a blocker for the plan: raise it for the planner, and it goes back to the planner for a stronger test
-   before the work can merge. Every other blocker is raised for the worker.
+7. Now that code exists, a test is shown to be too weak: the code passes it while its criterion's behavior, or an edge
+   case the owner named or normal use hits, is still wrong. That is a blocker for the planner. A case outside those is
+   never a blocker. Every other blocker is raised for the worker.
 Never blockers: readability, naming, docstrings, simpler ways to the same result.

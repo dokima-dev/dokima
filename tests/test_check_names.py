@@ -1,12 +1,11 @@
-"""The criteria workflow becomes Acceptance criteria, no check is renamed, and done-when is gone.
+"""The criteria workflow and its checks are named Acceptance criteria, and done-when is gone.
 
 Story 1 of #262. The owner left every check rename, all tests included, to #262, so main's branch rule only changes
 once. This story renames only the workflow that holds the criteria checks, from done-whens in done-whens.yml to
 Acceptance criteria in acceptance-criteria.yml, and takes the word done-when out of every other place a person reads.
 The card and the board start through `workflow_run` by workflow name, so the tests read those names out of card.yml and
 board.yml and match them against the workflows the repo really has. One test reads every file in the repo for the old
-word; the exceptions are the names of the checks that keep them until #262 (all done-whens passed and list done-whens),
-the owner's older "Done when:" plan lines Dokima still reads, and copies of past records in tests/samples.
+word; the exceptions are the owner's older "Done when:" plan lines Dokima still reads, and copies of past records in tests/samples.
 """
 import os
 import re
@@ -14,7 +13,7 @@ import subprocess
 import sys
 
 sys.path.insert(0, os.path.join(os.path.dirname(__file__), ".."))
-from dokima import agent, card, checks, manifest  # noqa: E402
+from dokima import agent, checks  # noqa: E402
 
 import test_card_records as tcr  # noqa: E402
 import test_start as ts  # noqa: E402
@@ -22,7 +21,7 @@ import test_start as ts  # noqa: E402
 ROOT = os.path.abspath(os.path.join(os.path.dirname(__file__), ".."))
 WORKFLOWS = os.path.join(ROOT, ".github", "workflows")
 CRITERIA = "Acceptance criteria"
-ALL_TESTS, GATE, LIST = "all tests", "all done-whens passed", "list done-whens"
+ALL_TESTS, GATE, LIST = "all tests", "Acceptance criteria", "list acceptance criteria"
 OLD_WORD = re.compile(r"done[\s_-]*whens?", re.I)
 
 
@@ -120,39 +119,6 @@ def test_the_card_and_the_board_update_when_the_acceptance_criteria_workflow_fin
         f"291.1: the card no longer redraws when the all tests check finishes; card.yml waits on {started_by('card.yml')}"
 
 
-# 291.2: no check changes its name, so main's branch rule stays as it is
-
-def test_no_check_changes_its_name_so_the_branch_rule_stays_as_it_is(record_property):
-    """No check changes its name, so main's branch rule stays as it is.
-
-    Proves 291.2. Checks that the check running every test is still named all tests, in the workflow full suite; that the Acceptance
-    criteria workflow's checks are still named list done-whens and all done-whens passed; that no workflow has a check
-    named All tests or Acceptance criteria; that the manifest still requires all tests and all done-whens passed on
-    main; that the card still reads the all tests check (green passes, red does not); and that AGENTS.md never tells
-    the owner to switch main's branch rule."""
-    record_property("proves", "291.2")
-    flows = workflows()
-    assert job_names(flows.get("full-suite.yml") or {}) == [ALL_TESTS] and flows["full-suite.yml"].get("name") == "full suite", \
-        f"291.2: full-suite.yml is no longer the workflow full suite with the one check all tests: {flows.get('full-suite.yml')}"
-    flow = criteria_workflow("291.2")
-    names = job_names(flow)
-    assert LIST in names and GATE in names, f"291.2: the Acceptance criteria workflow's checks were renamed: {names}"
-    for f, w in flows.items():
-        renamed = [n for n in job_names(w) if n in ("All tests", CRITERIA)]
-        assert not renamed, f"291.2: {f} has a check renamed to {renamed}, which this story leaves to #262"
-    required = manifest.BRANCH_RULES["main"]["required_checks"]
-    assert required == [ALL_TESTS, GATE] and manifest.CHECKS == [ALL_TESTS, GATE], \
-        f"291.2: main's required checks changed: the branch rule needs {required}, the manifest's checks are {manifest.CHECKS}"
-    plan = agent.latest(tcr.RECS, "planner")["handback"]
-    green = tcr.GREEN
-    red = [dict(r, conclusion="failure") if r["name"] == ALL_TESTS else r for r in green]
-    assert card.checks_passed(40, plan, green) is True, "291.2: the card no longer counts a green all tests check as passed"
-    assert card.checks_passed(40, plan, red) is False, "291.2: the card counts a red all tests check as passed"
-    text = " ".join(open(os.path.join(ROOT, "AGENTS.md")).read().split())
-    switch = [s for s in re.split(r"(?<=[.!?])\s+", text) if "branch rule" in s and re.search(r"\bswitch", s)]
-    assert not switch, f"291.2: AGENTS.md tells the owner to switch main's branch rule, though no check is renamed: {switch}"
-
-
 # 291.3: no text a person reads says done-when, outside the named exceptions
 
 def repo_files():
@@ -165,12 +131,9 @@ def repo_files():
 def allowed(path, line, match):
     """Whether this one use of the old word is one of the exceptions.
 
-    Anywhere, the names of the two checks that keep them until #262, all done-whens passed and list done-whens. In the
-    tests, the owner's older plan lines ("Done when: ...") that Dokima still reads, and a check that the word is gone
+    In the tests, the owner's older plan lines ("Done when: ...") that Dokima still reads, and a check that the word is gone
     ("done when" not in ...)."""
     word, before, after = match.group(0), line[:match.start()], line[match.end():]
-    if (before.endswith("all ") and after.startswith(" passed")) or (before.endswith("list ") and word == "done-whens"):
-        return True
     if path.startswith("tests/") and path.endswith(".py"):
         if word == "Done when" and after.startswith(":"):
             return True
@@ -191,12 +154,12 @@ def scan_self_check():
             ("dokima/checks.py", "def annotations(junit_xml, repo, sha, done_when):"),
             ("tests/test_x.py", "def test_long_done_whens_get_short_check_names(record_property):"),
             ("tests/test_x.py", '    """Reads the issue in the old done-when format."""'),
-            ("tests/test_x.py", '        DONE_WHENS = "all done-whens passed"'),
+            ("tests/test_x.py", '        DONE_WHENS = "Acceptance criteria"'),
             ("README.md", "Every Done when is checked."),
             ("AGENTS.md", "Each done-when has its check.")]
-    keep = [(".github/workflows/x.yml", "    name: all done-whens passed"),
-            (".github/workflows/x.yml", "    name: list done-whens"),
-            ("AGENTS.md", "main's branch rule requires all tests and all done-whens passed."),
+    keep = [(".github/workflows/x.yml", "    name: Acceptance criteria"),
+            (".github/workflows/x.yml", "    name: list acceptance criteria"),
+            ("AGENTS.md", "main's branch rule requires all tests and Acceptance criteria."),
             ("tests/test_x.py", '    "  - [ ] Done when: first thing works\\n"'),
             ("tests/test_x.py", '    assert "done when" not in text.lower()')]
     for path, line in flag:
@@ -210,7 +173,7 @@ def test_no_text_a_person_reads_says_done_when(record_property):
 
     Proves 291.3. Reads every file in the repo, its path and every line, for done-when, done-whens, done when and done_when in any
     case. Skipped: dokima/plan.py, which still reads an owner's older Done when: lines, copies of past records in
-    tests/samples, and this test. Allowed: the names of the checks all done-whens passed and list done-whens, which keep
+    tests/samples, and this test. Allowed: the names of the checks Acceptance criteria and list acceptance criteria, which keep
     them until #262, and in the tests the Done when: plan lines and their "not in" checks. Each leftover is listed with
     its file and line. The scan's rule is first tried on lines it must flag and lines it must pass, so a scan that flags
     nothing proves nothing."""

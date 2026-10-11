@@ -327,8 +327,8 @@ def test_queued_pr_with_no_linked_issue_fails_the_gate_with_the_same_reason(reco
     text = "\n".join(workflow("acceptance-criteria.yml"))
     assert re.search(r'if \[ -z "\$TESTS" \]; then .*exit 1; fi', text), \
         "191.3: acceptance-criteria.yml no longer fails a check that has no tests"
-    assert "name: all done-whens passed" in text and 'test "$RESULT" = "success"' in text, \
-        "191.3: the 'all done-whens passed' gate no longer needs every check to pass"
+    assert "name: Acceptance criteria" in text and 'test "$RESULT" = "success"' in text, \
+        "191.3: the 'Acceptance criteria' gate no longer needs every check to pass"
 
 
 def test_pull_request_checks_behave_exactly_as_before(record_property, run_matrix):
@@ -336,7 +336,7 @@ def test_pull_request_checks_behave_exactly_as_before(record_property, run_matri
 
     Proves 191.4. Checks the triggers are exactly main's plus merge_group (full-suite.yml: pull_request_target, push to main,
     merge_group, as #263 left it; acceptance-criteria.yml: pull_request_target, merge_group), so nothing was dropped, swapped or
-    added beyond the queue; that the required check names 'all tests' and 'all done-whens passed' are unchanged; that
+    added beyond the queue; that the required check names 'all tests' and 'Acceptance criteria' are unchanged; that
     `dokima.checks matrix` on a pull request lists its issue's plan exactly; that on a pull request the criteria
     check out and annotate the pull request's head commit, not main's; and that the all tests check still checks out
     the pull request's head on a pull request and main's commit on a push to main."""
@@ -348,7 +348,7 @@ def test_pull_request_checks_behave_exactly_as_before(record_property, run_matri
     assert triggers(dw) == {"pull_request_target", "merge_group"}, \
         f"191.4: acceptance-criteria.yml should run on pull_request_target and merge_group only, but runs on {sorted(triggers(dw))}"
     assert "name: all tests" in [x.strip() for x in suite], "191.4: the 'all tests' check was renamed"
-    assert "name: all done-whens passed" in [x.strip() for x in dw], "191.4: the 'all done-whens passed' check was renamed"
+    assert "name: Acceptance criteria" in [x.strip() for x in dw], "191.4: the 'Acceptance criteria' check was renamed"
     code, rows, err = run_matrix(pr_event(12))
     assert code == 0, f"191.4: on pull request #12, `dokima.checks matrix` failed:\n{err}"
     assert rows == expected(191), f"191.4: pull request #12 should list issue #191's checks, got {rows}"

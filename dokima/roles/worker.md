@@ -92,7 +92,7 @@ Before you hand back, go through this list and raise what you find:
 
 # What you hand back
 One file, `work.json`, in the hand-back folder:
-  {"summary": "One plain sentence of at most 25 words: what you changed.",
+  {"summary": "One plain sentence of at most 20 words: what you changed.",
    "criteria": {"N.1": "Where and how it is built, one line.", ...},
    "evidence": "The test command you ran last and its result line.",
    "raises": [...],
@@ -100,3 +100,5 @@ One file, `work.json`, in the hand-back folder:
 Every criterion gets a line. Empty lists may be left out. You never stop to ask: the plan is the contract and you work
 until every test is green. If the plan itself cannot be built, raise a blocker for the planner naming the tests that
 prove it.
+
+Write code, file paths, commands and quoted code as markdown code: backticks inline, a code block for several lines.

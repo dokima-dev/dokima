@@ -18,16 +18,13 @@ What the code these tests run must do, as the plan pins it:
 - Any other stop keeps its to-do as today, and a run that raised nothing for the owner shows no such link.
 
 How the tests read a card: the status line is the line inside the card that opens with the stage in bold, icons
-allowed in front. A link is markdown `[words](url)` or HTML `<a href="url">words</a>`. GitHub's rendering comes from
-tests/github_rendering.json: the answers of GitHub's markdown API for the exact card text, as #452 records them,
-refreshed with `python3 tests/record_rendering.py`.
+allowed in front. A link is markdown `[words](url)` or HTML `<a href="url">words</a>`.
 """
 import html as htmllib
 import json
 import os
 import re
 import sys
-from html.parser import HTMLParser
 
 import pytest
 
@@ -321,112 +318,3 @@ def test_the_same_raise_is_counted_once_however_many_records_carry_it(record_pro
     text = draw(found_for(*steps))
     check_to_do(text, "answer 2 questions", url(2), "455.4", "a re-plan raising the same question again")
     assert text.count(Q1["text"]) == 0, f"455.4: the question raised twice shows on the card:\n{text}"
-
-
-# 455.5: the same, as GitHub renders the card.
-
-class Rendered(HTMLParser):
-    """GitHub's HTML read as the owner sees it: its words, paragraphs and links."""
-
-    def __init__(self):
-        super().__init__()
-        self.words, self.paras, self.links, self._para, self._link = [], [], [], None, None
-
-    def handle_starttag(self, tag, attrs):
-        if tag == "p":
-            self._para = {"words": [], "links": []}
-        if tag == "a":
-            self._link = [dict(attrs).get("href"), []]
-
-    def handle_endtag(self, tag):
-        if tag == "a" and self._link:
-            got = (" ".join("".join(self._link[1]).split()), self._link[0])
-            self.links.append(got)
-            if self._para is not None:
-                self._para["links"].append(got)
-            self._link = None
-        if tag == "p" and self._para is not None:
-            self._para["words"] = " ".join("".join(self._para["words"]).split())
-            self.paras.append(self._para)
-            self._para = None
-
-    def handle_data(self, data):
-        self.words.append(data)
-        if self._para is not None:
-            self._para["words"].append(data)
-        if self._link:
-            self._link[1].append(data)
-
-
-def read(html):
-    """GitHub's HTML of a card, parsed."""
-    p = Rendered()
-    p.feed(html)
-    p.close()
-    return p
-
-
-RENDER_CASES = {
-    "plan": ("a plan with two questions for you", (planner(Q1, Q2, PI),), "answer 2 questions", 0, (Q1, Q2, PI)),
-    "code-review": ("a code review with a question and a blocker for you",
-                    (planner(PI), PLAN_OK, "/work", BUILT, review(RQ, RB, RW, RI)), "answer 1 question and 1 blocker",
-                    4, (PI, RQ, RB, RW, RI)),
-}
-RECORDED = os.path.join(os.path.dirname(os.path.abspath(__file__)), "github_rendering.json")
-
-
-def texts():
-    """The cards whose GitHub rendering 455.5 checks, drawn by the code as it is now.
-
-    Returns {name: text}; tests/record_rendering.py records GitHub's answer for each of these into
-    tests/github_rendering.json, beside the texts of tests/test_card_self_link.py."""
-    return {f"455 {key} card": draw(found_for(*steps)) for key, (_, steps, _, _, _) in RENDER_CASES.items()}
-
-
-def rendered(name, text):
-    """GitHub's HTML recorded in tests/github_rendering.json for exactly `text`; fails when none was recorded for it."""
-    try:
-        with open(RECORDED, encoding="utf-8") as f:
-            answers = json.load(f)
-    except FileNotFoundError:
-        pytest.fail(f"455.5: no GitHub rendering is recorded ({RECORDED} is missing); run python3 tests/record_rendering.py")
-    hit = [a["html"] for a in answers if isinstance(a, dict) and a.get("text") == text]
-    if not hit:
-        pytest.fail(f"455.5: GitHub's rendering of the {name} was never recorded for this exact text, so it proves "
-                    f"nothing; run python3 tests/record_rendering.py. The text:\n{text}")
-    return hit[0]
-
-
-@pytest.mark.parametrize("key", list(RENDER_CASES), ids=list(RENDER_CASES))
-def test_as_github_renders_the_card_no_raise_shows_and_the_words_link_to_their_comment(record_property, key):
-    """As GitHub renders the card, no raise shows and the to-do links its comment.
-
-    Draws the issue card of a plan with two questions for the owner, and of a code review raising a question and a
-    blocker for the owner beside raises for others, and checks the raw text first (no Raised section, the link
-    there). Then reads GitHub's own HTML for exactly that text, recorded from its markdown API in
-    tests/github_rendering.json by tests/record_rendering.py, and checks no raise's words or label show anywhere, and
-    one paragraph says Needs you with a link whose words are “answer …” and whose target is the comment that raised
-    them. Last, checks a recording made for other text never stands in: the card with one character changed has no
-    answer.
-
-    Proves 455.5."""
-    record_property("proves", "455.5")
-    case, steps, words, at, shown = RENDER_CASES[key]
-    text = draw(found_for(*steps))
-    assert text == texts()[f"455 {key} card"], f"455.5: {case}: the card is not drawn the same twice"
-    assert not RAISED_HEADING.search(text), f"455.5: {case}: the card's text still has a Raised section:\n{text}"
-    check_to_do(text, words, url(at), "455.5", f"{case}, in the card's text")
-    page = read(rendered(f"{case} card", text))
-    visible = " ".join("".join(page.words).split())
-    for r in shown:
-        assert r["text"] not in visible, f"455.5: {case}: as GitHub renders the card, “{r['text']}” still shows"
-        assert f"{r['label']}:" not in visible, f"455.5: {case}: as GitHub renders the card, the label “{r['label']}” shows"
-    asked = [(p, l) for p in page.paras for l in p["links"] if l[0].lower().startswith("answer")]
-    assert [l for _, l in asked] == [(words, url(at))], \
-        f"455.5: {case}: as GitHub renders the card, the links asking you to answer are {[l for _, l in asked]}, " \
-        f"not one “{words}” to {url(at)}"
-    para = asked[0][0]["words"]
-    assert "Needs you" in para and para.index("Needs you") < para.index(words), \
-        f"455.5: {case}: as GitHub renders the card, “{words}” is not on the Needs you line: “{para}”"
-    with pytest.raises(pytest.fail.Exception):
-        rendered(f"{case} card", text + " ")

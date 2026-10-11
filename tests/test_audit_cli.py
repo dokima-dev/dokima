@@ -135,7 +135,7 @@ def test_the_audit_command_reads_every_live_setting_through_gh(record_property, 
     one_line(lines, "283.1", "the missing Autopilot option of the Action field", "Action", "Autopilot", "PURPLE")
     one_line(lines, "283.1", "the High option's color", "High", "RED", "ORANGE")
     one_line(lines, "283.1", "the Autopilot view's filter", "label:autopilot is:open")
-    one_line(lines, "283.1", "main's missing required check", "main", "all done-whens passed")
+    one_line(lines, "283.1", "main's missing required check", "main", "Acceptance criteria")
     one_line(lines, "283.1", "the app's issues permission", "issues", "read", "write")
 
 

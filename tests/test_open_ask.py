@@ -8,6 +8,7 @@ the issue; and the owner's old checkboxes are never read as the plan.
 
 GitHub is faked by the same recorder tests/test_body.py uses; the card's main runs as in those tests.
 """
+import re
 import os
 import sys
 
@@ -36,7 +37,7 @@ def below(text):
 
 def assert_folded(k, new, ask):
     """Fail naming criterion k unless the ask sits inside one closed Original issue fold."""
-    part = below(new)
+    part = re.sub(r"\n\n<!-- dokima-done -->\n[^\n]*$", "", below(new).rstrip("\n"))  # since #416 Done sits last, after the fold
     assert body.ask(new) == ask, f"{k}: the quoted ask does not read back byte for byte"
     head = part.lstrip()
     assert head.startswith("<details>" + FOLD_SUMMARY), f"{k}: the ask is not folded under Original issue"

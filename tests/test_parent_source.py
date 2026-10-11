@@ -56,9 +56,11 @@ def feature(sources):
     return {"kind": "feature", "summary": "Two stories.", "feature": "Cards show what is true now.",
             "stories": [{"title": "One", "user_story": "u1", "non_functional": [], "depends_on": [],
                          "acceptance_criteria": [{"text": f"Criterion {k} holds.", "source": s}
-                                                 for k, s in enumerate(sources, 1)]},
+                                                 for k, s in enumerate(sources[:3], 1)]},
                         {"title": "Two", "user_story": "u2", "non_functional": [], "depends_on": [0],
-                         "acceptance_criteria": [{"text": "Two holds.", "source": url(STORY_N)}]}],
+                         "acceptance_criteria": [{"text": f"Criterion {k} holds.", "source": s}
+                                                 for k, s in enumerate(sources[3:], 4)]
+                                                + [{"text": "Two holds.", "source": url(STORY_N)}]}],
             "links": {"blocked_by": [], "blocks": [], "relates_to": []}}
 
 
@@ -104,7 +106,9 @@ def test_a_criterion_may_cite_its_own_issue_its_parent_or_a_comment_on_either(re
     for k, s in enumerate(sources, 1):
         assert_source_accepted(text, k, s, "334.1", "a story")
     code, text = planner_check(tmp_path / "split", feature(sources), PARENT_N)
-    assert code == 0, f"334.1: the planner's check rejected a split whose criteria cite #331, #330 or their comments:\n{text[-1500:]}"
+    # Its sources pass; since #416 a story of a parent never splits again, so the split itself is refused for that alone.
+    assert code != 0 and "never splits again" in text and "source" not in text.split("never splits again")[0][-300:], \
+        f"334.1: a split whose criteria cite #331, #330 or their comments was refused for its sources:\n{text[-1500:]}"
     code, text = planner_check(tmp_path / "no-parent", story([url(STORY_N), url(PARENT_N)]), None)
     assert code != 0 and url(PARENT_N) in text, \
         f"334.1: with no parent in the pack, the check accepted #330 as a source; the parent must come from GitHub:\n{text[-1500:]}"

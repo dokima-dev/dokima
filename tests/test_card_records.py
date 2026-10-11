@@ -39,7 +39,7 @@ import sys
 import pytest
 
 sys.path.insert(0, os.path.join(os.path.dirname(__file__), ".."))
-from dokima import card, checks, plan  # noqa: E402
+from dokima import body, card, checks, plan  # noqa: E402
 
 ROOT = os.path.join(os.path.dirname(__file__), "..")
 REPO = "o/r"
@@ -117,7 +117,9 @@ def draw(page="issue", **kw):
 def block(text):
     """The card itself: from its start marker to its end marker."""
     assert plan.CARD_START in text and plan.CARD_END in text, "the text holds no card between its markers"
-    return text[text.index(plan.CARD_START):text.index(plan.CARD_END) + len(plan.CARD_END)]
+    done = "\n" + text.rsplit(body.DONE, 1)[1].strip().split("\n")[0] if body.DONE in text else ""
+    # Since #416 the Definition of Done sits after the Original issue fold; read it as the card's last line.
+    return text[text.index(plan.CARD_START):text.index(plan.CARD_END)] + (done.lstrip("\n") + "\n" if done else "") + plan.CARD_END
 
 
 def links_as_html(text):
@@ -358,7 +360,7 @@ def test_the_issue_and_its_pr_show_the_same_card(record_property, monkeypatch, t
         # Since #452 the links row differs only by the issue's own link, which the PR's row keeps.
         assert x == y or x == y.replace(" · " + ISSUE["url"] + " · ", " · ", 1), \
             f"180.1: the issue and PR cards differ: “{x}” vs “{y}”"
-    assert on_pr.rstrip().endswith("Closes " + ISSUE["url"]), "180.1: the PR lost its line closing the issue"
+    assert "Closes" not in on_pr, "180.1: the PR still carries a Closes line (#416 dropped it)"
 
 
 def test_the_card_finds_the_pr_on_either_branch(record_property, monkeypatch):

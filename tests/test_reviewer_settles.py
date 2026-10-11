@@ -487,7 +487,7 @@ class Hub:
 
 def filed_lines(text, n):
     """The lines of a record that name the filed issue #n."""
-    return [l for l in text.splitlines() if re.search(rf"#{n}\b", l)]
+    return [l for l in text.splitlines() if re.search(rf"(?:#|/issues/){n}\b", l)]
 
 
 def test_on_autopilot_a_settled_raise_neither_merges_nor_waits_for_the_owner(tmp_path, record_property):

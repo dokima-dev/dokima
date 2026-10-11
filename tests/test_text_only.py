@@ -157,7 +157,7 @@ def test_the_text_only_check_passes_without_running_any_test(record_property, tm
         f"358.2: a real criterion with no test now passes too (exit {code}); only the text-only check may:\n{out}"
     matrix = json.dumps([{"id": "text-only", "name": SHORTCUT, "tests": ""}])
     code, out, _ = run_step(tmp_path, "gate", {"MATRIX": matrix, "RESULT": "success"})
-    assert code == 0, f"358.2: the 'all done-whens passed' gate failed on a passing text-only check (exit {code}):\n{out}"
+    assert code == 0, f"358.2: the 'Acceptance criteria' gate failed on a passing text-only check (exit {code}):\n{out}"
 
 
 def test_a_pull_request_touching_anything_but_text_files_goes_the_full_way(record_property, tmp_path):
@@ -198,17 +198,17 @@ def test_the_owner_still_approves_and_merges_a_text_only_pull_request(record_pro
 
     Proves 358.4.
     The shortcut lives only inside the criteria check: the text-only pull request still gets a check (so the
-    "all done-whens passed" gate still waits on it and fails when it fails), main's branch rule still requires
-    "all tests" and "all done-whens passed", and CODEOWNERS still names a code owner for every file, whose approving
+    "Acceptance criteria" gate still waits on it and fails when it fails), main's branch rule still requires
+    "all tests" and "Acceptance criteria", and CODEOWNERS still names a code owner for every file, whose approving
     review GitHub requires before the merge."""
     record_property("proves", "358.4")
     rows, out = run_matrix(tmp_path, changed("AGENTS.md"))
     assert is_shortcut(rows), f"358.4: a text-only pull request did not get its one text-only check: {rows}\n{out}"
     code, out, _ = run_step(tmp_path, "gate", {"MATRIX": json.dumps(rows), "RESULT": "failure"})
-    assert code != 0, "358.4: the 'all done-whens passed' gate passed although the text-only check failed"
+    assert code != 0, "358.4: the 'Acceptance criteria' gate passed although the text-only check failed"
     sys.path.insert(0, ROOT)
     from dokima import manifest
-    assert manifest.BRANCH_RULES["main"]["required_checks"] == ["all tests", "all done-whens passed"], \
+    assert manifest.BRANCH_RULES["main"]["required_checks"] == ["all tests", "Acceptance criteria"], \
         f"358.4: main no longer requires both checks: {manifest.BRANCH_RULES['main']}"
     owners = [l.split() for l in open(os.path.join(ROOT, ".github", "CODEOWNERS")) if l.strip() and not l.startswith("#")]
     assert any(parts[0] == "*" and len(parts) > 1 for parts in owners), \

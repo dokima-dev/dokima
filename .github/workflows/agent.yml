@@ -224,7 +224,7 @@ jobs:
           esac
           CHECK="$CHECK && python3 -m dokima.agent check-round $ROLE $OUT/$FILE $PACK"
           echo "CHECK=$CHECK" >> "$GITHUB_ENV"
-          claude -p "$(cat /tmp/runtime/dokima/roles/$GRADE.md /tmp/runtime/dokima/roles/$ROLE.md)
+          claude -p "$(cat /tmp/runtime/dokima/roles/style.md /tmp/runtime/dokima/roles/$GRADE.md /tmp/runtime/dokima/roles/$ROLE.md)
 
           # Your pack
           - $PACK/issue.md: issue #$N as it stands, with every comment (the owner's words and answers are here).
@@ -260,6 +260,9 @@ jobs:
           gh api -X DELETE installation/token --silent || echo "::warning title=Key not revoked::the card's key could not be revoked"
       - name: Code checks the hand-back
         if: always() && env.STARTED == 'true'
+        # The agent ran this check itself and cut its texts; here word caps only flag what is still over (#470).
+        env:
+          STYLE_SOFT: "1"
         run: |
           set +e; bash -c "$CHECK" > "$OUT/check.txt" 2>&1; rc=$?; set -e
           cat "$OUT/check.txt"

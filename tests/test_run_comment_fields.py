@@ -225,12 +225,15 @@ def item_of(text, needle):
 
 
 def stats_fold(body):
-    """The fold right above the Full record fold, and what lies between them.
+    """The stats line, the comment's last line (#416), and what lies between the Full record fold and it, Next aside.
 
-    Both are None when there is no such fold."""
-    head = body.partition(RECORD_FOLD)[0]
-    m = re.search(r"<details>(?:(?!<details>).)*?</details>(\s*)$", head, re.S)
-    return (m.group(0), m.group(1)) if m else (None, None)
+    Both are None when there is no stats line."""
+    if agent.STATS not in body:
+        return None, None
+    head, _, tail = body.rpartition(agent.STATS)
+    between = head.partition(RECORD_FOLD)[2].partition("</details>")[2]
+    between = re.sub(r"\*\*Next:\*\*.*", "", between)
+    return tail.strip(), between
 
 
 # 236.1: Plan review and Code review
@@ -330,7 +333,7 @@ def test_a_planners_comment_with_nothing_raised_or_changed_shows_no_empty_part(r
         f"236.2: a plan that raised and answered nothing shows a Raised heading:\n{text}"
     assert "Test changes" not in text, f"236.2: a plan with no changes to older tests shows Test changes:\n{text}"
     folds = re.findall(r"<summary>(.*?)</summary>", body, re.S)
-    assert len(folds) == 2 and "Full record" in folds[-1] and "Stats" in folds[0], \
+    assert folds == ["Full record"] and stats_fold(body)[0], \
         f"236.2: a plan with nothing to fold shows folds other than Stats and Full record: {folds}\n{body}"
 
 
@@ -569,13 +572,12 @@ def test_the_stats_sit_in_a_fold_right_above_the_full_record(record_property, en
     for what, body in bodies:
         fold, between = stats_fold(body)
         assert fold, f"236.7: the {what} comment has no fold right above the Full record:\n{body}"
-        title = re.search(r"<summary>(.*?)</summary>", fold, re.S).group(1)
-        assert img("stats") in title and "Stats" in plain(title), f"236.7: the {what} comment's last fold is not Stats: {title}"
+        assert fold.startswith(img("stats")), f"236.7: the {what} comment's stats line does not open with the stats icon: {fold}"
         assert not between.strip(), f"236.7: something sits between the Stats fold and the Full record: {between!r}"
         for said in ("Opus 5.5", "4.0 min", "23 turns", "401K", "18K", "$3.20", "https://g/log.md",
                      "https://github.com/o/r/actions/runs/1"):
             assert said in fold, f"236.7: the {what} comment's Stats fold does not hold {said!r}:\n{fold}"
-        outside = FOLD.sub("", body)
+        outside = FOLD.sub("", body).replace(fold, "")
         assert "turns" not in outside and img("stats") not in outside, \
             f"236.7: the {what} comment still shows its stats outside the fold:\n{outside}"
 
@@ -640,9 +642,10 @@ def test_the_full_record_stays_the_last_fold_and_reads_back(record_property, run
         body, record = run(role, stage, hb)
         assert RECORD_FOLD in body, f"236.9: the {role} {stage} comment has no Full record fold"
         after = body.partition(RECORD_FOLD)[2].partition("</details>")[2]
-        assert not after.strip(), f"236.9: something follows the Full record fold in the {role} {stage} comment: {after!r}"
+        assert after.strip().endswith(stats_fold(body)[0] or "?"), \
+            f"236.9: the {role} {stage} comment does not end with its stats line: {after!r}"
         fold, between = stats_fold(body)
-        assert fold and "Stats" in plain(re.search(r"<summary>(.*?)</summary>", fold, re.S).group(1)) and not between.strip(), \
+        assert fold and not between.strip(), \
             f"236.9: the Full record of the {role} {stage} comment is not right under the Stats fold:\n{body}"
         back = agent.records([{"author": {"login": agent.BOT}, "body": body}])
         assert back == [record], f"236.9: the {role} {stage} comment does not read back as its record"

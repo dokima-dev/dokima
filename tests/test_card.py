@@ -3,7 +3,7 @@ import re
 import sys
 
 sys.path.insert(0, os.path.join(os.path.dirname(__file__), ".."))
-from dokima import card, plan  # noqa: E402
+from dokima import body, card, plan  # noqa: E402
 from test_start import load_yaml  # noqa: E402
 
 REPO = "o/r"
@@ -123,7 +123,7 @@ def test_same_card_on_issue_and_pr_and_only_icons_change(record_property):
     # Since #373 the PR also carries the owner's text in a closed Original issue fold between the card and its Closes
     # line, and since #452 the PR's card links the issue and closes it by its full address.
     pr = card.pr_body(render(page="pr"), "Closes #40.\n\nSome prose.", "My ask.", issue_url=ISSUE["url"])
-    assert pr.startswith(render(page="pr")) and pr.endswith("\n\nCloses https://github.com/o/r/issues/40") and "Some prose." not in pr
+    assert pr.startswith(render(page="pr").split(body.DONE)[0].rstrip("\n")) and "Closes" not in pr and "Some prose." not in pr
     assert "\n<details><summary>Original issue</summary>\n\nMy ask.\n\n</details>" in pr
     src = open(os.path.join(os.path.dirname(__file__), "..", "dokima", "card.py")).read()
     assert 'f"repos/{repo}/pulls/{pr_number}", "-F", "body=@pr.md"' in src

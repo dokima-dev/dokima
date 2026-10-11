@@ -96,3 +96,15 @@ jobs:
           RUN_TITLE: ${{ github.event.workflow_run.display_title }}
           DOKIMA_BOARD: ${{ vars.DOKIMA_BOARD }}
         run: python3 dokima/card.py
+      # The PR's description carries no Closes line (#416), so a merge closes the issue it was built for here.
+      - name: Close the issue a merged pull request was built for
+        if: github.event_name == 'pull_request_target' && github.event.pull_request.merged
+        env:
+          GH_TOKEN: ${{ steps.app.outputs.token }}
+          HEAD: ${{ github.event.pull_request.head.ref }}
+          PR: ${{ github.event.pull_request.number }}
+        run: |
+          if [[ "$HEAD" =~ ^(try|work)/issue-([0-9]+)$ ]]; then
+            gh issue close "${BASH_REMATCH[2]}" -R "$GITHUB_REPOSITORY" --reason completed \
+              --comment "Closed: pull request #$PR merged." || echo "::warning title=Issue not closed::#${BASH_REMATCH[2]}"
+          fi

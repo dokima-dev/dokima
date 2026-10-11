@@ -11,7 +11,7 @@ permissions:
   pull-requests: read
 jobs:
   list:
-    name: list done-whens
+    name: list acceptance criteria
     runs-on: ubuntu-24.04
     outputs:
       matrix: ${{ steps.m.outputs.matrix }}
@@ -65,7 +65,7 @@ jobs:
         run: python3 -m dokima.checks annotate pr/r.xml
 
   gate:
-    name: all done-whens passed
+    name: Acceptance criteria
     needs: [list, check]
     if: always()
     runs-on: ubuntu-24.04
