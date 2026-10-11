@@ -759,13 +759,42 @@ def refresh(repo, numbers, cache, bodies=None):
     return failed
 
 
+def plan_side(recs):
+    """Each issue the approved plan in `recs` links to, as {issue: kind}."""
+    from dokima import agent
+    links = agent.plan_links(agent.approved_plan(recs))
+    return {m: k for k in agent.LINKS for m in links[k]}
+
+
+def follow_plan(repo, number, cache):
+    """Redraw each issue whose link from the newest approved plan of `number` changed (#438).
+
+    The plan approval saves no card, so this redraw notes this issue in theirs, or takes it out; a card already
+    current writes nothing. The records are those `draw` just read for `number`. Returns how many could not be
+    redrawn."""
+    from dokima import agent
+    recs = cache.get(("recs", int(number))) or []
+    # The links before are those of the plan approved before the newest approval.
+    approvals = [i for i, r in enumerate(recs) if r.get("role") == "reviewer" and r.get("stage") == "plan"
+                 and r.get("check", {}).get("passed") and (r.get("handback") or {}).get("verdict") == "approve"]
+    now, before = plan_side(recs), plan_side(recs[:approvals[-1]]) if approvals else {}
+    failed = 0
+    for m in sorted(x for x in set(now) | set(before) if now.get(x) != before.get(x) and x != int(number)):
+        try:
+            draw(repo, m, issue_pr(repo, m), noted={int(number): m in now}, cache=cache, changed_only=True)
+        except (subprocess.CalledProcessError, json.JSONDecodeError, KeyError, TypeError, AttributeError) as e:
+            print(f"::error title=Card not updated::the card of #{m} could not be updated: {reason(e)}")
+            failed += 1
+    return failed
+
+
 def follow(repo, number, before, now, cache):
     """Update the cards of the issues linked to one just drawn, when their links changed.
 
     Every issue it blocks, is blocked by or loops with, on GitHub now or on its card before, so a link a person added
-    or removed by hand shows on both sides."""
+    or removed by hand shows on both sides; first the issues its approved plan linked, dropped or changed."""
     others = {n for links in (before, now) for k in NO_LINKS for n in links.get(k) or []}
-    return refresh(repo, sorted(others - {int(number)}), cache)
+    return follow_plan(repo, number, cache) + refresh(repo, sorted(others - {int(number)}), cache)
 
 
 def last_sweep(repo):
@@ -880,7 +909,8 @@ def main():
 
     def redraw():
         cache = {}
-        before, now = draw(repo, number, pr_number, cache=cache)
+        # A redraw the bot's own change started writes only a card that changed, so its own save ends the chain.
+        before, now = draw(repo, number, pr_number, cache=cache, changed_only=os.environ.get("BY_BOT") == "true")
         return follow(repo, number, before, now, cache)
 
     if retry.once_more(f"the card of #{number}", redraw, failed=bool):
@@ -899,6 +929,7 @@ def draw(repo, number, pr_number, plans=None, noted=None, cache=None, changed_on
     cache = {} if cache is None else cache
     issue = plan.fetch_issue(repo, number)
     found = gather(repo, number, pr_number)
+    cache[("recs", int(number))] = found.get("recs") or []
     sources = set(linked_from(issue["current_body"]))
     for s, on in (noted or {}).items():
         (sources.add if on else sources.discard)(s)

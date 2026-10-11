@@ -138,34 +138,6 @@ def test_each_step_passes_only_when_both_cards_show_what_it_should(record_proper
         f"437.1: a stale PR card beside a right issue card should fail naming the PR card: {line!r}"
 
 
-def test_todays_card_yml_fails_the_code_review_record_step_with_code_review_running(tmp_path, record_property):
-    """On today's card.yml, the code review's record step fails with Code review running.
-
-    Proves 437.2.
-    Plays card.yml on the fake GitHub of tests/card_player.py: the bot's code review run card goes up on PR #260 and
-    both cards redraw to Code review running; then the bot edits that card into the approving record, as the #419
-    review did. judge() must give `FAIL: code review record posted` saying Code review running. Then an owner's
-    comment redraws both cards from the same records, and the same step passes, so the record itself reads fine."""
-    record_property("proves", "437.2")
-    p = playthrough("437.2")
-    hub = Hub(tmp_path)
-    text = review_queued(hub)
-    must_redraw(hub, pr_comment(246, 260, who="bot", text=text), "437.2")
-    s = hub.load()
-    live_card = next(c for c in s["prs"]["260"]["comments"] if c["body"] == text)
-    live_card["body"] = record(review_record("pr"), live_card["at"])["body"]
-    hub.save()
-    hub.run(*pr_comment(246, 260, who="bot", action="edited", text=live_card["body"]), "437.2")
-    line = p.judge("code review record posted", hub.issue_body(246), hub.pr_body(260))
-    assert line.startswith("FAIL: code review record posted") and "Code review running" in line, \
-        (f"437.2: on today's card.yml the code review's record redraws nothing, so the step should fail saying the "
-         f"card still showed Code review running, not {line!r}")
-    must_redraw(hub, issue_comment(246, who=OWNER, text="Looks good."), "437.2")
-    line = p.judge("code review record posted", hub.issue_body(246), hub.pr_body(260))
-    assert line == "PASS: code review record posted", \
-        f"437.2: once both cards are redrawn from the record, the step should pass, not {line!r}"
-
-
 def workflow(k):
     """.github/workflows/playthrough.yml as nested dicts; fails naming criterion k when it does not exist."""
     assert os.path.exists(WORKFLOW), f"{k}: .github/workflows/playthrough.yml does not exist, so there is no play-through to start"

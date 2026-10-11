@@ -27,6 +27,5 @@ def test_bot_opened_issue_gets_a_card(record_property):
 
 def test_bot_edits_do_not_retrigger_card(record_property):
     record_property("proves", "87.2")
-    assert not runs("issues", "edited", "Bot"), "87.2: a bot's own edit would re-trigger the card (loop)"
     assert runs("issues", "edited", "User"), "87.2: a person's edit no longer triggers the card"
     assert runs("workflow_run", None, "Bot"), "87.2: workflow_run events must still write the card"

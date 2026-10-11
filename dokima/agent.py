@@ -5,7 +5,6 @@ JSON hand-backs of earlier runs, downloaded from those runs. `check` is the dete
 hand-back before it finishes, and that code runs again after it: a malformed hand-back never reaches the next agent.
 The plan's own check lives in dokima/planner.py; this module adds review.json and work.json.
 """
-import contextlib
 import glob
 import json
 import os
@@ -1656,14 +1655,13 @@ def file_issues(repo, number, rec, recs):
 
 
 def record_links(repo, number, items):
-    """Record the just approved plan's links on GitHub, then redraw the cards they touch.
+    """Record the just approved plan's links on GitHub; card.yml redraws the cards they touch (#438).
 
     Code reads the plan from the issue's checked records only. Its blocked_by links become GitHub's own blocked-by
     links on this issue and its blocks links the other issue blocked by this one; a link GitHub already has is not
     added again, and a blocking link the previous approved plan had and this one dropped is removed first. A link
     no approved plan had, such as one a person made by hand, is left alone. Links that would make issues block each
-    other record nothing. Then the card of this issue and of every issue a link was added to, dropped from or
-    changed on is redrawn. Returns why the river must stop for the owner, or None when all went through.
+    other record nothing. Returns why the river must stop for the owner, or None when all went through.
     """
     recs = records(items)
     n = int(number)
@@ -1704,20 +1702,6 @@ def record_links(repo, number, items):
             failed.append(f"GitHub refused to record the link #{a} blocked by #{b}: {gh_reason(e)}.")
         except (json.JSONDecodeError, KeyError, TypeError) as e:
             failed.append(f"GitHub's answer for #{b} could not be read, so #{a} blocked by #{b} was not recorded: {e}.")
-    if failed:
-        return " ".join(failed) + after
-    side = lambda links: {m: k for k in LINKS for m in links[k]}
-    now, before = side(new), side(old)
-    changed = sorted(m for m in set(now) | set(before) if now.get(m) != before.get(m))
-    for m in [n] + changed if changed else []:
-        try:
-            # The card's own progress lines go to the run's log, so this step's output stays the river's decision.
-            with contextlib.redirect_stdout(sys.stderr):
-                card.draw(repo, m, card.issue_pr(repo, m), plans={n: new}, noted={n: m in now} if m != n else None)
-        except subprocess.CalledProcessError as e:
-            failed.append(f"The links are recorded, but the card of #{m} could not be redrawn: {gh_reason(e)}.")
-        except (json.JSONDecodeError, KeyError, TypeError) as e:
-            failed.append(f"The links are recorded, but the card of #{m} could not be redrawn: {e}.")
     return " ".join(failed) + after if failed else None
 
 
@@ -2596,7 +2580,7 @@ def main(argv):
                                     "review it with a command to send it back.")
         if rec.get("role") == "reviewer" and (rec.get("stage") or "") == "plan" and rec.get("check", {}).get("passed") \
                 and (rec.get("handback") or {}).get("verdict") == "approve":
-            # Code records the approved plan's links on GitHub and redraws the cards they touch; anything that keeps
+            # Code records the approved plan's links on GitHub, and card.yml redraws the cards they touch; anything that keeps
             # a link from being recorded stops the river, so autopilot never starts work that should wait.
             why = record_links(repo, number, items)
             if why:
