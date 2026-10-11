@@ -34,6 +34,13 @@ jobs:
     outputs:
       group: ${{ steps.queue.outputs.group }}
     steps:
+      - name: Count this run's GitHub calls
+        continue-on-error: true
+        # Every gh call this job makes goes through a counter, so its cost in GitHub's hourly budget is known (#426).
+        run: |
+          mkdir -p /tmp/ghcount && real=$(command -v gh)
+          printf '#!/bin/sh\necho "$*" | cut -c1-120 >> /tmp/ghcount/calls\nexec %s "$@"\n' "$real" > /tmp/ghcount/gh
+          chmod +x /tmp/ghcount/gh && { [ -z "$GITHUB_PATH" ] || echo /tmp/ghcount >> "$GITHUB_PATH"; } || true
       # The issue this event is about, from the issue, the pull request's branch or the worker run's title.
       - id: queue
         env:
@@ -59,6 +66,16 @@ jobs:
           else group="card-run-$RUN"
           fi
           echo "group=$group" >> "$GITHUB_OUTPUT"
+      - name: Report this run's GitHub calls
+        if: always()
+        continue-on-error: true
+        run: |
+          [ -s /tmp/ghcount/calls ] || { echo "::notice title=GitHub calls::none"; exit 0; }
+          awk '{ k = ($1 == "api") ? (($2 == "graphql") ? "graphql" : "rest") : ($1 ~ /^(run|workflow|release|secret|variable|cache)$/ ? "rest" : "graphql")
+                 n[k]++; t[$1 " " (($1 == "api" && $2 != "graphql") ? "rest" : $2)]++ }
+               END { for (x in t) print t[x], x | "sort -rn | head -4 | paste -sd, - > /tmp/ghcount/top"; close("sort -rn | head -4 | paste -sd, - > /tmp/ghcount/top")
+                     getline top < "/tmp/ghcount/top"
+                     printf "::notice title=GitHub calls::graphql %d, rest %d; most: %s\n", n["graphql"], n["rest"], top }' /tmp/ghcount/calls || true
   card:
     needs: queue
     concurrency:
@@ -67,6 +84,13 @@ jobs:
     environment: keys
     runs-on: ubuntu-24.04
     steps:
+      - name: Count this run's GitHub calls
+        continue-on-error: true
+        # Every gh call this job makes goes through a counter, so its cost in GitHub's hourly budget is known (#426).
+        run: |
+          mkdir -p /tmp/ghcount && real=$(command -v gh)
+          printf '#!/bin/sh\necho "$*" | cut -c1-120 >> /tmp/ghcount/calls\nexec %s "$@"\n' "$real" > /tmp/ghcount/gh
+          chmod +x /tmp/ghcount/gh && { [ -z "$GITHUB_PATH" ] || echo /tmp/ghcount >> "$GITHUB_PATH"; } || true
       - uses: actions/checkout@v5
       # The card is posted by the repo's Dokima app, so it shows as that app's bot.
       - id: app
@@ -98,3 +122,13 @@ jobs:
             gh issue close "${BASH_REMATCH[2]}" -R "$GITHUB_REPOSITORY" --reason completed \
               --comment "Closed: pull request #$PR merged." || echo "::warning title=Issue not closed::#${BASH_REMATCH[2]}"
           fi
+      - name: Report this run's GitHub calls
+        if: always()
+        continue-on-error: true
+        run: |
+          [ -s /tmp/ghcount/calls ] || { echo "::notice title=GitHub calls::none"; exit 0; }
+          awk '{ k = ($1 == "api") ? (($2 == "graphql") ? "graphql" : "rest") : ($1 ~ /^(run|workflow|release|secret|variable|cache)$/ ? "rest" : "graphql")
+                 n[k]++; t[$1 " " (($1 == "api" && $2 != "graphql") ? "rest" : $2)]++ }
+               END { for (x in t) print t[x], x | "sort -rn | head -4 | paste -sd, - > /tmp/ghcount/top"; close("sort -rn | head -4 | paste -sd, - > /tmp/ghcount/top")
+                     getline top < "/tmp/ghcount/top"
+                     printf "::notice title=GitHub calls::graphql %d, rest %d; most: %s\n", n["graphql"], n["rest"], top }' /tmp/ghcount/calls || true

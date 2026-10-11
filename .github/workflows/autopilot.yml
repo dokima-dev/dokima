@@ -22,6 +22,13 @@ jobs:
     environment: keys
     runs-on: ubuntu-24.04
     steps:
+      - name: Count this run's GitHub calls
+        continue-on-error: true
+        # Every gh call this job makes goes through a counter, so its cost in GitHub's hourly budget is known (#426).
+        run: |
+          mkdir -p /tmp/ghcount && real=$(command -v gh)
+          printf '#!/bin/sh\necho "$*" | cut -c1-120 >> /tmp/ghcount/calls\nexec %s "$@"\n' "$real" > /tmp/ghcount/gh
+          chmod +x /tmp/ghcount/gh && { [ -z "$GITHUB_PATH" ] || echo /tmp/ghcount >> "$GITHUB_PATH"; } || true
       - uses: actions/checkout@v5
         with:
           ref: ${{ github.event.repository.default_branch }}
@@ -45,3 +52,13 @@ jobs:
         run: |
           printf 'Autopilot could not finish after #%s closed: %s ([run](%s))\n' "$N" "$(paste -sd' ' /tmp/why.txt 2>/dev/null)" "$RUN" > /tmp/autopilot.md
           gh issue comment "$N" -R "$GITHUB_REPOSITORY" --body-file /tmp/autopilot.md
+      - name: Report this run's GitHub calls
+        if: always()
+        continue-on-error: true
+        run: |
+          [ -s /tmp/ghcount/calls ] || { echo "::notice title=GitHub calls::none"; exit 0; }
+          awk '{ k = ($1 == "api") ? (($2 == "graphql") ? "graphql" : "rest") : ($1 ~ /^(run|workflow|release|secret|variable|cache)$/ ? "rest" : "graphql")
+                 n[k]++; t[$1 " " (($1 == "api" && $2 != "graphql") ? "rest" : $2)]++ }
+               END { for (x in t) print t[x], x | "sort -rn | head -4 | paste -sd, - > /tmp/ghcount/top"; close("sort -rn | head -4 | paste -sd, - > /tmp/ghcount/top")
+                     getline top < "/tmp/ghcount/top"
+                     printf "::notice title=GitHub calls::graphql %d, rest %d; most: %s\n", n["graphql"], n["rest"], top }' /tmp/ghcount/calls || true

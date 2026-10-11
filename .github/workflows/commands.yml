@@ -35,6 +35,13 @@ jobs:
       autopilot: ${{ steps.r.outputs.autopilot }}
       why: ${{ steps.why.outputs.why }}
     steps:
+      - name: Count this run's GitHub calls
+        continue-on-error: true
+        # Every gh call this job makes goes through a counter, so its cost in GitHub's hourly budget is known (#426).
+        run: |
+          mkdir -p /tmp/ghcount && real=$(command -v gh)
+          printf '#!/bin/sh\necho "$*" | cut -c1-120 >> /tmp/ghcount/calls\nexec %s "$@"\n' "$real" > /tmp/ghcount/gh
+          chmod +x /tmp/ghcount/gh && { [ -z "$GITHUB_PATH" ] || echo /tmp/ghcount >> "$GITHUB_PATH"; } || true
       - uses: actions/checkout@v5
         with:
           persist-credentials: false
@@ -61,6 +68,16 @@ jobs:
         run: echo "why=$(paste -sd' ' /tmp/why.txt)" >> "$GITHUB_OUTPUT"
   # A code owner's command puts up its run's card within seconds, where the record will go: queued, or waiting for
   # the run still going on the issue. The run, or filing the split, edits this one card into its record.
+      - name: Report this run's GitHub calls
+        if: always()
+        continue-on-error: true
+        run: |
+          [ -s /tmp/ghcount/calls ] || { echo "::notice title=GitHub calls::none"; exit 0; }
+          awk '{ k = ($1 == "api") ? (($2 == "graphql") ? "graphql" : "rest") : ($1 ~ /^(run|workflow|release|secret|variable|cache)$/ ? "rest" : "graphql")
+                 n[k]++; t[$1 " " (($1 == "api" && $2 != "graphql") ? "rest" : $2)]++ }
+               END { for (x in t) print t[x], x | "sort -rn | head -4 | paste -sd, - > /tmp/ghcount/top"; close("sort -rn | head -4 | paste -sd, - > /tmp/ghcount/top")
+                     getline top < "/tmp/ghcount/top"
+                     printf "::notice title=GitHub calls::graphql %d, rest %d; most: %s\n", n["graphql"], n["rest"], top }' /tmp/ghcount/calls || true
   queue:
     needs: route
     if: needs.route.outputs.role != ''
@@ -69,6 +86,13 @@ jobs:
     outputs:
       card: ${{ steps.card.outputs.card }}
     steps:
+      - name: Count this run's GitHub calls
+        continue-on-error: true
+        # Every gh call this job makes goes through a counter, so its cost in GitHub's hourly budget is known (#426).
+        run: |
+          mkdir -p /tmp/ghcount && real=$(command -v gh)
+          printf '#!/bin/sh\necho "$*" | cut -c1-120 >> /tmp/ghcount/calls\nexec %s "$@"\n' "$real" > /tmp/ghcount/gh
+          chmod +x /tmp/ghcount/gh && { [ -z "$GITHUB_PATH" ] || echo /tmp/ghcount >> "$GITHUB_PATH"; } || true
       - uses: actions/checkout@v5
         with:
           persist-credentials: false
@@ -90,6 +114,16 @@ jobs:
           else
             echo "::warning title=No queued card::the card could not be put up; the run puts up its own"
           fi
+      - name: Report this run's GitHub calls
+        if: always()
+        continue-on-error: true
+        run: |
+          [ -s /tmp/ghcount/calls ] || { echo "::notice title=GitHub calls::none"; exit 0; }
+          awk '{ k = ($1 == "api") ? (($2 == "graphql") ? "graphql" : "rest") : ($1 ~ /^(run|workflow|release|secret|variable|cache)$/ ? "rest" : "graphql")
+                 n[k]++; t[$1 " " (($1 == "api" && $2 != "graphql") ? "rest" : $2)]++ }
+               END { for (x in t) print t[x], x | "sort -rn | head -4 | paste -sd, - > /tmp/ghcount/top"; close("sort -rn | head -4 | paste -sd, - > /tmp/ghcount/top")
+                     getline top < "/tmp/ghcount/top"
+                     printf "::notice title=GitHub calls::graphql %d, rest %d; most: %s\n", n["graphql"], n["rest"], top }' /tmp/ghcount/calls || true
   split:
     needs: [route, queue]
     if: always() && needs.route.result == 'success' && needs.route.outputs.role == 'split'
@@ -98,6 +132,13 @@ jobs:
     outputs:
       why: ${{ steps.why.outputs.why }}
     steps:
+      - name: Count this run's GitHub calls
+        continue-on-error: true
+        # Every gh call this job makes goes through a counter, so its cost in GitHub's hourly budget is known (#426).
+        run: |
+          mkdir -p /tmp/ghcount && real=$(command -v gh)
+          printf '#!/bin/sh\necho "$*" | cut -c1-120 >> /tmp/ghcount/calls\nexec %s "$@"\n' "$real" > /tmp/ghcount/gh
+          chmod +x /tmp/ghcount/gh && { [ -z "$GITHUB_PATH" ] || echo /tmp/ghcount >> "$GITHUB_PATH"; } || true
       - uses: actions/checkout@v5
         with:
           persist-credentials: false
@@ -116,6 +157,16 @@ jobs:
       - id: why
         if: failure()
         run: echo "why=$(paste -sd' ' /tmp/why.txt)" >> "$GITHUB_OUTPUT"
+      - name: Report this run's GitHub calls
+        if: always()
+        continue-on-error: true
+        run: |
+          [ -s /tmp/ghcount/calls ] || { echo "::notice title=GitHub calls::none"; exit 0; }
+          awk '{ k = ($1 == "api") ? (($2 == "graphql") ? "graphql" : "rest") : ($1 ~ /^(run|workflow|release|secret|variable|cache)$/ ? "rest" : "graphql")
+                 n[k]++; t[$1 " " (($1 == "api" && $2 != "graphql") ? "rest" : $2)]++ }
+               END { for (x in t) print t[x], x | "sort -rn | head -4 | paste -sd, - > /tmp/ghcount/top"; close("sort -rn | head -4 | paste -sd, - > /tmp/ghcount/top")
+                     getline top < "/tmp/ghcount/top"
+                     printf "::notice title=GitHub calls::graphql %d, rest %d; most: %s\n", n["graphql"], n["rest"], top }' /tmp/ghcount/calls || true
   autopilot:
     needs: route
     if: needs.route.outputs.autopilot != ''
@@ -124,6 +175,13 @@ jobs:
     outputs:
       why: ${{ steps.why.outputs.why }}
     steps:
+      - name: Count this run's GitHub calls
+        continue-on-error: true
+        # Every gh call this job makes goes through a counter, so its cost in GitHub's hourly budget is known (#426).
+        run: |
+          mkdir -p /tmp/ghcount && real=$(command -v gh)
+          printf '#!/bin/sh\necho "$*" | cut -c1-120 >> /tmp/ghcount/calls\nexec %s "$@"\n' "$real" > /tmp/ghcount/gh
+          chmod +x /tmp/ghcount/gh && { [ -z "$GITHUB_PATH" ] || echo /tmp/ghcount >> "$GITHUB_PATH"; } || true
       - uses: actions/checkout@v5
         with:
           persist-credentials: false
@@ -163,12 +221,29 @@ jobs:
       - id: why
         if: failure()
         run: echo "why=$(paste -sd' ' /tmp/why.txt)" >> "$GITHUB_OUTPUT"
+      - name: Report this run's GitHub calls
+        if: always()
+        continue-on-error: true
+        run: |
+          [ -s /tmp/ghcount/calls ] || { echo "::notice title=GitHub calls::none"; exit 0; }
+          awk '{ k = ($1 == "api") ? (($2 == "graphql") ? "graphql" : "rest") : ($1 ~ /^(run|workflow|release|secret|variable|cache)$/ ? "rest" : "graphql")
+                 n[k]++; t[$1 " " (($1 == "api" && $2 != "graphql") ? "rest" : $2)]++ }
+               END { for (x in t) print t[x], x | "sort -rn | head -4 | paste -sd, - > /tmp/ghcount/top"; close("sort -rn | head -4 | paste -sd, - > /tmp/ghcount/top")
+                     getline top < "/tmp/ghcount/top"
+                     printf "::notice title=GitHub calls::graphql %d, rest %d; most: %s\n", n["graphql"], n["rest"], top }' /tmp/ghcount/calls || true
   say-why:
     needs: [route, queue, split, autopilot]
     if: always() && (needs.route.result == 'failure' || needs.split.result == 'failure' || needs.autopilot.result == 'failure')
     environment: keys
     runs-on: ubuntu-24.04
     steps:
+      - name: Count this run's GitHub calls
+        continue-on-error: true
+        # Every gh call this job makes goes through a counter, so its cost in GitHub's hourly budget is known (#426).
+        run: |
+          mkdir -p /tmp/ghcount && real=$(command -v gh)
+          printf '#!/bin/sh\necho "$*" | cut -c1-120 >> /tmp/ghcount/calls\nexec %s "$@"\n' "$real" > /tmp/ghcount/gh
+          chmod +x /tmp/ghcount/gh && { [ -z "$GITHUB_PATH" ] || echo /tmp/ghcount >> "$GITHUB_PATH"; } || true
       - uses: actions/checkout@v5
         with:
           persist-credentials: false
@@ -201,6 +276,16 @@ jobs:
           else
             gh issue comment "$NUMBER" -R "$GITHUB_REPOSITORY" --body-file /tmp/out/comment.md
           fi
+      - name: Report this run's GitHub calls
+        if: always()
+        continue-on-error: true
+        run: |
+          [ -s /tmp/ghcount/calls ] || { echo "::notice title=GitHub calls::none"; exit 0; }
+          awk '{ k = ($1 == "api") ? (($2 == "graphql") ? "graphql" : "rest") : ($1 ~ /^(run|workflow|release|secret|variable|cache)$/ ? "rest" : "graphql")
+                 n[k]++; t[$1 " " (($1 == "api" && $2 != "graphql") ? "rest" : $2)]++ }
+               END { for (x in t) print t[x], x | "sort -rn | head -4 | paste -sd, - > /tmp/ghcount/top"; close("sort -rn | head -4 | paste -sd, - > /tmp/ghcount/top")
+                     getline top < "/tmp/ghcount/top"
+                     printf "::notice title=GitHub calls::graphql %d, rest %d; most: %s\n", n["graphql"], n["rest"], top }' /tmp/ghcount/calls || true
   run:
     needs: [route, queue]
     if: always() && needs.route.result == 'success' && needs.route.outputs.role != '' && needs.route.outputs.role != 'split'
