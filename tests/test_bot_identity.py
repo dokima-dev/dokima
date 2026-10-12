@@ -84,16 +84,36 @@ def test_worker_conflict_commit_is_credited_to_the_bot(record_property):
         assert name in BOT_NAMES, f"567.1: the clash commit is made as name {name!r}, not the bot's"
 
 
+def steps_that_always_run_before_starting_branch():
+    """Returns the ids of steps that run before Starting branch on every run.
+
+    A step with an `if:` may be skipped, so its outputs can be blank; a step after Starting branch has no outputs yet."""
+    text = open(os.path.join(ROOT, ".github/workflows/agent.yml")).read()
+    before = text[:text.index("- name: Starting branch")]
+    ids = set()
+    for step in re.split(r"\n      - ", before)[1:]:
+        m = re.search(r"(?:^|\n\s*)id:\s*([\w-]+)", step)
+        if m and not re.search(r"(?:^|\n\s*)if:", step):
+            ids.add(m.group(1))
+    return ids
+
+
 def test_bot_identity_in_step_is_defined(record_property):
     """The bot's address in the merge step is never blank or the old one.
 
-    Proves 567.1. When the step names the bot through ${SLUG} or ${BOT_ID}, it must set both. A `${BOT_ID}+${SLUG}[bot]` address with neither set would commit as `+[bot]@users.noreply.github.com`."""
+    Proves 567.1. When the step names the bot through ${SLUG} or ${BOT_ID}, it must set both. A `${BOT_ID}+${SLUG}[bot]`
+    address with neither set would commit as `+[bot]@users.noreply.github.com`. Every step output the step reads must come
+    from a step that ran before it on every run: one that runs later, such as `steps.app`, or may be skipped, is blank."""
     record_property("proves", "567.1")
     lines = starting_branch_step()
     text = "\n".join(lines)
     if "${SLUG}" in text or "${BOT_ID}" in text:
         assert re.search(r"\bSLUG[:=]", text), "567.1: the Starting branch step uses ${SLUG} but never sets it"
         assert re.search(r"\bBOT_ID[:=]", text), "567.1: the Starting branch step uses ${BOT_ID} but never sets it"
+    ready = steps_that_always_run_before_starting_branch()
+    for used in sorted(set(re.findall(r"\bsteps\.([\w-]+)\.outputs", text))):
+        assert used in ready, (f"567.1: the Starting branch step reads steps.{used}, which runs after it or may be "
+                               "skipped, so the bot's name or address comes out blank")
     assert "dokima@users.noreply.github.com" not in text, "567.1: the Starting branch step still names dokima@users.noreply.github.com"
 
 
