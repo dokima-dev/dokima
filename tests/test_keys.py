@@ -62,6 +62,6 @@ def test_a_build_starts_from_todays_main(record_property):
     steps are missing and the build fails.
     """
     record_property("proves", "123.1")
-    worker = TEXT["worker.yml"]
-    start = worker[worker.index("- name: Start from the issue's branch"):].split("- name:")[1]
-    assert "merge -q --no-edit origin/main" in start
+    agent = TEXT["agent.yml"]
+    merge = next(line for line in agent.splitlines() if "merge -q --no-edit origin/main" in line)
+    assert '"$ROLE" = worker' in merge, "123.1: the worker's branch is not brought up to today's main"

@@ -10,14 +10,14 @@ def read(path):
 
 def test_worker_and_card_act_as_the_dokima_app(record_property):
     record_property("proves", "40.1")
-    for name in ("worker.yml", "card.yml"):
+    for name in ("agent.yml", "card.yml"):
         text = read(f".github/workflows/{name}")
         assert "actions/create-github-app-token@v2" in text
         assert "app-id: ${{ vars.DOKIMA_APP_ID }}" in text
         assert "private-key: ${{ secrets.DOKIMA_APP_KEY }}" in text
         assert "DOKIMA_TOKEN" not in text
-    worker = read(".github/workflows/worker.yml")
-    push = worker[worker.index("name: Commit the build"):]  # identity is set when committing, before the workflow gate (#113)
+    agent = read(".github/workflows/agent.yml")
+    push = agent[agent.index("name: Push the planner's tests or the worker's code"):]  # identity is set when committing (#113)
     assert "GH_TOKEN: ${{ steps.app.outputs.token }}" in push and "SLUG: ${{ steps.app.outputs.app-slug }}" in push
     assert 'git config user.name "${SLUG}[bot]"' in push
     card = read(".github/workflows/card.yml")

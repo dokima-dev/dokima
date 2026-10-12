@@ -12,7 +12,7 @@ name: card
 # on beside it.
 on:
   workflow_run:
-    workflows: [Acceptance criteria, full suite, worker, reviews]
+    workflows: [Acceptance criteria, full suite, reviews]
     types: [in_progress, completed]
   issues:
   issue_comment:
@@ -41,7 +41,7 @@ jobs:
           d="$RUNNER_TEMP/ghcount" && mkdir -p "$d" && real=$(command -v gh)
           printf '#!/bin/sh\necho "$*" | cut -c1-120 >> %s/calls\nexec %s "$@"\n' "$d" "$real" > "$d/gh"
           chmod +x "$d/gh" && { [ -z "$GITHUB_PATH" ] || echo "$d" >> "$GITHUB_PATH"; } || true
-      # The issue this event is about, from the issue, the pull request's branch or the worker run's title.
+      # The issue this event is about, from the issue or the pull request's branch.
       - id: queue
         env:
           EVENT: ${{ github.event_name }}
@@ -51,7 +51,6 @@ jobs:
           ON_PR: ${{ github.event.issue.pull_request && github.event.issue.number || '' }}
           PR: ${{ github.event.pull_request.number || github.event.workflow_run.pull_requests[0].number }}
           HEAD: ${{ github.event.pull_request.head.ref || github.event.workflow_run.head_branch }}
-          TITLE: ${{ github.event.workflow_run.display_title }}
           RUN: ${{ github.run_id }}
         run: |
           # A comment on a pull request waits in its issue's queue, found from the pull request's branch.
@@ -60,7 +59,6 @@ jobs:
           fi
           if [ "$EVENT" = schedule ]; then group=card-sweep
           elif [ -n "$ISSUE" ]; then group="card-$ISSUE"
-          elif [[ "$TITLE" =~ ^worker\ for\ \#([0-9]+)$ ]]; then group="card-${BASH_REMATCH[1]}"
           elif [[ "$HEAD" =~ ^(try|work)/issue-([0-9]+)$ ]]; then group="card-${BASH_REMATCH[2]}"
           elif [ -n "$PR" ]; then group="card-pr-$PR"
           else group="card-run-$RUN"

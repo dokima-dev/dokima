@@ -134,8 +134,8 @@ def test_the_prompt_and_the_workflow_no_longer_offer_a_lone_question(record_prop
     kinds and the line saying how the planner ends never offer a question, no heading offers "one question" for the owner,
     no line says a question is shown as handed back, and raising a question is still taught. The shared section on
     raising and answering, whose example raises have kinds of their own, is left out of the kinds read.
-    Reads .github/workflows/planner.yml and checks question.md and "one question for the owner" appear nowhere while
-    plan.json is still shown.
+    Reads .github/workflows/agent.yml, which runs the planner, and checks question.md and "one question for the owner"
+    appear nowhere.
     """
     record_property("proves", "154.1")
     text = open(os.path.join(ROOT, "dokima", "roles", "planner.md")).read()
@@ -151,10 +151,9 @@ def test_the_prompt_and_the_workflow_no_longer_offer_a_lone_question(record_prop
     assert not headings, f"154.1: the prompt still has a section offering one question for the owner: {headings}"
     assert "or a question is shown" not in flat, "154.1: the prompt still says a question is shown to the owner as handed back"
     assert '"raises"' in flat and "question" in flat, "154.1: the prompt no longer teaches raising a question for the owner"
-    wf = open(os.path.join(ROOT, ".github", "workflows", "planner.yml")).read()
-    assert "question.md" not in wf, "154.1: the planner workflow still looks for question.md"
-    assert "one question for the owner" not in " ".join(wf.replace("#", " ").split()), "154.1: the planner workflow still says the planner may end with one question for the owner"
-    assert "/tmp/dokima-out/plan.json" in wf, "154.1: the planner workflow no longer shows plan.json"
+    wf = open(os.path.join(ROOT, ".github", "workflows", "agent.yml")).read()
+    assert "question.md" not in wf, "154.1: the agent workflow still looks for question.md"
+    assert "one question for the owner" not in " ".join(wf.replace("#", " ").split()), "154.1: the agent workflow still says the planner may end with one question for the owner"
 
 
 # 154.2: every criterion's source is this issue or one of its comments

@@ -8,14 +8,14 @@ issues never share one.
 These tests play card.yml for one event at a time against a fake GitHub, with tests/card_player.py (the player #332's
 planner wrote on branch try/issue-332), and read the concurrency groups every run took a place in. The events are the
 ones card.yml redraws on today: the issue changing or getting a comment, the pull request merged, the checks of the pull
-request finishing (Acceptance criteria and full suite), and the worker finishing.
+request finishing (Acceptance criteria and full suite).
 """
 import os
 import sys
 
 sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
 from card_player import (OWNER, Hub, checks_finished, issue_comment, issue_event, must_redraw,  # noqa: E402
-                         pr_comment, pr_event, schedule, stale_again, worker_finished)
+                         pr_comment, pr_event, schedule, stale_again)
 
 def events_about(n, p):
     """Every event card.yml redraws on today about issue n or its pull request p.
@@ -26,8 +26,7 @@ def events_about(n, p):
             "the pull request merged by the owner": pr_event(n, p, "closed", OWNER, merged=True),
             "the pull request merged by the bot on autopilot": pr_event(n, p, "closed", "bot", merged=True),
             "the criteria checks finishing": checks_finished(n, p, "Acceptance criteria"),
-            "the full suite finishing": checks_finished(n, p, "full suite"),
-            "the worker finishing": worker_finished(n)}
+            "the full suite finishing": checks_finished(n, p, "full suite")}
 
 
 def play(hub, event, k):
@@ -43,7 +42,7 @@ def test_every_redraw_about_an_issue_or_its_pr_waits_in_a_queue_of_its_own_that_
     """Redraws about an issue or its PR wait in its own queue, keeping the newest.
 
     Proves 346.1.     Plays card.yml for each event card.yml redraws on about #246 or its PR #260 (the issue edited, a comment on it, the
-    merge by the owner and by the bot, the Acceptance criteria and full suite checks finishing, the worker finishing), and the
+    merge by the owner and by the bot, the Acceptance criteria and full suite checks finishing), and the
     same for #312 and PR #314. Every run must redraw, the job that writes the cards must wait in a named queue, all of
     one issue's runs in the same one, and that queue must be its own: #312's redraws wait in a different one. No queue
     any run takes a place in may cancel the run already in it, so GitHub lets the running redraw finish and keeps the

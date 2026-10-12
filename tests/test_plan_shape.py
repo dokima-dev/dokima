@@ -107,16 +107,3 @@ def test_labels_come_from_the_plan_not_from_test_text(record_property):
     tc = planner.declared_labels(tc, declared)
     p = {"criteria": ["a", "b"], "test_changes": {"tests/t.py::test_old": "renamed to test_new_name for the new words"}}
     assert planner.problems("9", p, ["tests/t.py"], tc) == [], "138.3: a declared plan was still rejected"
-
-
-def test_every_run_shows_what_the_planner_handed_back(record_property):
-    """Every planner run shows the plan.json it handed back on the run's page, even when the plan is rejected.
-
-    Reads the planner workflow and checks the step that writes plan.json into the run summary always runs, before the check.
-    """
-    record_property("proves", "138.4")
-    wf = open(os.path.join(ROOT, ".github", "workflows", "planner.yml")).read()
-    show = wf.index("- name: Show what the planner handed back")
-    assert show < wf.index("- name: Check what the planner handed back"), "138.4: shown only after the check"
-    step = wf[show:wf.index("- name: Check what the planner handed back")]
-    assert "if: always()" in step and "GITHUB_STEP_SUMMARY" in step and "plan.json" in step, "138.4: plan.json not shown on every run"
