@@ -408,7 +408,7 @@ def test_a_replan_is_judged_only_on_what_the_planner_changed_in_its_run(record_p
     from dokima import planner
     out = tmp_path / "out"
     out.mkdir()
-    plan = {"kind": "user_story", "summary": "s", "user_story": "s", "acceptance_criteria": [{"text": "a", "source": "https://github.com/o/r/issues/9"}],
+    plan = {"kind": "user_story", "summary": "s", "user_story": "s", "acceptance_criteria": [{"text": "a", "source": "https://github.com/o/r/issues/9", "no_edge_cases": "a sample criterion"}],
             "non_functional": [], "scope": ["dokima/x.py"], "out_of_scope": [], "tests": {"9.1": ["tests/test_x.py::test_a"]}}
     (out / "plan.json").write_text(json.dumps(plan))
     since = {"SPLIT": ["dokima/x.py", "tests/test_x.py"], "RUN": ["tests/test_x.py"]}

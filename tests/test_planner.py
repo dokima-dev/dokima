@@ -12,7 +12,8 @@ WORKFLOWS = os.path.join(os.path.dirname(__file__), "..", ".github", "workflows"
 PLAN = {"objective": "Slow calls return a job id", "criteria": ["A slow call returns a job id within 20 s", "The job id is unique"],
         "scope": ["dokima/jobs.py"]}
 STORY = {"kind": "user_story", "summary": "Slow calls hand back a job id instead of timing out.", "user_story": "Slow calls return a job id",
-         "acceptance_criteria": [{"text": "A slow call returns a job id within 20 s", "source": "https://github.com/o/r/issues/9"}],
+         "acceptance_criteria": [{"text": "A slow call returns a job id within 20 s", "source": "https://github.com/o/r/issues/9",
+                                  "no_edge_cases": "a sample criterion"}],
          "scope": ["dokima/jobs.py"], "tests": {"9.1": ["tests/test_jobs.py::test_id"]}}
 TAGS = {"tests/test_jobs.py::test_id": ["9.1"], "tests/test_jobs.py::test_unique": ["9.2"]}
 

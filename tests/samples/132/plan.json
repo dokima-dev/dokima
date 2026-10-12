@@ -5,14 +5,16 @@
  "acceptance_criteria": [
   {
    "text": "When a planner, plan review, worker or code review run fails (its agent crashed, or code rejected its hand-back), the issue's card, and its open pull request's, stays in that stage's column (Plan, Plan, Work, Review) and shows Needs you. That still holds when the run's own \"Decide what follows\" step fails as well, for example because GitHub answers 502. A run that hands on to the next agent still leaves the pill cleared.",
-   "source": "https://github.com/dokima-dev/dokima/issues/132"
+   "source": "https://github.com/dokima-dev/dokima/issues/132",
+   "no_edge_cases": "saved before plans listed edge cases"
   }
  ],
  "non_functional": [
   {
    "text": "A run that left no record and no decision behind still puts its card in the column of the stage it was started for, with Needs you, and the board step exits 0.",
    "why": "A failure the run could not even write down must not leave the card looking fine; the run's own failure, not the board step, is what the owner reads.",
-   "principle": "Fail closed"
+   "principle": "Fail closed",
+   "no_edge_cases": "saved before plans listed edge cases"
   }
  ],
  "scope": [
