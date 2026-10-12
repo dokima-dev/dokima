@@ -47,7 +47,8 @@ STORY_N, PARENT_N, OTHER_N = 331, 330, 329
 def story(sources):
     """A one-story plan of #331 whose acceptance criteria cite these sources, one criterion each."""
     return {"kind": "user_story", "summary": "Cards show what is true now.", "user_story": "Cards show what is true now.",
-            "acceptance_criteria": [{"text": f"Criterion {k} holds.", "source": s} for k, s in enumerate(sources, 1)],
+            "acceptance_criteria": [{"text": f"Criterion {k} holds.", "source": s, "no_edge_cases": "a sample criterion"}
+                                    for k, s in enumerate(sources, 1)],
             "non_functional": [], "scope": ["dokima/x.py"], "out_of_scope": [],
             "tests": {f"{STORY_N}.{k}": [f"tests/test_x.py::test_{k}"] for k in range(1, len(sources) + 1)},
             "links": {"blocked_by": [], "blocks": [], "relates_to": []}}

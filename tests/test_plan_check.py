@@ -28,10 +28,10 @@ NEW_TESTS = ('def test_id(record_property):\n    """A slow call returns a job id
              'def test_unique(record_property):\n    """Job ids never repeat.\n\n    Proves 9.2 and 9.3.\n    """\n'
              '    record_property("proves", "9.2")\n    assert False, "9.2: no job ids yet"\n')
 STORY = {"kind": "user_story", "summary": "Slow calls hand back a job id instead of timing out.", "user_story": "Slow calls return a job id.",
-         "acceptance_criteria": [{"text": "A slow call returns a job id within 20 s.", "source": ISSUE},
-                                 {"text": "Job ids never repeat.", "source": ISSUE + "#issuecomment-123456"}],
+         "acceptance_criteria": [{"text": "A slow call returns a job id within 20 s.", "source": ISSUE, "no_edge_cases": "a sample criterion"},
+                                 {"text": "Job ids never repeat.", "source": ISSUE + "#issuecomment-123456", "no_edge_cases": "a sample criterion"}],
          "non_functional": [{"text": "A failed call says why.", "why": "the owner is never left guessing",
-                             "principle": "fail closed"}],
+                             "principle": "fail closed", "no_edge_cases": "a sample criterion"}],
          "scope": ["dokima/jobs.py"], "out_of_scope": ["No retries."],
          "tests": {"9.1": ["tests/test_jobs.py::test_id"], "9.2": ["tests/test_jobs.py::test_unique"],
                    "9.3": ["tests/test_jobs.py::test_unique"]},
