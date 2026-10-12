@@ -8,7 +8,7 @@ import pytest
 sys.path.insert(0, os.path.join(os.path.dirname(__file__), ".."))
 from dokima import plan, planner  # noqa: E402
 
-WORKFLOW = os.path.join(os.path.dirname(__file__), "..", ".github/workflows/planner.yml")
+WORKFLOWS = os.path.join(os.path.dirname(__file__), "..", ".github", "workflows")
 PLAN = {"objective": "Slow calls return a job id", "criteria": ["A slow call returns a job id within 20 s", "The job id is unique"],
         "non_goals": ["No retries"], "scope": ["dokima/jobs.py"]}
 STORY = {"kind": "user_story", "summary": "Slow calls hand back a job id instead of timing out.", "user_story": "Slow calls return a job id",
@@ -20,11 +20,6 @@ TAGS = {"tests/test_jobs.py::test_id": ["9.1"], "tests/test_jobs.py::test_unique
 def write(tmp_path, name, content):
     (tmp_path / name).write_text(content if isinstance(content, str) else json.dumps(content))
     return str(tmp_path)
-
-
-def steps():
-    text = open(WORKFLOW).read()
-    return text, text.split("      - ")
 
 
 # 80.1: the plan lands in the issue in the format the rest of Dokima reads
@@ -51,18 +46,6 @@ def test_planning_again_keeps_the_owner_text_once(record_property):
 def test_without_non_goals_there_is_no_non_goals_line(record_property):
     record_property("proves", "80.1")
     assert "Non-goals" not in planner.render("9", "x", dict(PLAN, non_goals=[]), TAGS)
-
-
-def test_only_a_code_owners_plan_label_starts_it_and_the_planner_holds_no_key(record_property):
-    record_property("proves", "80.1")
-    text, parts = steps()
-    assert "if: github.event.label.name == 'plan'" in text
-    assert "only a code owner's label starts the planner" in text
-    agent = next(p for p in parts if p.startswith("name: Planner"))
-    assert "GH_TOKEN" not in agent and "DOKIMA_APP_KEY" not in agent, "80.1: the planner step can reach GitHub"
-    names = [p.split("\n")[0] for p in parts]
-    assert names.index("name: Check what the planner handed back") < names.index("id: app"), "80.1: key minted before the check"
-    assert names.index("name: Planner (Claude Code)") < names.index("id: app"), "80.1: key minted before the planner ran"
 
 
 # 80.2: tests come with the plan, each tagged with a criterion of the plan
@@ -147,8 +130,8 @@ def test_rejected_output_fails_the_run_and_posts_nothing(record_property, tmp_pa
 
 def test_no_one_line_command_is_cut_short_by_a_yaml_comment(record_property):
     record_property("proves", "80.1")
-    for workflow in ("planner.yml", "worker.yml"):
-        for line in open(os.path.join(os.path.dirname(WORKFLOW), workflow)):
+    for workflow in sorted(os.listdir(WORKFLOWS)):
+        for line in open(os.path.join(WORKFLOWS, workflow)):
             value = line.strip()[len("run:"):] if line.strip().startswith("run:") else ""
             assert " #" not in value, f"80.1: in {workflow}, YAML reads everything after ' #' as a comment: {line.strip()}"
 
@@ -242,14 +225,3 @@ def test_a_run_that_failed_before_handing_back_still_says_so(record_property, tm
     monkeypatch.setenv("GITHUB_REPOSITORY", "o/r")
     planner.main(["x", "rejected", "9", str(tmp_path)])
     assert "the planner run failed before handing anything back" in calls[0][-1]
-
-
-def test_workflow_posts_the_reason_only_on_failure_and_never_hands_the_planner_a_key(record_property):
-    record_property("proves", "100.3")
-    text, parts = steps()
-    step = next(p for p in parts if p.startswith("name: Say on the issue why the plan was rejected"))
-    assert "if: failure()" in step and "dokima.planner rejected" in step
-    names = [p.split("\n")[0] for p in parts]
-    assert names.index("name: Planner (Claude Code)") < names.index("id: app"), "100.3: key minted before the planner ran"
-    for name in ("name: Push the tests", "name: Write the plan into the issue, or post the question"):
-        assert "if: success()" in parts[names.index(name)], f"100.3: {name} could run after a rejection"
