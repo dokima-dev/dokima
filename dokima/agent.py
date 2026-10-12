@@ -5,6 +5,7 @@ JSON hand-backs of earlier runs, downloaded from those runs. `check` is the dete
 hand-back before it finishes, and that code runs again after it: a malformed hand-back never reaches the next agent.
 The plan's own check lives in dokima/planner.py; this module adds review.json and work.json.
 """
+import contextlib
 import glob
 import json
 import os
@@ -1616,6 +1617,44 @@ def gh_reason(e):
     return " ".join((e.stderr or str(e)).split())
 
 
+def rate_limited(e):
+    """The rate limit that refused a call, "graphql" or "core" (REST); else None."""
+    text = gh_reason(e)
+    if "rate limit" not in text.lower():
+        return None
+    return "graphql" if "graphql" in text.lower() else "core"
+
+
+@contextlib.contextmanager
+def rate_limit_waited_once():
+    """Inside it, a call refused by GitHub's rate limit waits once, then retries.
+
+    A second refusal, or any other, raises at once, so a run never hangs on a limit that does not lift."""
+    global gh
+    plain, waited = gh, []
+
+    def patient(*args):
+        try:
+            return plain(*args)
+        except subprocess.CalledProcessError as e:
+            limit = rate_limited(e)
+            if waited or not limit:
+                raise
+            try:
+                reset = int(json.loads(plain("api", "rate_limit"))["resources"][limit]["reset"])
+            except (subprocess.CalledProcessError, json.JSONDecodeError, KeyError, TypeError, ValueError):
+                raise e
+            waited.append(limit)
+            print(f"GitHub's {limit} rate limit ran out; waiting until it resets: {gh_reason(e)}", file=sys.stderr)
+            time.sleep(max(0, reset - time.time()) + 1)
+            return plain(*args)
+    gh = patient
+    try:
+        yield
+    finally:
+        gh = plain
+
+
 def first_sentence(text):
     """A raise's first sentence, on one line, as a filed issue's title."""
     text = escape_line(text)
@@ -1970,11 +2009,17 @@ AUTOPILOT_LINES = {"worker": "Autopilot: plan approved, starting work", "split":
 UNREAD = "Autopilot could not be read from GitHub, so nothing starts by itself."
 
 
-def on_autopilot(repo, number):
-    """True or False from the issue's own labels on GitHub; None when GitHub cannot say."""
+def on_autopilot(repo, number, strict=False):
+    """True or False from the issue's own labels on GitHub; None when GitHub cannot say.
+
+    With strict, a call GitHub refuses raises its error, so the caller can say GitHub's reason."""
     try:
         labels = json.loads(gh("api", f"repos/{repo}/issues/{number}")).get("labels")
-    except (subprocess.CalledProcessError, json.JSONDecodeError, AttributeError):
+    except subprocess.CalledProcessError:
+        if strict:
+            raise
+        return None
+    except (json.JSONDecodeError, AttributeError):
         return None
     if not isinstance(labels, list):
         return None
@@ -2547,60 +2592,72 @@ def main(argv):
         repo = os.environ["GITHUB_REPOSITORY"]
         # A run that never started stops for the owner, and a cancelled one stops, whatever the conversation says,
         # so it is not read.
-        d, items = ({}, []) if rec.get("role") in ("not-started", "cancelled") else conversation(repo, number)
-        read = []
+        d, items, unread, undecided = {}, [], [], False
+        try:
+            with rate_limit_waited_once():
+                d, items = ({}, []) if rec.get("role") in ("not-started", "cancelled") else conversation(repo, number)
+                read, unread = [], []
 
-        def autopilot():
-            # Read once, and only when the river's decision turns on it.
-            if not read:
-                read.append(on_autopilot(repo, number))
-            return read[0]
-        ups = []
+                def autopilot():
+                    # Read once, and only when the river's decision turns on it.
+                    if not read:
+                        unread.append(True)
+                        read.append(on_autopilot(repo, number, strict=True))
+                        unread.clear()
+                    return read[0]
+                ups = []
 
-        def parent():
-            # The parent's words, read once and only when an assumption cites somewhere other than this issue.
-            if not ups:
-                ups.append(parent_words(repo, number))
-            return ups[0]
-        step = next_step(items, rec, owners, autopilot=autopilot, body=d.get("body") or "", number=number, parent=parent)
-        if approves_work(rec) and step[0] != "start":
-            # On autopilot the code review's approval stands in for the owner's: the pull request merges by itself.
-            on = autopilot()
-            if on is None:
-                step = ("stop", f"{UNREAD} {step[1]}")
-            elif on:
-                pr, how, why = automerge(repo, number)
-                if how == "merged":
-                    step = ("merged", f"Autopilot merged PR #{pr}; what it unblocks starts when the issue closes.")
-                elif how == "queued":
-                    step = ("queued", f"PR #{pr} is in the merge queue; GitHub merges it when the queue's checks pass.")
-                elif how == "waits":
-                    step = ("stop", f"PR #{pr} waits for your approval before it merges. Approve it on GitHub, or "
-                                    "review it with a command to send it back.")
-                elif how == "unconfirmed":
-                    unconfirmed_comment(repo, pr, why, " ".join(f"@{o}" for o in owners))
-                    step = ("stop", f"Autopilot could not confirm PR #{pr} merged: {why}. Check it on GitHub and merge "
-                                    "it if it did not merge.")
-                else:
-                    step = ("stop", f"Autopilot did not merge the pull request: {why}. It waits for you: merge it, or "
-                                    "review it with a command to send it back.")
-        if rec.get("role") == "reviewer" and (rec.get("stage") or "") == "plan" and rec.get("check", {}).get("passed") \
-                and (rec.get("handback") or {}).get("verdict") == "approve":
-            # Code records the approved plan's links on GitHub, and card.yml redraws the cards they touch; anything that keeps
-            # a link from being recorded stops the river, so autopilot never starts work that should wait.
-            why = record_links(repo, number, items)
-            if why:
-                step = ("stop", why)
-            elif step[:2] == ("start", "worker") and step[3:] == ("autopilot",):
-                # On autopilot a blocked issue builds nothing; it plans afresh once every issue blocking it closes.
-                try:
-                    left = open_blockers_of(repo, number)
-                except subprocess.CalledProcessError as e:
-                    left, step = None, ("stop", f"GitHub could not list the issues blocking #{number}, so the worker "
-                                                f"did not start: {gh_reason(e)}. Say `/work` once GitHub answers.")
-                if left:
-                    # Nothing is built from a plan written before its blockers landed: the issue plans again.
-                    step = ("waiting", f"Nothing is built: the issue plans again by itself when {named(left)} close.")
+                def parent():
+                    # The parent's words, read once and only when an assumption cites somewhere other than this issue.
+                    if not ups:
+                        ups.append(parent_words(repo, number))
+                    return ups[0]
+                step = next_step(items, rec, owners, autopilot=autopilot, body=d.get("body") or "", number=number, parent=parent)
+                if approves_work(rec) and step[0] != "start":
+                    # On autopilot the code review's approval stands in for the owner's: the pull request merges by itself.
+                    on = autopilot()
+                    if on is None:
+                        step = ("stop", f"{UNREAD} {step[1]}")
+                    elif on:
+                        pr, how, why = automerge(repo, number)
+                        if how == "merged":
+                            step = ("merged", f"Autopilot merged PR #{pr}; what it unblocks starts when the issue closes.")
+                        elif how == "queued":
+                            step = ("queued", f"PR #{pr} is in the merge queue; GitHub merges it when the queue's checks pass.")
+                        elif how == "waits":
+                            step = ("stop", f"PR #{pr} waits for your approval before it merges. Approve it on GitHub, or "
+                                            "review it with a command to send it back.")
+                        elif how == "unconfirmed":
+                            unconfirmed_comment(repo, pr, why, " ".join(f"@{o}" for o in owners))
+                            step = ("stop", f"Autopilot could not confirm PR #{pr} merged: {why}. Check it on GitHub and merge "
+                                            "it if it did not merge.")
+                        else:
+                            step = ("stop", f"Autopilot did not merge the pull request: {why}. It waits for you: merge it, or "
+                                            "review it with a command to send it back.")
+                if rec.get("role") == "reviewer" and (rec.get("stage") or "") == "plan" and rec.get("check", {}).get("passed") \
+                        and (rec.get("handback") or {}).get("verdict") == "approve":
+                    # Code records the approved plan's links on GitHub, and card.yml redraws the cards they touch; anything that keeps
+                    # a link from being recorded stops the river, so autopilot never starts work that should wait.
+                    why = record_links(repo, number, items)
+                    if why:
+                        step = ("stop", why)
+                    elif step[:2] == ("start", "worker") and step[3:] == ("autopilot",):
+                        # On autopilot a blocked issue builds nothing; it plans afresh once every issue blocking it closes.
+                        try:
+                            left = open_blockers_of(repo, number)
+                        except subprocess.CalledProcessError as e:
+                            left, step = None, ("stop", f"GitHub could not list the issues blocking #{number}, so the worker "
+                                                        f"did not start: {gh_reason(e)}. Say `/work` once GitHub answers.")
+                        if left:
+                            # Nothing is built from a plan written before its blockers landed: the issue plans again.
+                            step = ("waiting", f"Nothing is built: the issue plans again by itself when {named(left)} close.")
+        except subprocess.CalledProcessError as e:
+            # Deciding what runs next needs GitHub; a call it refused, after the one wait for its rate limit, stops
+            # for the owner with GitHub's own words, and nothing starts.
+            undecided = True
+            step = ("stop", (f"{UNREAD} GitHub's reason: " if unread else "GitHub refused a call while deciding what "
+                             "runs next, so nothing starts by itself: ") + f"{gh_reason(e)}. Give the command again once "
+                            "GitHub answers.")
         if rec.get("role") == "worker":
             # The pull request is opened after the record is written, so the worker's sentence links it only now.
             try:
@@ -2627,6 +2684,9 @@ def main(argv):
             open(os.path.join(out, "autopilot.md"), "w").write(AUTOPILOT_LINES[step[1]] + "\n")
         column, needs = board_place(json.load(open(os.path.join(out, "record.json"))), step)
         open(os.path.join(out, "board.txt"), "w").write(f"{column} {'needs' if needs else 'none'}\n")
+        if undecided:
+            # GitHub refused the decision, so the board step must not wait on GitHub's state to show Needs you.
+            open(os.path.join(out, "undecided"), "w").write("")
         print(" ".join(step[:3]) if step[0] == "start" else "stop")
         return 0
     if argv[1] == "recheck":
@@ -2648,7 +2708,8 @@ def main(argv):
         except (OSError, json.JSONDecodeError):
             rec = {"role": os.environ.get("ROLE", ""), "stage": os.environ.get("STAGE", "")}
         rec = rec if isinstance(rec, dict) else {}
-        if rec.get("role") == "cancelled" or os.path.exists(os.path.join(argv[3], "board.txt")) and (rec.get("check") or {"passed": True}).get("passed"):
+        if rec.get("role") == "cancelled" or os.path.exists(os.path.join(argv[3], "board.txt")) and (rec.get("check") or {"passed": True}).get("passed") \
+                and not os.path.exists(os.path.join(argv[3], "undecided")):
             # A run that decided what follows, or was cancelled, is placed from GitHub's state, never from the run.
             try:
                 placed = retry.once_more("the board step", lambda: board.rebuild(
@@ -2659,7 +2720,7 @@ def main(argv):
             for kind, n, column, pill in placed:
                 print(f"board: {kind} #{n} -> {column}{f' · {pill}' if pill else ''}")
             return 0
-        # The run failed, so the river stopped: its own stage's column with Needs you, at once.
+        # The run failed, or deciding what follows did, so the river stopped: its own stage's column with Needs you, at once.
         column = board_place(rec, ("stop",))[0]
         print(f"board: #{argv[2]} and its open pull request -> {column} · Needs you")
         errors = (subprocess.CalledProcessError, KeyError, ValueError)
