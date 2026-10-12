@@ -143,7 +143,7 @@ def drifted():
     del g.label_list["plan"]
     g.label_list["work"]["color"] = "000000"
     del g.field_map["Action"]["Autopilot"]
-    g.field_map["Priority"]["High"]["color"] = "RED"
+    g.field_map["Priority"]["Blocker"]["color"] = "ORANGE"
     g.view_map["Autopilot"]["filter"] = "label:autopilot"
     g.rules["main"]["required_checks"] = ["all tests"]
     g.perms["issues"] = "read"
@@ -175,7 +175,7 @@ def test_each_difference_gets_one_line_saying_what_is_off_and_what_dokima_needs(
     """Each setting that differs gets one line saying what is off and what Dokima needs.
 
     Proves 283.1. The faked repo differs in seven ways: the plan label is missing, the work label's color is 000000, the Action field
-    has no Autopilot option, the High priority option is RED, the Autopilot view filters on label:autopilot, main's
+    has no Autopilot option, the Blocker priority option is ORANGE, the Autopilot view filters on label:autopilot, main's
     rule lacks the Acceptance criteria check, and the app has issues: read. The audit returns seven single lines, one
     per difference, each naming the setting and the value Dokima needs (with the live value where there is one; a
     missing option's line gives the color Dokima needs)."""
@@ -186,7 +186,7 @@ def test_each_difference_gets_one_line_saying_what_is_off_and_what_dokima_needs(
     one_line(lines, "283.1", "the missing plan label", "plan", "1d76db")
     one_line(lines, "283.1", "the work label's color", "work", "000000", "0e8a16")
     one_line(lines, "283.1", "the missing Autopilot option of the Action field", "Action", "Autopilot", "PURPLE")
-    one_line(lines, "283.1", "the High option's color", "High", "RED", "ORANGE")
+    one_line(lines, "283.1", "the Blocker option's color", "Blocker", "ORANGE", "RED")
     one_line(lines, "283.1", "the Autopilot view's filter", "label:autopilot is:open")
     one_line(lines, "283.1", "main's missing required check", "main", "Acceptance criteria")
     one_line(lines, "283.1", "the app's issues permission", "issues", "read", "write")
@@ -287,8 +287,8 @@ def test_drift_opens_one_pinned_setup_issue_marked_needs_you(record_property, tm
 def test_a_later_run_updates_the_same_setup_issue(record_property, tmp_path):
     """A later run updates the open Setup issue with what is off now.
 
-    Proves 283.2. A first run opens the Setup issue for a missing plan label. The label is then put back and the high label's
-    color changes. The second run opens no issue; the same issue now lists the high label and no longer the plan label,
+    Proves 283.2. A first run opens the Setup issue for a missing plan label. The label is then put back and the autopilot label's
+    color changes. The second run opens no issue; the same issue now lists the autopilot label and no longer the plan label,
     and is still marked Needs you."""
     record_property("proves", "283.2")
     a = audit("283.2")
@@ -297,13 +297,13 @@ def test_a_later_run_updates_the_same_setup_issue(record_property, tmp_path):
     del g.label_list["plan"]
     n = a.run(g, REPO, root)
     g.label_list["plan"] = copy.deepcopy(manifest.LABELS["plan"])
-    g.label_list["high"]["color"] = "000000"
+    g.label_list["autopilot"]["color"] = "000000"
     g.issues[n]["needs_you"] = False
     again = a.run(g, REPO, root)
     assert g.kinds().count("create_issue") == 1, f"283.2: the second run opened another issue: {g.writes}"
     assert again == n, f"283.2: the second run returned {again!r}, not the open Setup issue #{n}"
     body = g.issues[n]["body"]
-    one_line(body_lines(body), "283.2", "the high label's new color", "high", "000000")
+    one_line(body_lines(body), "283.2", "the autopilot label's new color", "autopilot", "000000")
     assert "1d76db" not in body, f"283.2: the plan label, now fixed, is still listed on the Setup issue:\n{body}"
     assert g.issues[n]["needs_you"], "283.2: the updated Setup issue is not marked Needs you"
 

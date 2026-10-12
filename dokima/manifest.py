@@ -19,7 +19,6 @@ LABELS = {
     "plan": {"color": "1d76db", "description": "Starts the planner"},
     "work": {"color": "0e8a16", "description": "Starts the worker on the approved plan"},
     "autopilot": {"color": "8250df", "description": "Running on its own"},
-    "high": {"color": "d93f0b", "description": "Priority: high"},
     "filed-by-dokima": {"color": "bfd4f2", "description": "Created automatically, not by a person"},
 }
 
@@ -37,7 +36,6 @@ FIELDS = {
     },
     "Priority": {
         "Blocker": {"color": "RED", "description": "Blocks other work"},
-        "High": {"color": "ORANGE", "description": "High priority"},
     },
 }
 
