@@ -4,16 +4,9 @@ run-name: "play-through of ${{ inputs.commit || github.event.pull_request.head.s
 # says after each step whether both cards showed what had just happened (dokima/playthrough.py). Stand-in agents
 # call no model. The play-through installs the commit on the sandbox with SANDBOX_TOKEN, its own key that can write
 # only to card-gallery; Dokima's app key is minted for card-gallery alone and never gets workflow write.
-# A pull request that changes card, board or workflow code plays its head by itself. pull_request_target runs main's
-# copy of this file and of dokima/playthrough.py, so the work being judged cannot change how it is played.
+# It runs only from the Run workflow button: on every pull request it took 8 to 17 minutes and a burst of API calls,
+# and it moves to a nightly run with the shared surface (#517, #258).
 on:
-  pull_request_target:
-    types: [opened, synchronize, reopened]
-    paths:
-      - ".github/workflows/**"
-      - dokima/card.py
-      - dokima/body.py
-      - dokima/board.py
   workflow_dispatch:
     inputs:
       commit:
