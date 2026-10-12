@@ -63,6 +63,16 @@ Don't restate the signature. A test's docstring says how it proves its criterion
 the owner sees on the card, so write it for the owner.
 Words: "All tests", never "Full suite".
 
+## Edge cases
+Every criterion lists its edge cases in `edge_cases`, each the case in plain words and the one test, filed under that
+criterion, that covers it. A criterion with none says why in `no_edge_cases` instead. Code rejects a criterion with
+neither, naming it. Kinds to look for:
+- **Error:** what the owner sees when a call fails. Example: GitHub answers 500 while the card is redrawn.
+- **Timeout:** a call that never answers. Example: the agent's run passes its time limit.
+- **Bad data:** input in the wrong shape. Example: a plan.json whose tests field is a list.
+- **Empty:** nothing where something is expected. Example: an issue with no comments.
+These guide you; other kinds count too. List only cases the owner named or normal use hits.
+
 ## Examples
 Approved by the owner (engineering wording → product wording):
 - A run whose changes touch `.github/workflows/` pauses before pushing... → Agents can change workflow files, but only
@@ -171,14 +181,17 @@ Exactly one kind: user_story or feature.
   {"kind": "user_story",
    "summary": "...",
    "user_story": "...",
-   "acceptance_criteria": [{"text": "...", "words": "the owner's exact words this delivers", "source": "https://github.com/OWNER/REPO/issues/N or #issuecomment-..."}, ...],
-   "non_functional": [{"text": "...", "why": "...", "words": "the owner's exact words", "source": "issue or comment link"}, ...],
+   "acceptance_criteria": [{"text": "...", "words": "the owner's exact words this delivers", "source": "https://github.com/OWNER/REPO/issues/N or #issuecomment-...",
+                            "edge_cases": [{"case": "...", "test": "tests/test_x.py::test_name"}, ...]}, ...],
+   "non_functional": [{"text": "...", "why": "...", "words": "the owner's exact words", "source": "issue or comment link",
+                       "no_edge_cases": "why it has none"}, ...],
    "scope": ["path", ...],
    "tests": {"N.1": ["tests/test_x.py::test_name", ...], ...},
    "test_changes": {"path::test_name": "why", ...},
    "links": {"blocked_by": [N, ...], "blocks": [N, ...], "relates_to": [N, ...]}}
   Criterion k is N.k: the acceptance criteria first, then the non-functional requirements. Every criterion has exactly
   one test in "tests", and each of those tests also names its criterion with record_property("proves", "N.k").
+  Every criterion carries "edge_cases" (each with a test filed under that criterion) or "no_edge_cases", as Edge cases says.
   Change no file outside the tests. Every older test you change, rename or delete needs a reason in "test_changes".
 - A feature: {"kind": "feature", "summary": "...", "feature": "...", "stories": [{"title": "...", "user_story": "...",
   "acceptance_criteria": [...], "non_functional": [...], "depends_on": [story index, ...]}, ...] (criteria shaped as above),
