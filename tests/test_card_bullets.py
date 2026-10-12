@@ -29,7 +29,7 @@ ROOT = os.path.join(os.path.dirname(__file__), "..")
 REPO = "o/r"
 ISSUE = {"number": 40, "url": "https://github.com/o/r/issues/40"}
 ASK_1 = "https://github.com/o/r/issues/40#issuecomment-111"
-ASK_2 = "https://github.com/o/r/issues/40"
+ASK_2 = "https://github.com/o/r/issues/30"  # the parent: the issue's own link shows no Source line since #526
 PLAN = {"kind": "user_story", "summary": "Owners see one card.", "user_story": "Owners see one card on every issue.",
         "acceptance_criteria": [{"text": "First thing works", "source": ASK_1},
                                 {"text": "Second thing works", "source": ASK_2}],
