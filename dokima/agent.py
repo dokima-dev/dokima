@@ -2119,24 +2119,41 @@ def pages(text):
     return out
 
 
-def unproven(repo, sha):
+# How long autopilot waits for checks still running on a head before it stops for the owner, and how often it looks.
+CHECKS_WAIT, CHECKS_PAUSE = 45 * 60, 30
+
+
+def superseded(run):
+    """True for a card run cancelled because a newer redraw replaced it (#528).
+
+    It judges nothing."""
+    return run.get("name") == "card" and run.get("status") == "completed" and run.get("conclusion") == "cancelled"
+
+
+def unproven(repo, sha, wait=CHECKS_WAIT, pause=CHECKS_PAUSE):
     """Why the commit is not proven by every check on it, check runs and commit statuses alike, or None when every
-    check on it has passed."""
-    runs = [r for p in pages(gh("api", f"repos/{repo}/commits/{sha}/check-runs?per_page=100", "--paginate"))
-            for r in p.get("check_runs", [])]
-    statuses = [s for p in pages(gh("api", f"repos/{repo}/commits/{sha}/status?per_page=100", "--paginate"))
-                for s in p.get("statuses") or []]
-    if not runs and not statuses:
-        return f"there are no checks on its head commit {sha[:7]}"
-    red = [f"{r['name']} ({r.get('conclusion')})" for r in runs if r.get("status") == "completed" and r.get("conclusion") not in PASSING]
-    red += [f"{s.get('context')} ({s.get('state')})" for s in statuses if s.get("state") not in ("success", "pending")]
-    running = [r["name"] for r in runs if r.get("status") != "completed"]
-    running += [s.get("context") for s in statuses if s.get("state") == "pending"]
-    if red:
-        return f"not every check passed on its head commit {sha[:7]}: {', '.join(red)}"
-    if running:
-        return f"a check is still running on its head commit {sha[:7]}: {', '.join(running)}"
-    return None
+    check on it has passed. A check still running is waited for, up to `wait` seconds, looking every `pause` seconds;
+    a card run cancelled by a newer redraw is left out."""
+    deadline = time.monotonic() + wait
+    while True:
+        runs = [r for p in pages(gh("api", f"repos/{repo}/commits/{sha}/check-runs?per_page=100", "--paginate"))
+                for r in p.get("check_runs", []) if not superseded(r)]
+        statuses = [s for p in pages(gh("api", f"repos/{repo}/commits/{sha}/status?per_page=100", "--paginate"))
+                    for s in p.get("statuses") or []]
+        if not runs and not statuses:
+            return f"there are no checks on its head commit {sha[:7]}"
+        red = [f"{r['name']} ({r.get('conclusion')})" for r in runs if r.get("status") == "completed" and r.get("conclusion") not in PASSING]
+        red += [f"{s.get('context')} ({s.get('state')})" for s in statuses if s.get("state") not in ("success", "pending")]
+        running = [r["name"] for r in runs if r.get("status") != "completed"]
+        running += [s.get("context") for s in statuses if s.get("state") == "pending"]
+        if red:
+            return f"not every check passed on its head commit {sha[:7]}: {', '.join(red)}"
+        if not running:
+            return None
+        if time.monotonic() >= deadline:
+            return (f"a check was still running on its head commit {sha[:7]} after {wait // 60} minutes: "
+                    f"{', '.join(running)}")
+        time.sleep(pause)
 
 
 def try_merge(repo, pr):
