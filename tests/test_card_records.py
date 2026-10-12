@@ -51,7 +51,6 @@ PLAN = {"kind": "user_story",
                                 {"text": "Second thing works", "source": SRC}],
         "non_functional": [{"text": "Nothing leaks out", "why": "safety", "principle": "Fail closed"}],
         "scope": ["dokima/card.py", "tests/test_a.py"],
-        "out_of_scope": ["The board stays as it is."],
         "tests": {"40.1": ["tests/test_a.py::test_one", "tests/test_a.py::test_one_more"],
                   "40.2": ["tests/test_a.py::test_two"],
                   "40.3": ["tests/test_a.py::test_three"]},
@@ -525,7 +524,7 @@ def test_every_circle_is_one_of_the_four_states(record_property):
         "180.3: the card does not show running, failed and not started where GitHub reports them"
 
 
-# 180.4: non-functional in a fold, Scope and Out of scope once planned, one Definition of Done row at the bottom
+# 180.4: non-functional in a fold, Scope once planned, one Definition of Done row at the bottom
 
 def test_non_functional_requirements_sit_in_a_fold(record_property):
     """Non-functional requirements sit in a fold, with their own circles; the acceptance criteria stay outside it.
@@ -542,18 +541,17 @@ def test_non_functional_requirements_sit_in_a_fold(record_property):
 
 
 def test_scope_and_out_of_scope_appear_once_planned(record_property):
-    """Scope and Out of scope appear once there is a plan, and not before.
+    """Scope appears once there is a plan, and not before.
 
-    Draws the card with no plan, with only a plan that failed its check, and with a passed plan, and checks Scope and
-    Out of scope with their entries show only in the last."""
+    Draws the card with no plan, with only a plan that failed its check, and with a passed plan, and checks Scope
+    with its entries shows only in the last."""
     record_property("proves", "180.4")
     for recs in ([], [rec("planner", passed=False, n=11, **PLAN)]):
         text = block(draw(recs=recs, check_runs=[], reviews=[]))
-        assert "Scope" not in text and "Out of scope" not in text and "dokima/card.py" not in text, \
-            "180.4: Scope shows before there is a plan"
+        assert "Scope" not in text and "dokima/card.py" not in text, "180.4: Scope shows before there is a plan"
     text = block(draw())
-    assert "Scope" in text and "Out of scope" in text, "180.4: the planned card has no Scope or Out of scope"
-    for entry in PLAN["scope"] + PLAN["out_of_scope"]:
+    assert "Scope" in text, "180.4: the planned card has no Scope"
+    for entry in PLAN["scope"]:
         assert entry in text, f"180.4: the planned card does not list “{entry}”"
 
 

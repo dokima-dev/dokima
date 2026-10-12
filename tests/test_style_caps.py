@@ -8,7 +8,7 @@ from dokima import words  # noqa: E402
 
 ROOT = os.path.join(os.path.dirname(__file__), "..")
 NAMES = {"summary": "summary", "user_story": "user_story", "criterion": "criterion (acceptance or non-functional)",
-         "nfr_why": "a non-functional requirement's why", "out_of_scope": "an out_of_scope line", "feature": "feature",
+         "nfr_why": "a non-functional requirement's why", "feature": "feature",
          "story_title": "a story's title", "story_user_story": "a story's user_story", "raise_label": "a raise's label",
          "question": "a question for the owner", "blocker": "a blocker", "issue": "an issue found",
          "evidence": "evidence", "answer_why": "an answer's why", "previous_step": "a previous_step line",

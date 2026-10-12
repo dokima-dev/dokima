@@ -119,7 +119,7 @@ def standin(role, stage, out):
         h = {"kind": "user_story", "summary": "The play-through's stand-in plan.",
              "user_story": "The owner sees the play-through's issue go from opened to merged.",
              "acceptance_criteria": [{"text": "The play-through's change is merged.", "source": "the play-through"}],
-             "non_functional": [], "scope": ["playthrough/"], "out_of_scope": ["Everything else."], "tests": {},
+             "non_functional": [], "scope": ["playthrough/"], "tests": {},
              "raises": [], "answers": []}
     elif role == "worker":
         h = {"summary": "The stand-in worker added the play-through's file.", "criteria": {},

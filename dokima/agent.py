@@ -843,7 +843,7 @@ def details_as_posted(rec):
     if role == "planner":
         parts += [("Non-functional requirements", bullets(h.get("non_functional"), lambda n: f"{n.get('text', '')} "
                                                            f"({n.get('why', '')}; {n.get('principle', '')})")),
-                  ("Scope", bullets(h.get("scope"), str)), ("Out of scope", bullets(h.get("out_of_scope"), str)),
+                  ("Scope", bullets(h.get("scope"), str)),
                   ("Tests", pairs(h.get("tests"))),
                   ("Test changes", pairs(h.get("test_changes"))),
                   ("Concerns", bullets(h.get("concerns"), lambda c: f"{c.get('text', '')} ({c.get('evidence', '')})")),

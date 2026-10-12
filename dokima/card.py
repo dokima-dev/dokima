@@ -548,8 +548,6 @@ def render(repo, issue, found, page="issue"):
                           criteria_list(repo, issue["number"], len(criteria) + 1, "Non-functional requirement", nfr,
                                         plan_tests, by_key, tests)) + [""]
         lines += [" ".join(["**Scope:**", ", ".join(f"`{s}`" for s in h.get("scope") or [])]).rstrip(), ""]
-        if h.get("out_of_scope"):
-            lines += fold("Out of scope", [f"- {full_refs(repo, escape(s))}" for s in h["out_of_scope"]]) + [""]
     # The Definition of Done goes last, below the Original issue fold: body.redraw puts it after the fold.
     return "\n".join(lines + [body.FOLDED, plan.CARD_END, "", body.DONE, done_row(repo, found, all_tests)])
 
@@ -708,7 +706,7 @@ def gallery(repo, out):
              "acceptance_criteria": [{"text": "A slow call returns a job id within 20 s.", "source": src},
                                      {"text": "The job id fetches the result once it is ready.", "source": src}],
              "non_functional": [{"text": "A failed job says why.", "why": "nothing fails silently", "principle": "Fail closed"}],
-             "scope": ["app/jobs.py"], "out_of_scope": ["Retrying failed jobs."], "tests": {}}
+             "scope": ["app/jobs.py"], "tests": {}}
     feature = {"kind": "feature", "summary": "Slow calls run as jobs, in three stories.", "feature": "Slow calls run as jobs.",
                "stories": [{"title": t} for t in ("Jobs", "Results", "Failures")]}
     split = rec("split", stories=[{"story": i, "issue": n, "title": t, "blocked_by": []}

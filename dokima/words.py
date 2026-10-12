@@ -65,10 +65,10 @@ def summary_caps(text, cap=20):
 # The caps on every text the owner reads, in words, over the whole text (#470). The owner's quoted words are never
 # capped. Plain fields hold no code: no file, path, function or code span; evidence, blockers, issues found, test-change
 # reasons and the worker's own test run may name files and tests, as code.
-CAPS = {"summary": 20, "user_story": 20, "criterion": 20, "nfr_why": 12, "out_of_scope": 12, "feature": 25,
+CAPS = {"summary": 20, "user_story": 20, "criterion": 20, "nfr_why": 12, "feature": 25,
         "story_title": 10, "story_user_story": 20, "raise_label": 4, "question": 20, "blocker": 30, "issue": 25,
         "evidence": 20, "answer_why": 20, "previous_step": 15, "work_evidence": 15, "test_change": 15}
-PLAIN = {"summary", "user_story", "criterion", "nfr_why", "out_of_scope", "feature", "story_title", "story_user_story",
+PLAIN = {"summary", "user_story", "criterion", "nfr_why", "feature", "story_title", "story_user_story",
          "raise_label", "question", "answer_why", "previous_step"}
 CODE = re.compile(r"`|\b[\w.-]+/[\w.-]+\.\w{1,5}\b|\b\w+\.(?:py|ya?ml|json|md|js|ts|sh|toml)\b|\b\w+\(\)|::")
 URL = re.compile(r"https?://\S+")
@@ -97,8 +97,6 @@ def texts(h):
             put(f"story {n}'s title", "story_title", s.get("title"))
             put(f"story {n}'s user_story", "story_user_story", s.get("user_story"))
             criteria(s, f"story {n}: ")
-    for k, t in enumerate(items(h.get("out_of_scope")), 1):
-        put(f"out_of_scope line {k}", "out_of_scope", t)
     for k, r in enumerate(items(h.get("raises")), 1):
         if isinstance(r, dict):
             kind = r.get("kind")
