@@ -2156,29 +2156,45 @@ def superseded(run):
     return run.get("name") in ("card", BOARD_WAIT) and run.get("status") == "completed" and run.get("conclusion") == "cancelled"
 
 
-def unproven(repo, sha, wait=CHECKS_WAIT, pause=CHECKS_PAUSE):
-    """Why the commit is not proven by every check on it, check runs and commit statuses alike, or None when every
-    check on it has passed. A check still running is waited for, up to `wait` seconds, looking every `pause` seconds;
-    a card run cancelled by a newer redraw, or a board wait cancelled by a newer event, is left out."""
+def required_checks(repo, branch="main"):
+    """The checks the branch's rule requires, by name, as GitHub gives them (#561)."""
+    rule = json.loads(gh("api", f"repos/{repo}/branches/{branch}/protection/required_status_checks"))
+    return set(rule.get("contexts") or []) | {c.get("context") for c in rule.get("checks") or [] if c.get("context")}
+
+
+def unproven(repo, sha, wait=CHECKS_WAIT, pause=CHECKS_PAUSE, branch="main"):
+    """Why the commit is not proven by the checks the branch's rule requires, or None.
+
+    Check runs and commit statuses count alike; a check the rule does not require judges nothing (#561). A
+    required check still running or not yet on the commit is waited for, up to `wait` seconds, looking every `pause`
+    seconds; a card run cancelled by a newer redraw, or a board wait cancelled by a newer event, is left out."""
+    try:
+        required = required_checks(repo, branch)
+    except subprocess.CalledProcessError as e:
+        return f"GitHub did not give which checks {branch} requires: {gh_reason(e)}"
+    if not required:
+        return f"{branch}'s branch rule requires no checks, so no check proves its head commit {sha[:7]}"
     deadline = time.monotonic() + wait
     while True:
         runs = [r for p in pages(gh("api", f"repos/{repo}/commits/{sha}/check-runs?per_page=100", "--paginate"))
-                for r in p.get("check_runs", []) if not superseded(r)]
+                for r in p.get("check_runs", []) if not superseded(r) and r.get("name") in required]
         statuses = [s for p in pages(gh("api", f"repos/{repo}/commits/{sha}/status?per_page=100", "--paginate"))
-                    for s in p.get("statuses") or []]
-        if not runs and not statuses:
-            return f"there are no checks on its head commit {sha[:7]}"
+                    for s in p.get("statuses") or [] if s.get("context") in required]
         red = [f"{r['name']} ({r.get('conclusion')})" for r in runs if r.get("status") == "completed" and r.get("conclusion") not in PASSING]
         red += [f"{s.get('context')} ({s.get('state')})" for s in statuses if s.get("state") not in ("success", "pending")]
         running = [r["name"] for r in runs if r.get("status") != "completed"]
         running += [s.get("context") for s in statuses if s.get("state") == "pending"]
+        missing = sorted(required - {r.get("name") for r in runs} - {s.get("context") for s in statuses})
         if red:
             return f"not every check passed on its head commit {sha[:7]}: {', '.join(red)}"
-        if not running:
+        if not running and not missing:
             return None
         if time.monotonic() >= deadline:
-            return (f"a check was still running on its head commit {sha[:7]} after {wait // 60} minutes: "
-                    f"{', '.join(running)}")
+            if running:
+                return (f"a check was still running on its head commit {sha[:7]} after {wait // 60} minutes: "
+                        f"{', '.join(running)}")
+            return (f"a check {branch} requires never ran on its head commit {sha[:7]} after {wait // 60} minutes: "
+                    f"{', '.join(missing)}")
         time.sleep(pause)
 
 
