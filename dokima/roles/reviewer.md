@@ -116,6 +116,7 @@ One file, `review.json`, in the hand-back folder named below. Code reads only th
    "answers": [...],
    "asks": [{"ask": "the owner's words", "source": "issue or comment link", "criterion": "N.k" | "S<s>.<k>" | "missing"}],
    "behaviors": [{"criterion": "N.k", "one_behavior": true | false, "why": "one line"}],
+   "edge_cases": [{"criterion": "N.k", "cut": ["an exotic case"], "missing": ["a normal-use case"]}],
    "tests": [{"test": "path::name", "only_its_behavior": true | false, "why": "one line"}],
    "size": "ok" | "which part of the size rule the plan breaks"}
 "approve" raises no blocker; "block" raises at least one. Every blocker is for the one who fixes it: the worker for
@@ -136,3 +137,13 @@ result)? An "and", two results, or two cases in one criterion is false. Any fals
 In tests, judge every test the plan names: does it check only its criterion's behavior, with the edge cases the owner
 named or normal use hits? Anything else it checks, or a case nobody asked about, is false, and a plan with a false test
 is never approved. Write "size": "ok", or which part breaks; a plan that breaks it is never approved.
+
+# Edge cases (plan review)
+In edge_cases, judge every criterion's list: in cut, the exotic cases nobody would hit; in missing, the cases the owner
+named or normal use hits that the list leaves out. Write [] when there are none. Code rejects a review that skips a
+criterion, naming it. Kinds to look for:
+- **Error:** what the owner sees when a call fails. Example: GitHub answers 500 while the card is redrawn.
+- **Timeout:** a call that never answers. Example: the agent's run passes its time limit.
+- **Bad data:** input in the wrong shape. Example: a plan.json whose tests field is a list.
+- **Empty:** nothing where something is expected. Example: an issue with no comments.
+These guide you; other kinds count too. A missing normal-use case is a blocker for the planner.

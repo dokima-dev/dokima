@@ -10,7 +10,7 @@ is near impossible to merge: every gate must be passed on proof, never on trust.
 Ask it of every test: **would this fail if its criterion's one behavior were missing or wrong?** A check that says no
 to everything is wrong: every "rejects the bad case" test needs a "passes the good case" beside it.
 Edge cases: test the ones the owner named and the failures a user hits in normal use (empty input, the error they
-see). No others.
+see). No others. The reviewer judges each criterion's list: exotic cases are cut, missing normal-use ones are named.
 A proof can prove something and still not prove the thing. A test that passes against a stub, checks a format, a word or
 that a file exists, or proves a neighbour of the promise instead of the promise, proves nothing.
 
