@@ -75,6 +75,9 @@ class FakeGitHub:
             return json.dumps(inner if path.endswith("/required_status_checks") else {"required_status_checks": inner})
         if path == f"repos/{REPO}/rules/branches/main":
             return "[]"
+        if path == f"repos/{REPO}/actions/variables/DOKIMA_AUTO_MERGE":
+            # The auto-merge setting is unset here, as GitHub says for a variable never set (#557).
+            raise subprocess.CalledProcessError(1, ["gh", *a], output="", stderr="HTTP 404: Not Found")
         if path == f"repos/{REPO}/commits/{HEAD}/check-runs":
             return json.dumps({"total_count": len(self.runs), "check_runs": self.runs})
         if path in (f"repos/{REPO}/commits/{HEAD}/status", f"repos/{REPO}/commits/{HEAD}/statuses"):

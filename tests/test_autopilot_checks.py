@@ -10,6 +10,7 @@ Time is faked too: `time.sleep` only moves a fake clock that `time.time` and `ti
 no real time.
 """
 import json
+import subprocess
 import time
 
 import pytest
@@ -57,6 +58,9 @@ class FakeGitHub:
             return json.dumps({"data": {"repository": {"pullRequest": {
                 "state": "MERGED" if merged else "OPEN", "isInMergeQueue": False, "autoMergeRequest": None,
                 "reviewDecision": None, "mergeStateStatus": "CLEAN"}}}})
+        if "actions/variables/DOKIMA_AUTO_MERGE" in joined:
+            # The auto-merge setting is unset here, as GitHub says for a variable never set (#557).
+            raise subprocess.CalledProcessError(1, ["gh", *a], output="", stderr="HTTP 404: Not Found")
         if f"pulls/{PR}/files" in joined:
             return json.dumps([{"filename": "dokima/x.py"}])
         if "/protection" in joined:
