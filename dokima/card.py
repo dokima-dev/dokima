@@ -916,8 +916,9 @@ def main():
 
     def redraw():
         cache = {}
-        # A redraw the bot's own change started writes only a card that changed, so its own save ends the chain.
-        before, now = draw(repo, number, pr_number, cache=cache, changed_only=os.environ.get("BY_BOT") == "true")
+        # Every redraw writes only a card that changed, so the bot's own save ends the chain and a person's change
+        # spends no write on a card already current (#534).
+        before, now = draw(repo, number, pr_number, cache=cache, changed_only=True)
         return follow(repo, number, before, now, cache)
 
     if retry.once_more(f"the card of #{number}", redraw, failed=bool):
