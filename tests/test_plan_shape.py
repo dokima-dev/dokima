@@ -16,8 +16,9 @@ ROOT = os.path.join(os.path.dirname(__file__), "..")
 PROMPT = " ".join(open(os.path.join(ROOT, "dokima", "roles", "planner.md")).read().split())
 SRC = "https://github.com/o/r/issues/9"
 STORY = {"kind": "user_story", "summary": "Slow calls hand back a job id instead of timing out.", "user_story": "Slow calls return a job id.",
-         "acceptance_criteria": [{"text": "A slow call returns a job id within 20 s.", "source": SRC}],
-         "non_functional": [{"text": "Job ids never repeat.", "why": "two jobs would share results", "principle": "fail closed"}],
+         "acceptance_criteria": [{"text": "A slow call returns a job id within 20 s.", "source": SRC, "no_edge_cases": "a sample criterion"}],
+         "non_functional": [{"text": "Job ids never repeat.", "why": "two jobs would share results", "principle": "fail closed",
+                             "no_edge_cases": "a sample criterion"}],
          "scope": ["dokima/jobs.py"],
          "tests": {"9.1": ["tests/test_jobs.py::test_id"], "9.2": ["tests/test_jobs.py::test_unique"]}}
 

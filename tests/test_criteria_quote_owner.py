@@ -12,8 +12,9 @@ SAID = {ISSUE: "Code shows as code,\nnever escaped.", ISSUE + "#issuecomment-1":
 
 
 def story(*criteria, nfr=()):
-    return {"kind": "user_story", "summary": "s", "user_story": "u", "acceptance_criteria": list(criteria),
-            "non_functional": list(nfr), "scope": ["dokima/card.py"], "tests": {"7.1": ["tests/t.py::t"]}}
+    edge = lambda c: dict({"no_edge_cases": "a sample criterion"}, **c)
+    return {"kind": "user_story", "summary": "s", "user_story": "u", "acceptance_criteria": [edge(c) for c in criteria],
+            "non_functional": [edge(c) for c in nfr], "scope": ["dokima/card.py"], "tests": {"7.1": ["tests/t.py::t"]}}
 
 
 def test_a_criterion_quoting_the_owner_passes():
