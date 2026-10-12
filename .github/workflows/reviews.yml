@@ -2,6 +2,9 @@ name: reviews
 # Runs on every review and line note, only so board.yml and card.yml, which run
 # after it as main's copy, put the cards where their state says and redraw them. GitHub runs this
 # file from the pull request's own copy, so it holds no key and starts nothing.
+# Its run's name says whether a card can move, since board.yml sees no summary: only
+# a review whose summary starts with a command or is the bot's record can (#533).
+run-name: "Review on pull request #${{ github.event.pull_request.number }}: ${{ (startsWith(github.event.review.body, '/') || contains(github.event.review.body, '<!-- dokima-record -->')) && 'a card may move' || 'no card can move' }}"
 on:
   pull_request_review:
     types: [submitted, edited, dismissed]
