@@ -418,7 +418,8 @@ def criterion_item(repo, label, c, check, tests, number=None):
     The label links only when there is a check. Under it one italic Verified by line per test with a docstring, only
     the words Verified by linking to the test, then Source: and the link to where the owner asked for it written out
     bare, so GitHub draws it as its own reference, when it has one. A source that is issue `number` itself shows no
-    Source line, as it tells the owner nothing (#526)."""
+    Source line, as it tells the owner nothing (#526). Between them one Edge cases line joins the criterion's edge
+    cases with dots, or reads "none, because" and its reason; a criterion with neither shows none (#538)."""
     if check:
         label = f'<a href="{check["html_url"]}">{label}</a>'
     out = [f"- {circle(repo, state(check))} **{label}:** {escape(c.get('text'))}"]
@@ -426,6 +427,11 @@ def criterion_item(repo, label, c, check, tests, number=None):
         if t and t.get("verified_by"):
             out.append(f'  - *<a href="{t["url"]}">{field_icon(repo, "verified by")} Verified by</a>: '
                        f'{escape(t["verified_by"])}*')
+    cases = [e.get("case") for e in c.get("edge_cases") or [] if isinstance(e, dict) and e.get("case")]
+    if cases:
+        out.append(f'  - Edge cases: {" · ".join(escape(x) for x in cases)}')
+    elif c.get("no_edge_cases"):
+        out.append(f'  - Edge cases: none, because {escape(c["no_edge_cases"])}')
     own = f"https://github.com/{repo}/issues/{number}"
     if c.get("source") and c["source"].rstrip("/") != own:
         out.append(f'  - Source: {full_refs(repo, c["source"])}')
