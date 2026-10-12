@@ -33,7 +33,10 @@ REVIEW = {"previous_step": {"did": ["Wrote three criteria."], "decided": [], "op
           "verdict": "block", "summary": "One proof is missing.",
           "raises": [{"kind": "blocker", "to": "worker", "label": "9.1", "text": "No test.", "evidence": "plan.json"},
                      {"kind": "issue", "text": "t: w", "evidence": "e"}],
-          "answers": [{"raise": "W1", "answer": "done", "why": "The test is weak."}], "asks": ASKS}
+          "answers": [{"raise": "W1", "answer": "done", "why": "The test is weak."}], "asks": ASKS,
+          "size": "ok",
+          "behaviors": [{"criterion": c, "one_behavior": True, "why": "one result"} for c in ("9.1", "9.2", "9.3")],
+          "tests": [{"test": f"tests/test_x.py::test_{x}", "only_its_behavior": True, "why": "one result"} for x in "abc"]}
 WORK = {"summary": "Cause and change.", "criteria": {"9.1": "x.py, a()", "9.2": "x.py, b()", "9.3": "x.py, c()"},
         "evidence": "pytest -q: 3 passed",
         "raises": [],
@@ -95,7 +98,7 @@ def test_well_formed_hand_backs_pass_and_every_malformed_field_is_named(record_p
     record_property("proves", "244.1")
     record_property("proves", "244.2")
     # A plan review must list its asks, so on that stage the bare review keeps them; every other list is optional.
-    bare_review = {k: REVIEW[k] for k in ("previous_step", "verdict", "summary", "raises", "asks")}
+    bare_review = {k: REVIEW[k] for k in ("previous_step", "verdict", "summary", "raises", "asks", "size", "behaviors", "tests")}
     bare_work = {k: WORK[k] for k in ("summary", "criteria", "evidence")}
     no_asks = {k: v for k, v in REVIEW.items() if k != "asks"}
     for stage in STAGES:

@@ -79,38 +79,39 @@ def texts(h):
     if not isinstance(h, dict):
         return []
     out = []
+    items = lambda v: v if isinstance(v, list) else []  # a malformed field is named by the field check, not crashed on
     put = lambda where, field, t: out.append((where, field, t)) if isinstance(t, str) and t.strip() else None
     put("summary", "summary", h.get("summary"))
     put("user_story", "user_story", h.get("user_story"))
     put("feature", "feature", h.get("feature"))
     def criteria(owner, prefix=""):
-        for k, c in enumerate(owner.get("acceptance_criteria") or [], 1):
+        for k, c in enumerate(items(owner.get("acceptance_criteria")), 1):
             put(f"{prefix}acceptance criterion {k}", "criterion", c.get("text") if isinstance(c, dict) else None)
-        for k, c in enumerate(owner.get("non_functional") or [], 1):
+        for k, c in enumerate(items(owner.get("non_functional")), 1):
             if isinstance(c, dict):
                 put(f"{prefix}non-functional requirement {k}", "criterion", c.get("text"))
                 put(f"{prefix}non-functional requirement {k}'s why", "nfr_why", c.get("why"))
     criteria(h)
-    for n, s in enumerate(h.get("stories") or [], 1):
+    for n, s in enumerate(items(h.get("stories")), 1):
         if isinstance(s, dict):
             put(f"story {n}'s title", "story_title", s.get("title"))
             put(f"story {n}'s user_story", "story_user_story", s.get("user_story"))
             criteria(s, f"story {n}: ")
-    for k, t in enumerate(h.get("out_of_scope") or [], 1):
+    for k, t in enumerate(items(h.get("out_of_scope")), 1):
         put(f"out_of_scope line {k}", "out_of_scope", t)
-    for k, r in enumerate(h.get("raises") or [], 1):
+    for k, r in enumerate(items(h.get("raises")), 1):
         if isinstance(r, dict):
             kind = r.get("kind")
             put(f"raise {k}'s label", "raise_label", r.get("label"))
             put(f"raise {k}'s text", {"question": "question", "blocker": "blocker"}.get(kind, "issue"), r.get("text"))
             put(f"raise {k}'s evidence", "evidence", r.get("evidence"))
-    for k, a in enumerate(h.get("answers") or [], 1):
+    for k, a in enumerate(items(h.get("answers")), 1):
         if isinstance(a, dict):
             put(f"answer {k}'s why", "answer_why", a.get("why"))
     prev = h.get("previous_step")
     if isinstance(prev, dict):
         for part in ("did", "decided", "open"):
-            for k, t in enumerate(prev.get(part) or [], 1):
+            for k, t in enumerate(items(prev.get(part)), 1):
                 put(f"previous_step {part} line {k}", "previous_step", t)
     put("evidence", "work_evidence", h.get("evidence") if "verdict" not in h else None)
     for name, why in (h.get("test_changes") or {}).items() if isinstance(h.get("test_changes"), dict) else []:

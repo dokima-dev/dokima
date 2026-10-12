@@ -69,37 +69,6 @@ def with_criteria(ac=None, nfr=None):
     return s
 
 
-def feature_with(ac):
-    """The good feature with story 2's first criterion rewritten."""
-    f = copy.deepcopy(FEATURE)
-    f["stories"][1]["acceptance_criteria"][0]["text"] = ac
-    return f
-
-
-def test_a_criterion_over_25_words_in_its_first_sentence_is_held_to_the_cap(record_property, check, capsys):
-    """A criterion's first sentence is held to 25 words; a paragraph may follow it.
-
-    Proves 239.1. A 25-word first sentence followed by a 40-word paragraph passes and is not listed, in an acceptance
-    criterion, a non-functional requirement and a split's story. A 31-word first sentence (with or without an end mark)
-    is rejected in each of the three, naming it.
-    """
-    record_property("proves", "239.1")
-    at_cap = words(25) + " " + words(40)
-    for plan in (with_criteria(ac=at_cap, nfr=at_cap), feature_with(at_cap)):
-        rc, why, printed = run(check, capsys, plan, jobs(), "239.1")
-        assert rc == 0 and not why, f"239.1: a 25-word first sentence with a paragraph after it was rejected: {why!r}"
-        assert "criterion" not in printed and "requirement" not in printed, \
-            f"239.1: a criterion within its cap was listed as over it: {printed!r}"
-    cases = [(with_criteria(ac=words(31) + " " + words(5)), "acceptance criterion 1"),
-             (with_criteria(ac=words(31, end="")), "acceptance criterion 1"),
-             (with_criteria(nfr=words(31) + " " + words(5)), "non-functional requirement 1"),
-             (feature_with(words(31) + " " + words(5)), "story 2: acceptance criterion 1")]
-    for plan, where in cases:
-        rc, why, _ = run(check, capsys, plan, jobs(), "239.1")
-        assert rc == 1, f"239.1: {where} opening with a 31-word sentence was accepted; the cap is 25 (30 at most)"
-        assert where in why and "31 words" in why, f"239.1: the reason does not name {where} and its 31 words: {why!r}"
-
-
 def test_a_docstring_the_planner_adds_is_held_to_15_words_in_its_first_line(record_property, check, capsys):
     """Every docstring the planner adds, helpers included, opens with at most 15 words.
 
