@@ -1,24 +1,23 @@
 name: card
-# Writes the card at the top of the issue and its PR whenever the checks or the
-# worker finish, the full suite starts, the bot puts up a code review's run card on
-# the pull request, or a person changes or comments on an issue; the cards of the
-# issues it blocks or is blocked by follow when their links changed. GitHub
-# announces no event for a blocked-by link added or removed by hand, so a run
-# every 15 minutes catches up the cards whose links changed. A merged pull request redraws its card and its issue's,
-# whoever merged it. These triggers
-# always use the default branch's copy of this file and of dokima/card.py, so
-# the work being judged cannot change how it is reported.
+# Writes the card at the top of the issue and its PR on every change to either: an edit, a label, a comment, a
+# review or line note (heard through reviews.yml), a push, a close, a run starting or ending, the bot's own changes
+# included. A redraw the bot started that finds both cards current writes nothing, so its own card save ends the
+# chain. The cards of the issues it blocks or is blocked by follow when their links changed. GitHub announces no
+# event for a blocked-by link added or removed by hand, so a run every 15 minutes catches up the cards whose links
+# changed.
+# These triggers always use the default branch's copy of this file and of dokima/card.py, so the work being judged
+# cannot change how it is reported.
 # An issue and its pull request share one queue, so the newest redraw waits for the
 # running one and is never cancelled, while other issues' redraws and the sweep go
 # on beside it.
 on:
   workflow_run:
-    workflows: [Acceptance criteria, full suite, worker]
+    workflows: [Acceptance criteria, full suite, worker, reviews]
     types: [in_progress, completed]
   issues:
   issue_comment:
   pull_request_target:
-    types: [closed]
+    types: [opened, edited, synchronize, reopened, closed, labeled, unlabeled, ready_for_review, converted_to_draft]
   schedule:
     - cron: '*/15 * * * *'
 permissions:
@@ -29,16 +28,19 @@ permissions:
   pull-requests: read
 jobs:
   queue:
-    # The bot's own edits and comments (the card itself) don't trigger another card, and a comment on a pull
-    # request draws no issue card on it; an issue deleted or moved away has no card left to draw. A merge, even the
-    # bot's on autopilot, draws its pull request's card and its issue's; a pull request closed unmerged draws none.
-    # A run that starts redraws only for the full suite, so All tests shows running. The bot's comments on a pull
-    # request are read below: only a code review's run card redraws both cards, so Code review shows running.
-    if: (github.event_name == 'workflow_run' && (github.event.action != 'in_progress' || github.event.workflow_run.name == 'full suite')) || (github.event_name == 'issue_comment' && github.event.action == 'created' && github.event.issue.pull_request && github.event.sender.type == 'Bot') || (github.event_name == 'pull_request_target' && github.event.pull_request.merged) || github.event_name == 'schedule' || (github.event_name == 'issues' && github.event.action == 'opened') || (github.event_name != 'pull_request_target' && github.event.sender.type != 'Bot' && !github.event.issue.pull_request && !(github.event_name == 'issues' && (github.event.action == 'deleted' || github.event.action == 'transferred')))
+    # Every change redraws; an issue deleted or moved away has no card left to draw.
+    if: github.event_name != 'issues' || (github.event.action != 'deleted' && github.event.action != 'transferred')
     runs-on: ubuntu-24.04
     outputs:
       group: ${{ steps.queue.outputs.group }}
     steps:
+      - name: Count this run's GitHub calls
+        continue-on-error: true
+        # Every gh call this job makes goes through a counter, so its cost in GitHub's hourly budget is known (#426).
+        run: |
+          mkdir -p /tmp/ghcount && real=$(command -v gh)
+          printf '#!/bin/sh\necho "$*" | cut -c1-120 >> /tmp/ghcount/calls\nexec %s "$@"\n' "$real" > /tmp/ghcount/gh
+          chmod +x /tmp/ghcount/gh && { [ -z "$GITHUB_PATH" ] || echo /tmp/ghcount >> "$GITHUB_PATH"; } || true
       # The issue this event is about, from the issue, the pull request's branch or the worker run's title.
       - id: queue
         env:
@@ -47,18 +49,13 @@ jobs:
           REPO: ${{ github.repository }}
           ISSUE: ${{ !github.event.issue.pull_request && github.event.issue.number || '' }}
           ON_PR: ${{ github.event.issue.pull_request && github.event.issue.number || '' }}
-          COMMENT: ${{ github.event.comment.body }}
           PR: ${{ github.event.pull_request.number || github.event.workflow_run.pull_requests[0].number }}
           HEAD: ${{ github.event.pull_request.head.ref || github.event.workflow_run.head_branch }}
           TITLE: ${{ github.event.workflow_run.display_title }}
           RUN: ${{ github.run_id }}
         run: |
-          # Of the bot's comments on a pull request only a code review's run card redraws; it waits in its issue's
-          # queue, found from the pull request's branch.
+          # A comment on a pull request waits in its issue's queue, found from the pull request's branch.
           if [ -n "$ON_PR" ]; then
-            if [[ "$COMMENT" != '<!-- dokima-live -->'* || "$COMMENT" != *'**Reviewer (pr)**'* ]]; then
-              echo "group=none" >> "$GITHUB_OUTPUT"; exit 0
-            fi
             PR="$ON_PR"; HEAD=$(gh api "repos/$REPO/pulls/$ON_PR" --jq .head.ref)
           fi
           if [ "$EVENT" = schedule ]; then group=card-sweep
@@ -69,15 +66,31 @@ jobs:
           else group="card-run-$RUN"
           fi
           echo "group=$group" >> "$GITHUB_OUTPUT"
+      - name: Report this run's GitHub calls
+        if: always()
+        continue-on-error: true
+        run: |
+          [ -s /tmp/ghcount/calls ] || { echo "::notice title=GitHub calls::none"; exit 0; }
+          awk '{ k = ($1 == "api") ? (($2 == "graphql") ? "graphql" : "rest") : ($1 ~ /^(run|workflow|release|secret|variable|cache)$/ ? "rest" : "graphql")
+                 n[k]++; t[$1 " " (($1 == "api" && $2 != "graphql") ? "rest" : $2)]++ }
+               END { for (x in t) print t[x], x | "sort -rn | head -4 | paste -sd, - > /tmp/ghcount/top"; close("sort -rn | head -4 | paste -sd, - > /tmp/ghcount/top")
+                     getline top < "/tmp/ghcount/top"
+                     printf "::notice title=GitHub calls::graphql %d, rest %d; most: %s\n", n["graphql"], n["rest"], top }' /tmp/ghcount/calls || true
   card:
     needs: queue
-    if: needs.queue.outputs.group != 'none'
     concurrency:
       group: ${{ needs.queue.outputs.group }}
       cancel-in-progress: false
     environment: keys
     runs-on: ubuntu-24.04
     steps:
+      - name: Count this run's GitHub calls
+        continue-on-error: true
+        # Every gh call this job makes goes through a counter, so its cost in GitHub's hourly budget is known (#426).
+        run: |
+          mkdir -p /tmp/ghcount && real=$(command -v gh)
+          printf '#!/bin/sh\necho "$*" | cut -c1-120 >> /tmp/ghcount/calls\nexec %s "$@"\n' "$real" > /tmp/ghcount/gh
+          chmod +x /tmp/ghcount/gh && { [ -z "$GITHUB_PATH" ] || echo /tmp/ghcount >> "$GITHUB_PATH"; } || true
       - uses: actions/checkout@v5
       # The card is posted by the repo's Dokima app, so it shows as that app's bot.
       - id: app
@@ -94,6 +107,7 @@ jobs:
           HEAD_SHA: ${{ github.event.workflow_run.head_sha }}
           PR_NUMBER: ${{ github.event.workflow_run.pull_requests[0].number || github.event.pull_request.number }}
           RUN_TITLE: ${{ github.event.workflow_run.display_title }}
+          BY_BOT: ${{ github.event.sender.type == 'Bot' }}
           DOKIMA_BOARD: ${{ vars.DOKIMA_BOARD }}
         run: python3 dokima/card.py
       # The PR's description carries no Closes line (#416), so a merge closes the issue it was built for here.
@@ -108,3 +122,13 @@ jobs:
             gh issue close "${BASH_REMATCH[2]}" -R "$GITHUB_REPOSITORY" --reason completed \
               --comment "Closed: pull request #$PR merged." || echo "::warning title=Issue not closed::#${BASH_REMATCH[2]}"
           fi
+      - name: Report this run's GitHub calls
+        if: always()
+        continue-on-error: true
+        run: |
+          [ -s /tmp/ghcount/calls ] || { echo "::notice title=GitHub calls::none"; exit 0; }
+          awk '{ k = ($1 == "api") ? (($2 == "graphql") ? "graphql" : "rest") : ($1 ~ /^(run|workflow|release|secret|variable|cache)$/ ? "rest" : "graphql")
+                 n[k]++; t[$1 " " (($1 == "api" && $2 != "graphql") ? "rest" : $2)]++ }
+               END { for (x in t) print t[x], x | "sort -rn | head -4 | paste -sd, - > /tmp/ghcount/top"; close("sort -rn | head -4 | paste -sd, - > /tmp/ghcount/top")
+                     getline top < "/tmp/ghcount/top"
+                     printf "::notice title=GitHub calls::graphql %d, rest %d; most: %s\n", n["graphql"], n["rest"], top }' /tmp/ghcount/calls || true

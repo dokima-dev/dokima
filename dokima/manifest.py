@@ -19,8 +19,7 @@ LABELS = {
     "plan": {"color": "1d76db", "description": "Starts the planner"},
     "work": {"color": "0e8a16", "description": "Starts the worker on the approved plan"},
     "autopilot": {"color": "8250df", "description": "Running on its own"},
-    "high": {"color": "d93f0b", "description": "Priority: high"},
-    "parked": {"color": "c5c5c5", "description": "Priority: parked for later"},
+    "filed-by-dokima": {"color": "bfd4f2", "description": "Created automatically, not by a person"},
 }
 
 FIELDS = {
@@ -37,8 +36,6 @@ FIELDS = {
     },
     "Priority": {
         "Blocker": {"color": "RED", "description": "Blocks other work"},
-        "High": {"color": "ORANGE", "description": "High priority"},
-        "Parked": {"color": "GRAY", "description": "Parked for later"},
     },
 }
 
@@ -98,7 +95,7 @@ REPO_PATHS = [
 # REST paths outside a repo: (pattern, permission)
 OTHER_PATHS = [
     (r"orgs/[^/]+/projectsV2(/|$)", "organization_projects"),
-    (r"users/|installation/token$", NONE),
+    (r"users/|installation/token$|^rate_limit$", NONE),
 ]
 # What a GraphQL query or mutation touches: (pattern, permission)
 GRAPHQL = [

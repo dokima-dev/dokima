@@ -166,8 +166,7 @@ def test_the_code_reviews_queued_card_redraws_the_issue_and_pr_cards(tmp_path, r
 
     Proves 372.3.
     Puts the bot's queued code review card on PR #260 after the worker's build, plays card.yml for the comment event
-    GitHub sends, and checks it redraws both cards and both show Code review running. Any other comment the bot posts
-    on the PR still redraws nothing."""
+    GitHub sends, and checks it redraws both cards and both show Code review running."""
     record_property("proves", "372.3")
     hub = Hub(tmp_path)
     text = review_queued(hub)
@@ -176,9 +175,6 @@ def test_the_code_reviews_queued_card_redraws_the_issue_and_pr_cards(tmp_path, r
         got = done_of(body).get("Code review")
         assert got == "running", \
             f"372.3: the code review's run card went up on PR #260, but {where}'s card shows Code review {got!r}"
-    hub.clear_writes()
-    r = hub.run(*pr_comment(246, 260, who="bot", text="A note from the bot."), "372.3")
-    assert not (r.started and r.card_ran()), "372.3: a plain comment the bot posted on PR #260 ran the card job"
 
 
 def play(hub, event, k):

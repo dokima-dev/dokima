@@ -179,7 +179,7 @@ def test_a_decision_github_refuses_says_so_in_one_line_with_githubs_reason(recor
     printed, text, board, hub, escaped = decide(tmp_path, monkeypatch, capsys, name="answered")
     assert escaped is None, f"417.1: deciding what runs next failed though GitHub answered every call: {escaped}"
     assert printed == "start reviewer plan", f"417.1: with GitHub answering, the run printed {printed!r}, not 'start reviewer plan'"
-    assert text == agent.render(PLANNER) + "\n**Next:** The reviewer starts now.\n", \
+    assert text == agent.with_next(agent.render(PLANNER), "**Next:** The reviewer starts now."), \
         f"417.1: with GitHub answering, the record gained more than its Next line:\n{text[len(agent.render(PLANNER)):]}"
     printed, text, board, hub, escaped = decide(tmp_path, monkeypatch, capsys, SERVER_ERROR, until=float("inf"), name="refused")
     said = lines_with(text, SERVER_ERROR)

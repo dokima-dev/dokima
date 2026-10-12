@@ -2,7 +2,7 @@
 
 An open issue that blocks at least one other open issue shows Priority Blocker. The board sync recomputes it when an
 issue closes or reopens and on a schedule every 15 minutes (GitHub starts no workflow when a link is added or removed),
-and the blocker label no longer moves the pill. Without Blocker, the pill follows the high or parked label as before.
+and no label moves the pill. Without Blocker, Priority is empty: no label sets priority.
 
 Most tests fake dokima.board.Board itself and read the board's end state. What the fake Board offers, and the code is
 expected to use (the first group exists today; the second is new):
@@ -70,7 +70,7 @@ def fake_board(world):
             self.fields = {"Status": ("S", {o: "s-" + o for o in ("Backlog", "Plan", "Work", "Review", "Done")}),
                            "Action": ("W", {"Needs you": "w-you", "Autopilot": "w-auto"})}
             if world.priority_field:
-                self.fields["Priority"] = ("PRI", {o: "p-" + o for o in ("Blocker", "High", "Parked")})
+                self.fields["Priority"] = ("PRI", {o: "p-" + o for o in ("Blocker",)})
 
         def item(self, kind, n):
             world.cards.setdefault((kind, int(n)), {})
@@ -166,31 +166,31 @@ def test_an_issue_blocking_an_open_issue_gets_the_blocker_pill(record_property, 
 
     Proves 294.1. Runs the scheduled board sync over five open issues: #10 blocks open #11, #12 blocks only closed #13, #14 blocks
     nothing, #15 is blocked by #10 and labeled high, and #16 labeled high blocks open #11. Checks #10 and #16 show
-    Blocker (Blocker wins over the high label), #12 and #14 show no pill, and #15 shows High."""
+    Blocker, and #12, #14 and #15 show no pill: the high label sets nothing."""
     record_property("proves", "294.1")
     w = make(issues={10: ("open", []), 11: ("open", []), 12: ("open", []), 13: ("closed", []), 14: ("open", []),
                      15: ("open", ["high"]), 16: ("open", ["high"])},
              links=[(11, 10), (13, 12), (15, 10), (11, 16)])
     board.sync("schedule", SCHEDULE, SPEC, REPO)
     got = {n: w.pill(n) for n in (10, 12, 14, 15, 16)}
-    assert got == {10: "Blocker", 12: None, 14: None, 15: "High", 16: "Blocker"}, \
+    assert got == {10: "Blocker", 12: None, 14: None, 15: None, 16: "Blocker"}, \
         f"294.1: after the scheduled sync the pills are {got}; only open issues blocking an open issue show Blocker, " \
-        f"and the rest follow their high or parked label"
+        f"and the rest show none, whatever their labels"
 
 
 def test_the_scheduled_sync_writes_only_pills_that_change(record_property, make):
     """The scheduled sync writes a card's Priority only when its pill changes.
 
-    Proves 294.1. Runs the scheduled sync on a board already right (#20 shows Blocker and blocks open #21, #21 shows High from its
-    label) and checks nothing is written to Priority; then on one wrong card (#22 blocks open #21 but shows nothing)
+    Proves 294.1. Runs the scheduled sync on a board already right (#20 shows Blocker and blocks open #21, #21, labeled high, shows
+    no pill) and checks nothing is written to Priority; then on one wrong card (#22 blocks open #21 but shows nothing)
     and checks the only write is Blocker on #22."""
     record_property("proves", "294.1")
     w = make(issues={20: ("open", []), 21: ("open", ["high"])}, links=[(21, 20)],
-             cards={20: {"Priority": "Blocker"}, 21: {"Priority": "High"}})
+             cards={20: {"Priority": "Blocker"}})
     board.sync("schedule", SCHEDULE, SPEC, REPO)
     assert priority_writes(w) == [], f"294.1: the scheduled sync rewrote pills that were already right: {priority_writes(w)}"
     w = make(issues={20: ("open", []), 21: ("open", ["high"]), 22: ("open", [])}, links=[(21, 20), (21, 22)],
-             cards={20: {"Priority": "Blocker"}, 21: {"Priority": "High"}})
+             cards={20: {"Priority": "Blocker"}})
     board.sync("schedule", SCHEDULE, SPEC, REPO)
     assert priority_writes(w) == [(22, "Blocker")], \
         f"294.1: with only #22 wrong, the scheduled sync wrote {priority_writes(w)}, not Blocker on #22 alone"
@@ -201,16 +201,16 @@ def test_the_scheduled_sync_writes_only_pills_that_change(record_property, make)
 def test_closing_the_last_blocked_issue_clears_the_pill(record_property, make):
     """Closing the last open issue it blocks clears an issue's Blocker pill at once.
 
-    Proves 294.2. #30 blocks #31 only; #32 blocks #31 and #33; #34, labeled parked, blocks #31 only. #31 closes. Checks #30's pill
-    is cleared, #32 keeps Blocker (it still blocks open #33), and #34 falls back to Parked."""
+    Proves 294.2. #30 blocks #31 only; #32 blocks #31 and #33; #34, labeled high, blocks #31 only. #31 closes. Checks #30's pill
+    is cleared, #32 keeps Blocker (it still blocks open #33), and #34's is cleared too: its high label sets nothing."""
     record_property("proves", "294.2")
-    w = make(issues={30: ("open", []), 31: ("closed", []), 32: ("open", []), 33: ("open", []), 34: ("open", ["parked"])},
+    w = make(issues={30: ("open", []), 31: ("closed", []), 32: ("open", []), 33: ("open", []), 34: ("open", ["high"])},
              links=[(31, 30), (31, 32), (33, 32), (31, 34)],
              cards={30: {"Priority": "Blocker"}, 32: {"Priority": "Blocker"}, 34: {"Priority": "Blocker"}})
     board.sync("issues", issue_event("closed", 31, w), SPEC, REPO)
     got = {n: w.pill(n) for n in (30, 32, 34)}
-    assert got == {30: None, 32: "Blocker", 34: "Parked"}, \
-        f"294.2: after #31 closed the pills are {got}; #30 should lose Blocker, #32 keep it and #34 fall back to Parked"
+    assert got == {30: None, 32: "Blocker", 34: None}, \
+        f"294.2: after #31 closed the pills are {got}; #30 and #34 should lose Blocker and #32 keep it"
 
 
 def test_a_closed_issue_loses_its_own_blocker_pill(record_property, make):
@@ -254,7 +254,7 @@ def test_a_link_added_or_removed_reaches_the_pill_on_the_next_scheduled_run(reco
     """A blocked-by link added or removed reaches the pill on the next scheduled run.
 
     Proves 294.3. Starts with no links and no pills, adds the link #61 blocked by #60 and runs the scheduled sync: #60 shows
-    Blocker. Removes the link and runs it again: #60 loses the pill; with the high label on #60, it shows High."""
+    Blocker. Removes the link and runs it again: #60 loses the pill, and still has none with the high label on it."""
     record_property("proves", "294.3")
     w = make(issues={60: ("open", []), 61: ("open", [])})
     w.links.add((61, 60))
@@ -268,7 +268,7 @@ def test_a_link_added_or_removed_reaches_the_pill_on_the_next_scheduled_run(reco
     w.links.clear()
     w.issues[60]["labels"].add("high")
     board.sync("schedule", SCHEDULE, SPEC, REPO)
-    assert w.pill(60) == "High", f"294.3: with the link removed and the high label on, #60 shows {w.pill(60)}, not High"
+    assert w.pill(60) is None, f"294.3: with the link removed and the high label on, #60 shows {w.pill(60)}, not none"
 
 
 def test_the_workflow_runs_every_15_minutes(record_property):
@@ -307,11 +307,11 @@ def test_without_a_board_or_priority_field_nothing_is_read(record_property, make
 # 294.4: no one sets or clears it by hand
 
 def test_the_blocker_label_no_longer_moves_the_pill(record_property, make):
-    """The blocker label no longer sets or clears the pill: only the links do.
+    """No label sets or clears the pill: only the links do.
 
     Proves 294.4. Adds the blocker label to #80, which blocks nothing, and checks it shows no Blocker. Removes the blocker label
     from #81, which blocks open #82 and shows Blocker, and checks it keeps Blocker. Adds the high label to #81 and
-    checks it still shows Blocker, then adds high to #80 and checks it shows High, so the label path still works."""
+    checks it still shows Blocker, then adds high to #80 and checks it still shows no pill."""
     record_property("proves", "294.4")
     w = make(issues={80: ("open", ["blocker"]), 81: ("open", []), 82: ("open", [])}, links=[(82, 81)],
              cards={81: {"Priority": "Blocker"}})
@@ -324,7 +324,7 @@ def test_the_blocker_label_no_longer_moves_the_pill(record_property, make):
     assert w.pill(81) == "Blocker", f"294.4: adding high to #81, which blocks #82, replaced Blocker with {w.pill(81)}"
     w.issues[80]["labels"].add("high")
     board.sync("issues", issue_event("labeled", 80, w, label="high"), SPEC, REPO)
-    assert w.pill(80) == "High", f"294.4: adding high to #80 set {w.pill(80)}, not High"
+    assert w.pill(80) is None, f"294.4: adding high to #80, which blocks nothing, set {w.pill(80)}"
 
 
 def test_a_blocker_pill_set_by_hand_is_corrected(record_property, make):
@@ -341,15 +341,15 @@ def test_a_blocker_pill_set_by_hand_is_corrected(record_property, make):
 
 
 def test_dokima_no_longer_declares_a_blocker_label(record_property):
-    """Dokima no longer declares a blocker label, and the board reads no label named blocker.
+    """Dokima declares no label that sets priority: no blocker, high or parked label.
 
-    Proves 294.4. Checks the manifest's labels leave out blocker while keeping high and parked, and that blocker is not among the
-    labels the board turns into a priority."""
+    Proves 294.4. Checks the manifest's labels leave out blocker, high and parked, and that Blocker is the Priority
+    field's only option."""
     record_property("proves", "294.4")
     from dokima import manifest
     assert "blocker" not in manifest.LABELS, "294.4: the manifest still declares a blocker label to set by hand"
-    assert {"high", "parked"} <= set(manifest.LABELS), "294.4: the manifest dropped the high or parked label"
-    assert "blocker" not in board.PRIORITY, f"294.4: the board still turns the blocker label into a pill: {board.PRIORITY}"
+    assert "high" not in manifest.LABELS and "parked" not in manifest.LABELS, "294.4: the manifest still has a high or parked label"
+    assert set(manifest.FIELDS["Priority"]) == {"Blocker"}, f"294.4: Priority's options are {list(manifest.FIELDS['Priority'])}, not Blocker alone"
 
 
 # 294.5: when GitHub cannot list an issue's links, its pill stays and the run fails saying why
@@ -412,7 +412,7 @@ class FakeGitHub:
         self.calls.append(("graphql", query, v))
         if "organization" in query:
             return {"organization": {"projectV2": {"id": "P", "fields": {"nodes": [
-                {"id": "PRI", "name": "Priority", "options": [{"id": "p-" + o, "name": o} for o in ("Blocker", "High", "Parked")]}]}}}}
+                {"id": "PRI", "name": "Priority", "options": [{"id": "p-" + o, "name": o} for o in ("Blocker",)]}]}}}}
         if "repository" in query and "labels" in query:
             n = int(v.get("n"))
             labels = {"nodes": [{"name": l} for l in self.ISSUES[n]["labels"]]}

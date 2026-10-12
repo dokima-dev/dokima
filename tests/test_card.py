@@ -134,5 +134,4 @@ def test_same_card_on_issue_and_pr_and_only_icons_change(record_property):
     types = [types] if isinstance(types, str) else types
     assert isinstance(on, dict) and "issues" in on, "67.6: card.yml no longer starts on issue events"
     assert not types or {"opened", "edited"} <= set(types), f"67.6: card.yml no longer starts when an issue is opened or edited: {types}"
-    assert "github.event.sender.type != 'Bot'" in yml
 

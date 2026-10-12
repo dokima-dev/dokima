@@ -1,12 +1,12 @@
 name: reviews
-# Runs on every submitted review and new line note, only so board.yml, which runs
-# after it as main's copy, puts the cards where their state says. GitHub runs this
+# Runs on every review and line note, only so board.yml and card.yml, which run
+# after it as main's copy, put the cards where their state says and redraw them. GitHub runs this
 # file from the pull request's own copy, so it holds no key and starts nothing.
 on:
   pull_request_review:
-    types: [submitted]
+    types: [submitted, edited, dismissed]
   pull_request_review_comment:
-    types: [created]
+    types: [created, edited, deleted]
 permissions: {}
 jobs:
   heard:

@@ -5,8 +5,17 @@ autopilot stops where the owner must decide, a failed run gets Needs you, a canc
 The parked test-speed issue makes the rest fast and deletes this file. DOKIMA_ALL_TESTS=1 runs everything.
 """
 import os
+import sys
 
 import pytest
+
+# Tests judge this checkout's code on any machine (#449, #385). The agent's machine points Python at a runtime
+# copy of Dokima and sets its own run's settings; none of that may reach a test or a subprocess it starts.
+ROOT = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
+for k in ("STAGE", "ROLE", "N", "PACK", "OUT", "CARD_ID", "GITHUB_REPOSITORY", "PYTHONSAFEPATH"):
+    os.environ.pop(k, None)
+os.environ["PYTHONPATH"] = ROOT
+sys.path[:] = [ROOT] + [x for x in sys.path if os.path.abspath(x or ".") != "/tmp/runtime"]
 
 SLOW = {
     "test_automerge.py::test_a_pull_request_changing_a_workflow_file_never_merges_by_autopilot",

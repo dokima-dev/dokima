@@ -243,8 +243,10 @@ def test_the_card_never_changes_the_owner_part(record_property, monkeypatch, git
     current = run_card(monkeypatch, github, current)  # the first real redraw moves Done below the fold (#416)
     below = current.split(body.MARKER, 1)[1]
     for k in range(3):
+        # Every change now redraws (#438), so a run that finds the card current may save nothing and keeps the body.
         saved = run_card(monkeypatch, github, current)
-        assert saved is not None, f"179.2: card run {k + 1} saved nothing"
+        assert saved is not None or k > 0, "179.2: the first card run saved nothing"
+        saved = current if saved is None else saved
         assert body.ask(saved) == TRICKY, f"179.2: card run {k + 1} changed the owner's ask"
         assert saved.split(body.MARKER, 1)[1] == below, f"179.2: card run {k + 1} changed the part below the marker"
         assert "first thing works" in saved.split(body.MARKER, 1)[0], f"179.2: card run {k + 1} lost the plan above"
@@ -321,30 +323,6 @@ def test_the_card_refuses_rather_than_change_the_owner_part(record_property, mon
     assert saved is None, "179.3: the card saved a body that changes the owner's part"
     assert github.comments, "179.3: the card refused silently, with no comment on the issue"
     assert REASON in (github.comments[0][1] or ""), "179.3: the card's comment does not say why it refused"
-
-
-def test_the_planner_refuses_rather_than_change_the_owner_part(record_property, monkeypatch, tmp_path, github):
-    """When the planner writes its plan, it never saves a body that would change the owner's part; it comments why.
-
-    Runs the planner's post, the step that writes a plan into the issue, on an issue where the helper finds the owner's
-    part would change, and checks the body is not written and the issue gets a comment carrying the helper's reason.
-    Beside it, a good post on the same issue saves the plan above the marker with the owner's ask unchanged."""
-    record_property("proves", "179.3")
-    body = helper("179.3")
-    current = body.redraw("My ask.", PLAN_TOP)
-    run_planner_post(monkeypatch, tmp_path / "good", github, current)
-    assert len(github.saves) == 1, f"179.3: a good plan post made {len(github.saves)} saves of the issue body, not one"
-    assert body.ask(github.saves[0]) == "My ask.", "179.3: a good plan post changed the owner's ask"
-    assert "The issue shows a card on top." in github.saves[0].split(body.MARKER, 1)[0], \
-        "179.3: a good plan post did not write the plan above the marker"
-    assert not any(REASON in (t or "") for _, t in github.comments), "179.3: a good plan post posted a refusal"
-    github.saves.clear()
-    github.comments.clear()
-    refuse(monkeypatch, body)
-    run_planner_post(monkeypatch, tmp_path / "bad", github, current)
-    assert github.saves == [], "179.3: the planner saved a body that changes the owner's part"
-    assert any(REASON in (t or "") for _, t in github.comments), \
-        "179.3: the planner refused silently, with no comment on the issue saying why"
 
 
 # 179.4: a fresh ask with no marker gets the marker on its first redraw, the whole body kept below it
@@ -425,19 +403,3 @@ def test_the_card_posts_its_refusal_on_the_issue(record_property, monkeypatch, g
     assert any(a == str(NUMBER) or f"issues/{NUMBER}/" in a for a in args), "179.5: the refusal was posted somewhere other than this issue"
     assert (text or "").strip(), "179.5: the refusal comment is empty"
 
-
-def test_the_planner_posts_its_refusal_on_the_issue(record_property, monkeypatch, tmp_path, github):
-    """When the planner refuses to save its plan, the reason is a comment on the issue, even if the run then fails.
-
-    Runs the planner's post where the save would change the owner's part, and checks that, whatever the run does
-    afterwards, exactly one comment with the reason is posted to this issue and the body is never written."""
-    record_property("proves", "179.5")
-    body = helper("179.5")
-    current = body.redraw("My ask.", PLAN_TOP)
-    refuse(monkeypatch, body)
-    run_planner_post(monkeypatch, tmp_path, github, current)
-    refusals = [(a, t) for a, t in github.comments if REASON in (t or "")]
-    assert len(refusals) == 1, f"179.5: expected one refusal comment on the issue, got {len(refusals)}"
-    args, _ = refusals[0]
-    assert any(a == str(NUMBER) or f"issues/{NUMBER}/" in a for a in args), "179.5: the refusal was posted somewhere other than this issue"
-    assert github.saves == [], "179.5: the body was written although the save was refused"

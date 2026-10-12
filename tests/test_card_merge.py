@@ -978,49 +978,6 @@ def test_merging_one_pr_leaves_other_cards_alone(tmp_path, record_property):
         "345.1: the merge of PR #246 redrew issue #283 or PR #312, which it is not about"
 
 
-def test_the_cards_own_pr_edits_start_no_redraw(tmp_path, record_property):
-    """The card written into a pull request never starts another card run.
-
-    When card.yml writes PR #246's card, GitHub sends an `edited` event for the pull request from Dokima's bot. That
-    event must not start card.yml's card job, or every card it writes would start another run. A new commit pushed
-    by the bot to the open PR #312 starts no card job through the merge trigger either: only a merge does. Proves
-    345.1."""
-    record_property("proves", "345.1")
-    hub = Hub(tmp_path)
-    for event in (pr_event(239, 246, "edited", "bot"), pr_event(283, 312, "edited", "bot")):
-        r = Run(hub, *event)
-        assert not (r.started and r.card_ran()), \
-            f"345.1: the bot's own edit of PR #{event[1]['number']} ran card.yml's card job, so card writes loop"
-    r = Run(hub, *pr_event(283, 312, "closed", "bot", merged=True))
-    assert r.started and r.card_ran(), "345.1: beside the edits, a merge did not run card.yml's card job"
-
-
-def test_closing_a_pr_without_merging_redraws_nothing(tmp_path, record_property):
-    """Only a merge redraws: a pull request closed unmerged leaves every card as it was.
-
-    PR #312 is closed on GitHub without merging, once by the owner and once by Dokima's bot. Neither close event runs
-    card.yml's card job, directly or through a relay, and issue #283's and PR #312's bodies stay exactly as they were.
-    Beside them, the merge of PR #246 does run the card job, so the check never passes by redrawing nothing at all.
-    Proves 345.1."""
-    record_property("proves", "345.1")
-    for who in ("owner", "bot"):
-        hub = Hub(tmp_path / who)
-        s = hub.load()
-        s["prs"]["312"].update(state="closed", merged=False, closed_at="2026-10-09T09:00:00Z",
-                               updated_at="2026-10-09T09:00:00Z")
-        hub.save()
-        before = (hub.issue_body(283), hub.pr_body(312))
-        r = hub.run(*pr_event(283, 312, "closed", OWNER if who == "owner" else "bot", merged=False), "345.1")
-        ran = (r.started and r.card_ran()) or any(x.started and x.card_ran() for x in r.relays)
-        assert not ran, \
-            f"345.1: PR #312 closed without merging by the {who} ran card.yml's card job; only a merge may redraw"
-        assert (hub.issue_body(283), hub.pr_body(312)) == before, \
-            f"345.1: PR #312 closed without merging by the {who} changed issue #283's or PR #312's card"
-    hub = Hub(tmp_path / "merge")
-    hub.merge(239, 246)
-    must_redraw(hub, pr_event(239, 246, "closed", OWNER, merged=True), "345.1")
-
-
 # 345.2 -----------------------------------------------------------------------------------------------------------
 
 def test_prs_246_and_312_show_merged_after_their_merge_with_no_click(tmp_path, record_property):

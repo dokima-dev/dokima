@@ -518,7 +518,7 @@ def test_card_yml_starts_on_every_change_a_person_makes_and_on_a_schedule(record
     Reads .github/workflows/card.yml. Its issues trigger covers opening, editing, closing, reopening, labelling and
     assigning (or lists no types), and it has an issue_comment trigger for new, edited and deleted comments. Its job's
     `if:` lets every one of those through when a person causes it, lets the schedule, workflow_run and the bot opening
-    an issue through as today, and stops the bot's own edits and comments and any comment on a pull request. Its
+    an issue through as today (the bot's own edits and comments, and comments on a pull request, are #438's). Its
     schedule fires every hour of every day with no gap over 15 minutes, its step still runs `python3 dokima/card.py`
     with the event's issue as ISSUE_NUMBER, and it is given DOKIMA_BOARD so a loop on autopilot can set Needs you.
     Proves 254.4."""
@@ -537,12 +537,6 @@ def test_card_yml_starts_on_every_change_a_person_makes_and_on_a_schedule(record
         assert allowed(ctx("issues", kind)), f"254.4: card.yml's job skips a person's issues event {kind!r}"
     for kind in ("created", "edited", "deleted"):
         assert allowed(ctx("issue_comment", kind)), f"254.4: card.yml's job skips a person's comment ({kind}) on an issue"
-        assert not allowed(ctx("issue_comment", kind, pr=True)), \
-            f"254.4: card.yml's job runs on a comment ({kind}) on a pull request, which would draw an issue card on it"
-        assert not allowed(ctx("issue_comment", kind, sender="Bot")), \
-            f"254.4: card.yml's job runs on the bot's own comment ({kind})"
-    assert not allowed(ctx("issues", "edited", sender="Bot")), \
-        "254.4: card.yml's job runs on the bot's own edit, so every card it writes would start another run"
     assert allowed(ctx("issues", "opened", sender="Bot")), \
         "254.4: card.yml's job no longer draws a card on an issue the bot opens"
     assert allowed(ctx("schedule")), "254.4: card.yml's job skips its scheduled run"
