@@ -13,17 +13,8 @@ import sys
 
 from dokima import agent, manifest, plan, retry
 
-PRIORITY = {"high": "High"}  # highest first; Blocker comes from blocked-by links, not a label
 AUTOPILOT = "autopilot"
 DONE = ("Done", None)
-
-
-def priority(event, p):
-    """(number, option) when a priority label was added or removed: the highest priority label left, or None to clear."""
-    if event != "issues" or p["action"] not in ("labeled", "unlabeled") or p["label"]["name"] not in PRIORITY:
-        return None
-    names = {label["name"] for label in p["issue"].get("labels") or []}
-    return p["issue"]["number"], label_priority(names)
 
 
 def gql(query, **variables):
@@ -327,11 +318,6 @@ def sweep(board, repo, owners, todo=None):
         raise RuntimeError(" ".join(failed))
 
 
-def label_priority(labels):
-    """The pill the highest priority label gives, or None."""
-    return next((option for label, option in PRIORITY.items() if label in labels), None)
-
-
 def blockers(event, p):
     """What may have moved a Blocker pill, or None.
 
@@ -344,7 +330,7 @@ def blockers(event, p):
 
 
 def recompute(board, touched):
-    """Set Blocker on open issues blocking an open issue, else the label's pill.
+    """Set Blocker on open issues blocking an open issue, and clear it elsewhere: priority comes only from links.
 
     Writes only pills that change: every open issue for "all", else the issue that closed or reopened and the issues
     blocking it. An issue whose links GitHub will not list keeps its pill; the rest are still set, then the run fails naming it."""
@@ -368,7 +354,7 @@ def recompute(board, touched):
         except subprocess.CalledProcessError as e:
             refused(n, e)
             continue
-        want = "Blocker" if blocks else label_priority(board.labels("issue", n))
+        want = "Blocker" if blocks else None
         iid = board.item("issue", n)
         if board.value(iid, "Priority") != want:
             board.set(iid, "Priority", want)
@@ -380,7 +366,7 @@ def sync(event, payload, spec, repo, q=gql, rest=api):
     """Put the cards an event is about where their state says, and keep Priority."""
     if not spec:
         return []
-    pill, touched = priority(event, payload), blockers(event, payload)
+    touched = blockers(event, payload)
     on_off = event == "issues" and payload["action"] in ("labeled", "unlabeled") and payload["label"]["name"] == AUTOPILOT \
         and payload["issue"]["number"]
     merged = event in ("pull_request", "pull_request_target") and payload["action"] == "closed" and payload["pull_request"].get("merged")
@@ -403,12 +389,6 @@ def sync(event, payload, spec, repo, q=gql, rest=api):
             board.label("pr", n, True)
         if issue:
             placed += attempt(lambda: rebuild(board, repo, owners, issue, [n] if kind == "pr" else [])) or []
-    if pill and "Priority" in board.fields:
-        # A label never takes Blocker away: only the links do, on the next close, reopen or scheduled run.
-        number, option = pill
-        iid = board.item("issue", number)
-        if board.value(iid, "Priority") != "Blocker":
-            board.set(iid, "Priority", option)
     if on_off:
         attempt(lambda: switch(board, on_off))
     if merged:
