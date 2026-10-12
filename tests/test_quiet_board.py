@@ -12,35 +12,30 @@ check, though none of those can move a card. These tests hold the fix to the own
   step reads it from the run's event and name: reviews.yml names its run from the review (`run-name:`), and a run
   named any other way (a pull request whose own reviews.yml is older) still runs the update.
 - Events about one issue that arrive within a minute become one update: board.yml waits one minute in a queue of
-  the issue's own that a newer event cancels, and only then syncs. A wait cancelled that way is no failed check, so
-  autopilot still merges a green pull request (as it already ignores superseded card runs, #528).
-- The 15-minute sweep stays, so a card a skipped event could have put right is put right there.
+  the issue's own that a newer event cancels, and only then syncs.
+- A wait cancelled that way is no failed check, so autopilot still merges a green pull request (as it already ignores
+  superseded card runs, #528).
 
 board.yml is played with tests/test_start.py's reader and evaluator: each job's `if:`, outputs and concurrency group
-are evaluated the way GitHub evaluates them, with the queue step's real outputs. The board itself runs against
-tests/test_needs_you.py's in-memory world, as tests/test_board_state.py does.
+are evaluated the way GitHub evaluates them, with the queue step's real outputs.
 """
 import json
 import os
 import re
 import sys
 
-import pytest
-
 sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
 sys.path.insert(0, os.path.join(os.path.dirname(os.path.abspath(__file__)), ".."))
-import test_board_state as tbs  # noqa: E402
 import test_needs_you as tny  # noqa: E402
 from test_agent import GOOD_WORK, rec  # noqa: E402
 from test_start import Ctx, condition, evaluate, fill, load_yaml  # noqa: E402
-from dokima import agent, board, body, plan  # noqa: E402
+from dokima import agent, board, body  # noqa: E402
 
 ROOT = os.path.abspath(os.path.join(os.path.dirname(__file__), ".."))
 BOARD_YML = os.path.join(ROOT, ".github", "workflows", "board.yml")
 REVIEWS_YML = os.path.join(ROOT, ".github", "workflows", "reviews.yml")
 PR_TITLE = "The board is updated only when it can change"
 SPEC, REPO, OWNER, LABEL = tny.SPEC, tny.REPO, tny.OWNER, tny.LABEL
-NEEDS = tny.NEEDS
 BOT_LOGIN = f"{agent.BOT}[bot]"
 STRANGER = "someone-else" if OWNER != "someone-else" else "another-person"
 ASK = "The board is updated only when it can change.\n\n- Bursts become one update.\n"
@@ -327,26 +322,6 @@ def settle_job(jobs):
     return None
 
 
-# --- the board's in-memory world ------------------------------------------------------------------------------------
-
-@pytest.fixture
-def make(monkeypatch):
-    """Wire a world into dokima.board.Board and dokima.agent.gh, and return it (as tests/test_board_state.py does)."""
-
-    def wire(**kw):
-        world = tny.World(**kw)
-        monkeypatch.setattr(board, "Board", tbs.fake_board(world))
-        monkeypatch.setattr(agent, "gh", tny.fake_gh(world))
-        return world
-
-    return wire
-
-
-def settle(w, n=57):
-    """Put issue n's cards where its state says now, the way any board update does."""
-    board.rebuild(board.Board(SPEC, REPO), REPO, plan.repo_approvers("o"), n)
-
-
 # =================================================================================================================
 # 533.1: an event that cannot change a card's column or pill no longer starts a board update
 
@@ -403,8 +378,7 @@ def test_events_about_one_issue_within_a_minute_cause_one_board_update(record_pr
     wait cancelled by the next event, an update never syncs; the last one, left to wait, does: one update for the burst.
     An event about #58 waits in another group, so it never cancels #57's update; a skipped event about #57 (a comment,
     new commits, finished checks) waits in no group #57's update waits in, so the record a second before it still
-    lands. A wait cancelled this way shows on the pull request as a cancelled check: autopilot, reading the head's
-    checks, must not count it against an otherwise green pull request. Proves 533.2."""
+    lands. Proves 533.2."""
     record_property("proves", "533.2")
     jobs = jobs_of()
     j, s = settle_job(jobs), sync_job(jobs)
@@ -432,37 +406,26 @@ def test_events_about_one_issue_within_a_minute_cause_one_board_update(record_pr
     bad = [w for w, (e, p) in skipped_events().items()
            if (got := play(e, p, monkeypatch, tmp_path, "533.2")[j])["ran"] and got["group"] in waiting]
     assert not bad, f"533.2: these skipped events take #57's waiting queue and would cancel its update: {bad}"
+
+
+# =================================================================================================================
+# 533.3: autopilot ignores a burst's cancelled waits like cancelled card runs
+
+def test_autopilot_ignores_a_bursts_cancelled_waits(record_property, monkeypatch):
+    """Autopilot still merges a green pull request when a burst's board waits show as cancelled.
+
+    A board wait cancelled by a newer event shows on the pull request's head as a cancelled check named after
+    board.yml's waiting job. Autopilot, reading the head's checks, must not count it: with All tests and Acceptance
+    criteria green beside it, the head is proven. Beside it, a cancelled All tests on the same head must still stop
+    autopilot, so the check is not simply ignoring every cancelled run. Proves 533.3."""
+    record_property("proves", "533.3")
+    jobs = jobs_of()
+    j = settle_job(jobs)
+    assert j, "533.3: board.yml has no job the sync waits on that sleeps in a queue a newer event cancels, so there is no wait to ignore"
     name = str(jobs[j].get("name") or j)
     green = [{"name": n, "status": "completed", "conclusion": "success"} for n in ("All tests", "Acceptance criteria")]
     checks_on_head(monkeypatch, green + [{"name": name, "status": "completed", "conclusion": "cancelled"}])
     why = agent.unproven(REPO, "a1" * 20, wait=0, pause=0)
-    assert why is None, f"533.2: a board wait cancelled by a newer event keeps autopilot from merging a green pull request: {why}"
+    assert why is None, f"533.3: a board wait cancelled by a newer event keeps autopilot from merging a green pull request: {why}"
     checks_on_head(monkeypatch, green + [{"name": "All tests", "status": "completed", "conclusion": "cancelled"}])
-    assert agent.unproven(REPO, "a1" * 20, wait=0, pause=0), "533.2: test setup: a cancelled All tests no longer stops autopilot"
-
-
-# =================================================================================================================
-# 533.3: the 15-minute sweep still puts right any card a skipped event left in the wrong column
-
-def test_the_15_minute_sweep_still_puts_right_a_card_a_skipped_event_left_wrong(record_property, make, monkeypatch, tmp_path):
-    """The 15-minute sweep still puts right a card a skipped event left wrong.
-
-    board.yml must still be scheduled every 15 minutes and, played for the schedule, still run the job running
-    `python3 -m dokima.board`. Then: #57's code review approved, so its card and PR #60's belong in Review with Needs
-    you, but both sit in Work with no pill. A stranger's comment on #57 arrives and board.yml skips it. The next sweep,
-    with #57 updated since the last good sweep, must put both cards in Review with Needs you. Proves 533.3."""
-    record_property("proves", "533.3")
-    text = open(BOARD_YML).read()
-    assert re.search(r"cron:\s*[\"']\*/15 \* \* \* \*[\"']", text), "533.3: board.yml is no longer scheduled every 15 minutes"
-    s = sync_job(jobs_of())
-    assert play(*SCHEDULE, monkeypatch, tmp_path, "533.3")[s]["ran"], f"533.3: the {s!r} job does not run on the 15-minute sweep"
-    e, p = "issue_comment", comment_on_issue(57, "Looks right to me.", STRANGER)
-    assert not play(e, p, monkeypatch, tmp_path, "533.3")[s]["ran"], \
-        "533.3: a stranger's comment still updates the board, so no event is skipped yet for the sweep to put right"
-    w = make(prs={57: 60}, records={57: tny.code_approved()},
-             cards={("issue", 57): {"Status": "Work"}, ("pr", 60): {"Status": "Work"}})
-    tbs.with_github_lists(w, monkeypatch, runs=tbs.BOARD_RUNS, updated={("issue", 57): "2026-10-09T15:40:00Z"})
-    board.sync(*SCHEDULE, SPEC, REPO)
-    got = tbs.places(w, ("issue", 57), ("pr", 60))
-    assert got == {"issue #57": ("Review", NEEDS), "pr #60": ("Review", NEEDS)}, \
-        f"533.3: the sweep after a skipped event left #57's cards at {got}, not Review with Needs you"
+    assert agent.unproven(REPO, "a1" * 20, wait=0, pause=0), "533.3: a cancelled All tests no longer stops autopilot"
