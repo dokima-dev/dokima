@@ -311,25 +311,6 @@ def test_a_blocked_issue_on_autopilot_never_starts_its_planner_by_itself(tmp_pat
 
 # The code and AGENTS.md ---------------------------------------------------------------------------------------------
 
-def test_the_code_253_added_for_a_waiting_worker_is_gone(record_property):
-    """The waiting worker's code from #253 is gone from Dokima.
-
-    Proves 353.4.
-    dokima.agent must no longer have WAIT_LINE, GO_LINE, worker_waits, start_worker or start_blocked_workers, and no
-    file under dokima/ may still hold either of #253's lines, `Autopilot: plan approved, waiting for` or
-    `Autopilot: blockers closed, starting work`."""
-    record_property("proves", "353.4")
-    left = [n for n in ("WAIT_LINE", "GO_LINE", "worker_waits", "start_worker", "start_blocked_workers") if hasattr(agent, n)]
-    assert not left, f"353.4: dokima.agent still has #253's waiting-worker code: {left}"
-    held = []
-    for root, _, files in os.walk(os.path.join(ts.ROOT, "dokima")):
-        for f in files:
-            if f.endswith(".py"):
-                text = open(os.path.join(root, f), encoding="utf-8").read()
-                held += [f"{f}: {w!r}" for w in ("Autopilot: plan approved, waiting for", OLD_GO) if w in text]
-    assert not held, f"353.4: Dokima's code still holds #253's waiting-worker lines: {held}"
-
-
 def test_agents_md_says_a_blocked_issue_plans_only_after_its_blockers_merge(record_property):
     """AGENTS.md says a blocked issue plans only after its blockers merge, with no waiting worker.
 

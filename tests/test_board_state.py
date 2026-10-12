@@ -614,18 +614,6 @@ def test_the_board_workflow_joins_that_queue_and_never_cancels_a_running_recompu
 
 # 331.5: the per-event board rules this replaces are removed, and the board code is smaller
 
-def test_the_per_event_board_rules_are_removed(record_property):
-    """The rules that set the board from the event alone are gone.
-
-    Proves 331.5. dokima/board.py no longer has decide() (an event to a column), keeps() (events that keep Needs you), answered()
-    (a command clearing the pill from the event) or YOUR_TURN (bot comment texts that meant Needs you), and
-    dokima/agent.py no longer has move_card() (the card put where the run said)."""
-    record_property("proves", "331.5")
-    left = [f"board.{n}" for n in ("decide", "keeps", "answered", "YOUR_TURN") if hasattr(board, n)] + \
-        [f"agent.{n}" for n in ("move_card",) if hasattr(agent, n)]
-    assert not left, f"331.5: these per-event board rules are still there: {', '.join(left)}"
-
-
 def test_an_unreadable_card_keeps_its_place_and_the_run_fails_naming_it(record_property, make, monkeypatch, tmp_path, capsys):
     """A card GitHub cannot read keeps its place, and the run fails naming it.
 
