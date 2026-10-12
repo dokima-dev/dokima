@@ -143,13 +143,13 @@ jobs:
             git fetch -q origin "try/issue-$N" && git checkout -q -B "try/issue-$N" FETCH_HEAD
             # A worker's branch that clashes with main still starts: the merge is committed with its conflict markers,
             # the clashed files are listed for the fence, and the worker resolves them. Main's changes are in BASE.
-            if [ "$ROLE" = worker ] && ! git -c user.name=dokima -c user.email=dokima@users.noreply.github.com merge -q --no-edit origin/main; then
+            if [ "$ROLE" = worker ] && ! git -c user.name="dokima-runtime[bot]" -c user.email="337511017+dokima-runtime[bot]@users.noreply.github.com" merge -q --no-edit origin/main; then
               git diff --name-only --diff-filter=U > /tmp/clashed.txt
               if [ ! -s /tmp/clashed.txt ]; then
                 echo "Merging main into try/issue-$N failed with no clashed file to resolve." > /tmp/why.txt
                 echo "::error title=Merge failed::$(cat /tmp/why.txt)"; exit 1
               fi
-              git add -A && git -c user.name=dokima -c user.email=dokima@users.noreply.github.com commit -q --no-edit
+              git add -A && git -c user.name="dokima-runtime[bot]" -c user.email="337511017+dokima-runtime[bot]@users.noreply.github.com" commit -q --no-edit
               echo "::notice title=Clash with main::the worker resolves $(paste -sd, /tmp/clashed.txt)"
             fi
           elif [ "$ROLE" = planner ] || [ "$STAGE" = plan ]; then

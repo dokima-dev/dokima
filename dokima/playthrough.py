@@ -201,8 +201,8 @@ class Sandbox:
         self.since = None
 
     def git(self, *args):
-        return run("git", *self.git_auth, "-c", "user.name=dokima-playthrough",
-                   "-c", "user.email=dokima-playthrough@users.noreply.github.com", *args, env=self.env, cwd=self.clone)
+        return run("git", *self.git_auth, "-c", "user.name=dokima-runtime[bot]",
+                   "-c", "user.email=337511017+dokima-runtime[bot]@users.noreply.github.com", *args, env=self.env, cwd=self.clone)
 
     def gh(self, *args):
         return run("gh", *args, env=self.env)
