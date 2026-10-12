@@ -184,12 +184,30 @@ jobs:
       - name: Install pytest and Claude Code
         run: |
           set -o pipefail
-          { pip install pytest pytest-xdist && npm install -g @anthropic-ai/claude-code; } 2>&1 | tee /tmp/install.txt \
+          { pip install pytest pytest-xdist pytest-testmon && npm install -g @anthropic-ai/claude-code; } 2>&1 | tee /tmp/install.txt \
             || { echo "The step 'Install pytest and Claude Code' failed: $(tail -3 /tmp/install.txt | paste -sd' ')" > /tmp/why.txt; exit 1; }
-      - name: All tests, run by code before the reviewer reads the pull request
+      # The newest testmon baseline recorded on main (testmon.yml), so the review runs only the tests its change can affect.
+      - name: Restore main's testmon baseline
+        if: env.STAGE == 'pr'
+        uses: actions/cache/restore@v4
+        with:
+          path: .testmondata
+          key: testmon-${{ github.sha }}
+          restore-keys: testmon-
+      - name: Tests the change can affect, run by code before the reviewer reads the pull request
         if: env.STAGE == 'pr'
         run: |
-          PYTHONPATH= PYTHONSAFEPATH= python3 -m pytest -q -rA --junitxml="$PACK/tests.xml" > "$PACK/tests.txt" 2>&1 || true
+          # With a baseline testmon picks the affected tests; with none, or one it cannot read, every test runs.
+          code=0
+          if [ -f .testmondata ]; then
+            PYTHONPATH= PYTHONSAFEPATH= python3 -m pytest -q -rA --testmon --junitxml="$PACK/tests.xml" > "$PACK/tests.txt" 2>&1 || code=$?
+          fi
+          # Exit 0, 1 (a test failed) and 5 (no test affected) are testmon's real answers; anything else is a crash.
+          if [ ! -f .testmondata ] || { [ "$code" -gt 1 ] && [ "$code" -ne 5 ]; }; then
+            [ ! -f .testmondata ] || echo "::warning title=No usable baseline::testmon stopped with exit $code; running every test"
+            rm -f "$PACK/tests.xml"
+            PYTHONPATH= PYTHONSAFEPATH= python3 -m pytest -q -rA --junitxml="$PACK/tests.xml" > "$PACK/tests.txt" 2>&1 || true
+          fi
           tail -5 "$PACK/tests.txt"
       - name: Code checks the pack has everything this role needs
         run: |
@@ -239,7 +257,7 @@ jobs:
             the code check's verdict and the run it came from. Answer open blockers by id from the newest review.
           - $PACK/plan.json: the newest plan that passed its check (absent until the planner has one).
           - $PACK/open_blockers.json: the open blockers from the newest review at your stage. Answer every one by id.$( [ "$STAGE" = pr ] && echo "
-          - $PACK/diff.patch: the work against main. $PACK/tests.txt and tests.xml: all tests, run by code on this machine.
+          - $PACK/diff.patch: the work against main. $PACK/tests.txt and tests.xml: the tests the change can affect (every test with no baseline), run by code on this machine.
           - $PACK/worker-run/: the worker's session log." )
           You are on branch try/issue-$N. Your stage is: ${STAGE:-$ROLE}.
           Hand back into $OUT. Before you finish, run this check on your hand-back and fix everything it reports:
