@@ -15,7 +15,7 @@ import subprocess
 import sys
 import time
 
-from dokima import card, raises, words
+from dokima import card, manifest, raises, words
 from dokima.card import field_icon, icon
 
 VERDICTS = {"approve", "block", "escalate"}
@@ -2198,10 +2198,29 @@ def unproven(repo, sha, wait=CHECKS_WAIT, pause=CHECKS_PAUSE, branch="main"):
         time.sleep(pause)
 
 
+def auto_merge_on(repo):
+    """True when the repo's variable DOKIMA_AUTO_MERGE is `on` (#557).
+
+    Unset, any other value, or a read GitHub fails, leaves it off: the pull request waits for the owner's approval."""
+    try:
+        value = gh("api", f"repos/{repo}/actions/variables/{manifest.AUTO_MERGE}", "-q", ".value")
+    except subprocess.CalledProcessError as e:
+        if "HTTP 404" not in f"{e.stderr} {e.stdout}":
+            print(f"::warning::{manifest.AUTO_MERGE} could not be read, so it counts as off: {gh_reason(e)}")
+        return False
+    return value.strip().lower() == "on"
+
+
+def behind_main(repo, head):
+    """True when the commit misses main's newest commit."""
+    return json.loads(gh("api", f"repos/{repo}/compare/main...{head}")).get("behind_by") != 0
+
+
 def try_merge(repo, pr):
     """Merge the pull request at the head whose checks were read, only when it changes no workflow file and every
-    check on that head has passed. Returns (True, the merged head) or (False, why not, in GitHub's words when GitHub
-    refused)."""
+    check on that head has passed. With DOKIMA_AUTO_MERGE on, Dokima's app merges it directly, past the rule's
+    approval, only when its branch holds main's newest commit (#557). Returns (True, the merged head) or (False, why
+    not, in GitHub's words when GitHub refused)."""
     try:
         files = [f["filename"] for p in pages(gh("api", f"repos/{repo}/pulls/{pr}/files?per_page=100", "--paginate")) for f in p]
         flows = [f for f in files if f.startswith(WORKFLOWS)]
@@ -2213,8 +2232,11 @@ def try_merge(repo, pr):
         why = unproven(repo, head)
         if why:
             return False, why
+        bypass = auto_merge_on(repo)
+        if bypass and behind_main(repo, head):
+            return False, "its branch is behind main and misses main's newest commit; bring it up to date with main"
         # Pinned to the head whose checks passed: a commit pushed since makes GitHub refuse.
-        gh("pr", "merge", str(pr), "-R", repo, "--squash", "--match-head-commit", head)
+        gh("pr", "merge", str(pr), "-R", repo, "--squash", "--match-head-commit", head, *(["--admin"] if bypass else []))
         return True, head
     except subprocess.CalledProcessError as e:
         return False, " ".join((e.stderr or str(e)).split())
