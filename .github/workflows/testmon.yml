@@ -19,8 +19,11 @@ jobs:
         with:
           python-version: "3.12"
       - run: pip install -q pytest pytest-xdist pytest-testmon
-      # A failing test still records its baseline: testmon runs it again on the next review.
-      - run: python3 -m pytest -q -p no:cacheprovider --testmon || true
+      # A failing test still records its baseline (exit 1): testmon runs it again on the next review. Any other
+      # non-zero exit is a crash and fails this job, so a missing baseline is never silent. testmon needs pytest's
+      # cache plugin, so it is not turned off here.
+      - run: python3 -m pytest -q --testmon || [ $? -eq 1 ]
+      - run: test -s .testmondata || { echo "::error title=No testmon baseline::pytest --testmon wrote no .testmondata"; exit 1; }
       - uses: actions/cache/save@v4
         with:
           path: .testmondata
