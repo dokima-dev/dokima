@@ -21,7 +21,7 @@ import sys
 sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
 sys.path.insert(0, os.path.join(os.path.dirname(os.path.abspath(__file__)), ".."))
 from card_player import (BOT, OWNER, REPOSITORY, Hub, checks_finished, issue_comment, issue_event,  # noqa: E402
-                         line_note, pr_comment, pr_event, review_event, sender, stale_again, worker_finished)
+                         line_note, pr_comment, pr_event, review_event, sender, stale_again)
 import card_player  # noqa: E402
 from test_start import Ctx, condition, evaluate, fill, load_yaml  # noqa: E402
 from dokima import agent, body  # noqa: E402
@@ -101,7 +101,6 @@ def every_change(n=N, p=P):
         "the Acceptance criteria run ends": checks_finished(n, p, "Acceptance criteria"),
         "the full suite starts": run_started(n, p, "full suite", "in_progress"),
         "the full suite ends": checks_finished(n, p, "full suite"),
-        "the worker run ends": worker_finished(n),
         "the bot merges the pull request": pr_event(n, p, "closed", who="bot", merged=True),
     }
 
@@ -134,7 +133,7 @@ def test_every_change_on_an_issue_or_its_pull_request_redraws_both_cards(tmp_pat
     cards stale each time: the issue opened, edited (by the owner and by the bot), labeled, closed and reopened; a
     comment posted, edited and deleted on the issue and on the pull request, the bot's included; a run card going up
     and being edited into its record; the pull request opened, edited, pushed to, closed, reopened, reviewed, noted on
-    a line and merged; the Acceptance criteria and full suite runs starting and ending; the worker run ending. GitHub
+    a line and merged; the Acceptance criteria and full suite runs starting and ending. GitHub
     must start card.yml for each (counting only the activity types GitHub really sends), and the run must leave
     neither card old. One missed change turns it red, naming it."""
     record_property("proves", "438.1")

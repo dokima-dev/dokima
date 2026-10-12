@@ -17,20 +17,6 @@ def label(event, by, at, name="work"):
     return {"event": event, "label": {"name": name}, "actor": {"login": by}, "created_at": at}
 
 
-def test_a_code_owners_work_label_approves_and_starts_the_worker(record_property):
-    record_property("proves", "67.1")
-    text = read(".github/workflows/worker.yml")
-    assert "types: [labeled, unlabeled]" in text
-    assert "if: github.event.action == 'labeled' && github.event.label.name == 'work'" in text
-    assert 'python3 -m dokima.plan approvers | tr \',\' \'\\n\' | grep -qx "$SENDER"' in text
-    assert "SENDER: ${{ github.event.sender.login }}" in text
-    assert "claude -p" in text and "gh pr create" in text
-    assert plan.approvers("# owners\n* @alice @bob  # both\n/docs/ @carol\n", "repo-owner") == {"alice", "bob"}
-    assert plan.approvers("", "repo-owner") == {"repo-owner"}
-    events = [label("labeled", "some-app[bot]", "2026-10-04T10:00:00Z")]
-    assert plan.approved_at(events, APPROVERS) is None
-
-
 EDITS = [  # GitHub lists each version's full text; the oldest is the original.
     {"editedAt": "2026-10-04T13:00:00Z", "diff": "v3: edited while labeled"},
     {"editedAt": "2026-10-04T11:00:00Z", "diff": "v2: the approved plan"},
@@ -48,16 +34,6 @@ def test_the_plan_is_frozen_when_the_label_is_added(record_property):
     assert plan.approved_at(removed, APPROVERS) is None
     again = removed + [label("labeled", OWNER, "2026-10-04T14:00:00Z")]
     assert plan.approved_version("v3: edited while labeled", EDITS, plan.approved_at(again, APPROVERS)) == "v3: edited while labeled"
-    worker = read(".github/workflows/worker.yml")
-    assert 'git ls-remote --exit-code --heads origin "work/issue-$N"' in worker
-    assert 'git checkout -q -B "work/issue-$N" FETCH_HEAD' in worker
-
-
-def test_removing_work_stops_a_running_build(record_property):
-    record_property("proves", "67.4")
-    text = read(".github/workflows/worker.yml")
-    assert "group: work-${{ github.event.issue.number }}-${{ github.event.label.name }}" in text
-    assert "cancel-in-progress: true" in text
 
 
 def test_approve_only_means_merge(record_property):
@@ -77,7 +53,6 @@ def test_approve_only_means_merge(record_property):
             assert "github.event.review.state != 'approved'" in read(f".github/workflows/{name}")
             continue
         assert "pull_request_review" not in read(f".github/workflows/{name}")
-    assert ".dokima/plans" not in read(".github/workflows/worker.yml")
     assert "Approve the plan" not in read("dokima/card.py")
     assert not hasattr(plan, "starts_build")
 
