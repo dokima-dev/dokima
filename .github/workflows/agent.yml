@@ -465,3 +465,42 @@ jobs:
                END { for (x in t) print t[x], x | "sort -rn | head -4 | paste -sd, - > top"; close("sort -rn | head -4 | paste -sd, - > top")
                      getline top < "top"
                      printf "::notice title=GitHub calls::graphql %d, rest %d; most: %s\n", n["graphql"], n["rest"], top }' calls || true
+  # A run that failed may have died before posting its record (every step after the agent broke). On a fresh machine,
+  # code checks: when the run's record is not on the issue or its pull request, its live card becomes a failed record
+  # linking the run, mentioning the owner, and the board shows Needs you in the stage's column.
+  unrecorded:
+    needs: run
+    if: always() && needs.run.result == 'failure'
+    environment: keys
+    runs-on: ubuntu-24.04
+    env:
+      N: ${{ (inputs.issue || github.event.client_payload.issue) }}
+      ROLE: ${{ (inputs.role || github.event.client_payload.role) }}
+      STAGE: ${{ (inputs.role || github.event.client_payload.role) == 'reviewer' && (inputs.stage || github.event.client_payload.stage) || '' }}
+      OUT: /tmp/dokima-out
+    steps:
+      - uses: actions/checkout@v5
+        with:
+          persist-credentials: false
+      - uses: actions/setup-python@v6
+        with:
+          python-version: "3.12"
+      - id: app
+        uses: actions/create-github-app-token@v2
+        with:
+          app-id: ${{ vars.DOKIMA_APP_ID }}
+          private-key: ${{ secrets.DOKIMA_APP_KEY }}
+      - name: A failed record for a run that ended before posting its own
+        env:
+          GH_TOKEN: ${{ steps.app.outputs.token }}
+        run: |
+          export OWNERS=$(python3 -m dokima.plan approvers)
+          python3 -m dokima.agent unrecorded "$ROLE" "$STAGE" "$N" "$OUT"
+      - name: The board shows Needs you
+        if: vars.DOKIMA_BOARD != ''
+        env:
+          GH_TOKEN: ${{ steps.app.outputs.token }}
+          DOKIMA_BOARD: ${{ vars.DOKIMA_BOARD }}
+        run: |
+          [ -s "$OUT/record.json" ] || exit 0
+          python3 -m dokima.agent board "$N" "$OUT"
