@@ -135,15 +135,16 @@ def links_row(text):
 def test_each_source_shows_as_a_github_reference_to_where_the_ask_is(record_property):
     """Each Source shows its comment, issue or parent story as a GitHub reference.
 
-    Draws the card of a plan whose criteria point to a comment, to the issue and to the parent story, and checks
-    each criterion's last line reads Source: followed by its own link written out bare, so GitHub draws it with its
+    Draws the card of a plan whose criteria point to a comment and to the parent story, and checks
+    each such criterion's last line reads Source: followed by its own link written out bare, so GitHub draws it with its
     icon and title, that no Source is the word Source linked to a page, and that a criterion with no source shows no
-    Source line. Proves 359.1."""
+    Source line. Proves 359.1, and 526.2: a source on a comment or the parent still shows."""
     record_property("proves", "359.1")
+    record_property("proves", "526.2")
     for page in ("issue", "pr"):
         text = draw(page=page)
-        for words, url in (("First thing works", COMMENT), ("Second thing works", ISSUE["url"]),
-                           ("Third thing works", PARENT)):
+        # The criterion sourced from the issue itself shows no Source line since #526.
+        for words, url in (("First thing works", COMMENT), ("Third thing works", PARENT)):
             lines = under(text, words)
             assert lines, f"359.1: “{words}” has no lines under it on the {page} card"
             last = lines[-1]

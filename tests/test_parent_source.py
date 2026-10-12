@@ -26,6 +26,8 @@ import os
 import subprocess
 import sys
 
+sys.path.insert(0, os.path.join(os.path.dirname(__file__), ".."))
+from dokima import agent  # noqa: E402
 import test_autopilot_river as tr
 import test_start as ts
 
@@ -120,8 +122,11 @@ def test_any_other_issue_is_still_rejected_naming_the_criterion_and_the_source(r
     Runs the real planner check on plans of #331 (parent #330). Criterion 1 cites the parent and must raise nothing;
     criterion 2 cites another issue (#329, a comment on #329, #3301 whose number starts like the parent's, the
     parent's own repo path under another repo) and must be rejected, the problem naming "acceptance criterion 2"
-    and that source. A split's story is held to the same rule, naming "story 1". Proves 334.2."""
+    and that source. A split's story is held to the same rule, naming "story 1". Then, since #526 hides a Source on
+    the issue itself, a plan citing #331, a comment on it and #330 passes the check as handed back and its planner
+    run comment's record reads back with every source kept. Proves 334.2 and 526.3."""
     record_property("proves", "334.2")
+    record_property("proves", "526.3")
     for case, bad in (("another issue", url(OTHER_N)),
                       ("a comment on another issue", url(OTHER_N) + "#issuecomment-3291"),
                       ("a number that starts like the parent's", url(PARENT_N) + "1"),
@@ -137,6 +142,15 @@ def test_any_other_issue_is_still_rejected_naming_the_criterion_and_the_source(r
         f"334.2: a split citing #329 was not rejected naming story 1, its criterion 2 and the source:\n{text[-1500:]}"
     assert "acceptance criterion 1 " not in text, \
         f"334.2: a split's criterion 1, which cites the parent #330, was rejected too:\n{text[-1500:]}"
+    kept = [url(STORY_N), url(STORY_N) + "#issuecomment-3311", url(PARENT_N)]
+    code, text = planner_check(tmp_path / "kept", story(kept), PARENT_N)
+    for k, s in enumerate(kept, 1):
+        assert_source_accepted(text, k, s, "526.3", "a story")
+    rec = {"role": "planner", "stage": None, "handback": story(kept), "check": {"passed": True, "problems": []},
+           "run": "https://github.com/o/r/actions/runs/1"}
+    back = agent.records([{"author": {"login": agent.BOT}, "body": agent.render(rec)}])
+    assert back and [c.get("source") for c in back[0]["handback"]["acceptance_criteria"]] == kept, \
+        f"526.3: the planner's run comment does not record every criterion's source: {back}"
 
 
 # --- The fake GitHub that knows each issue's parent. ----------------------------------------------------------------
