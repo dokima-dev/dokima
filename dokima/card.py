@@ -412,12 +412,13 @@ def links_row(repo, issue, pr, worker, check_runs, page="issue"):
     return " · ".join(links)
 
 
-def criterion_item(repo, label, c, check, tests):
+def criterion_item(repo, label, c, check, tests, number=None):
     """One criterion bullet: its status circle, its label linked to its check, its words plain.
 
     The label links only when there is a check. Under it one italic Verified by line per test with a docstring, only
     the words Verified by linking to the test, then Source: and the link to where the owner asked for it written out
-    bare, so GitHub draws it as its own reference, when it has one."""
+    bare, so GitHub draws it as its own reference, when it has one. A source that is issue `number` itself shows no
+    Source line, as it tells the owner nothing (#526)."""
     if check:
         label = f'<a href="{check["html_url"]}">{label}</a>'
     out = [f"- {circle(repo, state(check))} **{label}:** {escape(c.get('text'))}"]
@@ -425,7 +426,8 @@ def criterion_item(repo, label, c, check, tests):
         if t and t.get("verified_by"):
             out.append(f'  - *<a href="{t["url"]}">{field_icon(repo, "verified by")} Verified by</a>: '
                        f'{escape(t["verified_by"])}*')
-    if c.get("source"):
+    own = f"https://github.com/{repo}/issues/{number}"
+    if c.get("source") and c["source"].rstrip("/") != own:
         out.append(f'  - Source: {full_refs(repo, c["source"])}')
     return out
 
@@ -435,7 +437,8 @@ def criteria_list(repo, number, start, label, criteria, plan_tests, by_key, test
     out = []
     for k, c in enumerate(criteria, start):
         key = f"{number}.{k}"
-        out += criterion_item(repo, label, c, by_key.get(key), [tests.get(t) for t in plan_tests.get(key, [])])
+        out += criterion_item(repo, label, c, by_key.get(key), [tests.get(t) for t in plan_tests.get(key, [])],
+                              number)
     return out
 
 
