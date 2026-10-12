@@ -17,6 +17,9 @@ from dokima.board import api
 
 PER_PAGE = 100
 UPDATE_WORDS = ("This pull request could not be updated with ", "This pull request is up to date with ")
+ALL_TESTS = "all tests"
+FAILED = ("failure", "timed_out")
+SKIP_MARK = "<!-- dokima-uptodate-skip {pr} {head} -->"
 
 
 def open_prs(repo, base, rest):
@@ -69,11 +72,38 @@ def say(repo, n, body, rest, refused):
         rest("DELETE", f"repos/{repo}/issues/comments/{c['id']}")
 
 
+def tests_failed(repo, head, rest):
+    """True when every all tests run on the head finished and failed.
+
+    False when one passed or is still running, there is none, or GitHub cannot say."""
+    try:
+        runs = (rest("GET", f"repos/{repo}/commits/{head}/check-runs?check_name={ALL_TESTS.replace(' ', '%20')}"
+                            f"&per_page={PER_PAGE}") or {}).get("check_runs") or []
+    except (subprocess.CalledProcessError, AttributeError):
+        return False
+    runs = [r for r in runs if r.get("name") == ALL_TESTS]
+    return bool(runs) and all(r.get("status") == "completed" and r.get("conclusion") in FAILED for r in runs)
+
+
+def say_skipped(repo, base, pr, issue, rest):
+    """Says once on the issue that its PR is skipped while this head fails.
+
+    A hidden mark naming the PR and its head keeps later merges from saying it again."""
+    n, head = pr["number"], pr["head"]["sha"]
+    mark = SKIP_MARK.format(pr=n, head=head)
+    if any(mark in (c.get("body") or "") for c in history(repo, issue, rest) if c["author"]["login"] == agent.BOT):
+        return
+    rest("POST", f"repos/{repo}/issues/{issue}/comments", body=(
+        f"{mark}\nPull request #{n} is not brought up to date with `{base}`: its all tests check failed on its head "
+        f"{head[:7]}. It is again once all tests pass on a new head.\n"))
+
+
 def run(repo, base, sha, rest=api, on_clash=None, failed=None):
     """Update every open PR into base whose branch is behind it.
 
     A refused PR carries one comment saying why, edited in place on every later refusal and to say it is up to date
-    once it updates cleanly.
+    once it updates cleanly. A PR whose all tests check failed on its head is left alone, and a Dokima PR says so once
+    on its issue for that head.
 
     on_clash(pr, sha) is called for each PR GitHub refuses with a merge conflict. When GitHub cannot list or change a
     PR's comments, (number, reason) goes into `failed` and the rest go on; with no `failed` list it raises.
@@ -82,6 +112,16 @@ def run(repo, base, sha, rest=api, on_clash=None, failed=None):
     for pr in open_prs(repo, base, rest):
         n, head = pr["number"], pr["head"]["sha"]
         if not rest("GET", f"repos/{repo}/compare/{base}...{head}").get("behind_by"):
+            continue
+        if tests_failed(repo, head, rest):
+            issue = dokima_issue(repo, pr)
+            if issue is not None:
+                try:
+                    say_skipped(repo, base, pr, issue, rest)
+                except subprocess.CalledProcessError as e:
+                    if failed is None:
+                        raise
+                    failed.append((n, reason(e)))
             continue
         try:
             rest("PUT", f"repos/{repo}/pulls/{n}/update-branch", expected_head_sha=head)

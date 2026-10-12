@@ -12,7 +12,8 @@ The fake GitHub answers:
   - GET .../compare/BASE...HEAD, where HEAD is a PR's head sha, its ref or its "owner:ref" label: behind_by, ahead_by;
   - PUT .../pulls/N/update-branch (expected_head_sha): 202, or GitHub's refusal for that PR, 422 with its message;
   - GET .../issues/N/comments: no comments yet (#408 looks for its earlier refusal comment);
-  - POST .../issues/N/comments (body): a comment on PR N.
+  - POST .../issues/N/comments (body): a comment on PR N;
+  - GET .../commits/SHA/check-runs: no check runs yet (#523 skips a PR whose all tests check failed).
 """
 import json
 import os
@@ -84,6 +85,8 @@ class FakeGitHub:
             return []
         if method == "POST" and m:
             return {"id": len(self.calls), "body": fields.get("body", "")}
+        if method == "GET" and re.fullmatch(rf"repos/{REPO}/commits/[^/]+/check-runs", bare):
+            return {"total_count": 0, "check_runs": []}
         raise AssertionError(f"189: unexpected GitHub call {method} {path} {fields}")
 
     @staticmethod
