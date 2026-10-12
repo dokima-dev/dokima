@@ -23,10 +23,19 @@ def test_annotation_links_permanently_to_the_tests_first_line(record_property):
 
 
 def test_full_suite_runs_every_test_on_every_pull_request(record_property):
+    """The merge gate still runs every test, in parallel, exactly as today.
+
+    Proves 29.4 and 539.3. Reads full-suite.yml and checks it still installs only pytest and pytest-xdist, still
+    runs every test spread over all cores with `-n auto`, and never uses testmon, which only code reviews use."""
     record_property("proves", "29.4")
+    record_property("proves", "539.3")
     path = os.path.join(os.path.dirname(__file__), "..", ".github/workflows/full-suite.yml")
     lines = [line.strip() for line in open(path)]
     assert "name: full suite" in lines
     assert "pull_request_target:" in lines
     assert "name: all tests" in lines
     assert any(line.startswith("- run: pytest") and line.endswith(" tests") for line in lines)
+    assert "- run: pip install -q pytest pytest-xdist" in lines, "539.3: the merge gate no longer installs exactly pytest and pytest-xdist"
+    assert "- run: pytest -q -p no:cacheprovider -n auto tests" in lines, \
+        "539.3: the merge gate no longer runs every test in parallel with -n auto"
+    assert not any("testmon" in line for line in lines), "539.3: the merge gate uses testmon, so it may skip tests"
