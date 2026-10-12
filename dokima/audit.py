@@ -116,6 +116,21 @@ def compare_permissions(live):
     return lines
 
 
+def merge_queue_bypass(github, repo):
+    """With DOKIMA_AUTO_MERGE on, a line when the merge queue ruleset lacks the app's bypass.
+
+    Dokima's direct merge needs the app as a bypass actor limited to pull requests."""
+    if (github.variable(repo, manifest.AUTO_MERGE) or "").strip().lower() != "on":
+        return []
+    app = github.app_id(repo)
+    queues = [r for r in github.rulesets(repo) if any(x.get("type") == "merge_queue" for x in r.get("rules") or [])]
+    if any(b.get("actor_type") == "Integration" and b.get("actor_id") == app and b.get("bypass_mode") == "pull_request"
+           for r in queues for b in r.get("bypass_actors") or []):
+        return []
+    return [f"`{manifest.AUTO_MERGE}` is `on`, but Dokima's app is not a bypass actor of the merge queue ruleset for "
+            f"pull requests; Dokima needs that bypass to merge a pull request whose code review passed."]
+
+
 def compare(github, repo):
     """One line per setting that differs from the manifest or could not be read."""
     reads = [("Labels", lambda: github.labels(repo), compare_labels),
@@ -124,7 +139,8 @@ def compare(github, repo):
     reads += [(f"Branch rule of `{branch}`", lambda branch=branch: github.branch_rule(repo, branch),
                lambda rule, branch=branch, want=want: compare_rule(branch, rule, want))
               for branch, want in manifest.BRANCH_RULES.items()]
-    reads += [("App permissions", lambda: github.permissions(repo), compare_permissions)]
+    reads += [("App permissions", lambda: github.permissions(repo), compare_permissions),
+              ("The merge queue ruleset's bypass list", lambda: merge_queue_bypass(github, repo), lambda lines: lines)]
     lines = []
     for what, read, check in reads:
         try:
@@ -241,6 +257,21 @@ class GitHub:
 
     def permissions(self, repo):
         return json.loads(gh("api", f"repos/{repo}/installation"))["permissions"]
+
+    def variable(self, repo, name):
+        try:
+            return json.loads(gh("api", f"repos/{repo}/actions/variables/{name}"))["value"]
+        except subprocess.CalledProcessError as e:
+            if "HTTP 404" in f"{e.stderr} {e.stdout}":
+                return None
+            raise
+
+    def rulesets(self, repo):
+        listed = pages(gh("api", "--paginate", f"repos/{repo}/rulesets?per_page=100"))
+        return [json.loads(gh("api", f"repos/{repo}/rulesets/{r['id']}")) for r in listed]
+
+    def app_id(self, repo):
+        return json.loads(gh("api", f"repos/{repo}/installation"))["app_id"]
 
     def setup_issue(self, repo):
         listed = json.loads(gh("issue", "list", "--repo", repo, "--state", "open", "--limit", "1000", "--json",

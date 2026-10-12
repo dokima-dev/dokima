@@ -10,7 +10,8 @@ What it answers (OWNER/REPO is the state's repo; any other repo is logged as uns
     gh api [-X GET] repos/OWNER/REPO/labels[?...]                       labels, as GitHub's REST list
     gh api [-X GET] repos/OWNER/REPO/branches/main/protection[/required_status_checks]
                                                                         main's rule; 404 "Branch not protected" if none
-    gh api [-X GET] repos/OWNER/REPO/installation                       the app's {"permissions": {...}}
+    gh api [-X GET] repos/OWNER/REPO/installation                       the app's {"app_id": 1, "permissions": {...}}
+    gh api [-X GET] repos/OWNER/REPO/actions/variables/NAME             the state's "variables"[NAME]; 404 when unset
     gh api [-X GET] repos/OWNER/REPO/issues[?state=...&labels=...]      issues (open unless state says otherwise)
     gh api [-X GET] repos/OWNER/REPO/issues/N[/comments]
     gh api [-X POST] repos/OWNER/REPO/issues -f title=.. -f body=.. [-f labels[]=..]   opens an issue
@@ -196,7 +197,16 @@ def rest(state, method, path, fields):
     if method == "GET" and rest_path == "installation":
         if "permissions" in fail:
             refuse(state, fail["permissions"])
-        reply(state, {"id": 1, "app_slug": "dokima-runtime", "permissions": state["permissions"]})
+        reply(state, {"id": 1, "app_id": 1, "app_slug": "dokima-runtime", "permissions": state["permissions"]})
+    m = re.fullmatch(r"actions/variables/([A-Za-z0-9_]+)", rest_path)
+    if method == "GET" and m:
+        if "variables" in fail:
+            refuse(state, fail["variables"])
+        have = state.get("variables", {})
+        if m.group(1) not in have:
+            refuse(state, "Not Found (HTTP 404)", {"message": "Not Found", "status": "404"})
+        reply(state, {"name": m.group(1), "value": have[m.group(1)], "created_at": "2026-10-01T00:00:00Z",
+                      "updated_at": "2026-10-01T00:00:00Z"})
     if rest_path == "issues":
         if method == "GET":
             want = params.get("state", "open")

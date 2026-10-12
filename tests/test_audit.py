@@ -18,6 +18,12 @@ What the faked GitHub offers, and the audit is expected to use (a read may raise
     views()                   the board's {view: {"layout": str, "filter": str}}
     branch_rule(repo, branch) {"required_checks": [name, ...]}, or None when the branch has no rule
     permissions(repo)         the app's {permission: "read" | "write"}
+    variable(repo, name)      the repo's Actions variable `name` as text, or None when it is unset
+    rulesets(repo)            every ruleset of the repo, each as GitHub's REST answers one ruleset: {"name", "target",
+                              "enforcement", "rules": [{"type": ...}, ...], "bypass_actors": [{"actor_id",
+                              "actor_type", "bypass_mode"}, ...]}; the merge queue ruleset holds a rule of type
+                              "merge_queue", and Dokima's app is the actor of type "Integration" whose id is app_id()
+    app_id(repo)              the id of Dokima's app, as the repo's installation answers it
     setup_issue(repo)         the open Setup issue as {"number": n, "body": str}, or None
     create_issue(repo, title, body) -> n
     edit_issue(repo, n, body)
@@ -42,6 +48,19 @@ from dokima import manifest  # noqa: E402
 REPO = "acme/widgets"
 FORBIDDEN = "gh: Resource not accessible by integration (HTTP 403)"
 BROKEN = "gh: Server Error (HTTP 502)"
+
+
+APP_ID = 9
+APP_BYPASS = {"actor_id": APP_ID, "actor_type": "Integration", "bypass_mode": "pull_request"}
+ADMIN_BYPASS = {"actor_id": 5, "actor_type": "RepositoryRole", "bypass_mode": "always"}
+
+
+def merge_queue_ruleset(*bypass):
+    """main's merge queue ruleset, as GitHub answers it, with the given bypass actors."""
+    return {"id": 1, "name": "main merge queue", "target": "branch", "enforcement": "active",
+            "conditions": {"ref_name": {"include": ["~DEFAULT_BRANCH"], "exclude": []}},
+            "rules": [{"type": "merge_queue", "parameters": {"merge_method": "SQUASH"}}, {"type": "pull_request"}],
+            "bypass_actors": [dict(b) for b in bypass]}
 
 
 def audit(criterion):
@@ -70,6 +89,8 @@ class GitHub:
         self.view_map = copy.deepcopy(manifest.VIEWS)
         self.rules = copy.deepcopy(manifest.BRANCH_RULES)
         self.perms = copy.deepcopy(manifest.PERMISSIONS)
+        self.variables = {}
+        self.ruleset_list = [merge_queue_ruleset(APP_BYPASS)]
         self.fail = dict(fail or {})
         self.issues = {n: dict(i) for n, i in (issues or {}).items()}
         self.writes = []
@@ -94,6 +115,15 @@ class GitHub:
 
     def permissions(self, repo):
         return self._read("permissions", self.perms)
+
+    def variable(self, repo, name):
+        return self._read("variable", self.variables.get(name))
+
+    def rulesets(self, repo):
+        return self._read("rulesets", self.ruleset_list)
+
+    def app_id(self, repo):
+        return self._read("app_id", APP_ID)
 
     def setup_issue(self, repo):
         for n, i in sorted(self.issues.items()):
@@ -476,3 +506,42 @@ def test_a_failed_github_call_is_reported_as_not_verified(record_property, tmp_p
     n = a.run(g, REPO, codeowners(tmp_path, "* @alice\n"))
     assert n in g.issues and g.issues[n]["state"] == "open", "283.6: failed calls were skipped: no Setup issue opened"
     assert all(l in body_lines(g.issues[n]["body"]) for l in lines), "283.6: the Setup issue misses a failed call"
+
+
+# 557.3: with the auto-merge setting on, the audit reports when the app lacks its pull-request-only merge queue bypass
+
+def test_with_auto_merge_on_the_audit_reports_the_app_missing_from_the_merge_queue_bypass(record_property):
+    """With auto-merge on, the audit reports Dokima's app missing from the merge queue bypass.
+
+    Proves 557.3. The repo variable `DOKIMA_AUTO_MERGE` is `on` and main's merge queue ruleset lets only the admin role
+    bypass it, while another ruleset with no merge queue lists the app: the audit returns exactly one line, naming the
+    bypass. Beside it, nothing is reported when the app is on the merge queue ruleset's bypass list for pull requests,
+    nor when the setting is `off` or unset with the app missing. When GitHub refuses to list the rulesets, one line
+    says they could not be verified, with GitHub's reason."""
+    record_property("proves", "557.3")
+    a = audit("557.3")
+    tags = {"id": 2, "name": "release tags", "target": "tag", "enforcement": "active", "rules": [{"type": "deletion"}],
+            "bypass_actors": [dict(APP_BYPASS)]}
+
+    def repo(value, *bypass, fail=None):
+        g = GitHub(fail=fail)
+        if value is not None:
+            g.variables["DOKIMA_AUTO_MERGE"] = value
+        g.ruleset_list = [merge_queue_ruleset(*bypass), copy.deepcopy(tags)]
+        return g
+
+    lines = a.compare(repo("on", ADMIN_BYPASS), REPO)
+    assert len(lines) == 1, (f"557.3: with the setting on and Dokima's app missing from the merge queue ruleset's "
+                             f"bypass list, the audit should give one line, got {lines}")
+    assert "bypass" in lines[0].lower(), f"557.3: the line should say the app's merge queue bypass is missing: {lines[0]!r}"
+    present = a.compare(repo("on", ADMIN_BYPASS, APP_BYPASS), REPO)
+    assert present == [], f"557.3: with the app on the merge queue bypass list for pull requests, nothing is off: {present}"
+    for value in ("off", None):
+        quiet = a.compare(repo(value, ADMIN_BYPASS), REPO)
+        assert quiet == [], (f"557.3: with the setting {value or 'unset'}, the missing bypass is not Dokima's need, "
+                             f"yet the audit reported: {quiet}")
+    refused_lines = a.compare(repo("on", APP_BYPASS, fail={"rulesets": FORBIDDEN}), REPO)
+    assert len(refused_lines) == 1 and "could not be verified" in refused_lines[0].lower() \
+        and "Resource not accessible by integration" in refused_lines[0], \
+        (f"557.3: when GitHub refuses the rulesets, one line should say they could not be verified, with GitHub's "
+         f"reason: {refused_lines}")

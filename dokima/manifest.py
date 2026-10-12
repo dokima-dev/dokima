@@ -50,6 +50,10 @@ BRANCH_RULES = {
     "main": {"required_checks": ["all tests", "Acceptance criteria"]},
 }
 
+# The repo's Actions variable that, set to `on`, lets Dokima's app merge a pull request whose code review passed, as a
+# bypass actor of the merge queue ruleset limited to pull requests (#557). Unset or `off`, the owner approves.
+AUTO_MERGE = "DOKIMA_AUTO_MERGE"
+
 PERMISSIONS = {
     "contents": "write",
     "pull_requests": "write",
@@ -61,6 +65,7 @@ PERMISSIONS = {
     "workflows": "write",
     "administration": "read",
     "organization_projects": "write",
+    "actions_variables": "read",
 }
 
 LEVEL = {"read": 1, "write": 2}
@@ -81,13 +86,14 @@ GH_COMMANDS = {
 
 # REST paths inside a repo (after repos/<owner>/<name>/), first match wins: (pattern, permission)
 REPO_PATHS = [
-    (r"branches/[^/]+/protection", "administration"),
+    (r"branches/[^/]+/protection|rulesets(/|$)", "administration"),
     (r"rules/branches/", "metadata"),
     (r"commits/[^/]+/check-runs|check-runs|check-suites", "checks"),
     (r"commits/[^/]+/status(es)?$|statuses/", "statuses"),
     (r"commits/[^/]+/pulls$", "pull_requests"),
     (r"issues(/|$)|labels(/|$)|milestones(/|$)", "issues"),
     (r"pulls(/|$)", "pull_requests"),
+    (r"actions/variables(/|$)", "actions_variables"),
     (r"actions/", "actions"),
     (r"commits(/|$)|compare/|contents/|git/|dispatches$|branches(/[^/]+)?$|merges$", "contents"),
     (r"installation$", NONE),  # the app's own installation: GitHub answers it to the app's key, not a permission
