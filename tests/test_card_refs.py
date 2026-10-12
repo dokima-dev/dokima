@@ -30,7 +30,7 @@ PLAN = {"kind": "user_story", "summary": "Owners see one card.", "user_story": "
                                 {"text": "Second thing works", "source": ISSUE["url"]},
                                 {"text": "Third thing works", "source": PARENT}],
         "non_functional": [{"text": "Fourth thing holds", "why": "it must", "principle": "Fail closed"}],
-        "scope": ["dokima/card.py"], "out_of_scope": ["Filing raises; story 3 (#300) does that."],
+        "scope": ["dokima/card.py"],
         "tests": {"40.1": ["tests/test_a.py::test_one"], "40.2": ["tests/test_a.py::test_two"],
                   "40.3": ["tests/test_a.py::test_three"], "40.4": ["tests/test_a.py::test_four"]},
         "links": {"blocked_by": [50], "blocks": [51], "relates_to": [52]}}
@@ -223,13 +223,13 @@ def test_each_story_shows_as_a_github_reference_then_its_stage(record_property):
 def test_no_issue_or_pr_on_a_card_is_a_link_with_words_of_its_own(record_property):
     """No issue or PR on a card is linked under words of its own.
 
-    Draws a full card (sources, top row, Blocked by, Blocks, Relates to, Out of scope), a split's card with its
+    Draws a full card (sources, top row, Blocked by, Blocks, Relates to), a split's card with its
     stories, and a card whose issues block each other in a loop, on the issue and on the pull request, and checks
     no line links an issue, pull request or comment under words of its own, and every issue and pull request the
     card names shows as a GitHub reference; the issue's own card need not name #40, since #452 leaves out its link
     to itself. Proves 359.4."""
     record_property("proves", "359.4")
-    cases = [(dict(), {40, 5, 30, 50, 51, 52, 300}),
+    cases = [(dict(), {40, 5, 30, 50, 51, 52}),
              (dict(recs=SPLIT_RECS, children=CHILDREN), {40, 5, 41, 42, 43}),
              (dict(blocking={"blocked_by": [60], "blocks": [], "loop": [60, 61]}), {40, 5, 52, 60, 61})]
     for kw, want in cases:

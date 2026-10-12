@@ -1,8 +1,8 @@
-"""Scope shows as code on one line; Out of scope, requirements and the owner's text fold.
+"""Scope shows as code on one line; requirements and the owner's text fold.
 
 Issue #373. The owner asked (2026-10-09) that on the issue and PR card the Scope lists its files as code fields,
 `dokima/card.py`, all on one line instead of one line per file, and that the original issue text, the non-functional
-requirements and Out of scope sit in folds, closed by default. Answering the plan's question (2026-10-10), the owner
+requirements and Out of scope sit in folds, closed by default (#527 later dropped Out of scope from plans). Answering the plan's question (2026-10-10), the owner
 added that the PR card also carries the original issue text in its own fold, so the issue and PR cards stay identical.
 
 The card is drawn by dokima/card.py render (the same card on the issue and the PR, which card.pr_body saves on the PR);
@@ -27,15 +27,14 @@ REPO = "o/r"
 ISSUE = {"number": 40, "url": "https://github.com/o/r/issues/40"}
 SRC = "https://github.com/o/r/issues/40"
 SCOPE = ["dokima/card.py", "tests/test_card.py", "dokima/body.py::redraw"]
-OUT = ["The journey diagram; that's another issue.", "Run comments keep their own folds."]
 NFR = [{"text": "A refused save says why.", "why": "nothing fails silently", "principle": "Fail closed"}]
 
 
-def plan_of(scope=SCOPE, out=OUT, nfr=NFR):
+def plan_of(scope=SCOPE, nfr=NFR):
     return {"kind": "user_story", "summary": "Cards fold what the owner rarely reads.",
             "user_story": "The owner reads a short card.",
             "acceptance_criteria": [{"text": "Scope shows on one line.", "source": SRC}],
-            "non_functional": nfr, "scope": scope, "out_of_scope": out, "tests": {}}
+            "non_functional": nfr, "scope": scope, "tests": {}}
 
 
 def rec(role, stage=None, **handback):
@@ -98,36 +97,18 @@ def test_scope_shows_every_file_as_code_on_one_line(record_property):
             f"373.1: the {where} does not show a one-file Scope as **Scope:** `app/jobs.py`"
 
 
-# 373.2: Out of scope and the non-functional requirements sit in folds, closed by default
-
-def test_out_of_scope_sits_in_a_closed_fold(record_property):
-    """Out of scope sits in a closed fold on the issue and PR cards.
-
-    Proves 373.2. Draws the card of a plan with two Out of scope sentences and checks each sits inside one closed
-    fold titled Out of scope, with no Out of scope heading or sentence left open on the card; Scope stays open
-    beside it."""
-    record_property("proves", "373.2")
-    for where, text in cards().items():
-        inside = fold_named("373.2", where, text, "Out of scope")
-        for sentence in OUT:
-            assert sentence in inside, f"373.2: on the {where}, {sentence!r} is not inside the Out of scope fold"
-        rest = outside_folds(text)
-        assert "Out of scope" not in rest, f"373.2: the {where} still shows an Out of scope heading outside its fold"
-        assert not any(s in rest for s in OUT), f"373.2: the {where} still shows an Out of scope sentence open"
-        assert "**Scope:** `dokima/card.py`" in rest, f"373.2: the {where} folded Scope too; it should stay open"
-
+# 373.2: the non-functional requirements sit in a fold, closed by default
 
 def test_non_functional_requirements_sit_in_a_closed_fold_beside_out_of_scope(record_property):
     """The non-functional requirements sit in their own closed fold on both cards.
 
     Proves 373.2. Draws the card of a plan with a non-functional requirement and checks it is inside one closed fold
-    titled Non-functional requirements and nowhere open on the card, and that Out of scope has its own closed fold."""
+    titled Non-functional requirements and nowhere open on the card."""
     record_property("proves", "373.2")
     for where, text in cards().items():
         inside = fold_named("373.2", where, text, "Non-functional requirements")
         assert NFR[0]["text"] in inside, f"373.2: on the {where}, the requirement is not in its fold"
         assert NFR[0]["text"] not in outside_folds(text), f"373.2: on the {where}, the requirement also shows open"
-        fold_named("373.2", where, text, "Out of scope")
 
 
 # 373.3: the owner's original issue text sits in a fold titled Original issue, closed by default

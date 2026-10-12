@@ -10,7 +10,7 @@ from dokima import plan, planner  # noqa: E402
 
 WORKFLOWS = os.path.join(os.path.dirname(__file__), "..", ".github", "workflows")
 PLAN = {"objective": "Slow calls return a job id", "criteria": ["A slow call returns a job id within 20 s", "The job id is unique"],
-        "non_goals": ["No retries"], "scope": ["dokima/jobs.py"]}
+        "scope": ["dokima/jobs.py"]}
 STORY = {"kind": "user_story", "summary": "Slow calls hand back a job id instead of timing out.", "user_story": "Slow calls return a job id",
          "acceptance_criteria": [{"text": "A slow call returns a job id within 20 s", "source": "https://github.com/o/r/issues/9"}],
          "scope": ["dokima/jobs.py"], "tests": {"9.1": ["tests/test_jobs.py::test_id"]}}
@@ -33,7 +33,7 @@ def test_plan_is_written_into_the_issue_as_goal_criteria_and_scope(record_proper
     crits = parsed["goals"][0]["criteria"]
     assert [c["text"] for c in crits] == PLAN["criteria"], "80.1: criteria not read back in order"
     assert crits[0]["verified_by"] == "`tests/test_jobs.py::test_id`", "80.1: criterion 1 not linked to its test"
-    assert "**Out of scope:** No retries" in parsed["notes"] and "- `dokima/jobs.py`" in parsed["notes"], "80.1: out of scope or scope missing"
+    assert "- `dokima/jobs.py`" in parsed["notes"], "80.1: scope missing"
 
 
 def test_planning_again_keeps_the_owner_text_once(record_property):
@@ -41,11 +41,6 @@ def test_planning_again_keeps_the_owner_text_once(record_property):
     first = planner.render("9", "Make slow calls async.", PLAN, TAGS)
     second = planner.render("9", first, PLAN, TAGS)
     assert second == first, "80.1: a second plan nested or lost the owner's original text"
-
-
-def test_without_non_goals_there_is_no_non_goals_line(record_property):
-    record_property("proves", "80.1")
-    assert "Non-goals" not in planner.render("9", "x", dict(PLAN, non_goals=[]), TAGS)
 
 
 # 80.2: tests come with the plan, each tagged with a criterion of the plan
@@ -102,7 +97,7 @@ def test_changed_files_counts_committed_and_new_files_since_the_start(record_pro
 def test_a_plan_is_read_as_a_plan(record_property, tmp_path):
     record_property("proves", "80.3")
     kind, p = planner.read_output(write(tmp_path, "plan.json", STORY))
-    assert kind == "plan" and p["non_goals"] == [], "80.3: optional out of scope not defaulted"
+    assert kind == "plan", "80.3: a plan was not read as a plan"
 
 
 @pytest.mark.parametrize("files, why", [

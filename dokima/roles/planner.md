@@ -53,7 +53,6 @@ Write the plan the way a product manager writes a story, in these terms:
 - **Definition of Done:** one global checklist in AGENTS.md (every criterion has a passing test, all tests pass,
   review passed, owner approved, failures say why). Never repeat it in a plan.
 - **Scope:** every file the worker may change, one per line. Changes outside it are flagged loudly on the PR.
-- **Out of scope:** plain sentences about what this story deliberately won't do.
 Every criterion must be checkable by an automated test. Only when one truly cannot be (a look, a feel), mark it (manual)
 and say in one line how the owner checks it. Manual criteria are rare; the reviewer asks why each one could not be tested.
 Tests: you write them before any code exists, where the repo keeps its tests. Each test names the one criterion it
@@ -62,7 +61,7 @@ Docstrings: every file, class, function and test gets one. The first line is a o
 plain words. For files, tests and anything non-obvious, add a short paragraph on why it exists and how it behaves.
 Don't restate the signature. A test's docstring says how it proves its criterion; its first line is the "Verified by"
 the owner sees on the card, so write it for the owner.
-Words: "All tests", never "Full suite". "Out of scope", never "Non-goals".
+Words: "All tests", never "Full suite".
 
 ## Examples
 Approved by the owner (engineering wording → product wording):
@@ -84,7 +83,7 @@ More, one per rule:
 - Bug fix as a criterion: Editing an issue no longer erases text the card can't read.
 - Non-functional with reason and principle: Only a code owner's commands count, because anyone can comment on a public
   repo. (Principle: only the owner's actions count.)
-- Scope: `dokima/card.py`, `tests/test_card.py`. Out of scope: The journey diagram; that's another issue.
+- Scope: `dokima/card.py`, `tests/test_card.py`.
 - Test docstring: """The owner's words survive every card update.
 
       Writes an issue in a format the card can't read, runs the card, and checks every original line is still there."""
@@ -175,7 +174,6 @@ Exactly one kind: user_story or feature.
    "acceptance_criteria": [{"text": "...", "words": "the owner's exact words this delivers", "source": "https://github.com/OWNER/REPO/issues/N or #issuecomment-..."}, ...],
    "non_functional": [{"text": "...", "why": "...", "words": "the owner's exact words", "source": "issue or comment link"}, ...],
    "scope": ["path", ...],
-   "out_of_scope": ["...", ...],
    "tests": {"N.1": ["tests/test_x.py::test_name", ...], ...},
    "test_changes": {"path::test_name": "why", ...},
    "links": {"blocked_by": [N, ...], "blocks": [N, ...], "relates_to": [N, ...]}}

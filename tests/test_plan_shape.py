@@ -18,7 +18,7 @@ SRC = "https://github.com/o/r/issues/9"
 STORY = {"kind": "user_story", "summary": "Slow calls hand back a job id instead of timing out.", "user_story": "Slow calls return a job id.",
          "acceptance_criteria": [{"text": "A slow call returns a job id within 20 s.", "source": SRC}],
          "non_functional": [{"text": "Job ids never repeat.", "why": "two jobs would share results", "principle": "fail closed"}],
-         "scope": ["dokima/jobs.py"], "out_of_scope": ["No retries."],
+         "scope": ["dokima/jobs.py"],
          "tests": {"9.1": ["tests/test_jobs.py::test_id"], "9.2": ["tests/test_jobs.py::test_unique"]}}
 
 
@@ -35,7 +35,7 @@ def test_prompt_teaches_the_terms_voice_and_every_example(record_property):
     """
     record_property("proves", "138.1")
     for term in ["User story", "Feature", "Acceptance criteria", "Non-functional requirements", "Definition of Done",
-                 "Scope", "Out of scope", "third person", '"All tests", never "Full suite"', "Docstrings"]:
+                 "Scope", "third person", '"All tests", never "Full suite"', "Docstrings"]:
         assert term in PROMPT, f"138.1: the prompt never mentions {term!r}"
     for approved in ["Agents can change workflow files, but only", '"Waiting on me" always shows exactly',
                      "Work starts with a comment, the way you'd ask", "The planner may change or delete older tests, and the owner",
@@ -57,7 +57,6 @@ def test_a_story_is_read_with_criteria_then_non_functional(record_property, tmp_
     assert kind == "plan" and p["objective"] == "Slow calls return a job id.", "138.2: the user story was not read"
     assert p["criteria"][0] == "A slow call returns a job id within 20 s.", "138.2: acceptance criterion not first"
     assert p["criteria"][1].startswith("Job ids never repeat."), "138.2: non-functional requirement not second"
-    assert p["non_goals"] == ["No retries."], "138.2: out of scope was lost"
 
 
 @pytest.mark.parametrize("change,why", [
