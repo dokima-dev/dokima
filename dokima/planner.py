@@ -207,6 +207,26 @@ def check_stories(stories, issue=None, said=None):
             visit(i, [i])
 
 
+def check_edge_cases(where, c, filed):
+    """Garbled unless C lists edge cases, each with a FILED test, or why none."""
+    cases, why = c.get("edge_cases"), c.get("no_edge_cases")
+    if cases is None or cases == []:
+        if not isinstance(why, str) or not why.strip():
+            raise Garbled(f"{where} needs its edge_cases, each with the test covering it, or no_edge_cases saying "
+                          f"why it has none")
+        return
+    if not isinstance(cases, list):
+        raise Garbled(f"{where} needs edge_cases as a list of cases, each with the test covering it")
+    for e in cases:
+        if not isinstance(e, dict) or not isinstance(e.get("case"), str) or not e["case"].strip():
+            raise Garbled(f"{where} has an edge case with no case saying what it is")
+        if not isinstance(e.get("test"), str) or not e["test"].strip():
+            raise Garbled(f"{where}: its edge case {e['case'].strip()!r} names no test covering it")
+        if e["test"].strip() not in filed:
+            raise Garbled(f"{where}: its edge case {e['case'].strip()!r} names {e['test'].strip()}, which the plan "
+                          f"does not file under this criterion in tests")
+
+
 def from_kind(p, issue=None, said=None):
     """Read a plan.json written in the agreed shape (user_story or feature) into what the rest of the code uses.
 
@@ -262,6 +282,10 @@ def from_kind(p, issue=None, said=None):
     tc = p.get("test_changes", {})
     if not isinstance(tc, dict) or not all(isinstance(k, str) and isinstance(v, str) and v.strip() for k, v in tc.items()):
         raise Garbled("plan.json test_changes must map each changed older test to a non-empty reason")
+    for k, (where, c) in enumerate([(f"acceptance criterion {k}", c) for k, c in enumerate(ac, 1)]
+                                   + [(f"non-functional requirement {k}", c) for k, c in enumerate(nfr, 1)], 1):
+        filed = {t.strip() for key, v in tests.items() if key.rpartition(".")[2] == str(k) for t in v}
+        check_edge_cases(where, c, filed)
     return "plan", {"objective": p["user_story"].strip(),
                     "criteria": [c["text"].strip() for c in ac] + [f"{c['text'].strip()} ({c['why'].strip()})" for c in nfr],
                     "scope": p["scope"], "test_changes": tc,
