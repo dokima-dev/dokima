@@ -10,7 +10,8 @@ The fake GitHub answers:
   - GET .../pulls: the open PRs; GET .../compare/BASE...HEAD: behind by one commit;
   - PUT .../pulls/N/update-branch: 202, or 422 with GitHub's refusal for that PR (set per run in `refuse`);
   - GET .../issues/N/comments (paged with page=): the PR's comments as REST returns them, oldest first;
-  - POST .../issues/N/comments, PATCH .../issues/comments/ID, DELETE .../issues/comments/ID.
+  - POST .../issues/N/comments, PATCH .../issues/comments/ID, DELETE .../issues/comments/ID;
+  - GET .../commits/SHA/check-runs: no check runs yet (#523 skips a PR whose all tests check failed).
 """
 import json
 import os
@@ -114,6 +115,8 @@ class GitHub:
             n, c = self.find(m[1])
             self.comments[n].remove(c)
             return {}
+        if method == "GET" and re.fullmatch(rf"repos/{REPO}/commits/[^/]+/check-runs", bare):
+            return {"total_count": 0, "check_runs": []}
         raise AssertionError(f"408: unexpected GitHub call {method} {path} {fields}")
 
     def merge(self, sha, refuse):
