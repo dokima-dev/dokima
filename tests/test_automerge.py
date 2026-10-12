@@ -692,12 +692,12 @@ def test_nothing_merges_unless_every_check_on_the_merging_commit_is_green(record
     """Nothing merges by autopilot unless every check on the very commit that merges passed; never with --admin.
 
     GitHub here merges whatever it is asked to, as on a repo with no branch protection. By the code review and by
-    `/autopilot start`, each of these must leave #60 unmerged: a check still running, no checks at all, a red commit
-    status beside a green check run, and a new commit pushed the moment the checks were read (its checks still
-    running). No merge may use --admin or auto-merge. Beside them, every check green (a check run and a status) merges
+    `/autopilot start`, each of these must leave #60 unmerged: no checks at all, a red commit status beside a green
+    check run, and a new commit pushed the moment the checks were read (its checks still running). A check still
+    running is waited for instead (#528, tests/test_autopilot_checks.py). No merge may use --admin or auto-merge. Beside them, every check green (a check run and a status) merges
     at the head that was checked."""
     record_property("proves", "212.6")
-    cases = (("check still running", PENDING, False), ("no checks", [], False), ("red commit status", RED_STATUS, False),
+    cases = (("no checks", [], False), ("red commit status", RED_STATUS, False),
              ("new commit after the checks were read", GREEN, True))
     for case, checks, moves in cases:
         m = Review(tmp_path / f"review-{case.replace(' ', '-')}", PR_APPROVE, ON, checks, moves=moves)
