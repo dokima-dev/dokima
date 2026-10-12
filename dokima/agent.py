@@ -2062,17 +2062,23 @@ AUTOPILOT_MERGE = {"merged": "Autopilot: merged PR #{pr}", "queued": "Autopilot:
                    "waits": "Autopilot: PR #{pr} waits for your approval before it merges"}
 
 
+MERGE_STATE = ("query($o:String!,$r:String!,$n:Int!){repository(owner:$o,name:$r){pullRequest(number:$n)"
+               "{state isInMergeQueue autoMergeRequest{mergeMethod} reviewDecision mergeStateStatus}}}")
+
+
 def merge_outcome(repo, pr):
     """What GitHub reports after a merge it took, read from the pull request.
 
     ("merged" | "queued" | "waits", "") or ("unconfirmed", why, in GitHub's words when it gave any). `gh pr merge` exits 0 when it only queues the pull request or turns on
     auto-merge, so only GitHub's own state says whether it merged."""
+    owner, name = repo.split("/", 1)
     try:
-        st = json.loads(gh("pr", "view", str(pr), "-R", repo, "--json",
-                           "state,isInMergeQueue,autoMergeRequest,reviewDecision,mergeStateStatus"))
+        # Asked through GitHub's API: the runners' `gh pr view --json` has no isInMergeQueue field (#467).
+        st = json.loads(gh("api", "graphql", "-f", f"query={MERGE_STATE}", "-f", f"o={owner}", "-f", f"r={name}",
+                           "-F", f"n={pr}"))["data"]["repository"]["pullRequest"]
     except subprocess.CalledProcessError as e:
         return "unconfirmed", f"GitHub could not say whether it merged: {gh_reason(e)}"
-    except (json.JSONDecodeError, TypeError) as e:
+    except (json.JSONDecodeError, TypeError, KeyError) as e:
         return "unconfirmed", f"GitHub's answer on whether it merged could not be read: {e}"
     if not isinstance(st, dict):
         return "unconfirmed", "GitHub's answer on whether it merged could not be read"
