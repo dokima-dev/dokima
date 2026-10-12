@@ -256,8 +256,6 @@ def from_kind(p, issue=None, said=None):
         check_words(f"non-functional requirement {k}", c, said)
     if not strings(p.get("scope")) or not p["scope"]:
         raise Garbled("a story needs scope as a non-empty list of files")
-    if not strings(p.get("out_of_scope", [])):
-        raise Garbled("out_of_scope must be a list of sentences")
     tests = p.get("tests")
     if not isinstance(tests, dict) or not all(isinstance(k, str) and strings(v) for k, v in tests.items()):
         raise Garbled("a story needs tests as a map from each criterion (N.k) to its tests")
@@ -266,7 +264,7 @@ def from_kind(p, issue=None, said=None):
         raise Garbled("plan.json test_changes must map each changed older test to a non-empty reason")
     return "plan", {"objective": p["user_story"].strip(),
                     "criteria": [c["text"].strip() for c in ac] + [f"{c['text'].strip()} ({c['why'].strip()})" for c in nfr],
-                    "non_goals": p.get("out_of_scope", []), "scope": p["scope"], "test_changes": tc,
+                    "scope": p["scope"], "test_changes": tc,
                     "declared": tests, "raw": p}
 
 
@@ -522,9 +520,6 @@ def plan_text(number, plan, tags, older=()):
         lines.append(f"  - [ ] Acceptance criteria: {c.strip()}")
         lines.append("    Verified by: " + (", ".join(f"`{t}`" for t in tests) or "no test"))
     lines.append("")
-    if plan["non_goals"]:
-        lines.append("**Out of scope:** " + "; ".join(x.strip() for x in plan["non_goals"]))
-        lines.append("")
     if older:
         lines.append("**Changes to older tests:**")
         lines += [f"- `{t}`: {plan['test_changes'].get(t, 'no reason given')}" for t in older]
