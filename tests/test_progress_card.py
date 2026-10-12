@@ -156,11 +156,21 @@ def test_the_card_goes_queued_setting_up_working_checking_done(record_property, 
     nothing between. When the tools start to install the card says setting up; when the agent starts it says agent
     working; when code starts checking the hand-back it says checking. Two runs that stop before their agent (no try
     branch, tools that fail to install) start at queued and go straight to their record, never saying working or
-    checking; the one that reaches the install says setting up there. The agent workflow has one job: no second
-    machine updates the card."""
+    checking; the one that reaches the install says setting up there. No second machine updates the card while the
+    run goes: every job of the agent workflow other than the run waits for it and starts only when it failed (#514)."""
     record_property("proves", "187.1")
-    jobs = list(ts.workflow("agent.yml")["jobs"])
-    assert jobs == ["run"], f"187.1: agent.yml should have one job, the run itself, not a second machine; it has {jobs}"
+    jobs = ts.workflow("agent.yml")["jobs"]
+    assert "run" in jobs, f"187.1: agent.yml should have its run job; it has {list(jobs)}"
+    for name, job in jobs.items():
+        if name == "run":
+            continue
+        needs = job.get("needs") or []
+        needs = [needs] if isinstance(needs, str) else needs
+        cond = str(job.get("if") or "")
+        assert "run" in needs and "needs.run.result == 'failure'" in cond, \
+            (f"187.1: agent.yml job '{name}' may run beside the run and update its card; a second job must wait for "
+             f"the run and start only when it failed (needs: run, if: needs.run.result == 'failure'); it has "
+             f"needs {needs}, if {cond!r}")
     for name in ("pass", "fail"):
         s = runs[name]
         assert s.run.agent_started(), f"187.1 ({name}): setup: the agent never started; stopped at '{s.run.failed_step}':\n{s.tail()}"

@@ -468,6 +468,70 @@ def live_card(role, stage, state, ahead=None):
 
 
 GOING = {"queued", "in_progress", "waiting", "requested", "pending"}
+CARD_HEADS = {"Planner": ("planner", ""), "Worker": ("worker", ""), "Plan review": ("reviewer", "plan"),
+              "Code review": ("reviewer", "pr")}
+UNRECORDED = "The run ended before posting its record: a step after the agent failed. See the run for why."
+
+
+def card_stage(body):
+    """The (role, stage) a live card is for; None when it names no agent."""
+    m = re.search(r"\*\*(Planner|Worker|Plan review|Code review)\*\*", body)
+    return CARD_HEADS[m.group(1)] if m else None
+
+
+def bot_cards(repo, number):
+    """Every record and live card the bot posted on the issue and its pull request."""
+    places = dict.fromkeys([str(number), where_card(repo, number, "worker", "")])
+    cards = []
+    for n in places:
+        for c in json.loads(gh("api", f"repos/{repo}/issues/{n}/comments", "--paginate") or "[]"):
+            body = c.get("body") or ""
+            if (c.get("user") or {}).get("login") in (BOT, f"{BOT}[bot]") and (MARK in body or LIVE in body):
+                cards.append({**c, "where": n})
+    return sorted(cards, key=lambda c: c.get("created_at") or "")
+
+
+def unrecorded_run(repo, number):
+    """The (role, stage) of the issue's last run when it ended unrecorded, else None.
+
+    The newest run card or record the bot posted on the issue or its open pull request is still a live card, it
+    links its run, and GitHub says that run has completed."""
+    cards = bot_cards(repo, number)
+    if not cards or MARK in cards[-1]["body"]:
+        return None
+    body = cards[-1]["body"]
+    runs = list(dict.fromkeys(re.findall(r"/actions/runs/(\d+)", body)))
+    if not runs or any(gh("api", f"repos/{repo}/actions/runs/{rid}", "--jq", ".status").strip() in GOING for rid in runs):
+        return None
+    return card_stage(body)
+
+
+def unrecorded(repo, number, role, stage, out):
+    """A failed record linking this run, when it ended before posting its own.
+
+    Next mentions the owner. Its live card becomes the record, or the record is posted where it would have gone. Writes OUT/record.json and
+    returns True when it posted; False when the run had posted its record."""
+    rid = os.environ.get("GITHUB_RUN_ID", "")
+    run = f"{os.environ.get('GITHUB_SERVER_URL', 'https://github.com')}/{repo}/actions/runs/{rid}"
+    card = None
+    for c in bot_cards(repo, number):
+        if MARK in c["body"]:
+            if any(str(r.get("run_id")) == rid for r in records([{"author": {"login": BOT}, "body": c["body"]}])):
+                return False
+        elif re.search(rf"/actions/runs/{rid}(?!\d)", c["body"]):
+            card = c
+    rec = {"role": role, "stage": stage or None, "run_id": rid, "run": run, "unrecorded": True, "handback": {},
+           "check": {"passed": False, "problems": [UNRECORDED]}}
+    owners = [o for o in os.environ.get("OWNERS", "").split(",") if o]
+    body = with_next(render(rec), next_line(("stop", "Give the command again to start this stage."), owners))
+    os.makedirs(out, exist_ok=True)
+    json.dump(rec, open(os.path.join(out, "record.json"), "w"), indent=1)
+    if card:
+        gh("api", "-X", "PATCH", f"repos/{repo}/issues/comments/{card['id']}", "-f", f"body={body}", "--silent")
+    else:
+        gh("api", "-X", "POST", f"repos/{repo}/issues/{where_card(repo, number, role, stage)}/comments",
+           "-f", f"body={body}", "--silent")
+    return True
 
 
 def where_card(repo, number, role, stage):
@@ -626,6 +690,8 @@ def review_lines(repo, rec, plan):
 def opening(rec):
     """The one plain sentence a run comment opens with: what the run did."""
     role, h, passed = rec["role"], rec["handback"], rec["check"]["passed"]
+    if rec.get("unrecorded"):
+        return f"{who(role, rec.get('stage'))}'s run ended before posting its record."
     if not passed and role == "worker":
         return "The worker stopped early with its hand-back rejected by code."
     if not passed:
@@ -2465,6 +2531,7 @@ def main(argv):
     agent cancelled ROLE STAGE OUT STARTED LOG_DIR  (the same, for a run someone cancelled) |
     agent card ROLE STAGE ready|working  (prints the run's live card, which is not a record) |
     agent queue ROLE STAGE N [queued|handoff]  (puts up a run's queued card where its record will go, prints its id) |
+    agent unrecorded ROLE STAGE N OUT  (a failed record for this run when it ended before posting one) |
     agent autopilot start|stop N [OUT]  (switches N's issue tree on or off autopilot, prints the comment naming what
     switched; with OUT, `start` writes what it picks up to OUT/next.txt and its Autopilot line to OUT/autopilot.md) |
     agent closed N  (what autopilot does now that issue N closed, for every tree on autopilot) |
@@ -2539,6 +2606,11 @@ def main(argv):
         return 0
     if argv[1] == "queue":
         print(queue(argv[2], argv[3], argv[4], argv[5] if len(argv) > 5 else "queued"))
+        return 0
+    if argv[1] == "unrecorded":
+        role, stage, number, out = argv[2:6]
+        posted = unrecorded(os.environ["GITHUB_REPOSITORY"], number, role, stage, out)
+        print("Posted a failed record for this run." if posted else "This run posted its record; nothing to do.")
         return 0
     if argv[1] == "check-round":
         try:
@@ -2747,8 +2819,15 @@ def main(argv):
             if AUTOPILOT in labels:
                 gh("api", "-X", "DELETE", f"repos/{repo}/issues/{said_on}/labels/{AUTOPILOT}")
                 switched.append(int(said_on))
-        pick = None
-        if switch == "start" and len(argv) > 4:
+        pick, dead = None, None
+        if switch == "start":
+            # A last run that ended with no record (its live card still up, its run over) starts that stage again.
+            dead = unrecorded_run(repo, number)
+            if dead:
+                gh("api", "-X", "POST", f"repos/{repo}/dispatches", "-f", "event_type=dokima-next",
+                   "-f", f"client_payload[role]={dead[0]}", "-f", f"client_payload[stage]={dead[1] or 'plan'}",
+                   "-f", f"client_payload[issue]={number}")
+        if switch == "start" and len(argv) > 4 and not dead:
             # What is already waiting for the owner's `/work` is picked up: written to OUT for the workflow to start.
             owners = [o for o in os.environ.get("OWNERS", "").split(",") if o]
             d, items = conversation(repo, number)
@@ -2759,10 +2838,12 @@ def main(argv):
                 open(os.path.join(argv[4], "next.txt"), "w").write(pick + "\n")
         picked = {"worker": f"#{number}'s approved plan goes to the worker now.",
                   "split": f"#{number}'s approved split files its stories now."}.get(pick, "")
+        if dead:
+            picked = f"{who(*dead)}'s last run on #{number} ended with no record, so it starts again."
         started = []
         if switch == "start":
             # The issue itself starts its planner when it waits on nothing open and nothing started on it yet.
-            started = start_waiting(repo, [int(number)], line=AUTOPILOT_START_LINE)
+            started = [] if dead else start_waiting(repo, [int(number)], line=AUTOPILOT_START_LINE)
             # `/autopilot start` picks up every issue under the issue, at every level, that waits on nothing open.
             started += start_waiting(repo, issue_tree(repo, number)[1:])
         sys.stdout.write(autopilot_comment(number, switch, switched, started, picked))
