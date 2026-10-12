@@ -59,6 +59,13 @@ class FakeGitHub:
                 "reviewDecision": None, "mergeStateStatus": "CLEAN"}}}})
         if f"pulls/{PR}/files" in joined:
             return json.dumps([{"filename": "dokima/x.py"}])
+        if "/protection" in joined:
+            # Main's branch rule requires every check the test gives except the card runs, which judge nothing (#561).
+            req = sorted({r["name"] for s in self.steps for r in s if r["name"] != "card"}
+                         | {s["context"] for s in self.statuses})
+            inner = {"strict": True, "contexts": req, "checks": [{"context": c, "app_id": None} for c in req]}
+            return json.dumps(inner if joined.split("?")[0].endswith("/required_status_checks")
+                              else {"required_status_checks": inner})
         if "check-runs" in joined:
             self.reads += 1
             if self.reads > 500:

@@ -18,6 +18,8 @@ pull requests, their checks and merging. It keeps them in prs.json, one entry pe
   - `gh api repos/o/r/pulls/N` (head.sha, head.ref, state, merged, mergeable), `.../pulls/N/files`,
     `.../pulls/N/comments` (no line notes), `repos/o/r/commits/SHA/check-runs`, `.../commits/SHA/status` and
     `.../commits/SHA/statuses` (SHA may also be the branch name), each with or without --paginate;
+  - `gh api repos/o/r/branches/BRANCH/protection[/required_status_checks]`: the branch rule, requiring every check
+    of the pull request the last call about one named, so each of its checks still judges its merge (#561);
   - `gh pr comment N` and `gh api repos/o/r/issues/N/comments` for a pull request N write on that pull request;
   - `gh run download` puts the worker's session log where the code review's pack expects it.
 A check is a check run (kind "run", from GitHub Actions) or a commit status (kind "status"), each SUCCESS, FAILURE or
@@ -95,6 +97,19 @@ def reveal(n):
         p["moved"] = True
         p["head"] = p["moves_to"]
         save_prs()
+RULE_PR = os.path.join(d, "rule_pr.txt")
+def track_pr():
+    """Remembers the pull request a call names, so the branch rule answers with that pull request's checks."""
+    n = pr_sel() if a[:1] == ["pr"] else None
+    for x in a[1:] if a[:1] == ["api"] else []:
+        m = re.match(r"/?repos/o/r/(?:pulls/(\d+)|commits/([^/]+)/)", x)
+        if m and m.group(1) in PRS:
+            n = m.group(1)
+        elif m and m.group(2):
+            n = next((k for k, p in PRS.items() if m.group(2) in p["checks"] or m.group(2) == p["branch"]), n)
+    if n:
+        open(RULE_PR, "w").write(n)
+track_pr()
 def bucket(c):
     return {"SUCCESS": "pass", "FAILURE": "fail", "PENDING": "pending"}[c["state"]]
 def rollup(p):
@@ -275,6 +290,15 @@ if m_pr and m_pr.group(1) in PRS:
         print("[]")
     else:
         pick(rest_pr(n))
+    sys.exit(0)
+m_rule = next((re.fullmatch(r"/?repos/o/r/branches/([^/?]+)/protection(/required_status_checks)?", x.split("?")[0])
+               for x in a[1:] if "/protection" in x), None) if a[:1] == ["api"] else None
+if m_rule:
+    # Main's branch rule requires every check the pull request being merged carries, so each one still judges it.
+    cur = open(RULE_PR).read().strip() if os.path.exists(RULE_PR) else ""
+    req = sorted({c["name"] for n, p in PRS.items() if n == cur or cur not in PRS for cs in p["checks"].values() for c in cs})
+    inner = {"strict": True, "contexts": req, "checks": [{"context": c, "app_id": None} for c in req]}
+    pick(inner if m_rule.group(2) else {"required_status_checks": inner})
     sys.exit(0)
 m_com = re.fullmatch(r"repos/o/r/commits/(.+?)/(check-runs|status|statuses)", PAPI or "")
 if m_com:

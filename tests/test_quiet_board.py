@@ -357,9 +357,16 @@ def test_an_event_that_cannot_move_a_card_no_longer_starts_a_board_update(record
 # 533.2: events about one issue or its pull request within one minute cause one board update
 
 def checks_on_head(monkeypatch, runs):
-    """Answer autopilot's reads of a head's checks with these check runs and no commit statuses."""
+    """Answer autopilot's reads of a head's checks with these check runs and no commit statuses.
+
+    Main's branch rule requires All tests and Acceptance criteria, as Dokima's own rule does (#561)."""
     def gh(*args, **kw):
         joined = " ".join(str(a) for a in args)
+        if "/protection" in joined:
+            inner = {"strict": True, "contexts": ["All tests", "Acceptance criteria"],
+                     "checks": [{"context": c, "app_id": None} for c in ("All tests", "Acceptance criteria")]}
+            return json.dumps(inner if joined.split("?")[0].endswith("/required_status_checks")
+                              else {"required_status_checks": inner})
         if "check-runs" in joined:
             return json.dumps({"total_count": len(runs), "check_runs": runs})
         if "/status" in joined:
