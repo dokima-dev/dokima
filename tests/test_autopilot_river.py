@@ -37,7 +37,7 @@ QUESTIONS = [{"question": "Should a failed run move its card to Needs you?",
 STORY_Q = {**ts.STORY, "questions": QUESTIONS}
 APPROVE = {**ts.APPROVE, "previous_step": {"did": ["Planned one story."], "decided": [], "open": []},
            "summary": "Every ask has a criterion and every criterion a test that breaks on any deviation.",
-           "asks": [{"ask": "Fix it.", "source": ISSUE, "criterion": "57.1"}], "tests": [{"test": t, "only_its_behavior": True, "why": "one result"} for t in ("tests/test_x.py::test_a", "tests/test_x.py::test_b", "tests/test_x.py::test_c")], "size": "ok", "behaviors": [{"criterion": c, "one_behavior": True, "why": "one result"} for c in ("9.1", "9.2", "9.3", "57.1", "57.2", "57.3", "S1.1", "S1.2", "S1.3", "S2.1", "S2.2", "S2.3")]}
+           "asks": [{"ask": "Fix it.", "source": ISSUE, "criterion": "57.1"}], "tests": [{"test": t, "only_its_behavior": True, "why": "one result"} for t in ("tests/test_x.py::test_a", "tests/test_x.py::test_b", "tests/test_x.py::test_c")], "size": "ok", "behaviors": [{"criterion": c, "one_behavior": True, "why": "one result"} for c in ("9.1", "9.2", "9.3", "57.1", "57.2", "57.3", "S1.1", "S1.2", "S1.3", "S2.1", "S2.2", "S2.3")], "edge_cases": [{"criterion": c, "cut": [], "missing": []} for c in ("9.1", "9.2", "9.3", "57.1", "57.2", "57.3", "S1.1", "S1.2", "S1.3", "S2.1", "S2.2", "S2.3")]}
 BLOCK = {**APPROVE, "verdict": "block", "summary": "The test for 57.1 proves nothing.",
          "raises": [{"kind": "blocker", "to": "planner", "label": "57.1", "text": "The test passes against a stub.", "evidence": "tests/test_x.py::test_a"}]}
 OWNER_SAID = {**ts.owner_comment("Every failure should name the step that failed, nothing vaguer.", "2026-10-07T09:50:00Z"),

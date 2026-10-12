@@ -1299,6 +1299,26 @@ def problems_size(r, ids=()):
     return []
 
 
+def problems_edge_cases(r, ids=()):
+    """A plan review must judge each criterion's edge cases, in `edge_cases`.
+
+    Each row lists the exotic cases it cuts and the normal-use ones missing, as plain lines ([] when none)."""
+    rows = r.get("edge_cases") if isinstance(r.get("edge_cases"), list) else []
+    seen = {str(e.get("criterion")): e for e in rows if isinstance(e, dict)}
+    bad = []
+    for k in ids:
+        e = seen.get(str(k))
+        if not e:
+            bad.append(f"edge_cases has no judgment of criterion {k}: list the exotic cases it cuts and the normal-use "
+                       "ones missing, each [] when there are none")
+            continue
+        for f in ("cut", "missing"):
+            v = e.get(f)
+            if not isinstance(v, list) or not all(filled(x) for x in v):
+                bad.append(f"edge_cases' {f} for criterion {k} must be a list of plain lines, [] when there are none")
+    return bad
+
+
 def problems_asks(r, ids):
     """Everything wrong with a plan review's asks list: every ask the owner made, in their words, with a link to where
     they said it and the plan's criterion (one of ids) that keeps it, or "missing"; an approve keeps every ask."""
@@ -1470,6 +1490,7 @@ def check(kind, path, plan_path=None, number=None):
             if kind == "review" and os.environ.get("STAGE") == "plan":
                 bad += problems_asks(data, plan_criteria(plan, number))
                 bad += problems_size(data, plan_criteria(plan, number))
+                bad += problems_edge_cases(data, plan_criteria(plan, number))
                 bad += problems_tests(data, plan)
     for line in listed + bad:
         print(line)
