@@ -184,7 +184,7 @@ jobs:
       - name: Install pytest and Claude Code
         run: |
           set -o pipefail
-          { pip install pytest && npm install -g @anthropic-ai/claude-code; } 2>&1 | tee /tmp/install.txt \
+          { pip install pytest pytest-xdist && npm install -g @anthropic-ai/claude-code; } 2>&1 | tee /tmp/install.txt \
             || { echo "The step 'Install pytest and Claude Code' failed: $(tail -3 /tmp/install.txt | paste -sd' ')" > /tmp/why.txt; exit 1; }
       - name: All tests, run by code before the reviewer reads the pull request
         if: env.STAGE == 'pr'
