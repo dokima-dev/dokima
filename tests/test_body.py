@@ -241,11 +241,11 @@ def test_the_card_never_changes_the_owner_part(record_property, monkeypatch, git
     body = helper("179.2")
     current = body.redraw(TRICKY, PLAN_TOP)
     current = run_card(monkeypatch, github, current)  # the first real redraw moves Done below the fold (#416)
+    assert current is not None, "179.2: the first card run saved nothing"
     below = current.split(body.MARKER, 1)[1]
     for k in range(3):
-        # Every change now redraws (#438), so a run that finds the card current may save nothing and keeps the body.
+        # A run that finds the card current saves nothing and keeps the body (#534).
         saved = run_card(monkeypatch, github, current)
-        assert saved is not None or k > 0, "179.2: the first card run saved nothing"
         saved = current if saved is None else saved
         assert body.ask(saved) == TRICKY, f"179.2: card run {k + 1} changed the owner's ask"
         assert saved.split(body.MARKER, 1)[1] == below, f"179.2: card run {k + 1} changed the part below the marker"
