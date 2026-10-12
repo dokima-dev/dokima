@@ -23,6 +23,7 @@ auto-merge waiting on an approval ("accepts": "approval"). This file teaches tha
 """
 import json
 import os
+import re
 
 import pytest
 
@@ -250,6 +251,32 @@ def owner_told(m, crit, case, *words):
          f"{[s[-400:] for s in m.said()]}\n{m.tail()}")
 
 
+BEHIND_WORDS = re.compile(r"behind|newest commit|latest commit|out of date|up to date", re.I)
+
+
+def plain(s):
+    """A comment as words the owner reads: no HTML tags, links or addresses.
+
+    Every record's icons are links under `/main/`, so `main` counts only in the words left after this."""
+    s = re.sub(r"<[^>]*>", " ", s)
+    s = re.sub(r"\]\([^)]*\)", "] ", s)
+    return re.sub(r"https?://\S+", " ", s)
+
+
+def says_behind(s):
+    """The comment mentions the owner and its words say the branch misses main's newest commit."""
+    t = plain(s)
+    return f"@{OWNER}" in t and re.search(r"\bmain\b", t) is not None and BEHIND_WORDS.search(t) is not None
+
+
+def told_behind(m, crit, case):
+    """A comment mentioning the owner says, in words, that #60 misses main's newest commit."""
+    assert any(says_behind(s) for s in m.said()), \
+        (f"{crit} ({case}): no comment on #57 or #60 mentions @{OWNER} and says its branch misses main's newest "
+         f"commit (words such as 'behind main' or 'main's newest commit', outside links): "
+         f"{[plain(s)[-400:] for s in m.said()]}\n{m.tail()}")
+
+
 def test_by_default_a_pull_request_waits_for_the_owners_approval(record_property, runs):
     """By default, a passed code review leaves the pull request waiting for your approval.
 
@@ -284,7 +311,8 @@ def test_with_the_setting_on_dokima_merges_a_passed_green_up_to_date_pull_reques
     the bypass. The fake lets the bypass merge anything, so each case below proves Dokima checks it itself. #60 must
     stay open, with no merged line, when: the code review blocks; GitHub refuses the bypass (a comment mentioning the
     owner gives GitHub's reason); a check on its head is red (a comment mentioning the owner names the red check);
-    its branch misses main's newest commit (a comment mentioning the owner names main); it changes a workflow file
+    its branch misses main's newest commit (a comment mentioning the owner says so in words, not in a link, and
+    the red-check case's comments do not); it changes a workflow file
     (a comment on #60 mentioning the owner names .github/workflows)."""
     record_property("proves", "557.2")
     m = runs("on")
@@ -304,7 +332,10 @@ def test_with_the_setting_on_dokima_merges_a_passed_green_up_to_date_pull_reques
     behind = runs("on-behind")
     started(behind, "557.2", "on, behind main")
     not_merged(behind, "557.2", "on, behind main", "its branch does not contain main's newest commit")
-    owner_told(behind, "557.2", "on, behind main", "main")
+    told_behind(behind, "557.2", "on, behind main")
+    assert not any(says_behind(s) for s in red.said()), \
+        (f"557.2 (on, red check): a comment on a branch that holds main's newest commit says it is behind main, so "
+         f"saying so proves nothing: {[plain(s)[-400:] for s in red.said()]}")
     w = runs("on-workflow")
     started(w, "557.2", "on, workflow file")
     not_merged(w, "557.2", "on, workflow file", "it changes a workflow file")
