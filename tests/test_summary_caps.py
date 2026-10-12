@@ -86,11 +86,11 @@ def line_naming(out, where, n):
     return next((l for l in out.splitlines() if where in l and f"{n} words" in l), None)
 
 
-def test_the_planners_summary_is_one_sentence_of_at_most_25_words(record_property, check, capsys):
-    """The planner's summary is one sentence of at most 25 words.
+def test_the_planners_summary_is_one_sentence_of_at_most_20_words(record_property, check, capsys):
+    """The planner's summary is one sentence of at most 20 words, with 20% leeway.
 
     Proves 240.1. A 20-word summary passes unlisted, in a story and a split; a 24-word one passes and is listed with
-    its word count. A 25-word summary is rejected naming the summary and its 31 words, in a story and a split. A
+    its word count. A 25-word summary is rejected naming the summary and its 25 words, in a story and a split. A
     summary of two short sentences is rejected naming the summary.
     """
     record_property("proves", "240.1")
@@ -103,8 +103,8 @@ def test_the_planners_summary_is_one_sentence_of_at_most_25_words(record_propert
     assert line_naming(printed, "summary", 24), f"240.1: the 24-word summary is not listed as over its cap: {printed!r}"
     for plan in (dict(STORY, summary=words(25)), dict(FEATURE, summary=words(25))):
         rc, why, _ = run_planner(check, capsys, plan, jobs(), "240.1")
-        assert rc == 1, f"240.1: a {plan['kind']} with a 25-word summary was accepted; the cap is 25 (30 at most)"
-        assert "summary" in why and "31 words" in why, f"240.1: the reason does not name the summary and its 31 words: {why!r}"
+        assert rc == 1, f"240.1: a {plan['kind']} with a 25-word summary was accepted; the cap is 20 (24 at most)"
+        assert "summary" in why and "25 words" in why, f"240.1: the reason does not name the summary and its 25 words: {why!r}"
     rc, why, _ = run_planner(check, capsys, dict(STORY, summary=TWO_SENTENCES), jobs(), "240.1")
     assert rc == 1 and "summary" in why, f"240.1: a summary of two sentences was not rejected naming the summary: {why!r}"
 
