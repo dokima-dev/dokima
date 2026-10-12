@@ -22,4 +22,5 @@ jobs:
         with:
           python-version: "3.12"
       - run: pip install -q pytest pytest-xdist
-      - run: pytest -q -p no:cacheprovider tests
+      # Every test, spread over all the runner's cores.
+      - run: pytest -q -p no:cacheprovider -n auto tests
