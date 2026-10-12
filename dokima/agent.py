@@ -814,6 +814,8 @@ def render(rec, pr=None, plan=None, earlier=None):
         lines += raised_lines(repo, rec) + ([""] + card.fold("What it built", built) if built else [])
         lines += answered_lines(repo, rec, earlier)
     elif role == "reviewer":
+        if filled(rec.get("no_baseline")):
+            lines += ["", f"Every test ran because no baseline was usable: {escape_line(rec['no_baseline'])}."]
         lines += review_lines(repo, rec, plan)
         rows = plan_rows(plan) if isinstance(plan, dict) else {}
         placed = [r for r in card.raises_of(h) if r["kind"] == "blocker" and criterion_of(r, rows)]
@@ -2582,6 +2584,10 @@ def main(argv):
                 print(f"::warning title=Record not read::{name} in the pack could not be read")
         # Code stamps each raise with who raised it and an ID no raise on the issue has yet.
         rec = stamp_record(build_record(role, stage, out, text, passed == "true", meta), earlier)
+        note = os.path.join(os.environ.get("PACK", ""), "no-baseline.txt")
+        if role == "reviewer" and stage == "pr" and os.environ.get("PACK") and os.path.isfile(note):
+            # The test step ran every test because no baseline was usable; the record says so, and why.
+            rec["no_baseline"] = open(note).read().strip() or "no baseline was usable"
         if role == "worker":
             # Kept in the record, so the comment redrawn once its pull request opens still names them.
             rec["files_changed"] = files_changed(os.environ.get("BASE"))

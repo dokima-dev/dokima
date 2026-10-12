@@ -205,6 +205,9 @@ jobs:
           # Exit 0, 1 (a test failed) and 5 (no test affected) are testmon's real answers; anything else is a crash.
           if [ ! -f .testmondata ] || { [ "$code" -gt 1 ] && [ "$code" -ne 5 ]; }; then
             [ ! -f .testmondata ] || echo "::warning title=No usable baseline::testmon stopped with exit $code; running every test"
+            # The code review's record reads this note and says every test ran, and why.
+            if [ -f .testmondata ]; then echo "testmon could not read main's baseline" > "$PACK/no-baseline.txt"
+            else echo "no baseline from main was restored" > "$PACK/no-baseline.txt"; fi
             rm -f "$PACK/tests.xml"
             PYTHONPATH= PYTHONSAFEPATH= python3 -m pytest -q -rA --junitxml="$PACK/tests.xml" > "$PACK/tests.txt" 2>&1 || true
           fi
