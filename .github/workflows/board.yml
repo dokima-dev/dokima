@@ -7,6 +7,11 @@ name: board
 # Every merge sweeps every card.
 # An issue and its pull requests share one queue, so the newest recompute waits for the
 # running one and is never cancelled, while other issues' runs go on beside it.
+# An event that cannot change a card's column or pill (a comment that is no command,
+# record, run card or Autopilot line, a review or line note with no command, new
+# commits, finished checks, another label, an edit leaving the owner's ask as it was)
+# skips the update; every other waits a minute in its issue's own queue, where a newer
+# one cancels it, so a burst becomes one update (#533).
 # Rules live in dokima/board.py. Does nothing unless the repo variable DOKIMA_BOARD
 # names a board ("org/number").
 on:
@@ -33,6 +38,8 @@ jobs:
     runs-on: ubuntu-24.04
     outputs:
       group: ${{ steps.queue.outputs.group }}
+      run: ${{ steps.queue.outputs.run }}
+      wait: ${{ steps.queue.outputs.wait }}
     steps:
       - name: Count this run's GitHub calls
         continue-on-error: true
@@ -60,13 +67,25 @@ jobs:
                END { for (x in t) print t[x], x | "sort -rn | head -4 | paste -sd, - > top"; close("sort -rn | head -4 | paste -sd, - > top")
                      getline top < "top"
                      printf "::notice title=GitHub calls::graphql %d, rest %d; most: %s\n", n["graphql"], n["rest"], top }' calls || true
-  sync:
+  # Only the wait is cancelled by a newer event about the issue, never a running sync.
+  # Autopilot leaves a cancelled board wait out of a head's checks (agent.BOARD_WAIT).
+  settle:
+    name: board wait
     needs: queue
+    concurrency:
+      group: ${{ needs.queue.outputs.wait }}
+      cancel-in-progress: true
+    if: needs.queue.outputs.run == 'true'
+    runs-on: ubuntu-24.04
+    steps:
+      - run: sleep 60
+  sync:
+    needs: [queue, settle]
     concurrency:
       group: ${{ needs.queue.outputs.group }}
       cancel-in-progress: false
     environment: keys
-    if: vars.DOKIMA_BOARD != ''
+    if: vars.DOKIMA_BOARD != '' && needs.queue.outputs.run == 'true'
     runs-on: ubuntu-24.04
     steps:
       - name: Count this run's GitHub calls

@@ -2125,17 +2125,20 @@ def pages(text):
 CHECKS_WAIT, CHECKS_PAUSE = 45 * 60, 30
 
 
+BOARD_WAIT = "board wait"  # board.yml's job that waits a minute, cancelled by a newer event about the issue (#533)
+
+
 def superseded(run):
-    """True for a card run cancelled because a newer redraw replaced it (#528).
+    """True for a card run or board wait cancelled by a newer one (#528, #533).
 
     It judges nothing."""
-    return run.get("name") == "card" and run.get("status") == "completed" and run.get("conclusion") == "cancelled"
+    return run.get("name") in ("card", BOARD_WAIT) and run.get("status") == "completed" and run.get("conclusion") == "cancelled"
 
 
 def unproven(repo, sha, wait=CHECKS_WAIT, pause=CHECKS_PAUSE):
     """Why the commit is not proven by every check on it, check runs and commit statuses alike, or None when every
     check on it has passed. A check still running is waited for, up to `wait` seconds, looking every `pause` seconds;
-    a card run cancelled by a newer redraw is left out."""
+    a card run cancelled by a newer redraw, or a board wait cancelled by a newer event, is left out."""
     deadline = time.monotonic() + wait
     while True:
         runs = [r for p in pages(gh("api", f"repos/{repo}/commits/{sha}/check-runs?per_page=100", "--paginate"))
