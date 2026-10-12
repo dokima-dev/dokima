@@ -1,0 +1,27 @@
+name: testmon baseline
+# Records which tests each line of main's code touches, so a code review runs only the tests its change can affect.
+# Every push to main runs every test with pytest-testmon and saves .testmondata to GitHub's cache; agent.yml restores
+# the newest one before a code review's test run. Installs the same packages agent.yml does, so testmon sees the same
+# environment and keeps the baseline.
+on:
+  push:
+    branches: [main]
+permissions:
+  contents: read
+jobs:
+  baseline:
+    runs-on: ubuntu-24.04
+    steps:
+      - uses: actions/checkout@v5
+        with:
+          persist-credentials: false
+      - uses: actions/setup-python@v6
+        with:
+          python-version: "3.12"
+      - run: pip install -q pytest pytest-xdist pytest-testmon
+      # A failing test still records its baseline: testmon runs it again on the next review.
+      - run: python3 -m pytest -q -p no:cacheprovider --testmon || true
+      - uses: actions/cache/save@v4
+        with:
+          path: .testmondata
+          key: testmon-${{ github.sha }}
