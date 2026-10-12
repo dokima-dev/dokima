@@ -4,17 +4,18 @@ Each event about an issue or its pull request, and a sweep every 15 minutes, put
 says now. Priority is Blocker on an open issue blocking an open issue (blocked-by links), else its label's.
 
     python3 -m dokima.board         # reads GITHUB_EVENT_NAME, GITHUB_EVENT_PATH and DOKIMA_BOARD ("org/number"), if set
-    python3 -m dokima.board queue   # writes the event's board queue to GITHUB_OUTPUT as group=...
+    python3 -m dokima.board queue   # writes the event's board queue, whether it runs and its waiting queue to GITHUB_OUTPUT
 """
 import json
 import os
 import subprocess
 import sys
 
-from dokima import agent, manifest, plan, retry
+from dokima import agent, body as issue_text, manifest, plan, retry
 
 AUTOPILOT = "autopilot"
 DONE = ("Done", None)
+QUIET = "no card can move"  # how reviews.yml names the run of a review or line note that cannot move a card
 
 
 def gql(query, **variables):
@@ -183,6 +184,42 @@ def queue(event, p):
         issue = n if kind == "issue" else agent.issue_of_pr(head, body)
         return f"board-{issue}" if issue else f"board-pr-{n}"
     return f"board-run-{os.environ.get('GITHUB_RUN_ID', '')}"
+
+
+def can_move(event, p):
+    """False exactly for an event that cannot change a card's column or pill (#533).
+
+    True for every other event, and for one it cannot read. The skipped ones are: a comment that is no command, record,
+    run card or Autopilot line; a review or line note reviews.yml names as such; new commits; finished Acceptance
+    criteria checks; a label other than autopilot; and an edit that leaves the owner's ask as it was, such as the card
+    redrawn above it or a new title."""
+    try:
+        action = p.get("action")
+        if event == "issue_comment":
+            words = p["comment"]["body"] or ""
+            return bool(agent.command_of(words) or agent.autopilot_of(words) or agent.MARK in words or agent.LIVE in words
+                        or words.strip().startswith("Autopilot"))
+        if event == "issues" and action in ("labeled", "unlabeled"):
+            return p["label"]["name"] == AUTOPILOT
+        if event == "issues" and action == "edited":
+            changes = p["changes"]
+            if not changes:
+                return True
+            if "body" not in changes:
+                return False
+            return issue_text.ask(changes["body"]["from"]) != issue_text.ask(p["issue"]["body"])
+        if event in ("pull_request", "pull_request_target"):
+            return action != "synchronize"
+        if event == "workflow_run":
+            run = p["workflow_run"]
+            path = run["path"]
+            if path.endswith("/reviews.yml"):
+                return not (run["event"] in ("pull_request_review", "pull_request_review_comment")
+                            and run["display_title"].endswith(QUIET))
+            return not path.endswith("/acceptance-criteria.yml")
+    except (KeyError, TypeError, AttributeError):
+        return True
+    return True
 
 
 def reason(e):
@@ -404,8 +441,12 @@ def sync(event, payload, spec, repo, q=gql, rest=api):
 
 def main(argv=()):
     if list(argv[1:2]) == ["queue"]:
+        event, p = os.environ["GITHUB_EVENT_NAME"], json.load(open(os.environ["GITHUB_EVENT_PATH"]))
+        group, run = queue(event, p), can_move(event, p)
+        # An update waits a minute in its issue's own queue, where a newer one cancels it; a skipped event waits nowhere.
+        wait = f"{group}-wait" if run else f"board-skip-{os.environ.get('GITHUB_RUN_ID', '')}"
         with open(os.environ["GITHUB_OUTPUT"], "a") as f:
-            f.write(f"group={queue(os.environ['GITHUB_EVENT_NAME'], json.load(open(os.environ['GITHUB_EVENT_PATH'])))}\n")
+            f.write(f"group={group}\nrun={'true' if run else 'false'}\nwait={wait}\n")
         return 0
     spec = os.environ.get("DOKIMA_BOARD", "").strip()
     if not spec:
