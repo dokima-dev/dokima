@@ -177,6 +177,19 @@ if a[:2] == ["pr", "list"]:
     else:
         print(json.dumps(rows))
     sys.exit(0)
+if a[:2] == ["api", "graphql"] and "isInMergeQueue" in (flag("-f") or ""):
+    # Whether a pull request merged or is queued, as GitHub's API answers it (#467).
+    n = next((x[2:] for x in a if x.startswith("n=")), None)
+    if n not in PRS:
+        sys.stderr.write("Could not resolve to a PullRequest\n")
+        sys.exit(1)
+    if PRS[n].get("unreadable") and PRS[n].get("asked"):
+        sys.stderr.write("HTTP 502: Bad Gateway\n")
+        sys.exit(1)
+    o = pr_obj(n)
+    keys = ("state", "isInMergeQueue", "autoMergeRequest", "reviewDecision", "mergeStateStatus")
+    print(json.dumps({"data": {"repository": {"pullRequest": {k: o.get(k) for k in keys}}}}))
+    sys.exit(0)
 if a[:2] == ["pr", "view"]:
     n = pr_sel()
     if n is None:
@@ -184,6 +197,10 @@ if a[:2] == ["pr", "view"]:
         sys.exit(1)
     obj = pr_obj(n)
     want = (flag("--json") or "").split(",")
+    if "isInMergeQueue" in want:
+        # The runners' gh has no such field (#467); only GitHub's API answers it.
+        sys.stderr.write('Unknown JSON field: "isInMergeQueue"\n')
+        sys.exit(1)
     pick(obj)
     if not flag("--json") or "statusCheckRollup" in want:
         reveal(n)

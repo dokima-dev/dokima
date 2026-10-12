@@ -7,7 +7,7 @@ request in the queue, or turns on auto-merge, and exits 0 with nothing merged. A
 These tests run the code review (agent.yml) and `/autopilot start` (commands.yml) the way test_automerge.py does, on its
 fake GitHub, taught three more ways a merge can go. A pull request in prs.json may carry "accepts":
   - "queue": `gh pr merge` with a method exits 0 saying the pull request was added to the merge queue; it stays open,
-    and GitHub then reports isInMergeQueue true, autoMergeRequest set and reviewDecision APPROVED (`gh pr view --json`),
+    and GitHub then reports isInMergeQueue true, autoMergeRequest set and reviewDecision APPROVED (GitHub's API),
     and auto_merge set with merged false (`gh api repos/o/r/pulls/N`);
   - "approval": `gh pr merge` exits 0 saying it will be merged when all requirements are met; it stays open, out of the
     queue, with autoMergeRequest set and reviewDecision REVIEW_REQUIRED;
