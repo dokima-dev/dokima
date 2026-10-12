@@ -15,7 +15,7 @@ import subprocess
 import sys
 import time
 
-from dokima import card, manifest, raises, words
+from dokima import body as issue_body, card, manifest, raises, words
 from dokima.card import field_icon, icon
 
 VERDICTS = {"approve", "block", "escalate"}
@@ -1839,6 +1839,29 @@ def record_links(repo, number, items):
     return " ".join(failed) + after if failed else None
 
 
+def set_title(repo, number, items):
+    """Set the issue's title to the approved plan's (#543); returns why it failed, or None.
+
+    Code reads the title from the issue's checked records only; a plan with none, from before titles, renames nothing.
+    The first rename keeps the owner's own title in the issue's Original issue fold, in the same write."""
+    title = ((latest(records(items), "planner") or {}).get("handback") or {}).get("title")
+    if not isinstance(title, str) or not title.strip():
+        return None
+    title = " ".join(title.split())
+    try:
+        now = json.loads(gh("api", f"repos/{repo}/issues/{number}"))
+        if now["title"] == title:
+            return None
+        kept = issue_body.keep_title(now.get("body") or "", now["title"])
+        gh("api", "-X", "PATCH", f"repos/{repo}/issues/{number}", "-f", f"title={title}",
+           *(["-f", f"body={kept}"] if kept != (now.get("body") or "") else []))
+    except subprocess.CalledProcessError as e:
+        return f"GitHub refused to set the issue's title to the plan's: {gh_reason(e)}."
+    except (json.JSONDecodeError, KeyError, TypeError) as e:
+        return f"GitHub's answer for #{number} could not be read, so its title was not set: {e}."
+    return None
+
+
 PUSH_EVENTS = ("pull_request", "pull_request_target", "push")
 NO_PERMISSION = "Resource not accessible by integration"
 
@@ -2802,6 +2825,9 @@ def main(argv):
                     # Code records the approved plan's links on GitHub, and card.yml redraws the cards they touch; anything that keeps
                     # a link from being recorded stops the river, so autopilot never starts work that should wait.
                     why = record_links(repo, number, items)
+                    renamed = set_title(repo, number, items)
+                    if renamed:
+                        why = f"{why} {renamed}" if why else renamed + " Say `/work` to go on, or `/plan` with changes."
                     if why:
                         step = ("stop", why)
                     elif step[:2] == ("start", "worker") and step[3:] == ("autopilot",):
