@@ -27,6 +27,7 @@ def test_tampering_is_undone_and_in_scope_work_survives(record_property, tmp_pat
     Simulates a worker that changes the app (allowed) and also edits the planner's test, adds a conftest that would
     skip everything, edits the README and adds a stray file, then checks what survives the fence and what it names."""
     record_property("proves", "fence.1")
+    record_property("proves", "527.3")
     base = repo(tmp_path, monkeypatch)
     (tmp_path / "app.py").write_text("x = 2\n")
     (tmp_path / "tests" / "test_app.py").write_text("def test_x():\n    assert True\n")

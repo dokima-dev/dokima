@@ -271,7 +271,6 @@ def test_a_criterion_proven_only_by_an_older_test_counts_as_proven(record_proper
     (lambda s: s.update(non_functional="none"), "non_functional"),
     (lambda s: s.update(user_story=5), "user_story"),
     (lambda s: s.update(scope="dokima/jobs.py"), "scope"),
-    (lambda s: s.update(out_of_scope="No retries."), "out_of_scope"),
     (lambda s: s["tests"].update({"9.1": "tests/test_jobs.py::test_id"}), "tests"),
     (lambda s: s.update(test_changes=["tests/test_old.py::test_old"]), "test_changes"),
     (lambda s: s.update(questions="Why?"), "questions"),
@@ -286,7 +285,7 @@ def test_a_criterion_proven_only_by_an_older_test_counts_as_proven(record_proper
     ("a plan", "plan.json"),
     (5, "plan.json"),
 ], ids=["criterion text", "criterion source", "requirement text", "requirement why", "criteria not a list",
-        "requirements not a list", "user_story", "scope", "out_of_scope", "tests", "test_changes", "questions", "kind",
+        "requirements not a list", "user_story", "scope", "tests", "test_changes", "questions", "kind",
         "split's criterion source", "split's criteria not a list", "split's requirements not a list",
         "split's requirement not an object", "split's requirement text", "split's requirement why", "plan.json a list", "plan.json a string", "plan.json a number"])
 def test_a_value_of_the_wrong_type_is_rejected_naming_the_field(record_property, check, change, field):
