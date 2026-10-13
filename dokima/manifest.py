@@ -50,10 +50,6 @@ BRANCH_RULES = {
     "main": {"required_checks": ["all tests", "Acceptance criteria"]},
 }
 
-# The repo's Actions variable that, set to `on`, lets Dokima's app merge a pull request whose code review passed, as a
-# bypass actor of the merge queue ruleset limited to pull requests (#557). Unset or `off`, the owner approves.
-AUTO_MERGE = "DOKIMA_AUTO_MERGE"
-
 PERMISSIONS = {
     "contents": "write",
     "pull_requests": "write",
@@ -65,7 +61,6 @@ PERMISSIONS = {
     "workflows": "write",
     "administration": "read",
     "organization_projects": "write",
-    "actions_variables": "read",
 }
 
 LEVEL = {"read": 1, "write": 2}
