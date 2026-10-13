@@ -23,6 +23,8 @@ FIXERS = {"worker", "planner"}
 # The fields agents raised and answered through before #300; a hand-back holding any of them, even empty, is rejected.
 OLD_FIELDS = ("questions", "concerns", "replies", "suspect_tests", "outside_scope", "blockers", "notes", "assumptions",
               "issues_found", "outside_plan", "resolved")
+# How the worker's end check names each plan test still red (#595); a record whose problems hold one opens as blocked.
+PLAN_TEST_FAILS = "plan test fails: "
 
 
 def gh(*args):
@@ -692,6 +694,8 @@ def opening(rec):
     role, h, passed = rec["role"], rec["handback"], rec["check"]["passed"]
     if rec.get("unrecorded"):
         return f"{who(role, rec.get('stage'))}'s run ended before posting its record."
+    if not passed and role == "worker" and any(str(p).startswith(PLAN_TEST_FAILS) for p in rec["check"]["problems"]):
+        return "The worker is blocked: its plan tests still fail."
     if not passed and role == "worker":
         return "The worker stopped early with its hand-back rejected by code."
     if not passed:
@@ -1462,6 +1466,23 @@ def load(path, name):
     return data, None
 
 
+def plan_tests(plan):
+    """Every test the plan lists for its criteria, each once, in the plan's order."""
+    tests = plan.get("tests") if isinstance(plan.get("tests"), dict) else {}
+    return list(dict.fromkeys(t for ts in tests.values() if isinstance(ts, list) for t in ts if filled(t)))
+
+
+def failing_plan_tests(plan):
+    """Run each plan test alone on this branch; return those that do not pass.
+
+    One at a time, so a test missing from the branch fails alone and is named, while the others still run."""
+    env = {**os.environ, "PYTHONPATH": os.getcwd()}
+    env.pop("PYTHONSAFEPATH", None)
+    return [t for t in plan_tests(plan)
+            if subprocess.run([sys.executable, "-m", "pytest", "-q", "-p", "no:cacheprovider", t],
+                              env=env, capture_output=True, text=True).returncode != 0]
+
+
 def check(kind, path, plan_path=None, number=None):
     """Check one hand-back file against its prompt's shape and, when given, the approved plan and the issue's number.
     Print every problem and return 1 if there are any, else 0."""
@@ -1487,6 +1508,8 @@ def check(kind, path, plan_path=None, number=None):
             bad.append(f"the issue number {number!r} is not a number: the hand-back can't be checked against the plan")
         else:
             bad += problems_plan(kind, data, plan, number)
+            if kind == "work" and os.environ.get("ROLE") == "worker":
+                bad += [PLAN_TEST_FAILS + t for t in failing_plan_tests(plan)]
             if kind == "review" and os.environ.get("STAGE") == "plan":
                 bad += problems_asks(data, plan_criteria(plan, number))
                 bad += problems_size(data, plan_criteria(plan, number))
