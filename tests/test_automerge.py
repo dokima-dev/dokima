@@ -18,6 +18,8 @@ pull requests, their checks and merging. It keeps them in prs.json, one entry pe
   - `gh api repos/o/r/pulls/N` (head.sha, head.ref, state, merged, mergeable), `.../pulls/N/files`,
     `.../pulls/N/comments` (no line notes), `repos/o/r/commits/SHA/check-runs`, `.../commits/SHA/status` and
     `.../commits/SHA/statuses` (SHA may also be the branch name), each with or without --paginate;
+  - `gh api repos/o/r/compare/main...HEAD` (HEAD the head commit or the branch): `behind_by` 0, as for a branch that
+    holds main's newest commit, or 1 when the test sets "behind" on the pull request (#596);
   - `gh api repos/o/r/branches/BRANCH/protection[/required_status_checks]`: the branch rule, requiring every check
     of the pull request the last call about one named, so each of its checks still judges its merge (#561);
   - `gh pr comment N` and `gh api repos/o/r/issues/N/comments` for a pull request N write on that pull request;
@@ -304,6 +306,18 @@ if m_rule or m_branch:
         pick({"name": m_branch.group(1), "protection": {"enabled": True, "required_status_checks": inner}})
     else:
         pick(inner if m_rule.group(2) else {"required_status_checks": inner})
+    sys.exit(0)
+m_cmp = next((re.fullmatch(r"/?repos/o/r/compare/(?:refs/heads/)?main\.\.\.?(.+)", x.split("?")[0]) for x in a[1:]
+              if "/compare/" in x), None) if a[:1] == ["api"] else None
+if m_cmp:
+    # Whether the branch holds main's newest commit: it does, unless the test made it fall behind ("behind": true).
+    n = next((k for k, p in PRS.items() if m_cmp.group(1) in (p["head"], p["branch"], "refs/heads/" + p["branch"])), None)
+    if n is None:
+        sys.stderr.write("HTTP 404: Not Found\n")
+        sys.exit(1)
+    b = 1 if PRS[n].get("behind") else 0
+    pick({"status": "diverged" if b else "ahead", "ahead_by": 1, "behind_by": b, "total_commits": 1,
+          "base_commit": {"sha": "d4" * 20}, "merge_base_commit": {"sha": ("e5" if b else "d4") * 20}})
     sys.exit(0)
 m_com = re.fullmatch(r"repos/o/r/commits/(.+?)/(check-runs|status|statuses)", PAPI or "")
 if m_com:
@@ -631,17 +645,17 @@ def test_without_autopilot_an_approved_pull_request_waits_for_the_owner(record_p
     """Off autopilot, an approved pull request with green checks still waits for the owner to merge it, as today.
 
     Runs the code review of #60, approving with every check green, on issue #57 without the autopilot label (it carries
-    only "bug"). No merge may be tried, no Autopilot line posted, the card must still say "Merge the pull request" and
-    mention the owner, and the board must show Needs you. `/autopilot stop` on the issue with that approved pull
-    request merges nothing either. Beside them, the same review on autopilot does merge."""
+    only "bug"). No merge may be tried, no Autopilot line posted, the card must ask the owner to approve the pull
+    request, mentioning them (#596: the merge gate passed, so approving is theirs), and the board must show Needs you.
+    `/autopilot stop` on the issue with that approved pull request merges nothing either. Beside them, the same review on autopilot does merge."""
     record_property("proves", "212.2")
     m = Review(tmp_path / "off", PR_APPROVE, {57: ["bug"]}, GREEN)
     assert m.agent_started(), f"212.2: test setup: the code review never ran; it stopped at '{m.failed_step}':\n{m.tail()}"
     assert m.tried() == [] and m.merged() is None, f"212.2: a merge was tried off autopilot: {m.tried()}"
     assert m.autopilot_lines() == [], f"212.2: an Autopilot line was posted off autopilot: {m.autopilot_lines()}"
     nxt = m.next_line()
-    assert "Merge the pull request" in nxt and f"@{OWNER}" in nxt, \
-        f"212.2: off autopilot the card no longer says 'Merge the pull request' to the owner: {nxt!r}"
+    assert re.search(r"\bapprove\b", nxt, re.I) and f"@{OWNER}" in nxt, \
+        f"212.2: off autopilot the card no longer asks the owner to approve the pull request: {nxt!r}"
     assert m.board().endswith("needs"), f"212.2: off autopilot the card does not show Needs you: {m.board()!r}"
 
     m = Command(tmp_path / "stop", {60: pr_state(57, GREEN)}, {57: "approve"}, labels={57: [LABEL]})
@@ -656,15 +670,15 @@ def test_without_autopilot_an_approved_pull_request_waits_for_the_owner(record_p
 def test_a_refused_merge_stops_for_the_owner_and_says_why(record_property, tmp_path):
     """A merge that cannot happen leaves the pull request open, says why on it, mentions the owner and shows Needs you.
 
-    Runs the code review of #60 on autopilot, approving, three ways: a red check, no checks at all, and GitHub
-    refusing the merge for a conflict. Each must leave #60 open, post no Autopilot line, write on #60 the reason (the
-    red check's name, that there are no checks, or GitHub's own words) mentioning the owner, show Needs you and start
-    nothing; for the conflict, the merge must have been asked. Then `/autopilot start` on the approved #60: with a red
-    check, and with every check green while GitHub refuses for a conflict, each says why on #60 and mentions the owner.
+    Runs the code review of #60 on autopilot, approving, two ways: no checks at all, and GitHub refusing the merge
+    for a conflict. Each must leave #60 open, post no Autopilot line, write on #60 the reason (that there are no
+    checks, or GitHub's own words) mentioning the owner, show Needs you and start nothing; for the conflict, the merge
+    must have been asked. A red check after the code review goes back to the worker instead (#596,
+    tests/test_merge_gate.py). Then `/autopilot start` on the approved #60: with a red check, and with every check
+    green while GitHub refuses for a conflict, each says why on #60 and mentions the owner.
     A merge GitHub holds for the owner's approval is a wait, not a refusal (#587, test_merge_approval.py)."""
     record_property("proves", "212.3")
-    cases = (("red check", RED, "", RED_NAME), ("no checks", [], "", "no check"),
-             ("conflict", GREEN, CONFLICT, CONFLICT))
+    cases = (("no checks", [], "", "no check"), ("conflict", GREEN, CONFLICT, CONFLICT))
     for case, checks, refuse, reason in cases:
         m = Review(tmp_path / case.replace(" ", "-"), PR_APPROVE, ON, checks, refuse=refuse)
         assert m.agent_started(), f"212.3 ({case}): test setup: the code review never ran:\n{m.tail()}"
