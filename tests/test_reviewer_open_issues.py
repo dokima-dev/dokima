@@ -194,8 +194,8 @@ def test_each_open_issue_in_the_reviewers_pack_says_whether_dokima_filed_it(reco
 
 
 def searched_review(searched):
-    """A code review that raises one issue, naming the open issues it searched."""
-    return review("approve", "pr", raises=[{**FOUND, "searched": searched}])
+    """A code review raising one issue, with its searched issues and verdict."""
+    return review("approve", "pr", raises=[{**FOUND, "searched": searched, "verdict": "new"}])
 
 
 def both_checks(tmp_path, handback, pack):
