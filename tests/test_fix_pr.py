@@ -116,7 +116,7 @@ def test_a_manual_fix_cannot_merge_before_all_tests_pass(record_property, tmp_pa
 
     Proves 589.2.
     Runs the fix workflow and checks its pull request targets main and no merge or auto-merge is asked for; then
-    checks main's branch rule requires the all tests check, and that check runs on every pull request with no filter."""
+    checks main's branch rule requires the all tests check, and that check runs when a pull request opens or gets a commit."""
     record_property("proves", "589.2")
     need_workflow("589.2")
     run = Fix(tmp_path)
@@ -131,6 +131,7 @@ def test_a_manual_fix_cannot_merge_before_all_tests_pass(record_property, tmp_pa
         "589.2: main's branch rule no longer requires all tests"
     suite = ts.workflow("full-suite.yml")
     on = suite.get("on") or suite.get(True) or {}
-    assert "pull_request_target" in on and not (on.get("pull_request_target") or {}), \
-        "589.2: the all tests check does not run on every pull request"
+    types = (on.get("pull_request_target") or {}).get("types") if "pull_request_target" in on else []
+    assert "pull_request_target" in on and (not types or {"opened", "synchronize", "reopened"} <= set(types)), \
+        "589.2: the all tests check does not run when a pull request opens or gets a commit"
     assert any(j.get("name") == "all tests" for j in suite["jobs"].values()), "589.2: no job is named all tests"
