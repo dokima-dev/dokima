@@ -44,6 +44,8 @@ OLD = "a1" * 20  # the head the code review approved
 NEW = "b2" * 20  # the head after Update branch: the pull request combined with main's newest commit
 REQUIRED = ["all tests", "Acceptance criteria"]
 APPROVE_ASK = re.compile(r"\bapprove\b", re.I)
+# A Next line that tells the owner to merge, the way today's does ("Merge the pull request").
+MERGE_ASK = re.compile(r"\bmerge (the|this) pull request\b|\bmerge it\b", re.I)
 UPDATE_REFUSED = "HTTP 422: merge conflict between base and head"
 
 STORY = {"kind": "user_story", "title": "t", "summary": "s", "user_story": "u",
@@ -333,8 +335,9 @@ def test_the_owner_is_asked_to_approve_only_after_the_merge_gate_passed(record_p
     Proves 596.3.
     Off autopilot, the code review approved #60. With every check green on the head combined with main, the run must
     stop for the owner with a Next line asking them to approve, and show Needs you; today its Next line only says to
-    merge. With the checks on the combined head still running past the wait, its Next line must not ask them to
-    approve. With All tests failed on the combined head, it must neither ask them to approve nor show Needs you."""
+    merge. With the checks on the combined head still running past the wait, its Next line must neither ask them to
+    approve nor tell them to merge. With All tests failed on the combined head, it must neither ask them to approve,
+    tell them to merge, nor show Needs you."""
     record_property("proves", "596.3")
     fake = FakeGitHub({OLD: green(OLD), NEW: green(NEW)}, behind=True)
     r = decide(tmp_path, monkeypatch, capsys, fake, "passed")
@@ -347,13 +350,11 @@ def test_the_owner_is_asked_to_approve_only_after_the_merge_gate_passed(record_p
     fake = FakeGitHub({OLD: green(OLD), NEW: running(NEW)}, behind=True)
     r = decide(tmp_path, monkeypatch, capsys, fake, "running")
     assert r[3] is None, f"596.3: deciding what follows the code review failed: {r[3]}"
-    assert not APPROVE_ASK.search(r[1]), \
-        f"596.3: the owner was asked to approve while tests still ran on the combined head: Next {r[1]!r}"
-
-
+    assert not APPROVE_ASK.search(r[1]) and not MERGE_ASK.search(r[1]), \
+        f"596.3: the owner was asked to approve or merge while tests still ran on the combined head: Next {r[1]!r}"
 
     fake = FakeGitHub({OLD: green(OLD), NEW: red(NEW)}, behind=True)
     r = decide(tmp_path, monkeypatch, capsys, fake, "failed")
     assert r[3] is None, f"596.3: deciding what follows the code review failed: {r[3]}"
-    assert not APPROVE_ASK.search(r[1]) and not r[2].endswith("needs"), \
-        f"596.3: the owner was asked to approve though the merge gate failed: Next {r[1]!r}, card {r[2]!r}"
+    assert not APPROVE_ASK.search(r[1]) and not MERGE_ASK.search(r[1]) and not r[2].endswith("needs"), \
+        f"596.3: the owner was asked to approve or merge though the merge gate failed: Next {r[1]!r}, card {r[2]!r}"
