@@ -2219,12 +2219,20 @@ def unproven(repo, sha, wait=CHECKS_WAIT, pause=CHECKS_PAUSE, branch="main"):
     Check runs and commit statuses count alike; a check the rule does not require judges nothing (#561). A
     required check still running or not yet on the commit is waited for, up to `wait` seconds, looking every `pause`
     seconds; a card run cancelled by a newer redraw, or a board wait cancelled by a newer event, is left out."""
+    return proof(repo, sha, wait, pause, branch)[1]
+
+
+def proof(repo, sha, wait=CHECKS_WAIT, pause=CHECKS_PAUSE, branch="main"):
+    """What the checks the branch's rule requires say of the commit, as `unproven` reads them.
+
+    ("passed", None), ("failed", why) when one of them failed, or ("stopped", why) when they never finished or GitHub
+    could not say."""
     try:
         required = required_checks(repo, branch)
     except subprocess.CalledProcessError as e:
-        return f"GitHub did not give which checks {branch} requires: {gh_reason(e)}"
+        return "stopped", f"GitHub did not give which checks {branch} requires: {gh_reason(e)}"
     if not required:
-        return f"{branch}'s branch rule requires no checks, so no check proves its head commit {sha[:7]}"
+        return "stopped", f"{branch}'s branch rule requires no checks, so no check proves its head commit {sha[:7]}"
     deadline = time.monotonic() + wait
     while True:
         runs = [r for p in pages(gh("api", f"repos/{repo}/commits/{sha}/check-runs?per_page=100", "--paginate"))
@@ -2237,16 +2245,46 @@ def unproven(repo, sha, wait=CHECKS_WAIT, pause=CHECKS_PAUSE, branch="main"):
         running += [s.get("context") for s in statuses if s.get("state") == "pending"]
         missing = sorted(required - {r.get("name") for r in runs} - {s.get("context") for s in statuses})
         if red:
-            return f"not every check passed on its head commit {sha[:7]}: {', '.join(red)}"
+            return "failed", f"not every check passed on its head commit {sha[:7]}: {', '.join(red)}"
         if not running and not missing:
-            return None
+            return "passed", None
         if time.monotonic() >= deadline:
             if running:
-                return (f"a check was still running on its head commit {sha[:7]} after {wait // 60} minutes: "
-                        f"{', '.join(running)}")
-            return (f"a check {branch} requires never ran on its head commit {sha[:7]} after {wait // 60} minutes: "
-                    f"{', '.join(missing)}")
+                return "stopped", (f"a check was still running on its head commit {sha[:7]} after {wait // 60} minutes: "
+                                   f"{', '.join(running)}")
+            return "stopped", (f"a check {branch} requires never ran on its head commit {sha[:7]} after {wait // 60} "
+                               f"minutes: {', '.join(missing)}")
         time.sleep(pause)
+
+
+UPDATE_WAIT, UPDATE_PAUSE = 5 * 60, 5
+
+
+def merge_gate(repo, pr):
+    """The merge gate, run once the code review approved the pull request (#596).
+
+    A branch behind main is brought up to date with it first (GitHub's Update branch), so the checks main requires
+    are read on the code as it would land. Returns ("passed", head, None) once every one passed on that head,
+    ("failed", head, why) when one failed there, or ("stopped", head, why) when GitHub would not update the branch, the
+    checks never finished or GitHub could not say."""
+    head = gh("pr", "view", str(pr), "-R", repo, "--json", "headRefOid", "-q", ".headRefOid").strip()
+    if not head:
+        return "stopped", "", "GitHub did not say which commit is its head"
+    if behind_main(repo, head):
+        try:
+            gh("api", "-X", "PUT", f"repos/{repo}/pulls/{pr}/update-branch", "-f", f"expected_head_sha={head}")
+        except subprocess.CalledProcessError as e:
+            return "stopped", head, f"GitHub could not bring its branch up to date with main: {gh_reason(e)}"
+        # GitHub updates the branch after it answers: the new head is the commit that holds main's newest one.
+        old, deadline = head, time.monotonic() + UPDATE_WAIT
+        while head == old:
+            if time.monotonic() >= deadline:
+                return "stopped", old, (f"GitHub did not bring its branch up to date with main within "
+                                        f"{UPDATE_WAIT // 60} minutes")
+            time.sleep(UPDATE_PAUSE)
+            head = gh("pr", "view", str(pr), "-R", repo, "--json", "headRefOid", "-q", ".headRefOid").strip() or old
+    state, why = proof(repo, head)
+    return state, head, why
 
 
 def behind_main(repo, head):
@@ -2260,10 +2298,11 @@ def held_for_approval(e):
     return "approving review" in f"{e.stderr} {e.stdout}"
 
 
-def try_merge(repo, pr):
-    """Ask GitHub to merge the pull request at the head whose checks were read.
+def try_merge(repo, pr, tested=None):
+    """Ask GitHub to merge the pull request at the head its merge gate tested.
 
-    Only when it changes no workflow file and every check on that head has passed. GitHub's own rules decide (#587):
+    Only when it changes no workflow file and its merge gate passed: every check main requires passed on its head,
+    brought up to date with main first. A head the gate already `tested` is merged without running it again. GitHub's own rules decide (#587):
     when it holds the merge for the owner's approval, Dokima's app asks it to merge directly, which GitHub allows only
     when the app may bypass that approval, and only when its branch holds main's newest commit; a direct merge GitHub refuses leaves it waiting for approval.
     Returns (True, the head) once GitHub took the merge, or (False, why not, in GitHub's words when GitHub refused)."""
@@ -2272,11 +2311,8 @@ def try_merge(repo, pr):
         flows = [f for f in files if f.startswith(WORKFLOWS)]
         if flows:
             return False, f"it changes a workflow file ({', '.join(flows)}), and only the owner merges those"
-        head = gh("pr", "view", str(pr), "-R", repo, "--json", "headRefOid", "-q", ".headRefOid").strip()
-        if not head:
-            return False, "GitHub did not say which commit is its head"
-        why = unproven(repo, head)
-        if why:
+        state, head, why = ("passed", tested, None) if tested else merge_gate(repo, pr)
+        if state != "passed":
             return False, why
         # Pinned to the head whose checks passed: a commit pushed since makes GitHub refuse.
         merge = ("pr", "merge", str(pr), "-R", repo, "--squash", "--match-head-commit", head)
@@ -2346,19 +2382,19 @@ def merge_outcome(repo, pr):
                            f"(merge state {st.get('mergeStateStatus') or 'unknown'})")
 
 
-def automerge(repo, number):
+def automerge(repo, number, tested=None):
     """On autopilot, merge the open pull request built for the issue.
 
     Once GitHub reports it merged, queued or waiting for the owner's approval, the issue gets that one Autopilot line. Returns (pull request or '', how, why): how is
     "merged", "queued" or "waits"; "unconfirmed" when GitHub took the merge but cannot confirm it, or '' when the
-    merge was not made, each with why."""
+    merge was not made, each with why. A head its merge gate already `tested` merges without running the gate again."""
     try:
         pr = open_pr(repo, number)
     except subprocess.CalledProcessError as e:
         return "", "", " ".join((e.stderr or str(e)).split())
     if not pr:
         return "", "", "there is no open pull request built for it"
-    asked, why = try_merge(repo, pr)
+    asked, why = try_merge(repo, pr, tested)
     if not asked:
         return pr, "", why
     how, why = merge_outcome(repo, pr)
@@ -2659,7 +2695,7 @@ def next_line(step, owners):
         return "**Next:** The split's stories are filed now."
     if step[0] == "start":
         who = {"planner": "The planner", "worker": "The worker", "reviewer": "The reviewer"}[step[1]]
-        return f"**Next:** {who} starts now."
+        return f"**Next:** {step[4] + ' ' if len(step) > 4 else ''}{who} starts now."
     if step[0] in ("cancelled", "merged", "waiting", "queued"):
         return f"**Next:** {step[1]}"
     mention = " ".join(f"@{o}" for o in owners)
@@ -2837,13 +2873,27 @@ def main(argv):
                         ups.append(parent_words(repo, number))
                     return ups[0]
                 step = next_step(items, rec, owners, autopilot=autopilot, body=d.get("body") or "", number=number, parent=parent)
+                gate = ""
                 if approves_work(rec) and step[0] != "start":
+                    # The merge gate runs first (#596): all tests on the pull request with main's newest commit. A
+                    # failure sends the work back to the worker; only a pass goes on, to the owner or to autopilot.
+                    pr = open_pr(repo, number)
+                    gate, tested, why = merge_gate(repo, pr) if pr else ("stopped", "", "there is no open pull request built for it")
+                    if gate == "failed":
+                        step = ("start", "worker", "", "", f"The merge gate failed: {why}.")
+                    elif gate == "stopped":
+                        step = ("stop", f"The merge gate did not pass: {why}. Give `/review` to run it again, or `/work` "
+                                        "to send it back to the worker.")
+                    else:
+                        step = ("stop", "All tests passed with main's newest commit. Approve the pull request on GitHub "
+                                        "to merge it, or review it with a command to send it back.")
+                if gate == "passed":
                     # On autopilot the code review's approval stands in for the owner's: the pull request merges by itself.
                     on = autopilot()
                     if on is None:
                         step = ("stop", f"{UNREAD} {step[1]}")
                     elif on:
-                        pr, how, why = automerge(repo, number)
+                        pr, how, why = automerge(repo, number, tested)
                         if how == "merged":
                             step = ("merged", f"Autopilot merged PR #{pr}; what it unblocks starts when the issue closes.")
                         elif how == "queued":
