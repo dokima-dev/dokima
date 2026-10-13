@@ -81,6 +81,7 @@ def texts(h):
     out = []
     items = lambda v: v if isinstance(v, list) else []  # a malformed field is named by the field check, not crashed on
     put = lambda where, field, t: out.append((where, field, t)) if isinstance(t, str) and t.strip() else None
+    put("title", "story_title", h.get("title"))  # a plan's title is held as a story's title is (#543)
     put("summary", "summary", h.get("summary"))
     put("user_story", "user_story", h.get("user_story"))
     put("feature", "feature", h.get("feature"))

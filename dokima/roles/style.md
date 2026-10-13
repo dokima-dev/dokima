@@ -24,6 +24,7 @@ below and cut until it passes. The owner's quoted `words` are never capped.
 | the worker's own test run (evidence) | 15 |
 | a test change reason | 15 |
 
-Plain words only, no code (no file, path, function or code span) in: summary, user_story, criteria, a why, feature,
-story titles and user stories, raise labels, questions, answers' why and previous_step lines. Evidence, blockers,
+Plain words only, no code (no file, path, function or code span) in: a plan's title, summary, user_story, criteria, a
+why, feature, story titles and user stories, raise labels, questions, answers' why and previous_step lines. A plan's
+title is held to a story's title's cap. Evidence, blockers,
 issues found, test change reasons and the worker's own test run may name files and tests, as `code`.

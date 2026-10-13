@@ -590,6 +590,8 @@ def main(argv):
         listed, bad = words.style({k: v for k, v in raw.items() if k != "summary"})
         more, too_long = words.summary_caps(raw["summary"])
         listed, bad = more + listed, too_long + bad
+        if not isinstance(raw.get("title"), str) or not raw["title"].strip():
+            bad.append("plan.json needs a title: a short plain name for the issue, set as its title once approved")
         if kind == "plan":
             base = os.environ.get("PLANNER_BASE", "HEAD")
             files = changed_files(base)

@@ -19,6 +19,8 @@ DONE = "<!-- dokima-done -->"
 # In a planned card: the owner's part stays folded, with the Definition of Done after the fold.
 FOLDED = "<!-- dokima-folded -->"
 TRAILER = "\n\n" + DONE + "\n"
+# The owner's own title, kept at the head of their part once a plan renames the issue (#543); code writes this line.
+TITLE = "<!-- dokima-title -->**Original title:** "
 # The head of a split's story, as agent.story_body quotes it from the parent's approved plan.
 STORY = re.compile(r"<!-- dokima-card -->\n<!-- /dokima-card -->\n\n<details open><summary>From the approved plan of #\d+, ")
 
@@ -41,17 +43,50 @@ def trailer(below):
     return below[:i], below[i:]
 
 
-def ask(body):
-    """The owner's part below the first marker, byte for byte; the whole body when there is no marker yet."""
+def owners_part(body):
+    """(the owner's kept title or None, their ask) below the first marker.
+
+    With no marker yet, the ask is the whole body."""
     body = body or ""
     if MARKER not in body:
-        return body
+        return None, body
     below = trailer(body.split(MARKER, 1)[1])[0]
     if below.startswith(FOLD_START) and below.endswith(FOLD_END) and len(below) >= len(FOLD_START) + len(FOLD_END):
-        return below[len(FOLD_START):len(below) - len(FOLD_END)]
-    if below.startswith(OPEN_START):
-        return below[len(OPEN_START):]
-    return below
+        part = below[len(FOLD_START):len(below) - len(FOLD_END)]
+    elif below.startswith(OPEN_START):
+        part = below[len(OPEN_START):]
+    else:
+        return None, below
+    head, sep, rest = part.partition("\n\n")
+    if part.startswith(TITLE) and sep and "\n" not in head:
+        return head[len(TITLE):], rest
+    return None, part
+
+
+def ask(body):
+    """The owner's part below the first marker, byte for byte; the whole body when there is no marker yet."""
+    return owners_part(body)[1]
+
+
+def original_title(body):
+    """The owner's own title, kept once a plan renamed the issue; None when none is."""
+    return owners_part(body)[0]
+
+
+def keep_title(body, title):
+    """The body with the owner's title kept at the head of their part (#543).
+
+    It stays shown after a rename. A body that keeps one already, or has no marker yet, is returned as it was."""
+    body = body or ""
+    if MARKER not in body or original_title(body) is not None:
+        return body
+    top, below = body.split(MARKER, 1)
+    start = FOLD_START if below.startswith(FOLD_START) else OPEN_START
+    if not below.startswith(start):
+        return body
+    line = TITLE + " ".join(title.split()) + "\n\n"
+    new = top + MARKER + start + line + below[len(start):]
+    return new if ask(new) == ask(body) and original_title(new) is not None else body
 
 
 def redraw(body, top):
@@ -60,13 +95,14 @@ def redraw(body, top):
     What `top` holds after its DONE marker (a card with no plan's Definition of Done) goes below the owner's part,
     which then shows open unless it is a split's story (#407); with a plan, the owner's part is folded."""
     body = body or ""
-    owner = ask(body)
+    title, owner = owners_part(body)
     top, done = top.split(DONE, 1) if DONE in top else (top, None)
     folded = STORY.match(owner) or FOLDED in top
-    shown = OPEN_START + owner if done is not None and not folded else FOLD_START + owner + FOLD_END
+    head = "" if title is None else TITLE + title + "\n\n"
+    shown = OPEN_START + head + owner if done is not None and not folded else FOLD_START + head + owner + FOLD_END
     below = shown + ("" if done is None else TRAILER + done.strip("\n"))
     new = top.rstrip("\n") + "\n\n" + MARKER + below
-    if ask(new) != ask(body) or new.split(MARKER, 1)[1] != below or (done is not None and not trailer(below)[1]):
+    if ask(new) != ask(body) or original_title(new) != title or new.split(MARKER, 1)[1] != below or (done is not None and not trailer(below)[1]):
         raise Refused("the owner's part below the marker would change: the new card holds the marker "
                       f"`{MARKER}` itself, so the owner's original ask would no longer read back as written")
     return new

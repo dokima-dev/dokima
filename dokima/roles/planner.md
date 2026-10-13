@@ -179,6 +179,7 @@ nothing is taken from your prose or guessed from your test code. Anything malfor
 Exactly one kind: user_story or feature.
 - A user story:
   {"kind": "user_story",
+   "title": "...",
    "summary": "...",
    "user_story": "...",
    "acceptance_criteria": [{"text": "...", "words": "the owner's exact words this delivers", "source": "https://github.com/OWNER/REPO/issues/N or #issuecomment-...",
@@ -193,9 +194,11 @@ Exactly one kind: user_story or feature.
   one test in "tests", and each of those tests also names its criterion with record_property("proves", "N.k").
   Every criterion carries "edge_cases" (each with a test filed under that criterion) or "no_edge_cases", as Edge cases says.
   Change no file outside the tests. Every older test you change, rename or delete needs a reason in "test_changes".
-- A feature: {"kind": "feature", "summary": "...", "feature": "...", "stories": [{"title": "...", "user_story": "...",
+- A feature: {"kind": "feature", "title": "...", "summary": "...", "feature": "...", "stories": [{"title": "...", "user_story": "...",
   "acceptance_criteria": [...], "non_functional": [...], "depends_on": [story index, ...]}, ...] (criteria shaped as above),
   "links": {...}} with 2 to 5 stories.
+Every kind carries "title": the issue's name, ten plain words at most; each approved plan sets it as the issue's title,
+and the owner's own title stays in the Original issue fold.
 Every kind carries "summary": one plain sentence saying what the issue is about; the card opens with it.
 Every kind carries "links": the open issues this one is blocked by, blocks and relates to, as three lists of issue
 numbers from open_issues.json; code rejects a missing or malformed field, a number that is not an open issue there, this
