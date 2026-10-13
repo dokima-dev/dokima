@@ -10,6 +10,10 @@ What it answers (OWNER/REPO is the state's repo; any other repo is logged as uns
     gh api [-X GET] repos/OWNER/REPO/labels[?...]                       labels, as GitHub's REST list
     gh api [-X GET] repos/OWNER/REPO/branches/main/protection[/required_status_checks]
                                                                         main's rule; 404 "Branch not protected" if none
+                                        the full rule lists the state's "review_bypass_apps" (app ids) as
+                                        required_pull_request_reviews.bypass_pull_request_allowances.apps
+    gh api [-X GET] repos/OWNER/REPO/rulesets[?...]                     the state's "rulesets" (none when absent), listed
+    gh api [-X GET] repos/OWNER/REPO/rulesets/ID                        one of them in full; "fail" key "rulesets"
     gh api [-X GET] repos/OWNER/REPO/installation                       the app's {"app_id": 1, "permissions": {...}}
     gh api [-X GET] repos/OWNER/REPO/actions/variables/NAME             the state's "variables"[NAME]; 404 when unset
     gh api [-X GET] repos/OWNER/REPO/issues[?state=...&labels=...]      issues (open unless state says otherwise)
@@ -202,7 +206,28 @@ def rest(state, method, path, fields):
             refuse(state, "Branch not protected (HTTP 404)",
                    {"message": "Branch not protected", "status": "404"})
         inner = {"strict": True, "contexts": list(checks), "checks": [{"context": c, "app_id": None} for c in checks]}
-        reply(state, inner if m.group(2) else {"required_status_checks": inner})
+        if m.group(2):
+            reply(state, inner)
+        full = {"required_status_checks": inner}
+        apps = state.get("review_bypass_apps")
+        if apps is not None:
+            full["required_pull_request_reviews"] = {
+                "required_approving_review_count": 1, "require_code_owner_reviews": True,
+                "bypass_pull_request_allowances": {"users": [], "teams": [],
+                                                   "apps": [{"id": a, "slug": f"app-{a}", "name": f"App {a}"}
+                                                            for a in apps]}}
+        reply(state, full)
+    if method == "GET" and re.fullmatch(r"rulesets(/\d+)?", rest_path):
+        if "rulesets" in fail:
+            refuse(state, fail["rulesets"])
+        have = state.get("rulesets", [])
+        if rest_path == "rulesets":
+            reply(state, [{"id": r["id"], "name": r["name"], "target": r["target"], "enforcement": r["enforcement"]}
+                          for r in have])
+        found = [r for r in have if str(r["id"]) == rest_path.split("/")[1]]
+        if not found:
+            refuse(state, "Not Found (HTTP 404)", {"message": "Not Found", "status": "404"})
+        reply(state, found[0])
     if method == "GET" and rest_path == "installation":
         if "permissions" in fail:
             refuse(state, fail["permissions"])
