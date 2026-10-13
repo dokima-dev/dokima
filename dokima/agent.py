@@ -23,6 +23,8 @@ FIXERS = {"worker", "planner"}
 # The fields agents raised and answered through before #300; a hand-back holding any of them, even empty, is rejected.
 OLD_FIELDS = ("questions", "concerns", "replies", "suspect_tests", "outside_scope", "blockers", "notes", "assumptions",
               "issues_found", "outside_plan", "resolved")
+# How the worker's end check names each plan test still red (#595); a record whose problems hold one opens as blocked.
+PLAN_TEST_FAILS = "plan test fails: "
 
 
 def gh(*args):
@@ -692,6 +694,8 @@ def opening(rec):
     role, h, passed = rec["role"], rec["handback"], rec["check"]["passed"]
     if rec.get("unrecorded"):
         return f"{who(role, rec.get('stage'))}'s run ended before posting its record."
+    if not passed and role == "worker" and any(str(p).startswith(PLAN_TEST_FAILS) for p in rec["check"]["problems"]):
+        return "The worker is blocked: its plan tests still fail."
     if not passed and role == "worker":
         return "The worker stopped early with its hand-back rejected by code."
     if not passed:
@@ -1462,6 +1466,23 @@ def load(path, name):
     return data, None
 
 
+def plan_tests(plan):
+    """Every test the plan lists for its criteria, each once, in the plan's order."""
+    tests = plan.get("tests") if isinstance(plan.get("tests"), dict) else {}
+    return list(dict.fromkeys(t for ts in tests.values() if isinstance(ts, list) for t in ts if filled(t)))
+
+
+def failing_plan_tests(plan):
+    """Run each plan test alone on this branch; return those that do not pass.
+
+    One at a time, so a test missing from the branch fails alone and is named, while the others still run."""
+    env = {**os.environ, "PYTHONPATH": os.getcwd()}
+    env.pop("PYTHONSAFEPATH", None)
+    return [t for t in plan_tests(plan)
+            if subprocess.run([sys.executable, "-m", "pytest", "-q", "-p", "no:cacheprovider", t],
+                              env=env, capture_output=True, text=True).returncode != 0]
+
+
 def check(kind, path, plan_path=None, number=None):
     """Check one hand-back file against its prompt's shape and, when given, the approved plan and the issue's number.
     Print every problem and return 1 if there are any, else 0."""
@@ -1487,6 +1508,8 @@ def check(kind, path, plan_path=None, number=None):
             bad.append(f"the issue number {number!r} is not a number: the hand-back can't be checked against the plan")
         else:
             bad += problems_plan(kind, data, plan, number)
+            if kind == "work" and os.environ.get("ROLE") == "worker":
+                bad += [PLAN_TEST_FAILS + t for t in failing_plan_tests(plan)]
             if kind == "review" and os.environ.get("STAGE") == "plan":
                 bad += problems_asks(data, plan_criteria(plan, number))
                 bad += problems_size(data, plan_criteria(plan, number))
@@ -2226,29 +2249,24 @@ def unproven(repo, sha, wait=CHECKS_WAIT, pause=CHECKS_PAUSE, branch="main"):
         time.sleep(pause)
 
 
-def auto_merge_on(repo):
-    """True when the repo's variable DOKIMA_AUTO_MERGE is `on` (#557).
-
-    Unset, any other value, or a read GitHub fails, leaves it off: the pull request waits for the owner's approval."""
-    try:
-        value = gh("api", f"repos/{repo}/actions/variables/{manifest.AUTO_MERGE}", "-q", ".value")
-    except subprocess.CalledProcessError as e:
-        if "HTTP 404" not in f"{e.stderr} {e.stdout}":
-            print(f"::warning::{manifest.AUTO_MERGE} could not be read, so it counts as off: {gh_reason(e)}")
-        return False
-    return value.strip().lower() == "on"
-
-
 def behind_main(repo, head):
-    """True when the commit misses main's newest commit."""
-    return json.loads(gh("api", f"repos/{repo}/compare/main...{head}")).get("behind_by") != 0
+    """True when the commit misses main's newest commit, as GitHub's comparison with main says."""
+    cmp = json.loads(gh("api", f"repos/{repo}/compare/main...{head}"))
+    return cmp.get("status") in ("behind", "diverged") or (cmp.get("behind_by") or 0) > 0
+
+
+def held_for_approval(e):
+    """True when GitHub refused a merge for a missing approving review."""
+    return "approving review" in f"{e.stderr} {e.stdout}"
 
 
 def try_merge(repo, pr):
-    """Merge the pull request at the head whose checks were read, only when it changes no workflow file and every
-    check on that head has passed. With DOKIMA_AUTO_MERGE on, Dokima's app merges it directly, past the rule's
-    approval, only when its branch holds main's newest commit (#557). Returns (True, the merged head) or (False, why
-    not, in GitHub's words when GitHub refused)."""
+    """Ask GitHub to merge the pull request at the head whose checks were read.
+
+    Only when it changes no workflow file and every check on that head has passed. GitHub's own rules decide (#587):
+    when it holds the merge for the owner's approval, Dokima's app asks it to merge directly, which GitHub allows only
+    when the app may bypass that approval, and only when its branch holds main's newest commit; a direct merge GitHub refuses leaves it waiting for approval.
+    Returns (True, the head) once GitHub took the merge, or (False, why not, in GitHub's words when GitHub refused)."""
     try:
         files = [f["filename"] for p in pages(gh("api", f"repos/{repo}/pulls/{pr}/files?per_page=100", "--paginate")) for f in p]
         flows = [f for f in files if f.startswith(WORKFLOWS)]
@@ -2260,11 +2278,26 @@ def try_merge(repo, pr):
         why = unproven(repo, head)
         if why:
             return False, why
-        bypass = auto_merge_on(repo)
-        if bypass and behind_main(repo, head):
-            return False, "its branch is behind main and misses main's newest commit; bring it up to date with main"
         # Pinned to the head whose checks passed: a commit pushed since makes GitHub refuse.
-        gh("pr", "merge", str(pr), "-R", repo, "--squash", "--match-head-commit", head, *(["--admin"] if bypass else []))
+        merge = ("pr", "merge", str(pr), "-R", repo, "--squash", "--match-head-commit", head)
+        try:
+            gh(*merge)
+            refused = False
+        except subprocess.CalledProcessError as e:
+            if not held_for_approval(e):
+                raise
+            refused = True
+        if not refused and merge_outcome(repo, pr)[0] != "waits":
+            return True, head
+        if behind_main(repo, head):
+            return False, "its branch is behind main and misses main's newest commit; bring it up to date with main"
+        try:
+            gh(*merge, "--admin")
+        except subprocess.CalledProcessError as e:
+            if not held_for_approval(e):
+                raise
+            if refused:
+                gh(*merge, "--auto")
         return True, head
     except subprocess.CalledProcessError as e:
         return False, " ".join((e.stderr or str(e)).split())
