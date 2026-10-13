@@ -164,15 +164,21 @@ jobs:
             fi
             # A planner starts with main merged in, so it sees and can change the tests main added (#475). A branch
             # that clashes with main stays unmerged for the worker; it takes only main's tests the branch never
-            # touched, and its plan check's base holds those too, so they never count as the plan's own tests.
+            # touched, and its plan check's base holds every test main changed, so none counts as the plan's own
+            # unless the branch's copy differs from main's, even after an earlier round took it.
             if [ "$ROLE" = planner ] && ! git -c user.name="dokima-runtime[bot]" -c user.email="337511017+dokima-runtime[bot]@users.noreply.github.com" merge -q --no-edit origin/main; then
               git reset -q --merge
               MB=$(git merge-base HEAD origin/main)
-              git diff --name-only "$MB" origin/main -- tests | grep -vxF -f <(git diff --name-only "$MB" HEAD; echo) > /tmp/mains-tests.txt || true
+              git diff --name-only "$MB" origin/main -- tests > /tmp/mains-tests.txt
               : > /tmp/mains-index.txt
               while read -r f; do
-                if git cat-file -e "origin/main:$f" 2>/dev/null; then git checkout -q origin/main -- "$f"; git ls-tree origin/main -- "$f" >> /tmp/mains-index.txt
-                else git rm -q -- "$f"; printf '0 0000000000000000000000000000000000000000\t%s\n' "$f" >> /tmp/mains-index.txt; fi
+                if git cat-file -e "origin/main:$f" 2>/dev/null; then
+                  ! git diff --quiet "$MB" HEAD -- "$f" || git checkout -q origin/main -- "$f"
+                  git ls-tree origin/main -- "$f" >> /tmp/mains-index.txt
+                else
+                  ! git diff --quiet "$MB" HEAD -- "$f" || git rm -q -- "$f"
+                  printf '0 0000000000000000000000000000000000000000\t%s\n' "$f" >> /tmp/mains-index.txt
+                fi
               done < /tmp/mains-tests.txt
               git diff --cached --quiet || git -c user.name="dokima-runtime[bot]" -c user.email="337511017+dokima-runtime[bot]@users.noreply.github.com" commit -qm "Main's tests for the planner of #$N"
               BASE_TREE=$(export GIT_INDEX_FILE=/tmp/base.index; git read-tree "$MB" && git update-index --index-info < /tmp/mains-index.txt && git write-tree)
