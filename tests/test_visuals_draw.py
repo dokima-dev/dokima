@@ -142,6 +142,9 @@ def autopilot_comment(*a, **k):
 
 AUTOPILOT_LINE = "Autopilot: BRANCH blockers line"
 AUTOPILOT_LINES = {"worker": "Autopilot: BRANCH work line", "split": "Autopilot: BRANCH split line"}
+AUTOPILOT_START_LINE = "Autopilot: BRANCH switch line"
+AUTOPILOT_MERGE = {"merged": "Autopilot: BRANCH merged PR #{pr}", "queued": "Autopilot: BRANCH PR #{pr} queued",
+                   "waits": "Autopilot: BRANCH PR #{pr} waits"}
 '''
 
 
@@ -174,16 +177,18 @@ def comment(k, login, body):
 
 
 def world():
-    """The fake GitHub: issue 7 with two records and three autopilot comments.
+    """The fake GitHub: issue 7 with two records and five autopilot comments.
 
     Every comment but the owner's `/plan` is by the bot; issue 8 is refused."""
     planner, review = records()
     comments = [comment(1, "reza", "/plan"),
                 comment(2, BOT, "Autopilot: blockers merged, starting plan"),
+                comment(7, BOT, "Autopilot: switched on, starting plan"),
                 comment(3, BOT, agent.render(planner)),
                 comment(4, BOT, agent.render(review)),
                 comment(5, BOT, "Autopilot: plan approved, starting work"),
-                comment(6, BOT, f"Autopilot is on for #{ISSUE}. No stage was started.\n")]
+                comment(6, BOT, f"Autopilot is on for #{ISSUE}. No stage was started.\n"),
+                comment(8, BOT, "Autopilot: merged PR #9")]
     body = "Slow calls time out. Make them hand back a job id instead."
     return {"issues": {str(ISSUE): {"number": ISSUE, "title": "Slow calls time out", "body": body, "state": "OPEN",
                                      "url": f"https://github.com/{REPO}/issues/{ISSUE}", "labels": [],
@@ -326,15 +331,18 @@ def test_run_comments_none(place, record_property):
 def test_autopilot_comments_from_branch(place, record_property):
     """Every autopilot comment of the issue is drawn by the chosen branch's code.
 
-    Issue 7 holds two autopilot lines and one autopilot switch reply. The branch changes both lines and marks the
-    reply; checks each shows as the branch draws it, and as today's when drawn from main. Proves 624.3."""
+    Issue 7 holds four autopilot lines (blockers merged, switched on, plan approved, merged PR) and one autopilot
+    switch reply. The branch changes every line and marks the reply; checks each shows as the branch draws it, and
+    as today's when drawn from main. Proves 624.3."""
     record_property("proves", "624.3")
     out = drawn(place, "visual-test", "624.3")
-    for line in ("Autopilot: BRANCH blockers line", "Autopilot: BRANCH work line",
+    for line in ("Autopilot: BRANCH blockers line", "Autopilot: BRANCH switch line", "Autopilot: BRANCH work line",
+                 "Autopilot: BRANCH merged PR #9",
                  f"BRANCH-SWITCH Autopilot is on for #{ISSUE}. No stage was started."):
         assert line in out, f"624.3: the branch's code did not draw the autopilot comment {line!r}:\n{out}"
     main = drawn(place, "main", "624.3")
-    for line in ("Autopilot: blockers merged, starting plan", "Autopilot: plan approved, starting work",
+    for line in ("Autopilot: blockers merged, starting plan", "Autopilot: switched on, starting plan",
+                 "Autopilot: plan approved, starting work", "Autopilot: merged PR #9",
                  f"Autopilot is on for #{ISSUE}. No stage was started."):
         assert line in main, f"624.3: drawn from main, the autopilot comment {line!r} is missing:\n{main}"
     assert "BRANCH" not in main, f"624.3: drawn from main, an autopilot comment shows the other branch's code:\n{main}"
