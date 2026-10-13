@@ -2243,7 +2243,9 @@ def proof(repo, sha, wait=CHECKS_WAIT, pause=CHECKS_PAUSE, branch="main"):
         red += [f"{s.get('context')} ({s.get('state')})" for s in statuses if s.get("state") not in ("success", "pending")]
         running = [r["name"] for r in runs if r.get("status") != "completed"]
         running += [s.get("context") for s in statuses if s.get("state") == "pending"]
-        missing = sorted(required - {r.get("name") for r in runs} - {s.get("context") for s in statuses})
+        # A check only skipped, as on a draft, has not run yet: it proves nothing (#597).
+        ran = {r.get("name") for r in runs if r.get("conclusion") != "skipped"}
+        missing = sorted(required - ran - {s.get("context") for s in statuses})
         if red:
             return "failed", f"not every check passed on its head commit {sha[:7]}: {', '.join(red)}"
         if not running and not missing:
@@ -2264,10 +2266,15 @@ def merge_gate(repo, pr):
     """The merge gate, run once the code review approved the pull request (#596).
 
     A branch behind main is brought up to date with it first (GitHub's Update branch), so the checks main requires
-    are read on the code as it would land. Returns ("passed", head, None) once every one passed on that head,
+    are read on the code as it would land. A draft is then readied, which starts its tests: none ran during the code
+    review (#597). Returns ("passed", head, None) once every one passed on that head,
     ("failed", head, why) when one failed there, or ("stopped", head, why) when GitHub would not update the branch, the
     checks never finished or GitHub could not say."""
-    head = gh("pr", "view", str(pr), "-R", repo, "--json", "headRefOid", "-q", ".headRefOid").strip()
+    try:
+        view = json.loads(gh("pr", "view", str(pr), "-R", repo, "--json", "headRefOid,isDraft"))
+        head, draft = str(view.get("headRefOid") or "").strip(), view.get("isDraft") is True
+    except (json.JSONDecodeError, AttributeError) as e:
+        return "stopped", "", f"GitHub's answer on its head commit could not be read: {e}"
     if not head:
         return "stopped", "", "GitHub did not say which commit is its head"
     if behind_main(repo, head):
@@ -2283,6 +2290,11 @@ def merge_gate(repo, pr):
                                         f"{UPDATE_WAIT // 60} minutes")
             time.sleep(UPDATE_PAUSE)
             head = gh("pr", "view", str(pr), "-R", repo, "--json", "headRefOid", "-q", ".headRefOid").strip() or old
+    if draft:
+        try:
+            gh("pr", "ready", str(pr), "-R", repo)
+        except subprocess.CalledProcessError as e:
+            return "stopped", head, f"GitHub could not mark it ready, so its tests never started: {gh_reason(e)}"
     state, why = proof(repo, head)
     return state, head, why
 

@@ -1,9 +1,11 @@
 name: full suite
 # Every test in the repo, on every pull request, in the merge queue and on main.
+# A draft pull request runs none: Dokima's are drafts until the merge gate readies them, after the code review (#597).
 # Runs main's copy of this workflow, so a pull request can't rewrite its own judge; only the code it tests comes from
 # the pull request, checked out with no token left behind, and the run holds no secret and only read access.
 on:
   pull_request_target:
+    types: [opened, synchronize, reopened, ready_for_review]
   push:
     branches: [main]
   merge_group:
@@ -12,6 +14,7 @@ permissions:
 jobs:
   all-tests:
     name: all tests
+    if: "!github.event.pull_request.draft"
     runs-on: ubuntu-24.04
     steps:
       - uses: actions/checkout@v5
