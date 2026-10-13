@@ -2,8 +2,10 @@ name: Acceptance criteria
 # One GitHub check per criterion of the PR's approved plan, plus one gate check.
 # Runs main's copy of this workflow and of Dokima's code; only the tests, and the code they judge, come from the PR.
 # In the merge queue they come from the queued commit: the PR on top of the latest main.
+# A draft pull request runs none: Dokima's are drafts until the merge gate readies them, after the code review (#597).
 on:
   pull_request_target:
+    types: [opened, synchronize, reopened, ready_for_review]
   merge_group:
 permissions:
   contents: read
@@ -12,6 +14,7 @@ permissions:
 jobs:
   list:
     name: list acceptance criteria
+    if: "!github.event.pull_request.draft"
     runs-on: ubuntu-24.04
     outputs:
       matrix: ${{ steps.m.outputs.matrix }}
@@ -67,7 +70,7 @@ jobs:
   gate:
     name: Acceptance criteria
     needs: [list, check]
-    if: always()
+    if: always() && !github.event.pull_request.draft
     runs-on: ubuntu-24.04
     steps:
       - env:

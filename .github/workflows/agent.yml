@@ -321,24 +321,25 @@ jobs:
           gh api -X PATCH "repos/$GITHUB_REPOSITORY/issues/comments/$CARD_ID" -F body=@/tmp/card.md --silent \
             || echo "::warning title=Card not updated::the card could not say checking"
           gh api -X DELETE installation/token --silent || echo "::warning title=Key not revoked::the card's key could not be revoked"
-      - name: Code checks the hand-back
-        if: always() && env.STARTED == 'true'
-        # The agent ran this check itself and cut its texts; here word caps only flag what is still over (#470).
-        env:
-          STYLE_SOFT: "1"
-        run: |
-          set +e; bash -c "$CHECK" > "$OUT/check.txt" 2>&1; rc=$?; set -e
-          cat "$OUT/check.txt"
-          echo "PASSED=$([ $rc = 0 ] && echo true || echo false)" >> "$GITHUB_ENV"
       - name: Fence - only in-scope changes, the planner's tests as committed
         if: env.ROLE == 'worker'
         run: |
+          # First, so the check runs the planner's tests as committed, on the code that gets pushed (#597).
           # A clashed file still holding conflict markers fails the hand-back, saying which, so nothing is pushed.
           if ! python3 -m dokima.fence "$BASE" "$PACK/plan.json" /tmp/clashed.txt > "$OUT/dropped.txt" 2> /tmp/fence-err.txt; then
             cat /tmp/fence-err.txt | tee -a "$OUT/check.txt"; echo "PASSED=false" >> "$GITHUB_ENV"
             echo "::error title=Fence::$(paste -sd' ' /tmp/fence-err.txt)"
           fi
           [ -s "$OUT/dropped.txt" ] && echo "::warning title=Dropped by the fence::$(paste -sd, "$OUT/dropped.txt")" || true
+      - name: Code checks the hand-back
+        if: always() && env.STARTED == 'true'
+        # The agent ran this check itself and cut its texts; here word caps only flag what is still over (#470).
+        env:
+          STYLE_SOFT: "1"
+        run: |
+          set +e; bash -c "$CHECK" >> "$OUT/check.txt" 2>&1; rc=$?; set -e
+          cat "$OUT/check.txt"
+          echo "PASSED=$([ $rc = 0 ] && [ "$PASSED" != false ] && echo true || echo false)" >> "$GITHUB_ENV"
       # The app's token for the result is minted only now, after the agent has finished.
       - id: app
         if: always()
@@ -363,6 +364,10 @@ jobs:
             # The branch may have moved during the run (main merged in): catch up once and push again. Changes that
             # still can't be saved fail the run here, before its record is written, so nothing reports them as done.
             R="https://x-access-token:${GH_TOKEN}@github.com/${GITHUB_REPOSITORY}.git"
+            # An open pull request turns draft first, so the push starts no test: its merge gate readies it (#597).
+            PR=$(gh pr list -R "$GITHUB_REPOSITORY" --head "try/issue-$N" --state open --json number -q '.[0].number')
+            [ -z "$PR" ] || gh pr ready "$PR" -R "$GITHUB_REPOSITORY" --undo \
+              || echo "::warning title=Not a draft::pull request #$PR could not be turned draft, so its tests start on this push"
             if ! git push -q "$R" "HEAD:try/issue-$N" \
                && ! { git fetch -q "$R" "try/issue-$N" && git merge -q --no-edit FETCH_HEAD && git push -q "$R" "HEAD:try/issue-$N"; }; then
               echo "The run's changes could not be saved to try/issue-$N, so nothing it did is on the branch." >> "$OUT/check.txt"
@@ -371,9 +376,10 @@ jobs:
               exit 0
             fi
           fi
-          # A finished worker opens its pull request whether or not it pushed anything (the planner may have pushed it all).
+          # A finished worker opens its pull request whether or not it pushed anything (the planner may have pushed it all),
+          # as a draft: no test runs on it until its code review approved and the merge gate readies it (#597).
           if [ "$ROLE" = worker ] && [ -z "$(gh pr list -R "$GITHUB_REPOSITORY" --head "try/issue-$N" --state open --json number -q '.[].number')" ]; then
-            gh pr create -R "$GITHUB_REPOSITORY" --head "try/issue-$N" --base main --title "$(gh issue view "$N" -R "$GITHUB_REPOSITORY" --json title -q .title)" --body "Closes #$N"
+            gh pr create -R "$GITHUB_REPOSITORY" --draft --head "try/issue-$N" --base main --title "$(gh issue view "$N" -R "$GITHUB_REPOSITORY" --json title -q .title)" --body "Closes #$N"
           fi
       - name: Write this run's record
         if: always()

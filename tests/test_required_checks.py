@@ -49,7 +49,7 @@ class FakeGitHub:
         if a[:2] == ["pr", "list"]:
             return f"{PR}\n"
         if a[:2] == ["pr", "view"]:
-            pr = {"number": PR, "headRefOid": HEAD, "baseRefName": "main", "headRefName": f"try/issue-{ISSUE}"}
+            pr = {"number": PR, "headRefOid": HEAD, "baseRefName": "main", "headRefName": f"try/issue-{ISSUE}", "isDraft": False}
             q = next((a[i + 1] for i, x in enumerate(a[:-1]) if x in ("-q", "--jq")), None)
             return (str(pr[q.lstrip(".")]) + "\n") if q else json.dumps(pr)
         if a[:2] == ["pr", "merge"]:
