@@ -377,14 +377,23 @@ def file_split(repo, parent, recs, labels=()):
     """File the stories of the newest approved split as sub-issues of the parent, in order, with their blocked-by links,
     each created with the given labels.
 
-    Returns the record of what was filed. Filing twice files nothing new: the newest split record is returned instead."""
-    done = latest(recs, "split", passed=True)
-    if done:
-        return done
+    Returns the record of what was filed. Filing twice files nothing new: a split record newer than the plan is returned
+    instead. A re-plan approved after an earlier split was filed files only its new stories; a story already filed under
+    the same title is kept as it is, marked kept."""
+    splits = [i for i, r in enumerate(recs) if r.get("role") == "split" and r.get("check", {}).get("passed")]
+    plans = [i for i, r in enumerate(recs) if r.get("role") == "planner" and r.get("check", {}).get("passed")]
+    if splits and (not plans or splits[-1] > plans[-1]):
+        return recs[splits[-1]]
     plan = latest(recs, "planner")["handback"]
+    earlier = {f["title"]: f for i in splits for f in recs[i]["handback"].get("stories", [])}
     title = json.loads(gh("issue", "view", str(parent), "-R", repo, "--json", "title"))["title"]
     filed = []
     for i, st in enumerate(plan["stories"], 1):
+        if st["title"] in earlier:
+            old = earlier[st["title"]]
+            filed.append({"story": i, "issue": old["issue"], "title": st["title"], "id": old["id"],
+                          "blocked_by": [d + 1 for d in st.get("depends_on", [])], "kept": True})
+            continue
         extra = [x for label in labels for x in ("--label", label)]
         url = gh("issue", "create", "-R", repo, "--title", st["title"], "--body", story_body(parent, i, st, title), *extra).strip()
         number = int(url.rstrip("/").split("/")[-1])
@@ -394,6 +403,8 @@ def file_split(repo, parent, recs, labels=()):
                       "blocked_by": [d + 1 for d in st.get("depends_on", [])]})
     by_story = {f["story"]: f for f in filed}
     for f in filed:
+        if f.get("kept"):
+            continue
         for d in f["blocked_by"]:
             try:
                 gh("api", "-X", "POST", f"repos/{repo}/issues/{f['issue']}/dependencies/blocked_by", "-F", f"issue_id={by_story[d]['id']}")
@@ -2822,13 +2833,15 @@ def main(argv):
         if card:
             # The command's queued card becomes the Split filed record, edited in place.
             gh("api", "-X", "PATCH", f"repos/{repo}/issues/comments/{card}", "-f", f"body={render(rec)}", "--silent")
-        elif not any(r.get("role") == "split" for r in recs):
+        elif rec not in recs:
             gh("issue", "comment", parent, "-R", repo, "--body", render(rec))
         spec = os.environ.get("DOKIMA_BOARD", "").strip()
         if spec:
             from dokima import board
             b = board.Board(spec, repo, board.gql)
             for f in rec["handback"]["stories"]:
+                if f.get("kept"):
+                    continue
                 iid = b.item("issue", f["issue"])
                 b.set(iid, "Status", "Backlog")
                 b.set(iid, "Action", "Autopilot" if on else None)
@@ -2837,7 +2850,7 @@ def main(argv):
             b.set(iid, "Action", "Autopilot" if on else None)
         if on:
             # On autopilot the stories go on too, and each one with nothing to wait for starts planning.
-            start_waiting(repo, [f["issue"] for f in rec["handback"]["stories"] if not f["blocked_by"]])
+            start_waiting(repo, [f["issue"] for f in rec["handback"]["stories"] if not f["blocked_by"] and not f.get("kept")])
         return 0
     if argv[1] == "kind":
         _, items = conversation(os.environ["GITHUB_REPOSITORY"], argv[2])
