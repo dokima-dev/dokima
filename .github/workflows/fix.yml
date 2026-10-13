@@ -1,0 +1,38 @@
+name: fix
+# Opens an agent's manual fix as a pull request authored by Dokima's app, so the owner can approve it (#589).
+# Started by hand on main with the name of the branch the agent pushed. The pull request goes into main, whose branch
+# rule holds it until all tests pass; this workflow never merges it.
+on:
+  workflow_dispatch:
+    inputs:
+      branch:
+        description: The branch the agent pushed
+        required: true
+permissions:
+  contents: read
+concurrency:
+  group: fix-${{ inputs.branch }}
+  cancel-in-progress: false
+jobs:
+  open:
+    environment: keys
+    runs-on: ubuntu-24.04
+    steps:
+      - id: app
+        uses: actions/create-github-app-token@v2
+        with:
+          app-id: ${{ vars.DOKIMA_APP_ID }}
+          private-key: ${{ secrets.DOKIMA_APP_KEY }}
+      # A branch whose pull request is already open gets no second one; a refusal from GitHub fails the run.
+      - name: Open the fix's pull request as Dokima's app
+        env:
+          GH_TOKEN: ${{ steps.app.outputs.token }}
+          GH_REPO: ${{ github.repository }}
+          BRANCH: ${{ inputs.branch }}
+        run: |
+          set -euo pipefail
+          if [ "$BRANCH" = "main" ]; then echo "::error::A fix comes from the branch the agent pushed, not main"; exit 1; fi
+          open=$(gh pr list --head "$BRANCH" --base main --state open --json number --jq '.[0].number // empty')
+          if [ -n "$open" ]; then echo "Pull request #$open is already open for $BRANCH"; exit 0; fi
+          gh pr create --base main --head "$BRANCH" --title "Manual fix: $BRANCH" \
+            --body "A manual fix from the branch \`$BRANCH\`, opened by Dokima's app. It merges once all tests pass and the owner approves."
