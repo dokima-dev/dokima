@@ -116,40 +116,65 @@ def compare_permissions(live):
     return lines
 
 
-def merge_queue_bypass(github, repo):
-    """With DOKIMA_AUTO_MERGE on, a line when the merge queue ruleset lacks the app's bypass.
+def auto_merge(github, repo, rule):
+    """Whether auto-merge is on, read from main's two pull-request-only exemption lists: (drift lines, note).
 
-    Dokima's direct merge needs the app as a bypass actor limited to pull requests."""
-    if (github.variable(repo, manifest.AUTO_MERGE) or "").strip().lower() != "on":
-        return []
-    app = github.app_id(repo)
-    queues = [r for r in github.rulesets(repo) if any(x.get("type") == "merge_queue" for x in r.get("rules") or [])]
-    if any(b.get("actor_type") == "Integration" and b.get("actor_id") == app and b.get("bypass_mode") == "pull_request"
-           for r in queues for b in r.get("bypass_actors") or []):
-        return []
-    return [f"`{manifest.AUTO_MERGE}` is `on`, but Dokima's app is not a bypass actor of the merge queue ruleset for "
-            f"pull requests; Dokima needs that bypass to merge a pull request whose code review passed."]
+    On both lists it is on, on neither it is off (the default); neither is drift, so each comes back as the note. On
+    only one list, or a list GitHub will not show, is a drift line. rule is main's rule as branch_rule() read it."""
+    try:
+        app = github.app_id(repo)
+        queues = [r for r in github.rulesets(repo)
+                  if any(x.get("type") == "merge_queue" for x in r.get("rules") or [])]
+    except FAILED as e:
+        return [f"Auto-merge is not verified: GitHub said `{reason(e)}` when the audit read the merge queue "
+                f"ruleset's bypass list."], None
+    review = app in ((rule or {}).get("review_bypass_apps") or [])
+    queue = any(b.get("actor_type") == "Integration" and b.get("actor_id") == app
+                and b.get("bypass_mode") == "pull_request" for r in queues for b in r.get("bypass_actors") or [])
+    if review and queue:
+        return [], ("Auto-merge is on: Dokima's app is on both of main's exemption lists, so a pull request whose "
+                    "code review passed merges by itself.")
+    if not review and not queue:
+        return [], "Auto-merge is off, the default: every pull request waits for your approval before it merges."
+    lacking = "main's review exemption" if queue else "the merge queue ruleset's bypass list for pull requests"
+    return [f"Auto-merge is half set up: Dokima's app is missing from {lacking}. Add it there for auto-merge, or take "
+            f"it off the other list to keep your approval."], None
 
 
-def compare(github, repo):
-    """One line per setting that differs from the manifest or could not be read."""
+def check(github, repo):
+    """(lines, notes): compare()'s lines, and the auto-merge state, which is no drift."""
+    rules = {}
+
+    def rule(branch):
+        rules[branch] = github.branch_rule(repo, branch)
+        return rules[branch]
+
     reads = [("Labels", lambda: github.labels(repo), compare_labels),
              ("Board fields", github.fields, compare_fields),
              ("Board views", github.views, compare_views)]
-    reads += [(f"Branch rule of `{branch}`", lambda branch=branch: github.branch_rule(repo, branch),
-               lambda rule, branch=branch, want=want: compare_rule(branch, rule, want))
+    reads += [(f"Branch rule of `{branch}`", lambda branch=branch: rule(branch),
+               lambda live, branch=branch, want=want: compare_rule(branch, live, want))
               for branch, want in manifest.BRANCH_RULES.items()]
-    reads += [("App permissions", lambda: github.permissions(repo), compare_permissions),
-              ("The merge queue ruleset's bypass list", lambda: merge_queue_bypass(github, repo), lambda lines: lines)]
+    reads += [("App permissions", lambda: github.permissions(repo), compare_permissions)]
     lines = []
-    for what, read, check in reads:
+    for what, read, check_live in reads:
         try:
             live = read()
         except FAILED as e:
             lines.append(unverified(what, e))
             continue
-        lines += check(live)
-    return lines
+        lines += check_live(live)
+    notes = []
+    if "main" in rules:  # an unreadable main rule already has its line
+        drift, note = auto_merge(github, repo, rules["main"])
+        lines += drift
+        notes += [note] if note else []
+    return lines, notes
+
+
+def compare(github, repo):
+    """One line per setting that differs from the manifest or could not be read."""
+    return check(github, repo)[0]
 
 
 def code_owners(root):
@@ -166,16 +191,17 @@ def code_owners(root):
     return owners
 
 
-def setup_body(lines, owners):
+def setup_body(lines, owners, notes=()):
     who = " ".join(owners) + ", " if owners else ""
     return (f"{MARK}\n{who}the drift audit found settings on this repo that differ from what Dokima needs, or that it "
             f"could not verify:\n\n" + "".join(f"- {l}\n" for l in lines)
+            + "".join(f"\n{n}\n" for n in notes)
             + "\nEach audit updates this issue, and closes it once nothing is off.\n")
 
 
 def run(github, repo, root="."):
     """Report the audit on the Setup issue; returns the Setup issue it touched, or None."""
-    lines = compare(github, repo)
+    lines, notes = check(github, repo)
     issue = github.setup_issue(repo)
     if not lines:
         if issue is None:
@@ -183,7 +209,7 @@ def run(github, repo, root="."):
         github.comment(repo, issue["number"], NOTHING_OFF)
         github.close_issue(repo, issue["number"])
         return issue["number"]
-    body = setup_body(lines, code_owners(root))
+    body = setup_body(lines, code_owners(root), notes)
     if issue is None:
         n = github.create_issue(repo, TITLE, body)
         github.pin_issue(repo, n)
@@ -253,18 +279,12 @@ class GitHub:
                 return None
             raise
         checks = rule.get("required_status_checks") or {}
-        return {"required_checks": checks.get("contexts") or [c["context"] for c in checks.get("checks") or []]}
+        exempt = ((rule.get("required_pull_request_reviews") or {}).get("bypass_pull_request_allowances") or {})
+        return {"required_checks": checks.get("contexts") or [c["context"] for c in checks.get("checks") or []],
+                "review_bypass_apps": [a["id"] for a in exempt.get("apps") or []]}
 
     def permissions(self, repo):
         return json.loads(gh("api", f"repos/{repo}/installation"))["permissions"]
-
-    def variable(self, repo, name):
-        try:
-            return json.loads(gh("api", f"repos/{repo}/actions/variables/{name}"))["value"]
-        except subprocess.CalledProcessError as e:
-            if "HTTP 404" in f"{e.stderr} {e.stdout}":
-                return None
-            raise
 
     def rulesets(self, repo):
         listed = pages(gh("api", "--paginate", f"repos/{repo}/rulesets?per_page=100"))
