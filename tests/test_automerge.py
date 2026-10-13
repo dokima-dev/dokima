@@ -670,15 +670,15 @@ def test_without_autopilot_an_approved_pull_request_waits_for_the_owner(record_p
 def test_a_refused_merge_stops_for_the_owner_and_says_why(record_property, tmp_path):
     """A merge that cannot happen leaves the pull request open, says why on it, mentions the owner and shows Needs you.
 
-    Runs the code review of #60 on autopilot, approving, three ways: no checks at all, GitHub refusing the merge for a
-    conflict, and GitHub refusing it for branch protection. Each must leave #60 open, post no Autopilot line, write on
-    #60 the reason (that there are no checks, or GitHub's own words) mentioning the owner, show Needs you and start
-    nothing; for the two GitHub refuses, the merge must have been asked. A red check after the code review goes back
-    to the worker instead (#596, tests/test_merge_gate.py). Then `/autopilot start` on the approved #60: with a red check, and with every check green while GitHub refuses for a
-    conflict and for branch protection, each says why on #60 and mentions the owner."""
+    Runs the code review of #60 on autopilot, approving, two ways: no checks at all, and GitHub refusing the merge
+    for a conflict. Each must leave #60 open, post no Autopilot line, write on #60 the reason (that there are no
+    checks, or GitHub's own words) mentioning the owner, show Needs you and start nothing; for the conflict, the merge
+    must have been asked. A red check after the code review goes back to the worker instead (#596,
+    tests/test_merge_gate.py). Then `/autopilot start` on the approved #60: with a red check, and with every check
+    green while GitHub refuses for a conflict, each says why on #60 and mentions the owner.
+    A merge GitHub holds for the owner's approval is a wait, not a refusal (#587, test_merge_approval.py)."""
     record_property("proves", "212.3")
-    cases = (("no checks", [], "", "no check"),
-             ("conflict", GREEN, CONFLICT, CONFLICT), ("branch protection", GREEN, PROTECTED, PROTECTED))
+    cases = (("no checks", [], "", "no check"), ("conflict", GREEN, CONFLICT, CONFLICT))
     for case, checks, refuse, reason in cases:
         m = Review(tmp_path / case.replace(" ", "-"), PR_APPROVE, ON, checks, refuse=refuse)
         assert m.agent_started(), f"212.3 ({case}): test setup: the code review never ran:\n{m.tail()}"
@@ -687,8 +687,7 @@ def test_a_refused_merge_stops_for_the_owner_and_says_why(record_property, tmp_p
         assert m.dispatches() == [], f"212.3 ({case}): a refused merge started another stage: {m.dispatches()}"
         if refuse:
             assert m.tried(PR), f"212.3 ({case}): the merge was never asked of GitHub, so GitHub's words cannot be its reason"
-    for case, checks, refuse, reason in (("red check", RED, "", RED_NAME), ("conflict", GREEN, CONFLICT, CONFLICT),
-                                         ("branch protection", GREEN, PROTECTED, PROTECTED)):
+    for case, checks, refuse, reason in (("red check", RED, "", RED_NAME), ("conflict", GREEN, CONFLICT, CONFLICT)):
         m = Command(tmp_path / f"command-{case.replace(' ', '-')}", {60: pr_state(57, checks, refuse=refuse)}, {57: "approve"})
         m.listen("/autopilot start")
         assert_waits(m, "212.3", f"/autopilot start, {case}", reason)

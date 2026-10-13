@@ -1,26 +1,29 @@
-"""A repo setting lets a passed code review merge through a narrow bypass (#557).
+"""Autopilot only asks GitHub to merge; GitHub merges it or holds it (#587).
 
-By default a pull request waits for the owner's approval before it merges, as today. The repo's Actions variable
-`DOKIMA_AUTO_MERGE`, set to `on`, turns the setting on; unset or `off`, it is off. With it on, once a code review
-passes, Dokima's app merges the pull request directly, as a bypass actor of the branch rule, a bypass the owner limits
-to pull requests (never direct pushes to main); only when every check on its head is green and its branch contains
-main's newest commit, and never when it changes a workflow file. The bot never approves its own pull request.
+Before, a repo variable, `DOKIMA_AUTO_MERGE`, said whether Dokima's app merged past main's approval rule (#557). The app
+cannot read repo variables, so the switch did nothing, while GitHub let the app merge anyway. Now no variable is read:
+Dokima asks GitHub to merge, and GitHub's own rules decide. When GitHub lets the app merge without approval, the pull
+request merges and the issue says so; when GitHub needs the owner's approval, it stays open and the issue says it waits.
 
 These tests run the code review through the whole agent workflow (agent.yml), as test_automerge.py does, on the fake
 GitHub of test_automerge_confirmed.py where #60 is protected the way main is: a plain `gh pr merge` only turns on
-auto-merge waiting on an approval ("accepts": "approval"). This file teaches that fake four more things:
-  - the setting: `gh api repos/o/r/actions/variables/DOKIMA_AUTO_MERGE` (with or without -q/--jq `.value`) and
-    `gh variable get DOKIMA_AUTO_MERGE` answer the value the test chose, 404 when it is unset, or a failure;
-  - the bypass: when the test makes Dokima's app a bypass actor ("bypass": true), a merge it asks past the rule, by
-    `gh pr merge --admin` or `gh api -X PUT repos/o/r/pulls/N/merge`, merges, as GitHub lets a bypass actor merge a
-    pull request, whatever its checks or base; when it is not one, GitHub refuses with its rule's words;
+auto-merge waiting on an approval ("accepts": "approval"). This file teaches that fake five more things:
+  - a repo variable: `gh api repos/o/r/actions/variables/...` and `gh variable ...` answer the value the test chose,
+    or 404 when unset, and every such read is recorded, so a test sees Dokima asked;
+  - the bypass: when the test makes Dokima's app a bypass actor of main's rules for pull requests ("bypass": true),
+    a merge asked of GitHub directly (`gh api -X PUT repos/o/r/pulls/N/merge` or `gh pr merge --admin`) merges, as
+    GitHub lets a bypass actor merge, whatever its checks or base; a plain `gh pr merge` still only turns on
+    auto-merge, as gh does when the pull request shows blocked. When the app is no bypass actor, GitHub refuses a
+    direct merge with its rule's words;
+  - a plain merge GitHub refuses outright for a missing approval ("refuse_plain": true), as gh does when auto-merge
+    is not turned on; `gh pr merge --auto` then turns auto-merge on, waiting on the approval;
   - a branch behind main: `gh api repos/o/r/compare/main...HEAD` (HEAD the head commit or the branch) answers
     `behind_by` 1 and `status` "diverged", the pull request's `mergeStateStatus` is BEHIND and its REST
     `mergeable_state` is "behind"; a branch that contains main's newest commit answers `behind_by` 0, "ahead",
     BLOCKED and "blocked"; GitHub's Update branch (`gh pr update-branch` or `gh api -X PUT
     repos/o/r/pulls/N/update-branch`) is refused as on a clash with main, so the branch stays behind (#596);
   - approving reviews, as GitHub answers them: the app may not approve the pull request it opened ("Can not approve
-    your own pull request"), and no other key may either. Every one asked is recorded, so a test sees it was tried.
+    your own pull request"), and no other key may either.
 """
 import json
 import os
@@ -32,29 +35,24 @@ import test_automerge as ta
 import test_automerge_confirmed as tc
 from test_start import OWNER, PR
 
-SETTING = "DOKIMA_AUTO_MERGE"
 WAITS = f"Autopilot: PR #{PR} waits for your approval before it merges"
 MERGED = f"Autopilot: merged PR #{PR}"
 RULE = "At least 1 approving review is required by reviewers with write access"
 UPDATE_REFUSED = "HTTP 422: merge conflict between base and head (https://api.github.com/repos/o/r/pulls/60/update-branch)"
 
 APPROVAL_GH = r'''
-SETTING = json.loads(SETTING_JSON)
-def setting_answer():
-    if SETTING.get("fail"):
-        sys.stderr.write(SETTING["fail"] + "\n")
-        sys.exit(1)
-    if "value" not in SETTING:
+GH = json.loads(GH_JSON)
+if (a[:1] == ["api"] and any("actions/variables" in x for x in a[1:])) or a[:1] == ["variable"]:
+    # Every read of a repo variable is recorded: Dokima's merge must read none (#587).
+    open(os.path.join(d, "variables.jsonl"), "a").write(json.dumps(a) + "\n")
+    v = GH.get("variable") or {}
+    if "value" not in v:
         sys.stderr.write("HTTP 404: Not Found (https://api.github.com/repos/o/r/actions/variables/DOKIMA_AUTO_MERGE)\n")
         sys.exit(1)
-_var_api = a[:1] == ["api"] and any(re.fullmatch(r"/?repos/o/r/actions/variables/DOKIMA_AUTO_MERGE", x) for x in a[1:])
-_var_cli = a[:2] == ["variable", "get"] and "DOKIMA_AUTO_MERGE" in a
-if _var_api or _var_cli:
-    setting_answer()
-    if _var_cli:
-        print(SETTING["value"])
+    if a[:1] == ["variable"]:
+        print(v["value"])
     else:
-        out({"name": "DOKIMA_AUTO_MERGE", "value": SETTING["value"], "created_at": "2026-10-01T00:00:00Z",
+        out({"name": "DOKIMA_AUTO_MERGE", "value": v["value"], "created_at": "2026-10-01T00:00:00Z",
              "updated_at": "2026-10-01T00:00:00Z"})
     sys.exit(0)
 def approve(n, args):
@@ -93,18 +91,30 @@ if _m_rev and _m_rev.group(1) in PRS:
     else:
         print(json.dumps([]))
     sys.exit(0)
-BYPASS = json.loads(BYPASS_JSON)
 _m_put = re.fullmatch(r"repos/o/r/pulls/(\d+)/merge", PAPI or "")
-_past = _m_put.group(1) if _m_put and (flag("-X", "--method") or "").upper() == "PUT" else (
+_direct = _m_put.group(1) if _m_put and (flag("-X", "--method") or "").upper() == "PUT" else (
     pr_sel() if a[:2] == ["pr", "merge"] and "--admin" in a else None)
-if _past in PRS and token == "fake-token" and PRS[_past].get("accepts") == "approval" and not PRS[_past].get("merged"):
-    if BYPASS:
-        # Dokima's app is a bypass actor of the rule for pull requests: GitHub lets it merge this one past the rule.
-        del PRS[_past]["accepts"]
+_plain = pr_sel() if a[:2] == ["pr", "merge"] and "--admin" not in a else None
+_n = _direct or _plain
+if _n in PRS and token == "fake-token" and PRS[_n].get("accepts") == "approval" and not PRS[_n].get("merged"):
+    if _direct and GH.get("bypass"):
+        # Dokima's app is a bypass actor of main's rules for pull requests: GitHub lets it merge this one directly.
+        del PRS[_n]["accepts"]
         save_prs()
-    else:
-        merge_log(_past, "squash", flag("--match-head-commit"), "rule refused the bypass")
+    elif _direct:
+        merge_log(_n, "squash", flag("--match-head-commit"), "rule refused the bypass")
         sys.stderr.write(f"GraphQL: Repository rule violations found\n\n{RULE_TEXT}\n (mergePullRequest)\n")
+        sys.exit(1)
+    elif "--auto" in a:
+        PRS[_n]["auto"] = True
+        save_prs()
+        merge_log(_n, "squash", flag("--match-head-commit"), "auto-merge turned on")
+        print(f"Pull request o/r#{_n} will be automatically merged when all requirements are met")
+        sys.exit(0)
+    elif GH.get("refuse_plain"):
+        merge_log(_n, "squash", flag("--match-head-commit"), "refused: approval")
+        sys.stderr.write(f"X Pull request o/r#{_n} is not mergeable: the base branch policy prohibits the merge. "
+                         f"{RULE_TEXT}\n")
         sys.exit(1)
 '''
 
@@ -140,23 +150,22 @@ if _m_cmp:
 '''
 
 
-def fake_gh(setting, bypass):
-    """test_automerge_confirmed.py's fake GitHub, taught the setting (`setting`), the app's bypass (`bypass`), reviews
-    and branches behind main."""
+def fake_gh(gh):
+    """test_automerge_confirmed.py's fake GitHub, taught repo variables, the app's bypass, refused plain merges,
+    reviews and branches behind main, as `gh` sets them."""
     fake = tc.fake_gh()
-    head = (f"SETTING_JSON = {json.dumps(setting)!r}\nBYPASS_JSON = {json.dumps(bypass)!r}\nRULE_TEXT = {RULE!r}\n"
-            f"UPDATE_REFUSED = {UPDATE_REFUSED!r}\n")
+    head = f"GH_JSON = {json.dumps(gh)!r}\nRULE_TEXT = {RULE!r}\nUPDATE_REFUSED = {UPDATE_REFUSED!r}\n"
     taught = fake.replace(tc.ACCEPTS_GH, head + APPROVAL_GH + tc.ACCEPTS_GH + BEHIND_GH, 1)
     assert taught != fake and APPROVAL_GH in taught and BEHIND_GH in taught, \
-        "test setup: could not teach the fake GitHub the auto-merge setting"
+        "test setup: could not teach the fake GitHub how its rules decide a merge"
     return taught
 
 
 class Approval:
     """Builds test_automerge's machines with this file's fake GitHub, #60 waiting on an approval to merge."""
 
-    def __init__(self, setting, bypass, behind=False):
-        self.setting, self.bypass, self.behind = setting, bypass, behind
+    def __init__(self, gh, behind=False):
+        self.gh, self.behind = gh, behind
 
     def __enter__(self):
         self.saved = ta.fake_gh, ta.pr_state
@@ -167,26 +176,26 @@ class Approval:
             st["accepts"] = "approval"
             st["behind"] = behind
             return st
-        ta.fake_gh, ta.pr_state = (lambda: fake_gh(self.setting, self.bypass)), state
+        ta.fake_gh, ta.pr_state = (lambda: fake_gh(self.gh)), state
         return self
 
     def __exit__(self, *exc):
         ta.fake_gh, ta.pr_state = self.saved
 
 
-class SettingReview(ta.Review):
-    """One code review of #60 on #57, with the given setting, bypass, checks and base.
+class RuleReview(ta.Review):
+    """One code review of #60 on #57 on autopilot, under the rules the test gives.
 
-    `setting` is {} for unset, {"value": "..."} for a set variable, or {"fail": "message"} for a read GitHub fails;
-    `behind` makes #60's branch miss main's newest commit."""
+    `gh` is {"bypass": bool, "refuse_plain": bool, "variable": {} unset or {"value": "..."}}; `behind` makes #60's
+    branch miss main's newest commit."""
 
-    def __init__(self, tmp, review, labels, checks, setting, bypass, files=None, behind=False):
-        with Approval(setting, bypass, behind):
-            super().__init__(tmp, review, labels, checks, files=files)
+    def __init__(self, tmp, review, checks, gh, behind=False):
+        with Approval(gh, behind):
+            super().__init__(tmp, review, ta.ON, checks)
 
-    def approvals(self):
-        """Every approving review asked of GitHub: [{pr, args, token}]."""
-        path = f"{self.tmp}/gh/approvals.jsonl"
+    def variable_reads(self):
+        """Every read of a repo variable asked of GitHub, as its arguments."""
+        path = f"{self.tmp}/gh/variables.jsonl"
         return [json.loads(l) for l in open(path)] if os.path.exists(path) else []
 
     def lines(self):
@@ -199,19 +208,15 @@ class SettingReview(ta.Review):
 
 
 RUNS = {}
-ON_VALUE = {"value": "on"}
-# name: (the review, the setting, whether Dokima's app is a bypass actor, #60's checks, the files #60 changes,
-#        whether #60's branch misses main's newest commit)
+# name: (#60's checks, GitHub's rules and the repo variable, whether #60's branch misses main's newest commit)
 CASES = {
-    "unset": (ta.PR_APPROVE, {}, True, ta.GREEN, None, False),
-    "off": (ta.PR_APPROVE, {"value": "off"}, True, ta.GREEN, None, False),
-    "unreadable": (ta.PR_APPROVE, {"fail": "HTTP 502: Bad Gateway"}, True, ta.GREEN, None, False),
-    "on": (ta.PR_APPROVE, ON_VALUE, True, ta.GREEN, None, False),
-    "on-block": (ta.PR_BLOCK, ON_VALUE, True, ta.GREEN, None, False),
-    "on-refused": (ta.PR_APPROVE, ON_VALUE, False, ta.GREEN, None, False),
-    "on-red": (ta.PR_APPROVE, ON_VALUE, True, ta.RED, None, False),
-    "on-behind": (ta.PR_APPROVE, ON_VALUE, True, ta.GREEN, None, True),
-    "on-workflow": (ta.PR_APPROVE, ON_VALUE, True, ta.GREEN, ["x57.py", ta.WORKFLOW_FILE], False),
+    "variable-on-held": (ta.GREEN, {"bypass": False, "variable": {"value": "on"}}, False),
+    "variable-off-bypass": (ta.GREEN, {"bypass": True, "variable": {"value": "off"}}, False),
+    "bypass": (ta.GREEN, {"bypass": True}, False),
+    "bypass-red": (ta.RED, {"bypass": True}, False),
+    "bypass-behind": (ta.GREEN, {"bypass": True}, True),
+    "held": (ta.GREEN, {"bypass": False}, False),
+    "held-refused": (ta.GREEN, {"bypass": False, "refuse_plain": True}, False),
 }
 
 
@@ -220,9 +225,8 @@ def runs(tmp_path_factory):
     """Each code review run, run once on first use and shared between tests."""
     def get(name):
         if name not in RUNS:
-            review, setting, bypass, checks, files, behind = CASES[name]
-            RUNS[name] = SettingReview(tmp_path_factory.mktemp(name), review, ta.ON, checks, setting, bypass, files,
-                                       behind)
+            checks, gh, behind = CASES[name]
+            RUNS[name] = RuleReview(tmp_path_factory.mktemp(name), ta.PR_APPROVE, checks, gh, behind)
         return RUNS[name]
     return get
 
@@ -239,12 +243,19 @@ def tried(m):
 
 def merged_alone(m, crit, case):
     """#60 merged at its green head with Dokima's app key, and #57 says so once."""
-    assert m.merged() == ta.HEAD, (f"{crit} ({case}): with the setting on and the code review passed, Dokima did not "
-                                   f"merge #60 at its green head (merged: {m.merged()}, merges tried: {tried(m)})\n"
-                                   f"{m.tail()}")
+    assert m.merged() == ta.HEAD, (f"{crit} ({case}): GitHub lets Dokima's app merge without approval, yet #60 did not "
+                                   f"merge at its green head (merged: {m.merged()}, merges tried: {tried(m)})\n{m.tail()}")
     assert all(t["token"] == "fake-token" for t in m.tried()), \
         f"{crit} ({case}): a merge was asked with a key other than Dokima's app key: {[t['token'] for t in m.tried()]}"
     assert m.lines() == [MERGED], f"{crit} ({case}): #57 did not get exactly one line {MERGED!r}: {m.lines()}"
+
+
+def waits(m, crit, case):
+    """#60 is still open and #57 got exactly the line saying it waits."""
+    assert m.merged() is None, (f"{crit} ({case}): #60 merged though GitHub requires the owner's approval "
+                                f"(merges tried: {tried(m)})")
+    assert m.lines() == [WAITS], (f"{crit} ({case}): #57 did not get exactly one line reading {WAITS!r}: "
+                                  f"{m.lines()}\n{m.tail()}")
 
 
 def not_merged(m, crit, case, why):
@@ -286,68 +297,66 @@ def told_behind(m, crit, case):
          f"{[plain(s)[-400:] for s in m.said()]}\n{m.tail()}")
 
 
-def test_by_default_a_pull_request_waits_for_the_owners_approval(record_property, runs):
-    """By default, a passed code review leaves the pull request waiting for your approval.
+def test_autopilots_merge_reads_no_repo_variable(record_property, runs):
+    """Setting or clearing a repo variable changes nothing: GitHub alone decides whether autopilot merges.
 
-    Proves 557.1.
-    Runs the code review approving #60 on autopilot, every check green, on a branch that needs an approval to merge,
-    with Dokima's app able to bypass that rule, three ways the setting is not on: `DOKIMA_AUTO_MERGE` unset, set to
-    `off`, and unreadable because GitHub fails the read. Each time #60 must stay open and #57 must get exactly the line
-    `Autopilot: PR #60 waits for your approval before it merges`: the bypass is used only when the setting says so.
-    A default means something only when there is a setting to change it: beside them, the same run with the setting
-    `on` must merge #60, or the test fails as proving nothing."""
-    record_property("proves", "557.1")
-    for case in ("unset", "off", "unreadable"):
-        m = runs(case)
-        started(m, "557.1", case)
-        assert m.merged() is None, (f"557.1 ({case}): #60 merged with no owner approval though the setting is not on "
-                                    f"(merges tried: {tried(m)})")
-        assert m.lines() == [WAITS], (f"557.1 ({case}): #57 did not get exactly one line reading {WAITS!r}, as today: "
-                                      f"{m.lines()}\n{m.tail()}")
-    c = runs("on")
-    assert c.merged() == ta.HEAD, ("557.1: with the setting `on` Dokima did not merge #60: there is no setting yet, so "
-                                   "waiting by default proves nothing")
+    Proves 587.1.
+    Runs the code review approving #60 on autopilot, every check green, twice. Once with the old switch
+    `DOKIMA_AUTO_MERGE` set to `on` while GitHub requires the owner's approval: #60 must stay open and #57 must get
+    exactly the line `Autopilot: PR #60 waits for your approval before it merges`. Once with it set to `off` while
+    GitHub lets Dokima's app merge without approval: #60 must merge and #57 must get `Autopilot: merged PR #60`. In
+    neither run may Dokima ask GitHub for any repo variable."""
+    record_property("proves", "587.1")
+    held = runs("variable-on-held")
+    started(held, "587.1", "variable on, GitHub requires approval")
+    waits(held, "587.1", "variable on, GitHub requires approval")
+    free = runs("variable-off-bypass")
+    started(free, "587.1", "variable off, GitHub lets the app merge")
+    merged_alone(free, "587.1", "variable off, GitHub lets the app merge")
+    for case, m in (("variable on", held), ("variable off", free)):
+        assert m.variable_reads() == [], f"587.1 ({case}): autopilot's merge read a repo variable: {m.variable_reads()}"
 
 
-def test_with_the_setting_on_dokima_merges_a_passed_green_up_to_date_pull_request_directly(record_property, runs):
-    """With the setting on, Dokima merges a passed, green, up-to-date pull request by itself.
+def test_when_github_lets_the_app_merge_autopilot_merges_and_says_so(record_property, runs):
+    """When GitHub lets Dokima's app merge without approval, autopilot merges and says so.
 
-    Proves 557.2.
+    Proves 587.2.
     Runs the code review approving #60 on autopilot, every check green, its branch holding main's newest commit, with
-    `DOKIMA_AUTO_MERGE` set to `on`, on a branch whose rule needs an approval and lets Dokima's app bypass it for pull
-    requests. #60 must merge at its green head with the app's key, and #57 must get exactly one line
-    `Autopilot: merged PR #60`. GitHub refuses the bot's approval of its own pull request, so the merge must come from
-    the bypass. The fake lets the bypass merge anything, so each case below proves Dokima checks it itself. #60 must
-    stay open, with no merged line, when: the code review blocks; GitHub refuses the bypass (a comment mentioning the
-    owner gives GitHub's reason); a check on its head is red (it goes back to the worker, #596);
-    its branch misses main's newest commit (a comment mentioning the owner says so in words, not in a link, and
-    the red-check case's comments do not); it changes a workflow file
-    (a comment on #60 mentioning the owner names .github/workflows)."""
-    record_property("proves", "557.2")
-    m = runs("on")
-    started(m, "557.2", "on")
-    merged_alone(m, "557.2", "on")
-    b = runs("on-block")
-    started(b, "557.2", "on, review blocks")
-    not_merged(b, "557.2", "on, review blocks", "its code review blocked")
-    r = runs("on-refused")
-    started(r, "557.2", "on, bypass refused")
-    not_merged(r, "557.2", "on, bypass refused", "GitHub refused the bypass")
-    owner_told(r, "557.2", "on, bypass refused", RULE)
-    red = runs("on-red")
-    started(red, "557.2", "on, red check")
-    not_merged(red, "557.2", "on, red check", f"the check {ta.RED_NAME} failed on its head")
-    behind = runs("on-behind")
-    started(behind, "557.2", "on, behind main")
-    not_merged(behind, "557.2", "on, behind main", "its branch does not contain main's newest commit")
-    told_behind(behind, "557.2", "on, behind main")
+    no repo variable set, while main's rules need an approval and let Dokima's app bypass them for pull requests. #60
+    must merge at its green head with the app's key, and #57 must get exactly one line `Autopilot: merged PR #60`.
+    GitHub refuses the bot's approval of its own pull request, so the merge must come from GitHub's bypass. The fake
+    lets the bypass merge anything, so each case below proves Dokima still checks it itself. #60 must stay open, with
+    no merged line, when a check on its head is red (it goes back to the worker, #596), and when its branch misses
+    main's newest commit, which GitHub here refuses to bring up to date (a comment mentioning the owner says so in
+    words, not in a link, and the red-check case's comments do not)."""
+    record_property("proves", "587.2")
+    m = runs("bypass")
+    started(m, "587.2", "bypass")
+    merged_alone(m, "587.2", "bypass")
+    red = runs("bypass-red")
+    started(red, "587.2", "bypass, red check")
+    not_merged(red, "587.2", "bypass, red check", f"the check {ta.RED_NAME} failed on its head")
+    behind = runs("bypass-behind")
+    started(behind, "587.2", "bypass, behind main")
+    not_merged(behind, "587.2", "bypass, behind main", "its branch does not contain main's newest commit")
+    told_behind(behind, "587.2", "bypass, behind main")
     assert not any(says_behind(s) for s in red.said()), \
-        (f"557.2 (on, red check): a comment on a branch that holds main's newest commit says it is behind main, so "
+        (f"587.2 (bypass, red check): a comment on a branch that holds main's newest commit says it is behind main, so "
          f"saying so proves nothing: {[plain(s)[-400:] for s in red.said()]}")
-    w = runs("on-workflow")
-    started(w, "557.2", "on, workflow file")
-    not_merged(w, "557.2", "on, workflow file", "it changes a workflow file")
-    on_pr = [ta.visible(x) for x in w.new_comments("pr", PR)]
-    assert any(f"@{OWNER}" in x and ".github/workflows" in x for x in on_pr), \
-        (f"557.2 (on, workflow file): no comment on #60 names .github/workflows and mentions @{OWNER}: "
-         f"{[x[-400:] for x in on_pr]}\n{w.tail()}")
+
+
+def test_when_github_requires_approval_the_pull_request_waits_and_the_issue_says_so(record_property, runs):
+    """When GitHub requires your approval, the pull request waits and the issue says so.
+
+    Proves 587.3.
+    Runs the code review approving #60 on autopilot, every check green, with no repo variable set, while main's rules
+    need the owner's approval and Dokima's app is on no exemption list. Two ways GitHub holds it: it turns on
+    auto-merge waiting on the approval, and it refuses the merge outright for the missing approval. Each time #60
+    must stay open and #57 must get exactly one line `Autopilot: PR #60 waits for your approval before it merges`:
+    a merge held for approval is a wait, not a failure."""
+    record_property("proves", "587.3")
+    for case in ("held", "held-refused"):
+        m = runs(case)
+        started(m, "587.3", case)
+        assert m.tried(), f"587.3 ({case}): autopilot never asked GitHub to merge #60, so GitHub never decided:\n{m.tail()}"
+        waits(m, "587.3", case)
