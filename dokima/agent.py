@@ -2180,8 +2180,13 @@ def superseded(run):
 
 
 def required_checks(repo, branch="main"):
-    """The checks the branch's rule requires, by name, as GitHub gives them (#561)."""
-    rule = json.loads(gh("api", f"repos/{repo}/branches/{branch}/protection/required_status_checks"))
+    """The checks the branch's rule requires, by name, as GitHub gives them (#561).
+
+    Read from the branch itself, which any token that reads the repo may see; the protection endpoint needs admin
+    rights Dokima's app lacks. Only when the branch shows no rule is the protection endpoint asked."""
+    rule = (json.loads(gh("api", f"repos/{repo}/branches/{branch}")).get("protection") or {}).get("required_status_checks")
+    if not rule:
+        rule = json.loads(gh("api", f"repos/{repo}/branches/{branch}/protection/required_status_checks"))
     return set(rule.get("contexts") or []) | {c.get("context") for c in rule.get("checks") or [] if c.get("context")}
 
 

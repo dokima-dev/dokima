@@ -64,12 +64,13 @@ class FakeGitHub:
         if f"pulls/{PR}/files" in joined:
             return json.dumps([{"filename": "dokima/x.py"}])
         if "/protection" in joined:
+            raise AssertionError("test setup: the protection endpoint is admin-only; the app reads the branch (#576)")
+        if joined.split("?")[0].endswith("/branches/main"):
             # Main's branch rule requires every check the test gives except the card runs, which judge nothing (#561).
             req = sorted({r["name"] for s in self.steps for r in s if r["name"] != "card"}
                          | {s["context"] for s in self.statuses})
             inner = {"strict": True, "contexts": req, "checks": [{"context": c, "app_id": None} for c in req]}
-            return json.dumps(inner if joined.split("?")[0].endswith("/required_status_checks")
-                              else {"required_status_checks": inner})
+            return json.dumps({"name": "main", "protection": {"enabled": True, "required_status_checks": inner}})
         if "check-runs" in joined:
             self.reads += 1
             if self.reads > 500:

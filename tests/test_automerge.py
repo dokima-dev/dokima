@@ -293,12 +293,17 @@ if m_pr and m_pr.group(1) in PRS:
     sys.exit(0)
 m_rule = next((re.fullmatch(r"/?repos/o/r/branches/([^/?]+)/protection(/required_status_checks)?", x.split("?")[0])
                for x in a[1:] if "/protection" in x), None) if a[:1] == ["api"] else None
-if m_rule:
+m_branch = next((re.fullmatch(r"/?repos/o/r/branches/([^/?]+)", x.split("?")[0]) for x in a[1:]
+                 if re.fullmatch(r"/?repos/o/r/branches/[^/?]+", x.split("?")[0])), None) if a[:1] == ["api"] else None
+if m_rule or m_branch:
     # Main's branch rule requires every check the pull request being merged carries, so each one still judges it.
     cur = open(RULE_PR).read().strip() if os.path.exists(RULE_PR) else ""
     req = sorted({c["name"] for n, p in PRS.items() if n == cur or cur not in PRS for cs in p["checks"].values() for c in cs})
     inner = {"strict": True, "contexts": req, "checks": [{"context": c, "app_id": None} for c in req]}
-    pick(inner if m_rule.group(2) else {"required_status_checks": inner})
+    if m_branch:
+        pick({"name": m_branch.group(1), "protection": {"enabled": True, "required_status_checks": inner}})
+    else:
+        pick(inner if m_rule.group(2) else {"required_status_checks": inner})
     sys.exit(0)
 m_com = re.fullmatch(r"repos/o/r/commits/(.+?)/(check-runs|status|statuses)", PAPI or "")
 if m_com:
