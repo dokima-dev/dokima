@@ -186,6 +186,8 @@ def test_the_pack_reads_the_issue_and_its_pr_as_one_conversation(record_property
                                "reviews": [{"author": {"login": "owner"}, "body": "line note", "submittedAt": "2026-01-01T00:00:02Z", "state": "COMMENTED"}]})
         if args[0] == "api" and args[1].endswith("/pulls/9/comments"):
             return json.dumps([{"user": {"login": "owner"}, "body": "rename this", "created_at": "2026-01-01T00:00:05Z", "path": "x.py", "line": 3}])
+        if args[0] == "api" and args[1].split("?")[0].lstrip("/") == "repos/o/r/issues":
+            return "[]"
         raise AssertionError(args)
     monkeypatch.setattr(agent, "gh", fake_gh)
     assert agent.pack("o/r", 7, "reviewer", "plan", str(tmp_path / "p"))
