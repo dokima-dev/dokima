@@ -154,17 +154,22 @@ def test_the_planners_change_to_a_test_main_added_reaches_the_worker(record_prop
 
 
 def test_a_planner_run_brings_its_branch_up_to_mains_newest_commit(record_property, tmp_path):
-    """After a planner run, its branch holds main's newest commit.
+    """A planner run on a cleanly merging branch brings it up to main's newest commit.
 
     Proves 475.3.
     Runs the planner's real checkout and push on try/issue-57, which merges cleanly with main, while main has moved on
     since the branch split off. The branch the planner pushed must then hold main's newest commit, so a later move of
-    main cannot clash with the planner's test changes. It must still hold the branch's own work too."""
+    main cannot clash with the planner's test changes. It must still hold the branch's own work too. Beside it, a
+    branch that clashes with main must still finish the planner's run and keep its own work, for the worker to merge."""
     record_property("proves", "475.3")
-    b = Branch(tmp_path, clash=False)
+    b = Branch(tmp_path / "clean", clash=False)
     assert b.planner == "success", f"475.3: the planner on a branch that merges cleanly failed:\n{b.planner_log[-3000:]}"
     branch = f"refs/heads/try/issue-{ts.N}"
     assert b.on_origin("merge-base", "--is-ancestor", "refs/heads/main", branch) == 0, \
-        "475.3: after the planner's run, its branch still lacks main's newest commit"
+        "475.3: after the planner's run on a branch that merges cleanly, its branch still lacks main's newest commit"
     assert b.on_origin("cat-file", "-e", f"{branch}:tests/test_x.py") == 0, \
         "475.3: after the planner's run, its branch lost its own tests/test_x.py"
+    c = Branch(tmp_path / "clash", clash=True)
+    assert c.planner == "success", f"475.3: the planner on a branch that clashes with main failed:\n{c.planner_log[-3000:]}"
+    assert c.on_origin("cat-file", "-e", f"{branch}:tests/test_x.py") == 0, \
+        "475.3: after the planner's run on a branch that clashes with main, its branch lost its own tests/test_x.py"
