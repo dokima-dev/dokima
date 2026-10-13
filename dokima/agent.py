@@ -2270,11 +2270,8 @@ def merge_gate(repo, pr):
     review (#597). Returns ("passed", head, None) once every one passed on that head,
     ("failed", head, why) when one failed there, or ("stopped", head, why) when GitHub would not update the branch, the
     checks never finished or GitHub could not say."""
-    try:
-        view = json.loads(gh("pr", "view", str(pr), "-R", repo, "--json", "headRefOid,isDraft"))
-        head, draft = str(view.get("headRefOid") or "").strip(), view.get("isDraft") is True
-    except (json.JSONDecodeError, AttributeError) as e:
-        return "stopped", "", f"GitHub's answer on its head commit could not be read: {e}"
+    head = gh("pr", "view", str(pr), "-R", repo, "--json", "headRefOid", "-q", ".headRefOid").strip()
+    draft = gh("pr", "view", str(pr), "-R", repo, "--json", "isDraft", "-q", ".isDraft").strip() == "true"
     if not head:
         return "stopped", "", "GitHub did not say which commit is its head"
     if behind_main(repo, head):
