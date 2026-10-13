@@ -363,10 +363,11 @@ def checks_on_head(monkeypatch, runs):
     def gh(*args, **kw):
         joined = " ".join(str(a) for a in args)
         if "/protection" in joined:
+            raise AssertionError("test setup: the protection endpoint is admin-only; the app reads the branch")
+        if joined.split("?")[0].endswith("/branches/main"):
             inner = {"strict": True, "contexts": ["All tests", "Acceptance criteria"],
                      "checks": [{"context": c, "app_id": None} for c in ("All tests", "Acceptance criteria")]}
-            return json.dumps(inner if joined.split("?")[0].endswith("/required_status_checks")
-                              else {"required_status_checks": inner})
+            return json.dumps({"name": "main", "protection": {"enabled": True, "required_status_checks": inner}})
         if "check-runs" in joined:
             return json.dumps({"total_count": len(runs), "check_runs": runs})
         if "/status" in joined:

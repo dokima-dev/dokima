@@ -184,6 +184,15 @@ def rest(state, method, path, fields):
             refuse(state, fail["labels"])
         reply(state, [{"id": k, "name": n, "color": l["color"], "description": l["description"], "default": False}
                       for k, (n, l) in enumerate(state["labels"].items())])
+    b = re.fullmatch(r"branches/([^/]+)", rest_path)
+    if method == "GET" and b:
+        if "protection" in fail:
+            refuse(state, fail["protection"])
+        checks = state["protection"].get(b.group(1))
+        rule = None if checks is None else {"strict": True, "contexts": list(checks),
+                                            "checks": [{"context": c, "app_id": None} for c in checks]}
+        reply(state, {"name": b.group(1), "protected": rule is not None,
+                      "protection": {"enabled": rule is not None, **({"required_status_checks": rule} if rule else {})}})
     m = re.fullmatch(r"branches/([^/]+)/protection(/required_status_checks)?", rest_path)
     if method == "GET" and m:
         if "protection" in fail:
