@@ -297,23 +297,31 @@ def reviewer_open_issues(repo):
 
 
 def problems_searched(h, pack_dir):
-    """Each searched issue a review names that its pack does not list as open."""
-    named = [r for r in h.get("raises", []) if isinstance(r, dict) and r.get("kind") == "issue"
-             and raises.SEARCHED in r] if isinstance(h.get("raises"), list) else []
-    if not named:
+    """What each filed issue lacks (#622), and each searched issue not open in the pack.
+
+    A review files its own issue raises and each issue it answers done that the planner or the worker raised; each
+    names the open issues it searched and its verdict, on the raise or on the answer."""
+    own = [r for r in h.get("raises", []) if isinstance(r, dict) and r.get("kind") == "issue"] \
+        if isinstance(h.get("raises"), list) else []
+    path = os.path.join(pack_dir, "open_blockers.json")
+    listed = json.load(open(path)) if os.path.exists(path) else []
+    theirs = {r.get("id") for r in listed if isinstance(r, dict) and r.get("kind") == "issue"
+              and raises.sent_to(r) == raises.CONFIRMS} if isinstance(listed, list) else set()
+    confirmed = [a for a in h.get("answers", []) if isinstance(a, dict) and a.get("answer") == "done"
+                 and a.get("raise") in theirs] if isinstance(h.get("answers"), list) else []
+    filed = [(f"raise {n}", r) for n, r in enumerate(own, 1)] + [(f"the answer to {a['raise']}", a) for a in confirmed]
+    if not filed:
         return []
+    bad = [p for where, d in filed for p in raises.filing_problems(where, d)]
+    named = [d for _, d in filed if raises.is_numbers(d.get(raises.SEARCHED)) and d.get(raises.SEARCHED)]
+    if not named:
+        return bad
     path = os.path.join(pack_dir, "open_issues.json")
     if not os.path.exists(path):
-        return [f"open_issues.json is missing from the pack, so the {raises.SEARCHED} issues cannot be checked"]
+        return bad + [f"open_issues.json is missing from the pack, so the {raises.SEARCHED} issues cannot be checked"]
     known = {i.get("number") for i in json.load(open(path)) if isinstance(i, dict)}
-    bad = []
-    for r in named:
-        if not raises.is_numbers(r[raises.SEARCHED]):
-            bad.append(f"{raises.SEARCHED} must be a list of issue numbers, not {r[raises.SEARCHED]!r}")
-            continue
-        bad += [f"{raises.SEARCHED} names #{n}, which is not an open issue in the pack" for n in r[raises.SEARCHED]
-                if n not in known]
-    return bad
+    return bad + [f"{raises.SEARCHED} names #{n}, which is not an open issue in the pack"
+                  for d in named for n in d[raises.SEARCHED] if n not in known]
 
 
 def problems_links(h, pack_dir):
@@ -1854,16 +1862,20 @@ def file_issues(repo, number, rec, recs):
     h = rec.get("handback") or {}
     if rec.get("role") != "reviewer" or not (rec.get("check") or {}).get("passed"):
         return []
-    found = [x for x in card.raises_of(h) if x.get("kind") == "issue"]
+    found = [(x, x) for x in card.raises_of(h) if x.get("kind") == "issue"]
     theirs = {x["id"]: x for x in open_raises(recs) if x.get("kind") == "issue" and raises.sent_to(x) == raises.CONFIRMS}
-    found += [theirs[a["raise"]] for a in card.answers_of(h)
+    found += [(theirs[a["raise"]], a) for a in card.answers_of(h)
               if a.get("answer") == "done" and isinstance(a["raise"], str) and a["raise"] in theirs]
     lines = []
-    for x in found:
+    for x, decided in found:
         title = first_sentence(x.get("text") or x.get("label") or "An issue found")
         by = x.get("raised_by") or "reviewer"
         who = "The reviewer found it" if by == "reviewer" else f"The {by} raised it and the reviewer confirmed it"
         body = [x.get("text") or ""] + (["", f"**Evidence:** {x['evidence']}"] if filled(x.get("evidence")) else [])
+        if decided.get(raises.VERDICT) in raises.VERDICTS:
+            body += ["", f"**Verdict:** {raises.VERDICTS[decided[raises.VERDICT]]}"]
+        if raises.is_numbers(decided.get(raises.SEARCHED)) and decided[raises.SEARCHED]:
+            body += ["", "**Open issues searched:** " + ", ".join(f"#{n}" for n in decided[raises.SEARCHED])]
         run = os.environ.get("GITHUB_RUN_ID")
         where = f" ([run]({os.environ.get('GITHUB_SERVER_URL', 'https://github.com')}/{repo}/actions/runs/{run}))" if run else ""
         body += ["", f"{who} on #{number}{where}."]
