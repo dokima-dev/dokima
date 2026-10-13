@@ -12,12 +12,14 @@ With clash=True, main and the branch both change app.py, so the branch clashes w
 branch changes only near.py and merges cleanly.
 """
 import os
+import subprocess
 import sys
 
 sys.path.insert(0, os.path.dirname(__file__))
 import test_start as ts  # noqa: E402
 
 MAINS_TEST = 'def test_m():\n    """Main\'s own test."""\n    assert True\n'
+BRANCHS_TEST = 'def test_a():\n    """A."""\n'
 PLANNERS_TEST = 'def test_m():\n    """Main\'s test, changed by the planner."""\n    assert 1 + 1 == 2\n'
 
 
@@ -40,7 +42,7 @@ class Branch(ts.Machine):
         ts.sh(src, "git", "push", "-q", "origin", "main")
         ts.sh(src, "git", "checkout", "-q", "-b", f"try/issue-{ts.N}")
         mine = {"app.py": "a = 2\n"} if clash else {"near.py": "n = 2\n"}
-        commit({**mine, "tests/test_x.py": 'def test_a():\n    """A."""\n'}, "the branch's work")
+        commit({**mine, "tests/test_x.py": BRANCHS_TEST}, "the branch's work")
         ts.sh(src, "git", "push", "-q", "origin", f"try/issue-{ts.N}")
         ts.sh(src, "git", "checkout", "-q", "main")
         commit({"app.py": "a = 3\n", "tests/test_main.py": MAINS_TEST}, "main adds a test")
@@ -48,6 +50,7 @@ class Branch(ts.Machine):
         open(f"{t}/planners_test.py", "w").write(PLANNERS_TEST)
         # The stand-in planner: keeps what it found, then changes main's test when it can see it.
         edits = ("mkdir -p \"$PACK\" \"$OUT\"\n"
+                 "if [ -f tests/test_x.py ]; then cp tests/test_x.py /tmp/seen_x.py; fi\n"
                  "if [ -f tests/test_main.py ]; then cp tests/test_main.py /tmp/seen.py; "
                  "cp /tmp/planners_test.py tests/test_main.py; fi\n")
         wf = ts.workflow("agent.yml")
@@ -84,6 +87,15 @@ class Branch(ts.Machine):
         path = f"{self.tmp}/seen.py"
         return open(path).read() if os.path.exists(path) else None
 
+    def seen_branchs(self):
+        """The branch's own test as the planner found it, or None when absent."""
+        path = f"{self.tmp}/seen_x.py"
+        return open(path).read() if os.path.exists(path) else None
+
+    def on_origin(self, *args):
+        """Run git in the temp origin; its exit code."""
+        return subprocess.run(["git", *args], cwd=f"{self.tmp}/origin.git", capture_output=True).returncode
+
     def workers(self, path):
         """A file's text in the worker's copy after its checkout, or None when absent."""
         p = f"{self.tmp}/jobs/worker/ws/{path}"
@@ -100,8 +112,9 @@ def test_the_planner_on_a_branch_that_clashes_with_main_sees_the_tests_main_adde
 
     Proves 475.1.
     Runs the planner's real checkout on try/issue-57, which clashes with main in app.py, while main has since added
-    tests/test_main.py. The planner's copy must hold that test exactly as main has it. Beside it, a branch that merges
-    cleanly with main must give the planner main's test too."""
+    tests/test_main.py. The planner's copy must hold that test exactly as main has it, and still hold the branch's own
+    tests/test_x.py, so starting from main alone does not pass. Beside it, a branch that merges cleanly with main must
+    give the planner both tests too."""
     record_property("proves", "475.1")
     for clash in (True, False):
         b = Branch(tmp_path / ("clash" if clash else "clean"), clash=clash)
@@ -110,6 +123,9 @@ def test_the_planner_on_a_branch_that_clashes_with_main_sees_the_tests_main_adde
         assert b.seen() == MAINS_TEST, \
             (f"475.1: on a branch that {kind}, the planner started without the test main added "
              f"(tests/test_main.py found: {b.seen()!r})")
+        assert b.seen_branchs() == BRANCHS_TEST, \
+            (f"475.1: on a branch that {kind}, the planner started without the branch's own test "
+             f"(tests/test_x.py found: {b.seen_branchs()!r})")
 
 
 def test_the_planners_change_to_a_test_main_added_reaches_the_worker(record_property, tmp_path):
@@ -130,6 +146,25 @@ def test_the_planners_change_to_a_test_main_added_reaches_the_worker(record_prop
         assert got == PLANNERS_TEST, \
             (f"475.2: on a branch that {kind}, the worker started without the planner's change to the test main "
              f"added; tests/test_main.py is {got!r}")
+        assert "tests/test_main.py" not in b.clashed(), \
+            f"475.2: on a branch that {kind}, the planner's change to the test main added clashed with main"
         if clash:
             assert "app.py" in b.clashed(), \
                 f"475.2: app.py clashes with main but was not left for the worker to resolve: {b.clashed()}"
+
+
+def test_a_planner_run_brings_its_branch_up_to_mains_newest_commit(record_property, tmp_path):
+    """After a planner run, its branch holds main's newest commit.
+
+    Proves 475.3.
+    Runs the planner's real checkout and push on try/issue-57, which merges cleanly with main, while main has moved on
+    since the branch split off. The branch the planner pushed must then hold main's newest commit, so a later move of
+    main cannot clash with the planner's test changes. It must still hold the branch's own work too."""
+    record_property("proves", "475.3")
+    b = Branch(tmp_path, clash=False)
+    assert b.planner == "success", f"475.3: the planner on a branch that merges cleanly failed:\n{b.planner_log[-3000:]}"
+    branch = f"refs/heads/try/issue-{ts.N}"
+    assert b.on_origin("merge-base", "--is-ancestor", "refs/heads/main", branch) == 0, \
+        "475.3: after the planner's run, its branch still lacks main's newest commit"
+    assert b.on_origin("cat-file", "-e", f"{branch}:tests/test_x.py") == 0, \
+        "475.3: after the planner's run, its branch lost its own tests/test_x.py"
