@@ -29,7 +29,7 @@ def story(title, deps):
 
 def feature(*stories):
     """A feature holding the given stories."""
-    return {"kind": "feature", "summary": "Slow calls run as jobs.", "feature": "A split.", "stories": list(stories)}
+    return {"kind": "feature", "title": "Slow calls run as jobs", "summary": "Slow calls run as jobs.", "feature": "A split.", "stories": list(stories)}
 
 
 def hand_back(tmp_path, content):

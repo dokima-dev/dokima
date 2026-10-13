@@ -157,11 +157,11 @@ def bot(monkeypatch):
 
 # 181.1: plan.json carries a one-sentence summary; the prompt asks for it and the check rejects a plan without it
 
-STORY_PLAN = {"kind": "user_story", "summary": SUMMARY, "user_story": "Slow calls return a job id.",
+STORY_PLAN = {"kind": "user_story", "title": "Slow calls return a job id", "summary": SUMMARY, "user_story": "Slow calls return a job id.",
               "acceptance_criteria": [{"text": "A slow call returns a job id within 20 s.", "source": "https://github.com/o/r/issues/9", "no_edge_cases": "a sample criterion"}],
               "non_functional": [], "scope": ["dokima/jobs.py"], "out_of_scope": [],
               "tests": {"9.1": ["tests/test_jobs.py::test_id"]}, "test_changes": {}}
-FEATURE_PLAN = {"kind": "feature", "summary": SUMMARY, "feature": "Slow calls run as jobs.", "stories": [
+FEATURE_PLAN = {"kind": "feature", "title": "Slow calls run as jobs", "summary": SUMMARY, "feature": "Slow calls run as jobs.", "stories": [
     {"title": t, "user_story": f"Owners get {t}.", "acceptance_criteria": [{"text": f"{t} works {k}.", "source": "https://github.com/o/r/issues/9"} for k in (1, 2, 3)],
      "non_functional": [], "depends_on": []} for t in ("Jobs", "Results")]}
 

@@ -55,7 +55,7 @@ OLD = ("questions", "concerns", "replies", "suspect_tests", "outside_scope", "bl
 OWNER = "owner"
 ISSUE = "https://github.com/o/r/issues/9"
 LINKS = {"blocked_by": [], "blocks": [], "relates_to": []}
-STORY = {"kind": "user_story", "summary": "Slow calls hand back a job id.", "user_story": "u",
+STORY = {"kind": "user_story", "title": "Slow calls hand back a job id", "summary": "Slow calls hand back a job id.", "user_story": "u",
          "acceptance_criteria": [{"text": "a", "source": ISSUE, "no_edge_cases": "a sample criterion"}, {"text": "b", "source": ISSUE, "no_edge_cases": "a sample criterion"}],
          "non_functional": [], "scope": ["dokima/x.py"], "out_of_scope": [],
          "tests": {"9.1": ["tests/test_x.py::test_a"], "9.2": ["tests/test_x.py::test_b"]}, "links": LINKS}
