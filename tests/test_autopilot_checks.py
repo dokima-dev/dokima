@@ -6,6 +6,7 @@ was still running, minutes before it passed. These tests call autopilot's merge 
 fake GitHub kept in memory: pull request #60 built for issue #57, its head commit, the check runs and commit statuses
 on that head, and merging. Each read of the head's check runs moves the fake on one step through the list of
 check-run states the test gives, the last state staying for good, so a check can be still running and then finish.
+The branch holds main's newest commit (`repos/o/r/compare/main...HEAD` answers `behind_by` 0).
 Time is faked too: `time.sleep` only moves a fake clock that `time.time` and `time.monotonic` read, so waiting costs
 no real time.
 """
@@ -71,6 +72,9 @@ class FakeGitHub:
                          | {s["context"] for s in self.statuses})
             inner = {"strict": True, "contexts": req, "checks": [{"context": c, "app_id": None} for c in req]}
             return json.dumps({"name": "main", "protection": {"enabled": True, "required_status_checks": inner}})
+        if "/compare/main..." in joined:
+            # The branch holds main's newest commit, so the merge gate has nothing to bring up to date (#596).
+            return json.dumps({"status": "ahead", "ahead_by": 1, "behind_by": 0, "total_commits": 1})
         if "check-runs" in joined:
             self.reads += 1
             if self.reads > 500:

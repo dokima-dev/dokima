@@ -9,7 +9,7 @@ Main's branch rule is read the way the drift audit reads it (dokima/audit.py): `
 repos/o/r/branches/main/protection` (or its `/required_status_checks`), which the app may NOT read (admin only; it reads `repos/o/r/branches/main` instead) with its
 administration permission. It requires "all tests" and "Acceptance criteria", as Dokima's own rule does
 (dokima/manifest.py). Rulesets (`repos/o/r/rules/branches/main`) answer an empty list, as on a repo protected the
-classic way. Time is faked: `time.sleep` only moves a fake clock that `time.time` and `time.monotonic` read, so a
+classic way. The branch holds main's newest commit (`repos/o/r/compare/main...HEAD` answers `behind_by` 0). Time is faked: `time.sleep` only moves a fake clock that `time.time` and `time.monotonic` read, so a
 wait costs no real time.
 """
 import json
@@ -78,6 +78,9 @@ class FakeGitHub:
             return json.dumps({"name": "main", "protection": {"enabled": True, "required_status_checks": inner}})
         if path == f"repos/{REPO}/rules/branches/main":
             return "[]"
+        if path.startswith(f"repos/{REPO}/compare/main..."):
+            # The branch holds main's newest commit, so the merge gate has nothing to bring up to date (#596).
+            return json.dumps({"status": "ahead", "ahead_by": 1, "behind_by": 0, "total_commits": 1})
         if path == f"repos/{REPO}/actions/variables/DOKIMA_AUTO_MERGE":
             # The auto-merge setting is unset here, as GitHub says for a variable never set (#557).
             raise subprocess.CalledProcessError(1, ["gh", *a], output="", stderr="HTTP 404: Not Found")

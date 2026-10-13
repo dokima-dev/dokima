@@ -17,7 +17,8 @@ auto-merge waiting on an approval ("accepts": "approval"). This file teaches tha
   - a branch behind main: `gh api repos/o/r/compare/main...HEAD` (HEAD the head commit or the branch) answers
     `behind_by` 1 and `status` "diverged", the pull request's `mergeStateStatus` is BEHIND and its REST
     `mergeable_state` is "behind"; a branch that contains main's newest commit answers `behind_by` 0, "ahead",
-    BLOCKED and "blocked";
+    BLOCKED and "blocked"; GitHub's Update branch (`gh pr update-branch` or `gh api -X PUT
+    repos/o/r/pulls/N/update-branch`) is refused as on a clash with main, so the branch stays behind (#596);
   - approving reviews, as GitHub answers them: the app may not approve the pull request it opened ("Can not approve
     your own pull request"), and no other key may either. Every one asked is recorded, so a test sees it was tried.
 """
@@ -35,6 +36,7 @@ SETTING = "DOKIMA_AUTO_MERGE"
 WAITS = f"Autopilot: PR #{PR} waits for your approval before it merges"
 MERGED = f"Autopilot: merged PR #{PR}"
 RULE = "At least 1 approving review is required by reviewers with write access"
+UPDATE_REFUSED = "HTTP 422: merge conflict between base and head (https://api.github.com/repos/o/r/pulls/60/update-branch)"
 
 APPROVAL_GH = r'''
 SETTING = json.loads(SETTING_JSON)
@@ -118,6 +120,12 @@ def rest_pr(n):
     o = _acc_rest_pr(n)
     o["mergeable_state"] = "behind" if PRS[n].get("behind") else "blocked" if PRS[n].get("accepts") else "clean"
     return o
+_m_upd = next((re.fullmatch(r"/?repos/o/r/pulls/(\d+)/update-branch", x.split("?")[0]) for x in a[1:] if "update-branch" in x),
+              None) if a[:1] == ["api"] else None
+if (_m_upd and _m_upd.group(1) in PRS) or a[:2] == ["pr", "update-branch"]:
+    # GitHub's Update branch, refused here as on a clash with main, so the branch stays behind (#596).
+    sys.stderr.write(UPDATE_REFUSED + "\n")
+    sys.exit(1)
 _m_cmp = (re.fullmatch(r"/?repos/o/r/compare/(?:refs/heads/)?main\.\.\.?(.+)", next((x for x in a[1:] if "/compare/" in x), "").split("?")[0])
           if a[:1] == ["api"] else None)
 if _m_cmp:
@@ -136,7 +144,8 @@ def fake_gh(setting, bypass):
     """test_automerge_confirmed.py's fake GitHub, taught the setting (`setting`), the app's bypass (`bypass`), reviews
     and branches behind main."""
     fake = tc.fake_gh()
-    head = f"SETTING_JSON = {json.dumps(setting)!r}\nBYPASS_JSON = {json.dumps(bypass)!r}\nRULE_TEXT = {RULE!r}\n"
+    head = (f"SETTING_JSON = {json.dumps(setting)!r}\nBYPASS_JSON = {json.dumps(bypass)!r}\nRULE_TEXT = {RULE!r}\n"
+            f"UPDATE_REFUSED = {UPDATE_REFUSED!r}\n")
     taught = fake.replace(tc.ACCEPTS_GH, head + APPROVAL_GH + tc.ACCEPTS_GH + BEHIND_GH, 1)
     assert taught != fake and APPROVAL_GH in taught and BEHIND_GH in taught, \
         "test setup: could not teach the fake GitHub the auto-merge setting"
@@ -310,7 +319,7 @@ def test_with_the_setting_on_dokima_merges_a_passed_green_up_to_date_pull_reques
     `Autopilot: merged PR #60`. GitHub refuses the bot's approval of its own pull request, so the merge must come from
     the bypass. The fake lets the bypass merge anything, so each case below proves Dokima checks it itself. #60 must
     stay open, with no merged line, when: the code review blocks; GitHub refuses the bypass (a comment mentioning the
-    owner gives GitHub's reason); a check on its head is red (a comment mentioning the owner names the red check);
+    owner gives GitHub's reason); a check on its head is red (it goes back to the worker, #596);
     its branch misses main's newest commit (a comment mentioning the owner says so in words, not in a link, and
     the red-check case's comments do not); it changes a workflow file
     (a comment on #60 mentioning the owner names .github/workflows)."""
@@ -328,7 +337,6 @@ def test_with_the_setting_on_dokima_merges_a_passed_green_up_to_date_pull_reques
     red = runs("on-red")
     started(red, "557.2", "on, red check")
     not_merged(red, "557.2", "on, red check", f"the check {ta.RED_NAME} failed on its head")
-    owner_told(red, "557.2", "on, red check", ta.RED_NAME)
     behind = runs("on-behind")
     started(behind, "557.2", "on, behind main")
     not_merged(behind, "557.2", "on, behind main", "its branch does not contain main's newest commit")
