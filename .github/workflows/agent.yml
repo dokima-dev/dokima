@@ -141,6 +141,7 @@ jobs:
         run: |
           if git ls-remote --exit-code --heads origin "try/issue-$N" >/dev/null; then
             git fetch -q origin "try/issue-$N" && git checkout -q -B "try/issue-$N" FETCH_HEAD
+            echo "BRANCH_TIP=$(git rev-parse HEAD)" >> "$GITHUB_ENV"
             # A worker's branch that clashes with main still starts: the merge is committed with its conflict markers,
             # the clashed files are listed for the fence, and the worker resolves them. Main's changes are in BASE.
             if [ "$ROLE" = worker ] && ! git -c user.name="dokima-runtime[bot]" -c user.email="337511017+dokima-runtime[bot]@users.noreply.github.com" merge -q --no-edit origin/main; then
@@ -149,8 +150,34 @@ jobs:
                 echo "Merging main into try/issue-$N failed with no clashed file to resolve." > /tmp/why.txt
                 echo "::error title=Merge failed::$(cat /tmp/why.txt)"; exit 1
               fi
+              # A test the planner changed after taking main's version of it keeps the planner's change.
+              MB=$(git merge-base HEAD origin/main)
+              for f in $(grep '^tests/' /tmp/clashed.txt || true); do
+                MAINS=$(git rev-parse -q --verify "origin/main:$f" || true)
+                if [ -n "$MAINS" ] && git log --format="%H:$f" "$MB..HEAD" -- "$f" | git cat-file --batch-check='%(objectname)' | grep -qxF "$MAINS"; then
+                  git checkout -q --ours -- "$f" && git add -- "$f"
+                fi
+              done
+              git diff --name-only --diff-filter=U > /tmp/clashed.txt
               git add -A && git -c user.name="dokima-runtime[bot]" -c user.email="337511017+dokima-runtime[bot]@users.noreply.github.com" commit -q --no-edit
-              echo "::notice title=Clash with main::the worker resolves $(paste -sd, /tmp/clashed.txt)"
+              [ ! -s /tmp/clashed.txt ] || echo "::notice title=Clash with main::the worker resolves $(paste -sd, /tmp/clashed.txt)"
+            fi
+            # A planner starts with main merged in, so it sees and can change the tests main added (#475). A branch
+            # that clashes with main stays unmerged for the worker; it takes only main's tests the branch never
+            # touched, and its plan check's base holds those too, so they never count as the plan's own tests.
+            if [ "$ROLE" = planner ] && ! git -c user.name="dokima-runtime[bot]" -c user.email="337511017+dokima-runtime[bot]@users.noreply.github.com" merge -q --no-edit origin/main; then
+              git reset -q --merge
+              MB=$(git merge-base HEAD origin/main)
+              git diff --name-only "$MB" origin/main -- tests | grep -vxF -f <(git diff --name-only "$MB" HEAD; echo) > /tmp/mains-tests.txt || true
+              : > /tmp/mains-index.txt
+              while read -r f; do
+                if git cat-file -e "origin/main:$f" 2>/dev/null; then git checkout -q origin/main -- "$f"; git ls-tree origin/main -- "$f" >> /tmp/mains-index.txt
+                else git rm -q -- "$f"; printf '0 0000000000000000000000000000000000000000\t%s\n' "$f" >> /tmp/mains-index.txt; fi
+              done < /tmp/mains-tests.txt
+              git diff --cached --quiet || git -c user.name="dokima-runtime[bot]" -c user.email="337511017+dokima-runtime[bot]@users.noreply.github.com" commit -qm "Main's tests for the planner of #$N"
+              BASE_TREE=$(export GIT_INDEX_FILE=/tmp/base.index; git read-tree "$MB" && git update-index --index-info < /tmp/mains-index.txt && git write-tree)
+              MAINS_BASE=$(git -c user.name="dokima-runtime[bot]" -c user.email="337511017+dokima-runtime[bot]@users.noreply.github.com" commit-tree "$BASE_TREE" -p "$MB" -m "Where #$N split off main, with main's tests")
+              echo "::notice title=Clash with main::the planner starts with main's tests; the worker merges main"
             fi
           elif [ "$ROLE" = planner ] || [ "$STAGE" = plan ]; then
             # A plan review needs no branch: a split never makes one, so it reviews from main.
@@ -162,6 +189,8 @@ jobs:
           echo "BASE=$(git rev-parse HEAD)" >> "$GITHUB_ENV"
           # A plan's tests are everything the issue's branch added since it split off main, over every planning round.
           echo "PLANNER_BASE=$(git merge-base HEAD origin/main)" >> "$GITHUB_ENV"
+          # A planner on a branch that clashes with main counts main's tests it took as already there.
+          [ -z "${MAINS_BASE:-}" ] || echo "PLANNER_BASE=$MAINS_BASE" >> "$GITHUB_ENV"
           # What this run starts from: the planner may change only tests from here on.
           echo "PLANNER_RUN_BASE=$(git rev-parse HEAD)" >> "$GITHUB_ENV"
           LOG="logs/$N/${{ github.run_id }}-$ROLE${STAGE:+-$STAGE}.md"
@@ -321,9 +350,10 @@ jobs:
           git config user.name "${SLUG}[bot]"
           git config user.email "${BOT_ID}+${SLUG}[bot]@users.noreply.github.com"
           if [ "$ROLE" = planner ]; then git add tests; else git add -A; fi
-          if git diff --cached --quiet; then echo "Nothing to push."
+          # A planner that merged main in pushes the merge even with no test changed, so the branch holds main.
+          if git diff --cached --quiet && { [ "$ROLE" != planner ] || [ "$(git rev-parse HEAD)" = "${BRANCH_TIP:-$(git rev-parse HEAD)}" ]; }; then echo "Nothing to push."
           else
-            git commit -qm "$ROLE for #$N (run ${{ github.run_id }})" --trailer "Co-authored-by: Reza Soleymanifar <34189616+RezaSoleymanifar@users.noreply.github.com>"
+            git diff --cached --quiet || git commit -qm "$ROLE for #$N (run ${{ github.run_id }})" --trailer "Co-authored-by: Reza Soleymanifar <34189616+RezaSoleymanifar@users.noreply.github.com>"
             # The branch may have moved during the run (main merged in): catch up once and push again. Changes that
             # still can't be saved fail the run here, before its record is written, so nothing reports them as done.
             R="https://x-access-token:${GH_TOKEN}@github.com/${GITHUB_REPOSITORY}.git"
