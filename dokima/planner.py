@@ -120,7 +120,7 @@ def check_source(where, source, issue):
                   "or a comment on either")
 
 
-PER_STORY = 3
+PER_STORY = 5
 
 
 def count(s):
@@ -129,25 +129,22 @@ def count(s):
 
 
 def check_size(stories, nested=False):
-    """Garbled unless the stories hold their criteria at 1 to 3 each, in exactly as many stories as the count needs.
+    """Garbled unless every story holds 1 to 5 criteria, in at least as many stories as the count needs.
 
-    The size rule (#416): stories = criteria / 3, rounded up. 1 to 3 criteria is one story; 4 to 6 two; and so on, up to
-    five stories. More than 15 criteria is too big for one issue: the owner breaks it up."""
+    The size rule: each story holds 1 to 5 criteria, so an issue needs at least criteria / 5 stories, rounded up. There
+    is no cap on how many stories an issue splits into."""
     sizes = [count(s) for s in stories]
     total, need = sum(sizes), -(-sum(sizes) // PER_STORY)
     if nested and (len(stories) > 1 or total > PER_STORY):
         raise Garbled(f"this issue is already a story of its parent, so it never splits again: hand back one story of at "
                       f"most {PER_STORY} criteria (acceptance criteria and non-functional requirements together), and "
                       "ask the owner, in a question, which of the rest to drop")
-    if need > 5:
-        raise Garbled(f"the issue holds {total} criteria, more than 15, too big for one issue: hand back one story that "
-                      "asks the owner, in a question, to break the issue up")
-    if len(stories) != need:
-        raise Garbled(f"{total} criteria make {need} {'story' if need == 1 else 'stories'} (3 at most each), not "
-                      f"{len(stories)}: " + ("hand back one user_story" if need == 1 else f"split into exactly {need}"))
-    big = [n for n, k in enumerate(sizes, 1) if k > PER_STORY]
+    big = [n for n, k in enumerate(sizes, 1) if not 1 <= k <= PER_STORY]
     if big:
-        raise Garbled(f"story {big[0]} holds {sizes[big[0] - 1]} criteria; each story holds 1 to 3")
+        raise Garbled(f"story {big[0]} holds {sizes[big[0] - 1]} criteria; each story holds 1 to {PER_STORY}")
+    if len(stories) < need:
+        raise Garbled(f"{total} criteria need at least {need} {'story' if need == 1 else 'stories'} "
+                      f"({PER_STORY} at most each), not {len(stories)}")
 
 
 def check_stories(stories, issue=None, said=None):
@@ -242,8 +239,8 @@ def from_kind(p, issue=None, said=None):
         raise Garbled("plan.json needs a summary: one plain sentence saying what the issue is about")
     if kind == "feature":
         stories = p.get("stories")
-        if not isinstance(stories, list) or not 2 <= len(stories) <= 5:
-            raise Garbled("a feature needs 2 to 5 stories")
+        if not isinstance(stories, list) or len(stories) < 2:
+            raise Garbled("a feature needs at least 2 stories")
         check_stories(stories, issue, said)
         check_size(stories, isinstance(issue, tuple))
         return "feature", json.dumps(p, indent=2)
