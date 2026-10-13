@@ -262,6 +262,60 @@ def open_issues(repo):
             if "pull_request" not in i]
 
 
+BOT_LOGIN = "dokima-runtime[bot]"  # Dokima's bot, which files issues from raises and split stories
+
+
+def open_issue_summary(text):
+    """An issue's summary: its plan summary, story, or its ask's first sentence.
+
+    An empty body gives none."""
+    text = text or ""
+    top = text.split(issue_body.MARKER, 1)[0] if issue_body.MARKER in text else ""
+    m = re.search(r"<!-- dokima-card -->\n(.*?)<!-- /dokima-card -->", top, re.S)
+    if m:
+        first = next((l.strip() for l in m.group(1).splitlines() if l.strip() and not l.strip().startswith("<!--")), "")
+        if first and not first.startswith(("**", "<")):
+            return first
+    owner = issue_body.ask(text)
+    if issue_body.STORY.match(owner):
+        story = re.search(r"^\*\*User story:\*\* (.*)$", owner, re.M)
+        if story:
+            return story.group(1).strip()
+    return first_sentence(owner) if owner.strip() else ""
+
+
+def reviewer_open_issues(repo):
+    """Every open issue for the reviewer: number, title, summary, link and whether Dokima filed it.
+
+    GitHub failing to list them fails the pack, never an empty list."""
+    items = [i for p in pages(gh("api", f"repos/{repo}/issues?state=open&per_page=100", "--paginate")) for i in p]
+    server = os.environ.get("GITHUB_SERVER_URL", "https://github.com")
+    return [{"number": i["number"], "title": i["title"], "summary": open_issue_summary(i.get("body")),
+             "link": i.get("html_url") or f"{server}/{repo}/issues/{i['number']}",
+             "filed_by_dokima": (i.get("user") or {}).get("login") == BOT_LOGIN}
+            for i in items if "pull_request" not in i]
+
+
+def problems_searched(h, pack_dir):
+    """Each searched issue a review names that its pack does not list as open."""
+    named = [r for r in h.get("raises", []) if isinstance(r, dict) and r.get("kind") == "issue"
+             and raises.SEARCHED in r] if isinstance(h.get("raises"), list) else []
+    if not named:
+        return []
+    path = os.path.join(pack_dir, "open_issues.json")
+    if not os.path.exists(path):
+        return [f"open_issues.json is missing from the pack, so the {raises.SEARCHED} issues cannot be checked"]
+    known = {i.get("number") for i in json.load(open(path)) if isinstance(i, dict)}
+    bad = []
+    for r in named:
+        if not raises.is_numbers(r[raises.SEARCHED]):
+            bad.append(f"{raises.SEARCHED} must be a list of issue numbers, not {r[raises.SEARCHED]!r}")
+            continue
+        bad += [f"{raises.SEARCHED} names #{n}, which is not an open issue in the pack" for n in r[raises.SEARCHED]
+                if n not in known]
+    return bad
+
+
 def problems_links(h, pack_dir):
     """Everything wrong with a plan's links: three lists of open issue numbers from the pack, never the issue itself,
     and no issue in two lists."""
@@ -356,6 +410,8 @@ def problems_round(role, h, pack_dir):
                 bad += problems_for_owner(a, number, parent)
     if role == "planner":
         bad += problems_links(h, pack_dir)
+    if role == "reviewer":
+        bad += problems_searched(h, pack_dir)
     return bad
 
 
@@ -1221,14 +1277,15 @@ def owner_words(repo, number, d, items, owners):
 def pack(repo, number, role, stage, dest):
     """Build the starting pack from GitHub's records: the issue and its PRs' conversation, every agent record so far,
     the open raises this role must answer (open_blockers.json), the newest passed plan, the issue's parent on GitHub (parent.json, naming none when it has none or GitHub cannot
-    say) and, for the planner, every open issue of the repo. The pull request review also gets the worker's session log from its run."""
+    say) and, for the planner and the reviewer, every open issue of the repo. The pull request review also gets the worker's session log from its run."""
     d, items = conversation(repo, number)
     recs = records(items)
-    listed = open_issues(repo) if role == "planner" else None
+    listed = open_issues(repo) if role == "planner" else reviewer_open_issues(repo) if role == "reviewer" else None
     os.makedirs(os.path.join(dest, "in"), exist_ok=True)
     json.dump({"number": parent_of(repo, number)}, open(os.path.join(dest, "parent.json"), "w"))
     if listed is not None:
         json.dump(listed, open(os.path.join(dest, "open_issues.json"), "w"), indent=1)
+    if role == "planner":
         owners = [o for o in os.environ.get("OWNERS", "").split(",") if o]
         json.dump(owner_words(repo, number, d, items, owners), open(os.path.join(dest, "owner_words.json"), "w"), indent=1)
     # The open raises this agent must answer; the file keeps the name the workflows give it.
