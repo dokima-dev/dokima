@@ -6,7 +6,7 @@ autopilot's merge (`dokima.agent.automerge`) against a fake GitHub kept in memor
 #57 on main, its head commit, the check runs and commit statuses on that head, and merging.
 
 Main's branch rule is read the way the drift audit reads it (dokima/audit.py): `gh api
-repos/o/r/branches/main/protection` (or its `/required_status_checks`), which the app may read with its
+repos/o/r/branches/main/protection` (or its `/required_status_checks`), which the app may NOT read (admin only; it reads `repos/o/r/branches/main` instead) with its
 administration permission. It requires "all tests" and "Acceptance criteria", as Dokima's own rule does
 (dokima/manifest.py). Rulesets (`repos/o/r/rules/branches/main`) answer an empty list, as on a repo protected the
 classic way. Time is faked: `time.sleep` only moves a fake clock that `time.time` and `time.monotonic` read, so a
@@ -68,11 +68,14 @@ class FakeGitHub:
             return json.dumps({"number": PR, "head": {"sha": HEAD, "ref": f"try/issue-{ISSUE}"}, "base": {"ref": "main"},
                                "state": "open", "merged": False})
         if path in (f"repos/{REPO}/branches/main/protection", f"repos/{REPO}/branches/main/protection/required_status_checks"):
+            # Admin-only: GitHub refuses Dokima's app here (#576), so the rule is read from the branch instead.
+            raise subprocess.CalledProcessError(1, ["gh", *a], output="", stderr="Resource not accessible by integration (HTTP 403)")
+        if path == f"repos/{REPO}/branches/main":
             if self.rule_fails:
                 raise subprocess.CalledProcessError(1, ["gh", *a], output="", stderr=BAD_GATEWAY)
             inner = {"strict": True, "contexts": self.required,
                      "checks": [{"context": c, "app_id": None} for c in self.required]}
-            return json.dumps(inner if path.endswith("/required_status_checks") else {"required_status_checks": inner})
+            return json.dumps({"name": "main", "protection": {"enabled": True, "required_status_checks": inner}})
         if path == f"repos/{REPO}/rules/branches/main":
             return "[]"
         if path == f"repos/{REPO}/actions/variables/DOKIMA_AUTO_MERGE":
