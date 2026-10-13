@@ -6,6 +6,7 @@ sys.path.insert(0, os.path.join(os.path.dirname(__file__), ".."))
 import pytest  # noqa: E402
 
 from dokima import agent, board  # noqa: E402
+from dokima import agent_github  # noqa: E402
 
 WORKFLOW = os.path.join(os.path.dirname(__file__), "..", ".github", "workflows", "board.yml")
 BOT, YOU = {"type": "Bot"}, {"type": "User"}
@@ -21,7 +22,7 @@ def pr(action, number=7, body="Closes #5", merged=False):
 def no_history(monkeypatch):
     """Every issue here is open with no record yet, so the board reads no network."""
     monkeypatch.setattr(board.Board, "state", lambda self, kind, n: "open")
-    monkeypatch.setattr(agent, "gh", lambda *a: json.dumps({"number": int(a[2]), "title": "", "body": "", "comments": []})
+    monkeypatch.setattr(agent_github, "gh", lambda *a: json.dumps({"number": int(a[2]), "title": "", "body": "", "comments": []})
                         if a[:2] == ("issue", "view") else "[]")
 
 
