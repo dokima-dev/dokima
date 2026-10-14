@@ -1,0 +1,122 @@
+{
+ "role": "planner",
+ "stage": null,
+ "run_id": "38629962249",
+ "commit_before": "0e584917b5d4977ca0c577986dc8b790340d2cbe",
+ "started_by": "dokima-runtime[bot]",
+ "models": [
+  "claude-opus-5-5"
+ ],
+ "report": {
+  "duration_ms": 223304,
+  "turns": 27,
+  "cost_usd": 1.2216595999999997,
+  "tokens_in": 1503693,
+  "tokens_out": 18930
+ },
+ "log": "https://github.com/dokima-dev/dokima/blob/logs/logs/670/38629962249-planner.md",
+ "run": "https://github.com/dokima-dev/dokima/actions/runs/38629962249",
+ "handback": {
+  "kind": "user_story",
+  "title": "Card shows criteria with no test as not verified",
+  "summary": "Red first stays, untestable asks become questions, and the card marks criteria with no test as not verified.",
+  "user_story": "The owner sees at a glance which criteria no automated test proves.",
+  "acceptance_criteria": [
+   {
+    "text": "The plan check rejects a new test that already passes before work starts.",
+    "words": "Red first stays: every criterion's test fails on main before work starts.",
+    "source": "https://github.com/dokima-dev/dokima/issues/661",
+    "files": [
+     "dokima/planner.py"
+    ],
+    "edge_cases": [
+     {
+      "case": "A new test that is skipped today is rejected too.",
+      "test": "tests/test_new_test_check.py::test_a_new_test_that_passes_or_skips_today_is_rejected_saying_so"
+     }
+    ]
+   },
+   {
+    "text": "The planner's instructions say an ask that cannot be tested becomes a question for the owner.",
+    "words": "An ask that can't be checked becomes a question to me",
+    "source": "https://github.com/dokima-dev/dokima/issues/661",
+    "files": [
+     "dokima/roles/planner.md"
+    ],
+    "no_edge_cases": "It is one line of fixed instructions, with no input."
+   },
+   {
+    "text": "A criterion with no automated test reads not verified on the card.",
+    "words": "or shows on the card as not verified.",
+    "source": "https://github.com/dokima-dev/dokima/issues/661",
+    "files": [
+     "dokima/card.py"
+    ],
+    "edge_cases": [
+     {
+      "case": "A criterion filed with an empty list of tests.",
+      "test": "tests/test_card_not_verified.py::test_a_criterion_filed_with_an_empty_test_list_shows_as_not_verified"
+     },
+     {
+      "case": "A non-functional requirement with no test, inside its fold.",
+      "test": "tests/test_card_not_verified.py::test_a_non_functional_requirement_with_no_test_shows_as_not_verified"
+     }
+    ]
+   }
+  ],
+  "non_functional": [],
+  "scope": [
+   "dokima/card.py"
+  ],
+  "tests": {
+   "670.1": [
+    "tests/test_new_test_check.py::test_a_new_test_that_passes_or_skips_today_is_rejected_saying_so"
+   ],
+   "670.2": [
+    "tests/test_plan_shape.py::test_prompt_teaches_the_terms_voice_and_every_example"
+   ],
+   "670.3": [
+    "tests/test_card_not_verified.py::test_a_criterion_with_no_test_shows_as_not_verified",
+    "tests/test_card_not_verified.py::test_a_criterion_filed_with_an_empty_test_list_shows_as_not_verified",
+    "tests/test_card_not_verified.py::test_a_non_functional_requirement_with_no_test_shows_as_not_verified"
+   ]
+  },
+  "test_changes": {
+   "tests/test_plan_shape.py::test_prompt_teaches_the_terms_voice_and_every_example": "Also pins that an untestable ask becomes a question, which already holds."
+  },
+  "links": {
+   "blocked_by": [],
+   "blocks": [],
+   "relates_to": [
+    661,
+    546
+   ]
+  },
+  "raises": [
+   {
+    "kind": "question",
+    "to": "owner",
+    "label": "Doubt: partly done",
+    "text": "Red first and the question rule already hold. Should the plan only pin them and change the card? Assumed yes.",
+    "evidence": "`dokima/planner.py` `passing_today()` rejects a passing new test; `dokima/roles/planner.md` says 'Such an ask becomes a question, never dropped.'",
+    "raised_by": "planner",
+    "id": "P1"
+   },
+   {
+    "kind": "question",
+    "to": "owner",
+    "label": "Never reached today",
+    "text": "The plan check rejects a criterion with no test, so none reaches the card. Allow one? The plan assumes not.",
+    "evidence": "`dokima/planner.py` `problems()` adds 'criterion N.k has no test'.",
+    "raised_by": "planner",
+    "id": "P2"
+   }
+  ],
+  "answers": []
+ },
+ "check": {
+  "passed": true,
+  "problems": []
+ },
+ "url": "https://github.com/dokima-dev/dokima/issues/670#issuecomment-6177384292"
+}
