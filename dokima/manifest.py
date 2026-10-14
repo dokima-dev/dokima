@@ -47,7 +47,7 @@ VIEWS = {
 CHECKS = ["all tests", "Acceptance criteria"]
 
 BRANCH_RULES = {
-    "main": {"required_checks": ["all tests", "Acceptance criteria"]},
+    "main": {"required_checks": ["all tests", "Acceptance criteria"], "up_to_date": True},
 }
 
 PERMISSIONS = {
