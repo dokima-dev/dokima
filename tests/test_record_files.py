@@ -28,6 +28,11 @@ import sys
 sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
 sys.path.insert(0, os.path.join(os.path.dirname(os.path.abspath(__file__)), ".."))
 from dokima import agent  # noqa: E402
+try:  # main keeps `gh` in its own file (#640); this branch merges main when the worker starts
+    from dokima import agent_github  # noqa: E402
+except ImportError:  # before that merge, `gh` is still in agent.py; test_start's import below needs the name too
+    import dokima
+    agent_github = dokima.agent_github = sys.modules["dokima.agent_github"] = agent
 from test_start import load_yaml  # noqa: E402
 
 ROOT = os.path.abspath(os.path.join(os.path.dirname(__file__), ".."))
@@ -120,7 +125,7 @@ def fake_github(monkeypatch, comments=()):
         if args[0] == "api":
             return "[]"
         raise AssertionError(f"unexpected gh call {args}")
-    monkeypatch.setattr(agent, "gh", gh)
+    monkeypatch.setattr(agent_github, "gh", gh)
     return calls
 
 
@@ -250,6 +255,28 @@ def test_a_starting_pack_holds_every_earlier_record_from_record_files(record_pro
     assert packed(tmp_path / "pack-empty") == [], "610.2: a pack for an issue with no record file holds records"
     assert calls == calls_without, \
         f"610.2: reading the record files made GitHub calls: {[c for c in calls if c not in calls_without]}"
+
+
+def test_a_pack_that_cannot_read_the_record_files_fails_saying_why(record_property, monkeypatch, tmp_path):
+    """A pack that cannot read the record files stops, saying why, never starting without history.
+
+    Points the logs remote at a place that is not a git repo, so the record files cannot be fetched, and builds a
+    worker's pack. Checks the pack fails with its own message naming the records, not a bare git or test error, so
+    a run never treats unreadable records as none. Its good case is the test above: an empty logs remote packs fine.
+
+    Proves 610.2."""
+    record_property("proves", "610.2")
+    monkeypatch.setenv("DOKIMA_LOGS_REMOTE", str(tmp_path / "missing.git"))
+    fake_github(monkeypatch)
+    dest = tmp_path / "pack"
+    try:
+        agent.pack(REPO, N, "worker", "", str(dest))
+    except (subprocess.CalledProcessError, AssertionError) as e:
+        raise AssertionError(f"610.2: an unreadable logs remote failed the pack without saying why: {e!r}") from e
+    except Exception as e:
+        assert "record" in str(e).lower(), f"610.2: the pack failed without naming the records: {e}"
+        return
+    raise AssertionError(f"610.2: the pack treated unreadable record files as no records, holding {len(packed(dest))}")
 
 
 # 610.3 ---------------------------------------------------------------------------------------------------------------

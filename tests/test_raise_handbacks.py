@@ -48,6 +48,7 @@ import pytest
 sys.path.insert(0, os.path.join(os.path.dirname(__file__), ".."))
 from dokima import agent, raises  # noqa: E402
 from dokima import agent_github  # noqa: E402
+import record_seed  # noqa: E402
 from tests.test_plan_check import FEATURE, STORY as PLAN_STORY, check  # noqa: E402,F401
 
 ROOT = os.path.abspath(os.path.join(os.path.dirname(__file__), ".."))
@@ -160,6 +161,7 @@ def fake_github(monkeypatch, recs, body="B"):
             return "[]"
         raise AssertionError(f"unexpected gh call {args}")
     monkeypatch.setattr(agent_github, "gh", gh)
+    record_seed.use(monkeypatch, 9, recs)  # since #610 records come from record files, not comments
 
 
 def listed(monkeypatch, tmp_path, recs, role, stage=""):
