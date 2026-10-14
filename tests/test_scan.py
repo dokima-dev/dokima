@@ -434,7 +434,7 @@ def test_the_card_the_scan_expects_is_drawn_from_the_state_now(world, monkeypatc
     #312 has no record and its card is the old one: the card the scan expects says Backlog and shows no plan.
     Once a plan is recorded on #312, the card it expects says the plan's summary and no longer says there is
     no plan. Merged PR #260 of #246, with every check passed: the card it expects for the PR says Merged, with All tests
-    passed, and is the same card it expects on #246 but for the PR's link back to #246 (#452). For both issues it is exactly the card Dokima's card code writes
+    passed (shown as Test suite, as on the approved card of #557), and is the same card it expects on #246 but for the PR's link back to #246 (#452). For both issues it is exactly the card Dokima's card code writes
     when it redraws them. A scan that trusted the card already on the issue, or drew one fixed card, would fail here."""
     record_property("proves", "333.1")
     need_scan("333.1")
@@ -451,7 +451,7 @@ def test_the_card_the_scan_expects_is_drawn_from_the_state_now(world, monkeypatc
     w.pr(260, 246, state="MERGED", card=OLD_CARD)
     pr_card = true_card(w, "pr", 260)
     assert "**Merged**" in pr_card, f"333.1: for merged PR #260 the scan expects a card that does not say Merged: {pr_card}"
-    assert re.search(r'alt="passed"></a> All tests', pr_card), \
+    assert re.search(r'alt="passed"></a> Test suite', pr_card), \
         f"333.1: for PR #260, whose every check passed, the scan expects a card without All tests passed: {pr_card}"
     # Since #452 the PR's card links back to its issue in its top row, and the issue's own card does not.
     url = re.escape("https://github.com/o/r/issues/246")
@@ -655,7 +655,8 @@ def test_the_owners_two_pr_cards_pass_only_showing_merged_with_every_check_passe
     Proves 333.2. Closed #246 with merged PR #260 and closed #312 with merged PR #314, every check passed, all four in
     Done with no pill and both issue cards true. First PR #260 still shows its old open card and PR #314 holds no card,
     as on GitHub today: the scan must name both PRs and exit 1. Then both PR bodies get the card Dokima draws now: each
-    says Merged with All tests passed, and the scan says all 4 cards match and exits 0."""
+    says Merged with All tests passed (shown as Test suite, as on the approved card of #557), and the scan says all 4
+    cards match and exits 0."""
     record_property("proves", "333.2")
     need_scan("333.2")
     w = world
@@ -672,7 +673,7 @@ def test_the_owners_two_pr_cards_pass_only_showing_merged_with_every_check_passe
     make_true(w, ("pr", 260), ("pr", 314))
     for p in (260, 314):
         shown = w.prs[p]["body"]
-        assert "**Merged**" in shown and re.search(r'alt="passed"></a> All tests', shown), \
+        assert "**Merged**" in shown and re.search(r'alt="passed"></a> Test suite', shown), \
             f"333.2: PR #{p}'s true card does not show Merged with All tests passed: {shown}"
     code, lines = run(w, capsys)
     assert "All 4 cards on the board match their state." in lines and code == 0, \

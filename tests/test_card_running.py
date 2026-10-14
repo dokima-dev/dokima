@@ -136,13 +136,13 @@ def test_all_tests_shows_running_once_the_full_suite_starts(tmp_path, record_pro
     set_all_tests(hub, 260, "in_progress")
     hub.run(*suite(246, 260, "in_progress", "in_progress"), "372.2")
     for where, text in (("issue #246", hub.issue_body(246)), ("PR #260", hub.pr_body(260))):
-        got = done_of(text).get("All tests")
+        got = done_of(text).get("Test suite")
         assert got == "running", (f"372.2: the full suite started on PR #260, but {where}'s card shows All tests as "
                                   f"{got!r}, not running; card.yml redraws only when the suite ends:\n{hub.log[-2000:]}")
     set_all_tests(hub, 260, "completed")
     must_redraw(hub, suite(246, 260, "completed", "completed"), "372.2")
     for where, text in (("issue #246", hub.issue_body(246)), ("PR #260", hub.pr_body(260))):
-        assert done_of(text).get("All tests") == "passed", \
+        assert done_of(text).get("Test suite") == "passed", \
             f"372.2: once the full suite passed, {where}'s card should show All tests passed: {done_of(text)}"
 
 

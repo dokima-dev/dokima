@@ -461,12 +461,14 @@ def stage_of(text):
 
 
 def done_of(text):
-    """The Definition of Done a card shows: {All tests, Code review, Owner approval: passed/failed/...}."""
+    """The Definition of Done a card shows: {Test suite, Code review, Owner approval: passed/failed/...}.
+
+    Test suite is the all tests check, named so on the approved card of #557 (#628)."""
     line = next((l for l in (card_of(text) or "").splitlines() if l.startswith("**Definition of Done:**")), "")
     found = {}
     for part in line.split(" · "):
         alt = re.search(r'alt="([^"]+)"', part)
-        for name in ("All tests", "Code review", "Owner approval"):
+        for name in ("Test suite", "Code review", "Owner approval"):
             if part.rstrip().endswith(name) and alt:
                 found[name] = alt.group(1)
     return found
