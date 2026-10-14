@@ -2,85 +2,169 @@
 
 **Coding agents now out-code us on narrow tasks. The bottleneck is knowing their work is actually done.**
 
-δokima moves your effort from writing code to verifying it: you assign, agents build, and nothing merges until it's proven. That clears the bottleneck, so you can hand off more work and run a fleet of agents with confidence.
+δokima takes grading away from the agent that did the work, and moves your effort from writing code to verifying it.
 
-## A management structure for agents
+**The problem:** agents drift when they check their own work.
+**The answer:** your words become the contract. You own what "done" means; δokima guarantees the output passes that bar before it merges.
 
-Remote engineering teams work because of structure: tickets, plans, reviews, and a rule that nothing ships unchecked. δokima gives agents that same structure. It is the organization around your agents that makes sure they deliver the work they were asked for, proven.
-
-## One history, any agent, any device
-
-Today the story of a codebase is scattered across chat sessions, coding agents and devices, with no single place to see it. δokima writes everything into native Git and GitHub: issues, plans, tests, failed attempts and lessons learned. Whatever agent or device you use next, it builds on the full history, permanently, with zero setup.
-
-## Project management for agents
-
-**δokima is Jira for agent teams.** You define the work, define what "done" means, and assign it. Agents plan, build and test it, and you get it back verified, every time. Run many at once and follow everything on one GitHub project board, all with GitHub's own tools.
-
-## Unattended until it's actually done
-
-Coding agents tend to stop before the work is finished, and leaving them running on your own machine is risky. δokima runs each step on a fresh, isolated machine with no access to your system or keys, and the work isn't done until its checks pass. Every plan, attempt and result is written back to the issue, so the next run picks up exactly where the last one stopped.
-
-δokima is an agent runtime that uses GitHub Actions as its orchestrator. You describe a task in a GitHub issue; isolated AI sessions plan it, build it and review it; and nothing reaches your main branch until it is proven.
-
-No servers to run. No database. Your repo, its issues and its pull requests are the whole system.
-
-> Status: in active development. The first slice is being built now; see [Roadmap](#roadmap). Full documentation: the [δokima wiki](https://github.com/δokima-dev/δokima/wiki).
-
-## You check the verification, not the work
-
-Coding agents like Claude Code are strong, but someone still has to watch every step. δokima moves you from checking the work to checking the verification. You approve the plan, you accept the result, and the runtime guarantees everything in between.
-
-## How it works
-
-```
-issue ──► Planner ──► you approve ──► Worker ──► Reviewer ──► Gate ──► main
-            plan +                      code       read-only     tests
-            tests                                  judgment      pass
-```
-
-1. **You open an issue** in plain words: what you want and what "done" looks like.
-2. **The planner** turns it into a plan and the tests that will prove it, then waits for your go.
-3. **The worker** writes the code to make those tests pass. It cannot change them.
-4. **The reviewer**, a fresh session that never talked to the worker, checks the change against the plan.
-5. **The gate** merges only when the full test suite passes on the latest main.
-
-Each role is its own GitHub Actions job on its own clean machine. Labels on the issue say whose turn it is.
-
-## Production-grade by design
-
-- **Separation of duties.** Planner, worker and reviewer run as separate sessions on separate machines. None can see, steer or vouch for another.
-- **Tamper-proof grading.** The tests are the contract. They are written before the work and locked during it; a change that edits them fails, even if everything passes.
-- **Independent review.** A read-only reviewer blocks gamed tests and damage outside the task's scope.
-- **A merge gate.** Main never breaks. Nothing lands until it is green against the latest main, and merges happen on their own.
-- **Durable execution.** The worker commits after every step. A crash, timeout or cancelled job resumes from the last commit instead of starting over, and stalled tasks restart themselves.
-- **Fast verification.** Large test suites split across many machines at once, so checking never becomes the bottleneck.
-- **Full audit trail.** Every plan, step, review and decision is a commit, comment or log on GitHub. Nothing happens off the record.
-- **Least privilege.** Each role gets only the permissions its job needs. Secrets live in GitHub's encrypted store, never in the repo.
-
-## Plug in any repo
-
-One command connects a repository: it adds a small workflow file, a starter `AGENTS.md` for the repo's own rules, the labels, and the branch protection that makes the gate binding. Your code and data stay in your repo; δokima only holds the pipeline.
-
-The same flow works beyond code. A job application or a research brief is a task too: the reviewer checks facts and fit, and anything that leaves your hands, like sending or submitting, waits for your yes.
-
-## Roadmap
-
-δokima is built through itself: a minimal pipeline is assembled by hand, then every capability below arrives as an issue run through that pipeline.
-
-- [ ] **Slice 1:** issue in, tested pull request out, merged only when green
-- [ ] **Plan:** you approve intent and tests before any work starts
-- [ ] **Review:** independent, read-only reviewer
-- [ ] **Locked tests:** the worker cannot touch what it is graded on
-- [ ] **Gate:** automatic, ordered merges against the latest main
-- [ ] **Resume:** crashes and stalls never lose work
-- [ ] **Fast tests:** suites split across many machines
-- [ ] **Any repo, any task:** one-command onboarding
-
-## Requirements
-
-- A GitHub account. Public repos work on the free plan; enforcing the gate on private repos needs GitHub Pro.
-- A Claude subscription or API key.
+*δ is the first letter of δοκιμασία, Greek for test, trial.*
 
 ---
 
-Built by Reza Soleymanifar.
+## Why δokima
+
+- **Verification is the product.** Every acceptance criterion gets its own test, written before any code. GitHub's verdict on that test is the proof. No model's say-so counts.
+- **A human at the root of every decision.** Not fully autonomous, by design. Plans and merges trace back to an owner's approval. The promise is not zero flaws; it is that you spend your time on verification, not on watching agents.
+- **GitHub-native.** Nothing to host, no new dashboard. Issues, pull requests, comments and Actions are the whole interface. Every agent decision is a linked comment, so the issue is a full audit trail.
+
+## How it works
+
+The building block is **plan → review → work → review**, each step a separate agent on a fresh GitHub Actions runner.
+
+```mermaid
+flowchart LR
+    A[Issue<br/>your words] -->|/plan| P[Planner<br/>criteria + tests + scope]
+    P --> PR[Plan review]
+    PR -->|block| P
+    PR -->|approve| O{You: /work}
+    O --> W[Worker<br/>builds the code]
+    W --> F[Fence<br/>tests locked, scope enforced]
+    F --> CR[Code review]
+    CR -->|block| W
+    CR -->|approve| G[Merge gate<br/>every criterion's check]
+    G -->|fail| W
+    G -->|pass| M[You approve and merge]
+```
+
+1. **You open an issue** in plain words: what you want, rough or detailed.
+2. **The planner** turns it into a short title, a user story, acceptance criteria, a test for every criterion and a scope (the files the work may touch). Large asks are proposed as a split into 2 to 5 sub-issues.
+3. **The plan reviewer**, a separate session, grades the plan: would each test fail if its behavior were missing? A block goes back to the planner on its own; an approval stops for you.
+4. **`/work`** is your approval. The worker builds on a fresh machine and opens a draft pull request.
+5. **The fence** runs after the worker stops. It reverts every edit to a test or test-setup file and every change outside the plan's scope, and lists what it dropped. The worker cannot move its own finish line.
+6. **The code reviewer** grades the result against the approved plan. Each blocker names who fixes it: the worker for code, the planner for a weak test.
+7. **The merge gate** brings the branch up to date with `main`, marks it ready, and waits for every required check on that exact commit: `all tests` plus one `Acceptance criteria` check per criterion. A failure goes back to the worker.
+8. **You approve and merge.** Only a passed gate asks you to.
+
+Agents settle what they can between themselves. The loop stops and mentions you only for questions, approvals, escalations, a hand-back code rejected, or three blocking reviews in a row at one stage. Agents also raise real problems they find outside the issue; once a reviewer confirms one, δokima files it as its own issue (labeled `filed-by-dokima`).
+
+**Code owns the structure; models fill in content.** Routing between stages, the fence, the card, labels and records are plain Python in [`dokima/`](dokima). Models write only plans, code and findings. Role prompts live in [`dokima/roles/`](dokima/roles).
+
+## What you see
+
+### The card
+
+A card at the top of every issue, and the same card on its pull request, says where things stand in plain English. It is drawn by code ([`dokima/card.py`](dokima/card.py)) from the agents' records and GitHub's own check results, always from `main`'s copy, so the work being judged cannot change how it is reported. No model writes it.
+
+| Line | What it shows |
+|---|---|
+| Summary | The plan's short plain title |
+| Status | The stage (Backlog, Plan, Work, Review, Merged), plus **Needs you:** and your to-do when it is your turn |
+| Links | The latest run, the pull request and its files changed |
+| Stories / Blocked by / Blocks | Sub-issues of a split and GitHub's own blocked-by links |
+| Acceptance criteria | Each criterion with GitHub's verdict on its check, linked to the proof |
+| Scope | The files the work may touch |
+| Original issue | Your ask, exactly as written, in a fold |
+| Definition of Done | All tests · Code review · Owner approval, each with its verdict |
+
+Every agent run also posts one record comment: what it did, what it raised, a Stats fold (model, time, turns, tokens, API-equivalent cost, links to the run and its full conversation) and the full JSON record. Each record ends with a **Next** line: what happens next, or what is yours to do.
+
+### Commands
+
+A command is the first word of a code owner's comment on the issue or its pull request, or of a pull request review submitted as a comment or a change request. Everything after the command, and every other comment and line note, reaches the agent. Only owners of `*` in [`.github/CODEOWNERS`](.github/CODEOWNERS) count.
+
+| Command | Where | What it does |
+|---|---|---|
+| `/plan [your words]` | issue or PR | The planner plans, or re-plans with your words |
+| `/review` | issue | The reviewer grades the plan (also: go on with the planner's assumptions) |
+| `/review` | PR | The reviewer grades the work |
+| `/work` | issue or PR | Approves the plan; the worker builds it. On an approved split, files its stories as sub-issues |
+| `/autopilot start` | issue or PR | Puts the issue and every sub-issue under it on autopilot and picks up what was waiting |
+| `/autopilot stop` | issue or PR | Takes that tree off autopilot |
+
+- No command, nothing starts. Bot comments never start anything.
+- An **Approve** review never starts a stage. It only ever means merge.
+- Labels do not start stages. The only label you will see change is `autopilot`, which `/autopilot` sets.
+
+### Autopilot
+
+On an issue on autopilot, an approved plan starts the worker and an approved split files its stories, each with one `Autopilot:` line on the issue where you would have typed `/work`. A blocked issue plans only after its blockers close. A passed merge gate asks GitHub to merge; GitHub's own branch rules decide whether that merges, joins the merge queue or waits for your approval. A pull request that changes a workflow file always stops for you.
+
+### The board (optional)
+
+Set the repo variable `DOKIMA_BOARD` to a GitHub Project (`org/number`) and code keeps it current: columns Backlog, Plan, Work, Review, Done; a **Needs you** or **Autopilot** pill on each card; a Blocker priority from blocked-by links. Without it, everything still works on the issues themselves.
+
+## δokima builds itself
+
+δokima is developed through its own loop. Dogfooding, October 2–14, 2026:
+
+| | |
+|---|---|
+| Merged pull requests authored by the bot | 162 of 197 |
+| Issues taken from plan to merge through the loop | 125 |
+| Agent workflow runs that fail | about 2.5% |
+| Tests in the suite | 1,150 |
+
+## Install
+
+> **Onboarding other repositories is in progress**, tracked in [#272](https://github.com/dokima-dev/dokima/issues/272) (one-link onboarding for any repo). Today δokima runs on its own repository. The list below is what that setup uses, for those who want to try it by hand.
+
+Requirements:
+
+- A GitHub repository with Actions enabled. Runs use your GitHub Actions minutes.
+- A GitHub App installed on the repo, with the permissions in [`dokima/app.json`](dokima/app.json). Agents act as this app, never as a person; it cannot approve.
+- A Claude subscription. Agents run Claude Code on GitHub-hosted runners.
+- Today the test runner is `pytest` on Python 3.12.
+
+Setup:
+
+1. Copy [`.github/workflows/`](.github/workflows) and [`dokima/`](dokima) into the repo.
+2. Create an Actions environment named `keys` holding the secrets `DOKIMA_APP_KEY` (the app's private key) and `CLAUDE_CODE_OAUTH_TOKEN`.
+3. Set the repo variable `DOKIMA_APP_ID`. Optionally set `DOKIMA_BOARD`.
+4. Add `.github/CODEOWNERS` with a `*` line naming who may give commands and approve.
+5. Protect `main`, requiring the checks `all tests` and `Acceptance criteria`.
+6. Open an issue and comment `/plan`.
+
+A daily audit ([`audit.yml`](.github/workflows/audit.yml)) compares the repo's settings with what δokima needs ([`dokima/manifest.py`](dokima/manifest.py)) and reports drift on one pinned **Setup** issue.
+
+## Principles
+
+- **Nothing merges until it is proven.** Every promise in a plan has its own check; GitHub's verdict is the proof.
+- **Separation of duties.** The agent that builds never grades. Planner, worker and reviewer are separate sessions on separate machines and talk only through recorded hand-backs.
+- **Tests are locked.** The planner's tests are fixed before work starts; the fence reverts any worker edit to them.
+- **Fail closed.** Missing proof, a missing reviewer or a broken check blocks, and the issue says why.
+- **The judge runs from `main`.** Checks, cards and agent code always come from the default branch, never from the pull request being judged.
+- **Least privilege.** Agents hold no GitHub key while they work; code checks their output, then posts it.
+- **Your attention is the scarce resource.** The card shows only what you need at a glance; the rest is folded.
+- **Agent-neutral by design.** Roles are prompts and hand-backs, not vendor code. Today the agent is Claude Code.
+
+The full specification is [`AGENTS.md`](AGENTS.md).
+
+## Status and roadmap
+
+Built and running on this repository:
+
+- [x] Plan → review → work → review loop, routed by code
+- [x] `/plan`, `/work`, `/review`, `/autopilot start|stop` commands, code owners only
+- [x] Planner-written tests, one check per acceptance criterion
+- [x] Fence: test files locked, out-of-scope changes reverted
+- [x] Independent plan review and code review
+- [x] Merge gate on the up-to-date head
+- [x] Splits into sub-issues with blocked-by links
+- [x] Agents raise questions to the owner and file issues they find
+- [x] The card, run records and the optional project board
+- [x] Autopilot across an issue tree
+- [x] Daily settings audit
+
+Planned:
+
+- [ ] One-link onboarding for other repositories ([#272](https://github.com/dokima-dev/dokima/issues/272), in progress)
+- [ ] Language-neutral: each repo declares its own setup and test command
+- [ ] Other coding agents beside Claude Code
+- [ ] Resume a crashed or timed-out run from its last commit
+- [ ] `/issue` to file the issues agents raised on command
+- [ ] MCP server
+- [ ] Optional code-quality gates: complexity, import rules, diff coverage, mutation testing
+
+## License
+
+Apache-2.0.
