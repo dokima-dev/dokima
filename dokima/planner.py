@@ -105,6 +105,14 @@ def strings(v):
     return isinstance(v, list) and all(isinstance(x, str) and x.strip() for x in v)
 
 
+def check_files(where, c):
+    """Garbled unless the criterion lists, in `files`, the code files it changes.
+
+    At least one path, each non-empty text. A path need not exist yet; the worker creates it."""
+    if not strings(c.get("files")) or not c["files"]:
+        raise Garbled(f"{where} lists no file: give files as a non-empty list of the code files it changes")
+
+
 def check_source(where, source, issue):
     """Garbled unless the source is this issue's link or one of its comment links; no issue given, nothing to check.
 
@@ -168,6 +176,7 @@ def check_stories(stories, issue=None, said=None):
                     raise Garbled(f"story {n}: acceptance criterion {k} has no {key}")
             check_source(f"story {n}: acceptance criterion {k}", c["source"], issue)
             check_words(f"story {n}: acceptance criterion {k}", c, said)
+            check_files(f"story {n}: acceptance criterion {k}", c)
         nfr = s.get("non_functional", [])
         if not isinstance(nfr, list):
             raise Garbled(f"story {n} needs non_functional as a list (empty for none)")
@@ -178,6 +187,7 @@ def check_stories(stories, issue=None, said=None):
                 if not isinstance(c.get(key), str) or not c[key].strip():
                     raise Garbled(f"story {n}: non-functional requirement {k} needs its text and why as non-empty "
                                   f"text, and its {key} is not")
+            check_files(f"story {n}: non-functional requirement {k}", c)
         if not isinstance(s.get("depends_on"), list):
             raise Garbled(f"story {n} needs depends_on as a list (empty for no dependencies)")
     last = len(stories) - 1
@@ -260,6 +270,7 @@ def from_kind(p, issue=None, said=None):
                               f"its {key} must be non-empty text")
         check_source(f"acceptance criterion {k}", c["source"], issue)
         check_words(f"acceptance criterion {k}", c, said)
+        check_files(f"acceptance criterion {k}", c)
     if not isinstance(nfr, list):
         raise Garbled("a story needs non_functional as a list (empty for none)")
     check_size([p], isinstance(issue, tuple))
@@ -271,6 +282,7 @@ def from_kind(p, issue=None, said=None):
                 raise Garbled(f"non-functional requirement {k} needs its text and why as non-empty text, "
                               f"and its {key} is not")
         check_words(f"non-functional requirement {k}", c, said)
+        check_files(f"non-functional requirement {k}", c)
     if not strings(p.get("scope")) or not p["scope"]:
         raise Garbled("a story needs scope as a non-empty list of files")
     tests = p.get("tests")
@@ -285,6 +297,7 @@ def from_kind(p, issue=None, said=None):
         check_edge_cases(where, c, filed)
     return "plan", {"objective": p["user_story"].strip(),
                     "criteria": [c["text"].strip() for c in ac] + [f"{c['text'].strip()} ({c['why'].strip()})" for c in nfr],
+                    "files": [c["files"] for c in ac + nfr],
                     "scope": p["scope"], "test_changes": tc,
                     "declared": tests, "raw": p}
 
