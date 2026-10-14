@@ -173,7 +173,7 @@ def test_no_text_a_person_reads_says_done_when(record_property):
 
     Proves 291.3. Reads every file in the repo, its path and every line, for done-when, done-whens, done when and done_when in any
     case. Skipped: dokima/plan.py, which still reads an owner's older Done when: lines, copies of past records in
-    tests/samples, and this test. Allowed: the names of the checks Acceptance criteria and list acceptance criteria, which keep
+    tests/samples and in the approved fixtures under tests/fixtures (#628), and this test. Allowed: the names of the checks Acceptance criteria and list acceptance criteria, which keep
     them until #262, and in the tests the Done when: plan lines and their "not in" checks. Each leftover is listed with
     its file and line. The scan's rule is first tried on lines it must flag and lines it must pass, so a scan that flags
     nothing proves nothing."""
@@ -182,7 +182,7 @@ def test_no_text_a_person_reads_says_done_when(record_property):
     skip = {"dokima/plan.py", "tests/test_check_names.py"}
     left = []
     for path in repo_files():
-        if path in skip or path.startswith("tests/samples/"):
+        if path in skip or path.startswith("tests/samples/") or path.startswith("tests/fixtures/"):
             continue
         if OLD_WORD.search(path):
             left.append(f"{path}: the file's name")
