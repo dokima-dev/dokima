@@ -45,6 +45,7 @@ import test_autopilot_close as tac
 import test_start as ts
 from dokima import agent
 from test_start import N, OWNER, PR, Ctx, evaluate, condition
+from rules_files import rules_text
 
 LABEL = "autopilot"
 HEAD = "a1" * 20
@@ -703,7 +704,7 @@ def test_agents_md_says_autopilot_merges_what_the_reviewer_approved(record_prope
     autopilot the pull request merges by itself once the reviewer approved and every check is green: the words
     autopilot, merge, approv(e/al) and green or check must all be in that step."""
     record_property("proves", "212.4")
-    text = open(os.path.join(ts.ROOT, "AGENTS.md")).read()
+    text = rules_text()
     m = re.search(r"^6\. \*\*Merge\.\*\*(.*?)(?=^\S|\Z)", text, re.S | re.M)
     assert m, "212.4: AGENTS.md has no step 6 (Merge) in The flow"
     step = m.group(1).lower()

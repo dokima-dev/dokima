@@ -25,6 +25,7 @@ sys.path.insert(0, os.path.join(os.path.dirname(__file__), ".."))
 from dokima import agent  # noqa: E402
 from dokima import agent_github  # noqa: E402
 import record_seed  # noqa: E402
+from rules_files import rules_files  # noqa: E402
 
 ROOT = os.path.abspath(os.path.join(os.path.dirname(__file__), ".."))
 OWNER = "owner-person"
@@ -439,8 +440,11 @@ class Machine:
         # The repo: Dokima's code from this checkout, owned by owner-person, pushed to a local origin.
         src = f"{t}/src"
         shutil.copytree(os.path.join(ROOT, "dokima"), f"{src}/dokima", ignore=shutil.ignore_patterns("__pycache__"))
-        # AGENTS.md too, as on main: the river checks the owner's words a plan reviewer quotes from it.
-        shutil.copy(os.path.join(ROOT, "AGENTS.md"), f"{src}/AGENTS.md")
+        # AGENTS.md and the topic files it links too, as on main: the river checks the owner's words a plan reviewer
+        # quotes from them.
+        for rule in rules_files(ROOT):
+            os.makedirs(os.path.dirname(f"{src}/{rule}"), exist_ok=True)
+            shutil.copy(os.path.join(ROOT, rule), f"{src}/{rule}")
         os.makedirs(f"{src}/.github")
         open(f"{src}/.github/CODEOWNERS", "w").write(f"* @{OWNER}\n")
         sh(t, "git", "init", "-q", "--bare", "-b", "main", f"{t}/origin.git")
