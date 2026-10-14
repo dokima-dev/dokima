@@ -49,6 +49,13 @@ MOVED = {
     "tests/test_size_rule.py::test_too_big_too_small_or_too_many_is_refused":
         "tests/test_size_rule.py::test_a_story_over_five_or_empty_is_refused",
 }
+# Tests another issue dropped after 61faa9e, with the issue that did it.
+DROPPED = {
+    # #667: no count of criteria or stories splits or refuses a plan, so the count rule tests are gone.
+    "tests/test_size_rule.py::test_the_right_number_of_stories_passes",
+    "tests/test_size_rule.py::test_too_big_too_small_or_too_many_is_refused",
+    "tests/test_size_rule.py::test_a_story_of_a_parent_never_splits_again",
+}
 
 
 def topic_files():
@@ -111,12 +118,13 @@ def test_every_test_from_before_the_first_split_still_runs(record_property):
 
     Checks the rules file is split, then collects every test as pytest would run them and compares with the 1,127
     test cases on main before the first split. Each test there must still be collected, with at least as many cases
-    as before; a test another issue renamed counts when its new name runs. Tests added since do not count against
-    it. Proves 638.3."""
+    as before; a test another issue renamed counts when its new name runs, and one another issue dropped is skipped.
+    Tests added since do not count against it. Proves 638.3."""
     record_property("proves", "638.3")
     require_split("638.3")
     before = Counter(l.strip().split("[")[0] for l in open(BEFORE) if l.strip())
     now = Counter(n.split("[")[0] for n in collected())
-    lost = [f"{t} ({k} before, {now[t]} now)" for t, k in sorted(before.items()) if t not in MOVED and now[t] < k]
-    lost += [f"{t}, renamed {new}, (none now)" for t, new in MOVED.items() if not now[new]]
+    lost = [f"{t} ({k} before, {now[t]} now)" for t, k in sorted(before.items())
+            if t not in MOVED and t not in DROPPED and now[t] < k]
+    lost += [f"{t}, renamed {new}, (none now)" for t, new in MOVED.items() if t not in DROPPED and not now[new]]
     assert not lost, "638.3: these tests no longer run as they did before the first split:\n" + "\n".join(lost)

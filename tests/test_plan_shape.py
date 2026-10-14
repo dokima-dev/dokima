@@ -86,7 +86,8 @@ def test_a_feature_is_shown_as_handed_back(record_property, tmp_path):
     """
     record_property("proves", "138.2")
     story = {"title": "t", "user_story": "u", "acceptance_criteria": [{"text": "a", "source": SRC, "files": ["dokima/jobs.py"]}] * 3, "depends_on": []}
-    assert hand_back(tmp_path, {"kind": "feature", "summary": "s", "feature": "f", "stories": [story, story]})[0] == "feature", "138.2: feature not read"
+    other = dict(story, acceptance_criteria=[{"text": "a", "source": SRC, "files": ["dokima/ids.py"]}] * 3)
+    assert hand_back(tmp_path, {"kind": "feature", "summary": "s", "feature": "f", "stories": [story, other]})[0] == "feature", "138.2: feature not read"
     with pytest.raises(planner.Garbled, match="at least 2"):
         hand_back(tmp_path, {"kind": "feature", "summary": "s", "feature": "f", "stories": [story]})
 

@@ -42,8 +42,8 @@ FEATURE = {"kind": "feature", "title": "Slow calls run as jobs", "summary": "Slo
                                                 {"text": "A fast call returns its result.", "source": ISSUE, "files": ["dokima/jobs.py"]}],
                         "non_functional": [], "depends_on": []},
                        {"title": "Job status", "user_story": "Owners see each job's status.",
-                        "acceptance_criteria": [{"text": "A job's status is shown.", "source": ISSUE, "files": ["dokima/jobs.py"]},
-                                                {"text": "A finished job shows its result.", "source": ISSUE, "files": ["dokima/jobs.py"]}],
+                        "acceptance_criteria": [{"text": "A job's status is shown.", "source": ISSUE, "files": ["dokima/status.py"]},
+                                                {"text": "A finished job shows its result.", "source": ISSUE, "files": ["dokima/status.py"]}],
                         "non_functional": [], "depends_on": [0]}]}
 
 
