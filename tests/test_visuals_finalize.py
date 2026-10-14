@@ -254,10 +254,11 @@ def test_finalize_saves_card_inputs(place, record_property):
 
 
 def test_finalize_saves_comment_inputs(place, record_property):
-    """Every record and autopilot comment of the issue is saved as input.
+    """Every record and autopilot comment of the issue is saved as input, whole.
 
-    Finalizes issue 7 and checks the saved comment inputs hold its two real records, as recorded, and one post for
-    each of its five autopilot comments, by link. Proves 627.1."""
+    Finalizes issue 7 and checks the saved comment inputs hold its two real records, as recorded, and each of its
+    five autopilot comments with everything the painter needs to word it again: its kind, link, key, pull request
+    number or reply arguments, in the issue's order. Proves 627.1."""
     record_property("proves", "627.1")
     p = fresh(place, "comment-inputs")
     finalized(p, ISSUE, "visual-test", "627.1")
@@ -268,11 +269,19 @@ def test_finalize_saves_comment_inputs(place, record_property):
     assert isinstance(posts, list), f"627.1: the comment inputs hold no list of posts:\n{inputs}"
     recs = [x.get("rec") for x in posts if x.get("kind") == "record"]
     assert recs == list(story1.records()), f"627.1: the saved records are not the issue's two records:\n{recs}"
-    w = story1.world()["issues"][str(ISSUE)]["comments"]
-    auto = sorted(c["url"] for c in w if c["author"]["login"] == story1.BOT and c["body"].startswith("Autopilot"))
-    got = sorted(x.get("url") for x in posts if x.get("kind") != "record")
-    assert got == auto, f"627.1: the saved autopilot posts are not the issue's autopilot comments.\n" \
-                        f"Wanted: {auto}\nSaved: {got}"
+
+    def url(k):
+        return f"https://github.com/{REPO}/issues/{ISSUE}#issuecomment-{100 + k}"
+
+    # What `draw` hands its painter for each autopilot comment of story 1's issue 7, oldest first.
+    auto = [{"kind": "line", "url": url(2)},
+            {"kind": "start", "url": url(7)},
+            {"kind": "lines", "key": "worker", "url": url(5)},
+            {"kind": "reply", "args": [ISSUE, "start", [ISSUE], [], "No stage was started."], "url": url(6)},
+            {"kind": "merge", "key": "merged", "pr": 9, "url": url(8)}]
+    got = [x for x in posts if x.get("kind") != "record"]
+    assert got == auto, f"627.1: the saved autopilot posts cannot word the issue's autopilot comments again.\n" \
+                        f"Wanted: {json.dumps(auto, indent=1)}\nSaved: {json.dumps(got, indent=1)}"
 
 
 def test_finalize_unreadable_issue_saves_nothing(place, record_property):
