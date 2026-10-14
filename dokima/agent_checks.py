@@ -28,15 +28,18 @@ def problems_searched(h, pack_dir):
     if not filed:
         return []
     bad = [p for where, d in filed for p in raises.filing_problems(where, d)]
-    named = [d for _, d in filed if raises.is_numbers(d.get(raises.SEARCHED)) and d.get(raises.SEARCHED)]
+    named = [(f, d[f] if f != raises.CAUSE else [d[f]]) for _, d in filed
+             for f in (raises.SEARCHED, raises.SYMPTOMS, raises.CAUSE)
+             if (raises.is_numbers(d.get(f)) and d.get(f)) or (f == raises.CAUSE and raises.is_numbers([d.get(f)]))]
     if not named:
         return bad
     path = os.path.join(pack_dir, "open_issues.json")
     if not os.path.exists(path):
-        return bad + [f"open_issues.json is missing from the pack, so the {raises.SEARCHED} issues cannot be checked"]
+        return bad + [f"open_issues.json is missing from the pack, so the "
+                      f"{', '.join(dict.fromkeys(f for f, _ in named))} issues cannot be checked"]
     known = {i.get("number") for i in json.load(open(path)) if isinstance(i, dict)}
-    return bad + [f"{raises.SEARCHED} names #{n}, which is not an open issue in the pack"
-                  for d in named for n in d[raises.SEARCHED] if n not in known]
+    return bad + [f"{f} names #{n}, which is not an open issue in the pack" for f, ns in named for n in ns
+                  if n not in known]
 
 
 def problems_links(h, pack_dir):
