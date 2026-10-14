@@ -121,7 +121,9 @@ def test_criteria_with_no_code_file_in_common_become_separate_stories(record_pro
     Code's groups of two criteria on different code files are two stories, even when their edge cases are covered by
     tests in one test file. As one user story they are rejected saying "separate stories"; so is one story of a split
     holding both. Handed back as a split, one per story, they are accepted, each story keeping its own criterion's edge
-    case. Proves 667.2.
+    case. A markdown file is not a code file: two criteria sharing only `rules/splitting.md`, each with its own code
+    file, are two stories, and so are two listing only `README.md`; as one user story both pairs are rejected saying
+    "separate stories", and the first pair as a split is accepted. Proves 667.2.
     """
     record_property("proves", "667.2")
     a = crit("A slow call returns a job id.", ["dokima/jobs.py"], edge="tests/test_jobs.py::test_1")
@@ -138,6 +140,17 @@ def test_criteria_with_no_code_file_in_common_become_separate_stories(record_pro
     stories = json.loads(text)["stories"]
     assert [s["acceptance_criteria"][0]["edge_cases"] for s in stories] == [a["edge_cases"], b["edge_cases"]], (
         f"667.2: the split's stories do not keep each criterion's own edge case: {stories!r}")
+    a = crit("A slow call returns a job id.", ["dokima/jobs.py", "rules/splitting.md"])
+    b = crit("Status shows.", ["dokima/status.py", "rules/splitting.md"])
+    docs = [crit("Docs say A.", ["README.md"]), crit("Docs say B.", ["README.md"])]
+    for pair in ([a, b], docs):
+        got = groups(pair, "667.2")
+        assert got == [[0], [1]], f"667.2: criteria sharing only a markdown file were put in one story: {got!r}"
+        why = rejected(tmp_path, story(*pair))
+        assert why and "separate stories" in why, (
+            f"667.2: criteria sharing only a markdown file were accepted as one story: {why!r}")
+    assert rejected(tmp_path, feature([a], [b])) is None, (
+        "667.2: criteria sharing only a markdown file were refused in separate stories")
 
 
 def test_no_count_of_criteria_or_stories_refuses_a_plan(record_property, tmp_path, monkeypatch):
@@ -188,22 +201,38 @@ def test_the_old_count_rules_are_gone_from_the_instructions(record_property):
     assert not stale, "667.4: the old count rules are still stated in " + "; ".join(stale)
 
 
-def test_criteria_sharing_only_a_markdown_file_stay_in_separate_stories(record_property, tmp_path):
-    """Two criteria sharing only a markdown file stay in separate stories.
+def test_a_story_of_a_split_never_splits_again(record_property, tmp_path, monkeypatch):
+    """A story of a split whose criteria share no code file is refused, not split.
 
-    Code's groups of two criteria sharing only `rules/splitting.md`, each with its own code file, are two stories; so
-    are those of two criteria listing only `README.md`. Both pairs, as one user story, are rejected saying "separate
-    stories". The first pair handed back as a split, one per story, is accepted. Proves 667.5.
+    In an issue that is already a story of a parent, a user story of two criteria on different code files is rejected
+    saying "never splits again", and so is the same pair handed back as a split of two stories. The same story with
+    both criteria on one code file is accepted. Proves 667.5.
     """
     record_property("proves", "667.5")
-    a = crit("A slow call returns a job id.", ["dokima/jobs.py", "rules/splitting.md"])
-    b = crit("Status shows.", ["dokima/status.py", "rules/splitting.md"])
-    docs = [crit("Docs say A.", ["README.md"]), crit("Docs say B.", ["README.md"])]
-    for pair in ([a, b], docs):
-        got = groups(pair, "667.5")
-        assert got == [[0], [1]], f"667.5: criteria sharing only a markdown file were put in one story: {got!r}"
-        why = rejected(tmp_path, story(*pair))
-        assert why and "separate stories" in why, (
-            f"667.5: criteria sharing only a markdown file were accepted as one story: {why!r}")
-    assert rejected(tmp_path, feature([a], [b])) is None, (
-        "667.5: criteria sharing only a markdown file were refused in separate stories")
+    pack = tmp_path / "pack"
+    pack.mkdir()
+    (pack / "parent.json").write_text(json.dumps({"number": 330}))
+    for k, v in {"PACK": str(pack), "GITHUB_REPOSITORY": "o/r", "GITHUB_SERVER_URL": "https://github.com"}.items():
+        monkeypatch.setenv(k, v)
+    mine = "https://github.com/o/r/issues/331"
+
+    def nested(content):
+        """Why the check refuses this plan of issue 331, a story of 330, or None."""
+        content = json.loads(json.dumps(content).replace(SRC, mine).replace('"9.', '"331.'))
+        (tmp_path / "plan.json").write_text(json.dumps(content))
+        try:
+            planner.read_output(str(tmp_path), 331)
+        except planner.Garbled as e:
+            return str(e)
+        return None
+
+    a, b = crit("A runs.", ["dokima/a.py"]), crit("B runs.", ["dokima/b.py"])
+    why = nested(story(a, b))
+    assert why and "never splits again" in why, (
+        f"667.5: a story of a split whose criteria share no code file was not refused saying 'never splits again': "
+        f"{why!r}")
+    why = nested(feature([a], [b]))
+    assert why and "never splits again" in why, (
+        f"667.5: a story of a split handed back as a split was not refused saying 'never splits again': {why!r}")
+    why = nested(story(a, crit("B runs.", ["dokima/a.py"])))
+    assert why is None, f"667.5: a story of a split whose criteria share a code file was refused: {why!r}"
