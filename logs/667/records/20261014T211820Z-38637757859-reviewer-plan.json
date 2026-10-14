@@ -1,0 +1,183 @@
+{
+ "role": "reviewer",
+ "stage": "plan",
+ "run_id": "38637757859",
+ "commit_before": "0ad54dfef24e5c358bdadd9d23acb40811ad8200",
+ "started_by": "dokima-runtime[bot]",
+ "models": [
+  "claude-opus-5-5"
+ ],
+ "report": {
+  "duration_ms": 5169,
+  "turns": 2,
+  "cost_usd": 0.7364932000000001,
+  "tokens_in": 128225,
+  "tokens_out": 384
+ },
+ "log": "https://github.com/dokima-dev/dokima/blob/logs/logs/667/38637757859-reviewer-plan.md",
+ "run": "https://github.com/dokima-dev/dokima/actions/runs/38637757859",
+ "handback": {
+  "previous_step": {
+   "did": [
+    "Rewrote five tests: code works out stories, and the check holds plans to them.",
+    "Split the count criterion in two and kept the empty story refusal."
+   ],
+   "decided": [
+    "A story of a parent still never splits again.",
+    "The edge case ask is proven under the second criterion, not its own."
+   ],
+   "open": [
+    "Asked the owner three questions: deeper splits, the folded edge case ask, who names stories."
+   ]
+  },
+  "verdict": "block",
+  "summary": "Close: one test misses an old count rule still written, and grouping never tests non-functional requirements.",
+  "raises": [
+   {
+    "kind": "blocker",
+    "to": "planner",
+    "label": "667.4: misses a rule",
+    "text": "The test for 667.4 passes while the planner's instructions still say a story of a parent holds at most 5. Add `at most 5` to its phrases.",
+    "evidence": "`dokima/roles/planner.md` line 122 says `it holds at most 5`; `test_the_old_count_rules_are_gone_from_the_instructions` never checks it.",
+    "raised_by": "reviewer",
+    "id": "R5"
+   },
+   {
+    "kind": "blocker",
+    "to": "planner",
+    "label": "667.1: requirements untested",
+    "text": "Criteria include non-functional requirements, but no test groups one sharing a code file with an acceptance criterion. Add that case to 667.1's test.",
+    "evidence": "`tests/test_story_groups.py` `story()` and `feature()` always set `non_functional` to `[]`; `dokima/roles/planner.md` line 120 counts both.",
+    "raised_by": "reviewer",
+    "id": "R6"
+   }
+  ],
+  "answers": [],
+  "asks": [
+   {
+    "ask": "Code puts criteria that share any code file into the same story.",
+    "source": "https://github.com/dokima-dev/dokima/issues/667",
+    "criterion": "667.1"
+   },
+   {
+    "ask": "the planner hands back criteria with files and code computes the groups",
+    "source": "https://github.com/dokima-dev/dokima/issues/667",
+    "criterion": "667.1"
+   },
+   {
+    "ask": "Criteria with no code file in common become separate stories.",
+    "source": "https://github.com/dokima-dev/dokima/issues/667",
+    "criterion": "667.2"
+   },
+   {
+    "ask": "No count of criteria or stories splits or refuses a plan",
+    "source": "https://github.com/dokima-dev/dokima/issues/667",
+    "criterion": "667.3"
+   },
+   {
+    "ask": "today's count rules are gone",
+    "source": "https://github.com/dokima-dev/dokima/issues/667",
+    "criterion": "667.4"
+   },
+   {
+    "ask": "Two criteria that share only a markdown file stay in separate stories.",
+    "source": "https://github.com/dokima-dev/dokima/issues/667",
+    "criterion": "667.5"
+   },
+   {
+    "ask": "Each edge case stays under its criterion and never changes how criteria group.",
+    "source": "https://github.com/dokima-dev/dokima/issues/667",
+    "criterion": "667.2"
+   }
+  ],
+  "behaviors": [
+   {
+    "criterion": "667.1",
+    "one_behavior": true,
+    "why": "One result: criteria joined by a code file form one story."
+   },
+   {
+    "criterion": "667.2",
+    "one_behavior": true,
+    "why": "One result: unrelated criteria form separate stories."
+   },
+   {
+    "criterion": "667.3",
+    "one_behavior": true,
+    "why": "One result: no count refuses a plan."
+   },
+   {
+    "criterion": "667.4",
+    "one_behavior": true,
+    "why": "One result: the written count rules are gone."
+   },
+   {
+    "criterion": "667.5",
+    "one_behavior": true,
+    "why": "One result: a shared markdown file never joins criteria."
+   }
+  ],
+  "edge_cases": [
+   {
+    "criterion": "667.1",
+    "cut": [],
+    "missing": [
+     "A non-functional requirement sharing a code file with an acceptance criterion."
+    ]
+   },
+   {
+    "criterion": "667.2",
+    "cut": [],
+    "missing": []
+   },
+   {
+    "criterion": "667.3",
+    "cut": [],
+    "missing": []
+   },
+   {
+    "criterion": "667.4",
+    "cut": [],
+    "missing": []
+   },
+   {
+    "criterion": "667.5",
+    "cut": [],
+    "missing": []
+   }
+  ],
+  "tests": [
+   {
+    "test": "tests/test_story_groups.py::test_criteria_sharing_a_code_file_are_put_in_the_same_story",
+    "only_its_behavior": true,
+    "why": "Checks code's groups and that the check holds a split to them."
+   },
+   {
+    "test": "tests/test_story_groups.py::test_criteria_with_no_code_file_in_common_become_separate_stories",
+    "only_its_behavior": true,
+    "why": "Checks separate groups; the edge case part is the folded ask, pending the owner's answer."
+   },
+   {
+    "test": "tests/test_story_groups.py::test_no_count_of_criteria_or_stories_refuses_a_plan",
+    "only_its_behavior": true,
+    "why": "Checks large stories and splits pass; an empty story still fails."
+   },
+   {
+    "test": "tests/test_story_groups.py::test_the_old_count_rules_are_gone_from_the_instructions",
+    "only_its_behavior": true,
+    "why": "Checks only the written rules, though it misses one phrase."
+   },
+   {
+    "test": "tests/test_story_groups.py::test_criteria_sharing_only_a_markdown_file_stay_in_separate_stories",
+    "only_its_behavior": true,
+    "why": "Checks a shared markdown file never joins criteria."
+   }
+  ],
+  "size": "ok"
+ },
+ "check": {
+  "passed": true,
+  "problems": []
+ },
+ "url": "https://github.com/dokima-dev/dokima/issues/667#issuecomment-6178527181"
+}
