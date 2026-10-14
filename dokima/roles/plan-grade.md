@@ -29,8 +29,8 @@ Blockers: a plan that fails any of 1 to 5 goes back to the planner.
 5. Today, every new test fails for the right reason: the feature is missing, not a crash, a missing tool or a bad path.
 Never blockers:
 6. Each failing test says which criterion failed and why, in plain words.
-Size is counted by code (stories = criteria / 3, rounded up, counting acceptance criteria and non-functional
-requirements together; a story split from a parent never splits again); the reviewer judges only that each criterion is one behavior.
+Size is counted by code (each story holds 1 to 5 criteria, counting acceptance criteria and non-functional
+requirements together, with no cap on stories; a story split from a parent never splits again); the reviewer judges only that each criterion is one behavior.
 
 ## Examples
 Bad: a test changed into a folder that only existed on the author's machine. It failed on every run however good the

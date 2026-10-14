@@ -6,6 +6,7 @@
 The plan is the newest one the planner handed back, once the reviewer approved it, read from the bot's own record
 comments; each criterion's check runs exactly the tests that plan lists for it. A pull request with no approved plan that
 changes only Markdown files outside dokima/roles/, tests/ and .github/ gets one passing "Text only" check instead.
+A manual fix Dokima's app opens with no linked issue gets one "Manual fix" check that runs all tests.
 
 A test proves a criterion by calling record_property("proves", "<issue>.<n>"),
 where n counts the issue's criteria from 1, top to bottom.
@@ -24,6 +25,7 @@ TEST_DEF = re.compile(r"^def (test_\w+)\(")
 QUEUE_REF = re.compile(r"^(?:refs/heads/)?gh-readonly-queue/.+/pr-(\d+)-[0-9a-f]+$")
 TEXT_ONLY = [{"id": "text-only", "name": "Text only: no plan needed", "tests": ""}]
 NOT_TEXT = ("dokima/roles/", "tests/", ".github/")
+MANUAL_FIX = [{"id": "manual-fix", "name": "Manual fix: all tests pass", "tests": "tests"}]
 
 
 def find_tests(paths):
@@ -54,10 +56,13 @@ def no_plan(name):
     return [{"id": "none", "name": name, "tests": ""}]
 
 
-def build_matrix(number, recs):
+def build_matrix(number, recs, author=None):
     """One check per criterion of the approved plan (acceptance criteria, then non-functional), each running exactly
-    the plan's tests for it; one failing "No approved plan found" check when there is no issue or no approved plan."""
+    the plan's tests for it; one failing "No approved plan found" check when there is no issue or no approved plan.
+    A pull request Dokima's app opened with no linked issue is a manual fix: one check that runs all tests."""
     if not number:
+        if author in (agent.BOT, f"{agent.BOT}[bot]"):
+            return MANUAL_FIX
         return no_plan("No approved plan found: no issue linked")
     if not agent.approved(recs):
         return no_plan(f"No approved plan found for issue #{number}")
@@ -115,7 +120,7 @@ def event_pr(repo, event):
     if not m:
         sys.exit(f"Not a merge queue branch: {ref}")
     pr = json.loads(agent.gh("api", f"repos/{repo}/pulls/{m.group(1)}"))
-    return {"number": pr["number"], "head": {"ref": pr["head"]["ref"]}, "body": pr.get("body")}
+    return {"number": pr["number"], "head": {"ref": pr["head"]["ref"]}, "body": pr.get("body"), "user": pr.get("user")}
 
 
 def main(argv):
@@ -124,7 +129,7 @@ def main(argv):
         pr = event_pr(repo, json.load(open(os.environ["GITHUB_EVENT_PATH"])))
         number = agent.issue_of_pr(pr["head"]["ref"], pr.get("body")) or plan.pr_issue_number(repo, pr["number"])
         recs = agent.records(agent.conversation(repo, number)[1]) if number else []
-        rows = build_matrix(number, recs)
+        rows = build_matrix(number, recs, (pr.get("user") or {}).get("login"))
         if rows[0]["id"] == "none" and text_only(repo, pr["number"]):
             rows = TEXT_ONLY
         print("matrix=" + json.dumps(rows))
