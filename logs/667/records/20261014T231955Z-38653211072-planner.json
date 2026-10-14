@@ -1,0 +1,174 @@
+{
+ "role": "planner",
+ "stage": null,
+ "run_id": "38653211072",
+ "commit_before": "97a008d6eb902220980ddb1a5662e192591231bc",
+ "started_by": "RezaSoleymanifar",
+ "models": [
+  "claude-opus-5-5"
+ ],
+ "report": {
+  "duration_ms": 43951,
+  "turns": 11,
+  "cost_usd": 0.6078498,
+  "tokens_in": 561850,
+  "tokens_out": 3835
+ },
+ "log": "https://github.com/dokima-dev/dokima/blob/logs/logs/667/38653211072-planner.md",
+ "run": "https://github.com/dokima-dev/dokima/actions/runs/38653211072",
+ "handback": {
+  "kind": "user_story",
+  "title": "Code groups criteria into stories by shared files",
+  "summary": "Code works out the stories from the files each criterion changes, and no count rule remains.",
+  "user_story": "Any ask, however big, splits into stories by the code files its criteria change, never by counting.",
+  "acceptance_criteria": [
+   {
+    "text": "Code puts criteria that share a code file, directly or through another criterion, into one story.",
+    "words": "Code groups criteria that share any code file into one story (a sub-issue).",
+    "source": "https://github.com/dokima-dev/dokima/issues/661",
+    "files": [
+     "dokima/planner.py"
+    ],
+    "edge_cases": [
+     {
+      "case": "Two criteria joined only through a third criterion that shares a file with each.",
+      "test": "tests/test_story_groups.py::test_criteria_sharing_a_code_file_are_put_in_the_same_story"
+     },
+     {
+      "case": "A non-functional requirement shares a code file with an acceptance criterion.",
+      "test": "tests/test_story_groups.py::test_criteria_sharing_a_code_file_are_put_in_the_same_story"
+     }
+    ]
+   },
+   {
+    "text": "Code puts criteria with no code file in common into separate stories.",
+    "words": "Criteria with no file in common become separate stories.",
+    "source": "https://github.com/dokima-dev/dokima/issues/661",
+    "files": [
+     "dokima/planner.py"
+    ],
+    "edge_cases": [
+     {
+      "case": "Two unrelated criteria whose edge cases are tested in one test file.",
+      "test": "tests/test_story_groups.py::test_criteria_with_no_code_file_in_common_become_separate_stories"
+     },
+     {
+      "case": "Two criteria share only a markdown file, each with its own code file.",
+      "test": "tests/test_story_groups.py::test_criteria_with_no_code_file_in_common_become_separate_stories"
+     },
+     {
+      "case": "Two criteria list only the same markdown file and no code file.",
+      "test": "tests/test_story_groups.py::test_criteria_with_no_code_file_in_common_become_separate_stories"
+     }
+    ]
+   },
+   {
+    "text": "No count of criteria or stories refuses a plan.",
+    "words": "No number decides it: no criteria cap, no story cap.",
+    "source": "https://github.com/dokima-dev/dokima/issues/661",
+    "files": [
+     "dokima/planner.py"
+    ],
+    "edge_cases": [
+     {
+      "case": "A story with no criteria is still refused.",
+      "test": "tests/test_story_groups.py::test_no_count_of_criteria_or_stories_refuses_a_plan"
+     },
+     {
+      "case": "A story of a parent holds six criteria on one code file.",
+      "test": "tests/test_story_groups.py::test_no_count_of_criteria_or_stories_refuses_a_plan"
+     }
+    ]
+   },
+   {
+    "text": "The planner's and reviewer's instructions no longer state the old count rules.",
+    "words": "This replaces today's count-based split rules",
+    "source": "https://github.com/dokima-dev/dokima/issues/661",
+    "files": [
+     "dokima/roles/planner.md",
+     "dokima/roles/plan-grade.md",
+     "dokima/roles/reviewer.md",
+     "rules/splitting.md",
+     "dokima/agent_checks.py"
+    ],
+    "no_edge_cases": "It is fixed text with no input, so nothing varies."
+   },
+   {
+    "text": "A story of a split whose criteria share no code file is refused, never split again.",
+    "words": "No second split",
+    "source": "https://github.com/dokima-dev/dokima/issues/667#issuecomment-6179810907",
+    "files": [
+     "dokima/planner.py"
+    ],
+    "edge_cases": [
+     {
+      "case": "The story is handed back as a split of two stories.",
+      "test": "tests/test_story_groups.py::test_a_story_of_a_split_never_splits_again"
+     }
+    ]
+   }
+  ],
+  "non_functional": [],
+  "scope": [
+   "dokima/planner.py",
+   "dokima/roles/planner.md",
+   "dokima/roles/plan-grade.md",
+   "dokima/roles/reviewer.md",
+   "rules/splitting.md",
+   "dokima/agent_checks.py"
+  ],
+  "tests": {
+   "667.1": [
+    "tests/test_story_groups.py::test_criteria_sharing_a_code_file_are_put_in_the_same_story"
+   ],
+   "667.2": [
+    "tests/test_story_groups.py::test_criteria_with_no_code_file_in_common_become_separate_stories"
+   ],
+   "667.3": [
+    "tests/test_story_groups.py::test_no_count_of_criteria_or_stories_refuses_a_plan"
+   ],
+   "667.4": [
+    "tests/test_story_groups.py::test_the_old_count_rules_are_gone_from_the_instructions"
+   ],
+   "667.5": [
+    "tests/test_story_groups.py::test_a_story_of_a_split_never_splits_again"
+   ]
+  },
+  "test_changes": {
+   "tests/test_size_rule.py::test_a_story_over_five_or_empty_is_refused": "Only the empty cases stay, since caps go; the name stays for the moved list.",
+   "tests/test_size_rule.py::test_the_right_number_of_stories_passes": "Docstring no longer states the five criteria cap.",
+   "tests/test_size_rule.py::test_a_story_of_a_parent_never_splits_again": "Keeps one level but drops the six criteria refusal, as caps go.",
+   "tests/test_criterion_files.py::test_each_criterion_carries_its_files": "Its sample criteria now share a file, so they form one story.",
+   "tests/test_criterion_files.py::test_a_criterion_with_no_files_is_rejected_by_name": "Its sample criteria now share a file, so they form one story.",
+   "tests/test_criterion_files.py::test_a_file_that_does_not_exist_yet_is_accepted": "Its sample criteria now share a file, so they form one story.",
+   "tests/test_plan_shape.py::test_a_feature_is_shown_as_handed_back": "Its two sample stories now change different files, as grouping requires."
+  },
+  "links": {
+   "blocked_by": [],
+   "blocks": [
+    668
+   ],
+   "relates_to": [
+    661,
+    666,
+    432,
+    559
+   ]
+  },
+  "raises": [
+   {
+    "kind": "issue",
+    "label": "Fresh sibling for scope",
+    "text": "When the owner approves new scope raised on a child story, code opens a fresh sibling issue under its parent.",
+    "evidence": "Owner's comments of 2026-10-14T22:25 and 23:18 on #667; `file_split` in `dokima/agent_autopilot.py` opens siblings only at a split.",
+    "raised_by": "planner",
+    "id": "P8"
+   }
+  ]
+ },
+ "check": {
+  "passed": true,
+  "problems": []
+ },
+ "url": "https://github.com/dokima-dev/dokima/issues/667#issuecomment-6180623888"
+}
