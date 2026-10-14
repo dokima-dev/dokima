@@ -74,8 +74,16 @@ jobs:
         with:
           python-version: "3.12"
       - name: Copy the runtime from main before touching any branch
-        # AGENTS.md comes too: the river checks the owner's words a plan reviewer quotes from it.
-        run: mkdir -p /tmp/runtime && cp -r dokima /tmp/runtime/dokima && { cp AGENTS.md /tmp/runtime/ 2>/dev/null || true; }
+        # AGENTS.md and the topic files it links come too: the river checks the owner's words a plan reviewer quotes from them.
+        run: |
+          mkdir -p /tmp/runtime && cp -r dokima /tmp/runtime/dokima
+          if [ -f AGENTS.md ]; then
+            cp AGENTS.md /tmp/runtime/
+            grep -oE '\]\([^)#: ]+\.md' AGENTS.md | cut -c3- | sort -u | while read -r f; do
+              case "$f" in /*|*..*) continue ;; esac
+              if [ -f "$f" ]; then cp --parents "$f" /tmp/runtime/; fi
+            done
+          fi
       - name: Only a code owner starts an agent
         env:
           SENDER: ${{ github.actor }}
