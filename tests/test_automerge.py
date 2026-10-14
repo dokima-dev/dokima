@@ -450,6 +450,9 @@ class Review(Merges, ts.Machine):
         seed = history(57, 60)
         json.dump(seed, open(f"{t}/gh/comments.json", "w"))
         self.seeded = len(seed)
+        # Since #610 runs read earlier records from record files on the logs branch, not from comments.
+        shown = [{"author": {"login": c["author"]}, "body": c["versions"][-1]} for c in seed]
+        ts.record_seed.seed(int(N), ts.record_seed.in_comments(shown, agent.BOT), f"{t}/origin.git")
         json.dump({str(k): list(v) for k, v in labels.items()}, open(f"{t}/gh/labels.json", "w"))
         json.dump({PR: pr_state(57, checks, files, refuse, moves)}, open(f"{t}/gh/prs.json", "w"))
         json.dump(review, open(f"{t}/review.json", "w"))

@@ -2,10 +2,11 @@ name: agent
 run-name: "${{ (inputs.role || github.event.client_payload.role) }}${{ (inputs.role || github.event.client_payload.role) == 'reviewer' && format(' ({0})', (inputs.stage || github.event.client_payload.stage)) || '' }} for #${{ (inputs.issue || github.event.client_payload.issue) }}"
 # Runs one agent on a fresh GitHub machine. Started by hand here, or by commands.yml when a code owner's comment
 # starts with /plan, /work or /review. Code gathers everything the agent needs: the issue and its PR as one
-# conversation (comments, reviews, line notes) and every earlier agent record. The agent runs its own check before it
+# conversation (comments, reviews, line notes) and every earlier agent record, from its record file. The agent runs its own check before it
 # finishes; code runs it again, then edits this run's live card (up since the code-owner gate) into its record: a card
 # on top, the full JSON folded below.
-# Those comments are the permanent records the cards are built from. Session logs stay on the run page.
+# Those comments are what the cards are built from; each record is also saved as its own file on the logs branch,
+# and starting packs read records only from those files (#610). Session logs stay on the run page.
 # The river: after posting, code decides what follows (next_step in dokima/agent.py) and, when the next stage is an
 # agent's, the bot sends a dokima-next signal that starts it here. On autopilot an approved plan starts the worker and
 # an approved split is filed here, each with one Autopilot line on the issue. Otherwise the card mentions the owner and stops.
@@ -467,16 +468,31 @@ jobs:
           GH_TOKEN: ${{ steps.app.outputs.token }}
         run: |
           # The run's card becomes its record, edited in place; a card that cannot be edited never loses the record.
+          # The comment's link goes to OUT/url.txt, so the saved record keeps it.
           if [ -n "$CARD_ID" ]; then
-            gh api -X PATCH "repos/$GITHUB_REPOSITORY/issues/comments/$CARD_ID" -F body=@"$OUT/comment.md" --silent && exit 0
+            gh api -X PATCH "repos/$GITHUB_REPOSITORY/issues/comments/$CARD_ID" -F body=@"$OUT/comment.md" --jq .html_url > "$OUT/url.txt" && exit 0
             echo "::warning title=Card not edited::the record is posted as a new comment"
           fi
           PR=$(gh pr list -R "$GITHUB_REPOSITORY" --head "try/issue-$N" --state open --json number -q '.[0].number')
           if [ -n "$PR" ] && { [ "$ROLE" = worker ] || [ "$STAGE" = pr ]; }; then
-            gh pr comment "$PR" -R "$GITHUB_REPOSITORY" --body-file "$OUT/comment.md"
+            gh pr comment "$PR" -R "$GITHUB_REPOSITORY" --body-file "$OUT/comment.md" > "$OUT/url.txt"
           else
-            gh issue comment "$N" -R "$GITHUB_REPOSITORY" --body-file "$OUT/comment.md"
+            gh issue comment "$N" -R "$GITHUB_REPOSITORY" --body-file "$OUT/comment.md" > "$OUT/url.txt"
           fi
+      # Each run's record is its own new file on the logs branch, never edited (#610), with the link of the comment it
+      # was posted as: later runs read records only from those files. It runs whatever happened, so a failed, cancelled
+      # or unstarted run keeps its record too.
+      - name: Save this run's record as its own file on the logs branch
+        if: always()
+        env:
+          GH_TOKEN: ${{ steps.app.outputs.token }}
+          SLUG: ${{ steps.app.outputs.app-slug }}
+        run: |
+          [ -s "$OUT/record.json" ] || { echo "::error title=Record not saved::this run wrote no record"; exit 1; }
+          BOT_ID=$(gh api "users/${SLUG}[bot]" --jq .id)
+          export GIT_AUTHOR_NAME="${SLUG}[bot]" GIT_COMMITTER_NAME="${SLUG}[bot]"
+          export GIT_AUTHOR_EMAIL="${BOT_ID}+${SLUG}[bot]@users.noreply.github.com" GIT_COMMITTER_EMAIL="${BOT_ID}+${SLUG}[bot]@users.noreply.github.com"
+          python3 -m dokima.agent save-record "$N" "$OUT" || { echo "::error title=Record not saved::the record could not be saved to the logs branch"; exit 1; }
       # An approved plan changes what the plan check reads, but GitHub runs it only on a new commit: code runs it
       # again on the pull request's head, with the app's key (minted after the agent finished), once the record is up.
       - name: Run the plan check again once the plan is approved
@@ -567,6 +583,17 @@ jobs:
         run: |
           export OWNERS=$(python3 -m dokima.plan approvers)
           python3 -m dokima.agent unrecorded "$ROLE" "$STAGE" "$N" "$OUT"
+      # The failed record is saved as its own file too, so later runs read it (#610).
+      - name: Save the failed record as its own file on the logs branch
+        env:
+          GH_TOKEN: ${{ steps.app.outputs.token }}
+          SLUG: ${{ steps.app.outputs.app-slug }}
+        run: |
+          [ -s "$OUT/record.json" ] || exit 0
+          BOT_ID=$(gh api "users/${SLUG}[bot]" --jq .id)
+          export GIT_AUTHOR_NAME="${SLUG}[bot]" GIT_COMMITTER_NAME="${SLUG}[bot]"
+          export GIT_AUTHOR_EMAIL="${BOT_ID}+${SLUG}[bot]@users.noreply.github.com" GIT_COMMITTER_EMAIL="${BOT_ID}+${SLUG}[bot]@users.noreply.github.com"
+          python3 -m dokima.agent save-record "$N" "$OUT"
       - name: The board shows Needs you
         if: vars.DOKIMA_BOARD != ''
         env:
