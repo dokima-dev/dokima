@@ -1,0 +1,37 @@
+{
+ "role": "worker",
+ "stage": null,
+ "run_id": "38644617803",
+ "commit_before": "5613fb546b8ee66c90d2de86c8f10045ade4256b",
+ "started_by": "dokima-runtime[bot]",
+ "models": [
+  "claude-opus-5-5"
+ ],
+ "report": {
+  "duration_ms": 269973,
+  "turns": 12,
+  "cost_usd": 0.437294,
+  "tokens_in": 444010,
+  "tokens_out": 2882
+ },
+ "log": "https://github.com/dokima-dev/dokima/blob/logs/logs/666/38644617803-worker.md",
+ "run": "https://github.com/dokima-dev/dokima/actions/runs/38644617803",
+ "handback": {
+  "summary": "The scope now comes from the criteria's files and tests; a plan carrying its own scope is rejected.",
+  "criteria": {
+   "666.1": "`scope_from` in `dokima/fence.py` joins every criterion's files and the plan's test files; `from_kind` in `dokima/planner.py` uses it.",
+   "666.2": "`from_kind` in `dokima/planner.py` rejects any plan with a scope field; `dokima/roles/planner.md` and `dokima/playthrough.py` drop it.",
+   "666.3": "`main` in `dokima/fence.py` reads the scope with `scope_from` from plan.json, so unlisted files are undone.",
+   "666.4": "Unchanged: `check_words` in `dokima/planner.py` already refuses it; its test passed before any change."
+  },
+  "evidence": "`pytest -q tests/test_scope_from_files.py tests/test_criteria_quote_owner.py tests/test_parent_source.py tests/test_agent.py`: 44 passed."
+ },
+ "check": {
+  "passed": true,
+  "problems": []
+ },
+ "dropped_by_fence": [],
+ "files_changed": [],
+ "branch": "try/issue-666",
+ "url": "https://github.com/dokima-dev/dokima/pull/693#issuecomment-6179442019"
+}
