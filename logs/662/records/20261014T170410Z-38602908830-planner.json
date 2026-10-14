@@ -1,0 +1,115 @@
+{
+ "role": "planner",
+ "stage": null,
+ "run_id": "38602908830",
+ "commit_before": "0583e0bcc0faafc2a1bdebe51c8a62899dc40f9e",
+ "started_by": "dokima-runtime[bot]",
+ "models": [
+  "claude-opus-5-5"
+ ],
+ "report": {
+  "duration_ms": 177806,
+  "turns": 22,
+  "cost_usd": 1.215514,
+  "tokens_in": 1334820,
+  "tokens_out": 16856
+ },
+ "log": "https://github.com/dokima-dev/dokima/blob/logs/logs/662/38602908830-planner.md",
+ "run": "https://github.com/dokima-dev/dokima/actions/runs/38602908830",
+ "handback": {
+  "kind": "user_story",
+  "title": "A clash in a test file goes to the planner",
+  "summary": "A clash with main inside a test file is resolved by the planner, so the worker's run no longer stalls.",
+  "user_story": "When a pull request clashes with main inside a test file, the planner resolves it and the issue keeps moving.",
+  "acceptance_criteria": [
+   {
+    "text": "When a pull request clashes with main inside a test file, the planner's run is handed that clash to resolve.",
+    "words": "When a pull request clashes with main inside a test file, the clash goes to the planner, which may edit tests",
+    "source": "https://github.com/dokima-dev/dokima/issues/662",
+    "edge_cases": [
+     {
+      "case": "The clash also touches a file that is not a test, as on the earlier stalled issue.",
+      "test": "tests/test_test_clash_planner.py::test_the_planner_is_handed_a_clash_inside_a_test_file"
+     },
+     {
+      "case": "A clash only outside test files hands the planner no clash in its tests.",
+      "test": "tests/test_test_clash_planner.py::test_the_planner_is_handed_a_clash_inside_a_test_file"
+     }
+    ]
+   },
+   {
+    "text": "The worker is no longer handed a clash inside a test file; it starts from the planner's resolution.",
+    "words": "not to the worker, which may not.",
+    "source": "https://github.com/dokima-dev/dokima/issues/662",
+    "edge_cases": [
+     {
+      "case": "A clash in a file that is not a test still goes to the worker.",
+      "test": "tests/test_test_clash_planner.py::test_the_worker_is_not_handed_a_clash_inside_a_test_file"
+     }
+    ]
+   },
+   {
+    "text": "A clash inside a test file no longer gets the worker's hand-back rejected for conflict markers.",
+    "words": "The fence drops the worker's edits to test files, so its hand-back is rejected and the issue stalls until someone resolves the clash by hand.",
+    "source": "https://github.com/dokima-dev/dokima/issues/662",
+    "edge_cases": [
+     {
+      "case": "The clash is in a test file and a rules file at once, as on the earlier stalled issue.",
+      "test": "tests/test_test_clash_planner.py::test_a_clash_inside_a_test_file_no_longer_stalls_the_workers_run"
+     }
+    ]
+   }
+  ],
+  "non_functional": [],
+  "scope": [
+   ".github/workflows/agent.yml",
+   "dokima/fence.py"
+  ],
+  "tests": {
+   "662.1": [
+    "tests/test_test_clash_planner.py::test_the_planner_is_handed_a_clash_inside_a_test_file"
+   ],
+   "662.2": [
+    "tests/test_test_clash_planner.py::test_the_worker_is_not_handed_a_clash_inside_a_test_file"
+   ],
+   "662.3": [
+    "tests/test_test_clash_planner.py::test_a_clash_inside_a_test_file_no_longer_stalls_the_workers_run"
+   ]
+  },
+  "test_changes": {},
+  "links": {
+   "blocked_by": [],
+   "blocks": [],
+   "relates_to": [
+    389,
+    384
+   ]
+  },
+  "raises": [
+   {
+    "kind": "question",
+    "to": "owner",
+    "label": "Doubt: overlaps open issue",
+    "text": "This repeats an older open issue on test file clashes. Should it close when this lands? The plan assumes so.",
+    "evidence": "#389 says a clash in a test file can never be resolved by the river, citing `dokima/fence.py` `fence()`.",
+    "raised_by": "planner",
+    "id": "P1"
+   },
+   {
+    "kind": "question",
+    "to": "owner",
+    "label": "Workflow file change",
+    "text": "The fix changes the agent workflow file, which agents touch only when asked. May it? The plan assumes yes.",
+    "evidence": "The planner and worker clash handling lives in `.github/workflows/agent.yml`, step Starting branch, lines 154-196.",
+    "raised_by": "planner",
+    "id": "P2"
+   }
+  ],
+  "answers": []
+ },
+ "check": {
+  "passed": true,
+  "problems": []
+ },
+ "url": "https://github.com/dokima-dev/dokima/issues/662#issuecomment-6173764311"
+}
