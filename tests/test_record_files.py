@@ -16,6 +16,9 @@ What the code these tests run must do, as the plan pins it:
   as the owner decided on this issue.
 - agent.yml's run job saves the record in a step that always runs, after the record is written; its unrecorded job
   saves the failed record it writes.
+- The saved record keeps, as `url`, the link of the comment it was posted as (the run's card edited into its record,
+  or the new comment when the card could not be edited), so a later run's "Raised earlier" items still link to where
+  each raise came from (#478). So the run job saves the record once it is posted.
 
 The tests use a local bare git repo as the logs remote and fake GitHub (gh) in-process for the pack.
 """
@@ -324,3 +327,31 @@ def test_an_edited_record_comment_changes_nothing_a_run_reads(record_property, m
     assert len(got) == 1 and same(got[0], PLANNER), \
         f"610.3: the pack should hold only the saved record, holds {[r.get('handback', {}).get('summary') for r in got]}"
     assert json.load(open(dest / "plan.json")) == PLAN, "610.3: the pack's plan came from the edited comment"
+
+
+def test_a_saved_record_keeps_the_link_of_the_comment_it_was_posted_as(record_property, tmp_path):
+    """A saved record keeps the link of the comment it was posted as.
+
+    Runs a plan review through agent.yml's own steps on a fake GitHub, with a local stand-in for the logs branch. Finds
+    the comment the run posted its record as, then reads the record file the run saved. Checks the file holds that
+    comment's link, the one a later run's "Raised earlier" item links to (#478); a record saved with no link, or with
+    another comment's, fails.
+
+    Proves 610.1."""
+    record_property("proves", "610.1")
+    import test_start as ts
+    r = ts.Run(tmp_path / "m", "reviewer", "plan", ts.STORY_PLANNED)
+    assert not r.failed, f"610.1: the plan review run failed at '{r.failed_step}':\n{r.tail()}"
+    posted = [c for c in r.comments()
+              if [(x["role"], x["stage"]) for x in agent.records([{"author": {"login": agent.BOT},
+                                                                     "body": c["versions"][-1]}])] == [("reviewer", "plan")]]
+    assert len(posted) == 1, f"610.1: the run should post its record as one comment, posted {len(posted)}"
+    c = posted[0]
+    link = f"https://github.com/o/r/{'pull' if c['kind'] == 'pr' else 'issues'}/{c['number']}#issuecomment-{c['id']}"
+    co = tmp_path / "logs"
+    git("clone", "-q", "-b", "logs", f"{r.tmp}/origin.git", str(co))
+    saved = [json.load(open(p)) for p in glob.glob(os.path.join(str(co), "logs", ts.N, "records", "*.json"))]
+    saved = [x for x in saved if x.get("role") == "reviewer" and x.get("stage") == "plan"]
+    assert len(saved) == 1, f"610.1: the run should save one plan review record file, saved {len(saved)}"
+    assert saved[0].get("url") == link, \
+        f"610.1: the saved record links {saved[0].get('url')!r}, not the comment it was posted as, {link}"
