@@ -1,0 +1,205 @@
+{
+ "role": "reviewer",
+ "stage": "plan",
+ "run_id": "38634824382",
+ "commit_before": "0e163311cc763a6f086e7be606ab474fae800247",
+ "started_by": "dokima-runtime[bot]",
+ "models": [
+  "claude-opus-5-5"
+ ],
+ "report": {
+  "duration_ms": 5081,
+  "turns": 2,
+  "cost_usd": 0.5868878,
+  "tokens_in": 106314,
+  "tokens_out": 329
+ },
+ "log": "https://github.com/dokima-dev/dokima/blob/logs/logs/667/38634824382-reviewer-plan.md",
+ "run": "https://github.com/dokima-dev/dokima/actions/runs/38634824382",
+ "handback": {
+  "previous_step": {
+   "did": [
+    "Wrote five tests, one per criterion; all fail today for the right reason.",
+    "Dropped the old five-per-story tests and updated nine others."
+   ],
+   "decided": [
+    "The planner still picks stories; the plan check only refuses wrong groups.",
+    "A story of a parent may now split again."
+   ],
+   "open": [
+    "Asked whether markdown-only criteria become separate stories."
+   ]
+  },
+  "verdict": "block",
+  "summary": "The plan checks the planner's stories instead of having code build them, and drops two rules unasked.",
+  "raises": [
+   {
+    "kind": "blocker",
+    "to": "planner",
+    "label": "667.1: code never groups",
+    "text": "The ask is that code computes the groups from criteria; the plan only refuses the planner's wrong groups. Add a criterion and test where code builds stories, or ask.",
+    "evidence": "Issue Context: 'the planner hands back criteria with files and code computes the groups'; every `test_story_groups.py` test only checks refusals.",
+    "raised_by": "reviewer",
+    "id": "R1"
+   },
+   {
+    "kind": "blocker",
+    "to": "planner",
+    "label": "667.3: unasked deeper splits",
+    "text": "The plan lets a story of a parent split again, making a third level. No ask says so. Raise it as a question for the owner, or keep the rule.",
+    "evidence": "`rules/splitting.md` says '2 or more children, one level'; `test_no_count_of_criteria_or_stories_refuses_a_plan` expects a child split accepted.",
+    "raised_by": "reviewer",
+    "id": "R2"
+   },
+   {
+    "kind": "blocker",
+    "to": "planner",
+    "label": "667.3: two behaviors",
+    "text": "667.3 bundles two behaviors: no count refuses a plan, and the written count rules are gone. Split it into two criteria, each with its own test.",
+    "evidence": "Criterion 667.3 text joins both with 'and'; its one test checks plan refusals and instruction wording.",
+    "raised_by": "reviewer",
+    "id": "R3"
+   },
+   {
+    "kind": "blocker",
+    "to": "planner",
+    "label": "Empty story guard lost",
+    "text": "Dropping `test_a_story_over_five_or_empty_is_refused` also drops the check that a story with no criteria is refused. Keep a test for the empty story.",
+    "evidence": "Removed cases `[0]` and `[3, 0]` in `tests/test_size_rule.py`; the owner asked to drop caps only.",
+    "raised_by": "reviewer",
+    "id": "R4"
+   }
+  ],
+  "answers": [
+   {
+    "raise": "P1",
+    "answer": "done",
+    "why": "The owner's own story says markdown files are ignored when grouping, so markdown-only criteria stay separate.",
+    "words": "Files ending in .md are ignored when grouping.",
+    "source": "https://github.com/dokima-dev/dokima/issues/667",
+    "changes": false
+   }
+  ],
+  "asks": [
+   {
+    "ask": "Code puts criteria that share any code file into the same story.",
+    "source": "https://github.com/dokima-dev/dokima/issues/667",
+    "criterion": "667.1"
+   },
+   {
+    "ask": "Criteria with no code file in common become separate stories.",
+    "source": "https://github.com/dokima-dev/dokima/issues/667",
+    "criterion": "667.2"
+   },
+   {
+    "ask": "No count of criteria or stories splits or refuses a plan; today's count rules are gone.",
+    "source": "https://github.com/dokima-dev/dokima/issues/667",
+    "criterion": "667.3"
+   },
+   {
+    "ask": "Two criteria that share only a markdown file stay in separate stories.",
+    "source": "https://github.com/dokima-dev/dokima/issues/667",
+    "criterion": "667.4"
+   },
+   {
+    "ask": "Each edge case stays under its criterion and never changes how criteria group.",
+    "source": "https://github.com/dokima-dev/dokima/issues/667",
+    "criterion": "667.5"
+   },
+   {
+    "ask": "the planner hands back criteria with files and code computes the groups",
+    "source": "https://github.com/dokima-dev/dokima/issues/667",
+    "criterion": "missing"
+   }
+  ],
+  "behaviors": [
+   {
+    "criterion": "667.1",
+    "one_behavior": true,
+    "why": "One refusal: criteria sharing a code file split apart."
+   },
+   {
+    "criterion": "667.2",
+    "one_behavior": true,
+    "why": "One refusal: a story mixing unrelated criteria."
+   },
+   {
+    "criterion": "667.3",
+    "one_behavior": false,
+    "why": "Two results: no count refuses a plan, and written rules removed."
+   },
+   {
+    "criterion": "667.4",
+    "one_behavior": true,
+    "why": "One rule: markdown never joins criteria."
+   },
+   {
+    "criterion": "667.5",
+    "one_behavior": true,
+    "why": "One rule: edge cases never join criteria."
+   }
+  ],
+  "edge_cases": [
+   {
+    "criterion": "667.1",
+    "cut": [],
+    "missing": []
+   },
+   {
+    "criterion": "667.2",
+    "cut": [],
+    "missing": []
+   },
+   {
+    "criterion": "667.3",
+    "cut": [],
+    "missing": [
+     "A story with no criteria is still refused."
+    ]
+   },
+   {
+    "criterion": "667.4",
+    "cut": [],
+    "missing": []
+   },
+   {
+    "criterion": "667.5",
+    "cut": [],
+    "missing": []
+   }
+  ],
+  "tests": [
+   {
+    "test": "tests/test_story_groups.py::test_criteria_sharing_a_code_file_are_put_in_the_same_story",
+    "only_its_behavior": true,
+    "why": "Checks refusal and acceptance of splits by shared code file only."
+   },
+   {
+    "test": "tests/test_story_groups.py::test_criteria_with_no_code_file_in_common_become_separate_stories",
+    "only_its_behavior": true,
+    "why": "Checks mixed stories refused and a clean split accepted."
+   },
+   {
+    "test": "tests/test_story_groups.py::test_no_count_of_criteria_or_stories_refuses_a_plan",
+    "only_its_behavior": false,
+    "why": "Also checks deeper splits and instruction wording, beyond counts refusing plans."
+   },
+   {
+    "test": "tests/test_story_groups.py::test_criteria_sharing_only_a_markdown_file_stay_in_separate_stories",
+    "only_its_behavior": true,
+    "why": "Checks markdown alone never joins criteria."
+   },
+   {
+    "test": "tests/test_story_groups.py::test_edge_cases_stay_under_their_criterion_and_never_change_the_groups",
+    "only_its_behavior": true,
+    "why": "Checks shared test files never join criteria and edge cases stay put."
+   }
+  ],
+  "size": "667.3 holds two behaviors, and its test checks more than one."
+ },
+ "check": {
+  "passed": true,
+  "problems": []
+ },
+ "url": "https://github.com/dokima-dev/dokima/issues/667#issuecomment-6178074219"
+}
