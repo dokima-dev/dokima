@@ -8,6 +8,7 @@ paragraph, so the worker may wrap lines freely.
 """
 import os
 import re
+from rules_files import rules_text
 
 ROOT = os.path.join(os.path.dirname(__file__), "..")
 EXAMPLE = "[#289](https://github.com/dokima-dev/dokima/issues/289) (raises and answers)"
@@ -15,7 +16,7 @@ EXAMPLE = "[#289](https://github.com/dokima-dev/dokima/issues/289) (raises and a
 
 def blocks():
     """Returns AGENTS.md split into paragraphs and bullets, each flattened to one lower-case line."""
-    text = open(os.path.join(ROOT, "AGENTS.md"), encoding="utf-8").read()
+    text = rules_text()
     parts = re.split(r"\n\s*\n|\n(?=\s*[-*] )", text)
     return [re.sub(r"\s+", " ", part).strip().lower() for part in parts if part.strip()]
 

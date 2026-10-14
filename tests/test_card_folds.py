@@ -21,6 +21,7 @@ sys.path.insert(0, os.path.join(os.path.dirname(__file__), ".."))
 sys.path.insert(0, os.path.dirname(__file__))
 from dokima import agent, body, card, planner  # noqa: E402
 from test_body import PLAN_TOP, TRICKY, github, run_card, text_of  # noqa: E402,F401
+from rules_files import rules_text  # noqa: E402
 
 ROOT = os.path.join(os.path.dirname(__file__), "..")
 REPO = "o/r"
@@ -302,7 +303,7 @@ def test_an_old_pr_card_gains_the_fold_on_its_next_redraw(record_property, monke
 # 373.4: AGENTS.md says the owner's text is folded, so every agent reads the decision
 
 def issue_body_section():
-    text = open(os.path.join(ROOT, "AGENTS.md"), encoding="utf-8").read()
+    text = rules_text()
     m = re.search(r"^## The issue body\n(.*?)(?=^## )", text, flags=re.S | re.M)
     assert m, "373.4: AGENTS.md has no '## The issue body' section"
     return m.group(1)

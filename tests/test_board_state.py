@@ -37,6 +37,7 @@ sys.path.insert(0, os.path.join(os.path.dirname(__file__), ".."))
 import test_needs_you as tny  # noqa: E402
 from dokima import agent, board  # noqa: E402
 from dokima import agent_github  # noqa: E402
+from rules_files import rules_text  # noqa: E402
 
 ROOT = os.path.join(os.path.dirname(__file__), "..")
 WORKFLOW = os.path.join(ROOT, ".github", "workflows", "board.yml")
@@ -512,7 +513,7 @@ def test_the_sweep_puts_closed_items_in_done_with_no_pill(record_property, make)
 
 def board_section():
     """AGENTS.md's "The board" section, as one paragraph of text."""
-    text = open(os.path.join(ROOT, "AGENTS.md")).read()
+    text = rules_text()
     return " ".join(text.split("\n## The board\n", 1)[1].split("\n## ", 1)[0].split())
 
 

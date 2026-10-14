@@ -30,6 +30,7 @@ import pytest
 
 sys.path.insert(0, os.path.join(os.path.dirname(__file__), ".."))
 from dokima import raises  # noqa: E402
+from rules_files import rules_text  # noqa: E402
 
 ROOT = os.path.abspath(os.path.join(os.path.dirname(__file__), ".."))
 ROLE_FILES = ("planner", "worker", "reviewer")
@@ -79,7 +80,7 @@ def agents_section(text=None):
 
     It runs from its heading to the next "## " heading."""
     if text is None:
-        text = open(os.path.join(ROOT, "AGENTS.md")).read()
+        text = rules_text()
     lines = text.splitlines()
     at = [i for i, l in enumerate(lines) if l.strip() == AGENTS_HEADING]
     if len(at) != 1:
@@ -163,7 +164,7 @@ def test_agents_md_has_one_section_listing_what_code_raises_and_the_three_kinds(
 
     Proves 302.1."""
     record_property("proves", "302.1")
-    text = open(os.path.join(ROOT, "AGENTS.md")).read()
+    text = rules_text()
     section = agents_section(text)
     assert section, f"302.1: AGENTS.md does not have exactly one '{AGENTS_HEADING}' section"
     assert not any(l.strip() == "## Questions" for l in text.splitlines()), \

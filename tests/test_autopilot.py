@@ -24,6 +24,7 @@ import re
 
 import test_start as ts
 from test_start import N, OWNER, PR, Ctx, evaluate, condition, fill
+from rules_files import rules_text
 
 
 LABEL = "autopilot"
@@ -257,7 +258,7 @@ def test_agents_md_tells_how_autopilot_works(record_property):
     Reads AGENTS.md: its Commands section must name both `/autopilot start` and `/autopilot stop`, and its The flow
     section must mention autopilot, since autopilot changes the flow."""
     record_property("proves", "209.4")
-    text = open(os.path.join(ts.ROOT, "AGENTS.md")).read()
+    text = rules_text()
     sections = {m.group(1).strip(): m.group(2) for m in re.finditer(r"^## (.+?)\n(.*?)(?=^## |\Z)", text, re.S | re.M)}
     commands = sections.get("Commands", "")
     for cmd in ("/autopilot start", "/autopilot stop"):
