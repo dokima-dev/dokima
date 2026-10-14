@@ -1,0 +1,120 @@
+{
+ "role": "reviewer",
+ "stage": "pr",
+ "run_id": "38645333881",
+ "commit_before": "5613fb546b8ee66c90d2de86c8f10045ade4256b",
+ "started_by": "dokima-runtime[bot]",
+ "models": [
+  "claude-opus-5-5"
+ ],
+ "report": {
+  "duration_ms": 390133,
+  "turns": 13,
+  "cost_usd": 0.6057159999999999,
+  "tokens_in": 605934,
+  "tokens_out": 5826
+ },
+ "log": "https://github.com/dokima-dev/dokima/blob/logs/logs/666/38645333881-reviewer-pr.md",
+ "run": "https://github.com/dokima-dev/dokima/actions/runs/38645333881",
+ "handback": {
+  "previous_step": {
+   "did": [
+    "The planner removed the scope field from the last sample plan that still had it.",
+    "The worker changed no code this round; its earlier build stands."
+   ],
+   "decided": [
+    "The worker kept the scope as the criteria's files plus the plan's test files."
+   ],
+   "open": [
+    "GitHub's checks on the final commit still show red from before the plan was approved."
+   ]
+  },
+  "verdict": "approve",
+  "summary": "The code does what the four criteria ask, and every test passes; GitHub's checks must turn green before merging.",
+  "raises": [],
+  "answers": [],
+  "asks": [],
+  "behaviors": [
+   {
+    "criterion": "666.1",
+    "one_behavior": true,
+    "why": "The scope is the criteria's files plus the plan's test files."
+   },
+   {
+    "criterion": "666.2",
+    "one_behavior": true,
+    "why": "A plan with a scope field is rejected."
+   },
+   {
+    "criterion": "666.3",
+    "one_behavior": true,
+    "why": "The fence undoes changes to files no criterion lists."
+   },
+   {
+    "criterion": "666.4",
+    "one_behavior": true,
+    "why": "A criterion without the owner's words is rejected."
+   }
+  ],
+  "edge_cases": [
+   {
+    "criterion": "666.1",
+    "cut": [],
+    "missing": []
+   },
+   {
+    "criterion": "666.2",
+    "cut": [],
+    "missing": []
+   },
+   {
+    "criterion": "666.3",
+    "cut": [],
+    "missing": []
+   },
+   {
+    "criterion": "666.4",
+    "cut": [],
+    "missing": []
+   }
+  ],
+  "tests": [
+   {
+    "test": "tests/test_scope_from_files.py::test_scope_is_the_criteria_files_plus_the_tests",
+    "only_its_behavior": true,
+    "why": "Checks the posted scope is the criteria's files plus test files, each once."
+   },
+   {
+    "test": "tests/test_scope_from_files.py::test_a_plan_with_a_scope_field_is_rejected",
+    "only_its_behavior": true,
+    "why": "Accepts a plan with no scope; rejects one with scope, even empty."
+   },
+   {
+    "test": "tests/test_scope_from_files.py::test_the_planner_is_not_told_to_write_a_scope_field",
+    "only_its_behavior": true,
+    "why": "The planner's instructions no longer show a scope field."
+   },
+   {
+    "test": "tests/test_scope_from_files.py::test_the_fence_undoes_files_no_criterion_lists",
+    "only_its_behavior": true,
+    "why": "Runs the real fence; listed changes stay, the unlisted one is undone."
+   },
+   {
+    "test": "tests/test_scope_from_files.py::test_the_fence_removes_a_new_file_no_criterion_lists",
+    "only_its_behavior": true,
+    "why": "Runs the real fence; a new unlisted file is removed."
+   },
+   {
+    "test": "tests/test_criteria_quote_owner.py::test_a_criterion_without_the_owners_words_at_its_source_is_refused",
+    "only_its_behavior": true,
+    "why": "Accepts the owner's words; refuses missing, invented or misplaced words."
+   }
+  ],
+  "size": "ok"
+ },
+ "check": {
+  "passed": true,
+  "problems": []
+ },
+ "url": "https://github.com/dokima-dev/dokima/pull/693#issuecomment-6179533633"
+}
