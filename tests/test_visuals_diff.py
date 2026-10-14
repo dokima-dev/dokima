@@ -14,9 +14,10 @@ Story 3 of #584. Builds on `tools/visuals.py draw` (#624) and `preview` (#625).
    cannot give, or a BRANCH that does not exist, ends it with a non-zero exit and one plain message naming it, never a
    traceback.
 
-2. Checks that post to or read from real GitHub (the card-gallery previews) live in `nightly/`, outside `tests/`, so
-   the all tests check (`pytest tests`, in full-suite.yml) never runs them. `.github/workflows/visuals-nightly.yml`
-   runs them on a schedule (and on Run workflow), never on a pull request, push or merge queue, with a GitHub token.
+2. Checks that post to or read from real GitHub (the card-gallery previews) live in `tests/nightly/`, and
+   `tests/conftest.py` leaves them out of every run that does not name that folder, so neither the all tests check
+   (`pytest tests`, in full-suite.yml) nor a bare `pytest` collects them. `.github/workflows/visuals-nightly.yml`
+   runs them, by naming `tests/nightly`, on a schedule (and on Run workflow), never on a pull request, push or merge queue, with a GitHub token.
    They call the real `gh`: when GitHub refuses, they fail and say GitHub's reason; they never skip.
 
 3. The tool stays ours: nothing in the `dokima/` package names it, and no workflow but the nightly one runs it.
@@ -43,7 +44,7 @@ from tests.test_visuals_draw import ISSUE, PLAN_SUMMARY, REPO  # noqa: E402
 
 WORKFLOWS = os.path.join(ROOT, ".github", "workflows")
 NIGHTLY_FLOW = os.path.join(WORKFLOWS, "visuals-nightly.yml")
-NIGHTLY = os.path.join(ROOT, "nightly")
+NIGHTLY = os.path.join(ROOT, "tests", "nightly")
 SAME = "No line differs from main."
 GALLERY = "dokima-dev/card-gallery"
 
@@ -200,8 +201,8 @@ def test_nightly_runs_real_checks_on_schedule_only(record_property):
     """Real GitHub checks run at night, and never in each pull request's tests.
 
     Reads the nightly workflow: it starts on a schedule with a cron time, on no pull request, push or merge queue,
-    and one step runs pytest on `nightly/` with a GitHub token. Checks `nightly/` holds checks and lies outside every
-    path the all tests check runs. Proves 626.2."""
+    and one step runs pytest on `tests/nightly` with a GitHub token. Checks `tests/nightly` holds checks, and that
+    neither the all tests check's own pytest paths nor a bare pytest from the root collects any of them. Proves 626.2."""
     record_property("proves", "626.2")
     wf = nightly_flow()
     on = wf.get("on")
@@ -211,29 +212,35 @@ def test_nightly_runs_real_checks_on_schedule_only(record_property):
     assert any(crons), "626.2: the nightly workflow's schedule names no cron time"
     extra = set(on) - {"schedule", "workflow_dispatch"}
     assert not extra, f"626.2: the nightly workflow also starts on {sorted(extra)}, so real checks run outside the night"
-    steps = [(t, e) for t, e in runs(wf) if "pytest" in t and "nightly" in t]
-    assert steps, "626.2: no step of the nightly workflow runs pytest on nightly/"
-    assert any("GH_TOKEN" in e for _, e in steps), "626.2: the step running nightly/ holds no GH_TOKEN to reach GitHub"
+    steps = [(t, e) for t, e in runs(wf) if "pytest" in t and "tests/nightly" in t]
+    assert steps, "626.2: no step of the nightly workflow runs pytest on tests/nightly"
+    assert any("GH_TOKEN" in e for _, e in steps), "626.2: the step running tests/nightly holds no GH_TOKEN to reach GitHub"
     checks = [f for f in (os.listdir(NIGHTLY) if os.path.isdir(NIGHTLY) else []) if f.startswith("test_") and f.endswith(".py")]
-    assert checks, "626.2: nightly/ holds no check file"
-    for p in suite_paths():
-        full = os.path.abspath(os.path.join(ROOT, p))
-        assert not (NIGHTLY + os.sep).startswith(full + os.sep), \
-            f"626.2: the all tests check runs {p!r}, which holds nightly/, so real checks run on every pull request"
+    assert checks, "626.2: tests/nightly holds no check file"
+    for name, paths in (("the all tests check", suite_paths()), ("a bare pytest from the root", [])):
+        r = subprocess.run([sys.executable, "-m", "pytest", "--collect-only", "-q", "-p", "no:cacheprovider", *paths],
+                           cwd=ROOT, capture_output=True, text=True, timeout=300)
+        collected = [line for line in r.stdout.splitlines() if line.startswith("tests/nightly/")]
+        assert not collected, f"626.2: {name} collects real GitHub checks, so they run on every pull request: {collected[:3]}"
 
 
 def test_nightly_checks_fail_when_github_refuses(tmp_path, record_property):
     """The nightly checks really call GitHub, and fail saying why when it refuses.
 
-    Runs nightly/ from a throwaway copy of the repo with a fake `gh` that logs and refuses every call. Checks the
-    checks ran (none skipped), called `gh` on the card-gallery repo, failed, and their output names GitHub's refusal. Proves 626.2."""
+    Runs the nightly workflow's own pytest command from a throwaway copy of the repo with a fake `gh` that logs and
+    refuses every call. Checks the checks ran (none skipped), called `gh` on the card-gallery repo, failed, and their
+    output names GitHub's refusal. Proves 626.2."""
     record_property("proves", "626.2")
+    commands = [line.strip() for text, _ in runs(nightly_flow()) for line in text.splitlines()
+                if "pytest" in line and "tests/nightly" in line]
+    assert commands, "626.2: no step of the nightly workflow runs pytest on tests/nightly"
     if not os.path.isdir(NIGHTLY):
-        pytest.fail("626.2: there is no nightly/ folder holding the real GitHub checks")
+        pytest.fail("626.2: there is no tests/nightly folder holding the real GitHub checks")
     repo = tmp_path / "checkout"
-    for d in ("dokima", "tools", "nightly"):
+    for d in ("dokima", "tools", os.path.join("tests", "nightly")):
         if os.path.isdir(os.path.join(ROOT, d)):
             shutil.copytree(os.path.join(ROOT, d), repo / d, ignore=shutil.ignore_patterns("__pycache__"))
+    shutil.copy(os.path.join(ROOT, "tests", "conftest.py"), repo / "tests" / "conftest.py")
     story1.git(repo, "init", "-q", "-b", "main")
     story1.git(repo, "config", "user.name", "Test")
     story1.git(repo, "config", "user.email", "test@example.com")
@@ -248,10 +255,10 @@ def test_nightly_checks_fail_when_github_refuses(tmp_path, record_property):
     env = {k: v for k, v in os.environ.items() if k not in ("DOKIMA_BOT", "GITHUB_REPOSITORY", "REPO")}
     env.update(PATH=f"{bin_dir}{os.pathsep}{env.get('PATH', '')}", VISUALS_LOG=str(log), GH_TOKEN="fake-token",
                PYTHONPATH=str(repo))
-    r = subprocess.run([sys.executable, "-m", "pytest", "-q", "-rs", "-p", "no:cacheprovider", "nightly"], cwd=repo,
-                       env=env, capture_output=True, text=True, timeout=300)
+    env["PATH"] = f"{bin_dir}{os.pathsep}{os.path.dirname(sys.executable)}{os.pathsep}{env.get('PATH', '')}"
+    r = subprocess.run(["bash", "-c", commands[0]], cwd=repo, env=env, capture_output=True, text=True, timeout=300)
     said = r.stdout + r.stderr
-    assert r.returncode != 5, f"626.2: pytest found no check in nightly/:\n{said}"
+    assert r.returncode not in (5, 127), f"626.2: `{commands[0]}` ran no check in tests/nightly:\n{said}"
     assert "skipped" not in said.lower(), f"626.2: a nightly check skipped instead of calling GitHub:\n{said}"
     calls = log.read_text().strip()
     assert calls, f"626.2: the nightly checks never called gh, so they do not reach real GitHub:\n{said}"
@@ -276,11 +283,11 @@ def test_tool_is_never_part_of_dokima(record_property):
                 text = open(path, encoding="utf-8").read()
             except UnicodeDecodeError:
                 continue
-            if "visuals" in text or "tools/" in text or "nightly/" in text:
+            if "visuals" in text or "tools/" in text or "tests/nightly" in text:
                 named.append(os.path.relpath(path, ROOT))
     assert not named, f"626.3: Dokima's own code names our tool, so it ships with the product: {named}"
     nightly_flow("626.3")
     naming = sorted(f for f in os.listdir(WORKFLOWS) if f.endswith((".yml", ".yaml"))
-                    and any(w in open(os.path.join(WORKFLOWS, f)).read() for w in ("visuals", "nightly/", "tools/")))
+                    and any(w in open(os.path.join(WORKFLOWS, f)).read() for w in ("visuals", "tests/nightly", "tools/")))
     assert naming == ["visuals-nightly.yml"], \
         f"626.3: the workflows naming our tool are {naming}, not only visuals-nightly.yml"
