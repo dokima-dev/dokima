@@ -1,0 +1,40 @@
+{
+ "role": "worker",
+ "stage": null,
+ "run_id": "38632759525",
+ "commit_before": "8cc48d9b7e6780b1db8ef64b25092adc92df7e68",
+ "started_by": "dokima-runtime[bot]",
+ "models": [
+  "claude-opus-5-5"
+ ],
+ "report": {
+  "duration_ms": 109847,
+  "turns": 10,
+  "cost_usd": 0.32529660000000005,
+  "tokens_in": 317275,
+  "tokens_out": 2288
+ },
+ "log": "https://github.com/dokima-dev/dokima/blob/logs/logs/670/38632759525-worker.md",
+ "run": "https://github.com/dokima-dev/dokima/actions/runs/38632759525",
+ "handback": {
+  "summary": "The card now marks a criterion with no automated test as not verified.",
+  "criteria": {
+   "670.1": "Already built: `passing_today` in `dokima/planner.py` rejects a passing or skipped new test; its test passed before any change.",
+   "670.2": "Already built: `dokima/roles/planner.md` says an untestable ask becomes a question; its test passed before any change.",
+   "670.3": "`criterion_item` in `dokima/card.py` adds a 'Not verified' line under any criterion or non-functional requirement with no test."
+  },
+  "evidence": "`pytest -q tests/test_card_not_verified.py` plus the 670.1 and 670.2 tests: 7 passed.",
+  "raises": [],
+  "answers": []
+ },
+ "check": {
+  "passed": true,
+  "problems": []
+ },
+ "dropped_by_fence": [],
+ "files_changed": [
+  "dokima/card.py"
+ ],
+ "branch": "try/issue-670",
+ "url": "https://github.com/dokima-dev/dokima/issues/670#issuecomment-6177802179"
+}
