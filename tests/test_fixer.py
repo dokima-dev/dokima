@@ -14,6 +14,7 @@ import tempfile
 
 sys.path.insert(0, os.path.join(os.path.dirname(__file__), ".."))
 from dokima import agent  # noqa: E402
+import record_seed  # noqa: E402
 
 ROOT = os.path.abspath(os.path.join(os.path.dirname(__file__), ".."))
 STORY = {"kind": "user_story", "user_story": "u",
@@ -148,6 +149,7 @@ def fake_github(monkeypatch, recs):
             return "[]"  # the repo's open issues, which the planner's pack lists
         raise AssertionError(f"unexpected gh call {args}")
     monkeypatch.setattr(agent, "gh", gh)
+    record_seed.use(monkeypatch, 9, recs)  # since #610 records come from record files, not comments
 
 
 def test_the_planner_answers_the_test_blockers_and_the_worker_the_code_ones(record_property, tmp_path, monkeypatch):

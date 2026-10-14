@@ -3,7 +3,7 @@
 Today a record lives as JSON inside the bot's comment, and anyone with write access can edit or delete a comment. The
 owner's words (#560, comment of 2026-10-12): "Each agent's JSON hand-back is saved as its own file on a protected
 branch (one file per record, never edited)", and "Starting packs build every earlier record from record files with no
-API call, and no code reads a record from a comment."
+API call, and no code reads a record from a comment." On this issue the owner left the card's readers to #613.
 
 What the code these tests run must do, as the plan pins it:
 - `python3 -m dokima.agent save-record N OUT` saves OUT/record.json as one new file under `logs/N/records/` on the
@@ -11,7 +11,9 @@ What the code these tests run must do, as the plan pins it:
   twice. A remote with no `logs` branch yet gets one. The logs remote is the git URL in DOKIMA_LOGS_REMOTE when set,
   else the repo itself on GitHub.
 - `agent.pack()` reads every earlier record of issue N from those files, fetched from the logs remote with git, oldest
-  saved first, and makes no GitHub call for them. A bot comment carrying a record's JSON counts for nothing.
+  saved first (by the commit that added each file), and makes no GitHub call for them. It writes each record to in/
+  as the file holds it. A bot comment carrying a record's JSON counts for nothing. The card's own readers move to #613,
+  as the owner decided on this issue.
 - agent.yml's run job saves the record in a step that always runs, after the record is written; its unrecorded job
   saves the failed record it writes.
 
@@ -20,7 +22,6 @@ The tests use a local bare git repo as the logs remote and fake GitHub (gh) in-p
 import glob
 import json
 import os
-import re
 import subprocess
 import sys
 
@@ -253,31 +254,28 @@ def test_a_starting_pack_holds_every_earlier_record_from_record_files(record_pro
 
 # 610.3 ---------------------------------------------------------------------------------------------------------------
 
-def test_no_code_reads_a_record_from_a_comment(record_property, monkeypatch, tmp_path):
-    """A record in the bot's comment counts for nothing: only record files are read.
+def test_a_run_never_reads_a_record_from_a_comment(record_property, monkeypatch, tmp_path):
+    """A record in the bot's comment counts for nothing: a run reads only record files.
 
     Fakes an issue whose bot comment carries a passed plan's JSON, the way records were posted until now, with no
-    record file saved. Checks the pack holds no record and no plan, that no record is read from that comment, and
-    that no Dokima module still holds the pattern that pulls a record's JSON out of a comment.
+    record file saved, and builds a plan review's starting pack. Checks the pack holds no record and no plan. Then
+    saves the same record as a file and checks the pack holds it, so the pack does read records, only never from a
+    comment. The card's own readers move to #613, as the owner decided on this issue.
 
     Proves 610.3."""
     record_property("proves", "610.3")
-    monkeypatch.setenv("DOKIMA_LOGS_REMOTE", str(bare_remote(tmp_path)))
+    remote = bare_remote(tmp_path)
+    monkeypatch.setenv("DOKIMA_LOGS_REMOTE", str(remote))
     fake_github(monkeypatch, [bot_comment(PLANNER)])
     dest = tmp_path / "pack"
     agent.pack(REPO, N, "reviewer", "plan", str(dest))
     assert packed(dest) == [], "610.3: the pack read a record from the bot's comment"
     assert not (dest / "plan.json").exists(), "610.3: the pack took its plan from the bot's comment"
-    for name, arg in (("records", [bot_comment(PLANNER)]), ("is_record", bot_comment(PLANNER))):
-        fn = getattr(agent, name, None)
-        if callable(fn):
-            got = fn(arg)
-            assert not got, f"610.3: agent.{name}() still reads a record from a comment: {got!r}"
-    fence = re.compile(r"json\\n\(")
-    for path in glob.glob(os.path.join(ROOT, "dokima", "*.py")):
-        src = open(path).read()
-        assert not fence.search(src), \
-            f"610.3: {os.path.relpath(path, ROOT)} still pulls a record's JSON out of a comment's ```json block"
+    save(tmp_path, remote, PLANNER, "out", "610.3")
+    again = tmp_path / "pack-again"
+    agent.pack(REPO, N, "reviewer", "plan", str(again))
+    got = packed(again)
+    assert len(got) == 1 and same(got[0], PLANNER), "610.3: with the record saved as a file, the pack still lacks it"
 
 
 def test_an_edited_record_comment_changes_nothing_a_run_reads(record_property, monkeypatch, tmp_path):

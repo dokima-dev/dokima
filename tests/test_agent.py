@@ -6,6 +6,7 @@ import sys
 
 sys.path.insert(0, os.path.join(os.path.dirname(__file__), ".."))
 from dokima import agent, fence  # noqa: E402
+import record_seed  # noqa: E402
 
 GOOD_REVIEW = {"previous_step": {"did": ["Split the issue into four stories."], "decided": [], "open": ["Three questions."]},
                "stage": "plan", "round": 1, "verdict": "block", "summary": "One test is missing.",
@@ -190,6 +191,7 @@ def test_the_pack_reads_the_issue_and_its_pr_as_one_conversation(record_property
             return "[]"
         raise AssertionError(args)
     monkeypatch.setattr(agent, "gh", fake_gh)
+    record_seed.use(monkeypatch, 7, [plan])  # since #610 records come from record files, not comments
     assert agent.pack("o/r", 7, "reviewer", "plan", str(tmp_path / "p"))
     text = (tmp_path / "p" / "issue.md").read_text()
     order = [text.index(x) for x in ("/plan first", "line note", "dokima-record", "/work change it", "rename this")]
