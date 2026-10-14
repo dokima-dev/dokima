@@ -1,0 +1,48 @@
+{
+ "role": "worker",
+ "stage": null,
+ "run_id": "38604363183",
+ "commit_before": "9e605d7831b4de6cdb2e6342088b04fec6b049bf",
+ "started_by": "RezaSoleymanifar",
+ "models": [
+  "claude-opus-5-5"
+ ],
+ "report": {
+  "duration_ms": 253707,
+  "turns": 13,
+  "cost_usd": 0.7117458000000001,
+  "tokens_in": 625317,
+  "tokens_out": 10507
+ },
+ "log": "https://github.com/dokima-dev/dokima/blob/logs/logs/662/38604363183-worker.md",
+ "run": "https://github.com/dokima-dev/dokima/actions/runs/38604363183",
+ "handback": {
+  "summary": "A clash with main inside a test file is now handed to the planner, and the worker keeps its resolution.",
+  "criteria": {
+   "662.1": "`.github/workflows/agent.yml` Starting branch: the planner gets each test both sides changed with clash markers, named in its commit.",
+   "662.2": "`.github/workflows/agent.yml` Starting branch: the worker's merge keeps the planner's resolved test when the branch names that main copy.",
+   "662.3": "Follows from 662.2: the resolved test is not listed as clashed, so the fence finds no markers in it."
+  },
+  "evidence": "`pytest -q tests/test_test_clash_planner.py`: 3 passed.",
+  "raises": [
+   {
+    "kind": "issue",
+    "label": "No marker check",
+    "text": "The planner's check does not reject conflict markers left in tests; the worker then gets the clash back.",
+    "evidence": "`dokima/planner.py` check reads no conflict markers; only `dokima/fence.py` `marked()` does, for the worker.",
+    "raised_by": "worker",
+    "id": "W1"
+   }
+  ]
+ },
+ "check": {
+  "passed": true,
+  "problems": []
+ },
+ "dropped_by_fence": [],
+ "files_changed": [
+  ".github/workflows/agent.yml"
+ ],
+ "branch": "try/issue-662",
+ "url": "https://github.com/dokima-dev/dokima/issues/662#issuecomment-6173954734"
+}
