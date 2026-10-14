@@ -275,9 +275,9 @@ def test_finalize_saves_comment_inputs(place, record_property):
 
     # What `draw` hands its painter for each autopilot comment of story 1's issue 7, oldest first.
     auto = [{"kind": "line", "url": url(2)},
-            {"kind": "start", "url": url(7)},
             {"kind": "lines", "key": "worker", "url": url(5)},
             {"kind": "reply", "args": [ISSUE, "start", [ISSUE], [], "No stage was started."], "url": url(6)},
+            {"kind": "start", "url": url(7)},
             {"kind": "merge", "key": "merged", "pr": 9, "url": url(8)}]
     got = [x for x in posts if x.get("kind") != "record"]
     assert got == auto, f"627.1: the saved autopilot posts cannot word the issue's autopilot comments again.\n" \
