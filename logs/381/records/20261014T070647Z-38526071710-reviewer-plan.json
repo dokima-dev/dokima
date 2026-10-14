@@ -1,0 +1,231 @@
+{
+ "role": "reviewer",
+ "stage": "plan",
+ "run_id": "38526071710",
+ "commit_before": "0583e0bcc0faafc2a1bdebe51c8a62899dc40f9e",
+ "started_by": "dokima-runtime[bot]",
+ "models": [
+  "claude-opus-5-5"
+ ],
+ "report": {
+  "duration_ms": 60191,
+  "turns": 6,
+  "cost_usd": 0.3958267999999999,
+  "tokens_in": 209290,
+  "tokens_out": 6213
+ },
+ "log": "https://github.com/dokima-dev/dokima/blob/logs/logs/381/38526071710-reviewer-plan.md",
+ "run": "https://github.com/dokima-dev/dokima/actions/runs/38526071710",
+ "handback": {
+  "previous_step": {
+   "did": [
+    "The planner split the issue into four stories from the owner's newest design.",
+    "The planner raised three questions for the owner."
+   ],
+   "decided": [
+    "Only split stories are checked; issues never split are not.",
+    "Approved pull requests hold a story back, autopilot or not."
+   ],
+   "open": [
+    "The owner answers whether single issues, owner commands and approved pull requests change the wait."
+   ]
+  },
+  "verdict": "approve",
+  "summary": "The split carries every ask of the newest design; three questions wait for the owner.",
+  "raises": [],
+  "answers": [],
+  "asks": [
+   {
+    "ask": "Issues run in parallel only when their changes cannot clash",
+    "source": "https://github.com/dokima-dev/dokima/issues/381",
+    "criterion": "S2.1"
+   },
+   {
+    "ask": "A split's parent plan gives every child story a mandatory `scope` (files it will change, new files marked new)",
+    "source": "https://github.com/dokima-dev/dokima/issues/381#issuecomment-6138002372",
+    "criterion": "S1.1"
+   },
+   {
+    "ask": "code checks it is non-empty",
+    "source": "https://github.com/dokima-dev/dokima/issues/381#issuecomment-6138002372",
+    "criterion": "S1.2"
+   },
+   {
+    "ask": "each file exists or is marked new",
+    "source": "https://github.com/dokima-dev/dokima/issues/381#issuecomment-6138002372",
+    "criterion": "S1.3"
+   },
+   {
+    "ask": "running work (its plan's scope)",
+    "source": "https://github.com/dokima-dev/dokima/issues/381#issuecomment-6138002372",
+    "criterion": "S2.1"
+   },
+   {
+    "ask": "open pull requests at the merge gate (the files they change)",
+    "source": "https://github.com/dokima-dev/dokima/issues/381#issuecomment-6138002372",
+    "criterion": "S2.2"
+   },
+   {
+    "ask": "Before a child plans, code compares its scope with everything in flight in the repo",
+    "source": "https://github.com/dokima-dev/dokima/issues/381#issuecomment-6138002372",
+    "criterion": "S2.3"
+   },
+   {
+    "ask": "Siblings that share nothing are still checked against all in-flight work, not started blindly together.",
+    "source": "https://github.com/dokima-dev/dokima/issues/381#issuecomment-6138002372",
+    "criterion": "S2.4"
+   },
+   {
+    "ask": "its card names what it waits on",
+    "source": "https://github.com/dokima-dev/dokima/issues/381#issuecomment-6138002372",
+    "criterion": "S2.5"
+   },
+   {
+    "ask": "Released when that work merges or closes; then it plans against the new main",
+    "source": "https://github.com/dokima-dev/dokima/issues/381#issuecomment-6138002372",
+    "criterion": "S3.1"
+   },
+   {
+    "ask": "Released when that work merges or closes",
+    "source": "https://github.com/dokima-dev/dokima/issues/381#issuecomment-6138002372",
+    "criterion": "S3.2"
+   },
+   {
+    "ask": "If its full plan needs a file outside its split scope, the same check runs again before work.",
+    "source": "https://github.com/dokima-dev/dokima/issues/381#issuecomment-6138002372",
+    "criterion": "S4.1"
+   }
+  ],
+  "behaviors": [
+   {
+    "criterion": "S1.1",
+    "one_behavior": true,
+    "why": "Each story carries a file list."
+   },
+   {
+    "criterion": "S1.2",
+    "one_behavior": true,
+    "why": "One rejection: a story with no files."
+   },
+   {
+    "criterion": "S1.3",
+    "one_behavior": true,
+    "why": "One rejection: a missing file not marked new."
+   },
+   {
+    "criterion": "S2.1",
+    "one_behavior": true,
+    "why": "One wait: a file shared with running work."
+   },
+   {
+    "criterion": "S2.2",
+    "one_behavior": true,
+    "why": "One wait: a file shared with an approved pull request."
+   },
+   {
+    "criterion": "S2.3",
+    "one_behavior": true,
+    "why": "One pass: nothing shared, planning starts."
+   },
+   {
+    "criterion": "S2.4",
+    "one_behavior": true,
+    "why": "One wait: a sibling sharing a file."
+   },
+   {
+    "criterion": "S2.5",
+    "one_behavior": true,
+    "why": "One card line naming the wait."
+   },
+   {
+    "criterion": "S3.1",
+    "one_behavior": true,
+    "why": "One release: on merge."
+   },
+   {
+    "criterion": "S3.2",
+    "one_behavior": true,
+    "why": "One release: on close without merge."
+   },
+   {
+    "criterion": "S4.1",
+    "one_behavior": true,
+    "why": "One wait before work."
+   },
+   {
+    "criterion": "S4.2",
+    "one_behavior": true,
+    "why": "One release before work."
+   }
+  ],
+  "edge_cases": [
+   {
+    "criterion": "S1.1",
+    "cut": [],
+    "missing": []
+   },
+   {
+    "criterion": "S1.2",
+    "cut": [],
+    "missing": []
+   },
+   {
+    "criterion": "S1.3",
+    "cut": [],
+    "missing": []
+   },
+   {
+    "criterion": "S2.1",
+    "cut": [],
+    "missing": []
+   },
+   {
+    "criterion": "S2.2",
+    "cut": [],
+    "missing": []
+   },
+   {
+    "criterion": "S2.3",
+    "cut": [],
+    "missing": []
+   },
+   {
+    "criterion": "S2.4",
+    "cut": [],
+    "missing": []
+   },
+   {
+    "criterion": "S2.5",
+    "cut": [],
+    "missing": []
+   },
+   {
+    "criterion": "S3.1",
+    "cut": [],
+    "missing": []
+   },
+   {
+    "criterion": "S3.2",
+    "cut": [],
+    "missing": []
+   },
+   {
+    "criterion": "S4.1",
+    "cut": [],
+    "missing": []
+   },
+   {
+    "criterion": "S4.2",
+    "cut": [],
+    "missing": []
+   }
+  ],
+  "tests": [],
+  "size": "ok"
+ },
+ "check": {
+  "passed": true,
+  "problems": []
+ },
+ "url": "https://github.com/dokima-dev/dokima/issues/381#issuecomment-6162866557"
+}
