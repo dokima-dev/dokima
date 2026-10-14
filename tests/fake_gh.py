@@ -10,6 +10,7 @@ What it answers (OWNER/REPO is the state's repo; any other repo is logged as uns
     gh api [-X GET] repos/OWNER/REPO/labels[?...]                       labels, as GitHub's REST list
     gh api [-X GET] repos/OWNER/REPO/branches/main/protection[/required_status_checks]
                                                                         main's rule; 404 "Branch not protected" if none
+                                        its "strict" (must be up to date) is the state's "strict"[branch], true when absent
                                         the full rule lists the state's "review_bypass_apps" (app ids) as
                                         required_pull_request_reviews.bypass_pull_request_allowances.apps
     gh api [-X GET] repos/OWNER/REPO/rulesets[?...]                     the state's "rulesets" (none when absent), listed
@@ -193,7 +194,7 @@ def rest(state, method, path, fields):
         if "protection" in fail:
             refuse(state, fail["protection"])
         checks = state["protection"].get(b.group(1))
-        rule = None if checks is None else {"strict": True, "contexts": list(checks),
+        rule = None if checks is None else {"strict": state.get("strict", {}).get(b.group(1), True), "contexts": list(checks),
                                             "checks": [{"context": c, "app_id": None} for c in checks]}
         reply(state, {"name": b.group(1), "protected": rule is not None,
                       "protection": {"enabled": rule is not None, **({"required_status_checks": rule} if rule else {})}})
@@ -205,7 +206,7 @@ def rest(state, method, path, fields):
         if checks is None:
             refuse(state, "Branch not protected (HTTP 404)",
                    {"message": "Branch not protected", "status": "404"})
-        inner = {"strict": True, "contexts": list(checks), "checks": [{"context": c, "app_id": None} for c in checks]}
+        inner = {"strict": state.get("strict", {}).get(m.group(1), True), "contexts": list(checks), "checks": [{"context": c, "app_id": None} for c in checks]}
         if m.group(2):
             reply(state, inner)
         full = {"required_status_checks": inner}
