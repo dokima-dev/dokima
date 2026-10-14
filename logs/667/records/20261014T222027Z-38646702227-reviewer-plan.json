@@ -1,0 +1,200 @@
+{
+ "role": "reviewer",
+ "stage": "plan",
+ "run_id": "38646702227",
+ "commit_before": "9a7eaf4fa3fa35443cb89079a3141027192fe264",
+ "started_by": "dokima-runtime[bot]",
+ "models": [
+  "claude-opus-5-5"
+ ],
+ "report": {
+  "duration_ms": 85533,
+  "turns": 10,
+  "cost_usd": 0.5884971999999999,
+  "tokens_in": 402266,
+  "tokens_out": 7770
+ },
+ "log": "https://github.com/dokima-dev/dokima/blob/logs/logs/667/38646702227-reviewer-plan.md",
+ "run": "https://github.com/dokima-dev/dokima/actions/runs/38646702227",
+ "handback": {
+  "previous_step": {
+   "did": [
+    "The test for 667.1 now groups a requirement with the criterion sharing its code file.",
+    "The test for 667.4 now also catches the at most five wording."
+   ],
+   "decided": [
+    "A story of a parent never splits again, kept by an old test only."
+   ],
+   "open": [
+    "Asks the owner whether regrouping a grown story goes to its own issue."
+   ]
+  },
+  "verdict": "block",
+  "summary": "All five tests fail today for the right reason, but the owner's one level answer has no criterion.",
+  "raises": [
+   {
+    "kind": "blocker",
+    "to": "planner",
+    "label": "One level: no criterion",
+    "text": "The owner answered 'No second split, ever. A story keeps one level.' No criterion carries it; only an edited old test does. Add a criterion for it, proven by `tests/test_size_rule.py::test_a_story_of_a_parent_never_splits_again`.",
+    "evidence": "Owner's comment of 2026-10-14T22:05 on #667, point 1; plan.json criteria 667.1 to 667.5 hold no such rule.",
+    "raised_by": "reviewer",
+    "id": "R7"
+   },
+   {
+    "kind": "question",
+    "to": "owner",
+    "label": "Doubt: own rule",
+    "text": "Under the new rule this plan is two stories: 667.4 shares no code file. Keep one story? Assumed yes.",
+    "evidence": "plan.json: 667.4 lists only `dokima/agent_checks.py` and markdown; 667.1 to 667.3 and 667.5 list `dokima/planner.py`.",
+    "raised_by": "reviewer",
+    "id": "R8"
+   }
+  ],
+  "answers": [],
+  "asks": [
+   {
+    "ask": "Code groups criteria that share any code file into one story (a sub-issue).",
+    "source": "https://github.com/dokima-dev/dokima/issues/667",
+    "criterion": "667.1"
+   },
+   {
+    "ask": "Criteria with no code file in common become separate stories.",
+    "source": "https://github.com/dokima-dev/dokima/issues/667",
+    "criterion": "667.2"
+   },
+   {
+    "ask": "No count of criteria or stories splits or refuses a plan",
+    "source": "https://github.com/dokima-dev/dokima/issues/667",
+    "criterion": "667.3"
+   },
+   {
+    "ask": "today's count rules are gone",
+    "source": "https://github.com/dokima-dev/dokima/issues/667",
+    "criterion": "667.4"
+   },
+   {
+    "ask": "Two criteria that share only a markdown file stay in separate stories.",
+    "source": "https://github.com/dokima-dev/dokima/issues/667",
+    "criterion": "667.5"
+   },
+   {
+    "ask": "Each edge case stays under its criterion and never changes how criteria group.",
+    "source": "https://github.com/dokima-dev/dokima/issues/667",
+    "criterion": "667.2"
+   },
+   {
+    "ask": "the planner hands back criteria with files and code computes the groups",
+    "source": "https://github.com/dokima-dev/dokima/issues/667",
+    "criterion": "667.1"
+   },
+   {
+    "ask": "No second split, ever. A story keeps one level.",
+    "source": "https://github.com/dokima-dev/dokima/issues/667",
+    "criterion": "missing"
+   },
+   {
+    "ask": "When a story's scope grows, the new criteria go back to the parent and code regroups there",
+    "source": "https://github.com/dokima-dev/dokima/issues/667",
+    "criterion": "missing"
+   },
+   {
+    "ask": "Fine: prove it under 667.2 for now; this story removes the cap.",
+    "source": "https://github.com/dokima-dev/dokima/issues/667",
+    "criterion": "667.2"
+   },
+   {
+    "ask": "code groups the stories, the planner writes each story's title and story text.",
+    "source": "https://github.com/dokima-dev/dokima/issues/667",
+    "criterion": "667.1"
+   }
+  ],
+  "behaviors": [
+   {
+    "criterion": "667.1",
+    "one_behavior": true,
+    "why": "Criteria sharing a code file, even through another, form one story."
+   },
+   {
+    "criterion": "667.2",
+    "one_behavior": true,
+    "why": "Criteria with no shared code file form separate stories."
+   },
+   {
+    "criterion": "667.3",
+    "one_behavior": true,
+    "why": "No count refuses a plan."
+   },
+   {
+    "criterion": "667.4",
+    "one_behavior": true,
+    "why": "The written count rules are gone from the instructions."
+   },
+   {
+    "criterion": "667.5",
+    "one_behavior": true,
+    "why": "A shared markdown file never joins criteria."
+   }
+  ],
+  "edge_cases": [
+   {
+    "criterion": "667.1",
+    "cut": [],
+    "missing": []
+   },
+   {
+    "criterion": "667.2",
+    "cut": [],
+    "missing": []
+   },
+   {
+    "criterion": "667.3",
+    "cut": [],
+    "missing": []
+   },
+   {
+    "criterion": "667.4",
+    "cut": [],
+    "missing": []
+   },
+   {
+    "criterion": "667.5",
+    "cut": [],
+    "missing": []
+   }
+  ],
+  "tests": [
+   {
+    "test": "tests/test_story_groups.py::test_criteria_sharing_a_code_file_are_put_in_the_same_story",
+    "only_its_behavior": true,
+    "why": "Checks code's groups and the check's verdicts for shared files, including a requirement."
+   },
+   {
+    "test": "tests/test_story_groups.py::test_criteria_with_no_code_file_in_common_become_separate_stories",
+    "only_its_behavior": true,
+    "why": "Checks two groups, both refusals and the accepted split keeping edge cases."
+   },
+   {
+    "test": "tests/test_story_groups.py::test_no_count_of_criteria_or_stories_refuses_a_plan",
+    "only_its_behavior": true,
+    "why": "Six criteria, seven stories and a nested six pass; an empty story is still refused."
+   },
+   {
+    "test": "tests/test_story_groups.py::test_the_old_count_rules_are_gone_from_the_instructions",
+    "only_its_behavior": true,
+    "why": "Fails today naming each stale rule in each file."
+   },
+   {
+    "test": "tests/test_story_groups.py::test_criteria_sharing_only_a_markdown_file_stay_in_separate_stories",
+    "only_its_behavior": true,
+    "why": "Markdown-shared and docs-only pairs stay apart; the split passes."
+   }
+  ],
+  "size": "ok"
+ },
+ "check": {
+  "passed": true,
+  "problems": []
+ },
+ "url": "https://github.com/dokima-dev/dokima/issues/667#issuecomment-6179743464"
+}
