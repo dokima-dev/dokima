@@ -1,0 +1,441 @@
+{
+ "role": "reviewer",
+ "stage": "plan",
+ "run_id": "38618197851",
+ "commit_before": "ac5c8e79bf7783ec4664ac8ecb5fdb39e9db110f",
+ "started_by": "dokima-runtime[bot]",
+ "models": [
+  "claude-opus-5-5"
+ ],
+ "report": {
+  "duration_ms": 50406,
+  "turns": 8,
+  "cost_usd": 0.45844300000000004,
+  "tokens_in": 304231,
+  "tokens_out": 5205
+ },
+ "log": "https://github.com/dokima-dev/dokima/blob/logs/logs/661/38618197851-reviewer-plan.md",
+ "run": "https://github.com/dokima-dev/dokima/actions/runs/38618197851",
+ "handback": {
+  "previous_step": {
+   "did": [
+    "The planner dropped the card naming a crowded file, as the owner asked.",
+    "Criterion 4.1 now says a story's turn ends when its pull request merges.",
+    "The plan no longer links #553."
+   ],
+   "decided": [
+    "The plan keeps six stories; each story's planner writes its tests."
+   ],
+   "open": [
+    "Nothing in the plan closes #553; the owner closes it."
+   ]
+  },
+  "verdict": "approve",
+  "summary": "The plan carries every ask, including the owner's latest answers; nothing blocks it.",
+  "raises": [],
+  "answers": [],
+  "asks": [
+   {
+    "ask": "The planner tags each criterion with the code files it changes.",
+    "source": "https://github.com/dokima-dev/dokima/issues/661",
+    "criterion": "S1.1"
+   },
+   {
+    "ask": "Each criterion carries a `files` list in the plan's structured output: the code files it changes, at least one.",
+    "source": "https://github.com/dokima-dev/dokima/issues/661#issuecomment-6173691734",
+    "criterion": "S1.1"
+   },
+   {
+    "ask": "Code rejects a plan where a criterion lists none.",
+    "source": "https://github.com/dokima-dev/dokima/issues/661#issuecomment-6173691734",
+    "criterion": "S1.2"
+   },
+   {
+    "ask": "A file it creates counts by its path.",
+    "source": "https://github.com/dokima-dev/dokima/issues/661#issuecomment-6173691734",
+    "criterion": "S1.3"
+   },
+   {
+    "ask": "A criterion lists every file its behavior needs, never just one, so a behavior is never cut across stories.",
+    "source": "https://github.com/dokima-dev/dokima/issues/661#issuecomment-6173691734",
+    "criterion": "S1.4"
+   },
+   {
+    "ask": "if it can be written as code (infrastructure as code, a setup script), it's a criterion like any other.",
+    "source": "https://github.com/dokima-dev/dokima/issues/661#issuecomment-6173691734",
+    "criterion": "S1.5"
+   },
+   {
+    "ask": "The plan's scope is all criteria's files plus their tests",
+    "source": "https://github.com/dokima-dev/dokima/issues/661#issuecomment-6173691734",
+    "criterion": "S2.1"
+   },
+   {
+    "ask": "with no separate scope field.",
+    "source": "https://github.com/dokima-dev/dokima/issues/661#issuecomment-6173691734",
+    "criterion": "S2.2"
+   },
+   {
+    "ask": "The fence keeps enforcing it.",
+    "source": "https://github.com/dokima-dev/dokima/issues/661#issuecomment-6173691734",
+    "criterion": "S2.3"
+   },
+   {
+    "ask": "Each one quotes my words, which are the spec.",
+    "source": "https://github.com/dokima-dev/dokima/issues/661",
+    "criterion": "S2.4"
+   },
+   {
+    "ask": "Code groups criteria that share any code file into one story (a sub-issue).",
+    "source": "https://github.com/dokima-dev/dokima/issues/661",
+    "criterion": "S3.1"
+   },
+   {
+    "ask": "Criteria with no file in common become separate stories.",
+    "source": "https://github.com/dokima-dev/dokima/issues/661",
+    "criterion": "S3.2"
+   },
+   {
+    "ask": "No number decides it: no criteria cap, no story cap.",
+    "source": "https://github.com/dokima-dev/dokima/issues/661",
+    "criterion": "S3.3"
+   },
+   {
+    "ask": "This replaces today's count-based split rules (split above 3 criteria per story, refuse above 15 per issue).",
+    "source": "https://github.com/dokima-dev/dokima/issues/661",
+    "criterion": "S3.3"
+   },
+   {
+    "ask": "Markdown files never group criteria",
+    "source": "https://github.com/dokima-dev/dokima/issues/661",
+    "criterion": "S3.4"
+   },
+   {
+    "ask": "Edge cases stay under their criterion and don't affect the split.",
+    "source": "https://github.com/dokima-dev/dokima/issues/661",
+    "criterion": "S3.5"
+   },
+   {
+    "ask": "Stories that share a file wait their turn to build.",
+    "source": "https://github.com/dokima-dev/dokima/issues/661",
+    "criterion": "S4.1"
+   },
+   {
+    "ask": "A story's turn ends when its PR merges.",
+    "source": "https://github.com/dokima-dev/dokima/issues/661#issuecomment-6175675553",
+    "criterion": "S4.1"
+   },
+   {
+    "ask": "Planning and plan review never wait; only the worker's build does.",
+    "source": "https://github.com/dokima-dev/dokima/issues/661",
+    "criterion": "S4.2"
+   },
+   {
+    "ask": "and never make a story wait.",
+    "source": "https://github.com/dokima-dev/dokima/issues/661",
+    "criterion": "S4.3"
+   },
+   {
+    "ask": "Stories merge to main one by one. No parent branch.",
+    "source": "https://github.com/dokima-dev/dokima/issues/661",
+    "criterion": "S4.4"
+   },
+   {
+    "ask": "a story whose plan changes files beyond the ones it was assigned is checked again for clashes before it builds.",
+    "source": "https://github.com/dokima-dev/dokima/issues/661#issuecomment-6173871465",
+    "criterion": "S4.5"
+   },
+   {
+    "ask": "A step that changes no file (clicking through a console, for example) is listed on the plan as mine to do.",
+    "source": "https://github.com/dokima-dev/dokima/issues/661",
+    "criterion": "S5.1"
+   },
+   {
+    "ask": "it's a step for me on the plan, and the stories that build on it are blocked by it until I close it.",
+    "source": "https://github.com/dokima-dev/dokima/issues/661#issuecomment-6173691734",
+    "criterion": "S5.2"
+   },
+   {
+    "ask": "Nothing waits on it by itself.",
+    "source": "https://github.com/dokima-dev/dokima/issues/661",
+    "criterion": "S5.3"
+   },
+   {
+    "ask": "Red first stays: every criterion's test fails on main before work starts.",
+    "source": "https://github.com/dokima-dev/dokima/issues/661",
+    "criterion": "S6.1"
+   },
+   {
+    "ask": "An ask that can't be checked becomes a question to me",
+    "source": "https://github.com/dokima-dev/dokima/issues/661",
+    "criterion": "S6.2"
+   },
+   {
+    "ask": "or shows on the card as not verified.",
+    "source": "https://github.com/dokima-dev/dokima/issues/661",
+    "criterion": "S6.3"
+   }
+  ],
+  "behaviors": [
+   {
+    "criterion": "S1.1",
+    "one_behavior": true,
+    "why": "One action with one result the owner can see."
+   },
+   {
+    "criterion": "S1.2",
+    "one_behavior": true,
+    "why": "One action with one result the owner can see."
+   },
+   {
+    "criterion": "S1.3",
+    "one_behavior": true,
+    "why": "One action with one result the owner can see."
+   },
+   {
+    "criterion": "S1.4",
+    "one_behavior": true,
+    "why": "One action with one result the owner can see."
+   },
+   {
+    "criterion": "S1.5",
+    "one_behavior": true,
+    "why": "One action with one result the owner can see."
+   },
+   {
+    "criterion": "S2.1",
+    "one_behavior": true,
+    "why": "One action with one result the owner can see."
+   },
+   {
+    "criterion": "S2.2",
+    "one_behavior": true,
+    "why": "One action with one result the owner can see."
+   },
+   {
+    "criterion": "S2.3",
+    "one_behavior": true,
+    "why": "One action with one result the owner can see."
+   },
+   {
+    "criterion": "S2.4",
+    "one_behavior": true,
+    "why": "One action with one result the owner can see."
+   },
+   {
+    "criterion": "S3.1",
+    "one_behavior": true,
+    "why": "One action with one result the owner can see."
+   },
+   {
+    "criterion": "S3.2",
+    "one_behavior": true,
+    "why": "One action with one result the owner can see."
+   },
+   {
+    "criterion": "S3.3",
+    "one_behavior": true,
+    "why": "One action with one result the owner can see."
+   },
+   {
+    "criterion": "S3.4",
+    "one_behavior": true,
+    "why": "One action with one result the owner can see."
+   },
+   {
+    "criterion": "S3.5",
+    "one_behavior": true,
+    "why": "One action with one result the owner can see."
+   },
+   {
+    "criterion": "S4.1",
+    "one_behavior": true,
+    "why": "One action with one result the owner can see."
+   },
+   {
+    "criterion": "S4.2",
+    "one_behavior": true,
+    "why": "One action with one result the owner can see."
+   },
+   {
+    "criterion": "S4.3",
+    "one_behavior": true,
+    "why": "One action with one result the owner can see."
+   },
+   {
+    "criterion": "S4.4",
+    "one_behavior": true,
+    "why": "One action with one result the owner can see."
+   },
+   {
+    "criterion": "S4.5",
+    "one_behavior": true,
+    "why": "One action with one result the owner can see."
+   },
+   {
+    "criterion": "S5.1",
+    "one_behavior": true,
+    "why": "One action with one result the owner can see."
+   },
+   {
+    "criterion": "S5.2",
+    "one_behavior": true,
+    "why": "One action with one result the owner can see."
+   },
+   {
+    "criterion": "S5.3",
+    "one_behavior": true,
+    "why": "One action with one result the owner can see."
+   },
+   {
+    "criterion": "S6.1",
+    "one_behavior": true,
+    "why": "One action with one result the owner can see."
+   },
+   {
+    "criterion": "S6.2",
+    "one_behavior": true,
+    "why": "One action with one result the owner can see."
+   },
+   {
+    "criterion": "S6.3",
+    "one_behavior": true,
+    "why": "One action with one result the owner can see."
+   }
+  ],
+  "edge_cases": [
+   {
+    "criterion": "S1.1",
+    "cut": [],
+    "missing": []
+   },
+   {
+    "criterion": "S1.2",
+    "cut": [],
+    "missing": []
+   },
+   {
+    "criterion": "S1.3",
+    "cut": [],
+    "missing": []
+   },
+   {
+    "criterion": "S1.4",
+    "cut": [],
+    "missing": []
+   },
+   {
+    "criterion": "S1.5",
+    "cut": [],
+    "missing": []
+   },
+   {
+    "criterion": "S2.1",
+    "cut": [],
+    "missing": []
+   },
+   {
+    "criterion": "S2.2",
+    "cut": [],
+    "missing": []
+   },
+   {
+    "criterion": "S2.3",
+    "cut": [],
+    "missing": []
+   },
+   {
+    "criterion": "S2.4",
+    "cut": [],
+    "missing": []
+   },
+   {
+    "criterion": "S3.1",
+    "cut": [],
+    "missing": []
+   },
+   {
+    "criterion": "S3.2",
+    "cut": [],
+    "missing": []
+   },
+   {
+    "criterion": "S3.3",
+    "cut": [],
+    "missing": []
+   },
+   {
+    "criterion": "S3.4",
+    "cut": [],
+    "missing": []
+   },
+   {
+    "criterion": "S3.5",
+    "cut": [],
+    "missing": []
+   },
+   {
+    "criterion": "S4.1",
+    "cut": [],
+    "missing": []
+   },
+   {
+    "criterion": "S4.2",
+    "cut": [],
+    "missing": []
+   },
+   {
+    "criterion": "S4.3",
+    "cut": [],
+    "missing": []
+   },
+   {
+    "criterion": "S4.4",
+    "cut": [],
+    "missing": []
+   },
+   {
+    "criterion": "S4.5",
+    "cut": [],
+    "missing": []
+   },
+   {
+    "criterion": "S5.1",
+    "cut": [],
+    "missing": []
+   },
+   {
+    "criterion": "S5.2",
+    "cut": [],
+    "missing": []
+   },
+   {
+    "criterion": "S5.3",
+    "cut": [],
+    "missing": []
+   },
+   {
+    "criterion": "S6.1",
+    "cut": [],
+    "missing": []
+   },
+   {
+    "criterion": "S6.2",
+    "cut": [],
+    "missing": []
+   },
+   {
+    "criterion": "S6.3",
+    "cut": [],
+    "missing": []
+   }
+  ],
+  "tests": [],
+  "size": "ok"
+ },
+ "check": {
+  "passed": true,
+  "problems": []
+ },
+ "url": "https://github.com/dokima-dev/dokima/issues/661#issuecomment-6175788825"
+}
