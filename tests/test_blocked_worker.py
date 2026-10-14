@@ -26,6 +26,7 @@ import test_autopilot_river as ar
 import test_plan_links_recorded as pl
 import test_start as ts
 from dokima import agent
+from rules_files import rules_text
 
 OLD_WAIT = "Autopilot: plan approved, waiting for"
 OLD_GO = "Autopilot: blockers closed, starting work"
@@ -321,7 +322,7 @@ def test_agents_md_says_a_blocked_issue_plans_only_after_its_blockers_merge(reco
     `Autopilot: plan approved, waiting for`, `Autopilot: blockers closed, starting work` or #343's "also while it
     waits on a blocker"."""
     record_property("proves", "353.4")
-    text = open(os.path.join(ts.ROOT, "AGENTS.md")).read()
+    text = rules_text()
     sections = {m.group(1).strip(): m.group(2) for m in re.finditer(r"^## (.+?)\n(.*?)(?=^## |\Z)", text, re.S | re.M)}
     flow = next((v for k, v in sections.items() if k.startswith("The flow")), "")
     assert flow, "353.4: AGENTS.md has no The flow section"

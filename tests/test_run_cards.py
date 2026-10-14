@@ -16,6 +16,7 @@ sys.path.insert(0, os.path.join(os.path.dirname(__file__), ".."))
 from dokima import agent, card  # noqa: E402
 from dokima import agent_github  # noqa: E402
 from tests.agent_patch import patch_agent  # noqa: E402
+from rules_files import rules_text  # noqa: E402
 
 RECORD_FOLD = "<details><summary>Full record</summary>"
 FOLD = re.compile(r"<details>(.*?)</details>", re.S)
@@ -318,7 +319,7 @@ def test_agents_md_has_the_human_brain_bottleneck_principle(record_property):
     Reads the Principles section of AGENTS.md and checks one of its bullets names the human brain bottleneck, what the
     owner needs at a glance, and folds."""
     record_property("proves", "182.5")
-    text = open(os.path.join(os.path.dirname(__file__), "..", "AGENTS.md")).read()
+    text = rules_text()
     section = text.split("## Principles", 1)[-1].split("\n## ", 1)[0] if "## Principles" in text else ""
     assert section, "182.5: AGENTS.md has no Principles section"
     bullets = [l for l in section.splitlines() if l.startswith("- ")]
