@@ -1,11 +1,16 @@
 """Draw what Dokima would post on a real issue, with any branch's code.
 
     python3 tools/visuals.py draw ISSUE --branch BRANCH --repo OWNER/NAME
+    python3 tools/visuals.py preview ISSUE --branch BRANCH --repo OWNER/NAME --gallery-issue N
 
 Run from the root of a checkout. The issue is read from GitHub through `gh`, and nothing is written there. The
 drawing code is taken from BRANCH through a git worktree of it in a temporary folder, so this checkout is left as it
 is. Printed to stdout: the issue's top card, every run comment drawn again from its record, and every autopilot
 comment drawn again as BRANCH's code would word it. Autopilot comments are recognised by this checkout's own lines.
+
+`preview` posts that same drawing, with the caller's own `gh` login, as one comment on issue N of the gallery repo, so
+GitHub renders it. A hidden marker names the real issue, so a later preview of it edits that comment instead of posting
+another. Nothing is written to OWNER/NAME.
 """
 import argparse
 import json
@@ -16,6 +21,7 @@ import sys
 import tempfile
 
 ROOT = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
+GALLERY = "dokima-dev/card-gallery"
 REPLY = re.compile(r"(?:Autopilot is (?P<on>on|off) for (?P<switched>#\d+(?:, #\d+)*)\."
                    r"|#\d+ and every issue under it were already on autopilot\.(?P<none_on>)"
                    r"|No issue in #\d+'s tree was on autopilot\.(?P<none_off>))"
@@ -86,8 +92,8 @@ def commit_of(branch):
     raise Stop(f"No branch named {branch!r} here or on origin.")
 
 
-def draw(number, branch, repo):
-    """Print what `branch`'s code would post on issue `number`."""
+def draw(number, branch, repo, stdout=None):
+    """Draw what `branch`'s code would post on issue `number`, to `stdout` when given."""
     commit = commit_of(branch)
     posts = read(repo, number)
     with tempfile.TemporaryDirectory() as tmp:
@@ -100,10 +106,41 @@ def draw(number, branch, repo):
             with open(job, "w") as f:
                 json.dump({"repo": repo, "issue": number, "posts": posts}, f)
             env = dict(os.environ, PYTHONPATH=tree, GITHUB_REPOSITORY=repo)
-            r = subprocess.run([sys.executable, os.path.abspath(__file__), "paint", job], cwd=tree, env=env)
-            return r.returncode
+            return subprocess.run([sys.executable, os.path.abspath(__file__), "paint", job], cwd=tree, env=env,
+                                  stdout=stdout, text=True)
         finally:
             subprocess.run(["git", "worktree", "remove", "--force", tree], cwd=ROOT, capture_output=True)
+
+
+def gallery(*args, stdin=None):
+    """`gh api` on the gallery repo, as the caller; Stop with GitHub's reason when refused."""
+    r = subprocess.run(["gh", "api", *args], input=stdin, capture_output=True, text=True)
+    if r.returncode != 0:
+        raise Stop(" ".join((r.stderr or r.stdout).split()))
+    return r.stdout
+
+
+def preview(number, branch, repo, gallery_issue):
+    """Post the drawing as one gallery comment, editing the one an earlier preview left."""
+    r = draw(number, branch, repo, stdout=subprocess.PIPE)
+    if r.returncode != 0:
+        return r.returncode
+    marker = f"<!-- visuals-preview: {repo}#{number} -->"
+    body = json.dumps({"body": f"{marker}\n{r.stdout.strip()}"})
+    sys.path.insert(0, ROOT)
+    from dokima import agent
+    base = f"repos/{GALLERY}/issues"
+    try:
+        mine = [c for page in agent.pages(gallery(f"{base}/{gallery_issue}/comments", "--paginate")) for c in page
+                if (c.get("body") or "").startswith(marker + "\n")]
+        if mine:
+            done = gallery("-X", "PATCH", f"{base}/comments/{mine[0]['id']}", "--input", "-", stdin=body)
+        else:
+            done = gallery("-X", "POST", f"{base}/{gallery_issue}/comments", "--input", "-", stdin=body)
+    except Stop as e:
+        raise Stop(f"GitHub could not give {GALLERY}#{gallery_issue}: {e}")
+    print(json.loads(done).get("html_url", ""))
+    return 0
 
 
 def paint(job):
@@ -164,9 +201,16 @@ def main(argv):
     d.add_argument("issue", type=int)
     d.add_argument("--branch", required=True)
     d.add_argument("--repo", required=True, help="OWNER/NAME")
+    v = sub.add_parser("preview", help=f"Post that drawing as one comment on an issue of {GALLERY}.")
+    v.add_argument("issue", type=int)
+    v.add_argument("--branch", required=True)
+    v.add_argument("--repo", required=True, help="OWNER/NAME")
+    v.add_argument("--gallery-issue", required=True, type=int)
     a = p.parse_args(argv)
     try:
-        return draw(a.issue, a.branch, a.repo)
+        if a.command == "preview":
+            return preview(a.issue, a.branch, a.repo, a.gallery_issue)
+        return draw(a.issue, a.branch, a.repo).returncode
     except Stop as e:
         print(f"visuals: {e}", file=sys.stderr)
         return 1
