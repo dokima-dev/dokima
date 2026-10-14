@@ -1,0 +1,184 @@
+{
+ "role": "planner",
+ "stage": null,
+ "run_id": "38525813202",
+ "commit_before": "0583e0bcc0faafc2a1bdebe51c8a62899dc40f9e",
+ "started_by": "dokima-runtime[bot]",
+ "models": [
+  "claude-opus-5-5"
+ ],
+ "report": {
+  "duration_ms": 88897,
+  "turns": 11,
+  "cost_usd": 0.655994,
+  "tokens_in": 463387,
+  "tokens_out": 9412
+ },
+ "log": "https://github.com/dokima-dev/dokima/blob/logs/logs/381/38525813202-planner.md",
+ "run": "https://github.com/dokima-dev/dokima/actions/runs/38525813202",
+ "handback": {
+  "kind": "feature",
+  "title": "Split stories that share a file wait before planning",
+  "summary": "Stories of a split name their files, and one waits unplanned while another in-flight change touches the same file.",
+  "feature": "Parallel stories never clash: each names its files, and code holds back any story whose files other running work is changing.",
+  "stories": [
+   {
+    "title": "Every split story names the files it changes",
+    "user_story": "Each story of an approved split lists the files it will change, checked by code before filing.",
+    "context": "Today a split's stories carry no file list: the planner check of stories (check_stories in dokima/planner.py) reads only titles, criteria and depends_on, and file_split in dokima/agent_autopilot.py files them. The fence (dokima/fence.py) already holds a worker to its plan's files. Keep the file list in the split's record so later code can read it.",
+    "acceptance_criteria": [
+     {
+      "text": "A split's plan gives every story a list of the files it will change, new files marked new.",
+      "words": "A split's parent plan gives every child story a mandatory `scope` (files it will change, new files marked new)",
+      "source": "https://github.com/dokima-dev/dokima/issues/381#issuecomment-6138002372",
+      "no_edge_cases": "Its own planner lists them once this story is planned."
+     },
+     {
+      "text": "The plan check rejects a split whose story has no files listed, naming that story.",
+      "words": "code checks it is non-empty",
+      "source": "https://github.com/dokima-dev/dokima/issues/381#issuecomment-6138002372",
+      "no_edge_cases": "Its own planner lists them once this story is planned."
+     },
+     {
+      "text": "The plan check rejects a split story naming a file missing from the repo and not marked new.",
+      "words": "each file exists or is marked new",
+      "source": "https://github.com/dokima-dev/dokima/issues/381#issuecomment-6138002372",
+      "no_edge_cases": "Its own planner lists them once this story is planned."
+     }
+    ],
+    "non_functional": [],
+    "depends_on": []
+   },
+   {
+    "title": "A story waits unplanned while its files are in flight",
+    "user_story": "A split story that shares a file with work in flight waits unplanned, and its card says what for.",
+    "context": "Stories start planning by themselves through start_waiting and start_unblocked in dokima/agent_autopilot.py. Running work is an issue whose worker has started and whose pull request has not merged or closed; its files are its approved plan's scope. A pull request at the merge gate is one whose code review approved it; its files are the files it changes.",
+    "acceptance_criteria": [
+     {
+      "text": "A story sharing a file with running work's plan scope waits unplanned.",
+      "words": "running work (its plan's scope)",
+      "source": "https://github.com/dokima-dev/dokima/issues/381#issuecomment-6138002372",
+      "no_edge_cases": "Its own planner lists them once this story is planned."
+     },
+     {
+      "text": "A story sharing a file changed by an open pull request at the merge gate waits unplanned.",
+      "words": "open pull requests at the merge gate (the files they change)",
+      "source": "https://github.com/dokima-dev/dokima/issues/381#issuecomment-6138002372",
+      "no_edge_cases": "Its own planner lists them once this story is planned."
+     },
+     {
+      "text": "A story sharing no file with anything in flight starts planning as today.",
+      "words": "Before a child plans, code compares its scope with everything in flight in the repo",
+      "source": "https://github.com/dokima-dev/dokima/issues/381#issuecomment-6138002372",
+      "no_edge_cases": "Its own planner lists them once this story is planned."
+     },
+     {
+      "text": "Two stories of one split that share a file never start planning together; the later one waits.",
+      "words": "Siblings that share nothing are still checked against all in-flight work, not started blindly together.",
+      "source": "https://github.com/dokima-dev/dokima/issues/381#issuecomment-6138002372",
+      "no_edge_cases": "Its own planner lists them once this story is planned."
+     },
+     {
+      "text": "A waiting story's card names the issue or pull request it waits on.",
+      "words": "its card names what it waits on",
+      "source": "https://github.com/dokima-dev/dokima/issues/381#issuecomment-6138002372",
+      "no_edge_cases": "Its own planner lists them once this story is planned."
+     }
+    ],
+    "non_functional": [],
+    "depends_on": [
+     0
+    ]
+   },
+   {
+    "title": "A waiting story plans once the work ahead ends",
+    "user_story": "A waiting story starts planning on the new main by itself once the work it waits on merges or closes.",
+    "context": "Closes and merges already reach autopilot_closed in dokima/agent_autopilot.py, which starts issues whose blockers closed; the release can hang off the same place.",
+    "acceptance_criteria": [
+     {
+      "text": "When the work a story waits on merges, the story starts planning against the new main.",
+      "words": "Released when that work merges or closes; then it plans against the new main",
+      "source": "https://github.com/dokima-dev/dokima/issues/381#issuecomment-6138002372",
+      "no_edge_cases": "Its own planner lists them once this story is planned."
+     },
+     {
+      "text": "When the work a story waits on closes without merging, the story starts planning.",
+      "words": "Released when that work merges or closes",
+      "source": "https://github.com/dokima-dev/dokima/issues/381#issuecomment-6138002372",
+      "no_edge_cases": "Its own planner lists them once this story is planned."
+     }
+    ],
+    "non_functional": [],
+    "depends_on": [
+     1
+    ]
+   },
+   {
+    "title": "A plan reaching outside its story's files is checked again",
+    "user_story": "A story whose full plan needs a file outside its split list is checked again before its worker starts.",
+    "context": "The worker starts after plan approval, on /work or by autopilot (agent_roles.py). Reuse the in-flight check of story 2 on the plan's extra files.",
+    "acceptance_criteria": [
+     {
+      "text": "A story whose plan adds a file in flight elsewhere waits before its worker starts.",
+      "words": "If its full plan needs a file outside its split scope, the same check runs again before work.",
+      "source": "https://github.com/dokima-dev/dokima/issues/381#issuecomment-6138002372",
+      "no_edge_cases": "Its own planner lists them once this story is planned."
+     },
+     {
+      "text": "That story's worker starts once the work it waits on merges or closes.",
+      "words": "Released when that work merges or closes",
+      "source": "https://github.com/dokima-dev/dokima/issues/381#issuecomment-6138002372",
+      "no_edge_cases": "Its own planner lists them once this story is planned."
+     }
+    ],
+    "non_functional": [],
+    "depends_on": [
+     1,
+     2
+    ]
+   }
+  ],
+  "links": {
+   "blocked_by": [],
+   "blocks": [],
+   "relates_to": [
+    111,
+    389
+   ]
+  },
+  "raises": [
+   {
+    "kind": "question",
+    "to": "owner",
+    "label": "Single issues unchecked?",
+    "text": "Your newest design checks only split stories. Should issues never split go unchecked? The plan assumes so.",
+    "evidence": "The 2026-10-12 comment speaks only of a child's split scope; a single issue has none before planning.",
+    "raised_by": "planner",
+    "id": "P1"
+   },
+   {
+    "kind": "question",
+    "to": "owner",
+    "label": "Your command skips wait?",
+    "text": "Does your own /plan or /work on a waiting story start it right away? The plan assumes it does.",
+    "evidence": "Your 2026-10-09 comment says /work starts a queued issue right away; the 2026-10-12 rewrite is silent.",
+    "raised_by": "planner",
+    "id": "P2"
+   },
+   {
+    "kind": "question",
+    "to": "owner",
+    "label": "Which pull requests hold",
+    "text": "Does every pull request whose code review approved it hold a story back, autopilot or not? The plan assumes so.",
+    "evidence": "Your 2026-10-09 comment held only autopilot or merge-queue pull requests; the 2026-10-12 rewrite says merge gate.",
+    "raised_by": "planner",
+    "id": "P3"
+   }
+  ]
+ },
+ "check": {
+  "passed": true,
+  "problems": []
+ },
+ "url": "https://github.com/dokima-dev/dokima/issues/381#issuecomment-6162834709"
+}
