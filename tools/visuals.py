@@ -11,6 +11,14 @@ comment drawn again as BRANCH's code would word it. Autopilot comments are recog
 `preview` posts that same drawing, with the caller's own `gh` login, as one comment on issue N of the gallery repo, so
 GitHub renders it. A hidden marker names the real issue, so a later preview of it edits that comment instead of posting
 another. Nothing is written to OWNER/NAME.
+
+    python3 tools/visuals.py finalize ISSUE --branch BRANCH --repo OWNER/NAME
+
+`finalize` freezes an approved drawing in this checkout, under `tests/fixtures/cards/`: `ISSUE.inputs.json` (the top
+card's `repo`, `issue` and `found`, enough for `card.render` to draw it again offline), `ISSUE.card.md` (that card as
+BRANCH drew it), `ISSUE.comments.inputs.json` (the run and autopilot posts the painter was handed) and
+`ISSUE.comments.md` (those comments as BRANCH drew them). It then posts the whole drawing on ISSUE of OWNER/NAME as one
+comment opening with a hidden marker, its fixture record.
 """
 import argparse
 import json
@@ -22,6 +30,8 @@ import tempfile
 
 ROOT = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 GALLERY = "dokima-dev/card-gallery"
+FIXTURES = os.path.join("tests", "fixtures", "cards")
+FIXTURE_MARK = "<!-- visuals-fixture -->"
 REPLY = re.compile(r"(?:Autopilot is (?P<on>on|off) for (?P<switched>#\d+(?:, #\d+)*)\."
                    r"|#\d+ and every issue under it were already on autopilot\.(?P<none_on>)"
                    r"|No issue in #\d+'s tree was on autopilot\.(?P<none_off>))"
@@ -92,8 +102,10 @@ def commit_of(branch):
     raise Stop(f"No branch named {branch!r} here or on origin.")
 
 
-def draw(number, branch, repo, stdout=None):
-    """Draw what `branch`'s code would post on issue `number`, to `stdout` when given."""
+def draw(number, branch, repo, stdout=None, save=None):
+    """Draw what `branch`'s code would post on issue `number`, to `stdout` when given.
+
+    With `save`, the painter also writes what it drew from, and the drawing's parts, as JSON to that path."""
     commit = commit_of(branch)
     posts = read(repo, number)
     with tempfile.TemporaryDirectory() as tmp:
@@ -104,7 +116,7 @@ def draw(number, branch, repo, stdout=None):
             raise Stop(f"Could not check out {branch!r}: {' '.join(r.stderr.split())}")
         try:
             with open(job, "w") as f:
-                json.dump({"repo": repo, "issue": number, "posts": posts}, f)
+                json.dump({"repo": repo, "issue": number, "posts": posts, "save": save}, f)
             env = dict(os.environ, PYTHONPATH=tree, GITHUB_REPOSITORY=repo)
             return subprocess.run([sys.executable, os.path.abspath(__file__), "paint", job], cwd=tree, env=env,
                                   stdout=stdout, text=True)
@@ -143,6 +155,36 @@ def preview(number, branch, repo, gallery_issue):
     return 0
 
 
+def finalize(number, branch, repo):
+    """Freeze the drawing as a fixture here, then post it as its issue's fixture record."""
+    with tempfile.TemporaryDirectory() as tmp:
+        save = os.path.join(tmp, "drawn.json")
+        r = draw(number, branch, repo, stdout=subprocess.PIPE, save=save)
+        if r.returncode != 0:
+            return r.returncode
+        with open(save) as f:
+            drawn = json.load(f)
+    folder = os.path.join(ROOT, FIXTURES)
+    os.makedirs(folder, exist_ok=True)
+    files = {f"{number}.inputs.json": json.dumps({"repo": repo, "issue": drawn["issue"], "found": drawn["found"]},
+                                                 indent=1, sort_keys=True) + "\n",
+             f"{number}.card.md": drawn["card"],
+             f"{number}.comments.inputs.json": json.dumps({"repo": repo, "issue": number, "pr": drawn["pr"],
+                                                          "posts": drawn["posts"]}, indent=1) + "\n",
+             f"{number}.comments.md": drawn["comments"]}
+    for name, text in files.items():
+        with open(os.path.join(folder, name), "w") as f:
+            f.write(text)
+    body = json.dumps({"body": f"{FIXTURE_MARK}\n{r.stdout.strip()}"})
+    done = subprocess.run(["gh", "api", "-X", "POST", f"repos/{repo}/issues/{number}/comments", "--input", "-"],
+                          input=body, capture_output=True, text=True)
+    if done.returncode != 0:
+        why = " ".join((done.stderr or done.stdout).split())
+        raise Stop(f"GitHub refused the fixture record on #{number} of {repo}: {why}")
+    print(json.loads(done.stdout).get("html_url", ""))
+    return 0
+
+
 def paint(job):
     """Draw the job with the dokima package on PYTHONPATH: the branch's own code."""
     from dokima import agent, card, plan
@@ -163,13 +205,14 @@ def paint(job):
                            "blocked_by": now.get("blocked_by") or [], "blocks": now.get("blocks") or []}
     except (subprocess.CalledProcessError, ValueError, KeyError, TypeError) as e:
         raise Stop(f"GitHub could not give #{number} of {repo}: {card.reason(e)}")
-    out = [f"# Card of #{number}", "", card.render(repo, issue, found)]
+    drawn_card = card.render(repo, issue, found)
+    out = [f"# Card of #{number}", "", drawn_card]
     pr_url = (found.get("pr") or {}).get("html_url")
     earlier = []
     for post in job["posts"]:
         out += ["", "", f"# {'Run' if post['kind'] == 'record' else 'Autopilot'} comment {post['url']}", ""]
         if post["kind"] == "record":
-            rec = post["rec"]
+            rec = {**post["rec"], "url": post["url"]}  # as production stamps it, so later comments link back here
             judged = agent.latest(earlier, "planner") if rec.get("role") == "reviewer" else None
             out.append(agent.render(rec, pr=pr_url if rec.get("role") == "worker" else None,
                                     plan=judged and judged.get("handback"), earlier=list(earlier)))
@@ -184,6 +227,10 @@ def paint(job):
             out.append(agent.AUTOPILOT_MERGE[post["key"]].format(pr=post["pr"]))
         else:
             out.append(agent.autopilot_comment(*post["args"]))
+    if job.get("save"):
+        with open(job["save"], "w") as f:
+            json.dump({"issue": issue, "found": found, "card": drawn_card, "pr": pr_url, "posts": job["posts"],
+                       "comments": "\n".join(out[3:]).lstrip("\n") + "\n"}, f, default=sorted)
     print("\n".join(out))
 
 
@@ -206,10 +253,16 @@ def main(argv):
     v.add_argument("--branch", required=True)
     v.add_argument("--repo", required=True, help="OWNER/NAME")
     v.add_argument("--gallery-issue", required=True, type=int)
+    z = sub.add_parser("finalize", help="Freeze the approved drawing as a fixture and post it on its issue.")
+    z.add_argument("issue", type=int)
+    z.add_argument("--branch", required=True)
+    z.add_argument("--repo", required=True, help="OWNER/NAME")
     a = p.parse_args(argv)
     try:
         if a.command == "preview":
             return preview(a.issue, a.branch, a.repo, a.gallery_issue)
+        if a.command == "finalize":
+            return finalize(a.issue, a.branch, a.repo)
         return draw(a.issue, a.branch, a.repo).returncode
     except Stop as e:
         print(f"visuals: {e}", file=sys.stderr)
