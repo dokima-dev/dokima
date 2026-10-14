@@ -23,7 +23,7 @@ import sys
 
 sys.path.insert(0, os.path.join(os.path.dirname(__file__), ".."))
 from dokima import agent  # noqa: E402
-import record_seed  # noqa: E402
+from dokima import agent_github  # noqa: E402
 
 ROOT = os.path.abspath(os.path.join(os.path.dirname(__file__), ".."))
 OWNER = "owner-person"
@@ -449,8 +449,6 @@ class Machine:
         sh(src, "git", "remote", "add", "origin", f"{t}/origin.git")
         sh(src, "git", "push", "-q", "origin", "main")
         self.main_sha = sh(src, "git", "rev-parse", "HEAD")
-        # Since #610 runs read earlier records from record files on the logs branch, not from comments.
-        record_seed.seed(int(N), record_seed.in_comments(comments, agent.BOT), f"{t}/origin.git")
         self.try_sha = None
         if try_branch:
             sh(src, "git", "checkout", "-q", "-b", f"try/issue-{N}")
@@ -473,8 +471,7 @@ class Machine:
                         "GITHUB_EVENT_PATH": f"{t}/event.json", "GITHUB_STEP_SUMMARY": f"{t}/summary.md",
                         "RUNNER_TEMP": f"{t}/runner-temp", "GIT_CONFIG_COUNT": "1",
                         "GIT_CONFIG_KEY_0": f"url.file://{t}/origin.git.insteadOf",
-                        "GIT_CONFIG_VALUE_0": "https://x-access-token:fake-token@github.com/o/r.git",
-                        "DOKIMA_LOGS_REMOTE": f"{t}/origin.git"})
+                        "GIT_CONFIG_VALUE_0": "https://x-access-token:fake-token@github.com/o/r.git"})
 
     def run_job(self, name, job, ctx, event_name, paths, defaults=None):
         """Run one job's steps in order on a fresh clone, keeping its status, env and step outputs; returns its result.
@@ -699,7 +696,7 @@ def test_a_reviewed_split_stops_for_the_owner_and_files_nothing_before_work(reco
     def kind_after(comments):
         issue = {"number": int(N), "title": "t", "body": "b", "comments": comments}
         monkeypatch.setenv("GITHUB_REPOSITORY", "o/r")
-        monkeypatch.setattr(agent, "gh", lambda *a: json.dumps(issue) if a[:2] == ("issue", "view") else "[]")
+        monkeypatch.setattr(agent_github, "gh", lambda *a: json.dumps(issue) if a[:2] == ("issue", "view") else "[]")
         agent.main(["agent", "kind", N])
         return capsys.readouterr().out.strip()
     assert kind_after(SPLIT_PROPOSED) == "", "176.2: /work would file the stories of a split no reviewer has approved"

@@ -26,7 +26,7 @@ import pytest
 
 sys.path.insert(0, os.path.join(os.path.dirname(__file__), ".."))
 from dokima import agent, card  # noqa: E402
-import record_seed  # noqa: E402
+from dokima import agent_github  # noqa: E402
 
 ROOT = os.path.join(os.path.dirname(__file__), "..")
 REPO = "o/r"
@@ -106,9 +106,7 @@ def fake_github(monkeypatch):
         if args[0] == "api" and args[1].lstrip("/").startswith(f"repos/{REPO}/issues"):
             return "[]"
         raise AssertionError(f"unexpected gh call {args}")
-    monkeypatch.setattr(agent, "gh", gh)
-    # Since #610 records come from record files, each keeping the link of the comment it was posted as.
-    record_seed.use(monkeypatch, N, record_seed.in_comments(on_issue + on_pr, agent.BOT))
+    monkeypatch.setattr(agent_github, "gh", gh)
 
 
 def record_step(pack, role, stage, handback, out):

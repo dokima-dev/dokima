@@ -6,7 +6,7 @@ import sys
 
 sys.path.insert(0, os.path.join(os.path.dirname(__file__), ".."))
 from dokima import agent, fence  # noqa: E402
-import record_seed  # noqa: E402
+from dokima import agent_github  # noqa: E402
 
 GOOD_REVIEW = {"previous_step": {"did": ["Split the issue into four stories."], "decided": [], "open": ["Three questions."]},
                "stage": "plan", "round": 1, "verdict": "block", "summary": "One test is missing.",
@@ -190,8 +190,7 @@ def test_the_pack_reads_the_issue_and_its_pr_as_one_conversation(record_property
         if args[0] == "api" and args[1].split("?")[0].lstrip("/") == "repos/o/r/issues":
             return "[]"
         raise AssertionError(args)
-    monkeypatch.setattr(agent, "gh", fake_gh)
-    record_seed.use(monkeypatch, 7, [plan])  # since #610 records come from record files, not comments
+    monkeypatch.setattr(agent_github, "gh", fake_gh)
     assert agent.pack("o/r", 7, "reviewer", "plan", str(tmp_path / "p"))
     text = (tmp_path / "p" / "issue.md").read_text()
     order = [text.index(x) for x in ("/plan first", "line note", "dokima-record", "/work change it", "rename this")]
@@ -310,7 +309,7 @@ def test_an_approved_split_is_filed_as_sub_issues_with_their_order(record_proper
         if args[0] == "api" and args[1].startswith("repos/o/r/issues/2"):
             return json.dumps({"id": 9000 + int(args[1].split("/")[-1])})
         return "{}"
-    monkeypatch.setattr(agent, "gh", fake_gh)
+    monkeypatch.setattr(agent_github, "gh", fake_gh)
     recs = [rec("planner", handback=SPLIT), rec("reviewer", "plan", {**GOOD_REVIEW, "verdict": "approve", "blockers": []})]
     r = agent.file_split("o/r", 139, recs)
     assert [(f["story"], f["issue"], f["blocked_by"]) for f in r["handback"]["stories"]] == [(1, 201, []), (2, 202, [1])]
@@ -446,7 +445,7 @@ def test_a_split_approved_after_its_stories_were_filed_files_its_new_stories(rec
         if args[0] == "api" and args[1].startswith("repos/o/r/issues/2"):
             return json.dumps({"id": 9000 + int(args[1].split("/")[-1])})
         return "{}"
-    monkeypatch.setattr(agent, "gh", fake_gh)
+    monkeypatch.setattr(agent_github, "gh", fake_gh)
     approve = rec("reviewer", "plan", {**GOOD_REVIEW, "verdict": "approve", "blockers": []})
     recs = [rec("planner", handback=SPLIT), approve]
     first = agent.file_split("o/r", 139, recs)
