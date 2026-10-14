@@ -1,0 +1,202 @@
+{
+ "role": "planner",
+ "stage": null,
+ "run_id": "38635830575",
+ "commit_before": "0e163311cc763a6f086e7be606ab474fae800247",
+ "started_by": "dokima-runtime[bot]",
+ "models": [
+  "claude-opus-5-5"
+ ],
+ "report": {
+  "duration_ms": 783878,
+  "turns": 20,
+  "cost_usd": 1.4196704,
+  "tokens_in": 1447766,
+  "tokens_out": 23413
+ },
+ "log": "https://github.com/dokima-dev/dokima/blob/logs/logs/667/38635830575-planner.md",
+ "run": "https://github.com/dokima-dev/dokima/actions/runs/38635830575",
+ "handback": {
+  "kind": "user_story",
+  "title": "Code groups criteria into stories by shared files",
+  "summary": "Code works out the stories from the files each criterion changes, and no count rule remains.",
+  "user_story": "Any ask, however big, splits into stories by the code files its criteria change, never by counting.",
+  "acceptance_criteria": [
+   {
+    "text": "Code puts criteria that share a code file, directly or through another criterion, into one story.",
+    "words": "Code groups criteria that share any code file into one story (a sub-issue).",
+    "source": "https://github.com/dokima-dev/dokima/issues/661",
+    "files": [
+     "dokima/planner.py"
+    ],
+    "edge_cases": [
+     {
+      "case": "Two criteria joined only through a third criterion that shares a file with each.",
+      "test": "tests/test_story_groups.py::test_criteria_sharing_a_code_file_are_put_in_the_same_story"
+     }
+    ]
+   },
+   {
+    "text": "Code puts criteria with no code file in common into separate stories.",
+    "words": "Criteria with no file in common become separate stories.",
+    "source": "https://github.com/dokima-dev/dokima/issues/661",
+    "files": [
+     "dokima/planner.py"
+    ],
+    "edge_cases": [
+     {
+      "case": "Two unrelated criteria whose edge cases are tested in one test file.",
+      "test": "tests/test_story_groups.py::test_criteria_with_no_code_file_in_common_become_separate_stories"
+     }
+    ]
+   },
+   {
+    "text": "No count of criteria or stories refuses a plan.",
+    "words": "No number decides it: no criteria cap, no story cap.",
+    "source": "https://github.com/dokima-dev/dokima/issues/661",
+    "files": [
+     "dokima/planner.py"
+    ],
+    "edge_cases": [
+     {
+      "case": "A story with no criteria is still refused.",
+      "test": "tests/test_story_groups.py::test_no_count_of_criteria_or_stories_refuses_a_plan"
+     },
+     {
+      "case": "A story of a parent holds six criteria on one code file.",
+      "test": "tests/test_story_groups.py::test_no_count_of_criteria_or_stories_refuses_a_plan"
+     }
+    ]
+   },
+   {
+    "text": "The planner's and reviewer's instructions no longer state the old count rules.",
+    "words": "This replaces today's count-based split rules",
+    "source": "https://github.com/dokima-dev/dokima/issues/661",
+    "files": [
+     "dokima/roles/planner.md",
+     "dokima/roles/plan-grade.md",
+     "dokima/roles/reviewer.md",
+     "rules/splitting.md",
+     "dokima/agent_checks.py"
+    ],
+    "no_edge_cases": "It is fixed text with no input, so nothing varies."
+   },
+   {
+    "text": "Two criteria that share only a markdown file stay in separate stories.",
+    "words": "Markdown files never group criteria and never make a story wait.",
+    "source": "https://github.com/dokima-dev/dokima/issues/661",
+    "files": [
+     "dokima/planner.py"
+    ],
+    "edge_cases": [
+     {
+      "case": "Two criteria list only the same markdown file and no code file.",
+      "test": "tests/test_story_groups.py::test_criteria_sharing_only_a_markdown_file_stay_in_separate_stories"
+     }
+    ]
+   }
+  ],
+  "non_functional": [],
+  "scope": [
+   "dokima/planner.py",
+   "dokima/roles/planner.md",
+   "dokima/roles/plan-grade.md",
+   "dokima/roles/reviewer.md",
+   "rules/splitting.md",
+   "dokima/agent_checks.py"
+  ],
+  "tests": {
+   "667.1": [
+    "tests/test_story_groups.py::test_criteria_sharing_a_code_file_are_put_in_the_same_story"
+   ],
+   "667.2": [
+    "tests/test_story_groups.py::test_criteria_with_no_code_file_in_common_become_separate_stories"
+   ],
+   "667.3": [
+    "tests/test_story_groups.py::test_no_count_of_criteria_or_stories_refuses_a_plan"
+   ],
+   "667.4": [
+    "tests/test_story_groups.py::test_the_old_count_rules_are_gone_from_the_instructions"
+   ],
+   "667.5": [
+    "tests/test_story_groups.py::test_criteria_sharing_only_a_markdown_file_stay_in_separate_stories"
+   ]
+  },
+  "test_changes": {
+   "tests/test_size_rule.py::test_a_story_over_five_or_empty_is_refused": "Only the empty cases stay, since caps go; the name stays for the moved list.",
+   "tests/test_size_rule.py::test_the_right_number_of_stories_passes": "Docstring no longer states the five criteria cap.",
+   "tests/test_size_rule.py::test_a_story_of_a_parent_never_splits_again": "Keeps one level but drops the six criteria refusal, as caps go.",
+   "tests/test_criterion_files.py::test_each_criterion_carries_its_files": "Its sample criteria now share a file, so they form one story.",
+   "tests/test_criterion_files.py::test_a_criterion_with_no_files_is_rejected_by_name": "Its sample criteria now share a file, so they form one story.",
+   "tests/test_criterion_files.py::test_a_file_that_does_not_exist_yet_is_accepted": "Its sample criteria now share a file, so they form one story.",
+   "tests/test_plan_shape.py::test_a_feature_is_shown_as_handed_back": "Its two sample stories now change different files, as grouping requires."
+  },
+  "links": {
+   "blocked_by": [],
+   "blocks": [
+    668
+   ],
+   "relates_to": [
+    661,
+    666,
+    432
+   ]
+  },
+  "raises": [
+   {
+    "kind": "question",
+    "to": "owner",
+    "label": "Split a split again",
+    "text": "A story of a split whose criteria share no code file: refuse it, or split again? The plan refuses it.",
+    "evidence": "`rules/splitting.md` says one level; `check_size` in `dokima/planner.py` refuses a story splitting again; #432 is open on it.",
+    "raised_by": "planner",
+    "id": "P2"
+   },
+   {
+    "kind": "question",
+    "to": "owner",
+    "label": "Edge cases folded in",
+    "text": "The check caps this story at five criteria, so 'edge cases don't affect the split' is proven under 667.2. Fine?",
+    "evidence": "`check_size` in `dokima/planner.py` refuses a story of a parent over 5 criteria.",
+    "raised_by": "planner",
+    "id": "P3"
+   },
+   {
+    "kind": "question",
+    "to": "owner",
+    "label": "Who names stories",
+    "text": "Code works out the stories and refuses plans that differ; the planner still titles each story. Fine?",
+    "evidence": "A split's stories need a title and user story (`check_stories` in `dokima/planner.py`); code cannot write those.",
+    "raised_by": "planner",
+    "id": "P4"
+   }
+  ],
+  "answers": [
+   {
+    "raise": "R1",
+    "answer": "done",
+    "why": "Code now computes the stories; 667.1, 667.2 and 667.5 test its groups, and the check holds plans to them."
+   },
+   {
+    "raise": "R2",
+    "answer": "done",
+    "why": "Kept one level: a story of a parent still never splits; asked the owner in a question."
+   },
+   {
+    "raise": "R3",
+    "answer": "done",
+    "why": "Split in two: 667.3 no count refuses a plan, 667.4 the written count rules are gone, each tested."
+   },
+   {
+    "raise": "R4",
+    "answer": "done",
+    "why": "An empty story is still refused: the old size test keeps its empty cases, and 667.3 tests it too."
+   }
+  ]
+ },
+ "check": {
+  "passed": true,
+  "problems": []
+ },
+ "url": "https://github.com/dokima-dev/dokima/issues/667#issuecomment-6178225598"
+}
