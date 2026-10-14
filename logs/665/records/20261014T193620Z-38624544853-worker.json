@@ -1,0 +1,42 @@
+{
+ "role": "worker",
+ "stage": null,
+ "run_id": "38624544853",
+ "commit_before": "9ca3556f7b5987d8279b065f790858163de17143",
+ "started_by": "dokima-runtime[bot]",
+ "models": [
+  "claude-opus-5-5"
+ ],
+ "report": {
+  "duration_ms": 184742,
+  "turns": 18,
+  "cost_usd": 0.5984984,
+  "tokens_in": 807359,
+  "tokens_out": 5000
+ },
+ "log": "https://github.com/dokima-dev/dokima/blob/logs/logs/665/38624544853-worker.md",
+ "run": "https://github.com/dokima-dev/dokima/actions/runs/38624544853",
+ "handback": {
+  "summary": "Every plan criterion now must list its code files, and the planner's instructions say how.",
+  "criteria": {
+   "665.1": "`read_output` keeps each criterion's `files`, in order, as the plan's `files` in `dokima/planner.py`.",
+   "665.2": "New `check_files` in `dokima/planner.py` rejects a missing, empty or non-list `files`, naming the criterion.",
+   "665.3": "`check_files` checks only that paths are non-empty text, never that they exist.",
+   "665.4": "`planner.md` Files rule and `plan-grade.md` item 2 say every file its behavior needs, never just one.",
+   "665.5": "`planner.md` Files rule says work that can be written as code is a criterion like any other."
+  },
+  "evidence": "`pytest -q` on every test file naming `acceptance_criteria`: 609 passed"
+ },
+ "check": {
+  "passed": true,
+  "problems": []
+ },
+ "dropped_by_fence": [],
+ "files_changed": [
+  "dokima/planner.py",
+  "dokima/roles/plan-grade.md",
+  "dokima/roles/planner.md"
+ ],
+ "branch": "try/issue-665",
+ "url": "https://github.com/dokima-dev/dokima/issues/665#issuecomment-6176644721"
+}
