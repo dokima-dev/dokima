@@ -186,6 +186,8 @@ def test_the_pack_reads_the_issue_and_its_pr_as_one_conversation(record_property
                                "reviews": [{"author": {"login": "owner"}, "body": "line note", "submittedAt": "2026-01-01T00:00:02Z", "state": "COMMENTED"}]})
         if args[0] == "api" and args[1].endswith("/pulls/9/comments"):
             return json.dumps([{"user": {"login": "owner"}, "body": "rename this", "created_at": "2026-01-01T00:00:05Z", "path": "x.py", "line": 3}])
+        if args[0] == "api" and args[1].split("?")[0].lstrip("/") == "repos/o/r/issues":
+            return "[]"
         raise AssertionError(args)
     monkeypatch.setattr(agent, "gh", fake_gh)
     assert agent.pack("o/r", 7, "reviewer", "plan", str(tmp_path / "p"))
@@ -423,3 +425,39 @@ def test_a_replan_is_judged_only_on_what_the_planner_changed_in_its_run(record_p
     (out / "rejected.txt").unlink(missing_ok=True)
     planner.main(["planner", "check", "9", str(out)])
     assert "dokima/x.py is outside tests/" in (out / "rejected.txt").read_text()
+
+
+def test_a_split_approved_after_its_stories_were_filed_files_its_new_stories(record_property, monkeypatch):
+    """A split approved again after filing files its new stories as sub-issues.
+
+    Proves 617.1. Files a first split, then adds a newer approved split that keeps the filed story First and adds Third, and
+    checks filing again creates only Third instead of handing back the old record or filing First twice; filing that
+    re-plan a second time files nothing more."""
+    record_property("proves", "617.1")
+    calls = []
+    def fake_gh(*args):
+        calls.append(args)
+        if args[:2] == ("issue", "view"):
+            return json.dumps({"title": "Parent"})
+        if args[:2] == ("issue", "create"):
+            return f"https://github.com/o/r/issues/{200 + sum(1 for c in calls if c[:2] == ('issue', 'create'))}\n"
+        if args[0] == "api" and args[1].startswith("repos/o/r/issues/2"):
+            return json.dumps({"id": 9000 + int(args[1].split("/")[-1])})
+        return "{}"
+    monkeypatch.setattr(agent, "gh", fake_gh)
+    approve = rec("reviewer", "plan", {**GOOD_REVIEW, "verdict": "approve", "blockers": []})
+    recs = [rec("planner", handback=SPLIT), approve]
+    first = agent.file_split("o/r", 139, recs)
+    replan = {**SPLIT, "stories": [SPLIT["stories"][0],
+        {"title": "Third", "user_story": "u3", "acceptance_criteria": [{"text": "c", "source": "https://x/3"}], "non_functional": [], "depends_on": []}]}
+    recs = recs + [first, rec("planner", handback=replan), approve]
+    calls.clear()
+    second = agent.file_split("o/r", 139, recs)
+    titles = [c[c.index("--title") + 1] for c in calls if c[:2] == ("issue", "create")]
+    assert titles == ["Third"], f"617.1: the approved re-plan filed {titles}, not only its new story Third"
+    assert second != first and "Third" in [f["title"] for f in second["handback"]["stories"]], \
+        "617.1: filing the approved re-plan handed back the old split record"
+    calls.clear()
+    again = agent.file_split("o/r", 139, recs + [second])
+    assert again == second and not [c for c in calls if c[:2] == ("issue", "create")], \
+        "617.1: filing the same approved re-plan twice filed new issues"

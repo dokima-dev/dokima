@@ -19,6 +19,11 @@ THROUGH = MappingProxyType({("worker", "planner"): "reviewer"})
 # An issue the planner or the worker raises is filed only once the reviewer confirms it.
 CONFIRMS = "reviewer"
 FIELDS = ("kind", "to", "label", "text", "evidence")
+# An issue may also name the open issues searched for the same cause, by number, each from the reviewer's pack (#621).
+SEARCHED = "searched"
+# Every issue the reviewer files, its own or one it confirms, also gives its verdict, one of these (#622).
+VERDICT = "verdict"
+VERDICTS = MappingProxyType({"symptom": "Symptom of a known cause", "root cause": "Root cause found", "new": "New"})
 STAMPED = ("raised_by", "id")
 ANSWERS = ("done", "disagree")
 PREFIX = MappingProxyType({"planner": "P", "worker": "W", "reviewer": "R"})
@@ -26,6 +31,28 @@ PREFIX = MappingProxyType({"planner": "P", "worker": "W", "reviewer": "R"})
 
 def _kinds():
     return ", ".join(KINDS[:-1]) + " or " + KINDS[-1]
+
+
+def _verdicts():
+    names = list(VERDICTS)
+    return ", ".join(names[:-1]) + " or " + names[-1]
+
+
+def filing_problems(where, decided):
+    """What a reviewer's filing lacks: the open issues it searched, and a verdict."""
+    problems = []
+    searched = decided.get(SEARCHED)
+    if not is_numbers(searched) or not searched:
+        problems.append(f"{where} files an issue, so {SEARCHED} must list the open issues searched for the same "
+                        f"cause, not {searched!r}")
+    if decided.get(VERDICT) not in VERDICTS:
+        problems.append(f"{where} files an issue, so {VERDICT} must be {_verdicts()}, not {decided.get(VERDICT)!r}")
+    return problems
+
+
+def is_numbers(v):
+    """True for a list of whole numbers, true and false left out."""
+    return isinstance(v, list) and all(isinstance(n, int) and not isinstance(n, bool) for n in v)
 
 
 def check_raises(role, raises):
@@ -42,7 +69,8 @@ def check_raises(role, raises):
         for field in STAMPED:
             if field in r:
                 problems.append(f"{where} carries {field}, which only code writes")
-        extra = sorted(k for k in r if k not in FIELDS and k not in STAMPED)
+        extra = sorted(k for k in r if k not in FIELDS and k not in STAMPED
+                       and not (k in (SEARCHED, VERDICT) and r.get("kind") == "issue"))
         if extra:
             problems.append(f"{where} carries fields no raise has: {', '.join(map(str, extra))}")
         kind = r.get("kind")
@@ -53,6 +81,10 @@ def check_raises(role, raises):
         if kind == "issue":
             if to is not None:
                 problems.append(f"{where}: the {role}'s issue is for no one, but names {to!r}")
+            if SEARCHED in r and not is_numbers(r[SEARCHED]):
+                problems.append(f"{where}: {SEARCHED} must be a list of issue numbers, not {r[SEARCHED]!r}")
+            if VERDICT in r and r[VERDICT] not in VERDICTS:
+                problems.append(f"{where}: {VERDICT} must be {_verdicts()}, not {r[VERDICT]!r}")
             continue
         if not isinstance(to, str) or not to.strip():
             problems.append(f"{where}: the {role}'s {kind} names no one; it must be sent to someone")

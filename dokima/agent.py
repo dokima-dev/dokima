@@ -262,6 +262,68 @@ def open_issues(repo):
             if "pull_request" not in i]
 
 
+BOT_LOGIN = "dokima-runtime[bot]"  # Dokima's bot, which files issues from raises and split stories
+
+
+def open_issue_summary(text):
+    """An issue's summary: its plan summary, story, or its ask's first sentence.
+
+    An empty body gives none."""
+    text = text or ""
+    top = text.split(issue_body.MARKER, 1)[0] if issue_body.MARKER in text else ""
+    m = re.search(r"<!-- dokima-card -->\n(.*?)<!-- /dokima-card -->", top, re.S)
+    if m:
+        first = next((l.strip() for l in m.group(1).splitlines() if l.strip() and not l.strip().startswith("<!--")), "")
+        if first and not first.startswith(("**", "<")):
+            return first
+    owner = issue_body.ask(text)
+    if issue_body.STORY.match(owner):
+        story = re.search(r"^\*\*User story:\*\* (.*)$", owner, re.M)
+        if story:
+            return story.group(1).strip()
+    return first_sentence(owner) if owner.strip() else ""
+
+
+def reviewer_open_issues(repo):
+    """Every open issue for the reviewer: number, title, summary, link and whether Dokima filed it.
+
+    GitHub failing to list them fails the pack, never an empty list."""
+    items = [i for p in pages(gh("api", f"repos/{repo}/issues?state=open&per_page=100", "--paginate")) for i in p]
+    server = os.environ.get("GITHUB_SERVER_URL", "https://github.com")
+    return [{"number": i["number"], "title": i["title"], "summary": open_issue_summary(i.get("body")),
+             "link": i.get("html_url") or f"{server}/{repo}/issues/{i['number']}",
+             "filed_by_dokima": (i.get("user") or {}).get("login") == BOT_LOGIN}
+            for i in items if "pull_request" not in i]
+
+
+def problems_searched(h, pack_dir):
+    """What each filed issue lacks (#622), and each searched issue not open in the pack.
+
+    A review files its own issue raises and each issue it answers done that the planner or the worker raised; each
+    names the open issues it searched and its verdict, on the raise or on the answer."""
+    own = [r for r in h.get("raises", []) if isinstance(r, dict) and r.get("kind") == "issue"] \
+        if isinstance(h.get("raises"), list) else []
+    path = os.path.join(pack_dir, "open_blockers.json")
+    listed = json.load(open(path)) if os.path.exists(path) else []
+    theirs = {r.get("id") for r in listed if isinstance(r, dict) and r.get("kind") == "issue"
+              and raises.sent_to(r) == raises.CONFIRMS} if isinstance(listed, list) else set()
+    confirmed = [a for a in h.get("answers", []) if isinstance(a, dict) and a.get("answer") == "done"
+                 and a.get("raise") in theirs] if isinstance(h.get("answers"), list) else []
+    filed = [(f"raise {n}", r) for n, r in enumerate(own, 1)] + [(f"the answer to {a['raise']}", a) for a in confirmed]
+    if not filed:
+        return []
+    bad = [p for where, d in filed for p in raises.filing_problems(where, d)]
+    named = [d for _, d in filed if raises.is_numbers(d.get(raises.SEARCHED)) and d.get(raises.SEARCHED)]
+    if not named:
+        return bad
+    path = os.path.join(pack_dir, "open_issues.json")
+    if not os.path.exists(path):
+        return bad + [f"open_issues.json is missing from the pack, so the {raises.SEARCHED} issues cannot be checked"]
+    known = {i.get("number") for i in json.load(open(path)) if isinstance(i, dict)}
+    return bad + [f"{raises.SEARCHED} names #{n}, which is not an open issue in the pack"
+                  for d in named for n in d[raises.SEARCHED] if n not in known]
+
+
 def problems_links(h, pack_dir):
     """Everything wrong with a plan's links: three lists of open issue numbers from the pack, never the issue itself,
     and no issue in two lists."""
@@ -356,6 +418,8 @@ def problems_round(role, h, pack_dir):
                 bad += problems_for_owner(a, number, parent)
     if role == "planner":
         bad += problems_links(h, pack_dir)
+    if role == "reviewer":
+        bad += problems_searched(h, pack_dir)
     return bad
 
 
@@ -377,14 +441,23 @@ def file_split(repo, parent, recs, labels=()):
     """File the stories of the newest approved split as sub-issues of the parent, in order, with their blocked-by links,
     each created with the given labels.
 
-    Returns the record of what was filed. Filing twice files nothing new: the newest split record is returned instead."""
-    done = latest(recs, "split", passed=True)
-    if done:
-        return done
+    Returns the record of what was filed. Filing twice files nothing new: a split record newer than the plan is returned
+    instead. A re-plan approved after an earlier split was filed files only its new stories; a story already filed under
+    the same title is kept as it is, marked kept."""
+    splits = [i for i, r in enumerate(recs) if r.get("role") == "split" and r.get("check", {}).get("passed")]
+    plans = [i for i, r in enumerate(recs) if r.get("role") == "planner" and r.get("check", {}).get("passed")]
+    if splits and (not plans or splits[-1] > plans[-1]):
+        return recs[splits[-1]]
     plan = latest(recs, "planner")["handback"]
+    earlier = {f["title"]: f for i in splits for f in recs[i]["handback"].get("stories", [])}
     title = json.loads(gh("issue", "view", str(parent), "-R", repo, "--json", "title"))["title"]
     filed = []
     for i, st in enumerate(plan["stories"], 1):
+        if st["title"] in earlier:
+            old = earlier[st["title"]]
+            filed.append({"story": i, "issue": old["issue"], "title": st["title"], "id": old["id"],
+                          "blocked_by": [d + 1 for d in st.get("depends_on", [])], "kept": True})
+            continue
         extra = [x for label in labels for x in ("--label", label)]
         url = gh("issue", "create", "-R", repo, "--title", st["title"], "--body", story_body(parent, i, st, title), *extra).strip()
         number = int(url.rstrip("/").split("/")[-1])
@@ -394,6 +467,8 @@ def file_split(repo, parent, recs, labels=()):
                       "blocked_by": [d + 1 for d in st.get("depends_on", [])]})
     by_story = {f["story"]: f for f in filed}
     for f in filed:
+        if f.get("kept"):
+            continue
         for d in f["blocked_by"]:
             try:
                 gh("api", "-X", "POST", f"repos/{repo}/issues/{f['issue']}/dependencies/blocked_by", "-F", f"issue_id={by_story[d]['id']}")
@@ -1210,14 +1285,15 @@ def owner_words(repo, number, d, items, owners):
 def pack(repo, number, role, stage, dest):
     """Build the starting pack from GitHub's records: the issue and its PRs' conversation, every agent record so far,
     the open raises this role must answer (open_blockers.json), the newest passed plan, the issue's parent on GitHub (parent.json, naming none when it has none or GitHub cannot
-    say) and, for the planner, every open issue of the repo. The pull request review also gets the worker's session log from its run."""
+    say) and, for the planner and the reviewer, every open issue of the repo. The pull request review also gets the worker's session log from its run."""
     d, items = conversation(repo, number)
     recs = records(items)
-    listed = open_issues(repo) if role == "planner" else None
+    listed = open_issues(repo) if role == "planner" else reviewer_open_issues(repo) if role == "reviewer" else None
     os.makedirs(os.path.join(dest, "in"), exist_ok=True)
     json.dump({"number": parent_of(repo, number)}, open(os.path.join(dest, "parent.json"), "w"))
     if listed is not None:
         json.dump(listed, open(os.path.join(dest, "open_issues.json"), "w"), indent=1)
+    if role == "planner":
         owners = [o for o in os.environ.get("OWNERS", "").split(",") if o]
         json.dump(owner_words(repo, number, d, items, owners), open(os.path.join(dest, "owner_words.json"), "w"), indent=1)
     # The open raises this agent must answer; the file keeps the name the workflows give it.
@@ -1786,16 +1862,20 @@ def file_issues(repo, number, rec, recs):
     h = rec.get("handback") or {}
     if rec.get("role") != "reviewer" or not (rec.get("check") or {}).get("passed"):
         return []
-    found = [x for x in card.raises_of(h) if x.get("kind") == "issue"]
+    found = [(x, x) for x in card.raises_of(h) if x.get("kind") == "issue"]
     theirs = {x["id"]: x for x in open_raises(recs) if x.get("kind") == "issue" and raises.sent_to(x) == raises.CONFIRMS}
-    found += [theirs[a["raise"]] for a in card.answers_of(h)
+    found += [(theirs[a["raise"]], a) for a in card.answers_of(h)
               if a.get("answer") == "done" and isinstance(a["raise"], str) and a["raise"] in theirs]
     lines = []
-    for x in found:
+    for x, decided in found:
         title = first_sentence(x.get("text") or x.get("label") or "An issue found")
         by = x.get("raised_by") or "reviewer"
         who = "The reviewer found it" if by == "reviewer" else f"The {by} raised it and the reviewer confirmed it"
         body = [x.get("text") or ""] + (["", f"**Evidence:** {x['evidence']}"] if filled(x.get("evidence")) else [])
+        if decided.get(raises.VERDICT) in raises.VERDICTS:
+            body += ["", f"**Verdict:** {raises.VERDICTS[decided[raises.VERDICT]]}"]
+        if raises.is_numbers(decided.get(raises.SEARCHED)) and decided[raises.SEARCHED]:
+            body += ["", "**Open issues searched:** " + ", ".join(f"#{n}" for n in decided[raises.SEARCHED])]
         run = os.environ.get("GITHUB_RUN_ID")
         where = f" ([run]({os.environ.get('GITHUB_SERVER_URL', 'https://github.com')}/{repo}/actions/runs/{run}))" if run else ""
         body += ["", f"{who} on #{number}{where}."]
@@ -2243,7 +2323,9 @@ def proof(repo, sha, wait=CHECKS_WAIT, pause=CHECKS_PAUSE, branch="main"):
         red += [f"{s.get('context')} ({s.get('state')})" for s in statuses if s.get("state") not in ("success", "pending")]
         running = [r["name"] for r in runs if r.get("status") != "completed"]
         running += [s.get("context") for s in statuses if s.get("state") == "pending"]
-        missing = sorted(required - {r.get("name") for r in runs} - {s.get("context") for s in statuses})
+        # A check only skipped, as on a draft, has not run yet: it proves nothing (#597).
+        ran = {r.get("name") for r in runs if r.get("conclusion") != "skipped"}
+        missing = sorted(required - ran - {s.get("context") for s in statuses})
         if red:
             return "failed", f"not every check passed on its head commit {sha[:7]}: {', '.join(red)}"
         if not running and not missing:
@@ -2264,10 +2346,12 @@ def merge_gate(repo, pr):
     """The merge gate, run once the code review approved the pull request (#596).
 
     A branch behind main is brought up to date with it first (GitHub's Update branch), so the checks main requires
-    are read on the code as it would land. Returns ("passed", head, None) once every one passed on that head,
+    are read on the code as it would land. A draft is then readied, which starts its tests: none ran during the code
+    review (#597). Returns ("passed", head, None) once every one passed on that head,
     ("failed", head, why) when one failed there, or ("stopped", head, why) when GitHub would not update the branch, the
     checks never finished or GitHub could not say."""
     head = gh("pr", "view", str(pr), "-R", repo, "--json", "headRefOid", "-q", ".headRefOid").strip()
+    draft = gh("pr", "view", str(pr), "-R", repo, "--json", "isDraft", "-q", ".isDraft").strip() == "true"
     if not head:
         return "stopped", "", "GitHub did not say which commit is its head"
     if behind_main(repo, head):
@@ -2283,6 +2367,11 @@ def merge_gate(repo, pr):
                                         f"{UPDATE_WAIT // 60} minutes")
             time.sleep(UPDATE_PAUSE)
             head = gh("pr", "view", str(pr), "-R", repo, "--json", "headRefOid", "-q", ".headRefOid").strip() or old
+    if draft:
+        try:
+            gh("pr", "ready", str(pr), "-R", repo)
+        except subprocess.CalledProcessError as e:
+            return "stopped", head, f"GitHub could not mark it ready, so its tests never started: {gh_reason(e)}"
     state, why = proof(repo, head)
     return state, head, why
 
@@ -2822,13 +2911,15 @@ def main(argv):
         if card:
             # The command's queued card becomes the Split filed record, edited in place.
             gh("api", "-X", "PATCH", f"repos/{repo}/issues/comments/{card}", "-f", f"body={render(rec)}", "--silent")
-        elif not any(r.get("role") == "split" for r in recs):
+        elif rec not in recs:
             gh("issue", "comment", parent, "-R", repo, "--body", render(rec))
         spec = os.environ.get("DOKIMA_BOARD", "").strip()
         if spec:
             from dokima import board
             b = board.Board(spec, repo, board.gql)
             for f in rec["handback"]["stories"]:
+                if f.get("kept"):
+                    continue
                 iid = b.item("issue", f["issue"])
                 b.set(iid, "Status", "Backlog")
                 b.set(iid, "Action", "Autopilot" if on else None)
@@ -2837,7 +2928,7 @@ def main(argv):
             b.set(iid, "Action", "Autopilot" if on else None)
         if on:
             # On autopilot the stories go on too, and each one with nothing to wait for starts planning.
-            start_waiting(repo, [f["issue"] for f in rec["handback"]["stories"] if not f["blocked_by"]])
+            start_waiting(repo, [f["issue"] for f in rec["handback"]["stories"] if not f["blocked_by"] and not f.get("kept")])
         return 0
     if argv[1] == "kind":
         _, items = conversation(os.environ["GITHUB_REPOSITORY"], argv[2])
