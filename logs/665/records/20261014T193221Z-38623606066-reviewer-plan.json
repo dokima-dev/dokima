@@ -1,0 +1,149 @@
+{
+ "role": "reviewer",
+ "stage": "plan",
+ "run_id": "38623606066",
+ "commit_before": "9ca3556f7b5987d8279b065f790858163de17143",
+ "started_by": "dokima-runtime[bot]",
+ "models": [
+  "claude-opus-5-5"
+ ],
+ "report": {
+  "duration_ms": 8347,
+  "turns": 3,
+  "cost_usd": 0.5030772,
+  "tokens_in": 148066,
+  "tokens_out": 654
+ },
+ "log": "https://github.com/dokima-dev/dokima/blob/logs/logs/665/38623606066-reviewer-plan.md",
+ "run": "https://github.com/dokima-dev/dokima/actions/runs/38623606066",
+ "handback": {
+  "previous_step": {
+   "did": [
+    "The planner wrote five criteria, one per ask carried from story 1 of #661.",
+    "The planner wrote five new tests and added file lists to older sample plans."
+   ],
+   "decided": [
+    "A missing list, an empty list or a single path counts as no file."
+   ],
+   "open": []
+  },
+  "verdict": "approve",
+  "summary": "The plan keeps all five asks, and each new test fails today because the feature is missing.",
+  "raises": [],
+  "answers": [],
+  "asks": [
+   {
+    "ask": "Each criterion in a plan carries a list of the code files it changes.",
+    "source": "https://github.com/dokima-dev/dokima/issues/661#issuecomment-6173691734",
+    "criterion": "665.1"
+   },
+   {
+    "ask": "The plan check rejects a plan where any criterion lists no file, naming that criterion.",
+    "source": "https://github.com/dokima-dev/dokima/issues/661#issuecomment-6173691734",
+    "criterion": "665.2"
+   },
+   {
+    "ask": "The plan check accepts a criterion listing a file that does not exist yet.",
+    "source": "https://github.com/dokima-dev/dokima/issues/661#issuecomment-6173691734",
+    "criterion": "665.3"
+   },
+   {
+    "ask": "The planner's instructions say a criterion lists every file its behavior needs, never just one.",
+    "source": "https://github.com/dokima-dev/dokima/issues/661#issuecomment-6173691734",
+    "criterion": "665.4"
+   },
+   {
+    "ask": "The planner's instructions say work that can be written as code is a criterion like any other.",
+    "source": "https://github.com/dokima-dev/dokima/issues/661#issuecomment-6173691734",
+    "criterion": "665.5"
+   }
+  ],
+  "behaviors": [
+   {
+    "criterion": "665.1",
+    "one_behavior": true,
+    "why": "A read plan keeps each criterion's file list."
+   },
+   {
+    "criterion": "665.2",
+    "one_behavior": true,
+    "why": "One result: a rejection naming the criterion with no file."
+   },
+   {
+    "criterion": "665.3",
+    "one_behavior": true,
+    "why": "One result: a new path is accepted."
+   },
+   {
+    "criterion": "665.4",
+    "one_behavior": true,
+    "why": "One rule in the planner's instructions."
+   },
+   {
+    "criterion": "665.5",
+    "one_behavior": true,
+    "why": "One rule in the planner's instructions."
+   }
+  ],
+  "edge_cases": [
+   {
+    "criterion": "665.1",
+    "cut": [],
+    "missing": []
+   },
+   {
+    "criterion": "665.2",
+    "cut": [],
+    "missing": []
+   },
+   {
+    "criterion": "665.3",
+    "cut": [],
+    "missing": []
+   },
+   {
+    "criterion": "665.4",
+    "cut": [],
+    "missing": []
+   },
+   {
+    "criterion": "665.5",
+    "cut": [],
+    "missing": []
+   }
+  ],
+  "tests": [
+   {
+    "test": "tests/test_criterion_files.py::test_each_criterion_carries_its_files",
+    "only_its_behavior": true,
+    "why": "Checks the read plan holds each criterion's files in order; fails today with None."
+   },
+   {
+    "test": "tests/test_criterion_files.py::test_a_criterion_with_no_files_is_rejected_by_name",
+    "only_its_behavior": true,
+    "why": "Five bad cases must be rejected by name; good plans must pass; all five fail today."
+   },
+   {
+    "test": "tests/test_criterion_files.py::test_a_file_that_does_not_exist_yet_is_accepted",
+    "only_its_behavior": true,
+    "why": "A path no repo holds is accepted and kept; fails today as files are not kept."
+   },
+   {
+    "test": "tests/test_criterion_files.py::test_instructions_say_list_every_file_never_just_one",
+    "only_its_behavior": true,
+    "why": "Looks for the owner's sentence in the planner's instructions; absent today."
+   },
+   {
+    "test": "tests/test_criterion_files.py::test_instructions_say_code_work_is_a_criterion",
+    "only_its_behavior": true,
+    "why": "Looks for the owner's phrases in the planner's instructions; absent today."
+   }
+  ],
+  "size": "ok"
+ },
+ "check": {
+  "passed": true,
+  "problems": []
+ },
+ "url": "https://github.com/dokima-dev/dokima/issues/665#issuecomment-6176522314"
+}
