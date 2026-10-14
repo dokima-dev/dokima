@@ -1,0 +1,70 @@
+{
+ "role": "reviewer",
+ "stage": "pr",
+ "run_id": "38633178910",
+ "commit_before": "c808b7ed11b830a9165a5de6a066617c8997921e",
+ "started_by": "dokima-runtime[bot]",
+ "models": [
+  "claude-opus-5-5"
+ ],
+ "report": {
+  "duration_ms": 2384,
+  "turns": 1,
+  "cost_usd": 0.6003142,
+  "tokens_in": 51133,
+  "tokens_out": 98
+ },
+ "log": "https://github.com/dokima-dev/dokima/blob/logs/logs/670/38633178910-reviewer-pr.md",
+ "run": "https://github.com/dokima-dev/dokima/actions/runs/38633178910",
+ "handback": {
+  "previous_step": {
+   "did": [
+    "The worker added a not verified line under each criterion with no test."
+   ],
+   "decided": [
+    "The worker kept red first and the question rule, since both already hold."
+   ],
+   "open": []
+  },
+  "verdict": "approve",
+  "summary": "The card now marks criteria with no test as not verified; all three criteria pass their tests.",
+  "raises": [],
+  "answers": [],
+  "asks": [],
+  "behaviors": [],
+  "edge_cases": [],
+  "tests": [
+   {
+    "test": "tests/test_new_test_check.py::test_a_new_test_that_passes_or_skips_today_is_rejected_saying_so",
+    "only_its_behavior": true,
+    "why": "Untouched; passes on the branch."
+   },
+   {
+    "test": "tests/test_plan_shape.py::test_prompt_teaches_the_terms_voice_and_every_example",
+    "only_its_behavior": true,
+    "why": "Changed only by the planner; passes on the branch."
+   },
+   {
+    "test": "tests/test_card_not_verified.py::test_a_criterion_with_no_test_shows_as_not_verified",
+    "only_its_behavior": true,
+    "why": "Checks both the untested and the tested criterion."
+   },
+   {
+    "test": "tests/test_card_not_verified.py::test_a_criterion_filed_with_an_empty_test_list_shows_as_not_verified",
+    "only_its_behavior": true,
+    "why": "Passes through the same empty check in the code."
+   },
+   {
+    "test": "tests/test_card_not_verified.py::test_a_non_functional_requirement_with_no_test_shows_as_not_verified",
+    "only_its_behavior": true,
+    "why": "Requirements share the criterion drawing, so the line shows there too."
+   }
+  ],
+  "size": "ok"
+ },
+ "check": {
+  "passed": true,
+  "problems": []
+ },
+ "url": "https://github.com/dokima-dev/dokima/pull/690#issuecomment-6177857509"
+}
