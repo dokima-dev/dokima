@@ -32,9 +32,15 @@ def test_prompt_teaches_the_terms_voice_and_every_example(record_property):
     """The planner's prompt teaches the agreed terms, the product voice and an example for every rule.
 
     Reads the prompt and looks for each term, each of the owner's six approved examples, and one
-    example per rule (user story, feature, bug fix, non-functional, scope, docstring, question, concern).
+    example per rule (user story, feature, bug fix, non-functional, scope, docstring, question, concern). It also
+    checks the prompt says an ask that cannot be tested becomes a question for the owner, never dropped (#670).
     """
     record_property("proves", "138.1")
+    record_property("proves", "670.2")
+    assert "Raise a question for the owner only where the owner's words allow two readings or an ask cannot be tested" \
+        in PROMPT, "670.2: the prompt never says an ask that cannot be tested becomes a question for the owner"
+    assert "Such an ask becomes a question, never dropped." in PROMPT, \
+        "670.2: the prompt never says an ask that cannot be tested becomes a question rather than being dropped"
     for term in ["User story", "Feature", "Acceptance criteria", "Non-functional requirements", "Definition of Done",
                  "Scope", "third person", '"All tests", never "Full suite"', "Docstrings"]:
         assert term in PROMPT, f"138.1: the prompt never mentions {term!r}"
