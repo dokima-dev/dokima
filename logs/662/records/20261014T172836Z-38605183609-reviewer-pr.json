@@ -1,0 +1,106 @@
+{
+ "role": "reviewer",
+ "stage": "pr",
+ "run_id": "38605183609",
+ "commit_before": "8379ad233b27c3c7c23cda3fba923b0b58e47917",
+ "started_by": "dokima-runtime[bot]",
+ "models": [
+  "claude-opus-5-5"
+ ],
+ "report": {
+  "duration_ms": 365162,
+  "turns": 21,
+  "cost_usd": 0.7394964,
+  "tokens_in": 1004877,
+  "tokens_out": 8154
+ },
+ "log": "https://github.com/dokima-dev/dokima/blob/logs/logs/662/38605183609-reviewer-pr.md",
+ "run": "https://github.com/dokima-dev/dokima/actions/runs/38605183609",
+ "handback": {
+  "previous_step": {
+   "did": [
+    "The planner now gets a test file that clashes with main, marked, to resolve.",
+    "The worker's merge keeps the planner's resolved test instead of handing it the clash."
+   ],
+   "decided": [
+    "Each test handed to the planner is named in its commit, with main's copy."
+   ],
+   "open": [
+    "A planner that leaves conflict markers in a test is not stopped by its check."
+   ]
+  },
+  "verdict": "approve",
+  "summary": "The build delivers all three criteria; its tests fail on main and the whole suite passes on the branch.",
+  "raises": [],
+  "answers": [
+   {
+    "raise": "W1",
+    "answer": "done",
+    "why": "Real but outside this issue; the worker's run then fails saying which file still has markers.",
+    "searched": [
+     389,
+     376
+    ],
+    "verdict": "new"
+   }
+  ],
+  "asks": [],
+  "behaviors": [
+   {
+    "criterion": "662.1",
+    "one_behavior": true,
+    "why": "The planner is handed a test clash with markers."
+   },
+   {
+    "criterion": "662.2",
+    "one_behavior": true,
+    "why": "The worker no longer lists the resolved test as clashed."
+   },
+   {
+    "criterion": "662.3",
+    "one_behavior": true,
+    "why": "The worker's run succeeds with no marker left."
+   }
+  ],
+  "edge_cases": [
+   {
+    "criterion": "662.1",
+    "cut": [],
+    "missing": []
+   },
+   {
+    "criterion": "662.2",
+    "cut": [],
+    "missing": []
+   },
+   {
+    "criterion": "662.3",
+    "cut": [],
+    "missing": []
+   }
+  ],
+  "tests": [
+   {
+    "test": "tests/test_test_clash_planner.py::test_the_planner_is_handed_a_clash_inside_a_test_file",
+    "only_its_behavior": true,
+    "why": "Fails on main: the planner sees no markers."
+   },
+   {
+    "test": "tests/test_test_clash_planner.py::test_the_worker_is_not_handed_a_clash_inside_a_test_file",
+    "only_its_behavior": true,
+    "why": "Fails on main: the worker lists the test as clashed."
+   },
+   {
+    "test": "tests/test_test_clash_planner.py::test_a_clash_inside_a_test_file_no_longer_stalls_the_workers_run",
+    "only_its_behavior": true,
+    "why": "Fails on main: the hand-back is rejected on markers."
+   }
+  ],
+  "size": "ok"
+ },
+ "check": {
+  "passed": true,
+  "problems": []
+ },
+ "url": "https://github.com/dokima-dev/dokima/pull/663#issuecomment-6174055837"
+}
