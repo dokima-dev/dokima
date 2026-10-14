@@ -1,0 +1,214 @@
+{
+ "role": "reviewer",
+ "stage": "plan",
+ "run_id": "38657221487",
+ "commit_before": "34d301ce183b7b835c2354735099149a653f8e4c",
+ "started_by": "dokima-runtime[bot]",
+ "models": [
+  "claude-opus-5-5"
+ ],
+ "report": {
+  "duration_ms": 56497,
+  "turns": 8,
+  "cost_usd": 0.4146632,
+  "tokens_in": 275541,
+  "tokens_out": 5733
+ },
+ "log": "https://github.com/dokima-dev/dokima/blob/logs/logs/696/38657221487-reviewer-plan.md",
+ "run": "https://github.com/dokima-dev/dokima/actions/runs/38657221487",
+ "handback": {
+  "previous_step": {
+   "did": [
+    "The planner split the issue into three stories: the file, Kimi runs, then Codex."
+   ],
+   "decided": [
+    "Dokima's own settings file puts every role on Kimi.",
+    "Building Kimi first means building it first, not switching when credit runs out."
+   ],
+   "open": [
+    "Three owner questions: what Kimi first means, workflow changes, overlap with issue 39."
+   ]
+  },
+  "verdict": "block",
+  "summary": "The split keeps every ask, but it never says what happens when a role is missing or misspelled.",
+  "raises": [
+   {
+    "kind": "blocker",
+    "to": "planner",
+    "label": "S2.1: missing cases",
+    "text": "S2.1 says nothing of a role left out of the file, no file at all, or an unknown agent. Add the expected result for each, so a typo fails clearly.",
+    "evidence": "Criteria S1.2 and S2.1 in `plan.json` name only roles that are set; `agent.yml` line 59 fixes one `MODEL` today.",
+    "raised_by": "reviewer",
+    "id": "R1"
+   },
+   {
+    "kind": "question",
+    "to": "owner",
+    "label": "Kimi for every role?",
+    "text": "Should Dokima's own file put every role, the reviewer too, on Kimi? The plan assumes yes, to spend its credit.",
+    "evidence": "Criterion S2.3; the issue says only 'Kimi first, since I want to use up its credit'.",
+    "raised_by": "reviewer",
+    "id": "R2"
+   }
+  ],
+  "answers": [],
+  "asks": [
+   {
+    "ask": "A settings file decides which agent and model each role uses, across subscriptions.",
+    "source": "https://github.com/dokima-dev/dokima/issues/696",
+    "criterion": "S2.1"
+   },
+   {
+    "ask": "Any agent, any model: planner, worker and reviewer each pick theirs.",
+    "source": "https://github.com/dokima-dev/dokima/issues/696",
+    "criterion": "S1.2"
+   },
+   {
+    "ask": "Any agent, any model",
+    "source": "https://github.com/dokima-dev/dokima/issues/696",
+    "criterion": "S1.3"
+   },
+   {
+    "ask": "Usual suspects first: Kimi first",
+    "source": "https://github.com/dokima-dev/dokima/issues/696",
+    "criterion": "S2.2"
+   },
+   {
+    "ask": "since I want to use up its credit",
+    "source": "https://github.com/dokima-dev/dokima/issues/696",
+    "criterion": "S2.3"
+   },
+   {
+    "ask": "then Codex",
+    "source": "https://github.com/dokima-dev/dokima/issues/696",
+    "criterion": "S3.1"
+   },
+   {
+    "ask": "The file is YAML-like, a structured file.",
+    "source": "https://github.com/dokima-dev/dokima/issues/696",
+    "criterion": "S1.1"
+   },
+   {
+    "ask": "It exposes a simple interface for deciding the orchestration across subscriptions.",
+    "source": "https://github.com/dokima-dev/dokima/issues/696",
+    "criterion": "S1.4"
+   },
+   {
+    "ask": "Later it may expand into other settings.",
+    "source": "https://github.com/dokima-dev/dokima/issues/696",
+    "criterion": "S1.5"
+   }
+  ],
+  "behaviors": [
+   {
+    "criterion": "S1.1",
+    "one_behavior": true,
+    "why": "One result: the file reads as YAML."
+   },
+   {
+    "criterion": "S1.2",
+    "one_behavior": true,
+    "why": "One result: each role has its own agent and model entry."
+   },
+   {
+    "criterion": "S1.3",
+    "one_behavior": true,
+    "why": "One result: any model name is accepted."
+   },
+   {
+    "criterion": "S1.4",
+    "one_behavior": true,
+    "why": "One result: changing one line moves one role."
+   },
+   {
+    "criterion": "S1.5",
+    "one_behavior": true,
+    "why": "One result: roles sit under their own section."
+   },
+   {
+    "criterion": "S2.1",
+    "one_behavior": true,
+    "why": "One result: a run starts what its role names."
+   },
+   {
+    "criterion": "S2.2",
+    "one_behavior": true,
+    "why": "One result: a Kimi role runs on Kimi."
+   },
+   {
+    "criterion": "S2.3",
+    "one_behavior": true,
+    "why": "One result: the repo's file names Kimi everywhere."
+   },
+   {
+    "criterion": "S3.1",
+    "one_behavior": true,
+    "why": "One result: a Codex role runs on Codex."
+   }
+  ],
+  "edge_cases": [
+   {
+    "criterion": "S1.1",
+    "cut": [],
+    "missing": []
+   },
+   {
+    "criterion": "S1.2",
+    "cut": [],
+    "missing": [
+     "A role left out of the file."
+    ]
+   },
+   {
+    "criterion": "S1.3",
+    "cut": [],
+    "missing": []
+   },
+   {
+    "criterion": "S1.4",
+    "cut": [],
+    "missing": []
+   },
+   {
+    "criterion": "S1.5",
+    "cut": [],
+    "missing": []
+   },
+   {
+    "criterion": "S2.1",
+    "cut": [],
+    "missing": [
+     "No settings file at all.",
+     "A role left out of the file.",
+     "An agent name Dokima does not know, with the error the owner sees."
+    ]
+   },
+   {
+    "criterion": "S2.2",
+    "cut": [],
+    "missing": [
+     "Kimi's key missing, with the error the owner sees."
+    ]
+   },
+   {
+    "criterion": "S2.3",
+    "cut": [],
+    "missing": []
+   },
+   {
+    "criterion": "S3.1",
+    "cut": [],
+    "missing": [
+     "Codex's key missing, with the error the owner sees."
+    ]
+   }
+  ],
+  "tests": [],
+  "size": "ok"
+ },
+ "check": {
+  "passed": true,
+  "problems": []
+ },
+ "url": "https://github.com/dokima-dev/dokima/issues/696#issuecomment-6181136593"
+}
