@@ -184,12 +184,19 @@ def next_step(items, rec, owners, rounds=3, autopilot=lambda: False, body="", nu
         return ("stop", "The work is approved. Merge the pull request, or review it with a command to send it back.")
     if verdict == "escalate":
         return ("stop", "The reviewer escalated this to you, see why above.")
-    last_owner = max([i for i, c in enumerate(items) if (c.get("author") or {}).get("login") in owners], default=-1)
-    later = [r for r in records(items[last_owner + 1:]) if r.get("role") == "reviewer" and (r.get("stage") or "") == stage]
-    blocks = sum(1 for r in later if (r.get("handback") or {}).get("verdict") == "block") + 1
+    blocks = blocks_since_owner(items, owners, stage) + 1
     if blocks >= rounds:
         return ("stop", f"{blocks} blocking reviews in a row without agreement. Your call: `/plan`, `/work` or `/review` with your words.")
     return ("start", "planner" if stage == "plan" or for_planner(h) or "done" in words_ else "worker", "")
+
+
+def blocks_since_owner(items, owners, stage):
+    """Blocks at a stage since the owner spoke: blocking reviews, and failed merge gates."""
+    last_owner = max([i for i, c in enumerate(items) if (c.get("author") or {}).get("login") in owners], default=-1)
+    later = items[last_owner + 1:]
+    blocks = sum(1 for r in records(later) if r.get("role") == "reviewer" and (r.get("stage") or "") == stage
+                 and (r.get("handback") or {}).get("verdict") == "block")
+    return blocks + (sum(1 for c in later if gate_failed(c)) if stage == "pr" else 0)
 
 
 def waiting(items, owners, body, number):
@@ -306,7 +313,7 @@ def next_line(step, owners):
 
 # The other agent job files, imported last so the job files can use each other (#636).
 from dokima.agent_github import BOT
-from dokima.agent_records import LIVE, records, latest, approved, is_record, settled, owner_raises, for_planner
+from dokima.agent_records import LIVE, records, latest, approved, is_record, settled, owner_raises, for_planner, gate_failed
 from dokima.agent_checks import issue_url, owner_source
 from dokima.agent_roles import command_of
 from dokima.agent_autopilot import AUTOPILOT_LINES, UNREAD, AUTOPILOT_MERGE

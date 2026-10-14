@@ -427,8 +427,13 @@ def main(argv):
                     # failure sends the work back to the worker; only a pass goes on, to the owner or to autopilot.
                     pr = open_pr(repo, number)
                     gate, tested, why = merge_gate(repo, pr) if pr else ("stopped", "", "there is no open pull request built for it")
-                    if gate == "failed":
-                        step = ("start", "worker", "", "", f"The merge gate failed: {why}.")
+                    blocks = blocks_since_owner(items, owners, "pr") + 1
+                    if gate == "failed" and blocks >= 3:
+                        # A failed gate counts toward the three-blocks stop, as a blocking code review does (#601).
+                        step = ("stop", f"{GATE_FAILED}: {why}. {blocks} blocks in a row without agreement. Your call: "
+                                        "`/plan`, `/work` or `/review` with your words.")
+                    elif gate == "failed":
+                        step = ("start", "worker", "", "", f"{GATE_FAILED}: {why}.")
                     elif gate == "stopped":
                         step = ("stop", f"The merge gate did not pass: {why}. Give `/review` to run it again, or `/work` "
                                         "to send it back to the worker.")
@@ -625,11 +630,11 @@ from dokima.agent_github import (
 from dokima.agent_records import (
     MARK, saved_records, save_record, RecordsUnreadable, name_of, records, latest, approved, raises_for, stamp_record, build_record, not_started, cancelled, live_card,
     unrecorded_run, unrecorded, queue, who, files_changed, render, jsonl_files, scrub, transcript, run_report,
-    with_next, models_used, first_sentence)
+    with_next, models_used, first_sentence, GATE_FAILED)
 from dokima.agent_checks import problems_round, issue_url, check
 from dokima.agent_autopilot import (
     file_split, AUTOPILOT, issue_tree, switch_autopilot, autopilot_comment, AUTOPILOT_START_LINE, named,
     file_issues, record_links, set_title, rerun_checks, start_waiting, open_blockers_of, close_done_parents,
     autopilot_closed, AUTOPILOT_LINES, UNREAD, on_autopilot, approves_work, merge_gate, open_pr, automerge,
     unconfirmed_comment, merge_tree)
-from dokima.agent_next import next_step, waiting, board_place, next_line
+from dokima.agent_next import next_step, waiting, board_place, next_line, blocks_since_owner

@@ -10,7 +10,7 @@ What code detects and raises itself, never an agent:
 - **A merge conflict**: GitHub cannot bring a pull request up to date with main, and code says why on it. Example: main changed the same lines of `dokima/card.py`, so the branch cannot be updated.
 - **A rejected hand-back**: the checker refuses a hand-back, says why on the issue, and nothing is posted. Example: a worker's `work.json` leaves a raise sent to it unanswered.
 - **A workflow file change**: a pull request that changes a workflow file stops for the owner. Example: a build touches `.github/workflows/board.yml`, so it waits for the owner's approval.
-- **Three blocks in a row**: three blocking reviews at one stage since the owner last spoke stop the river for the owner. Example: the code reviewer blocks the third build in a row, so the owner decides with `/plan`, `/work` or `/review`.
+- **Three blocks in a row**: three blocks in a row at one stage since the owner last spoke stop the river for the owner; at the code review a failed merge gate counts as a block. Example: the code reviewer blocks the third build in a row, so the owner decides with `/plan`, `/work` or `/review`.
 
 What agents raise by judgment, one of three kinds:
 

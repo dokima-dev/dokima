@@ -19,6 +19,8 @@ OLD_FIELDS = ("questions", "concerns", "replies", "suspect_tests", "outside_scop
               "issues_found", "outside_plan", "resolved")
 # How the worker's end check names each plan test still red (#595); a record whose problems hold one opens as blocked.
 PLAN_TEST_FAILS = "plan test fails: "
+# How a code review's Next line opens when its merge gate failed; such a review counts as a block (#601).
+GATE_FAILED = "The merge gate failed"
 
 
 MARK = "<!-- dokima-record -->"
@@ -179,6 +181,11 @@ def is_record(c, role=None, stage=None):
         return False
     r = records([c])
     return bool(r) and (role is None or (r[0].get("role") == role and (r[0].get("stage") or "") == (stage or "")))
+
+
+def gate_failed(c):
+    """True when a comment is a code review whose merge gate failed (#601)."""
+    return is_record(c, "reviewer", "pr") and f"**Next:** {GATE_FAILED}:" in (c.get("body") or "")
 
 
 def open_blockers(recs, stage):
