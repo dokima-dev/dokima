@@ -29,7 +29,6 @@ STORY = {"kind": "user_story", "summary": "Slow calls hand back a job id instead
               "no_edge_cases": "the page only prints the id the call returned"}],
          "non_functional": [{"text": "Job ids never repeat.", "why": "two jobs would share results", "files": ["dokima/jobs.py"],
                              "edge_cases": [{"case": "Two calls in the same second.", "test": "tests/test_jobs.py::test_unique"}]}],
-         "scope": ["dokima/jobs.py"],
          "tests": {"9.1": ["tests/test_jobs.py::test_id", "tests/test_jobs.py::test_timeout"],
                    "9.2": ["tests/test_jobs.py::test_page"], "9.3": ["tests/test_jobs.py::test_unique"]}}
 

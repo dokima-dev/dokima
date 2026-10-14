@@ -23,7 +23,7 @@ MENTION = re.compile(r"out[ _-]of[ _-]scope|non[ _-]goals", re.I)
 OLD_LINE = "The board stays exactly as it is today."
 STORY = {"kind": "user_story", "summary": "Slow calls hand back a job id.", "user_story": "Slow calls return a job id.",
          "acceptance_criteria": [{"text": "A slow call returns a job id within 20 s.", "source": SRC, "no_edge_cases": "a sample criterion", "files": ["dokima/jobs.py"]}],
-         "non_functional": [], "scope": ["dokima/jobs.py"], "tests": {"40.1": ["tests/test_jobs.py::test_id"]}}
+         "non_functional": [], "tests": {"40.1": ["tests/test_jobs.py::test_id"]}}
 
 
 def planner_prompt():

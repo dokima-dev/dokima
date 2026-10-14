@@ -21,7 +21,7 @@ SAMPLES = os.path.join(ROOT, "tests", "samples")
 STORY = {"kind": "user_story", "user_story": "u",
          "acceptance_criteria": [{"text": "a", "source": "https://x/9", "no_edge_cases": "a sample criterion"}, {"text": "b", "source": "https://x/9", "no_edge_cases": "a sample criterion"}],
          "non_functional": [{"text": "c", "why": "w", "principle": "Fail closed", "no_edge_cases": "a sample criterion"}],
-         "scope": ["dokima/x.py"], "out_of_scope": [],
+         "out_of_scope": [],
          "tests": {"9.1": ["tests/test_x.py::test_a"], "9.2": ["tests/test_x.py::test_b"], "9.3": ["tests/test_x.py::test_c"]}}
 SPLIT = {"kind": "feature", "feature": "f", "stories": [
     {"title": "One", "user_story": "u1", "acceptance_criteria": [{"text": "a", "source": "https://x/9"}],

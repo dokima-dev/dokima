@@ -293,7 +293,7 @@ class Clash(ts.Machine):
         commit({"app.py": "a = 3\n", "lib.py": "l = 3\n", "other.py": "o = 2\n", "fresh.py": "f = 1\n"}, "another merge")
         ts.sh(src, "git", "push", "-q", "origin", "main")
         self.main_sha = ts.sh(src, "git", "rev-parse", "HEAD")
-        plan = json.dumps({"kind": "user_story", "scope": ["app.py", "near.py"]})
+        plan = json.dumps({"kind": "user_story", "acceptance_criteria": [{"files": ["app.py", "near.py"]}]})
         edits = (f"mkdir -p \"$PACK\" \"$OUT\" && echo '{plan}' > \"$PACK/plan.json\"\n"
                  "printf 'a = 4\\n' > app.py\nprintf 'l = 4\\n' > lib.py\nprintf 's = 1\\n' > stray.py\n")
         wf = ts.workflow("agent.yml")

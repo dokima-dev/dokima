@@ -23,10 +23,6 @@
    ]
   }
  ],
- "scope": [
-  "dokima/agent.py",
-  "tests/test_failed_run_card.py"
- ],
  "out_of_scope": [
   "Posting a failure comment on the issue; failed runs already post their record.",
   "Retrying the run.",
