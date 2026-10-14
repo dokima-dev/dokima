@@ -212,7 +212,7 @@ def paint(job):
     for post in job["posts"]:
         out += ["", "", f"# {'Run' if post['kind'] == 'record' else 'Autopilot'} comment {post['url']}", ""]
         if post["kind"] == "record":
-            rec = post["rec"]
+            rec = {**post["rec"], "url": post["url"]}  # as production stamps it, so later comments link back here
             judged = agent.latest(earlier, "planner") if rec.get("role") == "reviewer" else None
             out.append(agent.render(rec, pr=pr_url if rec.get("role") == "worker" else None,
                                     plan=judged and judged.get("handback"), earlier=list(earlier)))
