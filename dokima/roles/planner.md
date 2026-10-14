@@ -190,7 +190,6 @@ Exactly one kind: user_story or feature.
                             "edge_cases": [{"case": "...", "test": "tests/test_x.py::test_name"}, ...]}, ...],
    "non_functional": [{"text": "...", "why": "...", "words": "the owner's exact words", "source": "issue or comment link",
                        "files": ["path", ...], "no_edge_cases": "why it has none"}, ...],
-   "scope": ["path", ...],
    "tests": {"N.1": ["tests/test_x.py::test_name", ...], ...},
    "test_changes": {"path::test_name": "why", ...},
    "links": {"blocked_by": [N, ...], "blocks": [N, ...], "relates_to": [N, ...]}}
