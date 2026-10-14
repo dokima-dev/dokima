@@ -11,7 +11,8 @@ Story 3 of #584. Builds on `tools/visuals.py draw` (#624) and `preview` (#625).
    draws the issue exactly as `draw` does twice, once with main's code and once with BRANCH's, and prints only the
    lines that differ as a unified diff: main's lines start with `-`, BRANCH's with `+`, every line both drawings share
    is left unmarked or out. When nothing differs it prints `No line differs from main.` and exits 0. An issue GitHub
-   cannot give ends it with a non-zero exit and one plain message naming the issue, never a traceback.
+   cannot give, or a BRANCH that does not exist, ends it with a non-zero exit and one plain message naming it, never a
+   traceback.
 
 2. Checks that post to or read from real GitHub (the card-gallery previews) live in `nightly/`, outside `tests/`, so
    the all tests check (`pytest tests`, in full-suite.yml) never runs them. `.github/workflows/visuals-nightly.yml`
@@ -44,6 +45,7 @@ WORKFLOWS = os.path.join(ROOT, ".github", "workflows")
 NIGHTLY_FLOW = os.path.join(WORKFLOWS, "visuals-nightly.yml")
 NIGHTLY = os.path.join(ROOT, "nightly")
 SAME = "No line differs from main."
+GALLERY = "dokima-dev/card-gallery"
 
 # Logs every call and refuses it, as GitHub does a bad token.
 REFUSING_GH = r'''#!/usr/bin/env python3
@@ -145,6 +147,19 @@ def test_diff_unreadable_issue_says_so(place, record_property):
     assert "Traceback" not in said, f"626.1: an unreadable issue crashed the command instead of saying why:\n{said}"
 
 
+def test_diff_unknown_branch_says_so(place, record_property):
+    """A missing branch ends the comparison with a plain message naming the branch.
+
+    Asks to compare a misspelled branch with main and checks the command fails naming it, with no traceback.
+    Proves 626.1."""
+    record_property("proves", "626.1")
+    r = diff(place, ISSUE, "no-such-branch")
+    said = r.stdout + r.stderr
+    assert r.returncode != 0, f"626.1: comparing a missing branch with main did not fail:\n{said}"
+    assert "no-such-branch" in said, f"626.1: the message does not name the missing branch:\n{said}"
+    assert "Traceback" not in said, f"626.1: a missing branch crashed the command instead of saying why:\n{said}"
+
+
 def nightly_flow(criterion="626.2"):
     """The nightly workflow, read; fails naming the criterion when it is missing."""
     if not os.path.exists(NIGHTLY_FLOW):
@@ -211,7 +226,7 @@ def test_nightly_checks_fail_when_github_refuses(tmp_path, record_property):
     """The nightly checks really call GitHub, and fail saying why when it refuses.
 
     Runs nightly/ from a throwaway copy of the repo with a fake `gh` that logs and refuses every call. Checks the
-    checks ran (none skipped), called `gh`, failed, and their output names GitHub's refusal. Proves 626.2."""
+    checks ran (none skipped), called `gh` on the card-gallery repo, failed, and their output names GitHub's refusal. Proves 626.2."""
     record_property("proves", "626.2")
     if not os.path.isdir(NIGHTLY):
         pytest.fail("626.2: there is no nightly/ folder holding the real GitHub checks")
@@ -238,7 +253,10 @@ def test_nightly_checks_fail_when_github_refuses(tmp_path, record_property):
     said = r.stdout + r.stderr
     assert r.returncode != 5, f"626.2: pytest found no check in nightly/:\n{said}"
     assert "skipped" not in said.lower(), f"626.2: a nightly check skipped instead of calling GitHub:\n{said}"
-    assert log.read_text().strip(), f"626.2: the nightly checks never called gh, so they do not reach real GitHub:\n{said}"
+    calls = log.read_text().strip()
+    assert calls, f"626.2: the nightly checks never called gh, so they do not reach real GitHub:\n{said}"
+    assert GALLERY in calls, \
+        f"626.2: no nightly check called gh on {GALLERY}, so none reads or posts the gallery previews:\n{calls}"
     assert r.returncode == 1, f"626.2: the nightly checks did not fail when GitHub refused every call (exit {r.returncode}):\n{said}"
     assert "HTTP 401" in said, f"626.2: the failing nightly checks do not say GitHub's reason:\n{said}"
 
