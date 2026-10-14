@@ -175,7 +175,7 @@ def problems_size(r, ids=()):
     if bad:
         return bad
     if not size:
-        return ['size is empty: write "ok" if every story holds 1 to 5 criteria, each one behavior; otherwise '
+        return ['size is empty: write "ok" if every criterion is one behavior; otherwise '
                 "say which part breaks it"]
     if size.lower() != "ok" and r.get("verdict") == "approve":
         return [f"size says the plan breaks the size rule ({size}), so the verdict cannot be approve"]
