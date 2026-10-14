@@ -36,6 +36,7 @@ sys.path.insert(0, os.path.dirname(__file__))
 sys.path.insert(0, os.path.join(os.path.dirname(__file__), ".."))
 import test_needs_you as tny  # noqa: E402
 from dokima import agent, board  # noqa: E402
+from dokima import agent_github  # noqa: E402
 
 ROOT = os.path.join(os.path.dirname(__file__), "..")
 WORKFLOW = os.path.join(ROOT, ".github", "workflows", "board.yml")
@@ -58,12 +59,12 @@ def fake_board(world):
 
 @pytest.fixture
 def make(monkeypatch):
-    """Wire a world into dokima.board.Board and dokima.agent.gh, and return it."""
+    """Wire a world into dokima.board.Board and dokima.agent_github.gh, and return it."""
 
     def wire(**kw):
         world = tny.World(**kw)
         monkeypatch.setattr(board, "Board", fake_board(world))
-        monkeypatch.setattr(agent, "gh", tny.fake_gh(world))
+        monkeypatch.setattr(agent_github, "gh", tny.fake_gh(world))
         return world
 
     return wire
@@ -272,7 +273,7 @@ def with_github_lists(w, monkeypatch, runs=(), updated=None, refuse=()):
     since (updated at or after it) and state (open by default, as on GitHub). Parameters may be in the path's query or
     given with -f/-F. `updated` maps (kind, n) to its updated_at; `refuse` holds "runs" and/or "issues" for a list
     GitHub answers with HTTP 502."""
-    base, updated = agent.gh, dict(updated or {})
+    base, updated = agent_github.gh, dict(updated or {})
 
     def gh(*args):
         a = [str(x) for x in args]
@@ -304,7 +305,7 @@ def with_github_lists(w, monkeypatch, runs=(), updated=None, refuse=()):
         return json.dumps(found)
 
     w.lists = []
-    monkeypatch.setattr(agent, "gh", gh)
+    monkeypatch.setattr(agent_github, "gh", gh)
     return w
 
 

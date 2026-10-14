@@ -31,6 +31,7 @@ sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
 sys.path.insert(0, os.path.join(os.path.dirname(os.path.abspath(__file__)), ".."))
 import test_needs_you as tny  # noqa: E402
 from dokima import agent, board, card  # noqa: E402
+from dokima import agent_github  # noqa: E402
 
 SPEC, REPO, NEEDS = tny.SPEC, tny.REPO, tny.NEEDS
 T0 = 1760047800  # 2026-10-09T22:10:00Z, when the GraphQL budget hit zero
@@ -131,7 +132,7 @@ def make(monkeypatch):
     def wire(**kw):
         world = tny.World(**kw)
         monkeypatch.setattr(board, "Board", tny.fake_board(world))
-        monkeypatch.setattr(agent, "gh", tny.fake_gh(world))
+        monkeypatch.setattr(agent_github, "gh", tny.fake_gh(world))
         return world
 
     return wire

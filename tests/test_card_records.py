@@ -238,7 +238,8 @@ def fake_github(monkeypatch, tmp_path, issue_text, reviews):
     reads one way at the PR's head and another on main.
     """
     import base64
-    from dokima import agent
+    from dokima import agent_github
+    from tests.agent_patch import patch_agent
     issue_comments = [record_comment(BOT_LOGIN, dict(PLANNED, run_id="11"), "2026-10-08T01:00:00Z"),
                       record_comment(BOT_LOGIN, dict(PLAN_OK, run_id="12"), "2026-10-08T02:00:00Z"),
                       record_comment("mallory", dict(CODE_OK, run_id="66"), "2026-10-08T05:00:00Z")]
@@ -305,8 +306,8 @@ def fake_github(monkeypatch, tmp_path, issue_text, reviews):
     (tmp_path / ".github" / "CODEOWNERS").write_text("* @boss @second\n")
     monkeypatch.chdir(tmp_path)
     monkeypatch.setenv("REPO", REPO)
-    monkeypatch.setattr(agent, "BOT", BOT_LOGIN)
-    for module in (card, agent, plan):
+    patch_agent(monkeypatch, "BOT", BOT_LOGIN)
+    for module in (card, agent_github, plan):
         monkeypatch.setattr(module, "gh", gh)
     return seen
 

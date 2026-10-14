@@ -23,6 +23,7 @@ import sys
 
 sys.path.insert(0, os.path.join(os.path.dirname(__file__), ".."))
 from dokima import agent  # noqa: E402
+from dokima import agent_github  # noqa: E402
 
 ROOT = os.path.abspath(os.path.join(os.path.dirname(__file__), ".."))
 OWNER = "owner-person"
@@ -695,7 +696,7 @@ def test_a_reviewed_split_stops_for_the_owner_and_files_nothing_before_work(reco
     def kind_after(comments):
         issue = {"number": int(N), "title": "t", "body": "b", "comments": comments}
         monkeypatch.setenv("GITHUB_REPOSITORY", "o/r")
-        monkeypatch.setattr(agent, "gh", lambda *a: json.dumps(issue) if a[:2] == ("issue", "view") else "[]")
+        monkeypatch.setattr(agent_github, "gh", lambda *a: json.dumps(issue) if a[:2] == ("issue", "view") else "[]")
         agent.main(["agent", "kind", N])
         return capsys.readouterr().out.strip()
     assert kind_after(SPLIT_PROPOSED) == "", "176.2: /work would file the stories of a split no reviewer has approved"

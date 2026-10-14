@@ -7,7 +7,7 @@ merge gate runs right after a code review approves: it brings the branch up to d
 approve (on autopilot, Dokima merges that head); any check red, the worker starts again on the pull request.
 
 These tests run `python3 -m dokima.agent next 57 OUT` in-process on a passed code review that approves pull request
-#60, built for issue #57 from `try/issue-57`, against a fake GitHub in memory that stands in for `dokima.agent.gh`:
+#60, built for issue #57 from `try/issue-57`, against a fake GitHub in memory that stands in for `dokima.agent_github.gh`:
 
 - the issue, its records (plan, plan review, the owner's `/work`, the worker's record) and its `autopilot` label,
   through `gh issue view` and `gh api repos/o/r/issues/57`;
@@ -35,6 +35,7 @@ import time
 sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
 sys.path.insert(0, os.path.join(os.path.dirname(os.path.abspath(__file__)), ".."))
 from dokima import agent  # noqa: E402
+from dokima import agent_github  # noqa: E402
 
 REPO = "o/r"
 N = "57"
@@ -213,7 +214,7 @@ def decide(tmp_path, monkeypatch, capsys, fake, name="out"):
     out.mkdir()
     json.dump(CODE_REVIEW, open(out / "record.json", "w"))
     (out / "comment.md").write_text(agent.render(CODE_REVIEW))
-    monkeypatch.setattr(agent, "gh", fake.gh)
+    monkeypatch.setattr(agent_github, "gh", fake.gh)
     monkeypatch.setattr(time, "sleep", fake.sleep)
     monkeypatch.setattr(time, "time", lambda: fake.clock)
     monkeypatch.setattr(time, "monotonic", lambda: fake.clock)
@@ -275,7 +276,7 @@ def test_autopilot_merges_only_the_head_tested_with_the_newest_main(record_prope
          f"GitHub's reason: printed {printed(r)!r}, Next {r[1]!r}")
 
     fake = FakeGitHub({OLD: green(OLD)}, behind=True, autopilot=True)
-    monkeypatch.setattr(agent, "gh", fake.gh)
+    monkeypatch.setattr(agent_github, "gh", fake.gh)
     monkeypatch.setattr(time, "sleep", fake.sleep)
     monkeypatch.setattr(time, "monotonic", lambda: fake.clock)
     try:
