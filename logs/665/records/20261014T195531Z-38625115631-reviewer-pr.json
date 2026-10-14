@@ -1,0 +1,124 @@
+{
+ "role": "reviewer",
+ "stage": "pr",
+ "run_id": "38625115631",
+ "commit_before": "0974ea8443f0e155b51afdb466475bba2d188920",
+ "started_by": "dokima-runtime[bot]",
+ "models": [
+  "claude-opus-5-5"
+ ],
+ "report": {
+  "duration_ms": 734513,
+  "turns": 13,
+  "cost_usd": 0.5336393999999999,
+  "tokens_in": 545730,
+  "tokens_out": 5149
+ },
+ "log": "https://github.com/dokima-dev/dokima/blob/logs/logs/665/38625115631-reviewer-pr.md",
+ "run": "https://github.com/dokima-dev/dokima/actions/runs/38625115631",
+ "handback": {
+  "previous_step": {
+   "did": [
+    "The worker made the plan check reject any criterion with no files listed, naming it.",
+    "The worker kept each criterion's files in the read plan.",
+    "The worker added the files rule to the planner's instructions."
+   ],
+   "decided": [
+    "A listed file is never checked to exist; the worker creates it."
+   ],
+   "open": []
+  },
+  "verdict": "approve",
+  "summary": "Every criterion now must list its files, and all tests pass on the branch.",
+  "raises": [],
+  "answers": [],
+  "asks": [],
+  "behaviors": [
+   {
+    "criterion": "665.1",
+    "one_behavior": true,
+    "why": "The read plan keeps each criterion's files."
+   },
+   {
+    "criterion": "665.2",
+    "one_behavior": true,
+    "why": "A criterion with no files is rejected by name."
+   },
+   {
+    "criterion": "665.3",
+    "one_behavior": true,
+    "why": "A file not yet made is accepted."
+   },
+   {
+    "criterion": "665.4",
+    "one_behavior": true,
+    "why": "One rule in the instructions."
+   },
+   {
+    "criterion": "665.5",
+    "one_behavior": true,
+    "why": "One rule in the instructions."
+   }
+  ],
+  "edge_cases": [
+   {
+    "criterion": "665.1",
+    "cut": [],
+    "missing": []
+   },
+   {
+    "criterion": "665.2",
+    "cut": [],
+    "missing": []
+   },
+   {
+    "criterion": "665.3",
+    "cut": [],
+    "missing": []
+   },
+   {
+    "criterion": "665.4",
+    "cut": [],
+    "missing": []
+   },
+   {
+    "criterion": "665.5",
+    "cut": [],
+    "missing": []
+   }
+  ],
+  "tests": [
+   {
+    "test": "tests/test_criterion_files.py::test_each_criterion_carries_its_files",
+    "only_its_behavior": true,
+    "why": "Fails on main, passes on the branch."
+   },
+   {
+    "test": "tests/test_criterion_files.py::test_a_criterion_with_no_files_is_rejected_by_name",
+    "only_its_behavior": true,
+    "why": "Checks the good plan passes beside each bad one."
+   },
+   {
+    "test": "tests/test_criterion_files.py::test_a_file_that_does_not_exist_yet_is_accepted",
+    "only_its_behavior": true,
+    "why": "Fails on main, passes on the branch."
+   },
+   {
+    "test": "tests/test_criterion_files.py::test_instructions_say_list_every_file_never_just_one",
+    "only_its_behavior": true,
+    "why": "Reads the rule in the owner's words."
+   },
+   {
+    "test": "tests/test_criterion_files.py::test_instructions_say_code_work_is_a_criterion",
+    "only_its_behavior": true,
+    "why": "Reads the rule in the owner's words."
+   }
+  ],
+  "size": "ok"
+ },
+ "check": {
+  "passed": true,
+  "problems": []
+ },
+ "url": "https://github.com/dokima-dev/dokima/pull/688#issuecomment-6176721263"
+}
