@@ -64,10 +64,10 @@ def test_check_fails_closed_on_missing_or_broken_files(record_property, tmp_path
 
 
 def test_the_fence_reads_scope_from_plan_json(record_property, tmp_path, monkeypatch):
-    """Given plan.json, the fence uses its scope list exactly."""
+    """Given plan.json, the fence uses its criteria's files exactly."""
     record_property("proves", "agent.4")
     plan = tmp_path / "plan.json"
-    plan.write_text(json.dumps({"scope": ["app.py"]}))
+    plan.write_text(json.dumps({"acceptance_criteria": [{"files": ["app.py"]}], "non_functional": [], "tests": {}}))
     seen = {}
     monkeypatch.setattr(fence, "fence", lambda base, scope: seen.setdefault("scope", scope) and [])
     fence.main(["fence", "BASE", str(plan)])
@@ -414,7 +414,7 @@ def test_a_replan_is_judged_only_on_what_the_planner_changed_in_its_run(record_p
     out = tmp_path / "out"
     out.mkdir()
     plan = {"kind": "user_story", "summary": "s", "user_story": "s", "acceptance_criteria": [{"text": "a", "source": "https://github.com/o/r/issues/9", "no_edge_cases": "a sample criterion", "files": ["dokima/x.py"]}],
-            "non_functional": [], "scope": ["dokima/x.py"], "out_of_scope": [], "tests": {"9.1": ["tests/test_x.py::test_a"]}}
+            "non_functional": [], "out_of_scope": [], "tests": {"9.1": ["tests/test_x.py::test_a"]}}
     (out / "plan.json").write_text(json.dumps(plan))
     since = {"SPLIT": ["dokima/x.py", "tests/test_x.py"], "RUN": ["tests/test_x.py"]}
     monkeypatch.setattr(planner, "changed_files", lambda base: since[base])

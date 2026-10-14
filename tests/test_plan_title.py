@@ -99,7 +99,7 @@ def plan_json(**title):
             "acceptance_criteria": [{"text": "Approving a plan sets the issue's title.",
                                      "source": "https://github.com/o/r/issues/543",
                                      "no_edge_cases": "One plain step.", "files": ["dokima/agent.py"]}],
-            "non_functional": [], "scope": ["dokima/agent.py"], "tests": {"543.1": ["tests/test_a.py::test_a"]},
+            "non_functional": [], "tests": {"543.1": ["tests/test_a.py::test_a"]},
             "test_changes": {}, "links": {"blocked_by": [], "blocks": [], "relates_to": []}, **title}
 
 
