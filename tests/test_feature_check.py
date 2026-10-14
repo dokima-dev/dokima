@@ -23,7 +23,7 @@ SRC = "https://github.com/o/r/issues/9"
 def story(title, deps):
     """One well-formed story with the given title and dependencies."""
     return {"title": title, "user_story": f"Owners get {title}.",
-            "acceptance_criteria": [{"text": f"{title} works {k}.", "source": SRC} for k in (1, 2, 3)],
+            "acceptance_criteria": [{"text": f"{title} works {k}.", "source": SRC, "files": ["dokima/jobs.py"]} for k in (1, 2, 3)],
             "non_functional": [], "depends_on": deps}
 
 
