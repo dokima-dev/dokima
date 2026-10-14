@@ -1,0 +1,188 @@
+{
+ "role": "reviewer",
+ "stage": "plan",
+ "run_id": "38653424831",
+ "commit_before": "97a008d6eb902220980ddb1a5662e192591231bc",
+ "started_by": "dokima-runtime[bot]",
+ "models": [
+  "claude-opus-5-5"
+ ],
+ "report": {
+  "duration_ms": 75485,
+  "turns": 13,
+  "cost_usd": 0.5973972000000001,
+  "tokens_in": 660915,
+  "tokens_out": 6820
+ },
+ "log": "https://github.com/dokima-dev/dokima/blob/logs/logs/667/38653424831-reviewer-plan.md",
+ "run": "https://github.com/dokima-dev/dokima/actions/runs/38653424831",
+ "handback": {
+  "previous_step": {
+   "did": [
+    "Proposed a separate issue: approved new scope on a child story opens a fresh sibling."
+   ],
+   "decided": [
+    "The fresh sibling for approved new scope is built in its own issue, not here."
+   ],
+   "open": [
+    "The owner files the fresh sibling issue, or says it belongs here."
+   ]
+  },
+  "verdict": "approve",
+  "summary": "All five tests fail today for the right reason; the fresh sibling ask moves to its own proposed issue.",
+  "raises": [],
+  "answers": [
+   {
+    "raise": "P8",
+    "answer": "done",
+    "why": "Opening a sibling for approved scope is separate work; the owner's answer left placement to the plan.",
+    "searched": [
+     661,
+     619,
+     573,
+     432
+    ],
+    "verdict": "new"
+   }
+  ],
+  "asks": [
+   {
+    "ask": "Code puts criteria that share any code file into the same story.",
+    "source": "https://github.com/dokima-dev/dokima/issues/667",
+    "criterion": "667.1"
+   },
+   {
+    "ask": "the planner hands back criteria with files and code computes the groups",
+    "source": "https://github.com/dokima-dev/dokima/issues/667",
+    "criterion": "667.1"
+   },
+   {
+    "ask": "Criteria with no code file in common become separate stories.",
+    "source": "https://github.com/dokima-dev/dokima/issues/667",
+    "criterion": "667.2"
+   },
+   {
+    "ask": "No count of criteria or stories splits or refuses a plan",
+    "source": "https://github.com/dokima-dev/dokima/issues/667",
+    "criterion": "667.3"
+   },
+   {
+    "ask": "today's count rules are gone",
+    "source": "https://github.com/dokima-dev/dokima/issues/667",
+    "criterion": "667.4"
+   },
+   {
+    "ask": "Two criteria that share only a markdown file stay in separate stories.",
+    "source": "https://github.com/dokima-dev/dokima/issues/667",
+    "criterion": "667.2"
+   },
+   {
+    "ask": "Each edge case stays under its criterion and never changes how criteria group.",
+    "source": "https://github.com/dokima-dev/dokima/issues/667",
+    "criterion": "667.2"
+   },
+   {
+    "ask": "No second split, ever. A story keeps one level.",
+    "source": "https://github.com/dokima-dev/dokima/issues/667",
+    "criterion": "667.5"
+   },
+   {
+    "ask": "No second split and no re-plan of siblings.",
+    "source": "https://github.com/dokima-dev/dokima/issues/667",
+    "criterion": "667.5"
+   },
+   {
+    "ask": "code groups the stories, the planner writes each story's title and story text.",
+    "source": "https://github.com/dokima-dev/dokima/issues/667",
+    "criterion": "667.1"
+   }
+  ],
+  "behaviors": [
+   {
+    "criterion": "667.1",
+    "one_behavior": true,
+    "why": "Criteria sharing a code file, even through another, form one story."
+   },
+   {
+    "criterion": "667.2",
+    "one_behavior": true,
+    "why": "Criteria with no shared code file form separate stories."
+   },
+   {
+    "criterion": "667.3",
+    "one_behavior": true,
+    "why": "No count refuses a plan."
+   },
+   {
+    "criterion": "667.4",
+    "one_behavior": true,
+    "why": "The written count rules are gone."
+   },
+   {
+    "criterion": "667.5",
+    "one_behavior": true,
+    "why": "A child story with separate file groups is refused."
+   }
+  ],
+  "edge_cases": [
+   {
+    "criterion": "667.1",
+    "cut": [],
+    "missing": []
+   },
+   {
+    "criterion": "667.2",
+    "cut": [],
+    "missing": []
+   },
+   {
+    "criterion": "667.3",
+    "cut": [],
+    "missing": []
+   },
+   {
+    "criterion": "667.4",
+    "cut": [],
+    "missing": []
+   },
+   {
+    "criterion": "667.5",
+    "cut": [],
+    "missing": []
+   }
+  ],
+  "tests": [
+   {
+    "test": "tests/test_story_groups.py::test_criteria_sharing_a_code_file_are_put_in_the_same_story",
+    "only_its_behavior": true,
+    "why": "Fails today: code has no way to group criteria."
+   },
+   {
+    "test": "tests/test_story_groups.py::test_criteria_with_no_code_file_in_common_become_separate_stories",
+    "only_its_behavior": true,
+    "why": "Fails today: code has no way to group criteria."
+   },
+   {
+    "test": "tests/test_story_groups.py::test_no_count_of_criteria_or_stories_refuses_a_plan",
+    "only_its_behavior": true,
+    "why": "Fails today: six criteria on one file are refused."
+   },
+   {
+    "test": "tests/test_story_groups.py::test_the_old_count_rules_are_gone_from_the_instructions",
+    "only_its_behavior": true,
+    "why": "Fails today, naming each old count phrase still written."
+   },
+   {
+    "test": "tests/test_story_groups.py::test_a_story_of_a_split_never_splits_again",
+    "only_its_behavior": true,
+    "why": "Fails today: a child story with two groups is not refused."
+   }
+  ],
+  "size": "ok"
+ },
+ "check": {
+  "passed": true,
+  "problems": []
+ },
+ "url": "https://github.com/dokima-dev/dokima/issues/667#issuecomment-6180647227"
+}
