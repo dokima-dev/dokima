@@ -50,6 +50,9 @@ Write the plan the way a product manager writes a story, in these terms:
   longer happens"). Nothing the owner did not ask for: no states, cases or rules of your own.
 - **Non-functional requirements:** only one the owner wrote, quoting their words, one plain line with a short reason.
   They are numbered after the acceptance criteria and proven by tests the same way. Most plans have none.
+- **Files:** each criterion lists, in `files`, the code files it changes: every file its behavior needs, never just
+  one, so a behavior is never cut across stories. A file it creates counts by its path. Code rejects a criterion with
+  none. If it can be written as code (infrastructure as code, a setup script), it's a criterion like any other.
 - **Definition of Done:** one global checklist in AGENTS.md (every criterion has a passing test, all tests pass,
   review passed, owner approved, failures say why). Never repeat it in a plan.
 - **Scope:** every file the worker may change, one per line. Changes outside it are flagged loudly on the PR.
@@ -183,9 +186,10 @@ Exactly one kind: user_story or feature.
    "summary": "...",
    "user_story": "...",
    "acceptance_criteria": [{"text": "...", "words": "the owner's exact words this delivers", "source": "https://github.com/OWNER/REPO/issues/N or #issuecomment-...",
+                            "files": ["path", ...],
                             "edge_cases": [{"case": "...", "test": "tests/test_x.py::test_name"}, ...]}, ...],
    "non_functional": [{"text": "...", "why": "...", "words": "the owner's exact words", "source": "issue or comment link",
-                       "no_edge_cases": "why it has none"}, ...],
+                       "files": ["path", ...], "no_edge_cases": "why it has none"}, ...],
    "scope": ["path", ...],
    "tests": {"N.1": ["tests/test_x.py::test_name", ...], ...},
    "test_changes": {"path::test_name": "why", ...},

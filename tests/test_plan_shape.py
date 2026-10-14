@@ -16,9 +16,9 @@ ROOT = os.path.join(os.path.dirname(__file__), "..")
 PROMPT = " ".join(open(os.path.join(ROOT, "dokima", "roles", "planner.md")).read().split())
 SRC = "https://github.com/o/r/issues/9"
 STORY = {"kind": "user_story", "summary": "Slow calls hand back a job id instead of timing out.", "user_story": "Slow calls return a job id.",
-         "acceptance_criteria": [{"text": "A slow call returns a job id within 20 s.", "source": SRC, "no_edge_cases": "a sample criterion"}],
+         "acceptance_criteria": [{"text": "A slow call returns a job id within 20 s.", "source": SRC, "no_edge_cases": "a sample criterion", "files": ["dokima/jobs.py"]}],
          "non_functional": [{"text": "Job ids never repeat.", "why": "two jobs would share results", "principle": "fail closed",
-                             "no_edge_cases": "a sample criterion"}],
+                             "no_edge_cases": "a sample criterion", "files": ["dokima/jobs.py"]}],
          "scope": ["dokima/jobs.py"],
          "tests": {"9.1": ["tests/test_jobs.py::test_id"], "9.2": ["tests/test_jobs.py::test_unique"]}}
 
@@ -85,7 +85,7 @@ def test_a_feature_is_shown_as_handed_back(record_property, tmp_path):
     Hands back a feature with two stories and checks it is read; a feature with one story is rejected.
     """
     record_property("proves", "138.2")
-    story = {"title": "t", "user_story": "u", "acceptance_criteria": [{"text": "a", "source": SRC}] * 3, "depends_on": []}
+    story = {"title": "t", "user_story": "u", "acceptance_criteria": [{"text": "a", "source": SRC, "files": ["dokima/jobs.py"]}] * 3, "depends_on": []}
     assert hand_back(tmp_path, {"kind": "feature", "summary": "s", "feature": "f", "stories": [story, story]})[0] == "feature", "138.2: feature not read"
     with pytest.raises(planner.Garbled, match="at least 2"):
         hand_back(tmp_path, {"kind": "feature", "summary": "s", "feature": "f", "stories": [story]})

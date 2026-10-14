@@ -47,7 +47,7 @@ STORY_N, PARENT_N, OTHER_N = 331, 330, 329
 def story(sources):
     """A one-story plan of #331 whose acceptance criteria cite these sources, one criterion each."""
     return {"kind": "user_story", "summary": "Cards show what is true now.", "user_story": "Cards show what is true now.",
-            "acceptance_criteria": [{"text": f"Criterion {k} holds.", "source": s, "no_edge_cases": "a sample criterion"}
+            "acceptance_criteria": [{"text": f"Criterion {k} holds.", "source": s, "no_edge_cases": "a sample criterion", "files": ["dokima/x.py"]}
                                     for k, s in enumerate(sources, 1)],
             "non_functional": [], "scope": ["dokima/x.py"], "out_of_scope": [],
             "tests": {f"{STORY_N}.{k}": [f"tests/test_x.py::test_{k}"] for k in range(1, len(sources) + 1)},
@@ -58,12 +58,12 @@ def feature(sources):
     """A two-story split of #331 whose first story's criteria cite these sources."""
     return {"kind": "feature", "summary": "Two stories.", "feature": "Cards show what is true now.",
             "stories": [{"title": "One", "user_story": "u1", "non_functional": [], "depends_on": [],
-                         "acceptance_criteria": [{"text": f"Criterion {k} holds.", "source": s}
+                         "acceptance_criteria": [{"text": f"Criterion {k} holds.", "source": s, "files": ["dokima/x.py"]}
                                                  for k, s in enumerate(sources[:3], 1)]},
                         {"title": "Two", "user_story": "u2", "non_functional": [], "depends_on": [0],
-                         "acceptance_criteria": [{"text": f"Criterion {k} holds.", "source": s}
+                         "acceptance_criteria": [{"text": f"Criterion {k} holds.", "source": s, "files": ["dokima/x.py"]}
                                                  for k, s in enumerate(sources[3:], 4)]
-                                                + [{"text": "Two holds.", "source": url(STORY_N)}]}],
+                                                + [{"text": "Two holds.", "source": url(STORY_N), "files": ["dokima/x.py"]}]}],
             "links": {"blocked_by": [], "blocks": [], "relates_to": []}}
 
 

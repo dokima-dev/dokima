@@ -138,7 +138,7 @@ REASON = "the owner's part below the marker would change"
 PLAN_TESTS = ('def test_card(record_property):\n    """The card shows.\n\n    Proves 40.1.\n    """\n'
               '    record_property("proves", "40.1")\n    assert False\n')
 PLAN = {"kind": "user_story", "title": "Every issue shows a card", "summary": "Every issue shows a card.", "user_story": "Owners see a card on every issue.",
-        "acceptance_criteria": [{"text": "The issue shows a card on top.", "source": f"https://github.com/{REPO}/issues/{NUMBER}", "no_edge_cases": "a sample criterion"}],
+        "acceptance_criteria": [{"text": "The issue shows a card on top.", "source": f"https://github.com/{REPO}/issues/{NUMBER}", "no_edge_cases": "a sample criterion", "files": ["dokima/card.py"]}],
         "non_functional": [], "scope": ["dokima/card.py"], "out_of_scope": [],
         "tests": {"40.1": ["tests/test_cardshow.py::test_card"]}, "test_changes": {}}
 
