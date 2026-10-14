@@ -23,6 +23,7 @@ sys.path.insert(0, os.path.dirname(__file__))
 sys.path.insert(0, os.path.join(os.path.dirname(__file__), ".."))
 import test_needs_you as tny  # noqa: E402
 from dokima import agent, board  # noqa: E402
+from dokima import agent_github  # noqa: E402
 
 ROOT = os.path.join(os.path.dirname(__file__), "..")
 WORKFLOWS = os.path.join(ROOT, ".github", "workflows")
@@ -97,7 +98,7 @@ def make(monkeypatch):
     def wire(**kw):
         world = tny.World(**kw)
         monkeypatch.setattr(board, "Board", tny.fake_board(world))
-        monkeypatch.setattr(agent, "gh", tny.fake_gh(world))
+        monkeypatch.setattr(agent_github, "gh", tny.fake_gh(world))
         return world
 
     return wire

@@ -17,6 +17,7 @@ import subprocess
 import time
 
 from dokima import agent
+from dokima import agent_github  # noqa: E402
 
 REPO = "o/r"
 ISSUE = 57
@@ -101,7 +102,7 @@ def merge(monkeypatch, runs, statuses=(), required=REQUIRED, rule_fails=False):
 
     Returns how it went, why, and the merges asked."""
     fake = FakeGitHub(runs, statuses, required, rule_fails)
-    monkeypatch.setattr(agent, "gh", fake.gh)
+    monkeypatch.setattr(agent_github, "gh", fake.gh)
     monkeypatch.setattr(time, "sleep", fake.sleep)
     monkeypatch.setattr(time, "time", lambda: fake.clock)
     monkeypatch.setattr(time, "monotonic", lambda: fake.clock)

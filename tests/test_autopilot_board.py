@@ -41,6 +41,8 @@ import pytest
 
 sys.path.insert(0, os.path.join(os.path.dirname(__file__), ".."))
 from dokima import agent, board  # noqa: E402
+from dokima import agent_github  # noqa: E402
+from tests.agent_patch import patch_agent  # noqa: E402
 from test_agent import GOOD_REVIEW, SPLIT, rec  # noqa: E402
 
 LABEL = "autopilot"
@@ -191,7 +193,7 @@ def no_history(monkeypatch):
     """Every issue here has no record yet, so the board reads no network.
 
     make() replaces it with its own world."""
-    monkeypatch.setattr(agent, "gh", no_records)
+    monkeypatch.setattr(agent_github, "gh", no_records)
 
 
 def no_records(*a):
@@ -208,7 +210,7 @@ def make(monkeypatch):
     def wire(**kw):
         world = World(**kw)
         monkeypatch.setattr(board, "Board", fake_board(world))
-        monkeypatch.setattr(agent, "gh", fake_gh(world))
+        monkeypatch.setattr(agent_github, "gh", fake_gh(world))
         return world
 
     return wire
@@ -292,8 +294,8 @@ def test_the_river_keeps_the_pill_when_it_moves_a_card_on_autopilot(record_prope
 def split_main(monkeypatch, w, parent=139):
     """Run `agent split PARENT` for an approved split, the way the /work command does, against the world."""
     recs = [rec("planner", handback=SPLIT), rec("reviewer", "plan", {**GOOD_REVIEW, "verdict": "approve", "blockers": []})]
-    monkeypatch.setattr(agent, "conversation", lambda repo, n: ({}, []))
-    monkeypatch.setattr(agent, "records", lambda items: list(recs))
+    patch_agent(monkeypatch, "conversation", lambda repo, n: ({}, []))
+    patch_agent(monkeypatch, "records", lambda items: list(recs))
     monkeypatch.setenv("GITHUB_REPOSITORY", "o/r")
     monkeypatch.setenv("CARD_ID", "")
     return agent.main(["agent", "split", str(parent)])
@@ -752,10 +754,10 @@ def start_tree(gh, monkeypatch, top, tree):
         n = int(path.rsplit("/", 1)[1])
         return json.dumps({"number": n, "labels": [{"name": l} for l in sorted(gh.labels.get(n, set()))]})
 
-    monkeypatch.setattr(agent, "gh", fake)
+    monkeypatch.setattr(agent_github, "gh", fake)
     agent.switch_autopilot("o/r", top, "start")
     # The board runs that follow read each issue's history: none has a record yet.
-    monkeypatch.setattr(agent, "gh", no_records)
+    monkeypatch.setattr(agent_github, "gh", no_records)
     return added
 
 

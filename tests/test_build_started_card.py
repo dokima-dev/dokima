@@ -17,6 +17,7 @@ sys.path.insert(0, os.path.dirname(__file__))
 sys.path.insert(0, os.path.join(os.path.dirname(__file__), ".."))
 import test_card_status as tcs  # noqa: E402
 from dokima import agent, card  # noqa: E402
+from tests.agent_patch import patch_agent  # noqa: E402
 
 STRANGER = "passer-by"
 SAY_WORK = "Say /work to build the plan"
@@ -24,7 +25,7 @@ SAY_WORK = "Say /work to build the plan"
 
 @pytest.fixture(autouse=True)
 def bot(monkeypatch):
-    monkeypatch.setattr(agent, "BOT", tcs.BOT)
+    patch_agent(monkeypatch, "BOT", tcs.BOT)
 
 
 def approved_then(*extra):

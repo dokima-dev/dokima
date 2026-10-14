@@ -2,6 +2,7 @@
 import json
 
 from dokima import agent
+from dokima import agent_github  # noqa: E402
 
 
 def test_required_checks_come_from_the_branch_when_the_protection_endpoint_refuses(monkeypatch):
@@ -19,6 +20,6 @@ def test_required_checks_come_from_the_branch_when_the_protection_endpoint_refus
             "contexts": ["all tests", "Acceptance criteria"],
             "checks": [{"context": "all tests"}, {"context": "Acceptance criteria"}]}}})
 
-    monkeypatch.setattr(agent, "gh", gh)
+    monkeypatch.setattr(agent_github, "gh", gh)
     assert agent.required_checks("o/r") == {"all tests", "Acceptance criteria"}
     assert calls == ["repos/o/r/branches/main"]

@@ -39,6 +39,8 @@ import pytest
 
 sys.path.insert(0, os.path.join(os.path.dirname(__file__), ".."))
 from dokima import agent, card, plan, planner  # noqa: E402
+from dokima import agent_github  # noqa: E402
+from tests.agent_patch import patch_agent  # noqa: E402
 
 ROOT = os.path.join(os.path.dirname(__file__), "..")
 REPO = "o/r"
@@ -152,7 +154,7 @@ def board(items, k):
 
 @pytest.fixture(autouse=True)
 def bot(monkeypatch):
-    monkeypatch.setattr(agent, "BOT", BOT)
+    patch_agent(monkeypatch, "BOT", BOT)
 
 
 # 181.1: plan.json carries a one-sentence summary; the prompt asks for it and the check rejects a plan without it
@@ -479,7 +481,7 @@ def fake_github(monkeypatch, tmp_path, broken=()):
     (tmp_path / ".github" / "CODEOWNERS").write_text(f"* @{OWNER}\n")
     monkeypatch.chdir(tmp_path)
     monkeypatch.setenv("REPO", REPO)
-    for module in (card, agent, plan):
+    for module in (card, agent_github, plan):
         monkeypatch.setattr(module, "gh", gh)
 
 

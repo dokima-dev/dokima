@@ -38,6 +38,7 @@ import pytest
 sys.path.insert(0, os.path.join(os.path.dirname(__file__), ".."))
 import test_autopilot_board as tab  # noqa: E402
 from dokima import agent, board, card, plan  # noqa: E402
+from dokima import agent_github  # noqa: E402
 from test_agent import GOOD_REVIEW, GOOD_WORK, SPLIT, rec  # noqa: E402
 
 LABEL = "autopilot"
@@ -196,7 +197,7 @@ def make(monkeypatch):
     def wire(**kw):
         world = World(**kw)
         monkeypatch.setattr(board, "Board", fake_board(world))
-        monkeypatch.setattr(agent, "gh", fake_gh(world))
+        monkeypatch.setattr(agent_github, "gh", fake_gh(world))
         return world
 
     return wire

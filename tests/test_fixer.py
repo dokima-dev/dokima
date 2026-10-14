@@ -14,6 +14,7 @@ import tempfile
 
 sys.path.insert(0, os.path.join(os.path.dirname(__file__), ".."))
 from dokima import agent  # noqa: E402
+from dokima import agent_github  # noqa: E402
 
 ROOT = os.path.abspath(os.path.join(os.path.dirname(__file__), ".."))
 STORY = {"kind": "user_story", "user_story": "u",
@@ -147,7 +148,7 @@ def fake_github(monkeypatch, recs):
                                              and "/comments" not in args[1]):
             return "[]"  # the repo's open issues, which the planner's pack lists
         raise AssertionError(f"unexpected gh call {args}")
-    monkeypatch.setattr(agent, "gh", gh)
+    monkeypatch.setattr(agent_github, "gh", gh)
 
 
 def test_the_planner_answers_the_test_blockers_and_the_worker_the_code_ones(record_property, tmp_path, monkeypatch):

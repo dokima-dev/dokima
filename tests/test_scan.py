@@ -38,6 +38,7 @@ import pytest
 sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
 sys.path.insert(0, os.path.join(os.path.dirname(os.path.abspath(__file__)), ".."))
 from dokima import agent, board, body, card, plan  # noqa: E402
+from dokima import agent_github  # noqa: E402
 from test_agent import GOOD_REVIEW, GOOD_WORK, rec  # noqa: E402
 
 try:
@@ -285,7 +286,7 @@ def world(monkeypatch):
     """A fresh World wired into the board and every `gh` helper, with the scan's settings."""
     w = World()
     monkeypatch.setattr(board, "Board", fake_board(w))
-    for mod in (agent, body, card, plan, scan):
+    for mod in (agent_github, body, card, plan, scan):
         if mod is not None and hasattr(mod, "gh"):
             monkeypatch.setattr(mod, "gh", fake_gh(w))
     monkeypatch.setenv("DOKIMA_BOARD", SPEC)
