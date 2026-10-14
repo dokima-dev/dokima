@@ -452,7 +452,7 @@ def criterion_item(repo, label, c, check, tests, number=None, all_tests=None, so
     written out bare, so GitHub draws it as its own reference, when it has one. A source that is issue `number` itself
     shows no Source line, as it tells the owner nothing (#526). Between them the edge cases in one closed fold (each
     linked to its test in `all_tests`, with its source from `sources`), or one line reading "none, because" and its
-    reason; a criterion with neither shows none (#538, #628)."""
+    reason; a criterion with neither shows none (#538, #628). A criterion with no test reads not verified (#670)."""
     if check:
         label = f'<a href="{check["html_url"]}">{label}</a>'
     out = [f"- {circle(repo, state(check))} **{label}:** {escape(c.get('text'))}"]
@@ -460,6 +460,8 @@ def criterion_item(repo, label, c, check, tests, number=None, all_tests=None, so
         if t and t.get("verified_by"):
             out.append(f'  *<a href="{t["url"]}">{field_icon(repo, "verified by")} Acceptance test</a>: '
                        f'{escape(t["verified_by"])}*')
+    if not tests:
+        out.append("  - Not verified: no automated test proves this.")
     cases = edge_cases_fold(c, all_tests or {}, sources or {})
     if cases:
         out += cases
