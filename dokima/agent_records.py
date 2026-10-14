@@ -106,9 +106,12 @@ def save_record(repo, number, out):
     """Save OUT/record.json as one new file under logs/N/records/ on the logs branch and push it.
 
     Never changes a file already there, even for a run that saves twice; a remote with no logs branch gets one.
-    Returns the file's path on the branch."""
+    The record keeps the link of the comment it was posted as, from OUT/url.txt. Returns the file's path on the branch."""
     import tempfile
     rec = json.load(open(os.path.join(out, "record.json")))
+    url = os.path.join(out, "url.txt")
+    if os.path.exists(url) and open(url).read().strip():
+        rec["url"] = open(url).read().strip()
     remote, folder = logs_remote(repo), f"logs/{number}/records"
     name = f"{rec.get('run_id') or 'run'}-{rec.get('role') or 'record'}{'-' + rec['stage'] if rec.get('stage') else ''}"
     with tempfile.TemporaryDirectory(prefix="dokima-save-") as tmp:
@@ -431,10 +434,12 @@ def unrecorded(repo, number, role, stage, out):
     os.makedirs(out, exist_ok=True)
     json.dump(rec, open(os.path.join(out, "record.json"), "w"), indent=1)
     if card:
-        agent_github.gh("api", "-X", "PATCH", f"repos/{repo}/issues/comments/{card['id']}", "-f", f"body={body}", "--silent")
+        url = agent_github.gh("api", "-X", "PATCH", f"repos/{repo}/issues/comments/{card['id']}", "-f", f"body={body}",
+                              "--jq", ".html_url")
     else:
-        agent_github.gh("api", "-X", "POST", f"repos/{repo}/issues/{where_card(repo, number, role, stage)}/comments",
-           "-f", f"body={body}", "--silent")
+        url = agent_github.gh("api", "-X", "POST", f"repos/{repo}/issues/{where_card(repo, number, role, stage)}/comments",
+           "-f", f"body={body}", "--jq", ".html_url")
+    open(os.path.join(out, "url.txt"), "w").write(url or "")  # the saved record keeps the link (#610)
     return True
 
 
