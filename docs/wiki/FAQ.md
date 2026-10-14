@@ -1,42 +1,44 @@
 # FAQ
 
-### Why GitHub Actions instead of a custom orchestrator?
-
-GitHub already provides what a runtime needs: clean machines for every job, a place to store tasks and state, permissions, secrets, logs, and a merge gate. Dokima adds only the rules on top. That means nothing to host, nothing to keep running, and nothing that can drift out of sync with your repository.
-
-### Why does every change go through a pull request?
-
-A pull request is a proposal to merge, plus the page where tests run, reviews happen and history is kept. Dokima treats AI workers like outside contributors to an open-source project: trusted to propose, never to merge on their own say-so. Every change, including the repository owner's, passes the same gate.
+### Is it fully autonomous?
+No. Every decision traces to a human approval: your `/work` on the plan, your merge of the result, or, on [[Autopilot]], your `/autopilot start` plus your own words quoted for any question it settles.
 
 ### What stops an agent from cheating?
+- The planner writes the tests before any code exists; each must fail today.
+- The [fence](How-it-works#the-fence) restores every test file and undoes changes outside scope before anything is pushed.
+- A separate reviewer, who never talks to the worker, blocks gamed tests and hard-coded answers, and reads the worker's session log.
+- Each criterion's check runs from `main`'s copy of the workflow; the PR can't rewrite its judge.
+- Merging needs GitHub's required checks to pass. That's GitHub's rule, not the agent's.
 
-Several independent layers:
+### Why GitHub Actions instead of a server?
+GitHub already has clean machines, storage (issues, comments), permissions, secrets, logs and merge rules. δokima adds only the rules on top. Nothing to host or keep in sync.
 
-- the tests are written before the work and locked during it,
-- the worker never sees the reviewer, and the reviewer never talks to the worker,
-- the reviewer is told to block changes that game the tests,
-- the gate is a GitHub setting, enforced by GitHub, not by the agent.
+### Where is the state?
+On GitHub. Each run's record is a bot comment with its full JSON. Every run rebuilds its starting point from the issue's whole history, so any stage can be re-entered at any time. Full agent conversations are saved, secrets removed, on the repo's `logs` branch.
 
-### Does it work on private repositories?
+### What if a run crashes?
+A run that dies before posting its record gets a failed record anyway, mentions you and shows **Needs you**. Give the command again; `/autopilot start` restarts it too. Resuming mid-run from a commit is **not built**.
 
-Yes. On GitHub's free plan the merge gate is only enforced on public repositories; for private ones you need GitHub Pro.
+### Why does every change go through a pull request?
+A PR is where tests run, reviews happen and history is kept. Agents are treated like outside contributors: trusted to propose, never to merge on their own word.
 
-### What does it cost to run?
+### Can I edit my issue after filing?
+Don't edit the text; comment instead. Your original text stays frozen below the card, and agents read every comment. Use `/plan <words>` to have the planner pick it up.
 
-The Actions minutes come from your GitHub plan; public repositories get unlimited free minutes. The AI sessions use your Claude subscription or API key.
+### What does Approve mean?
+Only "merge this". It never starts a stage. Approve plans with `/work`.
 
-### Where is the state kept? What if a job crashes?
+### What if agents disagree forever?
+Three blocking reviews in a row at one stage stop the loop for you.
 
-In GitHub: labels say whose turn it is, the issue holds the task, and the branch holds the work. Workers commit after every step, so a crashed or timed-out job resumes from the last commit. *Planned.*
+### Which languages?
+Python with `pytest` today. Per-repo setup and test commands are **Planned**.
 
-### Why isn't there a dashboard?
+### Can I use it on my repo?
+Not with one click yet. See [[Installing]] and [#272](https://github.com/dokima-dev/dokima/issues/272).
 
-GitHub's pull request and Actions pages already show the full history of every task, step by step. A separate dashboard would be a second copy to keep in sync.
-
-### Can it do work other than code?
-
-The same flow fits any task with checkable results, such as a research brief or a job application: the reviewer checks facts and fit, and anything that leaves your hands, like sending or submitting, waits for your approval. *Planned.*
+### Which model runs?
+Claude, via Claude Code. Each record's Stats fold names the model, and a run fails if any other model was used.
 
 ### Where do these docs come from?
-
-They live in the repository under `docs/wiki/` and are copied to this wiki automatically whenever they change. Like code, every edit goes through a pull request.
+`docs/wiki/` in the repo, synced to this wiki on every merge to main.
