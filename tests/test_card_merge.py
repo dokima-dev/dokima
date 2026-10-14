@@ -466,12 +466,14 @@ def stage_of(text):
 
 
 def done_of(text):
-    """The Definition of Done a card shows: {All tests, Code review, Owner approval: passed/failed/...}."""
+    """The Definition of Done a card shows: {Test suite, Code review, Owner approval: passed/failed/...}.
+
+    Test suite is the all tests check, named so on the approved card of #557 (#628)."""
     line = next((l for l in (card_of(text) or "").splitlines() if l.startswith("**Definition of Done:**")), "")
     found = {}
     for part in line.split(" · "):
         alt = re.search(r'alt="([^"]+)"', part)
-        for name in ("All tests", "Code review", "Owner approval"):
+        for name in ("Test suite", "Code review", "Owner approval"):
             if part.rstrip().endswith(name) and alt:
                 found[name] = alt.group(1)
     return found
@@ -994,7 +996,7 @@ def test_prs_246_and_312_show_merged_after_their_merge_with_no_click(tmp_path, r
         must_redraw(hub, pr_event(n, p, "closed", OWNER, merged=True), "345.2")
         assert stage_of(hub.pr_body(p)) == "Merged", f"345.2: PR #{p}'s card does not say Merged: {hub.pr_body(p)!r}"
         done = done_of(hub.pr_body(p))
-        assert done == {"All tests": "passed", "Code review": "passed", "Owner approval": "passed"}, \
+        assert done == {"Test suite": "passed", "Code review": "passed", "Owner approval": "passed"}, \
             f"345.2: merged PR #{p}'s Definition of Done is not every check passed: {done}"
         assert stage_of(hub.issue_body(n)) == "Merged", \
             f"345.2: issue #{n}'s card does not say Merged after PR #{p} merged: {hub.issue_body(n)[:300]!r}"
