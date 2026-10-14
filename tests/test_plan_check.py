@@ -32,7 +32,7 @@ STORY = {"kind": "user_story", "title": "Slow calls hand back a job id", "summar
                                  {"text": "Job ids never repeat.", "source": ISSUE + "#issuecomment-123456", "no_edge_cases": "a sample criterion", "files": ["dokima/jobs.py"]}],
          "non_functional": [{"text": "A failed call says why.", "why": "the owner is never left guessing",
                              "principle": "fail closed", "no_edge_cases": "a sample criterion", "files": ["dokima/jobs.py"]}],
-         "scope": ["dokima/jobs.py"], "out_of_scope": ["No retries."],
+         "out_of_scope": ["No retries."],
          "tests": {"9.1": ["tests/test_jobs.py::test_id"], "9.2": ["tests/test_jobs.py::test_unique"],
                    "9.3": ["tests/test_jobs.py::test_unique"]},
          "test_changes": {}}
@@ -105,7 +105,7 @@ def feature(change):
     {},
     {"question.md": "Split it into two issues?"},
     {"plan.json": {"objective": "Slow calls return a job id.", "criteria": ["A job id within 20 s.", "Ids never repeat."],
-                   "non_goals": [], "scope": ["dokima/jobs.py"]}},
+                   "non_goals": [], }},
     {"plan.json": {"kind": "question", "question": "Split it?", "options": ["Yes", "No"], "recommendation": "Yes"}},
     {"plan.json": story(lambda s: s.update(kind="question", question="Split it?"))},
     {"plan.json": story(lambda s: s.update(kind="essay"))},

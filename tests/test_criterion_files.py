@@ -35,7 +35,6 @@ def story(*files):
                                      "no_edge_cases": "a sample criterion"}],
             "non_functional": [{"text": "Job ids never repeat.", "why": "two jobs would share results", "source": SRC,
                                 "files": list(files[1]), "no_edge_cases": "a sample criterion"}],
-            "scope": ["dokima/jobs.py"],
             "tests": {"9.1": ["tests/test_jobs.py::test_id"], "9.2": ["tests/test_jobs.py::test_unique"]}}
 
 

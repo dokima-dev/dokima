@@ -50,8 +50,8 @@ MERGE_ASK = re.compile(r"\bmerge (the|this) pull request\b|\bmerge it\b", re.I)
 UPDATE_REFUSED = "HTTP 422: merge conflict between base and head"
 
 STORY = {"kind": "user_story", "title": "t", "summary": "s", "user_story": "u",
-         "acceptance_criteria": [{"text": "a", "source": "https://github.com/o/r/issues/57"}],
-         "non_functional": [], "scope": ["dokima/x.py"], "tests": {"57.1": ["tests/test_x.py::test_a"]}}
+         "acceptance_criteria": [{"text": "a", "source": "https://github.com/o/r/issues/57", "files": ["dokima/x.py"]}],
+         "non_functional": [], "tests": {"57.1": ["tests/test_x.py::test_a"]}}
 PLANNER = {"role": "planner", "stage": None, "run_id": "1", "run": "https://github.com/o/r/actions/runs/1",
            "models": ["claude-opus-5-5"], "handback": STORY, "check": {"passed": True, "problems": []}}
 APPROVAL = {"verdict": "approve", "summary": "Every criterion is proven.", "raises": [], "answers": [],

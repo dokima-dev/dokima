@@ -36,8 +36,8 @@ SPLIT = {"kind": "feature", "feature": "Stuck issues get unstuck.", "stories": [
      "non_functional": [], "depends_on": []},
     {"title": "Second", "user_story": "u2", "acceptance_criteria": [{"text": "b", "source": "https://github.com/o/r/issues/57"}],
      "non_functional": [], "depends_on": [0]}]}
-STORY = {"kind": "user_story", "user_story": "u", "acceptance_criteria": [{"text": "a", "source": "https://github.com/o/r/issues/57"}],
-         "non_functional": [], "scope": ["x.py"], "out_of_scope": [], "tests": {"57.1": ["tests/test_x.py::test_a"]}}
+STORY = {"kind": "user_story", "user_story": "u", "acceptance_criteria": [{"text": "a", "source": "https://github.com/o/r/issues/57", "files": ["x.py"]}],
+         "non_functional": [], "out_of_scope": [], "tests": {"57.1": ["tests/test_x.py::test_a"]}}
 APPROVE = {"previous_step": {"did": ["Proposed a split into two stories."], "decided": [], "open": []},
            "stage": "plan", "round": 1, "verdict": "approve", "summary": "The split keeps every promise once.",
            "raises": [], "answers": [],

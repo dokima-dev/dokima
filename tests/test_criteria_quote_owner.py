@@ -14,7 +14,7 @@ SAID = {ISSUE: "Code shows as code,\nnever escaped.", ISSUE + "#issuecomment-1":
 def story(*criteria, nfr=()):
     edge = lambda c: dict({"no_edge_cases": "a sample criterion", "files": ["dokima/card.py"]}, **c)
     return {"kind": "user_story", "summary": "s", "user_story": "u", "acceptance_criteria": [edge(c) for c in criteria],
-            "non_functional": [edge(c) for c in nfr], "scope": ["dokima/card.py"], "tests": {"7.1": ["tests/t.py::t"]}}
+            "non_functional": [edge(c) for c in nfr], "tests": {"7.1": ["tests/t.py::t"]}}
 
 
 def test_a_criterion_quoting_the_owner_passes():
@@ -26,8 +26,14 @@ def test_a_criterion_quoting_the_owner_passes():
 @pytest.mark.parametrize("c", [{"text": "t", "source": ISSUE},
                                {"text": "t", "words": "checked on GitHub's rendering", "source": ISSUE},
                                {"text": "t", "words": "Stats go last", "source": ISSUE}])
-def test_a_criterion_without_the_owners_words_at_its_source_is_refused(c):
-    """No words, invented words, or words from another place are refused."""
+def test_a_criterion_without_the_owners_words_at_its_source_is_refused(record_property, c):
+    """No words, invented words, or words from another place are refused.
+
+    Beside each, the same story quoting the owner's words is accepted, so the check is not a blanket refusal.
+    Proves 666.4.
+    """
+    record_property("proves", "666.4")
+    planner.from_kind(story({"text": "t", "words": "never escaped", "source": ISSUE}), ISSUE, SAID)
     with pytest.raises(planner.Garbled):
         planner.from_kind(story(c), ISSUE, SAID)
 

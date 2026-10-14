@@ -19,7 +19,6 @@ STORY = {"kind": "user_story", "summary": "Slow calls hand back a job id instead
          "acceptance_criteria": [{"text": "A slow call returns a job id within 20 s.", "source": SRC, "no_edge_cases": "a sample criterion", "files": ["dokima/jobs.py"]}],
          "non_functional": [{"text": "Job ids never repeat.", "why": "two jobs would share results", "principle": "fail closed",
                              "no_edge_cases": "a sample criterion", "files": ["dokima/jobs.py"]}],
-         "scope": ["dokima/jobs.py"],
          "tests": {"9.1": ["tests/test_jobs.py::test_id"], "9.2": ["tests/test_jobs.py::test_unique"]}}
 
 
