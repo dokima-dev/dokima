@@ -1,62 +1,40 @@
-# Dokima
+# δokima
 
 **Coding agents now out-code us on narrow tasks. The bottleneck is knowing their work is actually done.**
 
-Dokima moves your effort from writing code to verifying it: you assign, agents build, and nothing merges until it's proven. That clears the bottleneck, so you can hand off more work and run a fleet of agents with confidence.
+δokima turns a GitHub issue into merged code, takes grading away from the agent that did the work, and moves your effort from writing code to verifying it.
 
-## A management structure for agents
+*δ is the first letter of δοκιμασία, Greek for "test" or "trial".*
 
-Remote engineering teams work because of structure: tickets, plans, reviews, and a rule that nothing ships unchecked. Dokima gives agents that same structure. It is the organization around your agents that makes sure they deliver the work they were asked for, proven.
+## What it is
 
-## One history, any agent, any device
+- **Verification is the product.** Every promise in a plan gets its own test, and GitHub's verdict on that test is the proof. No model's word counts.
+- **Your words are the contract.** Each acceptance criterion quotes what you wrote, with a link to where you wrote it. Code checks the quote is really there.
+- **You own what "done" means.** You approve the plan before any code is written and the result before it merges.
+- **Not fully autonomous.** Every decision traces back to a human approval: a command you gave, or your own words quoted on autopilot.
+- **GitHub-native, nothing to host.** Issues, pull requests, comments, checks and Actions are the whole system. No server, no database.
+- **A full audit trail.** Every agent run posts one comment with what it did, why, and links to its full conversation and run.
 
-Today the story of a codebase is scattered across chat sessions, coding agents and devices, with no single place to see it. Dokima writes everything into native Git and GitHub: issues, plans, tests, failed attempts and lessons learned. Whatever agent or device you use next, it builds on the full history, permanently, with zero setup.
+## The loop in one line
 
-## Project management for agents
+You open an issue → the planner writes criteria and tests → a reviewer grades the plan → you say `/work` → the worker builds → the reviewer grades the code → the merge gate runs every check → you approve and merge.
 
-**Dokima is Jira for agent teams.** You define the work, define what "done" means, and assign it. Agents plan, build and test it, and you get it back verified, every time. Run many at once and follow everything on one GitHub project board, all with GitHub's own tools.
+Details: [[How it works|How-it-works]].
 
-## Unattended until it's actually done
+## Start here
 
-Coding agents tend to stop before the work is finished, and leaving them running on your own machine is risky. Dokima runs each step on a fresh, isolated machine with no access to your system or keys, and the work isn't done until its checks pass. Every plan, attempt and result is written back to the issue, so the next run picks up exactly where the last one stopped.
+| If you want to… | Read |
+|---|---|
+| Understand the flow | [[How it works|How-it-works]] |
+| File your first task | [[Writing issues|Writing-issues]] |
+| Know what to type | [[Commands]] |
+| Read what δokima shows you | [[The card|The-card]] |
+| Let a whole tree run by itself | [[Autopilot]] |
+| Set it up | [[Installing]] |
+| Look up a word | [[Glossary]] |
 
-Dokima is an agent runtime that uses GitHub Actions as its orchestrator. You describe a task in a GitHub issue. Isolated AI sessions plan it, build it and review it, and nothing reaches your main branch until it is proven.
+## Status
 
-There are no servers to run and no database. Your repository, its issues and its pull requests are the whole system.
+In active development. δokima builds itself: every feature since the first slice went through its own loop. It runs on [dokima-dev/dokima](https://github.com/dokima-dev/dokima) today; onboarding other repos is in progress ([#272](https://github.com/dokima-dev/dokima/issues/272)). Anything not built yet is marked **Planned**.
 
-> **Status:** in active development. Pages describe the design; features marked *planned* are not built yet.
-
-## You check the verification, not the work
-
-Coding agents are strong, but someone still has to watch every step. Dokima moves you from checking the work to checking the verification. You approve the plan, you accept the result, and the runtime guarantees everything in between.
-
-## How it works
-
-```
-issue ──► Planner ──► you approve ──► Worker ──► Reviewer ──► Gate ──► main
-```
-
-1. **You open an issue** saying what you want and how to tell it's done. See [Writing issues](Writing-issues).
-2. **The planner** turns it into a plan and the tests that will prove it, then waits for your go. You approve the plan by adding the `work` label to the issue. *Planned.*
-3. **The worker** writes code to make those tests pass. It cannot change them.
-4. **The reviewer**, a fresh session that never talked to the worker, checks the change against the plan. *Planned.*
-5. **The gate** merges only when the full test suite passes against the latest main.
-
-Each role runs as its own GitHub Actions job on its own clean machine. Labels on the issue say whose turn it is. At every step you see a [card](The-card): what was promised, and the proof it was delivered.
-
-## Production-grade by design
-
-- **Separation of duties.** Planner, worker and reviewer run as separate sessions on separate machines. None can see, steer or vouch for another.
-- **Tamper-proof grading.** Tests are written before the work and locked during it. A change that edits them fails, even if everything passes.
-- **Independent review.** A read-only reviewer blocks gamed tests and changes outside the task's scope.
-- **A merge gate.** Main never breaks. Nothing lands until it is green against the latest main, and the rule applies to everyone, admins included.
-- **Durable execution.** Work is committed after every step, so a crash or timeout resumes instead of starting over.
-- **Fast verification.** Large test suites split across many machines at once.
-- **Full audit trail.** Every plan, step, review and decision is a commit, comment or log on GitHub.
-- **Least privilege.** Each role gets only the permissions its job needs. Secrets stay in GitHub's encrypted store.
-
-## Pages
-
-- [Writing issues](Writing-issues): how to describe a task so it can be verified
-- [The card](The-card): how Dokima shows you what it did and proves it
-- [FAQ](FAQ): why GitHub, why pull requests, and other design choices
+License: Apache-2.0.

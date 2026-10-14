@@ -1,59 +1,52 @@
 # Writing issues
 
-In Dokima, a task is a GitHub issue. A good issue says what you want and how anyone could tell it's done. Everything downstream, the plan, the tests and the final verdict, is measured against it.
+**Just say what you want.** No template, no required fields. The planner turns your words into acceptance criteria and tests.
 
-## The three fields
+## What to write
 
-1. **Title:** the outcome, written as a sentence you could check.
-   *Good:* "Exported CSVs include a header row." *Vague:* "Fix export."
-2. **Objectives and acceptance criteria** (required): a list. Each objective has the acceptance criteria that prove it nested underneath. Each criterion has a "Verified by" line saying how it is checked. An objective is met once all of its criteria are met.
-3. **Where to look** (optional): file paths, one per line, so the agent doesn't have to rediscover them.
+Plain words, rough or detailed. What matters:
 
-## Example
+- **Say each thing you want.** Every criterion must quote your exact words and link to where you wrote them. If you didn't write it, it won't be built.
+- **Say what you'd see when it works.** A message, a file, a number, an exit code. Observable beats adjectives.
+- **One ask per issue is easiest.** Big asks are fine; the planner splits them (see [How it works](How-it-works#splits-features-and-stories)).
 
-**Title:** Exported CSVs include a header row
-
-**Objectives and acceptance criteria**
-
-```markdown
-- Objective: exported files are readable by spreadsheet apps
-  - Acceptance criteria: the first line of every export lists the column names
-    Verified by: a test that exports a file and reads its first line
-  - Acceptance criteria: column names match the field names shown in the app
-    Verified by: a test comparing the header to the app's field names
-- Objective: existing imports keep working
-  - Acceptance criteria: importing a file with a header row skips that row
-    Verified by: a test that imports a file with a header row
-```
-
-**Where to look**
-
-```
-src/export/csv.py
-src/import/csv.py
-```
-
-## What makes a good criterion
-
-A criterion is something a test or a person could confirm without judgment calls.
-
-| Instead of | Write |
-| --- | --- |
+| Vague | Better |
+|---|---|
 | "Export is faster" | "Exporting 10,000 rows takes under 2 seconds" |
-| "Errors are handled" | "A missing file shows 'File not found' and exits with code 1" |
-| "Clean up the code" | Leave it out, or split it into its own issue |
+| "Handle errors" | "A missing file says 'File not found' and exits with code 1" |
+| "Clean up the code" | Leave it out, or file it separately |
 
-If a criterion can't be verified, the planner will say so and propose a rewrite instead of guessing. *Planned.*
+Nothing runs until you comment `/plan`. Filing an issue alone just keeps it for later.
 
-## Big issues
+## What the planner does with it
 
-If an issue holds more than one deliverable, split it into sub-issues. The parent keeps the objectives and closes itself when all of its children close. The planner may propose a split; nothing is created until you approve it. *Planned.*
+- Judges the ask first: already fixed? patching a symptom? overlapping an open issue? It raises a doubt only with evidence.
+- Writes each criterion as **one behavior**, ≤20 words, quoting your words with a **Source** link.
+- Writes a test per criterion that **fails today**, before any code exists.
+- Lists the **Scope**: every file the worker may change.
+- Sets the issue's title to its own short title. Your original title is kept at the top of your text, in the **Original issue** fold.
 
-## Approving the plan
+Your original text is never edited. Code writes only the card above it. Changes go in comments.
 
-When the planner has posted its plan, read it. Adding the `work` label approves the plan and starts the worker.
+## Answering questions
 
-## Shortcuts
+When your words allow two readings, the planner asks, and plans on its best reading anyway. The card shows **Needs you: answer N questions**.
 
-- Blank issues are allowed. You can jot down an idea now and add objectives and acceptance criteria later; nothing runs until they're there.
-- Issues created through the website, the API or an agent are held to the same standard.
+| You want to… | Comment |
+|---|---|
+| Answer, or change the plan | `/plan` followed by your words |
+| Accept the planner's assumptions | `/review` |
+
+Your words after `/plan` reach the planner and become a new **Source** for criteria. Newer words win over older ones.
+
+More than 3 questions means the issue isn't ready: the loop stops until you answer with `/plan`.
+
+## Adding to an issue later
+
+- More detail on an issue being worked: comment `/plan <your words>`.
+- A note for later: a plain comment. Agents read every comment the next time they run.
+- A new idea: a new issue.
+
+## Limits today
+
+Every criterion needs an automated test, and the only runner supported is Python's `pytest` with tests in `tests/`. Other languages and test commands are **Planned**.
