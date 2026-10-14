@@ -17,9 +17,27 @@ def agents_text():
         return ""
 
 
+def rules_texts():
+    """AGENTS.md and every repo markdown file it links, as the runtime has them.
+
+    Web links and files outside the runtime are skipped."""
+    root = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
+    index = agents_text()
+    texts = [index]
+    for link in dict.fromkeys(re.findall(r"\]\(([^)#\s:]+\.md)(?:#[^)]*)?\)", index)):
+        path = os.path.realpath(os.path.join(root, link))
+        if not path.startswith(os.path.realpath(root) + os.sep):
+            continue
+        try:
+            texts.append(open(path).read())
+        except OSError:
+            pass
+    return texts
+
+
 def said_there(words, source, items, body, owners, number, parent=None):
     """True when the words appear word for word where the source says: the issue's own
-    text, a code owner's comment on this issue, or AGENTS.md; given the parent (parent_words), also the parent's own
+    text, a code owner's comment on this issue, or AGENTS.md and the topic files it links; given the parent (parent_words), also the parent's own
     text or a code owner's comment on it. Anything else, a comment by anyone else (the bot included) or one not found,
     is False."""
     flat = lambda t: " ".join((t or "").split())
@@ -28,7 +46,7 @@ def said_there(words, source, items, body, owners, number, parent=None):
     if not words or not owner_source(source, number, up):
         return False
     if source == "AGENTS.md":
-        return words in flat(agents_text())
+        return any(words in flat(t) for t in rules_texts())
     from dokima.body import ask
     if source == issue_url(number):
         return words in flat(ask(body))
