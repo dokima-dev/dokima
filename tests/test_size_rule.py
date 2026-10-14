@@ -1,11 +1,32 @@
-"""At most 3 questions for the owner, and a size verdict on every plan review.
+"""No caps on criteria or stories, at most 3 owner questions, a size verdict per review.
 
-No count of criteria or stories splits a plan any more (#667); stories come from the files criteria share."""
+Since #667 no count caps a story; only an empty story is refused."""
 import os
 import sys
 
+import pytest
+
 sys.path.insert(0, os.path.join(os.path.dirname(__file__), ".."))
-from dokima import agent  # noqa: E402
+from dokima import agent, planner  # noqa: E402
+
+C = {"text": "t", "source": "s"}
+
+
+def story(k):
+    return {"acceptance_criteria": [C] * k, "non_functional": []}
+
+
+@pytest.mark.parametrize("sizes", [[1], [5], [2, 1], [5, 5], [3, 3, 1], [5, 5, 5, 5, 5, 5, 1]])
+def test_the_right_number_of_stories_passes(sizes):
+    """Any number of stories passes, each holding at least one criterion."""
+    planner.check_size([story(k) for k in sizes])
+
+
+@pytest.mark.parametrize("sizes", [[0], [3, 0]])
+def test_a_story_over_five_or_empty_is_refused(sizes):
+    """A story of no criteria is refused."""
+    with pytest.raises(planner.Garbled):
+        planner.check_size([story(k) for k in sizes])
 
 
 def test_more_than_three_questions_stops_even_on_autopilot():
@@ -44,3 +65,9 @@ def test_every_test_is_judged_and_a_test_checking_more_never_approves():
     assert agent.problems_tests(wide, plan)
     assert not agent.problems_tests(dict(wide, verdict="block"), plan)
 
+
+def test_a_story_of_a_parent_never_splits_again():
+    """An issue that is already a story never becomes a feature, whatever its size."""
+    planner.check_size([story(5)], nested=True)
+    with pytest.raises(planner.Garbled, match="never splits again"):
+        planner.check_size([story(2), story(2)], nested=True)
