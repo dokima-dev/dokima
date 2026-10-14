@@ -1,0 +1,136 @@
+{
+ "role": "planner",
+ "stage": null,
+ "run_id": "38618534351",
+ "commit_before": "ac5c8e79bf7783ec4664ac8ecb5fdb39e9db110f",
+ "started_by": "dokima-runtime[bot]",
+ "models": [
+  "claude-opus-5-5"
+ ],
+ "report": {
+  "duration_ms": 2073500,
+  "turns": 41,
+  "cost_usd": 2.6593856,
+  "tokens_in": 2926285,
+  "tokens_out": 18558
+ },
+ "log": "https://github.com/dokima-dev/dokima/blob/logs/logs/665/38618534351-planner.md",
+ "run": "https://github.com/dokima-dev/dokima/actions/runs/38618534351",
+ "handback": {
+  "kind": "user_story",
+  "title": "Each criterion lists the code files it changes",
+  "summary": "Every criterion in a plan names the code files it changes, checked by code.",
+  "user_story": "Every plan shows which code files each criterion changes, so code can split and fence by them.",
+  "acceptance_criteria": [
+   {
+    "text": "Each criterion in a plan carries a list of the code files it changes.",
+    "words": "Each criterion carries a `files` list in the plan's structured output: the code files it changes, at least one.",
+    "source": "https://github.com/dokima-dev/dokima/issues/661#issuecomment-6173691734",
+    "files": [
+     "dokima/planner.py",
+     "dokima/roles/planner.md"
+    ],
+    "no_edge_cases": "Plans missing or holding a malformed list are the rejection criterion's cases."
+   },
+   {
+    "text": "The plan check rejects a plan where any criterion lists no file, naming that criterion.",
+    "words": "Code rejects a plan where a criterion lists none.",
+    "source": "https://github.com/dokima-dev/dokima/issues/661#issuecomment-6173691734",
+    "files": [
+     "dokima/planner.py"
+    ],
+    "edge_cases": [
+     {
+      "case": "Empty: the files list is missing or empty.",
+      "test": "tests/test_criterion_files.py::test_a_criterion_with_no_files_is_rejected_by_name"
+     },
+     {
+      "case": "Bad data: files is one bare path, not a list.",
+      "test": "tests/test_criterion_files.py::test_a_criterion_with_no_files_is_rejected_by_name"
+     },
+     {
+      "case": "A non-functional requirement lists no file.",
+      "test": "tests/test_criterion_files.py::test_a_criterion_with_no_files_is_rejected_by_name"
+     },
+     {
+      "case": "A criterion in a split's story lists no file.",
+      "test": "tests/test_criterion_files.py::test_a_criterion_with_no_files_is_rejected_by_name"
+     }
+    ]
+   },
+   {
+    "text": "The plan check accepts a criterion listing a file that does not exist yet.",
+    "words": "A file it creates counts by its path.",
+    "source": "https://github.com/dokima-dev/dokima/issues/661#issuecomment-6173691734",
+    "files": [
+     "dokima/planner.py"
+    ],
+    "no_edge_cases": "One case: a path no repo holds yet."
+   },
+   {
+    "text": "The planner's instructions say a criterion lists every file its behavior needs, never just one.",
+    "words": "A criterion lists every file its behavior needs, never just one, so a behavior is never cut across stories.",
+    "source": "https://github.com/dokima-dev/dokima/issues/661#issuecomment-6173691734",
+    "files": [
+     "dokima/roles/planner.md",
+     "dokima/roles/plan-grade.md"
+    ],
+    "no_edge_cases": "A sentence in the instructions has no edge cases."
+   },
+   {
+    "text": "The planner's instructions say work that can be written as code is a criterion like any other.",
+    "words": "if it can be written as code (infrastructure as code, a setup script), it's a criterion like any other.",
+    "source": "https://github.com/dokima-dev/dokima/issues/661#issuecomment-6173691734",
+    "files": [
+     "dokima/roles/planner.md"
+    ],
+    "no_edge_cases": "A sentence in the instructions has no edge cases."
+   }
+  ],
+  "non_functional": [],
+  "scope": [
+   "dokima/planner.py",
+   "dokima/roles/planner.md",
+   "dokima/roles/plan-grade.md"
+  ],
+  "tests": {
+   "665.1": [
+    "tests/test_criterion_files.py::test_each_criterion_carries_its_files"
+   ],
+   "665.2": [
+    "tests/test_criterion_files.py::test_a_criterion_with_no_files_is_rejected_by_name"
+   ],
+   "665.3": [
+    "tests/test_criterion_files.py::test_a_file_that_does_not_exist_yet_is_accepted"
+   ],
+   "665.4": [
+    "tests/test_criterion_files.py::test_instructions_say_list_every_file_never_just_one"
+   ],
+   "665.5": [
+    "tests/test_criterion_files.py::test_instructions_say_code_work_is_a_criterion"
+   ]
+  },
+  "test_changes": {
+   "tests/test_plan_shape.py::test_a_feature_is_shown_as_handed_back": "Its sample criteria now list their files, which every plan must carry.",
+   "tests/test_agent.py::test_a_replan_is_judged_only_on_what_the_planner_changed_in_its_run": "Its sample criterion now lists its files, which every plan must carry."
+  },
+  "links": {
+   "blocked_by": [],
+   "blocks": [
+    666,
+    667,
+    670
+   ],
+   "relates_to": [
+    669,
+    668,
+    551
+   ]
+  }
+ },
+ "check": {
+  "passed": true,
+  "problems": []
+ },
+ "url": "https://github.com/dokima-dev/dokima/issues/665#issuecomment-6175837986"
+}
