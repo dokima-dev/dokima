@@ -1,0 +1,319 @@
+{
+ "role": "planner",
+ "stage": null,
+ "run_id": "38617942328",
+ "commit_before": "ac5c8e79bf7783ec4664ac8ecb5fdb39e9db110f",
+ "started_by": "RezaSoleymanifar",
+ "models": [
+  "claude-opus-5-5"
+ ],
+ "report": {
+  "duration_ms": 26191,
+  "turns": 5,
+  "cost_usd": 0.362541,
+  "tokens_in": 194961,
+  "tokens_out": 2492
+ },
+ "log": "https://github.com/dokima-dev/dokima/blob/logs/logs/661/38617942328-planner.md",
+ "run": "https://github.com/dokima-dev/dokima/actions/runs/38617942328",
+ "handback": {
+  "kind": "feature",
+  "title": "Work splits into stories by the files it changes",
+  "summary": "Each criterion lists the code files it changes, and code groups criteria into stories by shared files, with no caps.",
+  "feature": "Criteria list their files; code groups them into stories by shared files. Shared files take turns to build. Owner steps sit on the plan.",
+  "stories": [
+   {
+    "title": "Each criterion lists the code files it changes",
+    "user_story": "Every plan shows which code files each criterion changes, so code can split and fence by them.",
+    "context": "Today a plan has one scope list for the whole story (`scope` in plan.json, checked in `from_kind` in `dokima/planner.py`); criteria carry no files. Add a `files` list to every criterion, in user stories and in a split's stories (`check_stories`). A path that does not exist yet is fine: the worker creates it. The planner's instructions live in `dokima/roles/planner.md` and `dokima/roles/plan-grade.md`; this issue explicitly asks to change how the planner tags criteria, so those files are in reach. Tests sit beside `tests/test_plan_shape.py` and `tests/test_planner_prompt.py`.",
+    "acceptance_criteria": [
+     {
+      "text": "Each criterion in a plan carries a list of the code files it changes.",
+      "words": "Each criterion carries a `files` list in the plan's structured output: the code files it changes, at least one.",
+      "source": "https://github.com/dokima-dev/dokima/issues/661#issuecomment-6173691734",
+      "edge_cases": [
+       {
+        "case": "A files field that is text, not a list, is rejected naming the criterion.",
+        "test": "written by this story's planner"
+       }
+      ]
+     },
+     {
+      "text": "The plan check rejects a plan where any criterion lists no file, naming that criterion.",
+      "words": "Code rejects a plan where a criterion lists none.",
+      "source": "https://github.com/dokima-dev/dokima/issues/661#issuecomment-6173691734",
+      "edge_cases": [
+       {
+        "case": "An empty list.",
+        "test": "written by this story's planner"
+       },
+       {
+        "case": "No files field at all.",
+        "test": "written by this story's planner"
+       }
+      ]
+     },
+     {
+      "text": "The plan check accepts a criterion listing a file that does not exist yet.",
+      "words": "A file it creates counts by its path.",
+      "source": "https://github.com/dokima-dev/dokima/issues/661#issuecomment-6173691734",
+      "edge_cases": [
+       {
+        "case": "A new file inside a folder that does not exist yet.",
+        "test": "written by this story's planner"
+       }
+      ]
+     },
+     {
+      "text": "The planner's instructions say a criterion lists every file its behavior needs, never just one.",
+      "words": "A criterion lists every file its behavior needs, never just one, so a behavior is never cut across stories.",
+      "source": "https://github.com/dokima-dev/dokima/issues/661#issuecomment-6173691734",
+      "no_edge_cases": "It is a rule the planner reads, with no input of its own."
+     },
+     {
+      "text": "The planner's instructions say work that can be written as code is a criterion like any other.",
+      "words": "if it can be written as code (infrastructure as code, a setup script), it's a criterion like any other.",
+      "source": "https://github.com/dokima-dev/dokima/issues/661#issuecomment-6173691734",
+      "no_edge_cases": "It is a rule the planner reads, with no input of its own."
+     }
+    ],
+    "non_functional": [],
+    "depends_on": []
+   },
+   {
+    "title": "A plan's scope comes from its criteria's files",
+    "user_story": "The worker may change exactly the files the criteria list, plus their tests, with no separate scope to keep.",
+    "context": "The fence (`dokima/fence.py`, `fence()`) reads the scope from plan.json's `scope` or the issue's Scope heading (`scope_of`). `dokima/planner.py` `plan_text` writes that heading. After this story the scope is the union of every criterion's `files` plus the tests the plan names; a plan still carrying `scope` is rejected, the way retired fields are (`problems_old` in `dokima/agent_checks.py`). Criteria already quote the owner's words, checked by `check_words` in `dokima/planner.py` and pinned by `tests/test_criteria_quote_owner.py`; keep that working.",
+    "acceptance_criteria": [
+     {
+      "text": "A plan's scope is every file its criteria list, plus the tests the plan names.",
+      "words": "The plan's scope is all criteria's files plus their tests",
+      "source": "https://github.com/dokima-dev/dokima/issues/661#issuecomment-6173691734",
+      "edge_cases": [
+       {
+        "case": "Two criteria listing the same file give it once in the scope.",
+        "test": "written by this story's planner"
+       }
+      ]
+     },
+     {
+      "text": "The plan check rejects a plan that still carries a separate scope field.",
+      "words": "with no separate scope field",
+      "source": "https://github.com/dokima-dev/dokima/issues/661#issuecomment-6173691734",
+      "no_edge_cases": "The field is either there or not; there is no other case."
+     },
+     {
+      "text": "The fence undoes the worker's change to any file no criterion lists.",
+      "words": "The fence keeps enforcing it.",
+      "source": "https://github.com/dokima-dev/dokima/issues/661#issuecomment-6173691734",
+      "edge_cases": [
+       {
+        "case": "The worker creates a new file a criterion lists, and it is kept.",
+        "test": "written by this story's planner"
+       }
+      ]
+     },
+     {
+      "text": "The plan check rejects a criterion that does not quote the owner's own words.",
+      "words": "Each one quotes my words, which are the spec.",
+      "source": "https://github.com/dokima-dev/dokima/issues/661",
+      "no_edge_cases": "Already true today and pinned by an existing test; this story keeps it."
+     }
+    ],
+    "non_functional": [],
+    "depends_on": [
+     0
+    ]
+   },
+   {
+    "title": "Code groups criteria into stories by shared files",
+    "user_story": "Any ask, however big, splits into stories by the files its criteria change, never by counting.",
+    "context": "Today the planner picks stories itself and code only counts them: `check_size` and `PER_STORY = 5` in `dokima/planner.py`; the count rule is also written in `dokima/roles/planner.md` (Split) and `rules/splitting.md`. After this story the planner hands back criteria with files and code computes the groups: criteria sharing a code file, directly or through another criterion, are one story; each story is filed as a sub-issue by `file_split` in `dokima/agent_autopilot.py`. One group means one user story, no split. Files ending in .md are ignored when grouping.",
+    "acceptance_criteria": [
+     {
+      "text": "Code puts criteria that share any code file into the same story.",
+      "words": "Code groups criteria that share any code file into one story (a sub-issue).",
+      "source": "https://github.com/dokima-dev/dokima/issues/661",
+      "edge_cases": [
+       {
+        "case": "A shares a file with B, and B with C: all three are one story.",
+        "test": "written by this story's planner"
+       }
+      ]
+     },
+     {
+      "text": "Criteria with no code file in common become separate stories.",
+      "words": "Criteria with no file in common become separate stories.",
+      "source": "https://github.com/dokima-dev/dokima/issues/661",
+      "edge_cases": [
+       {
+        "case": "Every criterion shares one file, so the plan stays a single story.",
+        "test": "written by this story's planner"
+       }
+      ]
+     },
+     {
+      "text": "No count of criteria or stories splits or refuses a plan; today's count rules are gone.",
+      "words": "No number decides it: no criteria cap, no story cap.",
+      "source": "https://github.com/dokima-dev/dokima/issues/661",
+      "edge_cases": [
+       {
+        "case": "A plan of twenty criteria sharing one file passes as one story.",
+        "test": "written by this story's planner"
+       }
+      ]
+     },
+     {
+      "text": "Two criteria that share only a markdown file stay in separate stories.",
+      "words": "Markdown files never group criteria",
+      "source": "https://github.com/dokima-dev/dokima/issues/661",
+      "no_edge_cases": "The case is the criterion itself; normal use adds none."
+     },
+     {
+      "text": "Each edge case stays under its criterion and never changes how criteria group.",
+      "words": "Edge cases stay under their criterion and don't affect the split.",
+      "source": "https://github.com/dokima-dev/dokima/issues/661",
+      "no_edge_cases": "The case is the criterion itself; normal use adds none."
+     }
+    ],
+    "non_functional": [],
+    "depends_on": [
+     0
+    ]
+   },
+   {
+    "title": "Stories sharing a code file take turns to build",
+    "user_story": "Two stories never build the same file at once, while planning and review go on freely.",
+    "context": "No build waits on another today. The worker is started from `dokima/agent_next.py` (`next_step`) and `dokima/agent_roles.py` (`start_waiting`); planner and plan-review starts must not be touched by the wait. The owner settled it: a story's turn ends when its pull request merges. Markdown files never cause a wait. Each story already merges to main on its own pull request with no parent branch; keep it so and pin it. A story's own planner may add files beyond the ones its split gave it; before the worker starts, the clash check runs again on the story's final file list.",
+    "acceptance_criteria": [
+     {
+      "text": "A story's build waits until another open story sharing a code file has its pull request merged.",
+      "words": "A story's turn ends when its PR merges.",
+      "source": "https://github.com/dokima-dev/dokima/issues/661#issuecomment-6175675553",
+      "edge_cases": [
+       {
+        "case": "The other story merges, and the waiting build starts.",
+        "test": "written by this story's planner"
+       }
+      ]
+     },
+     {
+      "text": "Planning and plan review of a story never wait on another story's files.",
+      "words": "Planning and plan review never wait; only the worker's build does.",
+      "source": "https://github.com/dokima-dev/dokima/issues/661",
+      "no_edge_cases": "The case is the criterion itself; normal use adds none."
+     },
+     {
+      "text": "A shared markdown file never makes a story's build wait.",
+      "words": "Markdown files never group criteria and never make a story wait.",
+      "source": "https://github.com/dokima-dev/dokima/issues/661",
+      "no_edge_cases": "The case is the criterion itself; normal use adds none."
+     },
+     {
+      "text": "Each story merges to main on its own pull request, with no parent branch.",
+      "words": "Stories merge to main one by one. No parent branch.",
+      "source": "https://github.com/dokima-dev/dokima/issues/661",
+      "no_edge_cases": "Already true today; this story pins it."
+     },
+     {
+      "text": "A story whose plan adds files beyond those it was assigned is checked again for clashes before it builds.",
+      "words": "a story whose plan changes files beyond the ones it was assigned is checked again for clashes before it builds.",
+      "source": "https://github.com/dokima-dev/dokima/issues/661#issuecomment-6173871465",
+      "edge_cases": [
+       {
+        "case": "The added file is held by another open story, so the build waits.",
+        "test": "written by this story's planner"
+       },
+       {
+        "case": "The added file is held by no other story, so the build starts.",
+        "test": "written by this story's planner"
+       }
+      ]
+     }
+    ],
+    "non_functional": [],
+    "depends_on": [
+     2
+    ]
+   },
+   {
+    "title": "Steps only the owner can do sit on the plan",
+    "user_story": "Interactive steps, like a console or a secret, show on the plan as the owner's, blocking only what needs them.",
+    "context": "Today a plan has no place for a step that changes no file. The issue says nothing waits on such a step by itself; the newer comment adds that stories building on it are blocked until the owner closes it. Both hold: only the stories that build on it wait. The plan reads 'close it' as the step being its own issue the owner closes, linked as blocked-by the way `file_split` in `dokima/agent_autopilot.py` links stories.",
+    "acceptance_criteria": [
+     {
+      "text": "A step that changes no file is listed on the plan as the owner's to do.",
+      "words": "it's a step for me on the plan",
+      "source": "https://github.com/dokima-dev/dokima/issues/661#issuecomment-6173691734",
+      "no_edge_cases": "The case is the criterion itself; normal use adds none."
+     },
+     {
+      "text": "Stories that build on an owner's step stay blocked until the owner closes it.",
+      "words": "the stories that build on it are blocked by it until I close it.",
+      "source": "https://github.com/dokima-dev/dokima/issues/661#issuecomment-6173691734",
+      "edge_cases": [
+       {
+        "case": "The owner closes the step, and the blocked story starts.",
+        "test": "written by this story's planner"
+       }
+      ]
+     },
+     {
+      "text": "Stories that do not build on an owner's step never wait on it.",
+      "words": "Nothing waits on it by itself.",
+      "source": "https://github.com/dokima-dev/dokima/issues/661",
+      "no_edge_cases": "The case is the criterion itself; normal use adds none."
+     }
+    ],
+    "non_functional": [],
+    "depends_on": [
+     2
+    ]
+   },
+   {
+    "title": "Red first stays and unproven criteria show on the card",
+    "user_story": "Every criterion is proven red first, and the card shows which criteria are not verified.",
+    "context": "Red first already holds: `passing_today` in `dokima/planner.py` rejects a new test that passes on main. The planner's instructions already say an ask that cannot be tested becomes a question. The card (`dokima/card.py`, which this issue explicitly asks to change) shows no 'not verified' today for a (manual) criterion. The owner dropped naming a crowded file on the card.",
+    "acceptance_criteria": [
+     {
+      "text": "The plan check rejects a criterion whose new test passes on main before work starts.",
+      "words": "Red first stays: every criterion's test fails on main before work starts.",
+      "source": "https://github.com/dokima-dev/dokima/issues/661",
+      "no_edge_cases": "Already true today and pinned by an existing test; this story keeps it."
+     },
+     {
+      "text": "The planner's instructions say an ask that cannot be checked becomes a question to the owner.",
+      "words": "An ask that can't be checked becomes a question to me",
+      "source": "https://github.com/dokima-dev/dokima/issues/661",
+      "no_edge_cases": "It is a rule the planner reads, with no input of its own."
+     },
+     {
+      "text": "A criterion with no automated test shows on the card as not verified.",
+      "words": "shows on the card as not verified.",
+      "source": "https://github.com/dokima-dev/dokima/issues/661",
+      "no_edge_cases": "The case is the criterion itself; normal use adds none."
+     }
+    ],
+    "non_functional": [],
+    "depends_on": [
+     0
+    ]
+   }
+  ],
+  "links": {
+   "blocked_by": [],
+   "blocks": [],
+   "relates_to": [
+    232,
+    573,
+    551,
+    384
+   ]
+  }
+ },
+ "check": {
+  "passed": true,
+  "problems": []
+ },
+ "url": "https://github.com/dokima-dev/dokima/issues/661#issuecomment-6175761976"
+}
