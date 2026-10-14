@@ -221,7 +221,7 @@ def test_the_planner_prompt_asks_for_the_summary_in_both_kinds(record_property):
     section = text[text.index("# What you hand back"):]
     story = section[section.index('{"kind": "user_story"'):section.index("- A feature:")]
     feature = section[section.index('{"kind": "feature"'):]
-    feature = feature[:feature.index("2 to 5 stories")]
+    feature = feature[:feature.index('Every kind carries "title"')]
     assert '"summary"' in story, "181.1: the user story's shape in the planner prompt has no summary"
     assert '"summary"' in feature, "181.1: the feature's shape in the planner prompt has no summary"
     words = " ".join(section.split()).lower()
