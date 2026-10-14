@@ -1,0 +1,195 @@
+{
+ "role": "reviewer",
+ "stage": "plan",
+ "run_id": "38650266247",
+ "commit_before": "97a008d6eb902220980ddb1a5662e192591231bc",
+ "started_by": "dokima-runtime[bot]",
+ "models": [
+  "claude-opus-5-5"
+ ],
+ "report": {
+  "duration_ms": 4254,
+  "turns": 2,
+  "cost_usd": 0.8281104000000001,
+  "tokens_in": 126853,
+  "tokens_out": 219
+ },
+ "log": "https://github.com/dokima-dev/dokima/blob/logs/logs/667/38650266247-reviewer-plan.md",
+ "run": "https://github.com/dokima-dev/dokima/actions/runs/38650266247",
+ "handback": {
+  "previous_step": {
+   "did": [
+    "Added 667.5: a story of a split is refused, never split again."
+   ],
+   "decided": [
+    "Markdown never grouping is proven as an edge case of 667.2."
+   ],
+   "open": [
+    "Asks the owner whether a fresh sibling for approved new scope is its own issue.",
+    "Asks the owner whether folding markdown under 667.2 is fine."
+   ]
+  },
+  "verdict": "block",
+  "summary": "All five tests fail today for the right reason; one owner ask waits on the owner's answer.",
+  "raises": [
+   {
+    "kind": "blocker",
+    "to": "owner",
+    "label": "New scope: no criterion",
+    "text": "No criterion opens a fresh sibling when you approve new scope for a child story. Answer the planner's question: here, or its own issue?",
+    "evidence": "Owner's comments of 2026-10-14T22:22 and 22:25 on #667; plan.json criteria 667.1 to 667.5 open no issue; question P6 is open.",
+    "raised_by": "reviewer",
+    "id": "R9"
+   }
+  ],
+  "answers": [
+   {
+    "raise": "P7",
+    "answer": "done",
+    "why": "A shared markdown file is no shared code file, so 667.2 already covers it.",
+    "words": "Files ending in .md are ignored when grouping.",
+    "source": "https://github.com/dokima-dev/dokima/issues/667",
+    "changes": false
+   }
+  ],
+  "asks": [
+   {
+    "ask": "Code puts criteria that share any code file into the same story.",
+    "source": "https://github.com/dokima-dev/dokima/issues/667",
+    "criterion": "667.1"
+   },
+   {
+    "ask": "the planner hands back criteria with files and code computes the groups",
+    "source": "https://github.com/dokima-dev/dokima/issues/667",
+    "criterion": "667.1"
+   },
+   {
+    "ask": "Criteria with no code file in common become separate stories.",
+    "source": "https://github.com/dokima-dev/dokima/issues/667",
+    "criterion": "667.2"
+   },
+   {
+    "ask": "No count of criteria or stories splits or refuses a plan",
+    "source": "https://github.com/dokima-dev/dokima/issues/667",
+    "criterion": "667.3"
+   },
+   {
+    "ask": "today's count rules are gone",
+    "source": "https://github.com/dokima-dev/dokima/issues/667",
+    "criterion": "667.4"
+   },
+   {
+    "ask": "Two criteria that share only a markdown file stay in separate stories.",
+    "source": "https://github.com/dokima-dev/dokima/issues/667",
+    "criterion": "667.2"
+   },
+   {
+    "ask": "Each edge case stays under its criterion and never changes how criteria group.",
+    "source": "https://github.com/dokima-dev/dokima/issues/667",
+    "criterion": "667.2"
+   },
+   {
+    "ask": "No second split, ever. A story keeps one level.",
+    "source": "https://github.com/dokima-dev/dokima/issues/667",
+    "criterion": "667.5"
+   },
+   {
+    "ask": "code groups the stories, the planner writes each story's title and story text.",
+    "source": "https://github.com/dokima-dev/dokima/issues/667",
+    "criterion": "667.1"
+   },
+   {
+    "ask": "A child story can never grow its scope; new scope only as a raised question, and if I approve it a fresh sibling issue is opened for it.",
+    "source": "https://github.com/dokima-dev/dokima/issues/667",
+    "criterion": "missing"
+   }
+  ],
+  "behaviors": [
+   {
+    "criterion": "667.1",
+    "one_behavior": true,
+    "why": "Criteria sharing a code file, even through another, form one story."
+   },
+   {
+    "criterion": "667.2",
+    "one_behavior": true,
+    "why": "Criteria with no shared code file form separate stories."
+   },
+   {
+    "criterion": "667.3",
+    "one_behavior": true,
+    "why": "No count refuses a plan."
+   },
+   {
+    "criterion": "667.4",
+    "one_behavior": true,
+    "why": "The written count rules are gone."
+   },
+   {
+    "criterion": "667.5",
+    "one_behavior": true,
+    "why": "A story of a split with separate groups is refused."
+   }
+  ],
+  "edge_cases": [
+   {
+    "criterion": "667.1",
+    "cut": [],
+    "missing": []
+   },
+   {
+    "criterion": "667.2",
+    "cut": [],
+    "missing": []
+   },
+   {
+    "criterion": "667.3",
+    "cut": [],
+    "missing": []
+   },
+   {
+    "criterion": "667.4",
+    "cut": [],
+    "missing": []
+   },
+   {
+    "criterion": "667.5",
+    "cut": [],
+    "missing": []
+   }
+  ],
+  "tests": [
+   {
+    "test": "tests/test_story_groups.py::test_criteria_sharing_a_code_file_are_put_in_the_same_story",
+    "only_its_behavior": true,
+    "why": "Checks code's groups and the check, including through a third criterion."
+   },
+   {
+    "test": "tests/test_story_groups.py::test_criteria_with_no_code_file_in_common_become_separate_stories",
+    "only_its_behavior": true,
+    "why": "Checks separate groups, with markdown and edge cases not joining them."
+   },
+   {
+    "test": "tests/test_story_groups.py::test_no_count_of_criteria_or_stories_refuses_a_plan",
+    "only_its_behavior": true,
+    "why": "Six criteria and seven stories pass; an empty story is still refused."
+   },
+   {
+    "test": "tests/test_story_groups.py::test_the_old_count_rules_are_gone_from_the_instructions",
+    "only_its_behavior": true,
+    "why": "Fails on each old count phrase in the instructions and size message."
+   },
+   {
+    "test": "tests/test_story_groups.py::test_a_story_of_a_split_never_splits_again",
+    "only_its_behavior": true,
+    "why": "Refuses a child story with two groups; accepts it with one."
+   }
+  ],
+  "size": "ok"
+ },
+ "check": {
+  "passed": true,
+  "problems": []
+ },
+ "url": "https://github.com/dokima-dev/dokima/issues/667#issuecomment-6180232568"
+}
