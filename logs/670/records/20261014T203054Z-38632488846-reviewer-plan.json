@@ -1,0 +1,123 @@
+{
+ "role": "reviewer",
+ "stage": "plan",
+ "run_id": "38632488846",
+ "commit_before": "8cc48d9b7e6780b1db8ef64b25092adc92df7e68",
+ "started_by": "dokima-runtime[bot]",
+ "models": [
+  "claude-opus-5-5"
+ ],
+ "report": {
+  "duration_ms": 45172,
+  "turns": 6,
+  "cost_usd": 0.2758242,
+  "tokens_in": 219825,
+  "tokens_out": 3825
+ },
+ "log": "https://github.com/dokima-dev/dokima/blob/logs/logs/670/38632488846-reviewer-plan.md",
+ "run": "https://github.com/dokima-dev/dokima/actions/runs/38632488846",
+ "handback": {
+  "previous_step": {
+   "did": [
+    "It kept the same plan after the owner's answer."
+   ],
+   "decided": [
+    "Red first and the question rule are only pinned; the card changes."
+   ],
+   "open": []
+  },
+  "verdict": "approve",
+  "summary": "The plan does what the owner said: pin the two rules that hold, and mark untested criteria on the card.",
+  "raises": [],
+  "answers": [],
+  "asks": [
+   {
+    "ask": "Red first stays: every criterion's test fails on main before work starts.",
+    "source": "https://github.com/dokima-dev/dokima/issues/661",
+    "criterion": "670.1"
+   },
+   {
+    "ask": "An ask that can't be checked becomes a question to me",
+    "source": "https://github.com/dokima-dev/dokima/issues/661",
+    "criterion": "670.2"
+   },
+   {
+    "ask": "or shows on the card as not verified.",
+    "source": "https://github.com/dokima-dev/dokima/issues/661",
+    "criterion": "670.3"
+   },
+   {
+    "ask": "Yes, only pin them and change the card.",
+    "source": "https://github.com/dokima-dev/dokima/issues/670",
+    "criterion": "670.3"
+   }
+  ],
+  "behaviors": [
+   {
+    "criterion": "670.1",
+    "one_behavior": true,
+    "why": "One rejection: a new test that passes today."
+   },
+   {
+    "criterion": "670.2",
+    "one_behavior": true,
+    "why": "One instruction in the planner's prompt."
+   },
+   {
+    "criterion": "670.3",
+    "one_behavior": true,
+    "why": "One card label for a criterion with no test."
+   }
+  ],
+  "edge_cases": [
+   {
+    "criterion": "670.1",
+    "cut": [],
+    "missing": []
+   },
+   {
+    "criterion": "670.2",
+    "cut": [],
+    "missing": []
+   },
+   {
+    "criterion": "670.3",
+    "cut": [],
+    "missing": []
+   }
+  ],
+  "tests": [
+   {
+    "test": "tests/test_new_test_check.py::test_a_new_test_that_passes_or_skips_today_is_rejected_saying_so",
+    "only_its_behavior": true,
+    "why": "Runs the real check; rejects passing and skipped tests, accepts failing ones."
+   },
+   {
+    "test": "tests/test_plan_shape.py::test_prompt_teaches_the_terms_voice_and_every_example",
+    "only_its_behavior": true,
+    "why": "Its 670.2 lines check only the question rule and fail if it goes."
+   },
+   {
+    "test": "tests/test_card_not_verified.py::test_a_criterion_with_no_test_shows_as_not_verified",
+    "only_its_behavior": true,
+    "why": "Draws the real card; untested reads not verified, tested does not. Fails today."
+   },
+   {
+    "test": "tests/test_card_not_verified.py::test_a_criterion_filed_with_an_empty_test_list_shows_as_not_verified",
+    "only_its_behavior": true,
+    "why": "Empty test list case on the real card; fails today for the missing label."
+   },
+   {
+    "test": "tests/test_card_not_verified.py::test_a_non_functional_requirement_with_no_test_shows_as_not_verified",
+    "only_its_behavior": true,
+    "why": "Same label in the non-functional fold; fails today for the missing label."
+   }
+  ],
+  "size": "ok"
+ },
+ "check": {
+  "passed": true,
+  "problems": []
+ },
+ "url": "https://github.com/dokima-dev/dokima/issues/670#issuecomment-6177766792"
+}
