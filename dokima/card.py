@@ -22,6 +22,9 @@ sys.path.insert(0, os.path.join(os.path.dirname(os.path.abspath(__file__)), ".."
 from dokima import body, plan, retry  # noqa: E402
 
 ALL_TESTS = "all tests"
+ACCEPTANCE = "Acceptance criteria"
+# The edge cases icon of the approved card of #557, kept on the sandbox's demo branch as the owner chose (#628).
+EDGE_CASES_ICON = "https://raw.githubusercontent.com/dokima-dev/merge-sandbox/demo-icons/icons/bug.svg"
 TODO = {"questions": "Answer the questions with /plan, or say /review",
         "plan approved": "Say /work to build the plan",
         "three blocks": "Three blocks in a row: your call",
@@ -412,24 +415,54 @@ def links_row(repo, issue, pr, worker, check_runs, page="issue"):
     return " · ".join(links)
 
 
-def criterion_item(repo, label, c, check, tests, number=None):
+def comment_ref(url):
+    """An issue or comment link as GitHub words it: owner/name#N, plus (comment) for a comment."""
+    m = re.fullmatch(r"https://github\.com/([\w.-]+/[\w.-]+)/(?:issues|pull)/(\d+)(#issuecomment-\d+)?", url or "")
+    if not m:
+        return escape(url)
+    return f"{m.group(1)}#{m.group(2)}" + (" (comment)" if m.group(3) else "")
+
+
+def edge_cases_fold(c, tests, sources):
+    """The criterion's edge cases in one closed fold titled Edge cases, one item each.
+
+    Each case links to its test, with its Source when the saved data holds one, as on the approved card of #557 (#628)."""
+    items = []
+    for e in c.get("edge_cases") or []:
+        if not (isinstance(e, dict) and e.get("case")):
+            continue
+        url = (tests.get(e.get("test")) or {}).get("url")
+        text = f'<a href="{url}">{escape(e["case"])}</a>' if url else escape(e["case"])
+        src = sources.get(e["case"])
+        if src:
+            text += f' · Source: <a href="{src}">{comment_ref(src)}</a>'
+        items.append(f"<li><em>{text}</em></li>")
+    if not items:
+        return []
+    head = (f'<picture><img src="{EDGE_CASES_ICON}" width="16" height="16" align="absmiddle" alt="edge cases">'
+            '</picture> <em>Edge cases</em>')
+    return [f'  <details><summary>{head}</summary><ul>{"".join(items)}</ul></details>']
+
+
+def criterion_item(repo, label, c, check, tests, number=None, all_tests=None, sources=None):
     """One criterion bullet: its status circle, its label linked to its check, its words plain.
 
-    The label links only when there is a check. Under it one italic Verified by line per test with a docstring, only
-    the words Verified by linking to the test, then Source: and the link to where the owner asked for it written out
-    bare, so GitHub draws it as its own reference, when it has one. A source that is issue `number` itself shows no
-    Source line, as it tells the owner nothing (#526). Between them one Edge cases line joins the criterion's edge
-    cases with dots, or reads "none, because" and its reason; a criterion with neither shows none (#538)."""
+    The label links only when there is a check. Under it one italic Acceptance test line per test with a docstring,
+    only the words Acceptance test linking to the test, then Source: and the link to where the owner asked for it
+    written out bare, so GitHub draws it as its own reference, when it has one. A source that is issue `number` itself
+    shows no Source line, as it tells the owner nothing (#526). Between them the edge cases in one closed fold (each
+    linked to its test in `all_tests`, with its source from `sources`), or one line reading "none, because" and its
+    reason; a criterion with neither shows none (#538, #628)."""
     if check:
         label = f'<a href="{check["html_url"]}">{label}</a>'
     out = [f"- {circle(repo, state(check))} **{label}:** {escape(c.get('text'))}"]
     for t in tests:
         if t and t.get("verified_by"):
-            out.append(f'  - *<a href="{t["url"]}">{field_icon(repo, "verified by")} Verified by</a>: '
+            out.append(f'  *<a href="{t["url"]}">{field_icon(repo, "verified by")} Acceptance test</a>: '
                        f'{escape(t["verified_by"])}*')
-    cases = [e.get("case") for e in c.get("edge_cases") or [] if isinstance(e, dict) and e.get("case")]
+    cases = edge_cases_fold(c, all_tests or {}, sources or {})
     if cases:
-        out.append(f'  - Edge cases: {" · ".join(escape(x) for x in cases)}')
+        out += cases
     elif c.get("no_edge_cases"):
         out.append(f'  - Edge cases: none, because {escape(c["no_edge_cases"])}')
     own = f"https://github.com/{repo}/issues/{number}"
@@ -438,13 +471,13 @@ def criterion_item(repo, label, c, check, tests, number=None):
     return out
 
 
-def criteria_list(repo, number, start, label, criteria, plan_tests, by_key, tests):
+def criteria_list(repo, number, start, label, criteria, plan_tests, by_key, tests, sources=None):
     """The bullet list of criteria numbered from `start`, each with its own check and tests."""
     out = []
     for k, c in enumerate(criteria, start):
         key = f"{number}.{k}"
         out += criterion_item(repo, label, c, by_key.get(key), [tests.get(t) for t in plan_tests.get(key, [])],
-                              number)
+                              number, tests, sources)
     return out
 
 
@@ -485,15 +518,26 @@ def owner_merge(pr, owners):
     return pr if pr and pr.get("merged") and merger in owners else None
 
 
-def done_row(repo, found, all_tests):
-    """The Definition of Done: All tests, the code review and the owner's approval, each with its verdict and proof.
-    A code owner's merge is their approval, with or without an Approve review."""
+def done_row(repo, found, all_tests, planned=False):
+    """The Definition of Done: each check, review and approval with its verdict and proof.
+
+    A code owner's merge is their approval, with or without an Approve review.
+
+    Once planned it is drawn as on the approved card of #557 (#628): Acceptance tests (the Acceptance criteria
+    check), Code review, Test suite (the all tests check) and Owner approval, with no field icons."""
     review = code_review(found["recs"])
     review_st = ("running" if review_running(found.get("items")) else "not started" if not review else
                  "passed" if review["handback"].get("verdict") == "approve" else "failed")
     merge = owner_merge(found["pr"], found["owners"])
     approval = {"state": "APPROVED", "html_url": merge.get("html_url")} if merge else owner_review(found["reviews"], found["owners"])
     approval_st = "not started" if not approval else "passed" if approval["state"] == "APPROVED" else "failed"
+    if planned:
+        accepted = next((r for r in found["check_runs"] if r["name"] == ACCEPTANCE), None)
+        return ("**Definition of Done:** "
+                f"{circle(repo, state(accepted), accepted and accepted['html_url'])} Acceptance tests · "
+                f"{circle(repo, review_st, review and review.get('run'))} Code review · "
+                f"{circle(repo, state(all_tests), all_tests and all_tests['html_url'])} Test suite · "
+                f"{circle(repo, approval_st, approval and approval.get('html_url'))} Owner approval")
     return ("**Definition of Done:** "
             f"{circle(repo, state(all_tests), all_tests and all_tests['html_url'])} All tests · "
             f"{circle(repo, review_st, review and review.get('run'))} {field_icon(repo, 'code review')} Code review · "
@@ -548,14 +592,19 @@ def render(repo, issue, found, page="issue"):
         if h.get("user_story"):
             lines += [f"**User story:** {escape(h['user_story'])}", ""]
         lines += [f"{field_icon(repo, 'acceptance criterion')} **Acceptance criteria**", ""]
-        lines += criteria_list(repo, issue["number"], 1, "Acceptance criterion", criteria, plan_tests, by_key, tests) + [""]
+        sources = found.get("edge_case_sources") or {}
+        lines += criteria_list(repo, issue["number"], 1, "Acceptance criterion", criteria, plan_tests, by_key, tests,
+                               sources) + [""]
         if nfr:
             lines += fold("Non-functional requirements",
                           criteria_list(repo, issue["number"], len(criteria) + 1, "Non-functional requirement", nfr,
-                                        plan_tests, by_key, tests)) + [""]
-        lines += [" ".join(["**Scope:**", ", ".join(f"`{s}`" for s in h.get("scope") or [])]).rstrip(), ""]
+                                        plan_tests, by_key, tests, sources)) + [""]
+        # Each scope path links to the file at the commit the tests are read from (#628).
+        ref = pr["head"]["sha"] if pr and (pr.get("head") or {}).get("sha") else None
+        scope = [f"[`{s}`](https://github.com/{repo}/blob/{ref}/{s})" if ref else f"`{s}`" for s in h.get("scope") or []]
+        lines += [" ".join(["**Scope:**", ", ".join(scope)]).rstrip(), ""]
     # The Definition of Done goes last, below the Original issue fold: body.redraw puts it after the fold.
-    return "\n".join(lines + [body.FOLDED, plan.CARD_END, "", body.DONE, done_row(repo, found, all_tests)])
+    return "\n".join(lines + [body.FOLDED, plan.CARD_END, "", body.DONE, done_row(repo, found, all_tests, planned=True)])
 
 
 def issue_body(card, notes):
