@@ -30,6 +30,7 @@ from tests.test_reviewer_open_issues import both_checks, reviewer_pack
 from tests import test_reviewer_settles as settles
 
 SEARCHED = [12, 15]  # both open issues in the faked pack
+LINKS = {"symptom": {"cause": 12}, "root cause": {"symptoms": SEARCHED}, "new": {}}  # what each verdict names (#623)
 NAMES = {"symptom": "symptom of a known cause", "root cause": "root cause found", "new": "new"}
 WORKER_ISSUE = {"kind": "issue", "label": "Docs", "text": "The wiki page on labels is out of date.",
                 "evidence": "wiki/Labels.md", "raised_by": "worker", "id": "W1", "to": "reviewer"}
@@ -109,14 +110,15 @@ def test_a_review_filing_its_own_issue_without_one_of_the_three_verdicts_is_reje
     """A review filing an issue without one of the three verdicts is rejected.
 
     Builds the code review's pack, then runs a review's checks on an issue raise naming the issues it searched: each
-    of the three verdicts passes. No verdict at all is rejected naming verdict, and so is a verdict outside the
+    of the three verdicts passes, a symptom naming its cause and a root cause its symptoms (#623). No verdict at all is rejected naming verdict, and so is a verdict outside the
     three, such as maybe.
 
     Proves 622.2."""
     record_property("proves", "622.2")
     pack = reviewer_pack(monkeypatch, tmp_path, "pr")
     for verdict in NAMES:
-        passed(tmp_path, own(searched=SEARCHED, verdict=verdict), pack, "622.2", f"the verdict {verdict!r}")
+        passed(tmp_path, own(searched=SEARCHED, verdict=verdict, **LINKS[verdict]), pack, "622.2",
+               f"the verdict {verdict!r}")
     rejected(tmp_path, own(searched=SEARCHED), pack, "verdict", "622.2", "an issue raise with no verdict")
     rejected(tmp_path, own(searched=SEARCHED, verdict="maybe"), pack, "verdict", "622.2", "the verdict 'maybe'")
 
@@ -125,12 +127,12 @@ def test_a_review_confirming_a_workers_issue_without_a_verdict_is_rejected(recor
     """A review confirming another agent's issue must give one of the three verdicts.
 
     The pack lists the worker's issue W1 for the reviewer to confirm. Answering it done with the issues searched and
-    the verdict root cause passes; with no verdict, or the verdict maybe, it is rejected naming verdict.
+    the verdict root cause, naming its symptoms (#623), passes; with no verdict, or the verdict maybe, it is rejected naming verdict.
 
     Proves 622.2."""
     record_property("proves", "622.2")
     pack = with_worker_issue(reviewer_pack(monkeypatch, tmp_path, "pr"))
-    passed(tmp_path, confirming(searched=SEARCHED, verdict="root cause"), pack, "622.2",
+    passed(tmp_path, confirming(searched=SEARCHED, verdict="root cause", symptoms=SEARCHED), pack, "622.2",
            "a review confirming W1 as a root cause")
     rejected(tmp_path, confirming(searched=SEARCHED), pack, "verdict", "622.2", "a review confirming W1 with no verdict")
     rejected(tmp_path, confirming(searched=SEARCHED, verdict="maybe"), pack, "verdict", "622.2",

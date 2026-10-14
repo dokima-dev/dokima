@@ -313,15 +313,18 @@ def problems_searched(h, pack_dir):
     if not filed:
         return []
     bad = [p for where, d in filed for p in raises.filing_problems(where, d)]
-    named = [d for _, d in filed if raises.is_numbers(d.get(raises.SEARCHED)) and d.get(raises.SEARCHED)]
+    named = [(f, d[f] if f != raises.CAUSE else [d[f]]) for _, d in filed
+             for f in (raises.SEARCHED, raises.SYMPTOMS, raises.CAUSE)
+             if (raises.is_numbers(d.get(f)) and d.get(f)) or (f == raises.CAUSE and raises.is_numbers([d.get(f)]))]
     if not named:
         return bad
     path = os.path.join(pack_dir, "open_issues.json")
     if not os.path.exists(path):
-        return bad + [f"open_issues.json is missing from the pack, so the {raises.SEARCHED} issues cannot be checked"]
+        return bad + [f"open_issues.json is missing from the pack, so the "
+                      f"{', '.join(dict.fromkeys(f for f, _ in named))} issues cannot be checked"]
     known = {i.get("number") for i in json.load(open(path)) if isinstance(i, dict)}
-    return bad + [f"{raises.SEARCHED} names #{n}, which is not an open issue in the pack"
-                  for d in named for n in d[raises.SEARCHED] if n not in known]
+    return bad + [f"{f} names #{n}, which is not an open issue in the pack" for f, ns in named for n in ns
+                  if n not in known]
 
 
 def problems_links(h, pack_dir):
@@ -1872,12 +1875,28 @@ def file_issues(repo, number, rec, recs):
         by = x.get("raised_by") or "reviewer"
         who = "The reviewer found it" if by == "reviewer" else f"The {by} raised it and the reviewer confirmed it"
         body = [x.get("text") or ""] + (["", f"**Evidence:** {x['evidence']}"] if filled(x.get("evidence")) else [])
+        run = os.environ.get("GITHUB_RUN_ID")
+        where = f" ([run]({os.environ.get('GITHUB_SERVER_URL', 'https://github.com')}/{repo}/actions/runs/{run}))" if run else ""
+        cause = decided.get(raises.CAUSE)
+        if decided.get(raises.VERDICT) == "symptom" and raises.is_numbers([cause]):
+            # A symptom joins its cause as a comment, and files no issue (#623).
+            text = "\n".join(["**Symptom of this issue:**", ""] + body + ["", f"{who} on #{number}{where}."])
+            try:
+                gh("issue", "comment", str(cause), "-R", repo, "--body", text)
+            except subprocess.CalledProcessError as e:
+                lines.append(f"- Not added to #{cause}: {card.escape(title)} GitHub refused it: {card.escape(gh_reason(e))}")
+                continue
+            lines.append(f"- {card.ref(os.environ.get('GITHUB_REPOSITORY', ''), cause)} · a symptom, added as a comment")
+            continue
+        symptoms = decided.get(raises.SYMPTOMS)
+        if decided.get(raises.VERDICT) == "root cause" and raises.is_numbers(symptoms) and symptoms:
+            # A root cause files one issue marked as such, naming each symptom so GitHub links both ways (#623).
+            title = f"Root cause found: {title}"
+            body += ["", "**Symptoms:** " + ", ".join(f"#{n}" for n in symptoms)]
         if decided.get(raises.VERDICT) in raises.VERDICTS:
             body += ["", f"**Verdict:** {raises.VERDICTS[decided[raises.VERDICT]]}"]
         if raises.is_numbers(decided.get(raises.SEARCHED)) and decided[raises.SEARCHED]:
             body += ["", "**Open issues searched:** " + ", ".join(f"#{n}" for n in decided[raises.SEARCHED])]
-        run = os.environ.get("GITHUB_RUN_ID")
-        where = f" ([run]({os.environ.get('GITHUB_SERVER_URL', 'https://github.com')}/{repo}/actions/runs/{run}))" if run else ""
         body += ["", f"{who} on #{number}{where}."]
         try:
             url = gh("issue", "create", "-R", repo, "--title", title, "--body", "\n".join(body),

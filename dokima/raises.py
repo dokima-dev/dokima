@@ -24,6 +24,9 @@ SEARCHED = "searched"
 # Every issue the reviewer files, its own or one it confirms, also gives its verdict, one of these (#622).
 VERDICT = "verdict"
 VERDICTS = MappingProxyType({"symptom": "Symptom of a known cause", "root cause": "Root cause found", "new": "New"})
+# A symptom names its cause, one open issue; a root cause names its symptoms, the open issues it explains (#623).
+CAUSE = "cause"
+SYMPTOMS = "symptoms"
 STAMPED = ("raised_by", "id")
 ANSWERS = ("done", "disagree")
 PREFIX = MappingProxyType({"planner": "P", "worker": "W", "reviewer": "R"})
@@ -47,6 +50,13 @@ def filing_problems(where, decided):
                         f"cause, not {searched!r}")
     if decided.get(VERDICT) not in VERDICTS:
         problems.append(f"{where} files an issue, so {VERDICT} must be {_verdicts()}, not {decided.get(VERDICT)!r}")
+    cause = decided.get(CAUSE)
+    if decided.get(VERDICT) == "symptom" and not (isinstance(cause, int) and not isinstance(cause, bool)):
+        problems.append(f"{where} is a symptom, so {CAUSE} must name its cause, an open issue by number, not {cause!r}")
+    symptoms = decided.get(SYMPTOMS)
+    if decided.get(VERDICT) == "root cause" and (not is_numbers(symptoms) or not symptoms):
+        problems.append(f"{where} is a root cause, so {SYMPTOMS} must list the open issues it explains, not "
+                        f"{symptoms!r}")
     return problems
 
 
@@ -70,7 +80,7 @@ def check_raises(role, raises):
             if field in r:
                 problems.append(f"{where} carries {field}, which only code writes")
         extra = sorted(k for k in r if k not in FIELDS and k not in STAMPED
-                       and not (k in (SEARCHED, VERDICT) and r.get("kind") == "issue"))
+                       and not (k in (SEARCHED, VERDICT, CAUSE, SYMPTOMS) and r.get("kind") == "issue"))
         if extra:
             problems.append(f"{where} carries fields no raise has: {', '.join(map(str, extra))}")
         kind = r.get("kind")
