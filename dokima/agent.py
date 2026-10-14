@@ -1,7 +1,7 @@
 """Packs and hand-back checks for running one agent by hand on a fresh machine.
 
-`pack` builds the agent's starting pack from GitHub's records: the issue as it stands (body and every comment) and the
-JSON hand-backs of earlier runs, downloaded from those runs. `check` is the deterministic check an agent runs on its own
+`pack` builds the agent's starting pack: the issue as it stands (body and every comment) from GitHub, and the JSON
+records of earlier runs from their record files on the logs branch (#610). `check` is the deterministic check an agent runs on its own
 hand-back before it finishes, and that code runs again after it: a malformed hand-back never reaches the next agent.
 The plan's own check lives in dokima/planner.py; this module adds review.json and work.json.
 
@@ -26,7 +26,8 @@ from dokima.agent_github import (  # noqa: F401
     BOT, linked_prs, conversation, open_issues, BOT_LOGIN, parent_of, issue_of_pr, sub_issues, blocked_by,
     gh_reason, rate_limited, rate_limit_waited_once, NO_PERMISSION, pages)
 from dokima.agent_records import (  # noqa: F401
-    VERDICTS, FIXERS, OLD_FIELDS, PLAN_TEST_FAILS, MARK, LIVE, HANDBACK, name_of, records, latest, approved,
+    VERDICTS, FIXERS, OLD_FIELDS, PLAN_TEST_FAILS, MARK, LIVE, HANDBACK, name_of, records, LOGS_BRANCH,
+    RecordsUnreadable, logs_remote, saved_records, save_record, latest, approved,
     approved_plan, is_record, open_blockers, old_blocker, open_raises, raises_for, settled, taken_ids, stamp_record,
     owner_raises, for_planner, LINKS, plan_links, build_record, not_started, cancelled, live_card, GOING,
     CARD_HEADS, UNRECORDED, card_stage, bot_cards, unrecorded_run, unrecorded, where_card, run_ahead, queue,

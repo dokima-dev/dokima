@@ -13,14 +13,15 @@ from dokima import body as issue_body
 
 
 def issue_text(d, items):
-    """The issue as it stands: title, body and every comment, oldest first. A record's JSON
-    is in in/ as its own file, so its comment points there instead of repeating it."""
-    parts, n = [f"# Issue #{d['number']}: {d['title']}", "", d["body"] or "", "", "## Comments"], 0
+    """The issue as it stands: title, body and every comment, oldest first.
+
+    Records come from the record files, in in/ (#610), so a record comment's JSON is never read: it points to in/
+    instead."""
+    parts = [f"# Issue #{d['number']}: {d['title']}", "", d["body"] or "", "", "## Comments"]
     for c in items:
         b = c["body"] or ""
-        if rs := records([c]):
-            n += 1
-            b = re.sub(r"```json\n.*?\n```", f"(full record: in/{name_of(rs[0], n)})", b, count=1, flags=re.S)
+        if (c.get("author") or {}).get("login") == BOT and MARK in b:
+            b = re.sub(r"```json\n.*?\n```", "(full record: in/, from the record files)", b, count=1, flags=re.S)
         parts += ["", f"### {c['author']['login']} on {c['where']} ({c['createdAt']})", "", b]
     return "\n".join(parts) + "\n"
 
@@ -120,11 +121,14 @@ def owner_words(repo, number, d, items, owners):
 
 
 def pack(repo, number, role, stage, dest):
-    """Build the starting pack from GitHub's records: the issue and its PRs' conversation, every agent record so far,
+    """Build the starting pack for one role and stage.
+
+    The issue and its PRs' conversation from GitHub, every agent record so far from the record files (#610),
     the open raises this role must answer (open_blockers.json), the newest passed plan, the issue's parent on GitHub (parent.json, naming none when it has none or GitHub cannot
     say) and, for the planner and the reviewer, every open issue of the repo. The pull request review also gets the worker's session log from its run."""
     d, items = conversation(repo, number)
-    recs = records(items)
+    # Every earlier record comes from its record file on the logs branch, never from a comment (#610).
+    recs = saved_records(repo, number)
     listed = open_issues(repo) if role == "planner" else reviewer_open_issues(repo) if role == "reviewer" else None
     os.makedirs(os.path.join(dest, "in"), exist_ok=True)
     json.dump({"number": parent_of(repo, number)}, open(os.path.join(dest, "parent.json"), "w"))
@@ -136,13 +140,8 @@ def pack(repo, number, role, stage, dest):
     # The open raises this agent must answer; the file keeps the name the workflows give it.
     json.dump(raises_for(recs, role), open(os.path.join(dest, "open_blockers.json"), "w"), indent=1)
     open(os.path.join(dest, "issue.md"), "w").write(issue_text(d, items))
-    # Each record keeps the link of the comment it was posted as, so a later run can say where a raise came from.
-    urls = [c.get("url") for c in items if records([c])]
     for i, r in enumerate(recs, 1):
-        name = name_of(r, i)
-        if len(urls) == len(recs) and isinstance(urls[i - 1], str):
-            r = {**r, "url": urls[i - 1]}
-        json.dump(r, open(os.path.join(dest, "in", name), "w"), indent=1)
+        json.dump(r, open(os.path.join(dest, "in", name_of(r, i)), "w"), indent=1)
     plan = latest(recs, "planner")
     if role == "worker" and not approved(recs):
         return False
@@ -252,9 +251,17 @@ def main(argv):
     (switches N's issue tree on or off autopilot, prints the comment naming what switched; with OUT, `start` writes what
     it picks up to OUT/next.txt and its Autopilot line to OUT/autopilot.md) | agent closed N  (what autopilot does now
     that issue N closed, for every tree on autopilot) | agent recheck N OUT  (once OUT's plan review approved, runs
-    every check of N's open pull request again)"""
+    every check of N's open pull request again) | agent save-record N OUT  (saves OUT/record.json as its own new file
+    on the logs branch)"""
+    if argv[1] == "save-record":
+        print(save_record(os.environ["GITHUB_REPOSITORY"], argv[2], argv[3]))
+        return 0
     if argv[1] == "pack":
-        has_plan = pack(os.environ["GITHUB_REPOSITORY"], argv[2], argv[3], argv[4], argv[5])
+        try:
+            has_plan = pack(os.environ["GITHUB_REPOSITORY"], argv[2], argv[3], argv[4], argv[5])
+        except RecordsUnreadable as e:
+            sys.stderr.write(f"The pack has no history: {e}\n")
+            return 1
         return 0 if has_plan or argv[3] == "planner" else 3
     if argv[1] == "check":
         if len(argv) < 6:
@@ -614,9 +621,9 @@ def main(argv):
 # The other agent job files, imported last so the job files can use each other (#636).
 from dokima import agent_github
 from dokima.agent_github import (
-    conversation, open_issues, BOT_LOGIN, parent_of, issue_of_pr, gh_reason, rate_limit_waited_once, pages)
+    BOT, conversation, open_issues, BOT_LOGIN, parent_of, issue_of_pr, gh_reason, rate_limit_waited_once, pages)
 from dokima.agent_records import (
-    name_of, records, latest, approved, raises_for, stamp_record, build_record, not_started, cancelled, live_card,
+    MARK, saved_records, save_record, RecordsUnreadable, name_of, records, latest, approved, raises_for, stamp_record, build_record, not_started, cancelled, live_card,
     unrecorded_run, unrecorded, queue, who, files_changed, render, jsonl_files, scrub, transcript, run_report,
     with_next, models_used, first_sentence)
 from dokima.agent_checks import problems_round, issue_url, check

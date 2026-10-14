@@ -48,6 +48,99 @@ def records(items):
     return [r for r in out if isinstance(r, dict)]
 
 
+# Since #610 each run's record is its own file under logs/N/records/ on the logs branch, never edited, and runs read
+# earlier records only from those files.
+LOGS_BRANCH = "logs"
+
+
+class RecordsUnreadable(Exception):
+    """The record files could not be read, so a run would start without its history."""
+
+
+def logs_remote(repo):
+    """The git URL holding the logs branch.
+
+    DOKIMA_LOGS_REMOTE when set, else the repo itself on GitHub."""
+    if os.environ.get("DOKIMA_LOGS_REMOTE"):
+        return os.environ["DOKIMA_LOGS_REMOTE"]
+    token = os.environ.get("GH_TOKEN")
+    return f"https://x-access-token:{token}@github.com/{repo}.git" if token else f"https://github.com/{repo}.git"
+
+
+def _git(*args, cwd=None):
+    """Run git and return its output; raises CalledProcessError naming git's own words."""
+    return subprocess.run(["git", *args], cwd=cwd, check=True, capture_output=True, text=True).stdout
+
+
+def saved_records(repo, number):
+    """Every record file of the issue on the logs branch, oldest saved first.
+
+    Read by git, with no GitHub API call. No logs branch, or no file for the issue, gives none. Files that cannot be read raise RecordsUnreadable."""
+    import tempfile
+    remote, folder = logs_remote(repo), f"logs/{number}/records/"
+    try:
+        if not _git("ls-remote", "--heads", remote, LOGS_BRANCH).strip():
+            return []
+        with tempfile.TemporaryDirectory(prefix="dokima-records-") as work:
+            _git("init", "-q", work)
+            _git("fetch", "-q", "--filter=blob:none", remote, f"refs/heads/{LOGS_BRANCH}", cwd=work)
+            # The order each file was added in is the order its run saved it.
+            added = _git("log", "--reverse", "--topo-order", "--diff-filter=A", "--name-only", "--format=",
+                         "FETCH_HEAD", "--", folder, cwd=work).split()
+            there = set(_git("ls-tree", "-r", "--name-only", "FETCH_HEAD", "--", folder, cwd=work).split())
+            out = []
+            for path in dict.fromkeys(p for p in added if p.endswith(".json") and p in there):
+                r = json.loads(_git("show", f"FETCH_HEAD:{path}", cwd=work))
+                if not isinstance(r, dict):
+                    raise RecordsUnreadable(f"the record file {path} holds no record")
+                out.append(r)
+            return out
+    except subprocess.CalledProcessError as e:
+        raise RecordsUnreadable(f"the record files of #{number} on the {LOGS_BRANCH} branch could not be read: "
+                                f"{scrub((e.stderr or str(e)).strip(), [os.environ.get('GH_TOKEN') or ''])}") from e
+    except ValueError as e:
+        raise RecordsUnreadable(f"a record file of #{number} is not JSON: {e}") from e
+
+
+def save_record(repo, number, out):
+    """Save OUT/record.json as one new file under logs/N/records/ on the logs branch and push it.
+
+    Never changes a file already there, even for a run that saves twice; a remote with no logs branch gets one.
+    Returns the file's path on the branch."""
+    import tempfile
+    rec = json.load(open(os.path.join(out, "record.json")))
+    remote, folder = logs_remote(repo), f"logs/{number}/records"
+    name = f"{rec.get('run_id') or 'run'}-{rec.get('role') or 'record'}{'-' + rec['stage'] if rec.get('stage') else ''}"
+    with tempfile.TemporaryDirectory(prefix="dokima-save-") as tmp:
+        for attempt in range(1, 4):
+            work = os.path.join(tmp, str(attempt))
+            if _git("ls-remote", "--heads", remote, LOGS_BRANCH).strip():
+                _git("clone", "-q", "--depth", "1", "--filter=blob:none", "--no-checkout", "-b", LOGS_BRANCH, remote,
+                     work)
+                _git("reset", "-q", cwd=work)  # the index holds the branch as it is, so the commit adds one file
+                taken = set(_git("ls-tree", "--name-only", "HEAD", f"{folder}/", cwd=work).split())
+            else:
+                _git("init", "-q", work)
+                _git("checkout", "-q", "--orphan", LOGS_BRANCH, cwd=work)
+                taken = set()
+            stamp = time.strftime("%Y%m%dT%H%M%SZ", time.gmtime())
+            path, i = f"{folder}/{stamp}-{name}.json", 1
+            while path in taken:
+                i += 1
+                path = f"{folder}/{stamp}-{name}-{i}.json"
+            os.makedirs(os.path.join(work, folder), exist_ok=True)
+            with open(os.path.join(work, path), "w") as f:
+                json.dump(rec, f, indent=1)
+            _git("add", path, cwd=work)
+            _git("commit", "-qm", f"Record of run {rec.get('run_id') or 'unknown'} for #{number}", cwd=work)
+            try:
+                _git("push", "-q", remote, f"HEAD:refs/heads/{LOGS_BRANCH}", cwd=work)
+                return path
+            except subprocess.CalledProcessError:
+                if attempt == 3:
+                    raise  # another run pushed first each time: the step fails with git's own words
+
+
 def latest(recs, role, passed=True):
     """The newest record of a role whose hand-back passed its check, or None."""
     for r in reversed(recs):
