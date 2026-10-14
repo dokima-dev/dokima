@@ -1,4 +1,4 @@
-"""No caps on criteria or stories, at most 3 owner questions, a size verdict per review.
+"""No caps on stories, at most 3 owner questions, a size verdict per review.
 
 Since #667 no count caps a story; only an empty story is refused."""
 import os

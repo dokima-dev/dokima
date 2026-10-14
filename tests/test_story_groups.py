@@ -32,22 +32,33 @@ def crit(text, files, edge=None):
     return c
 
 
-def story(*criteria):
-    """A well-formed user story of issue #9 holding these criteria, each with its test."""
+def nfr(text, files):
+    """One non-functional requirement changing these files."""
+    return dict(crit(text, files), why="It matters.")
+
+
+def story(*criteria, nfrs=()):
+    """A well-formed user story of issue #9 holding these criteria and requirements."""
     tests = {}
-    for k, c in enumerate(criteria, 1):
+    for k, c in enumerate([*criteria, *nfrs], 1):
         tests[f"9.{k}"] = [c["edge_cases"][0]["test"]] if c.get("edge_cases") else [f"tests/test_jobs.py::test_{k}"]
     return {"kind": "user_story", "title": "Slow calls run as jobs", "summary": "Slow calls run as jobs.",
-            "user_story": "Slow calls return a job id.", "acceptance_criteria": list(criteria), "non_functional": [],
-            "scope": sorted({f for c in criteria for f in c["files"]}), "tests": tests}
+            "user_story": "Slow calls return a job id.", "acceptance_criteria": list(criteria),
+            "non_functional": list(nfrs), "scope": sorted({f for c in [*criteria, *nfrs] for f in c["files"]}),
+            "tests": tests}
 
 
 def feature(*stories):
-    """A well-formed split of issue #9, one story per list of criteria given."""
+    """A well-formed split of issue #9, one story per list of criteria given.
+
+    A story given as a pair (criteria, requirements) also holds those non-functional requirements."""
+    def parts(cs):
+        return cs if isinstance(cs, tuple) else (cs, [])
     return {"kind": "feature", "title": "Slow calls run as jobs", "summary": "Slow calls run as jobs.",
             "feature": "A split.",
-            "stories": [{"title": f"Story {n}", "user_story": f"Owners get part {n}.", "acceptance_criteria": list(cs),
-                         "non_functional": [], "depends_on": []} for n, cs in enumerate(stories, 1)]}
+            "stories": [{"title": f"Story {n}", "user_story": f"Owners get part {n}.",
+                         "acceptance_criteria": list(parts(cs)[0]), "non_functional": list(parts(cs)[1]),
+                         "depends_on": []} for n, cs in enumerate(stories, 1)]}
 
 
 def hand_back(tmp_path, content):
@@ -76,7 +87,10 @@ def test_criteria_sharing_a_code_file_are_put_in_the_same_story(record_property,
 
     Code's groups of A (`x.py`), B (`x.py`, `y.py`) and C (`y.py`) are one story, since C joins A through B. A user
     story holding all three is accepted. A split putting C in another story is rejected naming `dokima/y.py` and saying
-    "same story". Proves 667.1.
+    "same story". A non-functional requirement counts as a criterion: one sharing `dokima/x.py` with A is grouped with
+    it and accepted beside it in one user story; a split putting a requirement on `dokima/d.py` and `dokima/x.py` in
+    another story than A is rejected naming `dokima/x.py`.
+    Proves 667.1.
     """
     record_property("proves", "667.1")
     a, b = crit("A runs.", ["dokima/x.py"]), crit("B runs.", ["dokima/x.py", "dokima/y.py"])
@@ -89,6 +103,16 @@ def test_criteria_sharing_a_code_file_are_put_in_the_same_story(record_property,
     assert why and "dokima/y.py" in why and "same story" in why, (
         f"667.1: a split putting criteria joined by dokima/y.py in different stories was not rejected naming the "
         f"file and saying 'same story': {why!r}")
+    n = nfr("Nothing leaks.", ["dokima/x.py"])
+    got = groups([a, n], "667.1")
+    assert got == [[0, 1]], f"667.1: code did not put a requirement sharing a code file with a criterion in one story: {got!r}"
+    why = rejected(tmp_path, story(a, nfrs=[n]))
+    assert why is None, f"667.1: a story whose criterion and requirement share a code file was rejected: {why!r}"
+    d, n2 = crit("D runs.", ["dokima/d.py"]), nfr("D leaks nothing.", ["dokima/d.py", "dokima/x.py"])
+    why = rejected(tmp_path, feature([a], ([d], [n2])))
+    assert why and "dokima/x.py" in why and "same story" in why, (
+        f"667.1: a split putting a requirement apart from the criterion it shares dokima/x.py with was not rejected "
+        f"naming the file and saying 'same story': {why!r}")
 
 
 def test_criteria_with_no_code_file_in_common_become_separate_stories(record_property, tmp_path):
@@ -152,13 +176,14 @@ def test_the_old_count_rules_are_gone_from_the_instructions(record_property):
     """The planner's and reviewer's instructions and the rules no longer state the old count rules.
 
     Reads the planner's, plan grade's and reviewer's instructions, the splitting rules and the reviewer's size message,
-    and checks none still says "1 to 5 criteria", "criteria / 5" or "more than five criteria". Proves 667.4.
+    and checks none still says "1 to 5 criteria", "criteria / 5", "more than five criteria", "at most 5" or "at most five
+    criteria". Proves 667.4.
     """
     record_property("proves", "667.4")
     texts = {f: open(os.path.join(ROOT, f)).read() for f in (
         "dokima/roles/planner.md", "dokima/roles/plan-grade.md", "dokima/roles/reviewer.md", "rules/splitting.md")}
     texts["the reviewer's size message"] = " ".join(agent.problems_size({"verdict": "approve"}))
-    rules = ("1 to 5 criteria", "criteria / 5", "more than five criteria")
+    rules = ("1 to 5 criteria", "criteria / 5", "more than five criteria", "at most 5", "at most five criteria")
     stale = [f"{where}: {rule!r}" for where, text in texts.items() for rule in rules if rule in " ".join(text.split())]
     assert not stale, "667.4: the old count rules are still stated in " + "; ".join(stale)
 
