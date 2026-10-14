@@ -97,7 +97,9 @@ def compare_rule(branch, live, want):
     return ([f"Branch rule of `{branch}` does not require `{c}`; Dokima needs it required." for c in needed
              if c not in have]
             + [f"Branch rule of `{branch}` requires `{c}`, a check Dokima does not declare." for c in have
-               if c not in needed])
+               if c not in needed]
+            + ([f"Branch rule of `{branch}` lets a branch behind it merge; Dokima needs it to demand an up-to-date "
+                f"branch."] if want.get("up_to_date") and not live.get("up_to_date") else []))
 
 
 def compare_permissions(live):
@@ -281,7 +283,8 @@ class GitHub:
         checks = rule.get("required_status_checks") or {}
         exempt = ((rule.get("required_pull_request_reviews") or {}).get("bypass_pull_request_allowances") or {})
         return {"required_checks": checks.get("contexts") or [c["context"] for c in checks.get("checks") or []],
-                "review_bypass_apps": [a["id"] for a in exempt.get("apps") or []]}
+                "review_bypass_apps": [a["id"] for a in exempt.get("apps") or []],
+                "up_to_date": bool(checks.get("strict"))}
 
     def permissions(self, repo):
         return json.loads(gh("api", f"repos/{repo}/installation"))["permissions"]
