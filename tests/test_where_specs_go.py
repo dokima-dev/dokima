@@ -7,6 +7,7 @@ Matching ignores case, line breaks and repeated spaces, so the worker may wrap l
 """
 import os
 import re
+from rules_files import rules_text
 
 ROOT = os.path.join(os.path.dirname(__file__), "..")
 HEADING = "## Where specs go"
@@ -14,7 +15,7 @@ HEADING = "## Where specs go"
 
 def section():
     """Returns the lines of the specs section of AGENTS.md, or None when missing."""
-    lines = open(os.path.join(ROOT, "AGENTS.md"), encoding="utf-8").read().splitlines()
+    lines = rules_text().splitlines()
     if HEADING not in [line.strip() for line in lines]:
         return None
     start = [line.strip() for line in lines].index(HEADING) + 1

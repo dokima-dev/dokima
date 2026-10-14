@@ -23,6 +23,7 @@ from dokima import agent, body, card, plan, planner  # noqa: E402
 from test_body import TRICKY, github  # noqa: E402,F401
 from test_new_issue_card import (NO_PLAN, OLD_TOP, PLAN, REPO, SUMMARY, TOPS, draw, found_for, rec,  # noqa: E402
                                  without_comments)
+from rules_files import rules_text  # noqa: E402
 
 ROOT = os.path.join(os.path.dirname(__file__), "..")
 FOLD_START = "\n<details><summary>Original issue</summary>\n\n"
@@ -227,7 +228,7 @@ def test_agents_md_says_the_text_shows_open_until_planned(record_property):
     text open with its Definition of Done below it, that the text folds under Original issue once a plan exists, and
     that it no longer says a new issue's Definition of Done sits below the Original issue fold."""
     record_property("proves", "407.5")
-    text = open(os.path.join(ROOT, "AGENTS.md"), encoding="utf-8").read()
+    text = rules_text()
     m = re.search(r"^## The issue body\n(.*?)(?=^## )", text, flags=re.S | re.M)
     assert m, "407.5: AGENTS.md has no '## The issue body' section"
     section = m.group(1)
