@@ -1,0 +1,162 @@
+{
+ "role": "planner",
+ "stage": null,
+ "run_id": "38629941341",
+ "commit_before": "0e584917b5d4977ca0c577986dc8b790340d2cbe",
+ "started_by": "dokima-runtime[bot]",
+ "models": [
+  "claude-opus-5-5"
+ ],
+ "report": {
+  "duration_ms": 1556753,
+  "turns": 44,
+  "cost_usd": 1.9330644,
+  "tokens_in": 3207766,
+  "tokens_out": 26925
+ },
+ "log": "https://github.com/dokima-dev/dokima/blob/logs/logs/666/38629941341-planner.md",
+ "run": "https://github.com/dokima-dev/dokima/actions/runs/38629941341",
+ "handback": {
+  "kind": "user_story",
+  "title": "A plan's scope comes from its criteria's files",
+  "summary": "The worker may change only the files the criteria list, plus their tests.",
+  "user_story": "The worker may change exactly the files the criteria list, plus their tests, with no separate scope to keep.",
+  "acceptance_criteria": [
+   {
+    "text": "A plan's scope is every file its criteria list, plus the tests the plan names.",
+    "words": "The plan's scope is all criteria's files plus their tests",
+    "source": "https://github.com/dokima-dev/dokima/issues/661#issuecomment-6173691734",
+    "files": [
+     "dokima/planner.py",
+     "dokima/fence.py"
+    ],
+    "edge_cases": [
+     {
+      "case": "A file two criteria both list shows once in the scope.",
+      "test": "tests/test_scope_from_files.py::test_scope_is_the_criteria_files_plus_the_tests"
+     }
+    ]
+   },
+   {
+    "text": "The plan check rejects a plan that still carries a separate scope field.",
+    "words": "with no separate scope field",
+    "source": "https://github.com/dokima-dev/dokima/issues/661#issuecomment-6173691734",
+    "files": [
+     "dokima/planner.py",
+     "dokima/roles/planner.md",
+     "dokima/playthrough.py"
+    ],
+    "edge_cases": [
+     {
+      "case": "An empty scope field is rejected too.",
+      "test": "tests/test_scope_from_files.py::test_a_plan_with_a_scope_field_is_rejected"
+     },
+     {
+      "case": "A planner following its instructions writes no scope field, so it is not rejected.",
+      "test": "tests/test_scope_from_files.py::test_the_planner_is_not_told_to_write_a_scope_field"
+     }
+    ]
+   },
+   {
+    "text": "The fence undoes the worker's change to any file no criterion lists.",
+    "words": "The fence keeps enforcing it.",
+    "source": "https://github.com/dokima-dev/dokima/issues/661#issuecomment-6173691734",
+    "files": [
+     "dokima/fence.py"
+    ],
+    "edge_cases": [
+     {
+      "case": "A new file no criterion lists is removed.",
+      "test": "tests/test_scope_from_files.py::test_the_fence_removes_a_new_file_no_criterion_lists"
+     },
+     {
+      "case": "A file only a non-functional requirement lists is kept.",
+      "test": "tests/test_scope_from_files.py::test_the_fence_undoes_files_no_criterion_lists"
+     }
+    ]
+   },
+   {
+    "text": "The plan check rejects a criterion that does not quote the owner's own words.",
+    "words": "Each one quotes my words, which are the spec.",
+    "source": "https://github.com/dokima-dev/dokima/issues/661",
+    "files": [
+     "dokima/planner.py"
+    ],
+    "no_edge_cases": "The existing test already covers missing, invented and misplaced words."
+   }
+  ],
+  "non_functional": [],
+  "scope": [
+   "dokima/planner.py",
+   "dokima/fence.py",
+   "dokima/roles/planner.md",
+   "dokima/playthrough.py",
+   "tests/test_scope_from_files.py"
+  ],
+  "tests": {
+   "666.1": [
+    "tests/test_scope_from_files.py::test_scope_is_the_criteria_files_plus_the_tests"
+   ],
+   "666.2": [
+    "tests/test_scope_from_files.py::test_a_plan_with_a_scope_field_is_rejected",
+    "tests/test_scope_from_files.py::test_the_planner_is_not_told_to_write_a_scope_field"
+   ],
+   "666.3": [
+    "tests/test_scope_from_files.py::test_the_fence_undoes_files_no_criterion_lists",
+    "tests/test_scope_from_files.py::test_the_fence_removes_a_new_file_no_criterion_lists"
+   ],
+   "666.4": [
+    "tests/test_criteria_quote_owner.py::test_a_criterion_without_the_owners_words_at_its_source_is_refused"
+   ]
+  },
+  "test_changes": {
+   "tests/test_agent.py::test_the_fence_reads_scope_from_plan_json": "The fence now reads criteria files, since plans no longer carry scope.",
+   "tests/test_agent.py::test_a_replan_is_judged_only_on_what_the_planner_changed_in_its_run": "Its sample plan drops the scope field, which the check now rejects.",
+   "tests/test_criteria_quote_owner.py::test_a_criterion_without_the_owners_words_at_its_source_is_refused": "Now proves 666.4, with an accepted good case beside each refusal."
+  },
+  "links": {
+   "blocked_by": [],
+   "blocks": [],
+   "relates_to": [
+    661,
+    667,
+    384,
+    673
+   ]
+  },
+  "raises": [
+   {
+    "kind": "question",
+    "to": "owner",
+    "label": "Protected instructions",
+    "text": "The protected planner instructions still ask for a scope field. May this story change them? The plan assumes yes.",
+    "evidence": "`dokima/roles/planner.md` line 193 shows `scope`; AGENTS.md protects `dokima/roles/`.",
+    "raised_by": "planner",
+    "id": "P1"
+   },
+   {
+    "kind": "question",
+    "to": "owner",
+    "label": "Doubt: already works",
+    "text": "Rejecting criteria that don't quote you already works. Pin it with the existing test? The plan assumes so.",
+    "evidence": "`check_words` in `dokima/planner.py`; `tests/test_criteria_quote_owner.py` passes on main.",
+    "raised_by": "planner",
+    "id": "P2"
+   },
+   {
+    "kind": "issue",
+    "label": "Card scope goes blank",
+    "text": "Once plans carry no scope field, the card's Scope line shows empty, since it reads that field.",
+    "evidence": "`dokima/card.py` line 604 reads `scope` from the planner's hand-back.",
+    "raised_by": "planner",
+    "id": "P3"
+   }
+  ],
+  "answers": []
+ },
+ "check": {
+  "passed": true,
+  "problems": []
+ },
+ "url": "https://github.com/dokima-dev/dokima/issues/666#issuecomment-6177381201"
+}
