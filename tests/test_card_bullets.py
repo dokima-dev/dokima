@@ -7,9 +7,11 @@ tests read, with markdown links `[text](url)` and HTML links `<a href="url">text
 
     - <status icon> **Acceptance criterion:** <the criterion's sentence>   the words Acceptance criterion link to
                                                                           its check when it has one (#354)
-      - *Verified by: <the test's docstring first line>*      one line per test with a docstring; only the words
-                                                              Verified by link, to that test (the Verified by field
-                                                              icon may sit in front of the words, inside the link)
+      *Acceptance test: <the test's docstring first line>*    one line per test with a docstring, under the bullet;
+                                                              only the label (Acceptance test, the Verified by of
+                                                              #235, as on the approved card of #557, #628) links, to
+                                                              that test (the Verified by field icon may sit in front
+                                                              of the words, inside the link)
       - Source: <link>                                        the link to where the owner asked, written out bare so
                                                               GitHub draws it as a reference (#359)
 
@@ -143,25 +145,25 @@ def head(text, words, k):
 
 
 def verified(line):
-    """The link on the words Verified by, and the sentence after them, or None.
+    """The link on the label Acceptance test, and the sentence after it, or None.
 
     None when the line is not a Verified by line.
 
-    The line must be an indented bullet in italics holding exactly one link, whose words are Verified by."""
-    m = re.fullmatch(r"\s+- (.*)", line)
-    if not m or "Verified by" not in line:
+    The line must be an indented line in italics holding exactly one link, whose words are Acceptance test."""
+    m = re.fullmatch(r"\s+(?:- )?(.*)", line)
+    if not m or "Acceptance test</a>" not in line:
         return None
     body = m.group(1).strip()
     body = re.sub(r"^(<img [^>]*>\s*)", "", body)
     italic = re.fullmatch(r"\*(.+)\*|_(.+)_|<em>(.+)</em>|<i>(.+)</i>", body)
     assert italic, f"the Verified by line is not in italics: {line}"
     links = re.findall(r'<a href="([^"]+)">(.*?)</a>', body)
-    assert len(links) == 1, f"the Verified by line holds {len(links)} links, not one on the words Verified by: {line}"
+    assert len(links) == 1, f"the Verified by line holds {len(links)} links, not one on its label: {line}"
     url, words = links[0]
-    assert plain(words) == "Verified by", f"the link on the Verified by line is on “{plain(words)}”, not on Verified by: {line}"
+    assert plain(words) == "Acceptance test", f"the link on the Verified by line is on “{plain(words)}”, not on Acceptance test: {line}"
     seen = plain(body)
-    assert seen.startswith("Verified by:"), f"the Verified by line does not read “Verified by: ...”: {seen}"
-    return url, seen[len("Verified by:"):].strip()
+    assert seen.startswith("Acceptance test:"), f"the Verified by line does not read “Acceptance test: ...”: {seen}"
+    return url, seen[len("Acceptance test:"):].strip()
 
 
 # 235.1: criteria are an indented bullet list; Verified by in italics, only its words linking to the exact test
@@ -196,7 +198,7 @@ def test_verified_by_is_left_out_for_a_test_with_no_docstring(record_property):
     tests = dict(TESTS, **{"tests/test_a.py::test_two": {"verified_by": None, "url": TESTS["tests/test_a.py::test_two"]["url"]}})
     text = draw(tests=tests)
     _, under = item(text, "Second thing works", "235.1")
-    assert not any("Verified by" in l for l in under), f"235.1: Verified by shown for a test with no docstring: {under}"
+    assert not any(verified(l) for l in under), f"235.1: Verified by shown for a test with no docstring: {under}"
     _, under = item(text, "First thing works", "235.1")
     assert len([l for l in under if verified(l)]) == 2, f"235.1: criterion 1 lost a Verified by line: {under}"
 
@@ -238,8 +240,8 @@ def approval(text):
     """The state on the Owner approval circle in the Definition of Done line."""
     line = next(l for l in block(text).splitlines() if "Definition of Done" in l)
     alts = [a for a in re.findall(r'<img [^>]*alt="([^"]*)"', line) if a in STATES]
-    assert len(alts) == 3, f"the Definition of Done line does not hold three verdict circles: {line}"
-    return alts[2]
+    assert len(alts) == 4, f"the Definition of Done line does not hold four verdict circles: {line}"
+    return alts[3]
 
 
 def merged(login):

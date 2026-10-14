@@ -261,9 +261,10 @@ def test_the_issue_and_pr_card_show_each_fields_icon_in_front_of_it(record_prope
     """On the issue and PR card, every field shown has its icon right in front of it.
 
     Draws the card of approved work with every check green, a test with a Verified by and the owner's approval, on
-    the issue and on the PR, and checks Needs you, files changed, Acceptance criteria, Verified by, Code review and
-    Owner approval each have their icon right in front; then a merged PR's card and a split's card with a merged
-    child, and checks Merged has its icon on the status line and on the child's row."""
+    the issue and on the PR, and checks Needs you, files changed, Acceptance criteria and Verified by (labelled
+    Acceptance test) each have their icon right in front; then a merged PR's card and a split's card with a merged
+    child, and checks Merged has its icon on the status line and on the child's row. The Definition of Done row
+    draws no field icons, as on the approved card of #557 (#628)."""
     record_property("proves", "234.2")
     f = found_for(APPROVED, pr=PR, check_runs=GREEN, reviews=OWNER_OK)
     for page in ("issue", "pr"):
@@ -272,11 +273,7 @@ def test_the_issue_and_pr_card_show_each_fields_icon_in_front_of_it(record_prope
         shows(text, "needs you", "Needs you", "234.2", where)
         shows(text, "files changed", "[files changed]", "234.2", where)
         shows(text, "acceptance criterion", "Acceptance criteria", "234.2", where)
-        shows(text, "verified by", "Verified by", "234.2", where)
-        shows(text, "code review", "Code review", "234.2", where)
-        shows(text, "owner approval", "Owner approval", "234.2", where)
-        assert re.search(r'alt="passed"[^>]*>(?:</a>)?\s*' + re.escape(img("code review")), text), \
-            f"234.2: on {where} the Code review icon does not follow its verdict circle:\n{text}"
+        shows(text, "verified by", "Acceptance test", "234.2", where)
     merged = draw(found_for(APPROVED, pr=dict(PR, merged=True, state="closed"), check_runs=GREEN), "issue")
     shows(merged, "merged", "Merged", "234.2", "a merged PR's status line")
     split = [rec("planner", n=11, kind="feature", summary="Jobs, in two stories.", feature="Jobs.",

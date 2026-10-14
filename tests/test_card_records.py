@@ -24,10 +24,11 @@ then the non-functional requirements, and its check is the check run named "<iss
 Layout, as the tests read it (issue #235): each criterion is one bullet line "- " opening with its verdict circle (an
 <img> whose alt is its state, never inside a link), then its label, linked to its check when one exists (#354),
 then its words; under it,
-indented, one "Verified by" line per test with a docstring, where the words Verified by link to the test and the
-docstring's first line follows. Markdown links and HTML links read alike. The non-functional requirements sit inside
+indented, one line per test with a docstring, where its label (Acceptance test, the Verified by of #180) links to
+the test and the docstring's first line follows (the approved card of #557, #628). Markdown links and HTML links read alike. The non-functional requirements sit inside
 a <details> fold. The Definition of Done is one line, the last with a circle
-on the card: All tests, then review, then owner approval, each a circle (linked when there is a verdict) and its words.
+on the card: Acceptance tests, then Code review, then Test suite (the all tests check, #180's All tests), then Owner
+approval, each a circle (linked when there is a verdict) and its words, as on the approved card of #557 (#628).
 Every circle's alt is one of: passed, failed, running, not started.
 """
 import inspect
@@ -168,6 +169,16 @@ def circle(text, words, k):
     assert not links or links[0][1] in ("Acceptance criterion", "Non-functional requirement"), \
         f"{k}: the link on the bullet of “{words}” is on “{links[0][1]}”, not on its label: {first}"
     return alts(first)[0], links[0][0] if links else None
+
+
+def done_items(row):
+    """The Definition of Done row's items, each name with the state of its circle."""
+    items = {}
+    for part in row.split("**Definition of Done:**", 1)[-1].split(" · "):
+        states = alts(part)
+        name = re.sub(r"<[^>]*>", "", part).strip()
+        items[name] = states[0] if states else None
+    return items
 
 
 def dod(text, k):
@@ -436,11 +447,11 @@ def test_verified_by_is_each_tests_first_docstring_line_and_links_to_the_test(re
     its own Verified by line whose words Verified by link to its own test."""
     record_property("proves", "180.2")
     _, words = row_of(draw(), "First thing works", "180.2")
-    assert "Verified by" in words, "180.2: the criterion does not say Verified by"
+    assert "Acceptance test" in words, "180.2: the criterion does not say Acceptance test"
     for t in ("tests/test_a.py::test_one", "tests/test_a.py::test_one_more"):
         line = next((l for l in words.splitlines() if TESTS[t]["verified_by"] in l), "")
         link = re.search(rf'<a href="{re.escape(TESTS[t]["url"])}"[^>]*>(.*?)</a>', line)
-        assert link and "Verified by" in link.group(1), f"180.2: Verified by does not link “{TESTS[t]['verified_by']}” to {t}"
+        assert link and "Acceptance test" in link.group(1), f"180.2: Acceptance test does not link “{TESTS[t]['verified_by']}” to {t}"
 
 
 def test_verified_by_is_hidden_when_there_is_none(record_property):
@@ -450,11 +461,11 @@ def test_verified_by_is_hidden_when_there_is_none(record_property):
     cell never says Verified by, while criterion 1's still does."""
     record_property("proves", "180.2")
     _, words = row_of(draw(), "Second thing works", "180.2")
-    assert "Verified by" not in words, "180.2: Verified by shown for a test with no docstring"
+    assert "Acceptance test" not in words, "180.2: Verified by shown for a test with no docstring"
     bare = dict(PLAN, tests={k: v for k, v in PLAN["tests"].items() if k != "40.2"})
     text = draw(recs=[rec("planner", n=11, **bare), PLAN_OK])
-    assert "Verified by" not in row_of(text, "Second thing works", "180.2")[1], "180.2: Verified by shown with no test"
-    assert "Verified by" in row_of(text, "First thing works", "180.2")[1], "180.2: Verified by hidden where there is one"
+    assert "Acceptance test" not in row_of(text, "Second thing works", "180.2")[1], "180.2: Verified by shown with no test"
+    assert "Acceptance test" in row_of(text, "First thing works", "180.2")[1], "180.2: Verified by hidden where there is one"
 
 
 def test_a_tests_verified_by_is_its_first_docstring_line(record_property):
@@ -497,8 +508,8 @@ def test_each_criterion_shows_the_state_github_reports(record_property):
 def test_all_tests_shows_the_state_github_reports(record_property):
     """The All tests check in the Definition of Done row shows the same four states as GitHub reports.
 
-    Draws the card with the all tests check missing, queued, in progress, passed and failed, and checks the row's first
-    circle each time."""
+    Draws the card with the all tests check missing, queued, in progress, passed and failed, and checks the row's Test
+    suite circle each time."""
     record_property("proves", "180.3")
     record_property("proves", "344.2")
     cases = [(None, "not started"), (run("all tests", "queued", None, n=4), "not started"),
@@ -506,7 +517,8 @@ def test_all_tests_shows_the_state_github_reports(record_property):
              (run("all tests", conclusion="failure", n=4), "failed")]
     for check, want in cases:
         row = dod(draw(check_runs=[check] if check else []), "180.3")
-        assert alts(row)[:1] == [want], f"180.3: All tests showed {alts(row)[:1]} for GitHub's {check and check['status']}, not {want}"
+        got = done_items(row).get("Test suite")
+        assert got == want, f"180.3: Test suite showed {got} for GitHub's {check and check['status']}, not {want}"
 
 
 def test_every_circle_is_one_of_the_four_states(record_property):
@@ -559,22 +571,22 @@ def test_scope_and_out_of_scope_appear_once_planned(record_property):
 def test_definition_of_done_row_shows_all_tests_review_and_owner_approval(record_property):
     """One Definition of Done row at the bottom shows All tests, review and owner approval, each with its verdict and link.
 
-    Draws the card three ways and checks the one row at the bottom names the three in order, each circle shows
-    that item's own verdict (passed, failed or not started), and each verdict links to its proof."""
+    Draws the card three ways and checks the one row at the bottom names Acceptance tests, Code review, Test suite (the
+    all tests check) and Owner approval in order, as on the approved card of #557, each circle shows that item's own
+    verdict (passed, failed or not started), and each verdict links to its proof."""
     record_property("proves", "180.4")
     row = dod(draw(recs=[PLANNED, PLAN_OK, BUILT, CODE_BLOCK], reviews=[review("APPROVED")]), "180.4")
-    words = row.lower()
-    assert 0 <= row.find("All tests") < words.find("review") < words.find("approval"), \
-        "180.4: the row does not show All tests, review and owner approval in order"
-    assert alts(row) == ["passed", "failed", "passed"], f"180.4: wrong verdicts {alts(row)} for passed, blocked, approved"
+    names = ["Acceptance tests", "Code review", "Test suite", "Owner approval"]
+    assert list(done_items(row)) == names, f"180.4: the row shows {list(done_items(row))}, not {names} in order"
+    assert alts(row)[1:] == ["failed", "passed", "passed"], f"180.4: wrong verdicts {alts(row)} for blocked, passed, approved"
     for url in (job(4), REVIEW_RUN, APPROVAL):
         assert url in row, f"180.4: the Definition of Done row does not link {url}"
     row = dod(draw(check_runs=[run("all tests", conclusion="failure", n=4)], recs=RECS,
                    reviews=[review("CHANGES_REQUESTED", url=CHANGES)]), "180.4")
-    assert alts(row) == ["failed", "passed", "failed"], f"180.4: wrong verdicts {alts(row)} for failed, approved, changes asked"
+    assert alts(row)[1:] == ["passed", "failed", "failed"], f"180.4: wrong verdicts {alts(row)} for approved, failed, changes asked"
     assert CHANGES in row and REVIEW_RUN in row, "180.4: a verdict in the row does not link to its proof"
     row = dod(draw(check_runs=[], recs=[PLANNED, PLAN_OK], reviews=[]), "180.4")
-    assert alts(row) == ["not started"] * 3, f"180.4: wrong verdicts {alts(row)} before anything ran"
+    assert alts(row) == ["not started"] * 4, f"180.4: wrong verdicts {alts(row)} before anything ran"
 
 
 # 180.5: the words are acceptance criteria, user story and All tests, never Objective or Full suite
@@ -586,7 +598,7 @@ def test_the_card_and_check_names_use_the_agreed_words(record_property):
     checks and the all tests check."""
     record_property("proves", "180.5")
     planned = block(draw())
-    for want in ("User story", "Acceptance criteria", "All tests"):
+    for want in ("User story", "Acceptance criteria", "Test suite"):
         assert want in planned, f"180.5: the card does not say {want}"
     for text in (planned, block(draw(recs=[], check_runs=[], reviews=[]))):
         for banned in ("objective", "full suite"):
@@ -608,12 +620,13 @@ def test_a_missing_or_failed_check_never_shows_as_passed(record_property):
     GitHub reports, and checks neither ever shows passed."""
     record_property("proves", "180.6")
     assert circle(draw(check_runs=[]), "First thing works", "180.6")[0] != "passed", "180.6: a missing check showed passed"
-    assert alts(dod(draw(check_runs=[]), "180.6"))[0] != "passed", "180.6: a missing All tests showed passed"
+    assert done_items(dod(draw(check_runs=[]), "180.6"))["Test suite"] != "passed", "180.6: a missing All tests showed passed"
     for end in ("failure", "neutral", "skipped", "cancelled", "timed_out", "action_required", "stale", None):
         runs = [run("40.1 · First thing works", conclusion=end, n=1), run("all tests", conclusion=end, n=4)]
         assert circle(draw(check_runs=runs), "First thing works", "180.6")[0] == "failed", \
             f"180.6: a check that ended {end} did not show failed"
-        assert alts(dod(draw(check_runs=runs), "180.6"))[0] == "failed", f"180.6: All tests that ended {end} did not show failed"
+        assert done_items(dod(draw(check_runs=runs), "180.6"))["Test suite"] == "failed", \
+            f"180.6: All tests that ended {end} did not show failed"
 
 
 def test_a_missing_stale_or_unproven_review_never_shows_as_passed(record_property):
@@ -625,14 +638,16 @@ def test_a_missing_stale_or_unproven_review_never_shows_as_passed(record_propert
     record_property("proves", "180.6")
     record_property("proves", "344.2")
     stale = dod(draw(recs=[PLANNED, PLAN_OK, BUILT, CODE_OK, rec("worker", n=15)]), "180.6")
-    assert alts(stale)[1] != "passed", "180.6: a review of an older build showed passed"
+    assert done_items(stale)["Code review"] != "passed", "180.6: a review of an older build showed passed"
     unproven = dod(draw(recs=[PLANNED, PLAN_OK, BUILT, rec("reviewer", "pr", passed=False, n=14, verdict="approve")]), "180.6")
-    assert alts(unproven)[1] != "passed", "180.6: a review whose record failed its check showed passed"
+    assert done_items(unproven)["Code review"] != "passed", "180.6: a review whose record failed its check showed passed"
     stranger = dod(draw(reviews=[review("APPROVED", login="someone")]), "180.6")
-    assert alts(stranger)[2] != "passed", "180.6: an approval by someone not a code owner showed passed"
+    assert done_items(stranger)["Owner approval"] != "passed", "180.6: an approval by someone not a code owner showed passed"
     withdrawn = dod(draw(reviews=[review("APPROVED"), review("CHANGES_REQUESTED", url=CHANGES)]), "180.6")
-    assert alts(withdrawn)[2] == "failed", "180.6: an owner's approval withdrawn by asking for changes did not show failed"
-    assert alts(dod(draw(), "180.6"))[1:] == ["passed", "passed"], "180.6: a current approval did not show passed"
+    assert done_items(withdrawn)["Owner approval"] == "failed", "180.6: an owner's approval withdrawn by asking for changes did not show failed"
+    current = done_items(dod(draw(), "180.6"))
+    assert [current["Code review"], current["Owner approval"]] == ["passed", "passed"], \
+        "180.6: a current approval did not show passed"
 
 
 def test_only_a_code_owner_on_main_makes_the_approval_pass(record_property, monkeypatch, tmp_path):
@@ -646,8 +661,8 @@ def test_only_a_code_owner_on_main_makes_the_approval_pass(record_property, monk
     found = gather(monkeypatch, tmp_path, reviews=others, k="180.6")
     assert set(found["owners"]) == {"boss", "second"}, f"180.6: the code owners fetched are {found['owners']}, not boss and second from main"
     assert [r["user"]["login"] for r in found["reviews"]] == ["someone", "intruder"], "180.6: the PR's reviews were not fetched"
-    assert alts(dod(card.render(REPO, ISSUE, found, page="pr"), "180.6"))[2] != "passed", \
+    assert done_items(dod(card.render(REPO, ISSUE, found, page="pr"), "180.6"))["Owner approval"] != "passed", \
         "180.6: an approval by someone who is not a code owner showed passed"
     found = gather(monkeypatch, tmp_path, reviews=[review("APPROVED")], k="180.6")
-    assert alts(dod(card.render(REPO, ISSUE, found, page="pr"), "180.6"))[2] == "passed", \
+    assert done_items(dod(card.render(REPO, ISSUE, found, page="pr"), "180.6"))["Owner approval"] == "passed", \
         "180.6: a code owner's approval did not show passed"

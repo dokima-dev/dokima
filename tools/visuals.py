@@ -206,10 +206,22 @@ def paint(job):
     except (subprocess.CalledProcessError, ValueError, KeyError, TypeError) as e:
         raise Stop(f"GitHub could not give #{number} of {repo}: {card.reason(e)}")
     drawn_card = card.render(repo, issue, found)
-    out = [f"# Card of #{number}", "", drawn_card]
     pr_url = (found.get("pr") or {}).get("html_url")
-    earlier = []
-    for post in job["posts"]:
+    drawn = comments({"repo": repo, "issue": number, "pr": pr_url, "posts": job["posts"]})
+    if job.get("save"):
+        with open(job["save"], "w") as f:
+            json.dump({"issue": issue, "found": found, "card": drawn_card, "pr": pr_url, "posts": job["posts"],
+                       "comments": drawn}, f, default=sorted)
+    print("\n".join([f"# Card of #{number}", "", drawn_card]) + ("\n\n\n" + drawn[:-1] if job["posts"] else ""))
+
+
+def comments(inputs):
+    """The run and autopilot comments of `inputs` (`{"repo", "issue", "pr", "posts"}`), drawn offline with the
+    dokima package on the path: the step `paint` uses, and the one the fixture test draws a comments fixture with."""
+    from dokima import agent
+    pr_url = inputs.get("pr")
+    out, earlier = [], []
+    for post in inputs["posts"]:
         out += ["", "", f"# {'Run' if post['kind'] == 'record' else 'Autopilot'} comment {post['url']}", ""]
         if post["kind"] == "record":
             rec = {**post["rec"], "url": post["url"]}  # as production stamps it, so later comments link back here
@@ -227,11 +239,7 @@ def paint(job):
             out.append(agent.AUTOPILOT_MERGE[post["key"]].format(pr=post["pr"]))
         else:
             out.append(agent.autopilot_comment(*post["args"]))
-    if job.get("save"):
-        with open(job["save"], "w") as f:
-            json.dump({"issue": issue, "found": found, "card": drawn_card, "pr": pr_url, "posts": job["posts"],
-                       "comments": "\n".join(out[3:]).lstrip("\n") + "\n"}, f, default=sorted)
-    print("\n".join(out))
+    return "\n".join(out).lstrip("\n") + "\n"
 
 
 def main(argv):
