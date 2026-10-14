@@ -1,0 +1,111 @@
+{
+ "role": "reviewer",
+ "stage": "plan",
+ "run_id": "38603507069",
+ "commit_before": "9e605d7831b4de6cdb2e6342088b04fec6b049bf",
+ "started_by": "dokima-runtime[bot]",
+ "models": [
+  "claude-opus-5-5"
+ ],
+ "report": {
+  "duration_ms": 46206,
+  "turns": 7,
+  "cost_usd": 0.3573922,
+  "tokens_in": 254419,
+  "tokens_out": 3668
+ },
+ "log": "https://github.com/dokima-dev/dokima/blob/logs/logs/662/38603507069-reviewer-plan.md",
+ "run": "https://github.com/dokima-dev/dokima/actions/runs/38603507069",
+ "handback": {
+  "previous_step": {
+   "did": [
+    "Wrote three criteria, each with one test run end to end."
+   ],
+   "decided": [
+    "The planner gets the clash in test files; the worker keeps clashes outside tests."
+   ],
+   "open": [
+    "Asks whether the older open issue on test clashes closes when this lands.",
+    "Asks whether the agent workflow file may change."
+   ]
+  },
+  "verdict": "approve",
+  "summary": "The plan carries every ask, and each test fails today because the feature is missing.",
+  "raises": [],
+  "answers": [],
+  "asks": [
+   {
+    "ask": "When a pull request clashes with main inside a test file, the clash goes to the planner, which may edit tests",
+    "source": "https://github.com/dokima-dev/dokima/issues/662",
+    "criterion": "662.1"
+   },
+   {
+    "ask": "not to the worker, which may not.",
+    "source": "https://github.com/dokima-dev/dokima/issues/662",
+    "criterion": "662.2"
+   },
+   {
+    "ask": "its hand-back is rejected and the issue stalls until someone resolves the clash by hand.",
+    "source": "https://github.com/dokima-dev/dokima/issues/662",
+    "criterion": "662.3"
+   }
+  ],
+  "behaviors": [
+   {
+    "criterion": "662.1",
+    "one_behavior": true,
+    "why": "The planner's checkout holds the test file's clash."
+   },
+   {
+    "criterion": "662.2",
+    "one_behavior": true,
+    "why": "The worker starts from the resolved test, not the clash; one result said two ways."
+   },
+   {
+    "criterion": "662.3",
+    "one_behavior": true,
+    "why": "The worker's hand-back is not rejected for conflict markers."
+   }
+  ],
+  "edge_cases": [
+   {
+    "criterion": "662.1",
+    "cut": [],
+    "missing": []
+   },
+   {
+    "criterion": "662.2",
+    "cut": [],
+    "missing": []
+   },
+   {
+    "criterion": "662.3",
+    "cut": [],
+    "missing": []
+   }
+  ],
+  "tests": [
+   {
+    "test": "tests/test_test_clash_planner.py::test_the_planner_is_handed_a_clash_inside_a_test_file",
+    "only_its_behavior": true,
+    "why": "Runs the real planner checkout; needs markers with both sides, and none when tests did not clash."
+   },
+   {
+    "test": "tests/test_test_clash_planner.py::test_the_worker_is_not_handed_a_clash_inside_a_test_file",
+    "only_its_behavior": true,
+    "why": "Runs the real worker checkout; test file absent from its clash list and equal to the planner's fix."
+   },
+   {
+    "test": "tests/test_test_clash_planner.py::test_a_clash_inside_a_test_file_no_longer_stalls_the_workers_run",
+    "only_its_behavior": true,
+    "why": "Runs the worker's whole run to push; fails today on conflict markers, as on the stalled issue."
+   }
+  ],
+  "size": "ok"
+ },
+ "check": {
+  "passed": true,
+  "problems": []
+ },
+ "url": "https://github.com/dokima-dev/dokima/issues/662#issuecomment-6173836706"
+}
