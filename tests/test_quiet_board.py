@@ -30,6 +30,7 @@ import test_needs_you as tny  # noqa: E402
 from test_agent import GOOD_WORK, rec  # noqa: E402
 from test_start import Ctx, condition, evaluate, fill, load_yaml  # noqa: E402
 from dokima import agent, board, body  # noqa: E402
+from dokima import agent_github  # noqa: E402
 
 ROOT = os.path.abspath(os.path.join(os.path.dirname(__file__), ".."))
 BOARD_YML = os.path.join(ROOT, ".github", "workflows", "board.yml")
@@ -373,7 +374,7 @@ def checks_on_head(monkeypatch, runs):
         if "/status" in joined:
             return json.dumps({"state": "success", "statuses": []})
         raise AssertionError(f"test setup: unexpected gh call: gh {joined}")
-    monkeypatch.setattr(agent, "gh", gh)
+    monkeypatch.setattr(agent_github, "gh", gh)
 
 
 def test_events_about_one_issue_within_a_minute_cause_one_board_update(record_property, monkeypatch, tmp_path):

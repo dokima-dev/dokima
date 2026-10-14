@@ -41,6 +41,7 @@ import pytest
 
 sys.path.insert(0, os.path.join(os.path.dirname(__file__), ".."))
 from dokima import agent, card  # noqa: E402
+from dokima import agent_github  # noqa: E402
 
 ROOT = os.path.join(os.path.dirname(__file__), "..")
 REPO = "o/r"
@@ -485,7 +486,7 @@ def test_what_code_detects_never_enters_the_raised_section(record_property, env,
         if "pulls/5/files" in " ".join(args):
             return json.dumps([{"filename": "dokima/agent.py"}, {"filename": ".github/workflows/ci.yml"}])
         raise AssertionError(f"299.5: autopilot went on past a workflow file change: gh {args}")
-    monkeypatch.setattr(agent, "gh", fake_gh)
+    monkeypatch.setattr(agent_github, "gh", fake_gh)
     assert agent.try_merge(REPO, 5) == (False, "it changes a workflow file (.github/workflows/ci.yml), and only the owner "
                                                "merges those"), "299.5: a workflow file change that needs you reads differently"
     assert card.TODO == TODO_TODAY, f"299.5: the owner's to-dos for what code detects changed: {card.TODO}"

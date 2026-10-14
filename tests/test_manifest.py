@@ -399,12 +399,12 @@ def test_the_guard_passes_settings_the_manifest_declares(record_property, tmp_pa
     assert m.undeclared(ROOT) == [], f"282.3: code or workflows in this repo rely on settings the manifest leaves out: {m.undeclared(ROOT)}"
 
 
-@pytest.mark.parametrize("label,path", [("autopilot", "dokima/agent.py")])
+@pytest.mark.parametrize("label,path", [("autopilot", "dokima/agent_autopilot.py")])
 def test_the_guard_catches_a_label_taken_out_of_the_manifest(record_property, monkeypatch, label, path):
     """A label taken out of the manifest is named with the code that sets it.
 
     Proves 282.3. With autopilot left out of the manifest's labels, the guard run on this repo names that label and
-    dokima/agent.py, which puts it on issues."""
+    dokima/agent_autopilot.py, which puts it on issues."""
     record_property("proves", "282.3")
     m = manifest("282.3")
     monkeypatch.delitem(m.LABELS, label)
@@ -597,9 +597,9 @@ def test_the_guard_names_a_github_call_it_cannot_tie_to_a_permission(record_prop
     ("issues", None, "dokima/body.py"),
     ("checks", None, "dokima/card.py"),
     ("actions", None, "dokima/card.py"),
-    ("statuses", None, "dokima/agent.py"),
+    ("statuses", None, "dokima/agent_autopilot.py"),
     ("pull_requests", None, "dokima/uptodate.py"),
-    ("contents", "read", "dokima/agent.py"),
+    ("contents", "read", "dokima/agent_autopilot.py"),
     ("contents", "read", ".github/workflows/agent.yml"),
     ("issues", "read", ".github/workflows/agent.yml"),
 ], ids=lambda v: str(v))
@@ -607,8 +607,8 @@ def test_the_guard_catches_a_permission_this_repos_calls_need(record_property, m
     """A permission this repo's calls need, when missing, is named with a file needing it.
 
     Proves 282.4. On this repo: without Organization projects the guard names dokima/board.py; without issues, body.py; without
-    checks or actions, card.py; without statuses, agent.py; without pull requests, uptodate.py. With contents cut to read
-    it names agent.py (dispatch, merge) and agent.yml (git push on the app's key); with issues cut to read, agent.yml
+    checks or actions, card.py; without statuses, agent_autopilot.py; without pull requests, uptodate.py. With contents cut to read
+    it names agent_autopilot.py (dispatch, merge) and agent.yml (git push on the app's key); with issues cut to read, agent.yml
     (editing a comment on the app's key)."""
     record_property("proves", "282.4")
     m = manifest("282.4")

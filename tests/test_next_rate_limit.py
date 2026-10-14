@@ -3,7 +3,7 @@
 agent.yml runs `python3 -m dokima.agent next N OUT` as `NEXT=$(...) || NEXT=stop`, so before #417 a GitHub call that
 failed inside it (on 10-10, "GraphQL: API rate limit already exceeded for installation ID ...") became a stop with no
 Next line and no word on the issue. These tests run the same `next` command in-process on a passed planner record,
-whose decision is to start the plan reviewer, against a fake GitHub that stands in for `dokima.agent.gh`:
+whose decision is to start the plan reviewer, against a fake GitHub that stands in for `dokima.agent_github.gh`:
 
 - `gh issue view` gives the issue and its comments, `gh pr list` gives no pull requests, and `gh api rate_limit`
   gives GitHub's rate limit answer (`resources.graphql.reset` and `resources.core.reset`, epoch seconds), the one
@@ -16,7 +16,7 @@ What the run decided is what `next` printed (the workflow reads it as NEXT) and 
 record (OUT/comment.md, which the workflow posts on the issue). Where the card lands is what the workflow's board step,
 `python3 -m dokima.agent board`, does with what the run left behind, run against a fake board as tests/test_failed_run_card.py
 does.
-So the fakes reach the code, `next` reads GitHub only through `dokima.agent.gh` and reads the clock and waits only
+So the fakes reach the code, `next` reads GitHub only through `dokima.agent_github.gh` and reads the clock and waits only
 through `time.time()` and `time.sleep()`.
 """
 import json
@@ -30,6 +30,7 @@ import pytest
 sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
 sys.path.insert(0, os.path.join(os.path.dirname(os.path.abspath(__file__)), ".."))
 from dokima import agent  # noqa: E402
+from dokima import agent_github  # noqa: E402
 
 N = "57"
 OWNER = "owner-person"
@@ -138,7 +139,7 @@ def decide(tmp_path, monkeypatch, capsys, failure=None, until=0, name="out", rec
     json.dump(rec, open(out / "record.json", "w"))
     (out / "comment.md").write_text(agent.render(rec))
     hub = FakeGitHub(failure, until, failing, labels=labels)
-    monkeypatch.setattr(agent, "gh", hub.gh)
+    monkeypatch.setattr(agent_github, "gh", hub.gh)
     monkeypatch.setattr(time, "time", hub.time)
     monkeypatch.setattr(time, "sleep", hub.sleep)
     monkeypatch.setenv("GITHUB_REPOSITORY", "o/r")

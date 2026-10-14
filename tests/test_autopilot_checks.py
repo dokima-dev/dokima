@@ -17,6 +17,7 @@ import time
 import pytest
 
 from dokima import agent
+from dokima import agent_github  # noqa: E402
 
 REPO = "o/r"
 ISSUE = 57
@@ -95,7 +96,7 @@ def github(monkeypatch):
     """Puts a fake GitHub in place, given the check-run states the head goes through."""
     def make(steps, statuses=()):
         fake = FakeGitHub(steps, statuses)
-        monkeypatch.setattr(agent, "gh", fake.gh)
+        monkeypatch.setattr(agent_github, "gh", fake.gh)
         monkeypatch.setattr(time, "sleep", fake.sleep)
         monkeypatch.setattr(time, "time", lambda: fake.clock)
         monkeypatch.setattr(time, "monotonic", lambda: fake.clock)

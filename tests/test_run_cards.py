@@ -14,6 +14,8 @@ import pytest
 
 sys.path.insert(0, os.path.join(os.path.dirname(__file__), ".."))
 from dokima import agent, card  # noqa: E402
+from dokima import agent_github  # noqa: E402
+from tests.agent_patch import patch_agent  # noqa: E402
 
 RECORD_FOLD = "<details><summary>Full record</summary>"
 FOLD = re.compile(r"<details>(.*?)</details>", re.S)
@@ -261,8 +263,8 @@ def test_the_worker_card_links_the_pull_request_code_opened_after_the_run(record
     def gh(*args):
         calls.append(args)
         return "7\n" if args[:2] == ("pr", "list") and "try/issue-9" in args else "[]"
-    monkeypatch.setattr(agent, "gh", gh)
-    monkeypatch.setattr(agent, "conversation", lambda repo, number: ({}, []))
+    monkeypatch.setattr(agent_github, "gh", gh)
+    patch_agent(monkeypatch, "conversation", lambda repo, number: ({}, []))
     monkeypatch.setenv("GITHUB_REPOSITORY", "o/r")
     monkeypatch.setenv("GITHUB_SERVER_URL", "https://github.com")
     monkeypatch.setenv("OWNERS", "owner")

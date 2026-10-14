@@ -35,6 +35,7 @@ import pytest
 ROOT = os.path.abspath(os.path.join(os.path.dirname(__file__), ".."))
 sys.path.insert(0, ROOT)
 from dokima import agent  # noqa: E402
+from dokima import agent_github  # noqa: E402
 from tests.test_raise_handbacks import FOUND, check_handback, review, run_agent  # noqa: E402
 
 N = 9
@@ -99,7 +100,7 @@ def fake_github(monkeypatch, fail=False):
             per, page = int(q.get("per_page", ["30"])[0]), int(q.get("page", ["1"])[0])
             return json.dumps(items[(page - 1) * per:page * per])
         raise AssertionError(f"unexpected GitHub call: gh {' '.join(map(str, args))}")
-    monkeypatch.setattr(agent, "gh", gh)
+    monkeypatch.setattr(agent_github, "gh", gh)
 
 
 def reviewer_pack(monkeypatch, where, stage):

@@ -30,6 +30,7 @@ import pytest
 
 sys.path.insert(0, os.path.join(os.path.dirname(__file__), ".."))
 from dokima import agent, board  # noqa: E402
+from dokima import agent_github  # noqa: E402
 
 ROOT = os.path.join(os.path.dirname(__file__), "..")
 WORKFLOW = os.path.join(ROOT, ".github", "workflows", "board.yml")
@@ -139,7 +140,7 @@ def make(monkeypatch):
         world = World(**kw)
         monkeypatch.setattr(board, "Board", fake_board(world))
         # Each issue has no record yet, so the board's recompute of its column reads no network.
-        monkeypatch.setattr(agent, "gh", lambda *a: json.dumps({"number": int(a[2]), "title": "", "body": "", "comments": []})
+        monkeypatch.setattr(agent_github, "gh", lambda *a: json.dumps({"number": int(a[2]), "title": "", "body": "", "comments": []})
                             if a[:2] == ("issue", "view") else "[]")
         return world
 
