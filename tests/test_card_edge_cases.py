@@ -5,8 +5,12 @@ the issue card and the PR card with `dokima/card.py` for a plan of issue #40 who
 for none, or neither (a plan written before edge cases existed), and read the lines under each criterion. Each
 criterion is sourced from the parent #30, so its Source line shows and the edge case line can be placed between
 Verified by and Source.
+
+Since #628 the card draws what the owner approved on the card of #557: a test's Verified by line is labelled
+Acceptance test, and the edge cases sit in one closed fold titled Edge cases, one list item per case.
 """
 import os
+import re
 import sys
 
 sys.path.insert(0, os.path.join(os.path.dirname(__file__), ".."))
@@ -69,7 +73,7 @@ def under(text, words):
 
 def between(lines, crit, page):
     """The lines strictly between the criterion's last Verified by line and its Source line."""
-    vb = [i for i, l in enumerate(lines) if "Verified by" in l]
+    vb = [i for i, l in enumerate(lines) if "Acceptance test</a>" in l]
     src = [i for i, l in enumerate(lines) if "Source" in l]
     assert vb and src, f"{crit}: on the {page} card the criterion lost its Verified by or Source line: {lines}"
     return lines[vb[-1] + 1:src[0]]
@@ -77,17 +81,21 @@ def between(lines, crit, page):
 
 @pytest.mark.parametrize("page", ["issue", "pr"])
 def test_edge_cases_show_on_one_line_between_verified_by_and_source(record_property, page):
-    """Edge cases show on one line between Verified by and Source, separated by dots.
+    """Edge cases show in one fold between Verified by and Source, one item each.
 
     Draws both cards for a criterion with three edge cases and checks exactly one line sits between its Verified by
-    and Source lines, holding the three cases in order joined by a dot. Proves 538.1."""
+    and Source lines: a closed fold titled Edge cases holding the three cases in order, one list item each. Proves
+    538.1."""
     record_property("proves", "538.1")
     mid = between(under(draw(page), "Cases thing works"), "538.1", page)
     assert len(mid) == 1, f"538.1: on the {page} card the edge cases are not one line between Verified by and Source: {mid}"
     line = mid[0]
     missing = [c for c in CASES if c not in line]
     assert not missing, f"538.1: on the {page} card the edge case line misses {missing}: {line}"
-    assert " · ".join(CASES) in line, f"538.1: on the {page} card the edge cases are not separated by dots: {line}"
+    assert re.match(r"\s*<details><summary>.*Edge cases.*</summary>", line) and line.endswith("</details>"), \
+        f"538.1: on the {page} card the edge cases are not one closed fold titled Edge cases: {line}"
+    items = [re.sub(r"<[^>]*>", "", i) for i in re.findall(r"<li>(.*?)</li>", line)]
+    assert items == CASES, f"538.1: on the {page} card the edge cases are not one list item each, in order: {items}"
 
 
 @pytest.mark.parametrize("page", ["issue", "pr"])

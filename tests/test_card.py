@@ -101,10 +101,10 @@ def test_no_footer_and_no_gap(record_property):
     body = render()
     assert "Built by the card workflow" not in body
     lines = body.splitlines()
-    shown = [i for i, line in enumerate(lines) if "Verified by" in line]
+    shown = [i for i, line in enumerate(lines) if "Acceptance test</a>" in line]
     assert shown
     for i in shown:
-        assert lines[i].startswith("  - ")
+        assert lines[i].startswith("  *")
         above = next(line for line in reversed(lines[:i]) if line.startswith("- "))
         assert "first thing works" in above or "second thing works" in above
 
