@@ -1,0 +1,186 @@
+{
+ "role": "planner",
+ "stage": null,
+ "run_id": "38656913804",
+ "commit_before": "34d301ce183b7b835c2354735099149a653f8e4c",
+ "started_by": "RezaSoleymanifar",
+ "models": [
+  "claude-opus-5-5"
+ ],
+ "report": {
+  "duration_ms": 120277,
+  "turns": 14,
+  "cost_usd": 0.8021712000000001,
+  "tokens_in": 656438,
+  "tokens_out": 11498
+ },
+ "log": "https://github.com/dokima-dev/dokima/blob/logs/logs/696/38656913804-planner.md",
+ "run": "https://github.com/dokima-dev/dokima/actions/runs/38656913804",
+ "handback": {
+  "kind": "feature",
+  "title": "A settings file picks each role's agent and model",
+  "summary": "One settings file says which agent and model the planner, worker and reviewer use; Kimi is supported first, then Codex.",
+  "feature": "The owner picks each role's agent and model in one settings file. Stories: (1) the file; (2) runs follow it, on Kimi; (3) Codex.",
+  "stories": [
+   {
+    "title": "One settings file names each role's agent and model",
+    "user_story": "The owner sets each role's agent and model in one small file at the top of the repo.",
+    "context": "Today the agent and model are fixed in the agent workflow: it installs Claude Code and runs it with a model set once for every role (.github/workflows/agent.yml, the MODEL line and the claude -p step). No settings file exists. PyYAML is not installed and the repo adds no dependencies, so the file is read by a small reader of its own; the tests' own YAML reader (tests/test_start.py, load_yaml) shows the subset the workflows need. Story 2 wires the file into runs; this story only adds the file and its reader.",
+    "acceptance_criteria": [
+     {
+      "text": "The settings file is a YAML file, so the owner edits plain keys and values.",
+      "words": "The file is YAML-like, a structured file.",
+      "source": "https://github.com/dokima-dev/dokima/issues/696",
+      "files": [
+       "dokima/settings.py",
+       "dokima.yml"
+      ]
+     },
+     {
+      "text": "The planner, the worker and the reviewer each get their own agent and model in the file.",
+      "words": "Any agent, any model: planner, worker and reviewer each pick theirs.",
+      "source": "https://github.com/dokima-dev/dokima/issues/696",
+      "files": [
+       "dokima/settings.py",
+       "dokima.yml"
+      ]
+     },
+     {
+      "text": "A role may name any model its agent takes; Dokima keeps no list of allowed models.",
+      "words": "Any agent, any model",
+      "source": "https://github.com/dokima-dev/dokima/issues/696",
+      "files": [
+       "dokima/settings.py"
+      ]
+     },
+     {
+      "text": "Moving a role to another subscription is a one-line edit: that role's line in the file.",
+      "words": "It exposes a simple interface for deciding the orchestration across subscriptions.",
+      "source": "https://github.com/dokima-dev/dokima/issues/696",
+      "files": [
+       "dokima/settings.py",
+       "dokima.yml"
+      ]
+     }
+    ],
+    "non_functional": [
+     {
+      "text": "The roles sit in their own section of the file, so other settings can join later.",
+      "why": "The owner expects the file to hold other settings later.",
+      "words": "Later it may expand into other settings.",
+      "source": "https://github.com/dokima-dev/dokima/issues/696",
+      "files": [
+       "dokima/settings.py",
+       "dokima.yml"
+      ]
+     }
+    ],
+    "depends_on": []
+   },
+   {
+    "title": "Each run follows the settings file, starting with Kimi",
+    "user_story": "Each role runs on the agent and model the owner set, and Kimi works first.",
+    "context": "The agent workflow runs Claude Code with one fixed model and then fails the run when the session logs name any other model (.github/workflows/agent.yml, the step 'Fail closed on a bad hand-back or the wrong model'; dokima/agent_records.py, models_used and run_report read Claude's logs and claude.json). Running Kimi needs the workflow changed, Kimi's command line installed and a Kimi key added as a secret by the owner; the model check and the run's stats must read Kimi's logs too. AGENTS.md forbids workflow changes unless the issue asks; see the owner question on this.",
+    "acceptance_criteria": [
+     {
+      "text": "Each run starts the agent and model the settings file gives its role.",
+      "words": "A settings file decides which agent and model each role uses, across subscriptions.",
+      "source": "https://github.com/dokima-dev/dokima/issues/696",
+      "files": [
+       ".github/workflows/agent.yml",
+       "dokima/settings.py",
+       "dokima/agent_records.py"
+      ]
+     },
+     {
+      "text": "A role set to Kimi runs on Kimi, with the model the file names.",
+      "words": "Usual suspects first: Kimi first",
+      "source": "https://github.com/dokima-dev/dokima/issues/696",
+      "files": [
+       ".github/workflows/agent.yml",
+       "dokima/settings.py",
+       "dokima/agent_records.py"
+      ]
+     },
+     {
+      "text": "Dokima's own settings file names Kimi for every role, so its credit is used first.",
+      "words": "Kimi first, since I want to use up its credit",
+      "source": "https://github.com/dokima-dev/dokima/issues/696",
+      "files": [
+       "dokima.yml"
+      ]
+     }
+    ],
+    "non_functional": [],
+    "depends_on": [
+     0
+    ]
+   },
+   {
+    "title": "A role can run on Codex",
+    "user_story": "The owner can move any role to Codex by naming it in the settings file.",
+    "context": "Built after Kimi, as the owner ordered. It reuses story 2's way of starting an agent from the settings file; it adds Codex's command line, its key as a secret, and reading Codex's logs for the model check and the run's stats (dokima/agent_records.py). Open issue 39 plans one adapter per agent, Codex among them.",
+    "acceptance_criteria": [
+     {
+      "text": "A role set to Codex runs on Codex, with the model the file names.",
+      "words": "then Codex",
+      "source": "https://github.com/dokima-dev/dokima/issues/696",
+      "files": [
+       ".github/workflows/agent.yml",
+       "dokima/settings.py",
+       "dokima/agent_records.py"
+      ]
+     }
+    ],
+    "non_functional": [],
+    "depends_on": [
+     0,
+     1
+    ]
+   }
+  ],
+  "links": {
+   "blocked_by": [],
+   "blocks": [],
+   "relates_to": [
+    39,
+    148
+   ]
+  },
+  "raises": [
+   {
+    "kind": "question",
+    "to": "owner",
+    "label": "Two readings",
+    "text": "Does Kimi first mean build Kimi first, or switch to Codex once Kimi's credit runs out? Plan assumes building.",
+    "evidence": "The issue says 'Kimi first, since I want to use up its credit, then Codex' and names no fallback.",
+    "raised_by": "planner",
+    "id": "P1"
+   },
+   {
+    "kind": "question",
+    "to": "owner",
+    "label": "Workflow change needed",
+    "text": "Kimi and Codex need the agent workflow changed and their keys added. May the stories do that? Plan assumes yes.",
+    "evidence": "`.github/workflows/agent.yml` fixes `MODEL: claude-opus-5-5` and runs `claude -p`; AGENTS.md forbids workflow changes unless the issue asks.",
+    "raised_by": "planner",
+    "id": "P2"
+   },
+   {
+    "kind": "question",
+    "to": "owner",
+    "label": "Doubt: overlaps open issue",
+    "text": "Issue 39 also plans one adapter per agent. Should this issue build the Kimi and Codex ones? Plan assumes so.",
+    "evidence": "#39 asks for 'One small adapter per agent (Claude Code, Codex, others)'.",
+    "raised_by": "planner",
+    "id": "P3"
+   }
+  ],
+  "answers": []
+ },
+ "check": {
+  "passed": true,
+  "problems": []
+ },
+ "url": "https://github.com/dokima-dev/dokima/issues/696#issuecomment-6181100495"
+}
