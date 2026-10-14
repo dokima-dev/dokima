@@ -159,11 +159,14 @@ jobs:
                 echo "Merging main into try/issue-$N failed with no clashed file to resolve." > /tmp/why.txt
                 echo "::error title=Merge failed::$(cat /tmp/why.txt)"; exit 1
               fi
-              # A test the planner changed after taking main's version of it keeps the planner's change.
+              # A test the planner changed after taking main's version of it keeps the planner's change, and so does
+              # a test whose clash with main's version the planner was handed and resolved, with no marker left (#662).
               MB=$(git merge-base HEAD origin/main)
               for f in $(grep '^tests/' /tmp/clashed.txt || true); do
                 MAINS=$(git rev-parse -q --verify "origin/main:$f" || true)
-                if [ -n "$MAINS" ] && git log --format="%H:$f" "$MB..HEAD" -- "$f" | git cat-file --batch-check='%(objectname)' | grep -qxF "$MAINS"; then
+                if [ -n "$MAINS" ] && { git log --format="%H:$f" "$MB..HEAD" -- "$f" | git cat-file --batch-check='%(objectname)' | grep -qxF "$MAINS" \
+                     || { git log --format=%B "$MB..HEAD" | grep -qxF "Clash-with-main: $f $MAINS" \
+                          && ! git show "HEAD:$f" | grep -qE '^(<<<<<<<|=======|>>>>>>>)( |$)'; }; }; then
                   git checkout -q --ours -- "$f" && git add -- "$f"
                 fi
               done
@@ -174,7 +177,9 @@ jobs:
             # A planner starts with main merged in, so it sees and can change the tests main added (#475). A branch
             # that clashes with main stays unmerged for the worker; it takes only main's tests the branch never
             # touched, and its plan check's base holds every test main changed, so none counts as the plan's own
-            # unless the branch's copy differs from main's, even after an earlier round took it.
+            # unless the branch's copy differs from main's, even after an earlier round took it. A test both sides
+            # changed is handed to the planner with its clash marked, to resolve (#662); the commit names main's copy
+            # it clashed with, so the worker's merge keeps the planner's resolution instead of handing it the clash.
             if [ "$ROLE" = planner ] && ! git -c user.name="dokima-runtime[bot]" -c user.email="337511017+dokima-runtime[bot]@users.noreply.github.com" merge -q --no-edit origin/main; then
               git reset -q --merge
               MB=$(git merge-base HEAD origin/main)
@@ -189,7 +194,24 @@ jobs:
                   printf '0 0000000000000000000000000000000000000000\t%s\n' "$f" >> /tmp/mains-index.txt
                 fi
               done < /tmp/mains-tests.txt
-              git diff --cached --quiet || git -c user.name="dokima-runtime[bot]" -c user.email="337511017+dokima-runtime[bot]@users.noreply.github.com" commit -qm "Main's tests for the planner of #$N"
+              : > /tmp/clash-trailers.txt
+              while read -r f; do
+                MAINS=$(git rev-parse -q --verify "origin/main:$f" || true)
+                if [ -n "$MAINS" ] && git cat-file -e "HEAD:$f" 2>/dev/null && ! git diff --quiet "$MB" HEAD -- "$f" \
+                   && ! git log --format=%B "$MB..HEAD" | grep -qxF "Clash-with-main: $f $MAINS"; then
+                  git show "$MB:$f" > /tmp/base-side 2>/dev/null || : > /tmp/base-side
+                  git show "$MAINS" > /tmp/mains-side
+                  rc=0; git merge-file -p -L "try/issue-$N" -L "where it split off" -L origin/main "$f" /tmp/base-side /tmp/mains-side > /tmp/merged-side || rc=$?
+                  if [ "$rc" -gt 0 ] && [ "$rc" -lt 128 ]; then
+                    cp /tmp/merged-side "$f"
+                    echo "Clash-with-main: $f $MAINS" >> /tmp/clash-trailers.txt
+                  fi
+                fi
+              done < /tmp/mains-tests.txt
+              if ! git diff --cached --quiet || [ -s /tmp/clash-trailers.txt ]; then
+                { echo "Main's tests for the planner of #$N"; [ ! -s /tmp/clash-trailers.txt ] || { echo; cat /tmp/clash-trailers.txt; }; } > /tmp/mains-msg.txt
+                git -c user.name="dokima-runtime[bot]" -c user.email="337511017+dokima-runtime[bot]@users.noreply.github.com" commit -q --allow-empty -F /tmp/mains-msg.txt
+              fi
               BASE_TREE=$(export GIT_INDEX_FILE=/tmp/base.index; git read-tree "$MB" && git update-index --index-info < /tmp/mains-index.txt && git write-tree)
               MAINS_BASE=$(git -c user.name="dokima-runtime[bot]" -c user.email="337511017+dokima-runtime[bot]@users.noreply.github.com" commit-tree "$BASE_TREE" -p "$MB" -m "Where #$N split off main, with main's tests")
               echo "::notice title=Clash with main::the planner starts with main's tests; the worker merges main"
