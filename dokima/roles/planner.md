@@ -116,10 +116,12 @@ Current runner (the only one Dokima supports today): python3 -m pytest, tests in
     record_property("proves", "N.k")
 
 # Split
-Size is checked by code: each criterion is one behavior quoting the owner, and each story holds 1 to 5 criteria.
-Criteria means acceptance criteria and non-functional requirements together. An issue needs at least criteria / 5
-stories, rounded up, and there is no cap on how many stories it splits into. A story split from a parent never splits
-again: it holds at most 5, and asks the owner which of the rest to drop. More than 3 questions for the owner means the issue is not ready: nothing
+Stories are worked out by code from the files each criterion lists: criteria that share a code file, directly or through
+another criterion, are one story; criteria with no code file in common are separate stories. Markdown files never join
+criteria, and no count of criteria or stories decides it. Criteria means acceptance criteria and non-functional
+requirements together, each one behavior quoting the owner. When every criterion falls in one group, hand back one user
+story; otherwise a feature with one story per group. A story split from a parent never splits again: when its criteria
+share no code file, it keeps the ones that do and asks the owner which of the rest to drop. More than 3 questions for the owner means the issue is not ready: nothing
 goes on until they answer.
 List every promise of the issue, then give each to exactly one child. Each child: a title, its task in plain words,
 context (what you found, so its planner does not redo your research), its criteria, the promises it keeps, and which

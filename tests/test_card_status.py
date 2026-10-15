@@ -164,7 +164,7 @@ STORY_PLAN = {"kind": "user_story", "title": "Slow calls return a job id", "summ
               "non_functional": [], "out_of_scope": [],
               "tests": {"9.1": ["tests/test_jobs.py::test_id"]}, "test_changes": {}}
 FEATURE_PLAN = {"kind": "feature", "title": "Slow calls run as jobs", "summary": SUMMARY, "feature": "Slow calls run as jobs.", "stories": [
-    {"title": t, "user_story": f"Owners get {t}.", "acceptance_criteria": [{"text": f"{t} works {k}.", "source": "https://github.com/o/r/issues/9", "files": ["dokima/jobs.py"]} for k in (1, 2, 3)],
+    {"title": t, "user_story": f"Owners get {t}.", "acceptance_criteria": [{"text": f"{t} works {k}.", "source": "https://github.com/o/r/issues/9", "files": [f"dokima/{t.lower()}.py"]} for k in (1, 2, 3)],
      "non_functional": [], "depends_on": []} for t in ("Jobs", "Results")]}
 
 

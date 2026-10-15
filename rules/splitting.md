@@ -1,6 +1,6 @@
 ## Splitting and the graph
 
-- Split when an issue has more than one independent objective, more than five criteria, or work in unrelated parts of the code. Don't split parts that can't land separately.
+- Code works out the stories from the files each criterion changes: criteria sharing a code file, directly or through another criterion, are one story; criteria with no code file in common are separate stories. Markdown files never join criteria, and no count of criteria or stories decides it.
 - 2 or more children, one level; every promise owned by exactly one child; children may depend on siblings, with no cycles.
 - The planner proposes; code checks the rules and files real GitHub sub-issues. `/work` on the parent approves the split and every child's plan.
 - When a child merges, every sibling whose needs have landed starts; independent children run in parallel. GitHub is the state.

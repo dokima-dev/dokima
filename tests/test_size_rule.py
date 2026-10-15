@@ -1,5 +1,6 @@
-"""The size rule: each story holds 1 to 5 criteria with no cap on stories, at most 3 questions for the owner, and a size verdict on every
-plan review."""
+"""No caps on stories, at most 3 owner questions, a size verdict per review.
+
+Since #667 no count caps a story; only an empty story is refused."""
 import os
 import sys
 
@@ -17,13 +18,13 @@ def story(k):
 
 @pytest.mark.parametrize("sizes", [[1], [5], [2, 1], [5, 5], [3, 3, 1], [5, 5, 5, 5, 5, 5, 1]])
 def test_the_right_number_of_stories_passes(sizes):
-    """Any number of stories passes, each holding 1 to 5 criteria."""
+    """Any number of stories passes, each holding at least one criterion."""
     planner.check_size([story(k) for k in sizes])
 
 
-@pytest.mark.parametrize("sizes", [[6], [5, 6], [0], [3, 0]])
+@pytest.mark.parametrize("sizes", [[0], [3, 0]])
 def test_a_story_over_five_or_empty_is_refused(sizes):
-    """A story of 6 criteria, or of none, is refused."""
+    """A story of no criteria is refused."""
     with pytest.raises(planner.Garbled):
         planner.check_size([story(k) for k in sizes])
 
@@ -66,8 +67,7 @@ def test_every_test_is_judged_and_a_test_checking_more_never_approves():
 
 
 def test_a_story_of_a_parent_never_splits_again():
-    """An issue that is already a story holds at most 5 criteria and never becomes a feature."""
+    """An issue that is already a story never becomes a feature, whatever its size."""
     planner.check_size([story(5)], nested=True)
-    for sizes in ([6], [2, 2]):
-        with pytest.raises(planner.Garbled, match="never splits again"):
-            planner.check_size([story(k) for k in sizes], nested=True)
+    with pytest.raises(planner.Garbled, match="never splits again"):
+        planner.check_size([story(2), story(2)], nested=True)

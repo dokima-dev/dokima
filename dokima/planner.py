@@ -129,31 +129,72 @@ def check_source(where, source, issue):
                   "or a comment on either")
 
 
-PER_STORY = 5
-
-
 def count(s):
     """How many criteria a story holds: its acceptance criteria and non-functional requirements."""
     return len(s.get("acceptance_criteria") or []) + len(s.get("non_functional") or [])
 
 
 def check_size(stories, nested=False):
-    """Garbled unless every story holds 1 to 5 criteria, in at least as many stories as the count needs.
+    """Garbled unless every story holds a criterion, and a parent's story stays one.
 
-    The size rule: each story holds 1 to 5 criteria, so an issue needs at least criteria / 5 stories, rounded up. There
-    is no cap on how many stories an issue splits into."""
-    sizes = [count(s) for s in stories]
-    total, need = sum(sizes), -(-sum(sizes) // PER_STORY)
-    if nested and (len(stories) > 1 or total > PER_STORY):
-        raise Garbled(f"this issue is already a story of its parent, so it never splits again: hand back one story of at "
-                      f"most {PER_STORY} criteria (acceptance criteria and non-functional requirements together), and "
-                      "ask the owner, in a question, which of the rest to drop")
-    big = [n for n, k in enumerate(sizes, 1) if not 1 <= k <= PER_STORY]
-    if big:
-        raise Garbled(f"story {big[0]} holds {sizes[big[0] - 1]} criteria; each story holds 1 to {PER_STORY}")
-    if len(stories) < need:
-        raise Garbled(f"{total} criteria need at least {need} {'story' if need == 1 else 'stories'} "
-                      f"({PER_STORY} at most each), not {len(stories)}")
+    No count caps a story or how many stories an issue splits into; the code files criteria share decide the stories."""
+    if nested and len(stories) > 1:
+        raise Garbled("this issue is already a story of its parent, so it never splits again: hand back one story, and "
+                      "ask the owner, in a question, which criteria to drop")
+    empty = [n for n, s in enumerate(stories, 1) if not count(s)]
+    if empty:
+        raise Garbled(f"story {empty[0]} holds no criteria; each story holds at least one")
+
+
+def code_files(c):
+    """The code files a criterion changes: its files, less markdown, which never joins criteria."""
+    return {f.strip() for f in c.get("files") or [] if not f.strip().lower().endswith(".md")}
+
+
+def story_groups(criteria):
+    """The stories these criteria make: criteria sharing a code file are one story.
+
+    Sharing may be direct or through another criterion. Returns one list per story, each the 0-based indexes of its criteria in ascending order, the stories in the order
+    of their first criterion. Edge cases never change the groups."""
+    root = list(range(len(criteria)))
+
+    def find(i):
+        while root[i] != i:
+            root[i] = root[root[i]]
+            i = root[i]
+        return i
+
+    first = {}  # code file -> the first criterion listing it
+    for i, c in enumerate(criteria):
+        for f in sorted(code_files(c)):
+            a, b = find(i), find(first.setdefault(f, i))
+            root[max(a, b)] = min(a, b)
+    groups = {}
+    for i in range(len(criteria)):
+        groups.setdefault(find(i), []).append(i)
+    return list(groups.values())
+
+
+def check_groups(stories, nested=False):
+    """Garbled unless the stories are exactly code's groups of criteria by shared code files.
+
+    Each story's criteria share code files, and no code file is changed by criteria in different stories."""
+    owner = {}  # code file -> the first story whose criteria change it
+    for n, s in enumerate(stories, 1):
+        criteria = (s.get("acceptance_criteria") or []) + (s.get("non_functional") or [])
+        if len(story_groups(criteria)) > 1:
+            if nested:
+                raise Garbled("this issue is already a story of its parent, so it never splits again, but its criteria "
+                              "share no code file: hand back the criteria that share one, and ask the owner, in a "
+                              "question, which to drop")
+            where = "this story" if len(stories) == 1 else f"story {n}"
+            raise Garbled(f"{where} holds criteria with no code file in common: put them in separate stories")
+        for c in criteria:
+            for f in sorted(code_files(c)):
+                m = owner.setdefault(f, n)
+                if m != n:
+                    raise Garbled(f"stories {m} and {n} both change {f}: criteria sharing a code file belong in the "
+                                  "same story")
 
 
 def check_stories(stories, issue=None, said=None):
@@ -256,6 +297,7 @@ def from_kind(p, issue=None, said=None):
             raise Garbled("a feature needs at least 2 stories")
         check_stories(stories, issue, said)
         check_size(stories, isinstance(issue, tuple))
+        check_groups(stories, isinstance(issue, tuple))
         return "feature", json.dumps(p, indent=2)
     if kind != "user_story":
         raise Garbled(f"plan.json kind is {kind!r}: {ALWAYS}")
@@ -286,6 +328,7 @@ def from_kind(p, issue=None, said=None):
                               f"and its {key} is not")
         check_words(f"non-functional requirement {k}", c, said)
         check_files(f"non-functional requirement {k}", c)
+    check_groups([p], isinstance(issue, tuple))
     tests = p.get("tests")
     if not isinstance(tests, dict) or not all(isinstance(k, str) and strings(v) for k, v in tests.items()):
         raise Garbled("a story needs tests as a map from each criterion (N.k) to its tests")

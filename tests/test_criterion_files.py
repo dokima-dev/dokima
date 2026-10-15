@@ -60,19 +60,19 @@ def test_each_criterion_carries_its_files(record_property, tmp_path):
     checks the read plan holds each criterion's files, in criterion order, as handed back. Proves 665.1.
     """
     record_property("proves", "665.1")
-    kind, p = hand_back(tmp_path, story(["dokima/jobs.py", "dokima/queue.py"], ["dokima/ids.py"]))
+    kind, p = hand_back(tmp_path, story(["dokima/jobs.py", "dokima/queue.py"], ["dokima/jobs.py"]))
     assert kind == "plan", f"665.1: a well-formed story was read as {kind}"
-    assert p.get("files") == [["dokima/jobs.py", "dokima/queue.py"], ["dokima/ids.py"]], (
+    assert p.get("files") == [["dokima/jobs.py", "dokima/queue.py"], ["dokima/jobs.py"]], (
         f"665.1: the read plan does not hold each criterion's files in order; it holds {p.get('files')!r}")
 
 
 @pytest.mark.parametrize("content,names", [
-    (lambda: story(["dokima/jobs.py"], ["dokima/ids.py"]) | {"acceptance_criteria": [
+    (lambda: story(["dokima/jobs.py"], ["dokima/jobs.py"]) | {"acceptance_criteria": [
         {"text": "A slow call returns a job id.", "source": SRC, "no_edge_cases": "a sample criterion"}]},
      "acceptance criterion 1"),
     (lambda: story([], ["dokima/ids.py"]), "acceptance criterion 1"),
     (lambda: story(["dokima/jobs.py"], []), "non-functional requirement 1"),
-    (lambda: story(["dokima/jobs.py"], ["dokima/ids.py"]) | {"non_functional": [
+    (lambda: story(["dokima/jobs.py"], ["dokima/jobs.py"]) | {"non_functional": [
         {"text": "Job ids never repeat.", "why": "two jobs would share results", "source": SRC,
          "files": "dokima/ids.py", "no_edge_cases": "a sample criterion"}]},
      "non-functional requirement 1"),
@@ -86,7 +86,7 @@ def test_a_criterion_with_no_files_is_rejected_by_name(record_property, tmp_path
     that criterion and the files. The same plans with files listed are accepted, so the check is not a blanket refusal. Proves 665.2.
     """
     record_property("proves", "665.2")
-    assert hand_back(tmp_path, story(["dokima/jobs.py"], ["dokima/ids.py"]))[0] == "plan", (
+    assert hand_back(tmp_path, story(["dokima/jobs.py"], ["dokima/jobs.py"]))[0] == "plan", (
         "665.2: a story whose every criterion lists its files was rejected")
     assert hand_back(tmp_path, feature(["dokima/ids.py"]))[0] == "feature", (
         "665.2: a split whose every criterion lists its files was rejected")
@@ -109,7 +109,7 @@ def test_a_file_that_does_not_exist_yet_is_accepted(record_property, tmp_path):
     record_property("proves", "665.3")
     new = "dokima/not_written_yet_665.py"
     assert not os.path.exists(os.path.join(ROOT, new)), "665.3: the sample new file already exists"
-    kind, p = hand_back(tmp_path, story([new], ["dokima/ids.py"]))
+    kind, p = hand_back(tmp_path, story([new], [new]))
     assert kind == "plan", f"665.3: a story listing a new file was read as {kind}"
     assert (p.get("files") or [None])[0] == [new], (
         f"665.3: the plan did not keep the new file {new} as its criterion's file: {p.get('files')!r}")
