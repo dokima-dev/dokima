@@ -1,0 +1,47 @@
+{
+ "role": "reviewer",
+ "stage": "pr",
+ "run_id": "38667466982",
+ "commit_before": "718d60f784439073698e00f389b556bf51bbc600",
+ "started_by": "dokima-runtime[bot]",
+ "models": [
+  "claude-opus-5-5"
+ ],
+ "report": {
+  "duration_ms": 340851,
+  "turns": 12,
+  "cost_usd": 0.4804602000000001,
+  "tokens_in": 596767,
+  "tokens_out": 3542
+ },
+ "log": "https://github.com/dokima-dev/dokima/blob/logs/logs/668/38667466982-reviewer-pr.md",
+ "run": "https://github.com/dokima-dev/dokima/actions/runs/38667466982",
+ "handback": {
+  "previous_step": {
+   "did": [
+    "The worker changed no code this round.",
+    "The worker ran the whole suite here: every test passed."
+   ],
+   "decided": [
+    "The failed full test run on GitHub could not be reproduced, so nothing changed."
+   ],
+   "open": [
+    "Why the full test run failed on GitHub is still unknown."
+   ]
+  },
+  "verdict": "approve",
+  "summary": "The code still meets every criterion and the whole suite passes here; GitHub's full test run must still go green.",
+  "raises": [],
+  "answers": [],
+  "asks": [],
+  "behaviors": [],
+  "edge_cases": [],
+  "tests": [],
+  "size": "ok"
+ },
+ "check": {
+  "passed": true,
+  "problems": []
+ },
+ "url": "https://github.com/dokima-dev/dokima/pull/701#issuecomment-6182495713"
+}
