@@ -44,7 +44,11 @@ def rec(role, stage="", handback=None, run_id="1"):
     return agent.build_record(role, stage, out, "", True, {"run_id": run_id, "run": f"https://x/run/{run_id}"})
 
 
-def fake_github(monkeypatch, recs):
+STORY_COMMENTS = [{"author": {"login": OWNER}, "body": "/work", "createdAt": "2026-10-07T09:00:00Z",
+                   "url": "https://github.com/o/r/issues/9#issuecomment-90"}]
+
+
+def fake_github(monkeypatch, recs, story_comments=STORY_COMMENTS):
     """Fake GitHub: story 9 is split from issue 5, which the owner commented on."""
     parent_comments = [
         {"author": {"login": OWNER}, "body": OWNER_ON_PARENT, "createdAt": "2026-10-01T10:00:00Z",
@@ -56,9 +60,7 @@ def fake_github(monkeypatch, recs):
         if args[:2] == ("issue", "view") and str(args[2]) == str(PARENT):
             return json.dumps({"number": PARENT, "title": "Parent", "body": PARENT_ASK, "comments": parent_comments})
         if args[:2] == ("issue", "view"):
-            return json.dumps({"number": N, "title": "Story", "body": STORY_BODY, "comments": [
-                {"author": {"login": OWNER}, "body": "/work", "createdAt": "2026-10-07T09:00:00Z",
-                 "url": "https://github.com/o/r/issues/9#issuecomment-90"}]})
+            return json.dumps({"number": N, "title": "Story", "body": STORY_BODY, "comments": story_comments})
         if args[:2] in (("pr", "list"), ("issue", "list")):
             return "[]"
         if args[:2] == ("run", "download"):
@@ -227,3 +229,4 @@ def test_text_the_owner_committed_on_the_branch_counts_as_their_words(record_pro
     with pytest.raises(planner.Garbled):
         planner.read_output(str(out), 7)
         pytest.fail("708.5: a line a stranger committed was accepted as the owner's words")
+

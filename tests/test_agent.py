@@ -173,7 +173,9 @@ def test_a_pack_missing_anything_its_role_needs_is_refused(record_property, tmp_
 
 
 def test_the_pack_reads_the_issue_and_its_pr_as_one_conversation(record_property, tmp_path, monkeypatch):
-    """Comments from the issue, its PR, PR reviews and line notes on the code arrive in time order, each labeled with where it was written; records come from both."""
+    """Comments from the issue, its PR, PR reviews and line notes on the code arrive in time order, each labeled with where it was written; records come from both.
+
+    Then builds the planner's pack from the same conversation and finds the owner's /plan comment in it, word for word."""
     record_property("proves", "agent.12")
     plan = rec("planner", handback={"kind": "user_story", "user_story": "s"})
     def fake_gh(*args):
@@ -200,10 +202,15 @@ def test_the_pack_reads_the_issue_and_its_pr_as_one_conversation(record_property
     assert "on PR #9 review (commented)" in text and "on issue #7" in text and "on PR #9 line note on x.py:3" in text
     assert json.load(open(tmp_path / "p" / "plan.json")) == {"kind": "user_story", "user_story": "s"}
     assert (tmp_path / "p" / "in" / "01-planner.json").exists()
+    agent.pack("o/r", 7, "planner", "", str(tmp_path / "planner"))
+    assert "/plan first" in (tmp_path / "planner" / "issue.md").read_text(), \
+        "the owner's /plan comment did not reach the planner's pack word for word"
 
 
 def test_a_command_starts_its_stage_and_anything_else_starts_nothing(record_property):
-    """/plan, /work and /review on the first line route to their stage with the right issue; prose, a later-line command or an unlinked PR start nothing."""
+    """/plan, /work and /review on the first line route to their stage with the right issue; prose, a later-line command or an unlinked PR start nothing.
+
+    /review on a pull request starts its code review; /review below a line of prose on a pull request starts nothing."""
     record_property("proves", "agent.13")
     assert agent.route("/plan tighten story 2\nmore words", False, 139) == {"role": "planner", "stage": "", "issue": "139"}
     assert agent.route("/review", False, 139) == {"role": "reviewer", "stage": "plan", "issue": "139"}
@@ -211,6 +218,8 @@ def test_a_command_starts_its_stage_and_anything_else_starts_nothing(record_prop
     assert agent.route("/WORK fix the line notes", True, 150, "feature-x", "Closes #42") == {"role": "worker", "stage": "", "issue": "42"}
     assert agent.route("looks good to me", False, 139) is None
     assert agent.route("thoughts first\n/plan later", False, 139) is None, "a command not on the first line started a stage"
+    assert agent.route("thoughts first\n/review", True, 150, "try/issue-139") is None, \
+        "/review on a later line of a pull request comment started a stage"
     assert agent.route("/planner", False, 139) is None
     assert agent.route("/work", True, 150, "feature-x", "no link here") is None, "a PR with no issue started a stage"
     assert agent.route("", False, 139) is None
