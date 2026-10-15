@@ -1,0 +1,652 @@
+{
+ "role": "planner",
+ "stage": null,
+ "run_id": "38673549737",
+ "commit_before": "cfb11e4519569d5ea3fdade9e1ce41dad37b38bd",
+ "started_by": "dokima-runtime[bot]",
+ "models": [
+  "claude-opus-5-5"
+ ],
+ "report": {
+  "duration_ms": 16480,
+  "turns": 4,
+  "cost_usd": 0.1703976,
+  "tokens_in": 142791,
+  "tokens_out": 1648
+ },
+ "log": "https://github.com/dokima-dev/dokima/blob/logs/logs/559/38673549737-planner.md",
+ "run": "https://github.com/dokima-dev/dokima/actions/runs/38673549737",
+ "handback": {
+  "kind": "feature",
+  "title": "Tests are the spec, and every text has two halves",
+  "summary": "The owner's tests lead the plan, stay locked, and every text the owner reads comes short with full detail folded.",
+  "feature": "Stories: (1) tests locked. (2) every role reads the ask. (3, 4) short and full texts. (5, 6, 7, 8) prompts. (9, 10) owner's commits.",
+  "stories": [
+   {
+    "title": "The plan check locks my tests and checks test docstrings",
+    "user_story": "Tests the owner writes stay exactly as written, and every new test explains itself in one shape.",
+    "context": "Owner's tests are tests added by commits on the branch whose author is not the bot (agent commits are authored by dokima-runtime[bot] and only co-credit the owner). The check lives in dokima/planner.py (problems, unsummarized, unnumbered, docstring_caps); agent_checks.worker_docstring_caps reuses planner.docstring_caps. The worker's fence already restores every test file. The Edge line is optional and capped when present. Newer words here win over open issue 546, which asked for fixed rigor kinds.",
+    "acceptance_criteria": [
+     {
+      "text": "A plan that changes a test the owner committed is rejected, naming that test.",
+      "words": "My tests are locked: agents may propose more but never change or drop mine.",
+      "source": "https://github.com/dokima-dev/dokima/issues/559",
+      "files": [
+       "dokima/planner.py"
+      ],
+      "edge_cases": [
+       {
+        "case": "A branch with no commits by the owner locks nothing.",
+        "test": "tests/test_owner_tests.py::test_no_owner_commits_locks_nothing"
+       }
+      ]
+     },
+     {
+      "text": "A plan that deletes a test the owner committed is rejected, naming that test.",
+      "words": "my tests cannot be changed by an agent",
+      "source": "https://github.com/dokima-dev/dokima/issues/559",
+      "files": [
+       "dokima/planner.py"
+      ],
+      "no_edge_cases": "Deleting is one case; the empty branch case is covered under changing a test."
+     },
+     {
+      "text": "A plan that files no criterion for a test the owner committed is rejected, naming that test.",
+      "words": "A plan built on my tests keeps every one unchanged and maps each to a criterion.",
+      "source": "https://github.com/dokima-dev/dokima/issues/559",
+      "files": [
+       "dokima/planner.py"
+      ],
+      "edge_cases": [
+       {
+        "case": "The owner committed no tests, so nothing needs filing.",
+        "test": "tests/test_owner_tests.py::test_no_owner_tests_nothing_to_file"
+       }
+      ]
+     },
+     {
+      "text": "A new or changed test with no User line in its docstring is rejected, naming the test.",
+      "words": "enforce this as a schema in test files",
+      "source": "https://github.com/dokima-dev/dokima/issues/559#issuecomment-6131843348",
+      "files": [
+       "dokima/planner.py"
+      ],
+      "edge_cases": [
+       {
+        "case": "A test with no docstring at all is rejected the same way.",
+        "test": "tests/test_test_docstrings.py::test_no_docstring_rejected"
+       }
+      ]
+     },
+     {
+      "text": "A new or changed test with no Verified by line is rejected, naming the test.",
+      "words": "rigor line let's name it verified by line:",
+      "source": "https://github.com/dokima-dev/dokima/issues/559#issuecomment-6131843348",
+      "files": [
+       "dokima/planner.py"
+      ],
+      "no_edge_cases": "Missing is the one case; an empty line counts as missing."
+     },
+     {
+      "text": "A new or changed test with no Agent paragraph is rejected, naming the test.",
+      "words": "test docstrings user facing and agent facing",
+      "source": "https://github.com/dokima-dev/dokima/issues/559#issuecomment-6131843348",
+      "files": [
+       "dokima/planner.py"
+      ],
+      "no_edge_cases": "Missing is the one case."
+     },
+     {
+      "text": "An Agent paragraph of any length that names code passes the check.",
+      "words": "Agent holds the full detail, uncapped and folded on cards.",
+      "source": "https://github.com/dokima-dev/dokima/issues/559#issuecomment-6131843348",
+      "files": [
+       "dokima/planner.py"
+      ],
+      "no_edge_cases": "Passing is the case itself; its rejection twin is the missing paragraph."
+     },
+     {
+      "text": "A User line over its word cap is rejected, naming the test and its word count.",
+      "words": "User, Verified by and Edge are short and capped",
+      "source": "https://github.com/dokima-dev/dokima/issues/559#issuecomment-6131843348",
+      "files": [
+       "dokima/planner.py"
+      ],
+      "edge_cases": [
+       {
+        "case": "A line exactly at the cap passes.",
+        "test": "tests/test_test_docstrings.py::test_user_line_at_cap_passes"
+       }
+      ]
+     },
+     {
+      "text": "A Verified by line over its word cap is rejected, naming the test and its word count.",
+      "words": "User, Verified by and Edge are short and capped",
+      "source": "https://github.com/dokima-dev/dokima/issues/559#issuecomment-6131843348",
+      "files": [
+       "dokima/planner.py"
+      ],
+      "edge_cases": [
+       {
+        "case": "A line exactly at the cap passes.",
+        "test": "tests/test_test_docstrings.py::test_verified_line_at_cap_passes"
+       }
+      ]
+     },
+     {
+      "text": "An Edge line over its word cap is rejected, naming the test and its word count.",
+      "words": "User, Verified by and Edge are short and capped",
+      "source": "https://github.com/dokima-dev/dokima/issues/559#issuecomment-6131843348",
+      "files": [
+       "dokima/planner.py"
+      ],
+      "edge_cases": [
+       {
+        "case": "A test with no Edge line passes.",
+        "test": "tests/test_test_docstrings.py::test_no_edge_line_passes"
+       }
+      ]
+     },
+     {
+      "text": "A new test file whose opening docstring has no user line is rejected.",
+      "words": "Each test file opens with the same pair: one user line, then agent detail.",
+      "source": "https://github.com/dokima-dev/dokima/issues/559#issuecomment-6131843348",
+      "files": [
+       "dokima/planner.py"
+      ],
+      "edge_cases": [
+       {
+        "case": "A new file with no opening docstring is rejected the same way.",
+        "test": "tests/test_test_docstrings.py::test_file_without_docstring_rejected"
+       }
+      ]
+     },
+     {
+      "text": "A new test file whose opening docstring has no agent detail after its user line is rejected.",
+      "words": "Each test file opens with the same pair: one user line, then agent detail.",
+      "source": "https://github.com/dokima-dev/dokima/issues/559#issuecomment-6131843348",
+      "files": [
+       "dokima/planner.py"
+      ],
+      "no_edge_cases": "Missing is the one case; the no-docstring case is covered under the user line."
+     },
+     {
+      "text": "An older test left unchanged passes the check without the new docstring shape.",
+      "words": "checked by code on new and changed tests only",
+      "source": "https://github.com/dokima-dev/dokima/issues/559#issuecomment-6131843348",
+      "files": [
+       "dokima/planner.py"
+      ],
+      "no_edge_cases": "Unchanged older tests are the case itself."
+     }
+    ],
+    "non_functional": [
+     {
+      "text": "Any plain sentence passes as a Verified by line; no list of test kinds is required.",
+      "why": "It must work in any repo, not only this one.",
+      "words": "please don't use categories finetuned for our repo only that will not fly. think longterm.",
+      "source": "https://github.com/dokima-dev/dokima/issues/559#issuecomment-6131843348",
+      "files": [
+       "dokima/planner.py"
+      ],
+      "no_edge_cases": "It is a rule on every line; the passing case is the test."
+     }
+    ],
+    "depends_on": []
+   },
+   {
+    "title": "Every role reads the parent's ask and the owner's commands",
+    "user_story": "Every role on a story sees the parent's ask, and the owner's comments and commits steer the work.",
+    "context": "Today only the planner gets owner_words.json, with the parent's ask and owner comments (dokima/agent_roles.py, pack and owner_words). parent.json already reaches every role. route() in dokima/agent_roles.py already sends /review on a pull request to the code review and /plan to the planner; issue.md in every pack holds the owner's comments. The owner answered that plans live off the branch and are edited by comment.",
+    "acceptance_criteria": [
+     {
+      "text": "A worker on a split story finds the parent's original issue in its starting pack.",
+      "words": "A worker on a split story reads the parent's original issue and my comments.",
+      "source": "https://github.com/dokima-dev/dokima/issues/559",
+      "files": [
+       "dokima/agent_roles.py"
+      ],
+      "edge_cases": [
+       {
+        "case": "An issue with no parent gets no parent text and still starts.",
+        "test": "tests/test_parent_detail.py::test_no_parent_still_starts"
+       }
+      ]
+     },
+     {
+      "text": "A worker on a split story finds the owner's comments on the parent in its starting pack.",
+      "words": "A worker on a split story reads the parent's original issue and my comments.",
+      "source": "https://github.com/dokima-dev/dokima/issues/559",
+      "files": [
+       "dokima/agent_roles.py"
+      ],
+      "edge_cases": [
+       {
+        "case": "A parent with no owner comments gives an empty list.",
+        "test": "tests/test_parent_detail.py::test_parent_without_comments"
+       }
+      ]
+     },
+     {
+      "text": "A reviewer on a split story finds the parent's original issue in its starting pack.",
+      "words": "Every role working on a split story gets the parent's original issue and my comments",
+      "source": "https://github.com/dokima-dev/dokima/issues/559",
+      "files": [
+       "dokima/agent_roles.py"
+      ],
+      "no_edge_cases": "The no-parent case is covered under the worker."
+     },
+     {
+      "text": "A reviewer on a split story finds the owner's comments on the parent in its starting pack.",
+      "words": "Every role working on a split story gets the parent's original issue and my comments",
+      "source": "https://github.com/dokima-dev/dokima/issues/559",
+      "files": [
+       "dokima/agent_roles.py"
+      ],
+      "no_edge_cases": "The no-comments case is covered under the worker."
+     },
+     {
+      "text": "Text the owner committed on the branch counts as the owner's words a criterion may quote.",
+      "words": "Anything I write counts as my words",
+      "source": "https://github.com/dokima-dev/dokima/issues/559",
+      "files": [
+       "dokima/agent_roles.py"
+      ],
+      "edge_cases": [
+       {
+        "case": "Text the bot committed does not count.",
+        "test": "tests/test_parent_detail.py::test_bot_commits_not_owner_words"
+       }
+      ]
+     },
+     {
+      "text": "The owner's comment that says /review on a pull request starts its code review.",
+      "words": "I can add, change or delete tests, plan and code on Dokima's branches, then say /review.",
+      "source": "https://github.com/dokima-dev/dokima/issues/559",
+      "files": [
+       "dokima/agent_roles.py"
+      ],
+      "edge_cases": [
+       {
+        "case": "The same comment from someone who is not a code owner starts nothing.",
+        "test": "tests/test_owner_edits.py::test_review_from_stranger_starts_nothing"
+       }
+      ]
+     },
+     {
+      "text": "The owner's /plan comment reaches the next planner in its starting pack, word for word.",
+      "words": "Yes, plans live off the branch; I edit them by comment.",
+      "source": "https://github.com/dokima-dev/dokima/issues/559#issuecomment-6183274943",
+      "files": [
+       "dokima/agent_roles.py"
+      ],
+      "edge_cases": [
+       {
+        "case": "A /plan comment with no words still starts the planner.",
+        "test": "tests/test_owner_edits.py::test_bare_plan_still_starts"
+       }
+      ]
+     }
+    ],
+    "non_functional": [],
+    "depends_on": []
+   },
+   {
+    "title": "Every raise and story has a short and full half",
+    "user_story": "Every raise and split story carries a short plain text for the owner and a full one for agents.",
+    "context": "Raises are checked in dokima/raises.py and capped in dokima/words.py, which also walks split stories. Context is the split story's research note.",
+    "acceptance_criteria": [
+     {
+      "text": "A raise with no short half is rejected, naming the raise.",
+      "words": "raises, stories, Context and questions live in the record as pairs.",
+      "source": "https://github.com/dokima-dev/dokima/issues/559",
+      "files": [
+       "dokima/raises.py",
+       "dokima/words.py"
+      ],
+      "no_edge_cases": "Missing is the one case; an empty half counts as missing."
+     },
+     {
+      "text": "A raise with no full half is rejected, naming the raise.",
+      "words": "raises, stories, Context and questions live in the record as pairs.",
+      "source": "https://github.com/dokima-dev/dokima/issues/559",
+      "files": [
+       "dokima/raises.py",
+       "dokima/words.py"
+      ],
+      "edge_cases": [
+       {
+        "case": "A raise with an empty full half is rejected the same way.",
+        "test": "tests/test_text_pairs.py::test_empty_full_half_rejected"
+       }
+      ]
+     },
+     {
+      "text": "A split story with no short half is rejected, naming the story.",
+      "words": "raises, stories, Context and questions live in the record as pairs.",
+      "source": "https://github.com/dokima-dev/dokima/issues/559",
+      "files": [
+       "dokima/words.py"
+      ],
+      "no_edge_cases": "Missing is the one case; an empty half counts as missing."
+     },
+     {
+      "text": "A split story with no full half is rejected, naming the story.",
+      "words": "raises, stories, Context and questions live in the record as pairs.",
+      "source": "https://github.com/dokima-dev/dokima/issues/559",
+      "files": [
+       "dokima/words.py"
+      ],
+      "no_edge_cases": "Missing is the one case; an empty half counts as missing."
+     },
+     {
+      "text": "A split story's context with no short half is rejected, naming the story.",
+      "words": "raises, stories, Context and questions live in the record as pairs.",
+      "source": "https://github.com/dokima-dev/dokima/issues/559",
+      "files": [
+       "dokima/words.py"
+      ],
+      "no_edge_cases": "Missing is the one case; an empty half counts as missing."
+     },
+     {
+      "text": "A split story's context with no full half is rejected, naming the story.",
+      "words": "raises, stories, Context and questions live in the record as pairs.",
+      "source": "https://github.com/dokima-dev/dokima/issues/559",
+      "files": [
+       "dokima/words.py"
+      ],
+      "no_edge_cases": "Missing is the one case; an empty half counts as missing."
+     },
+     {
+      "text": "A short half that names code is rejected, naming the text.",
+      "words": "A short text for me (capped, plain, no code)",
+      "source": "https://github.com/dokima-dev/dokima/issues/559",
+      "files": [
+       "dokima/words.py"
+      ],
+      "no_edge_cases": "One rule; the cap check already exists for each field."
+     },
+     {
+      "text": "A full half that names code passes the check.",
+      "words": "a full text for agents (uncapped, may name code)",
+      "source": "https://github.com/dokima-dev/dokima/issues/559",
+      "files": [
+       "dokima/words.py"
+      ],
+      "no_edge_cases": "Passing is the case itself; its twin is the short half naming code."
+     },
+     {
+      "text": "A full half longer than every word cap passes the check.",
+      "words": "a full text for agents (uncapped, may name code)",
+      "source": "https://github.com/dokima-dev/dokima/issues/559",
+      "files": [
+       "dokima/words.py"
+      ],
+      "no_edge_cases": "Passing is the case itself; its twin is the short half over its cap."
+     }
+    ],
+    "non_functional": [],
+    "depends_on": []
+   },
+   {
+    "title": "Cards show short texts and fold the full ones",
+    "user_story": "The owner reads short plain texts on cards, with the full detail one click away.",
+    "context": "The card reads a test's docstring first line (dokima/card.py, near line 681). Run comments are drawn in dokima/agent_records.py with the card's folds. A criterion's text lives in its test's User line, so the record points to the test.",
+    "acceptance_criteria": [
+     {
+      "text": "The issue card shows each raise's short half.",
+      "words": "Cards show short texts and fold full ones.",
+      "source": "https://github.com/dokima-dev/dokima/issues/559",
+      "files": [
+       "dokima/card.py"
+      ],
+      "edge_cases": [
+       {
+        "case": "An older raise with one text shows as before.",
+        "test": "tests/test_card_pairs.py::test_older_raise_shows_as_before"
+       }
+      ]
+     },
+     {
+      "text": "The issue card folds each raise's full half under its short half.",
+      "words": "Cards show short texts and fold full ones.",
+      "source": "https://github.com/dokima-dev/dokima/issues/559",
+      "files": [
+       "dokima/card.py"
+      ],
+      "no_edge_cases": "The older raise with one text is covered under the short half."
+     },
+     {
+      "text": "A run comment shows each raise's short half.",
+      "words": "those json models should print out user facing and agent facing information",
+      "source": "https://github.com/dokima-dev/dokima/issues/559",
+      "files": [
+       "dokima/agent_records.py",
+       "dokima/card.py"
+      ],
+      "no_edge_cases": "The older raise case is covered under the issue card."
+     },
+     {
+      "text": "A run comment folds each raise's full half under its short half.",
+      "words": "those json models should print out user facing and agent facing information",
+      "source": "https://github.com/dokima-dev/dokima/issues/559",
+      "files": [
+       "dokima/agent_records.py",
+       "dokima/card.py"
+      ],
+      "no_edge_cases": "The older raise case is covered under the issue card."
+     },
+     {
+      "text": "The card draws a criterion's text from its test's User line.",
+      "words": "acceptance criteria docstring: user facing and agent facing",
+      "source": "https://github.com/dokima-dev/dokima/issues/559#issuecomment-6131843348",
+      "files": [
+       "dokima/card.py"
+      ],
+      "edge_cases": [
+       {
+        "case": "A test with no User line falls back to the plan's text.",
+        "test": "tests/test_card_pairs.py::test_no_user_line_falls_back"
+       }
+      ]
+     },
+     {
+      "text": "The card shows each test's Verified by line under its criterion.",
+      "words": "user facing for tests of course the methodology of testing so you know the rigor of test right of the bat.",
+      "source": "https://github.com/dokima-dev/dokima/issues/559#issuecomment-6131843348",
+      "files": [
+       "dokima/card.py"
+      ],
+      "edge_cases": [
+       {
+        "case": "An older test with no Verified by line shows its first line.",
+        "test": "tests/test_card_pairs.py::test_older_test_shows_first_line"
+       }
+      ]
+     },
+     {
+      "text": "The card folds each test's Agent paragraph under its Verified by line.",
+      "words": "Agent holds the full detail, uncapped and folded on cards.",
+      "source": "https://github.com/dokima-dev/dokima/issues/559#issuecomment-6131843348",
+      "files": [
+       "dokima/card.py"
+      ],
+      "no_edge_cases": "A test with no Agent paragraph shows no fold; that is the plain case."
+     }
+    ],
+    "non_functional": [],
+    "depends_on": [
+     0,
+     2
+    ]
+   },
+   {
+    "title": "Plan review compares each short text with its full text",
+    "user_story": "The owner can trust a short text says what its full text says.",
+    "context": "Prompt only: dokima/roles/plan-grade.md and dokima/roles/reviewer.md.",
+    "acceptance_criteria": [
+     {
+      "text": "The plan reviewer's grade has it check each short text against its full text.",
+      "words": "The plan reviewer checks each short text matches its full text",
+      "source": "https://github.com/dokima-dev/dokima/issues/559",
+      "files": [
+       "dokima/roles/plan-grade.md",
+       "dokima/roles/reviewer.md"
+      ],
+      "no_edge_cases": "A prompt line; it holds no cases."
+     }
+    ],
+    "non_functional": [],
+    "depends_on": [
+     2
+    ]
+   },
+   {
+    "title": "Plan review compares each docstring with what its test does",
+    "user_story": "The owner can trust a test's docstring says what the test really does.",
+    "context": "Prompt only: dokima/roles/plan-grade.md and dokima/roles/reviewer.md.",
+    "acceptance_criteria": [
+     {
+      "text": "The plan reviewer's grade has it check each test's docstring against what the test does.",
+      "words": "each docstring matches what its test does",
+      "source": "https://github.com/dokima-dev/dokima/issues/559",
+      "files": [
+       "dokima/roles/plan-grade.md",
+       "dokima/roles/reviewer.md"
+      ],
+      "no_edge_cases": "A prompt line; it holds no cases."
+     }
+    ],
+    "non_functional": [],
+    "depends_on": [
+     0
+    ]
+   },
+   {
+    "title": "The planner's prompt explains the Verified by line",
+    "user_story": "The planner writes each Verified by line so any two tests' rigor compares at a glance.",
+    "context": "Prompt only: dokima/roles/planner.md. The owner's comment asks both prompts to say Verified by explains what the test runs, against what, and what it checks, in plain words.",
+    "acceptance_criteria": [
+     {
+      "text": "The planner's prompt says Verified by tells what the test runs, against what, and what it checks.",
+      "words": "The planner and worker prompts say: Verified by explains how the test proves the behavior (what it runs, against what, and what it checks), in plain words",
+      "source": "https://github.com/dokima-dev/dokima/issues/559#issuecomment-6132026430",
+      "files": [
+       "dokima/roles/planner.md"
+      ],
+      "no_edge_cases": "A prompt line; it holds no cases."
+     }
+    ],
+    "non_functional": [],
+    "depends_on": [
+     0
+    ]
+   },
+   {
+    "title": "The worker's prompt explains the Verified by line",
+    "user_story": "The worker writes each Verified by line so any two tests' rigor compares at a glance.",
+    "context": "Prompt only: dokima/roles/worker.md. The owner's comment asks both prompts to say Verified by explains what the test runs, against what, and what it checks, in plain words.",
+    "acceptance_criteria": [
+     {
+      "text": "The worker's prompt says Verified by tells what the test runs, against what, and what it checks.",
+      "words": "The planner and worker prompts say: Verified by explains how the test proves the behavior (what it runs, against what, and what it checks), in plain words",
+      "source": "https://github.com/dokima-dev/dokima/issues/559#issuecomment-6132026430",
+      "files": [
+       "dokima/roles/worker.md"
+      ],
+      "no_edge_cases": "A prompt line; it holds no cases."
+     }
+    ],
+    "non_functional": [],
+    "depends_on": [
+     0
+    ]
+   },
+   {
+    "title": "A re-plan and code review keep the owner's commits",
+    "user_story": "Commits the owner pushes to a Dokima branch stay through a re-plan and reach the code review.",
+    "context": "Already true today; pin it with tests that run the real steps of .github/workflows/agent.yml, as tests/test_planner_starts_with_main.py does. Starting branch fetches try/issue-N when it exists; the pr stage writes git diff origin/main...HEAD to diff.patch. The owner closed #184, which would have deleted the branch. No workflow change is expected.",
+    "acceptance_criteria": [
+     {
+      "text": "A re-plan starts on the branch with the owner's commits still in it.",
+      "words": "a re-plan keeps my commits",
+      "source": "https://github.com/dokima-dev/dokima/issues/559",
+      "files": [
+       ".github/workflows/agent.yml"
+      ],
+      "edge_cases": [
+       {
+        "case": "An issue with no branch yet starts from main.",
+        "test": "tests/test_owner_commits.py::test_no_branch_starts_from_main"
+       }
+      ]
+     },
+     {
+      "text": "The code review's diff holds the owner's commits on the branch.",
+      "words": "My work goes through the same reviews and checks as agent work.",
+      "source": "https://github.com/dokima-dev/dokima/issues/559",
+      "files": [
+       ".github/workflows/agent.yml"
+      ],
+      "no_edge_cases": "The owner's commits are the case; a branch without them is today's agent work."
+     }
+    ],
+    "non_functional": [],
+    "depends_on": []
+   },
+   {
+    "title": "All tests run on the owner's commits",
+    "user_story": "The owner's pushes to a Dokima pull request get the same all tests check as agent work.",
+    "context": "Already true today: .github/workflows/full-suite.yml runs on pull_request_target synchronize, whoever pushed. Pin it with a test that reads the workflow's triggers and its author filter (there must be none).",
+    "acceptance_criteria": [
+     {
+      "text": "A push by the owner to a Dokima pull request runs all tests, with no rule skipping the owner.",
+      "words": "My work goes through the same reviews and checks as agent work.",
+      "source": "https://github.com/dokima-dev/dokima/issues/559",
+      "files": [
+       ".github/workflows/full-suite.yml"
+      ],
+      "edge_cases": [
+       {
+        "case": "A draft pull request runs none, for the owner and agents alike.",
+        "test": "tests/test_owner_commits.py::test_draft_skips_for_everyone"
+       }
+      ]
+     }
+    ],
+    "non_functional": [],
+    "depends_on": []
+   }
+  ],
+  "links": {
+   "blocked_by": [],
+   "blocks": [],
+   "relates_to": [
+    470,
+    517,
+    546,
+    335,
+    560,
+    612,
+    435
+   ]
+  },
+  "answers": [
+   {
+    "raise": "R4",
+    "answer": "done",
+    "why": "Story 1 now has two criteria: no user line, and no agent detail."
+   },
+   {
+    "raise": "R5",
+    "answer": "done",
+    "why": "Story 4 now shows the short half and folds the full half as separate criteria."
+   }
+  ]
+ },
+ "check": {
+  "passed": true,
+  "problems": []
+ },
+ "url": "https://github.com/dokima-dev/dokima/issues/559#issuecomment-6183337011"
+}
