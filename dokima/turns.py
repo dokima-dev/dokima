@@ -1,14 +1,16 @@
 """Build turns: stories of one parent sharing a code file take turns to build (#668).
 
-A story holds the turn once its build has started (a worker ran on it, or its pull request is open), until its pull
-request merges. Another open story of the same parent whose plan shares a code file with it waits; planning and plan
-review never do, and markdown files never count. Each story's files are its own newest plan's, so a story whose planner
+A story holds the turn once its build has started (a worker started or ran on it, or its pull request is open), until
+its pull request merges. Another open story of the same parent whose plan shares a code file with it waits; planning and
+plan review never do, and markdown files never count. Each story's files are its own newest plan's, so a story whose planner
 added files beyond its assigned ones is checked on its final list.
 """
 import json
+import re
 
 from dokima import agent_github
-from dokima.agent_records import records, latest
+from dokima.agent_github import BOT
+from dokima.agent_records import LIVE, MARK, records, latest
 from dokima.planner import code_files
 
 
@@ -19,17 +21,29 @@ def plan_code_files(recs):
     return set().union(*(code_files(c) for c in h.get("acceptance_criteria", []) + h.get("non_functional", [])))
 
 
-def building(repo, number, recs):
+def worker_running(items):
+    """True when a worker started after the issue's last record and has not ended.
+
+    The bot's line starting it on autopilot, or the run's live Worker card, which becomes its record when it ends."""
+    from dokima.agent_autopilot import AUTOPILOT_LINES
+    bot = [c for c in items if (c.get("author") or {}).get("login") in (BOT, f"{BOT}[bot]")]
+    last = max((i for i, c in enumerate(bot) if MARK in (c.get("body") or "")), default=-1)
+    return any(body == AUTOPILOT_LINES["worker"] or re.match(re.escape(LIVE) + r"[^*]*\*\*Worker\*\*", body)
+               for body in ((c.get("body") or "").strip() for c in bot[last + 1:]))
+
+
+def building(repo, number, recs, items):
     """True when the issue's build has started and its pull request has not merged."""
     prs = json.loads(agent_github.gh("pr", "list", "-R", repo, "--head", f"try/issue-{number}", "--state", "all",
                                      "--json", "state"))
     if any(p.get("state") == "MERGED" for p in prs):
         return False
-    return any(p.get("state") == "OPEN" for p in prs) or latest(recs, "worker", passed=False) is not None
+    return any(p.get("state") == "OPEN" for p in prs) or latest(recs, "worker", passed=False) is not None \
+        or worker_running(items)
 
 
 def siblings(repo, number):
-    """The other open stories of the issue's parent, with their records.
+    """The other open stories of the issue's parent, with their records and comments.
 
     None when it has no parent.
 
@@ -41,7 +55,8 @@ def siblings(repo, number):
     for s in agent_github.sub_issues(repo, up):
         if s["number"] == int(number) or s.get("state") == "closed":
             continue
-        out.append((s["number"], records(agent_github.conversation(repo, s["number"])[1])))
+        items = agent_github.conversation(repo, s["number"])[1]
+        out.append((s["number"], records(items), items))
     return out
 
 
@@ -54,9 +69,9 @@ def holder(repo, number, recs):
     mine = plan_code_files(recs)
     if not mine:
         return None
-    for n, theirs in siblings(repo, number):
+    for n, theirs, items in siblings(repo, number):
         shared = mine & plan_code_files(theirs)
-        if shared and building(repo, n, theirs):
+        if shared and building(repo, n, theirs, items):
             return n, sorted(shared)
     return None
 
