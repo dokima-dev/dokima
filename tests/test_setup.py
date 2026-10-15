@@ -241,9 +241,9 @@ def test_settings_name_key_secret(tmp_path, record_property):
 
 
 def test_settings_keep_other_subscription(tmp_path, record_property):
-    """Adding a second subscription keeps the first one and its roles in the settings file.
+    """Adding a second subscription keeps the first one in the settings file.
 
-    Adds Kimi by sign-in, then Codex by key, and checks both subscriptions and both roles' lines are there.
+    Adds Kimi by sign-in, then Codex by key, and checks both subscriptions are there with their agents and secrets.
     Proves 697.3."""
     record_property("proves", "697.3")
     box = Box(tmp_path)
@@ -252,13 +252,11 @@ def test_settings_keep_other_subscription(tmp_path, record_property):
     p = add_with_key(box)
     assert p.returncode == 0, f"697.3: adding a second subscription failed.\n{said(p)}"
     s = box.settings() or {}
-    subs, roles = s.get("subscriptions") or {}, s.get("roles") or {}
+    subs = s.get("subscriptions") or {}
     assert subs.get("kimi-max") == {"agent": "kimi", "key": "KIMI_SIGN_IN"}, \
         f"697.3: adding Codex dropped or changed the Kimi subscription: {subs!r}"
     assert subs.get("codex-pro") == {"agent": "codex", "key": "CODEX_KEY"}, \
         f"697.3: the Codex subscription is missing or wrong: {subs!r}"
-    assert roles.get("planner") == {"subscription": "kimi-max", "model": "kimi-for-coding"}, \
-        f"697.3: adding Codex dropped or changed the planner's lines: {roles!r}"
 
 
 def test_sign_in_uses_region(tmp_path, record_property):
@@ -326,3 +324,19 @@ def test_settings_give_roles(tmp_path, record_property):
     for role in ("worker", "reviewer"):
         assert roles.get(role) == {"subscription": "codex-pro", "model": "gpt-5-codex"}, \
             f"697.6: the settings file gives the {role} {roles.get(role)!r}, not codex-pro with gpt-5-codex."
+
+
+def test_settings_keep_other_roles(tmp_path, record_property):
+    """Adding a second subscription keeps the roles given to the first one.
+
+    Adds Kimi for the planner by sign-in, then Codex for the worker and the reviewer by key, and checks the planner
+    still names kimi-max with model kimi-for-coding. Proves 697.6."""
+    record_property("proves", "697.6")
+    box = Box(tmp_path)
+    first = add_with_sign_in(box)
+    assert first.returncode == 0, f"697.6: adding the first subscription failed.\n{said(first)}"
+    p = add_with_key(box)
+    assert p.returncode == 0, f"697.6: adding a second subscription failed.\n{said(p)}"
+    roles = (box.settings() or {}).get("roles") or {}
+    assert roles.get("planner") == {"subscription": "kimi-max", "model": "kimi-for-coding"}, \
+        f"697.6: adding Codex dropped or changed the planner's role: {roles!r}"
