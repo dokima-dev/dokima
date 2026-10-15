@@ -1,0 +1,58 @@
+{
+ "role": "reviewer",
+ "stage": "pr",
+ "run_id": "38663754465",
+ "commit_before": "84d132d64b094ef72c110682ca817212c875b6fc",
+ "started_by": "dokima-runtime[bot]",
+ "models": [
+  "claude-opus-5-5"
+ ],
+ "report": {
+  "duration_ms": 405597,
+  "turns": 19,
+  "cost_usd": 0.7807073999999999,
+  "tokens_in": 1005283,
+  "tokens_out": 7647
+ },
+ "log": "https://github.com/dokima-dev/dokima/blob/logs/logs/668/38663754465-reviewer-pr.md",
+ "run": "https://github.com/dokima-dev/dokima/actions/runs/38663754465",
+ "handback": {
+  "previous_step": {
+   "did": [
+    "The worker made a story's build wait while a sibling sharing a code file builds.",
+    "The worker made a waiting story plan again once that sibling merges."
+   ],
+   "decided": [
+    "A story holds the turn once a worker ran or its pull request opened.",
+    "Asking for work on a waiting story builds nothing and names the other story."
+   ],
+   "open": [
+    "Nothing was left open."
+   ]
+  },
+  "verdict": "block",
+  "summary": "Two stories can still build a shared file at once while the first story's worker is running.",
+  "raises": [
+   {
+    "kind": "blocker",
+    "to": "planner",
+    "label": "668.1 test too weak",
+    "text": "A story counts as building only once its worker finishes. While its worker runs, a sibling sharing its file starts building too. Add that case to the 668.1 test.",
+    "evidence": "`dokima/turns.py` `building()` sees only a record or open pull request; `agent.yml` writes both after the agent.",
+    "raised_by": "reviewer",
+    "id": "R1"
+   }
+  ],
+  "answers": [],
+  "asks": [],
+  "behaviors": [],
+  "edge_cases": [],
+  "tests": [],
+  "size": "ok"
+ },
+ "check": {
+  "passed": true,
+  "problems": []
+ },
+ "url": "https://github.com/dokima-dev/dokima/pull/701#issuecomment-6181996806"
+}
