@@ -34,12 +34,14 @@ def jobs(id_doc=ID_DOC, unique_doc=UNIQUE_DOC, id_rest="Proves 9.1.", unique_res
          helper_doc=None, module_doc=None):
     """The planner's tests/test_jobs.py: test_id and test_unique (as STORY files them), both failing today.
 
-    Each docstring is its first line, a blank line, then its paragraph (none when the paragraph is empty). A helper
-    function, make_job, and a module docstring are added only when their docstrings are given.
+    Each test docstring takes the shape #707 asks for: "User:" and its first line, a Verified by line, then, after a
+    blank line, its paragraph as the Agent part (none when the paragraph is empty). The module docstring is a User
+    line and an Agent part unless one is given. A helper function, make_job, is added only when its docstring is given.
     """
     def doc(first, rest):
-        return f'    """{first}\n\n    {rest}\n    """\n' if rest else f'    """{first}"""\n'
-    text = f'"""{module_doc}"""\n\n\n' if module_doc else ""
+        shown = f'    """User: {first}\n    Verified by: calling the job code.\n'
+        return shown + (f'\n    Agent: {rest}\n    """\n' if rest else '    """\n')
+    text = f'"""{module_doc or "User: Sample tests for slow calls.\n\nAgent: They fail until the job code exists."}"""\n\n\n'
     if helper_doc:
         text += f'def make_job():\n    """{helper_doc}"""\n    return None\n\n\n'
     text += ("def test_id(record_property):\n" + doc(id_doc, id_rest)
@@ -72,14 +74,15 @@ def with_criteria(ac=None, nfr=None):
 def test_a_docstring_the_planner_adds_is_held_to_15_words_in_its_first_line(record_property, check, capsys):
     """Every docstring the planner adds, helpers included, opens with at most 15 words.
 
-    Proves 239.2. Docstrings of 15 words pass unlisted. A 19-word first line is rejected by name in a new test, a
+    Proves 239.2. Docstrings of 15 words pass unlisted, a "User:" label opening the line not counted. A 19-word first line is rejected by name in a new test, a
     helper and the module docstring; the words of the paragraph below never count. A docstring that opens with a line
     break is measured by its first line of text, so a helper or module docstring written that way is held to 15 too.
     """
     record_property("proves", "239.2")
-    for good in (jobs(id_doc=words(15), id_rest=words(40) + " Proves 9.1.", helper_doc=words(15), module_doc=words(15)),
+    for good in (jobs(id_doc=words(15), id_rest=words(40) + " Proves 9.1.", helper_doc=words(15),
+                      module_doc="User: " + words(15) + "\n\nAgent: " + words(40)),
                  jobs(helper_doc="\n    " + words(15) + "\n    " + words(40) + "\n    ",
-                      module_doc="\n" + words(15) + "\n\n" + words(40) + "\n")):
+                      module_doc="\nUser: " + words(15) + "\n\nAgent: " + words(40) + "\n")):
         rc, why, printed = run(check, capsys, STORY, good, "239.2")
         assert rc == 0 and not why, f"239.2: docstrings of 15 words, with long paragraphs below, were rejected: {why!r}"
         assert "tests/test_jobs.py" not in printed, f"239.2: a docstring within its cap was listed: {printed!r}"

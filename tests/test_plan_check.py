@@ -23,9 +23,13 @@ ISSUE = "https://github.com/o/r/issues/9"
 OLD_TESTS = ('def test_old(record_property):\n    """An older test, already in the repo."""\n'
              '    record_property("proves", "50.1")\n    assert True\n')
 # The planner's new tests fail today, as every new test must (#155): the job code they need does not exist yet.
-NEW_TESTS = ('def test_id(record_property):\n    """A slow call returns a job id.\n\n    Proves 9.1.\n    """\n'
+# They open, as every new test file and test must (#707), with a User line, then a Verified by line, then an Agent part.
+NEW_TESTS = ('"""User: Sample tests for slow calls.\n\nAgent: They fail until the job code exists.\n"""\n\n\n'
+             'def test_id(record_property):\n    """User: A slow call returns a job id.\n    Verified by: calling the job code.\n\n'
+             '    Agent: Proves 9.1.\n    """\n'
              '    record_property("proves", "9.1")\n    assert False, "9.1: no job id yet"\n\n\n'
-             'def test_unique(record_property):\n    """Job ids never repeat.\n\n    Proves 9.2 and 9.3.\n    """\n'
+             'def test_unique(record_property):\n    """User: Job ids never repeat.\n    Verified by: calling the job code.\n\n'
+             '    Agent: Proves 9.2 and 9.3.\n    """\n'
              '    record_property("proves", "9.2")\n    assert False, "9.2: no job ids yet"\n')
 STORY = {"kind": "user_story", "title": "Slow calls hand back a job id", "summary": "Slow calls hand back a job id instead of timing out.", "user_story": "Slow calls return a job id.",
          "acceptance_criteria": [{"text": "A slow call returns a job id within 20 s.", "source": ISSUE, "no_edge_cases": "a sample criterion", "files": ["dokima/jobs.py"]},

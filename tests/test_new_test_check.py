@@ -19,13 +19,17 @@ from dokima import planner  # noqa: E402
 from tests.test_plan_check import ROOT, STORY, check  # noqa: E402,F401
 
 
-def jobs(id_doc='"""A slow call returns a job id.\n\n    Proves 9.1.\n    """', id_body='assert False, "9.1: no job id yet"',
-         unique_doc='"""Job ids never repeat.\n\n    Proves 9.2 and 9.3.\n    """', unique_body='assert False, "9.2: no job ids yet"', top=""):
+# Every new test file and test opens in the shape #707 asks for: a User line, a Verified by line, then an Agent part.
+FILE_DOC = '"""User: Sample tests for slow calls.\n\nAgent: They fail until the job code exists.\n"""\n\n\n'
+
+
+def jobs(id_doc='"""User: A slow call returns a job id.\n    Verified by: calling the job code.\n\n    Agent: Proves 9.1.\n    """', id_body='assert False, "9.1: no job id yet"',
+         unique_doc='"""User: Job ids never repeat.\n    Verified by: calling the job code.\n\n    Agent: Proves 9.2 and 9.3.\n    """', unique_body='assert False, "9.2: no job ids yet"', top=""):
     """The planner's tests/test_jobs.py, with the two tests STORY names; by default both have a summary and fail."""
     def one(name, key, doc, body):
         lines = [f"def {name}(record_property):"] + ([f"    {doc}"] if doc else [])
         return "\n".join(lines + [f'    record_property("proves", "{key}")', f"    {body}"]) + "\n"
-    return top + one("test_id", "9.1", id_doc, id_body) + "\n\n" + one("test_unique", "9.2", unique_doc, unique_body)
+    return FILE_DOC + top + one("test_id", "9.1", id_doc, id_body) + "\n\n" + one("test_unique", "9.2", unique_doc, unique_body)
 
 
 def write_jobs(text):
@@ -39,13 +43,15 @@ def git(*args):
     return subprocess.run(["git", *args], check=True, capture_output=True, text=True).stdout
 
 
-LEGACY = ('def test_legacy(record_property):\n    record_property("proves", "50.2")\n    assert True\n')
+# An older test in the shape #707 asks for, since a changed or renamed test is held to it.
+LEGACY = ('def test_legacy(record_property):\n    """User: An older test.\n    Verified by: asserting a constant.\n\n'
+          '    Agent: Proves 50.2.\n    """\n    record_property("proves", "50.2")\n    assert True\n')
 
 
 @pytest.fixture
 def legacy(check, monkeypatch):
-    """The `check` fixture with one more older test at the start: tests/test_legacy.py::test_legacy, which has no
-    docstring and passes, so only a rename (never a new test) may get past the check with it."""
+    """The `check` fixture with one more older test at the start: tests/test_legacy.py::test_legacy, which passes,
+    so only a rename (never a new test) may get past the check with it."""
     with open("tests/test_legacy.py", "w") as f:
         f.write(LEGACY)
     git("add", "tests/test_legacy.py")
@@ -60,8 +66,9 @@ CHANGED = "tests/test_legacy.py::test_legacy"
 
 
 def change_legacy():
-    """Change the body of the older test_legacy, keeping its name, no docstring, and a pass today: a changed test, not
-    a new one, so neither new-test rule may reject it. Returns the plan with its reason under test_changes."""
+    """Change the body of the older test_legacy, keeping its name, docstring and a pass today.
+
+    A changed test, not a new one, so neither new-test rule may reject it. Returns the plan with its reason under test_changes."""
     with open("tests/test_legacy.py", "w") as f:
         f.write(LEGACY.replace("assert True", "assert 1 == 1"))
     return dict(STORY, test_changes={CHANGED: "asserts a value instead of True"})
@@ -82,21 +89,21 @@ def change_legacy():
 def test_a_new_test_without_a_one_sentence_summary_is_rejected_naming_it(record_property, legacy, doc):
     """A new test with no docstring, or whose first line is not one sentence on one line, is rejected by name.
 
-    Throughout, an older test is changed (same name, new body) and has no docstring: only new tests are held to the
-    rule, so it must never be rejected or named. First checks that new tests whose summaries end in '.', '?' or '!'
+    Throughout, an older test is changed (same name, new body): only new tests are held to the rule, so it must never
+    be rejected or named. First checks that new tests whose summaries end in '.', '?' or '!'
     (one with a dot inside, "1.5 s") pass beside it. Then gives test_unique a bad docstring, runs the check, and checks
     it fails with a reason naming test_unique and neither the good test_id nor the changed older test.
     """
     record_property("proves", "155.1")
     plan = change_legacy()
-    for good in ('"""A slow call returns a job id within 1.5 s.\n\n    Proves 9.1.\n    """',
-                 '"""Does a slow call return a job id?\n\n    Proves 9.1.\n    """',
-                 '"""A slow call returns a job id!\n\n    Proves 9.1.\n    """',
-                 '"""A slow call returns a job id.\n\n    More words. And more. Proves 9.1."""'):
+    for good in ('"""User: A slow call returns a job id within 1.5 s.\n    Verified by: calling the job code.\n\n    Agent: Proves 9.1.\n    """',
+                 '"""User: Does a slow call return a job id?\n    Verified by: calling the job code.\n\n    Agent: Proves 9.1.\n    """',
+                 '"""User: A slow call returns a job id!\n    Verified by: calling the job code.\n\n    Agent: Proves 9.1.\n    """',
+                 '"""User: A slow call returns a job id.\n    Verified by: calling the job code.\n\n    Agent: More words. And more. Proves 9.1."""'):
         write_jobs(jobs(id_doc=good))
         rc, why = legacy({"plan.json": plan}, "155.1")
         assert rc == 0 and not why, \
-            f"155.1: new tests with the good summary {good!r}, beside a changed older test with no docstring, were rejected: {why!r}"
+            f"155.1: new tests with the good summary {good!r}, beside a changed older test, were rejected: {why!r}"
     write_jobs(jobs(unique_doc=doc))
     rc, why = legacy({"plan.json": plan}, "155.1")
     assert rc == 1, f"155.1: a new test with the docstring {doc!r} was accepted; it needs a one-sentence first line"
@@ -167,9 +174,9 @@ def renamed(body="assert True"):
 def test_a_renamed_older_test_needs_a_reason_under_its_old_name_and_nothing_more(record_property, legacy):
     """A renamed older test counts as a change: a reason under its old name lets it pass; without one it is rejected.
 
-    The older test has no docstring and passes. First renames it and also changes its body: that is a new test, so
-    it must be rejected for passing today. Then renames it alone, with a reason under its old name: the check passes,
-    holding it to no docstring or must-fail rule. Then with no reason, or the reason only under its new name: the
+    The older test passes. First renames it and also changes its body: that is a new test, so it must be rejected
+    for passing today. Then renames it alone, with a reason under its old name: the check passes, holding it to no
+    must-fail rule. Then with no reason, or the reason only under its new name: the
     check fails naming the old test.
     """
     record_property("proves", "155.3")

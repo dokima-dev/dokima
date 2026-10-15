@@ -18,18 +18,23 @@ from tests.test_plan_check import STORY, check  # noqa: E402,F401
 # The worker's code: on the branch only, never on main.
 WORKER_CODE = 'def make_job_id():\n    return "job-1"\n\n\ndef job_ids(n):\n    return ["job-%d" % i for i in range(n)]\n'
 
-TEST_ID = ('import os\nimport sys\n\n\ndef test_id(record_property):\n    """A slow call returns a job id.\n\n    Proves 9.1.\n    """\n'
+# Every new test file and test opens in the shape #707 asks for: a User line, a Verified by line, then an Agent part.
+TEST_ID = ('"""User: Sample tests for slow calls.\n\nAgent: They fail until the job code exists.\n"""\n'
+           'import os\nimport sys\n\n\ndef test_id(record_property):\n    """User: A slow call returns a job id.\n'
+           '    Verified by: calling the job code.\n\n    Agent: Proves 9.1.\n    """\n'
            '    record_property("proves", "9.1")\n    sys.path.insert(0, os.getcwd())\n    from jobs import make_job_id\n'
            '    assert make_job_id() == "job-1", "9.1: no job id yet"\n')
 
 # The re-plan's new test: it proves the worker's code, so it passes on the branch and fails on main.
-NEEDS_WORKER = ('\n\ndef test_unique(record_property):\n    """Job ids never repeat.\n\n    Proves 9.2 and 9.3.\n    """\n'
+NEEDS_WORKER = ('\n\ndef test_unique(record_property):\n    """User: Job ids never repeat.\n'
+                '    Verified by: calling the job code.\n\n    Agent: Proves 9.2 and 9.3.\n    """\n'
                 '    record_property("proves", "9.2")\n    sys.path.insert(0, os.getcwd())\n    from jobs import job_ids\n'
                 '    assert len(set(job_ids(3))) == 3, "9.2: job ids repeat"\n')
 
 # A new test that passes on main too: it needs only a helper the planner added under tests/, no worker code.
 HELPER = 'def ids():\n    return ["a", "b", "c"]\n'
-ON_MAIN = ('\n\ndef test_unique(record_property):\n    """Job ids never repeat.\n\n    Proves 9.2 and 9.3.\n    """\n'
+ON_MAIN = ('\n\ndef test_unique(record_property):\n    """User: Job ids never repeat.\n'
+                '    Verified by: calling the job code.\n\n    Agent: Proves 9.2 and 9.3.\n    """\n'
            '    record_property("proves", "9.2")\n    from jobs_helper import ids\n'
            '    assert len(set(ids())) == 3, "9.2: job ids repeat"\n')
 
@@ -54,11 +59,11 @@ def worker_built(monkeypatch):
     """
     write("tests/test_jobs.py", TEST_ID)
     git("add", "tests/test_jobs.py")
-    git("commit", "-qm", "planner: first round")
+    git("-c", "user.name=dokima-runtime[bot]", "commit", "-qm", "planner: first round")
     write("jobs.py", WORKER_CODE)
     write(".gitignore", "__pycache__/\n")
     git("add", "jobs.py", ".gitignore")
-    git("commit", "-qm", "worker: jobs")
+    git("-c", "user.name=dokima-runtime[bot]", "commit", "-qm", "worker: jobs")
     monkeypatch.setenv("PLANNER_RUN_BASE", git("rev-parse", "HEAD").strip())
 
 
