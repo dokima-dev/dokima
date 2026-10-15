@@ -1,0 +1,149 @@
+{
+ "role": "planner",
+ "stage": null,
+ "run_id": "38662178361",
+ "commit_before": "a2e94e1e645c47ea2f3ca54a3e7e441bb8f510c5",
+ "started_by": "dokima-runtime[bot]",
+ "models": [
+  "claude-opus-5-5"
+ ],
+ "report": {
+  "duration_ms": 457808,
+  "turns": 36,
+  "cost_usd": 2.6452748000000006,
+  "tokens_in": 3404126,
+  "tokens_out": 43819
+ },
+ "log": "https://github.com/dokima-dev/dokima/blob/logs/logs/668/38662178361-planner.md",
+ "run": "https://github.com/dokima-dev/dokima/actions/runs/38662178361",
+ "handback": {
+  "kind": "user_story",
+  "title": "Stories sharing a code file take turns to build",
+  "summary": "A story's build waits while another story sharing a code file is building, until that one merges.",
+  "user_story": "Two stories never build the same code file at once, while planning and review go on freely.",
+  "acceptance_criteria": [
+   {
+    "text": "A story's build waits until another open story sharing a code file has its pull request merged.",
+    "words": "A story's turn ends when its PR merges.",
+    "source": "https://github.com/dokima-dev/dokima/issues/661#issuecomment-6175675553",
+    "files": [
+     "dokima/turns.py",
+     "dokima/agent_roles.py",
+     "dokima/agent_autopilot.py"
+    ],
+    "edge_cases": [
+     {
+      "case": "The owner says work while the other story is building: nothing builds and the reason names it.",
+      "test": "tests/test_build_turns.py::test_a_story_sharing_a_code_file_builds_only_after_the_other_story_merges"
+     },
+     {
+      "case": "A story sharing the file whose build never started holds no turn.",
+      "test": "tests/test_build_turns.py::test_a_story_sharing_a_code_file_builds_only_after_the_other_story_merges"
+     },
+     {
+      "case": "An issue with no parent builds as before.",
+      "test": "tests/test_build_turns.py::test_a_story_sharing_a_code_file_builds_only_after_the_other_story_merges"
+     },
+     {
+      "case": "GitHub fails to list the parent's stories: nothing builds and the card says why.",
+      "test": "tests/test_build_turns.py::test_a_story_sharing_a_code_file_builds_only_after_the_other_story_merges"
+     }
+    ]
+   },
+   {
+    "text": "Planning and plan review of a story never wait on another story's files.",
+    "words": "Planning and plan review never wait; only the worker's build does.",
+    "source": "https://github.com/dokima-dev/dokima/issues/661",
+    "files": [
+     "dokima/turns.py",
+     "dokima/agent_roles.py"
+    ],
+    "no_edge_cases": "The planner and plan reviewer start as today; the test holds them beside a real clash."
+   },
+   {
+    "text": "A markdown file shared by two stories never makes either build wait.",
+    "words": "Markdown files never group criteria and never make a story wait.",
+    "source": "https://github.com/dokima-dev/dokima/issues/661",
+    "files": [
+     "dokima/turns.py"
+    ],
+    "edge_cases": [
+     {
+      "case": "The same two stories also sharing a code file do wait.",
+      "test": "tests/test_build_turns.py::test_a_shared_markdown_file_never_makes_a_build_wait"
+     }
+    ]
+   },
+   {
+    "text": "Each story merges to main on its own pull request, with no parent branch.",
+    "words": "Stories merge to main one by one. No parent branch.",
+    "source": "https://github.com/dokima-dev/dokima/issues/661",
+    "files": [
+     "dokima/agent_roles.py"
+    ],
+    "no_edge_cases": "Already true for every issue; an existing test pins it."
+   },
+   {
+    "text": "A story whose own plan adds files beyond its assigned ones is checked again for clashes before it builds.",
+    "words": "Also: a story whose plan changes files beyond the ones it was assigned is checked again for clashes before it builds.",
+    "source": "https://github.com/dokima-dev/dokima/issues/661#issuecomment-6173871465",
+    "files": [
+     "dokima/turns.py"
+    ],
+    "edge_cases": [
+     {
+      "case": "A plan keeping to its assigned files builds.",
+      "test": "tests/test_build_turns.py::test_a_story_whose_plan_adds_files_is_checked_again_before_it_builds"
+     }
+    ]
+   }
+  ],
+  "non_functional": [],
+  "tests": {
+   "668.1": [
+    "tests/test_build_turns.py::test_a_story_sharing_a_code_file_builds_only_after_the_other_story_merges"
+   ],
+   "668.2": [
+    "tests/test_build_turns.py::test_planning_and_plan_review_never_wait_on_another_story"
+   ],
+   "668.3": [
+    "tests/test_build_turns.py::test_a_shared_markdown_file_never_makes_a_build_wait"
+   ],
+   "668.4": [
+    "tests/test_worker_pr.py::test_a_worker_with_nothing_new_to_push_still_opens_its_pull_request"
+   ],
+   "668.5": [
+    "tests/test_build_turns.py::test_a_story_whose_plan_adds_files_is_checked_again_before_it_builds"
+   ]
+  },
+  "test_changes": {
+   "tests/test_worker_pr.py::test_a_worker_with_nothing_new_to_push_still_opens_its_pull_request": "Also pins 668.4: every story opens its own pull request into main."
+  },
+  "links": {
+   "blocked_by": [],
+   "blocks": [
+    559
+   ],
+   "relates_to": [
+    661
+   ]
+  },
+  "raises": [
+   {
+    "kind": "question",
+    "to": "owner",
+    "label": "Already true",
+    "text": "Stories already merge to main on their own pull requests. The plan pins it with an existing test. Enough?",
+    "evidence": "`.github/workflows/agent.yml` opens every pull request with `--base main`; `tests/test_worker_pr.py` checks it.",
+    "raised_by": "planner",
+    "id": "P1"
+   }
+  ],
+  "answers": []
+ },
+ "check": {
+  "passed": true,
+  "problems": []
+ },
+ "url": "https://github.com/dokima-dev/dokima/issues/668#issuecomment-6181791562"
+}
