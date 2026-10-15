@@ -9,7 +9,7 @@ import re
 import subprocess
 import sys
 
-from dokima import body as issue_body
+from dokima import agents, body as issue_body
 
 
 def issue_text(d, items):
@@ -292,8 +292,8 @@ def main(argv):
     if argv[1] == "record":
         role, stage, out, check_file, passed, log_dir = argv[2:8]
         meta = {"run_id": os.environ.get("GITHUB_RUN_ID"), "commit_before": os.environ.get("BASE"),
-                "started_by": os.environ.get("GITHUB_ACTOR"), "models": models_used(log_dir),
-                "report": run_report(os.path.join(out, "claude.json")), "log": os.environ.get("LOG_URL"),
+                "started_by": os.environ.get("GITHUB_ACTOR"), "models": agents.models(role, out, log_dir),
+                "report": agents.report(role, out), "log": os.environ.get("LOG_URL"),
                 "run": f"{os.environ.get('GITHUB_SERVER_URL', 'https://github.com')}/{os.environ.get('GITHUB_REPOSITORY', '')}/actions/runs/{os.environ.get('GITHUB_RUN_ID', '')}"}
         text = open(check_file).read() if os.path.exists(check_file) else ""
         earlier = []
@@ -337,7 +337,7 @@ def main(argv):
         meta = {"run_id": os.environ.get("GITHUB_RUN_ID"), "started_by": os.environ.get("GITHUB_ACTOR"),
                 "run": f"{os.environ.get('GITHUB_SERVER_URL', 'https://github.com')}/{os.environ.get('GITHUB_REPOSITORY', '')}/actions/runs/{os.environ.get('GITHUB_RUN_ID', '')}"}
         if started == "true":
-            meta.update({"models": models_used(log_dir), "report": run_report(os.path.join(out, "claude.json")),
+            meta.update({"models": agents.models(role, out, log_dir), "report": agents.report(role, out),
                          "log": os.environ.get("LOG_URL")})
         rec = cancelled(role, stage, started == "true", meta)
         json.dump(rec, open(os.path.join(out, "record.json"), "w"), indent=1)
@@ -368,7 +368,8 @@ def main(argv):
         return 1 if bad else 0
     if argv[1] == "transcript":
         secrets = [v for k, v in os.environ.items() if k.startswith("SCRUB_")]
-        sys.stdout.write(transcript(argv[2], secrets))
+        # The role's agent reads its own session (ROLE, given after the folder); with none, Claude Code's, as before.
+        sys.stdout.write(agents.transcript(argv[3], argv[2], secrets) if len(argv) > 3 else transcript(argv[2], secrets))
         return 0
     if argv[1] == "split":
         repo, parent = os.environ["GITHUB_REPOSITORY"], argv[2]
