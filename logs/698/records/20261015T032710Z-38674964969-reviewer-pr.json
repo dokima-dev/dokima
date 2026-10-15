@@ -1,0 +1,61 @@
+{
+ "role": "reviewer",
+ "stage": "pr",
+ "run_id": "38674964969",
+ "commit_before": "86b64e8885c1f0c6368e736f304134dbbc6967ef",
+ "started_by": "dokima-runtime[bot]",
+ "models": [
+  "claude-opus-5-5"
+ ],
+ "report": {
+  "duration_ms": 108486,
+  "turns": 23,
+  "cost_usd": 0.9338790000000001,
+  "tokens_in": 1353909,
+  "tokens_out": 7270
+ },
+ "log": "https://github.com/dokima-dev/dokima/blob/logs/logs/698/38674964969-reviewer-pr.md",
+ "run": "https://github.com/dokima-dev/dokima/actions/runs/38674964969",
+ "handback": {
+  "previous_step": {
+   "did": [
+    "Each role now starts its agent through one interface, on the file's model and key.",
+    "Claude Code moved behind that interface with today's install, command, record and stats.",
+    "A bad subscription, agent or missing model stops the run, saying why."
+   ],
+   "decided": [
+    "With no file, or a role left out, runs stay on Claude Code as today."
+   ],
+   "open": [
+    "The settings reader keeps a trailing comment in a value; raised separately."
+   ]
+  },
+  "verdict": "approve",
+  "summary": "Approved: every criterion is built and proven, the planner's tests are untouched, and all tests pass.",
+  "raises": [],
+  "answers": [
+   {
+    "raise": "W1",
+    "answer": "done",
+    "why": "Confirmed: the settings reader keeps text after a comment mark, so an agent line reads wrong.",
+    "searched": [
+     696,
+     698,
+     39,
+     366
+    ],
+    "verdict": "new"
+   }
+  ],
+  "asks": [],
+  "behaviors": [],
+  "edge_cases": [],
+  "tests": [],
+  "size": "ok"
+ },
+ "check": {
+  "passed": true,
+  "problems": []
+ },
+ "url": "https://github.com/dokima-dev/dokima/pull/719#issuecomment-6183529673"
+}
