@@ -23,8 +23,10 @@ MODEL = "kimi-model.txt"
 
 
 def install():
-    """Install Kimi Code CLI; return the install's exit code."""
-    return subprocess.run(["uv", "tool", "install", "--python", "3.13", "kimi-cli"]).returncode
+    """Install Kimi Code CLI (npm package @moonshot-ai/kimi-code, its `kimi` command); return the install's exit code.
+
+    Not the deprecated Python kimi-cli: that one keeps its sign-in elsewhere and takes other flags."""
+    return subprocess.run(["npm", "install", "-g", "@moonshot-ai/kimi-code"]).returncode
 
 
 def restore_sign_in(key):

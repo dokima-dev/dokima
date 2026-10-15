@@ -28,12 +28,12 @@ KIMI = textwrap.dedent('''\
     import json, os, sys
     home = os.path.expanduser("~")
     if sys.argv[1:2] == ["login"]:
-        os.makedirs(os.path.join(home, ".kimi", "credentials"), exist_ok=True)
-        open(os.path.join(home, ".kimi", "credentials", "kimi-code.json"), "w").write('{{"access_token": "tok-123"}}')
-        open(os.path.join(home, ".kimi", "config.toml"), "w").write('default_model = "kimi-for-coding"\\n')
+        os.makedirs(os.path.join(home, ".kimi-code", "credentials"), exist_ok=True)
+        open(os.path.join(home, ".kimi-code", "credentials", "kimi-code.json"), "w").write('{{"access_token": "tok-123"}}')
+        open(os.path.join(home, ".kimi-code", "config.toml"), "w").write('default_model = "kimi-for-coding"\\n')
         sys.exit(0)
     seen = {{}}
-    for d, _, files in os.walk(os.path.join(home, ".kimi")):
+    for d, _, files in os.walk(os.path.join(home, ".kimi-code")):
         for name in files:
             p = os.path.join(d, name)
             seen[os.path.relpath(p, home)] = open(p).read()
@@ -157,7 +157,7 @@ def test_a_kimi_run_writes_the_stored_sign_in_back_before_kimi_starts(record_pro
     starts = box.starts()
     assert starts, f"699.2: Kimi Code CLI never started: {said(p)}"
     saved = {}
-    for d, _, files in os.walk(box.owner_home / ".kimi"):
+    for d, _, files in os.walk(box.owner_home / ".kimi-code"):
         for name in files:
             f = os.path.join(d, name)
             saved[os.path.relpath(f, box.owner_home)] = open(f).read()
