@@ -1,0 +1,78 @@
+{
+ "role": "planner",
+ "stage": null,
+ "run_id": "38677700025",
+ "commit_before": "f6be5b28019051ad9bc8728411fb6527f33e917f",
+ "started_by": "dokima-runtime[bot]",
+ "models": [
+  "claude-opus-5-5"
+ ],
+ "report": {
+  "duration_ms": 115719,
+  "turns": 13,
+  "cost_usd": 0.8197329999999999,
+  "tokens_in": 633490,
+  "tokens_out": 12487
+ },
+ "log": "https://github.com/dokima-dev/dokima/blob/logs/logs/699/38677700025-planner.md",
+ "run": "https://github.com/dokima-dev/dokima/actions/runs/38677700025",
+ "handback": {
+  "kind": "user_story",
+  "title": "A role can run on Kimi Code CLI",
+  "summary": "Any role named on a Kimi subscription runs in Kimi Code CLI, signed in from the stored sign-in.",
+  "user_story": "The owner moves any role to Kimi by naming a Kimi subscription for it, and spends Kimi's credit.",
+  "acceptance_criteria": [
+   {
+    "text": "A role on a Kimi subscription starts Kimi Code CLI with the Kimi model the settings file names.",
+    "words": "Kimi models in Kimi Code CLI",
+    "source": "https://github.com/dokima-dev/dokima/issues/696#issuecomment-6181290061",
+    "files": [
+     "dokima/agent_kimi.py"
+    ],
+    "edge_cases": [
+     {
+      "case": "Kimi fails: the run fails with Kimi's own exit code.",
+      "test": "tests/test_agent_kimi.py::test_a_failed_kimi_run_fails_the_run"
+     }
+    ]
+   },
+   {
+    "text": "A Kimi run puts the stored sign-in back in place before Kimi starts, so no one signs in again.",
+    "words": "signed in with `kimi login --region global`",
+    "source": "https://github.com/dokima-dev/dokima/issues/696#issuecomment-6181290061",
+    "files": [
+     "dokima/agent_kimi.py"
+    ],
+    "no_edge_cases": "Runs always start on a fresh machine with one stored sign-in, the case its test covers."
+   }
+  ],
+  "non_functional": [],
+  "tests": {
+   "699.1": [
+    "tests/test_agent_kimi.py::test_a_kimi_role_runs_in_kimi_code_cli_with_its_model",
+    "tests/test_agent_kimi.py::test_a_failed_kimi_run_fails_the_run"
+   ],
+   "699.2": [
+    "tests/test_agent_kimi.py::test_a_kimi_run_writes_the_stored_sign_in_back_before_kimi_starts"
+   ]
+  },
+  "test_changes": {},
+  "links": {
+   "blocked_by": [],
+   "blocks": [
+    700
+   ],
+   "relates_to": [
+    696,
+    39,
+    706,
+    721
+   ]
+  }
+ },
+ "check": {
+  "passed": true,
+  "problems": []
+ },
+ "url": "https://github.com/dokima-dev/dokima/issues/699#issuecomment-6183892141"
+}
