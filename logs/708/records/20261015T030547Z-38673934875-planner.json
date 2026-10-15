@@ -1,0 +1,161 @@
+{
+ "role": "planner",
+ "stage": null,
+ "run_id": "38673934875",
+ "commit_before": "cfb11e4519569d5ea3fdade9e1ce41dad37b38bd",
+ "started_by": "dokima-runtime[bot]",
+ "models": [
+  "claude-opus-5-5"
+ ],
+ "report": {
+  "duration_ms": 283368,
+  "turns": 26,
+  "cost_usd": 1.5551586,
+  "tokens_in": 1707410,
+  "tokens_out": 26703
+ },
+ "log": "https://github.com/dokima-dev/dokima/blob/logs/logs/708/38673934875-planner.md",
+ "run": "https://github.com/dokima-dev/dokima/actions/runs/38673934875",
+ "handback": {
+  "kind": "user_story",
+  "title": "Every role reads the parent's ask and the owner's words",
+  "summary": "Workers and reviewers on a story read the parent's ask and the owner's comments; the owner's commits count as words.",
+  "user_story": "Every role on a story sees the parent's ask, and the owner's comments and commits steer the work.",
+  "acceptance_criteria": [
+   {
+    "text": "A worker on a split story finds the parent's original issue in its starting pack.",
+    "words": "Every role working on a split story gets the parent's original issue and my comments, which only the planner gets today.",
+    "source": "https://github.com/dokima-dev/dokima/issues/559",
+    "files": [
+     "dokima/agent_roles.py"
+    ],
+    "no_edge_cases": "The owner named none; a split story always has a parent."
+   },
+   {
+    "text": "A worker on a split story finds the owner's comments on the parent in its starting pack.",
+    "words": "Every role working on a split story gets the parent's original issue and my comments, which only the planner gets today.",
+    "source": "https://github.com/dokima-dev/dokima/issues/559",
+    "files": [
+     "dokima/agent_roles.py"
+    ],
+    "no_edge_cases": "The owner named none; a parent with no owner comments gives nothing to find."
+   },
+   {
+    "text": "A reviewer on a split story finds the parent's original issue in its starting pack.",
+    "words": "Every role working on a split story gets the parent's original issue and my comments, which only the planner gets today.",
+    "source": "https://github.com/dokima-dev/dokima/issues/559",
+    "files": [
+     "dokima/agent_roles.py"
+    ],
+    "no_edge_cases": "The owner named none; the test covers both the plan review and the code review."
+   },
+   {
+    "text": "A reviewer on a split story finds the owner's comments on the parent in its starting pack.",
+    "words": "Every role working on a split story gets the parent's original issue and my comments, which only the planner gets today.",
+    "source": "https://github.com/dokima-dev/dokima/issues/559",
+    "files": [
+     "dokima/agent_roles.py"
+    ],
+    "no_edge_cases": "The owner named none; the test covers both the plan review and the code review."
+   },
+   {
+    "text": "Text the owner committed on the branch counts as the owner's words a criterion may quote.",
+    "words": "Anything I write counts as my words",
+    "source": "https://github.com/dokima-dev/dokima/issues/559",
+    "files": [
+     "dokima/agent_roles.py",
+     "dokima/planner.py"
+    ],
+    "edge_cases": [
+     {
+      "case": "A line someone else committed on the branch is not taken as the owner's words.",
+      "test": "tests/test_story_reads_parent.py::test_text_the_owner_committed_on_the_branch_counts_as_their_words"
+     }
+    ]
+   },
+   {
+    "text": "The owner's comment that says /review on a pull request starts its code review.",
+    "words": "I can add, change or delete tests, plan and code on Dokima's branches, then say /review.",
+    "source": "https://github.com/dokima-dev/dokima/issues/559",
+    "files": [
+     "dokima/agent_roles.py"
+    ],
+    "edge_cases": [
+     {
+      "case": "A comment with the command on a later line starts nothing.",
+      "test": "tests/test_agent.py::test_a_command_starts_its_stage_and_anything_else_starts_nothing"
+     }
+    ]
+   },
+   {
+    "text": "The owner's /plan comment reaches the next planner in its starting pack, word for word.",
+    "words": "Yes, plans live off the branch; I edit them by comment.",
+    "source": "https://github.com/dokima-dev/dokima/issues/559#issuecomment-6183274943",
+    "files": [
+     "dokima/agent_roles.py"
+    ],
+    "no_edge_cases": "Already built; the older test pins it as it stands."
+   }
+  ],
+  "non_functional": [],
+  "tests": {
+   "708.1": [
+    "tests/test_story_reads_parent.py::test_a_worker_on_a_split_story_finds_the_parents_original_issue"
+   ],
+   "708.2": [
+    "tests/test_story_reads_parent.py::test_a_worker_on_a_split_story_finds_the_owners_comments_on_the_parent"
+   ],
+   "708.3": [
+    "tests/test_story_reads_parent.py::test_a_reviewer_on_a_split_story_finds_the_parents_original_issue"
+   ],
+   "708.4": [
+    "tests/test_story_reads_parent.py::test_a_reviewer_on_a_split_story_finds_the_owners_comments_on_the_parent"
+   ],
+   "708.5": [
+    "tests/test_story_reads_parent.py::test_text_the_owner_committed_on_the_branch_counts_as_their_words"
+   ],
+   "708.6": [
+    "tests/test_agent.py::test_a_command_starts_its_stage_and_anything_else_starts_nothing"
+   ],
+   "708.7": [
+    "tests/test_agent.py::test_the_pack_reads_the_issue_and_its_pr_as_one_conversation"
+   ]
+  },
+  "test_changes": {},
+  "links": {
+   "blocked_by": [],
+   "blocks": [],
+   "relates_to": [
+    559,
+    707,
+    715,
+    335
+   ]
+  },
+  "raises": [
+   {
+    "kind": "question",
+    "to": "owner",
+    "label": "Doubt: already built",
+    "text": "/review on a pull request already start code review. Only pin it with the older test? The plan assumes so.",
+    "evidence": "`dokima/agent_roles.py` `route()`; `tests/test_agent.py::test_a_command_starts_its_stage_and_anything_else_starts_nothing` passes today.",
+    "raised_by": "planner",
+    "id": "P1"
+   },
+   {
+    "kind": "question",
+    "to": "owner",
+    "label": "Doubt: already built",
+    "text": "Your /plan comments already reach the planner verbatim. Only pin it with the older test? The plan assumes so.",
+    "evidence": "`issue_text()` copies every comment verbatim into `issue.md`, the same for every role, including the planner.",
+    "raised_by": "planner",
+    "id": "P2"
+   }
+  ]
+ },
+ "check": {
+  "passed": true,
+  "problems": []
+ },
+ "url": "https://github.com/dokima-dev/dokima/issues/708#issuecomment-6183399175"
+}
