@@ -1,0 +1,53 @@
+{
+ "role": "planner",
+ "stage": null,
+ "run_id": "38819566348",
+ "commit_before": "e05e426b73487841e18151b08976155d7ab4ae5c",
+ "started_by": "RezaSoleymanifar",
+ "models": [
+  "claude-opus-5-5"
+ ],
+ "report": {
+  "duration_ms": 37580,
+  "turns": 7,
+  "cost_usd": 0.2916488,
+  "tokens_in": 217610,
+  "tokens_out": 2571
+ },
+ "log": "https://github.com/dokima-dev/dokima/blob/logs/logs/751/38819566348-planner.md",
+ "run": "https://github.com/dokima-dev/dokima/actions/runs/38819566348",
+ "handback": {
+  "kind": "user_story",
+  "title": "Sample issue with no ask yet",
+  "summary": "The owner asked for a feature but listed no criteria yet.",
+  "user_story": "Nothing changes for the owner until they say what the feature should do.",
+  "acceptance_criteria": [],
+  "non_functional": [],
+  "tests": {},
+  "test_changes": {},
+  "links": {
+   "blocked_by": [],
+   "blocks": [],
+   "relates_to": []
+  },
+  "raises": [
+   {
+    "kind": "question",
+    "to": "owner",
+    "label": "No ask yet",
+    "text": "The issue names no behavior, only placeholder text. What should this feature do? Nothing is planned until you say.",
+    "evidence": "The issue body reads only: i need a feature with these criteria: balh blah blah.",
+    "raised_by": "planner",
+    "id": "P1"
+   }
+  ],
+  "answers": []
+ },
+ "check": {
+  "passed": false,
+  "problems": [
+   "::error title=Planner output rejected::a story needs a non-empty list of acceptance_criteria"
+  ]
+ },
+ "url": "https://github.com/dokima-dev/dokima/issues/751#issuecomment-6203886192"
+}
