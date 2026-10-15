@@ -1,0 +1,49 @@
+{
+ "role": "worker",
+ "stage": null,
+ "run_id": "38666363095",
+ "commit_before": "cc59b0ed0d8a052b8d0858688768b5afb24d1b15",
+ "started_by": "dokima-runtime[bot]",
+ "models": [
+  "claude-opus-5-5"
+ ],
+ "report": {
+  "duration_ms": 779592,
+  "turns": 21,
+  "cost_usd": 0.767628,
+  "tokens_in": 1048665,
+  "tokens_out": 8760
+ },
+ "log": "https://github.com/dokima-dev/dokima/blob/logs/logs/697/38666363095-worker.md",
+ "run": "https://github.com/dokima-dev/dokima/actions/runs/38666363095",
+ "handback": {
+  "summary": "No code change: the full suite passes here twice, so the failed GitHub run looks like a flake.",
+  "criteria": {
+   "697.1": "`dokima/setup.py` `needs` prints membership, region, sign-in or key, and model.",
+   "697.2": "`add --key` reads the key from standard input, refuses an empty one, sets it with `gh secret set`, and names the secret on failure.",
+   "697.3": "`add` writes `subscriptions: SUB: {agent, key}` into `.dokima/agents.yml`, keeping earlier entries; key is the secret's name.",
+   "697.4": "`add --sign-in` runs the agent's own login from `LOGIN`, e.g. `kimi login --region REGION`.",
+   "697.5": "After the login, the files in `SIGN_IN` are packed as base64 gzip tar and stored as the repo secret; a failed login stores nothing.",
+   "697.6": "`add` writes `roles: ROLE: {subscription, model}` for each `--role`, keeping earlier roles."
+  },
+  "evidence": "`pytest -q -n auto tests` on a shallow clone: 1215 passed in 312.14s",
+  "raises": [
+   {
+    "kind": "issue",
+    "label": "Unexplained red suite",
+    "text": "The full suite failed on GitHub for this branch, but the same commit passes every test here, so a test may be flaky.",
+    "evidence": "Job 116197539255 failed at its pytest step on `cc59b0e`; main `a2e94e1` is the same base and green.",
+    "raised_by": "worker",
+    "id": "W1"
+   }
+  ]
+ },
+ "check": {
+  "passed": true,
+  "problems": []
+ },
+ "dropped_by_fence": [],
+ "files_changed": [],
+ "branch": "try/issue-697",
+ "url": "https://github.com/dokima-dev/dokima/pull/702#issuecomment-6182347097"
+}
