@@ -1,0 +1,44 @@
+{
+ "role": "worker",
+ "stage": null,
+ "run_id": "38663138973",
+ "commit_before": "a4c10e8eb5fe27065469f936a1dcc5bb721c5027",
+ "started_by": "dokima-runtime[bot]",
+ "models": [
+  "claude-opus-5-5"
+ ],
+ "report": {
+  "duration_ms": 313968,
+  "turns": 27,
+  "cost_usd": 1.0862513999999999,
+  "tokens_in": 1434932,
+  "tokens_out": 13431
+ },
+ "log": "https://github.com/dokima-dev/dokima/blob/logs/logs/668/38663138973-worker.md",
+ "run": "https://github.com/dokima-dev/dokima/actions/runs/38663138973",
+ "handback": {
+  "summary": "A story's build now waits while another story sharing a code file builds, and plans again once it merges.",
+  "criteria": {
+   "668.1": "`dokima/turns.py` finds the sibling holding the turn; `agent next` waits and `agent pack` refuses the worker; `start_unblocked` replans after the merge.",
+   "668.2": "Only the worker's start and the worker's pack check turns; planner and plan review paths are unchanged.",
+   "668.3": "`turns.plan_code_files` uses `planner.code_files`, which drops markdown files.",
+   "668.4": "Unchanged: every pull request still opens into main; the existing test pins it.",
+   "668.5": "Turns compare each story's own newest plan's files, not the split's assigned files."
+  },
+  "evidence": "`pytest -q tests/test_build_turns.py tests/test_worker_pr.py`: 6 passed",
+  "raises": [],
+  "answers": []
+ },
+ "check": {
+  "passed": true,
+  "problems": []
+ },
+ "dropped_by_fence": [],
+ "files_changed": [
+  "dokima/agent_autopilot.py",
+  "dokima/agent_roles.py",
+  "dokima/turns.py"
+ ],
+ "branch": "try/issue-668",
+ "url": "https://github.com/dokima-dev/dokima/issues/668#issuecomment-6181920246"
+}
