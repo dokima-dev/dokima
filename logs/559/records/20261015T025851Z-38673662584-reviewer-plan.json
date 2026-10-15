@@ -1,0 +1,754 @@
+{
+ "role": "reviewer",
+ "stage": "plan",
+ "run_id": "38673662584",
+ "commit_before": "cfb11e4519569d5ea3fdade9e1ce41dad37b38bd",
+ "started_by": "dokima-runtime[bot]",
+ "models": [
+  "claude-opus-5-5"
+ ],
+ "report": {
+  "duration_ms": 75956,
+  "turns": 10,
+  "cost_usd": 0.48855040000000005,
+  "tokens_in": 452725,
+  "tokens_out": 6764
+ },
+ "log": "https://github.com/dokima-dev/dokima/blob/logs/logs/559/38673662584-reviewer-plan.md",
+ "run": "https://github.com/dokima-dev/dokima/actions/runs/38673662584",
+ "handback": {
+  "previous_step": {
+   "did": [
+    "Split the file docstring check into a missing user line and missing agent detail.",
+    "Split card and run comment criteria into show short half, fold full half."
+   ],
+   "decided": [],
+   "open": [
+    "Each story's tests are written when that story is planned."
+   ]
+  },
+  "verdict": "approve",
+  "summary": "Both earlier blockers are fixed, every ask has a criterion, and the plan can split into its ten stories.",
+  "raises": [],
+  "answers": [],
+  "asks": [
+   {
+    "ask": "I write tests, as many or as few as I like, or none.",
+    "source": "https://github.com/dokima-dev/dokima/issues/559",
+    "criterion": "S1.3"
+   },
+   {
+    "ask": "The planner groups tests into criteria, fills gaps with its own tests, and splits work that is too big.",
+    "source": "https://github.com/dokima-dev/dokima/issues/559",
+    "criterion": "S1.3"
+   },
+   {
+    "ask": "My tests are locked: agents may propose more but never change or drop mine.",
+    "source": "https://github.com/dokima-dev/dokima/issues/559",
+    "criterion": "S1.1"
+   },
+   {
+    "ask": "A short text for me (capped, plain, no code)",
+    "source": "https://github.com/dokima-dev/dokima/issues/559",
+    "criterion": "S3.7"
+   },
+   {
+    "ask": "a full text for agents (uncapped, may name code)",
+    "source": "https://github.com/dokima-dev/dokima/issues/559",
+    "criterion": "S3.8"
+   },
+   {
+    "ask": "raises, stories, Context and questions live in the record as pairs.",
+    "source": "https://github.com/dokima-dev/dokima/issues/559",
+    "criterion": "S3.1"
+   },
+   {
+    "ask": "Cards show short texts and fold full ones.",
+    "source": "https://github.com/dokima-dev/dokima/issues/559",
+    "criterion": "S4.1"
+   },
+   {
+    "ask": "The plan reviewer checks each short text matches its full text",
+    "source": "https://github.com/dokima-dev/dokima/issues/559",
+    "criterion": "S5.1"
+   },
+   {
+    "ask": "each docstring matches what its test does",
+    "source": "https://github.com/dokima-dev/dokima/issues/559",
+    "criterion": "S6.1"
+   },
+   {
+    "ask": "Every role working on a split story gets the parent's original issue and my comments",
+    "source": "https://github.com/dokima-dev/dokima/issues/559",
+    "criterion": "S2.3"
+   },
+   {
+    "ask": "I can add, change or delete tests, plan and code on Dokima's branches, then say /review.",
+    "source": "https://github.com/dokima-dev/dokima/issues/559",
+    "criterion": "S2.6"
+   },
+   {
+    "ask": "Anything I write counts as my words",
+    "source": "https://github.com/dokima-dev/dokima/issues/559",
+    "criterion": "S2.5"
+   },
+   {
+    "ask": "a re-plan keeps my commits",
+    "source": "https://github.com/dokima-dev/dokima/issues/559",
+    "criterion": "S9.1"
+   },
+   {
+    "ask": "My work goes through the same reviews and checks as agent work.",
+    "source": "https://github.com/dokima-dev/dokima/issues/559",
+    "criterion": "S9.2"
+   },
+   {
+    "ask": "A plan built on my tests keeps every one unchanged and maps each to a criterion.",
+    "source": "https://github.com/dokima-dev/dokima/issues/559",
+    "criterion": "S1.3"
+   },
+   {
+    "ask": "A worker on a split story reads the parent's original issue and my comments.",
+    "source": "https://github.com/dokima-dev/dokima/issues/559",
+    "criterion": "S2.1"
+   },
+   {
+    "ask": "my tests cannot be changed by an agent",
+    "source": "https://github.com/dokima-dev/dokima/issues/559",
+    "criterion": "S1.2"
+   },
+   {
+    "ask": "those json models should print out user facing and agent facing information",
+    "source": "https://github.com/dokima-dev/dokima/issues/559",
+    "criterion": "S4.3"
+   },
+   {
+    "ask": "tests should have structure: file docstring.",
+    "source": "https://github.com/dokima-dev/dokima/issues/559#issuecomment-6131843348",
+    "criterion": "S1.11"
+   },
+   {
+    "ask": "acceptance criteria docstring: user facing and agent facing",
+    "source": "https://github.com/dokima-dev/dokima/issues/559#issuecomment-6131843348",
+    "criterion": "S4.5"
+   },
+   {
+    "ask": "test docstrings user facing and agent facing",
+    "source": "https://github.com/dokima-dev/dokima/issues/559#issuecomment-6131843348",
+    "criterion": "S1.6"
+   },
+   {
+    "ask": "user facing for tests of course the methodology of testing so you know the rigor of test right of the bat.",
+    "source": "https://github.com/dokima-dev/dokima/issues/559#issuecomment-6131843348",
+    "criterion": "S4.6"
+   },
+   {
+    "ask": "edge cases too have user facing and agent facing texts",
+    "source": "https://github.com/dokima-dev/dokima/issues/559#issuecomment-6131843348",
+    "criterion": "S1.10"
+   },
+   {
+    "ask": "enforce this as a schema in test files",
+    "source": "https://github.com/dokima-dev/dokima/issues/559#issuecomment-6131843348",
+    "criterion": "S1.4"
+   },
+   {
+    "ask": "rigor line let's name it verified by line:",
+    "source": "https://github.com/dokima-dev/dokima/issues/559#issuecomment-6131843348",
+    "criterion": "S1.5"
+   },
+   {
+    "ask": "please don't use categories finetuned for our repo only that will not fly. think longterm.",
+    "source": "https://github.com/dokima-dev/dokima/issues/559#issuecomment-6131843348",
+    "criterion": "S1.14"
+   },
+   {
+    "ask": "checked by code on new and changed tests only",
+    "source": "https://github.com/dokima-dev/dokima/issues/559#issuecomment-6131843348",
+    "criterion": "S1.13"
+   },
+   {
+    "ask": "User, Verified by and Edge are short and capped",
+    "source": "https://github.com/dokima-dev/dokima/issues/559#issuecomment-6131843348",
+    "criterion": "S1.8"
+   },
+   {
+    "ask": "Agent holds the full detail, uncapped and folded on cards.",
+    "source": "https://github.com/dokima-dev/dokima/issues/559#issuecomment-6131843348",
+    "criterion": "S4.7"
+   },
+   {
+    "ask": "Each test file opens with the same pair: one user line, then agent detail.",
+    "source": "https://github.com/dokima-dev/dokima/issues/559#issuecomment-6131843348",
+    "criterion": "S1.12"
+   },
+   {
+    "ask": "The planner and worker prompts say: Verified by explains how the test proves the behavior",
+    "source": "https://github.com/dokima-dev/dokima/issues/559#issuecomment-6132026430",
+    "criterion": "S7.1"
+   },
+   {
+    "ask": "Yes, plans live off the branch; I edit them by comment.",
+    "source": "https://github.com/dokima-dev/dokima/issues/559#issuecomment-6183274943",
+    "criterion": "S2.7"
+   },
+   {
+    "ask": "Yes, a criterion is its test's docstring User and Agent lines.",
+    "source": "https://github.com/dokima-dev/dokima/issues/559#issuecomment-6183274943",
+    "criterion": "S4.5"
+   },
+   {
+    "ask": "The planner and worker prompts say: Verified by explains how the test proves the behavior",
+    "source": "https://github.com/dokima-dev/dokima/issues/559#issuecomment-6132026430",
+    "criterion": "S8.1"
+   },
+   {
+    "ask": "Yes, close #184 (closed).",
+    "source": "https://github.com/dokima-dev/dokima/issues/559#issuecomment-6183274943",
+    "criterion": "S9.1"
+   }
+  ],
+  "behaviors": [
+   {
+    "criterion": "S1.1",
+    "one_behavior": true,
+    "why": "One action, one result the owner can see."
+   },
+   {
+    "criterion": "S1.2",
+    "one_behavior": true,
+    "why": "One action, one result the owner can see."
+   },
+   {
+    "criterion": "S1.3",
+    "one_behavior": true,
+    "why": "One action, one result the owner can see."
+   },
+   {
+    "criterion": "S1.4",
+    "one_behavior": true,
+    "why": "One action, one result the owner can see."
+   },
+   {
+    "criterion": "S1.5",
+    "one_behavior": true,
+    "why": "One action, one result the owner can see."
+   },
+   {
+    "criterion": "S1.6",
+    "one_behavior": true,
+    "why": "One action, one result the owner can see."
+   },
+   {
+    "criterion": "S1.7",
+    "one_behavior": true,
+    "why": "One action, one result the owner can see."
+   },
+   {
+    "criterion": "S1.8",
+    "one_behavior": true,
+    "why": "One action, one result the owner can see."
+   },
+   {
+    "criterion": "S1.9",
+    "one_behavior": true,
+    "why": "One action, one result the owner can see."
+   },
+   {
+    "criterion": "S1.10",
+    "one_behavior": true,
+    "why": "One action, one result the owner can see."
+   },
+   {
+    "criterion": "S1.11",
+    "one_behavior": true,
+    "why": "One action, one result the owner can see."
+   },
+   {
+    "criterion": "S1.12",
+    "one_behavior": true,
+    "why": "One action, one result the owner can see."
+   },
+   {
+    "criterion": "S1.13",
+    "one_behavior": true,
+    "why": "One action, one result the owner can see."
+   },
+   {
+    "criterion": "S1.14",
+    "one_behavior": true,
+    "why": "One action, one result the owner can see."
+   },
+   {
+    "criterion": "S2.1",
+    "one_behavior": true,
+    "why": "One action, one result the owner can see."
+   },
+   {
+    "criterion": "S2.2",
+    "one_behavior": true,
+    "why": "One action, one result the owner can see."
+   },
+   {
+    "criterion": "S2.3",
+    "one_behavior": true,
+    "why": "One action, one result the owner can see."
+   },
+   {
+    "criterion": "S2.4",
+    "one_behavior": true,
+    "why": "One action, one result the owner can see."
+   },
+   {
+    "criterion": "S2.5",
+    "one_behavior": true,
+    "why": "One action, one result the owner can see."
+   },
+   {
+    "criterion": "S2.6",
+    "one_behavior": true,
+    "why": "One action, one result the owner can see."
+   },
+   {
+    "criterion": "S2.7",
+    "one_behavior": true,
+    "why": "One action, one result the owner can see."
+   },
+   {
+    "criterion": "S3.1",
+    "one_behavior": true,
+    "why": "One action, one result the owner can see."
+   },
+   {
+    "criterion": "S3.2",
+    "one_behavior": true,
+    "why": "One action, one result the owner can see."
+   },
+   {
+    "criterion": "S3.3",
+    "one_behavior": true,
+    "why": "One action, one result the owner can see."
+   },
+   {
+    "criterion": "S3.4",
+    "one_behavior": true,
+    "why": "One action, one result the owner can see."
+   },
+   {
+    "criterion": "S3.5",
+    "one_behavior": true,
+    "why": "One action, one result the owner can see."
+   },
+   {
+    "criterion": "S3.6",
+    "one_behavior": true,
+    "why": "One action, one result the owner can see."
+   },
+   {
+    "criterion": "S3.7",
+    "one_behavior": true,
+    "why": "One action, one result the owner can see."
+   },
+   {
+    "criterion": "S3.8",
+    "one_behavior": true,
+    "why": "One action, one result the owner can see."
+   },
+   {
+    "criterion": "S3.9",
+    "one_behavior": true,
+    "why": "One action, one result the owner can see."
+   },
+   {
+    "criterion": "S4.1",
+    "one_behavior": true,
+    "why": "One action, one result the owner can see."
+   },
+   {
+    "criterion": "S4.2",
+    "one_behavior": true,
+    "why": "One action, one result the owner can see."
+   },
+   {
+    "criterion": "S4.3",
+    "one_behavior": true,
+    "why": "One action, one result the owner can see."
+   },
+   {
+    "criterion": "S4.4",
+    "one_behavior": true,
+    "why": "One action, one result the owner can see."
+   },
+   {
+    "criterion": "S4.5",
+    "one_behavior": true,
+    "why": "One action, one result the owner can see."
+   },
+   {
+    "criterion": "S4.6",
+    "one_behavior": true,
+    "why": "One action, one result the owner can see."
+   },
+   {
+    "criterion": "S4.7",
+    "one_behavior": true,
+    "why": "One action, one result the owner can see."
+   },
+   {
+    "criterion": "S5.1",
+    "one_behavior": true,
+    "why": "One action, one result the owner can see."
+   },
+   {
+    "criterion": "S6.1",
+    "one_behavior": true,
+    "why": "One action, one result the owner can see."
+   },
+   {
+    "criterion": "S7.1",
+    "one_behavior": true,
+    "why": "One action, one result the owner can see."
+   },
+   {
+    "criterion": "S8.1",
+    "one_behavior": true,
+    "why": "One action, one result the owner can see."
+   },
+   {
+    "criterion": "S9.1",
+    "one_behavior": true,
+    "why": "One action, one result the owner can see."
+   },
+   {
+    "criterion": "S9.2",
+    "one_behavior": true,
+    "why": "One action, one result the owner can see."
+   },
+   {
+    "criterion": "S10.1",
+    "one_behavior": true,
+    "why": "One action, one result the owner can see."
+   }
+  ],
+  "edge_cases": [
+   {
+    "criterion": "S1.1",
+    "cut": [],
+    "missing": []
+   },
+   {
+    "criterion": "S1.2",
+    "cut": [],
+    "missing": []
+   },
+   {
+    "criterion": "S1.3",
+    "cut": [],
+    "missing": []
+   },
+   {
+    "criterion": "S1.4",
+    "cut": [],
+    "missing": []
+   },
+   {
+    "criterion": "S1.5",
+    "cut": [],
+    "missing": []
+   },
+   {
+    "criterion": "S1.6",
+    "cut": [],
+    "missing": []
+   },
+   {
+    "criterion": "S1.7",
+    "cut": [],
+    "missing": []
+   },
+   {
+    "criterion": "S1.8",
+    "cut": [],
+    "missing": []
+   },
+   {
+    "criterion": "S1.9",
+    "cut": [],
+    "missing": []
+   },
+   {
+    "criterion": "S1.10",
+    "cut": [],
+    "missing": []
+   },
+   {
+    "criterion": "S1.11",
+    "cut": [],
+    "missing": []
+   },
+   {
+    "criterion": "S1.12",
+    "cut": [],
+    "missing": []
+   },
+   {
+    "criterion": "S1.13",
+    "cut": [],
+    "missing": []
+   },
+   {
+    "criterion": "S1.14",
+    "cut": [],
+    "missing": []
+   },
+   {
+    "criterion": "S2.1",
+    "cut": [],
+    "missing": []
+   },
+   {
+    "criterion": "S2.2",
+    "cut": [],
+    "missing": []
+   },
+   {
+    "criterion": "S2.3",
+    "cut": [],
+    "missing": []
+   },
+   {
+    "criterion": "S2.4",
+    "cut": [],
+    "missing": []
+   },
+   {
+    "criterion": "S2.5",
+    "cut": [],
+    "missing": []
+   },
+   {
+    "criterion": "S2.6",
+    "cut": [],
+    "missing": []
+   },
+   {
+    "criterion": "S2.7",
+    "cut": [],
+    "missing": []
+   },
+   {
+    "criterion": "S3.1",
+    "cut": [],
+    "missing": []
+   },
+   {
+    "criterion": "S3.2",
+    "cut": [],
+    "missing": []
+   },
+   {
+    "criterion": "S3.3",
+    "cut": [],
+    "missing": []
+   },
+   {
+    "criterion": "S3.4",
+    "cut": [],
+    "missing": []
+   },
+   {
+    "criterion": "S3.5",
+    "cut": [],
+    "missing": []
+   },
+   {
+    "criterion": "S3.6",
+    "cut": [],
+    "missing": []
+   },
+   {
+    "criterion": "S3.7",
+    "cut": [],
+    "missing": []
+   },
+   {
+    "criterion": "S3.8",
+    "cut": [],
+    "missing": []
+   },
+   {
+    "criterion": "S3.9",
+    "cut": [],
+    "missing": []
+   },
+   {
+    "criterion": "S4.1",
+    "cut": [],
+    "missing": []
+   },
+   {
+    "criterion": "S4.2",
+    "cut": [],
+    "missing": []
+   },
+   {
+    "criterion": "S4.3",
+    "cut": [],
+    "missing": []
+   },
+   {
+    "criterion": "S4.4",
+    "cut": [],
+    "missing": []
+   },
+   {
+    "criterion": "S4.5",
+    "cut": [],
+    "missing": []
+   },
+   {
+    "criterion": "S4.6",
+    "cut": [],
+    "missing": []
+   },
+   {
+    "criterion": "S4.7",
+    "cut": [],
+    "missing": []
+   },
+   {
+    "criterion": "S5.1",
+    "cut": [],
+    "missing": []
+   },
+   {
+    "criterion": "S6.1",
+    "cut": [],
+    "missing": []
+   },
+   {
+    "criterion": "S7.1",
+    "cut": [],
+    "missing": []
+   },
+   {
+    "criterion": "S8.1",
+    "cut": [],
+    "missing": []
+   },
+   {
+    "criterion": "S9.1",
+    "cut": [],
+    "missing": []
+   },
+   {
+    "criterion": "S9.2",
+    "cut": [],
+    "missing": []
+   },
+   {
+    "criterion": "S10.1",
+    "cut": [],
+    "missing": []
+   }
+  ],
+  "tests": [
+   {
+    "test": "tests/test_owner_tests.py::test_no_owner_commits_locks_nothing",
+    "only_its_behavior": true,
+    "why": "Checks only its criterion's named case."
+   },
+   {
+    "test": "tests/test_owner_tests.py::test_no_owner_tests_nothing_to_file",
+    "only_its_behavior": true,
+    "why": "Checks only its criterion's named case."
+   },
+   {
+    "test": "tests/test_test_docstrings.py::test_no_docstring_rejected",
+    "only_its_behavior": true,
+    "why": "Checks only its criterion's named case."
+   },
+   {
+    "test": "tests/test_test_docstrings.py::test_user_line_at_cap_passes",
+    "only_its_behavior": true,
+    "why": "Checks only its criterion's named case."
+   },
+   {
+    "test": "tests/test_test_docstrings.py::test_verified_line_at_cap_passes",
+    "only_its_behavior": true,
+    "why": "Checks only its criterion's named case."
+   },
+   {
+    "test": "tests/test_test_docstrings.py::test_no_edge_line_passes",
+    "only_its_behavior": true,
+    "why": "Checks only its criterion's named case."
+   },
+   {
+    "test": "tests/test_test_docstrings.py::test_file_without_docstring_rejected",
+    "only_its_behavior": true,
+    "why": "Checks only its criterion's named case."
+   },
+   {
+    "test": "tests/test_parent_detail.py::test_no_parent_still_starts",
+    "only_its_behavior": true,
+    "why": "Checks only its criterion's named case."
+   },
+   {
+    "test": "tests/test_parent_detail.py::test_parent_without_comments",
+    "only_its_behavior": true,
+    "why": "Checks only its criterion's named case."
+   },
+   {
+    "test": "tests/test_parent_detail.py::test_bot_commits_not_owner_words",
+    "only_its_behavior": true,
+    "why": "Checks only its criterion's named case."
+   },
+   {
+    "test": "tests/test_owner_edits.py::test_review_from_stranger_starts_nothing",
+    "only_its_behavior": true,
+    "why": "Checks only its criterion's named case."
+   },
+   {
+    "test": "tests/test_owner_edits.py::test_bare_plan_still_starts",
+    "only_its_behavior": true,
+    "why": "Checks only its criterion's named case."
+   },
+   {
+    "test": "tests/test_text_pairs.py::test_empty_full_half_rejected",
+    "only_its_behavior": true,
+    "why": "Checks only its criterion's named case."
+   },
+   {
+    "test": "tests/test_card_pairs.py::test_older_raise_shows_as_before",
+    "only_its_behavior": true,
+    "why": "Checks only its criterion's named case."
+   },
+   {
+    "test": "tests/test_card_pairs.py::test_no_user_line_falls_back",
+    "only_its_behavior": true,
+    "why": "Checks only its criterion's named case."
+   },
+   {
+    "test": "tests/test_card_pairs.py::test_older_test_shows_first_line",
+    "only_its_behavior": true,
+    "why": "Checks only its criterion's named case."
+   },
+   {
+    "test": "tests/test_owner_commits.py::test_no_branch_starts_from_main",
+    "only_its_behavior": true,
+    "why": "Checks only its criterion's named case."
+   },
+   {
+    "test": "tests/test_owner_commits.py::test_draft_skips_for_everyone",
+    "only_its_behavior": true,
+    "why": "Checks only its criterion's named case."
+   }
+  ],
+  "size": "ok"
+ },
+ "check": {
+  "passed": true,
+  "problems": []
+ },
+ "url": "https://github.com/dokima-dev/dokima/issues/559#issuecomment-6183355362"
+}
