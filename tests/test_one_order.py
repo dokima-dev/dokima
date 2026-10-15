@@ -41,7 +41,7 @@ PLANNER_TEST = ('import os, sys\n'
 
 WORKER = r'''#!/usr/bin/env python3
 """A stand-in worker: builds x.py (build) or rewrites the planner's test to pass (cheat), then hands back."""
-import json, os
+import json, os, sys
 mode = open(os.environ["FAKE_WORKER_MODE"]).read().strip()
 if mode == "cheat":
     open("tests/test_x.py", "w").write('def test_a():\n    """Always passes."""\n')
@@ -51,7 +51,7 @@ json.dump({"summary": "Built it.", "criteria": {"57.1": "x.py, value()"}, "evide
            "raises": [], "answers": []}, open(os.path.join(os.environ["OUT"], "work.json"), "w"))
 logs = os.path.join(os.environ["HOME"], ".claude", "projects", "p")
 os.makedirs(logs, exist_ok=True)
-open(os.path.join(logs, "s.jsonl"), "w").write(json.dumps({"message": {"model": os.environ["MODEL"], "role": "assistant", "content": "Done."}}) + "\n")
+open(os.path.join(logs, "s.jsonl"), "w").write(json.dumps({"message": {"model": sys.argv[sys.argv.index("--model") + 1] if "--model" in sys.argv[:-1] else os.environ.get("MODEL", ""), "role": "assistant", "content": "Done."}}) + "\n")
 open(os.environ["FAKE_CLAUDE_MARK"], "w").write("started")
 print(json.dumps({"num_turns": 1, "duration_ms": 1000, "usage": {}}))
 '''
