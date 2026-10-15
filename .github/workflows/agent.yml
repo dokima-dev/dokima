@@ -56,7 +56,8 @@ jobs:
       PYTHONPATH: /tmp/runtime
       PYTHONSAFEPATH: "1"
       OUT: /tmp/dokima-out
-      MODEL: claude-opus-5-5
+      # Main's settings file, copied with the runtime: it names each role's agent, model and key secret (#698).
+      DOKIMA_SETTINGS: /tmp/runtime/.dokima/agents.yml
       # A card already up for this run: queued by the listener, or by the hand-off that started it.
       CARD_ID: ${{ (inputs.card || github.event.client_payload.card) }}
     steps:
@@ -78,6 +79,7 @@ jobs:
         # AGENTS.md and the topic files it links come too: the river checks the owner's words a plan reviewer quotes from them.
         run: |
           mkdir -p /tmp/runtime && cp -r dokima /tmp/runtime/dokima
+          if [ -f .dokima/agents.yml ]; then mkdir -p /tmp/runtime/.dokima && cp .dokima/agents.yml /tmp/runtime/.dokima/; fi
           if [ -f AGENTS.md ]; then
             cp AGENTS.md /tmp/runtime/
             grep -oE '\]\([^)#: ]+\.md' AGENTS.md | cut -c3- | sort -u | while read -r f; do
@@ -95,6 +97,13 @@ jobs:
           python3 -m dokima.plan approvers | tr ',' '\n' | grep -qx "$SENDER" \
             || { echo "$SENDER is not a code owner, so they cannot start an agent." > /tmp/why.txt
                  echo "::error title=Not started::$(cat /tmp/why.txt)"; exit 1; }
+      - name: The role's agent, model and key from the settings file
+        # A role naming an unknown subscription or agent, or no model, stops here, before any agent starts.
+        run: |
+          { M=$(python3 -m dokima.agents model "$ROLE") && K=$(python3 -m dokima.agents key "$ROLE"); } 2> /tmp/agents-err.txt \
+            || { echo "The settings file stopped the run: $(paste -sd' ' /tmp/agents-err.txt)" > /tmp/why.txt
+                 echo "::error title=Bad settings::$(cat /tmp/why.txt)"; exit 1; }
+          echo "MODEL=$M" >> "$GITHUB_ENV"; echo "AGENT_KEY=$K" >> "$GITHUB_ENV"
       # The run's card moves through its stages (queued, setting up, agent working, checking, then its record), each
       # written by this job's own steps, each with a key made for that one call and revoked at once: no bot key stays
       # live on this machine while the branch's code, its tests, the agent or the hand-back check run. Every stage
@@ -250,7 +259,7 @@ jobs:
       - name: Install pytest and Claude Code
         run: |
           set -o pipefail
-          { pip install pytest pytest-xdist pytest-testmon && npm install -g @anthropic-ai/claude-code; } 2>&1 | tee /tmp/install.txt \
+          { pip install pytest pytest-xdist pytest-testmon && python3 -m dokima.agents install "$ROLE"; } 2>&1 | tee /tmp/install.txt \
             || { echo "The step 'Install pytest and Claude Code' failed: $(tail -3 /tmp/install.txt | paste -sd' ')" > /tmp/why.txt; exit 1; }
       # The newest testmon baseline recorded on main (testmon.yml), so the review runs only the tests its change can affect.
       - name: Restore main's testmon baseline
@@ -305,9 +314,10 @@ jobs:
           gh api -X DELETE installation/token --silent || echo "::warning title=Key not revoked::the card's key could not be revoked"
       - name: The agent starts now
         run: echo "STARTED=true" >> "$GITHUB_ENV"
+      # The role's agent, through the one agent interface, with the key from the secret its subscription names.
       - name: The agent (Claude Code)
         env:
-          CLAUDE_CODE_OAUTH_TOKEN: ${{ secrets.CLAUDE_CODE_OAUTH_TOKEN }}
+          DOKIMA_AGENT_KEY: ${{ secrets[env.AGENT_KEY || 'CLAUDE_CODE_OAUTH_TOKEN'] }}
         run: |
           mkdir -p "$OUT"
           case "$ROLE$STAGE" in
@@ -318,7 +328,7 @@ jobs:
           esac
           CHECK="$CHECK && python3 -m dokima.agent check-round $ROLE $OUT/$FILE $PACK"
           echo "CHECK=$CHECK" >> "$GITHUB_ENV"
-          claude -p "$(cat /tmp/runtime/dokima/roles/style.md /tmp/runtime/dokima/roles/$GRADE.md /tmp/runtime/dokima/roles/$ROLE.md)
+          printf '%s' "$(cat /tmp/runtime/dokima/roles/style.md /tmp/runtime/dokima/roles/$GRADE.md /tmp/runtime/dokima/roles/$ROLE.md)
 
           # Your pack
           - $PACK/issue.md: issue #$N as it stands, with every comment (the owner's words and answers are here).
@@ -330,8 +340,8 @@ jobs:
           - $PACK/worker-run/: the worker's session log." )
           You are on branch try/issue-$N. Your stage is: ${STAGE:-$ROLE}.
           Hand back into $OUT. Before you finish, run this check on your hand-back and fix everything it reports:
-            $CHECK" \
-            --model "$MODEL" --dangerously-skip-permissions --max-turns 60 --output-format json > "$OUT/claude.json"
+            $CHECK" > /tmp/prompt.md
+          python3 -m dokima.agents run "$ROLE" /tmp/prompt.md "$OUT"
       # The card says checking, with a key made for this one edit and revoked before code checks the hand-back.
       - id: checking-key
         if: always() && !cancelled() && env.STARTED == 'true' && env.CARD_ID != ''
@@ -436,6 +446,7 @@ jobs:
         if: always()
         env:
           SCRUB_CLAUDE: ${{ secrets.CLAUDE_CODE_OAUTH_TOKEN }}
+          SCRUB_AGENT: ${{ secrets[env.AGENT_KEY || 'CLAUDE_CODE_OAUTH_TOKEN'] }}
           SCRUB_GITHUB: ${{ github.token }}
         run: |
           python3 -c "
@@ -462,13 +473,14 @@ jobs:
           SCRUB_CLAUDE: ${{ secrets.CLAUDE_CODE_OAUTH_TOKEN }}
           SCRUB_GITHUB: ${{ github.token }}
           SCRUB_APP: ${{ steps.app.outputs.token }}
+          SCRUB_AGENT: ${{ secrets[env.AGENT_KEY || 'CLAUDE_CODE_OAUTH_TOKEN'] }}
         run: |
           W=/tmp/logs-branch; R="https://x-access-token:${GH_TOKEN}@github.com/${GITHUB_REPOSITORY}.git"
           if git ls-remote --exit-code --heads origin logs >/dev/null; then git clone -q --depth 1 -b logs "$R" "$W"
           else git init -q "$W" && git -C "$W" checkout -q --orphan logs && git -C "$W" remote add origin "$R"; fi
           mkdir -p "$W/$(dirname "$LOG")"
           { echo "# ${ROLE}${STAGE:+ ($STAGE)} for #$N"; echo; echo "Run: ${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }}"; echo
-            python3 -m dokima.agent transcript /home/runner/.claude/projects; } > "$W/$LOG"
+            python3 -m dokima.agent transcript /home/runner/.claude/projects "$ROLE"; } > "$W/$LOG"
           BOT_ID=$(gh api "users/${SLUG}[bot]" --jq .id)
           git -C "$W" -c user.name="${SLUG}[bot]" -c user.email="${BOT_ID}+${SLUG}[bot]@users.noreply.github.com" add -A
           git -C "$W" -c user.name="${SLUG}[bot]" -c user.email="${BOT_ID}+${SLUG}[bot]@users.noreply.github.com" commit -qm "Conversation of run ${{ github.run_id }}"
