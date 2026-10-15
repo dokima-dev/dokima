@@ -102,10 +102,31 @@ def pack_parent(*dirs):
     return None
 
 
+def committed_words(repo, number, owners):
+    """The lines each code owner added on the issue's branch, as {commit link: text}.
+
+    Text the owner commits is their words (#708). A commit by anyone else gives nothing. No branch yet, or GitHub failing, gives none, and says why."""
+    out = {}
+    try:
+        compare = json.loads(agent_github.gh("api", f"repos/{repo}/compare/main...try/issue-{number}"))
+        for c in compare.get("commits") or []:
+            if (c.get("author") or {}).get("login") not in owners:
+                continue
+            full = json.loads(agent_github.gh("api", f"repos/{repo}/commits/{c['sha']}"))
+            added = [line[1:] for f in full.get("files") or [] for line in (f.get("patch") or "").splitlines()
+                     if line.startswith("+") and not line.startswith("+++")]
+            out[c.get("html_url") or full.get("html_url")] = "\n".join(added)
+    except Exception as e:  # noqa: BLE001 - any failure means GitHub did not say: no commit counts
+        why = gh_reason(e) if isinstance(e, subprocess.CalledProcessError) else str(e)
+        print(f"No commit on try/issue-{number} counts as the owner's words: {why or 'GitHub named none'}", file=sys.stderr)
+        return {}
+    return out
+
+
 def owner_words(repo, number, d, items, owners):
     """Where the owner said things, as {link: text}: the issue's own ask, each code owner's
-    comment, and the same on its parent issue. Every criterion of a plan must quote words found at its source link
-    (#416)."""
+    comment, the lines they committed on the issue's branch, and the parent issue's ask and their comments on it. Every
+    criterion of a plan must quote words found at its source link (#416)."""
     from dokima.body import ask
     mine = lambda c: (c.get("author") or {}).get("login") in owners and c.get("url")
     from dokima.body import STORY
@@ -117,6 +138,7 @@ def owner_words(repo, number, d, items, owners):
     if up:
         out[issue_url(up["number"])] = ask(up["body"])
         out.update({c["url"]: c.get("body") or "" for c in up["comments"] if mine(c)})
+    out.update(committed_words(repo, number, owners))
     return out
 
 
@@ -129,7 +151,7 @@ def pack(repo, number, role, stage, dest):
 
     The issue and its PRs' conversation from GitHub, every agent record so far from the record files (#610),
     the open raises this role must answer (open_blockers.json), the newest passed plan, the issue's parent on GitHub (parent.json, naming none when it has none or GitHub cannot
-    say) and, for the planner and the reviewer, every open issue of the repo. The pull request review also gets the worker's session log from its run."""
+    say), the owner's words with the parent's ask and the owner's comments on it, for every role (owner_words.json, #708) and, for the planner and the reviewer, every open issue of the repo. The pull request review also gets the worker's session log from its run."""
     d, items = conversation(repo, number)
     # Every earlier record comes from its record file on the logs branch, never from a comment (#610).
     recs = saved_records(repo, number)
@@ -138,9 +160,9 @@ def pack(repo, number, role, stage, dest):
     json.dump({"number": parent_of(repo, number)}, open(os.path.join(dest, "parent.json"), "w"))
     if listed is not None:
         json.dump(listed, open(os.path.join(dest, "open_issues.json"), "w"), indent=1)
-    if role == "planner":
-        owners = [o for o in os.environ.get("OWNERS", "").split(",") if o]
-        json.dump(owner_words(repo, number, d, items, owners), open(os.path.join(dest, "owner_words.json"), "w"), indent=1)
+    # Every role on a story reads the parent's ask and the owner's words, not only the planner (#708).
+    owners = [o for o in os.environ.get("OWNERS", "").split(",") if o]
+    json.dump(owner_words(repo, number, d, items, owners), open(os.path.join(dest, "owner_words.json"), "w"), indent=1)
     # The open raises this agent must answer; the file keeps the name the workflows give it.
     json.dump(raises_for(recs, role), open(os.path.join(dest, "open_blockers.json"), "w"), indent=1)
     open(os.path.join(dest, "issue.md"), "w").write(issue_text(d, items))

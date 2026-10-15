@@ -114,11 +114,14 @@ def check_files(where, c):
         raise Garbled(f"{where} lists no file: give files as a non-empty list of the code files it changes")
 
 
-def check_source(where, source, issue):
+def check_source(where, source, issue, said=None):
     """Garbled unless the source is this issue's link or one of its comment links; no issue given, nothing to check.
 
-    The issue may be a pair (this issue's link, its parent's link): then a link to the parent or its comments counts too."""
+    The issue may be a pair (this issue's link, its parent's link): then a link to the parent or its comments counts too.
+    A commit link among the owner's words (`said`) counts too: text the owner committed is their words (#708)."""
     if not issue:
+        return
+    if said and re.search(r"/commit/[0-9a-f]+$", source.strip()) and source.strip() in said:
         return
     links = (issue,) if isinstance(issue, str) else tuple(issue)
     if any(re.fullmatch(re.escape(link) + r"(#issuecomment-\d+)?", source.strip()) for link in links):
@@ -216,7 +219,7 @@ def check_stories(stories, issue=None, said=None):
             for key in ("text", "source"):
                 if not isinstance(c.get(key), str) or not c[key].strip():
                     raise Garbled(f"story {n}: acceptance criterion {k} has no {key}")
-            check_source(f"story {n}: acceptance criterion {k}", c["source"], issue)
+            check_source(f"story {n}: acceptance criterion {k}", c["source"], issue, said)
             check_words(f"story {n}: acceptance criterion {k}", c, said)
             check_files(f"story {n}: acceptance criterion {k}", c)
         nfr = s.get("non_functional", [])
@@ -313,7 +316,7 @@ def from_kind(p, issue=None, said=None):
             if not isinstance(c.get(key), str) or not c[key].strip():
                 raise Garbled(f"acceptance criterion {k} has no {'source link' if key == 'source' else key}: "
                               f"its {key} must be non-empty text")
-        check_source(f"acceptance criterion {k}", c["source"], issue)
+        check_source(f"acceptance criterion {k}", c["source"], issue, said)
         check_words(f"acceptance criterion {k}", c, said)
         check_files(f"acceptance criterion {k}", c)
     if not isinstance(nfr, list):
