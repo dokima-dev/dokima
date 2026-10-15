@@ -24,7 +24,7 @@ SETTINGS = os.path.join(".dokima", "agents.yml")
 
 # Per agent: its login command (the region follows it) and where that login saves the sign-in, under the home folder.
 LOGIN = {"kimi": ["kimi", "login", "--region"]}
-SIGN_IN = {"kimi": [".kimi/credentials", ".kimi/config.toml"]}
+SIGN_IN = {"kimi": [".kimi-code/credentials", ".kimi-code/config.toml", ".kimi-code/device_id", ".kimi-code/region"]}
 
 NEEDS = """A subscription needs:
 - membership: the plan you pay for, and the agent it runs (for example kimi or codex).
