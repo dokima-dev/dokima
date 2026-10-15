@@ -1,0 +1,53 @@
+{
+ "role": "worker",
+ "stage": null,
+ "run_id": "38685708147",
+ "commit_before": "d5c4b603b8d186077378f026ddc08ee7c93d4532",
+ "started_by": "dokima-runtime[bot]",
+ "models": [
+  "claude-opus-5-5"
+ ],
+ "report": {
+  "duration_ms": 122474,
+  "turns": 15,
+  "cost_usd": 0.69863,
+  "tokens_in": 701755,
+  "tokens_out": 8285
+ },
+ "log": "https://github.com/dokima-dev/dokima/blob/logs/logs/708/38685708147-worker.md",
+ "run": "https://github.com/dokima-dev/dokima/actions/runs/38685708147",
+ "handback": {
+  "summary": "Every role's pack now holds the parent's ask and owner comments; owner commits on the branch count as words.",
+  "criteria": {
+   "708.1": "`pack()` in `dokima/agent_roles.py` writes `owner_words.json`, with the parent's ask, for every role, the worker included.",
+   "708.2": "The same `owner_words.json` holds the owner's comments on the parent, for the worker.",
+   "708.3": "The same file reaches both the plan review and the code review packs.",
+   "708.4": "The owner's comments on the parent reach both reviewers through that file.",
+   "708.5": "`committed_words()` adds the lines each owner added on `try/issue-N` by commit link; `check_source()` in `dokima/planner.py` accepts such a commit link.",
+   "708.6": "Already built in `route()`; its test passed before any change.",
+   "708.7": "Already built in `issue_text()`; its test passed before any change."
+  },
+  "evidence": "`pytest -q tests/test_story_reads_parent.py tests/test_agent.py`: 32 passed",
+  "raises": [
+   {
+    "kind": "issue",
+    "label": "Commit links elsewhere",
+    "text": "Answers on autopilot still refuse a commit link as the owner's words, so a committed line cannot settle a question.",
+    "evidence": "`dokima/agent_checks.py` `owner_source()` accepts only issue and comment links.",
+    "raised_by": "worker",
+    "id": "W1"
+   }
+  ]
+ },
+ "check": {
+  "passed": true,
+  "problems": []
+ },
+ "dropped_by_fence": [],
+ "files_changed": [
+  "dokima/agent_roles.py",
+  "dokima/planner.py"
+ ],
+ "branch": "try/issue-708",
+ "url": "https://github.com/dokima-dev/dokima/issues/708#issuecomment-6184968685"
+}
