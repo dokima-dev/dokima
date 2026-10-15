@@ -1,0 +1,47 @@
+{
+ "role": "worker",
+ "stage": null,
+ "run_id": "38678078111",
+ "commit_before": "47fdf8b9273cc4537fa1c6c53519b831606cb119",
+ "started_by": "dokima-runtime[bot]",
+ "models": [
+  "claude-opus-5-5"
+ ],
+ "report": {
+  "duration_ms": 123908,
+  "turns": 12,
+  "cost_usd": 0.4612744,
+  "tokens_in": 476888,
+  "tokens_out": 4698
+ },
+ "log": "https://github.com/dokima-dev/dokima/blob/logs/logs/699/38678078111-worker.md",
+ "run": "https://github.com/dokima-dev/dokima/actions/runs/38678078111",
+ "handback": {
+  "summary": "Added a Kimi adapter that puts the stored sign-in back, then starts Kimi with the role's model.",
+  "criteria": {
+   "699.1": "`dokima/agent_kimi.py` `run()` starts `kimi -p PROMPT --model MODEL --output-format stream-json` and returns Kimi's exit code.",
+   "699.2": "`dokima/agent_kimi.py` `restore_sign_in()` unpacks the stored base64 gzip tar into the home folder before Kimi starts."
+  },
+  "evidence": "`pytest -q tests/test_agent_kimi.py`: 3 passed in 0.35s",
+  "raises": [
+   {
+    "kind": "issue",
+    "label": "Tests read runner settings",
+    "text": "Nine agent interface tests fail on a runner because the runner's settings path leaks into them.",
+    "evidence": "`tests/test_agents.py` keeps `DOKIMA_SETTINGS`; 9 fail with it set, all pass with `env -u DOKIMA_SETTINGS`.",
+    "raised_by": "worker",
+    "id": "W1"
+   }
+  ]
+ },
+ "check": {
+  "passed": true,
+  "problems": []
+ },
+ "dropped_by_fence": [],
+ "files_changed": [
+  "dokima/agent_kimi.py"
+ ],
+ "branch": "try/issue-699",
+ "url": "https://github.com/dokima-dev/dokima/issues/699#issuecomment-6183938110"
+}
