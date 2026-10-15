@@ -1,0 +1,66 @@
+{
+ "role": "planner",
+ "stage": null,
+ "run_id": "38680691282",
+ "commit_before": "f71d144d2bd98ab2068596b1eb49ecf40534e27a",
+ "started_by": "dokima-runtime[bot]",
+ "models": [
+  "claude-opus-5-5"
+ ],
+ "report": {
+  "duration_ms": 143059,
+  "turns": 14,
+  "cost_usd": 0.5871114000000001,
+  "tokens_in": 529446,
+  "tokens_out": 8166
+ },
+ "log": "https://github.com/dokima-dev/dokima/blob/logs/logs/700/38680691282-planner.md",
+ "run": "https://github.com/dokima-dev/dokima/actions/runs/38680691282",
+ "handback": {
+  "kind": "user_story",
+  "title": "A role can run on Codex CLI",
+  "summary": "Any role named for a Codex subscription runs in Codex CLI, on the model the settings file gives.",
+  "user_story": "The owner moves any role to Codex by naming a Codex subscription for it.",
+  "acceptance_criteria": [
+   {
+    "text": "A role on a Codex subscription runs in Codex CLI, with the Codex model the file names.",
+    "words": "Codex in Codex CLI",
+    "source": "https://github.com/dokima-dev/dokima/issues/696#issuecomment-6181290061",
+    "files": [
+     "dokima/agent_codex.py"
+    ],
+    "edge_cases": [
+     {
+      "case": "Codex fails, so the run fails with its exit code.",
+      "test": "tests/test_agent_codex.py::test_a_failed_codex_run_fails_the_run"
+     },
+     {
+      "case": "Codex starts read-only unless told, so a worker could not build.",
+      "test": "tests/test_agent_codex.py::test_a_codex_run_may_change_files"
+     }
+    ]
+   }
+  ],
+  "non_functional": [],
+  "tests": {
+   "700.1": [
+    "tests/test_agent_codex.py::test_a_codex_role_runs_in_codex_cli_with_its_model",
+    "tests/test_agent_codex.py::test_a_codex_run_may_change_files",
+    "tests/test_agent_codex.py::test_a_failed_codex_run_fails_the_run"
+   ]
+  },
+  "test_changes": {},
+  "links": {
+   "blocked_by": [],
+   "blocks": [],
+   "relates_to": [
+    39
+   ]
+  }
+ },
+ "check": {
+  "passed": true,
+  "problems": []
+ },
+ "url": "https://github.com/dokima-dev/dokima/issues/700#issuecomment-6184296501"
+}
