@@ -1,0 +1,68 @@
+{
+ "role": "reviewer",
+ "stage": "plan",
+ "run_id": "38675681190",
+ "commit_before": "76337df52ac69ab0ff91e88cfeb25b8930e9696b",
+ "started_by": "dokima-runtime[bot]",
+ "models": [
+  "claude-opus-5-5"
+ ],
+ "report": {
+  "duration_ms": 36054,
+  "turns": 7,
+  "cost_usd": 0.30924240000000003,
+  "tokens_in": 232310,
+  "tokens_out": 3377
+ },
+ "log": "https://github.com/dokima-dev/dokima/blob/logs/logs/716/38675681190-reviewer-plan.md",
+ "run": "https://github.com/dokima-dev/dokima/actions/runs/38675681190",
+ "handback": {
+  "previous_step": {
+   "did": [
+    "The 716.1 check now plays the owner by their real login as repository owner."
+   ],
+   "decided": [
+    "The planner kept the older merge gate check, since new tests passing today are rejected."
+   ],
+   "open": []
+  },
+  "verdict": "approve",
+  "summary": "The check now catches any rule skipping the owner by name, so the plan proves its one promise.",
+  "raises": [],
+  "answers": [],
+  "asks": [
+   {
+    "ask": "A push by the owner to a Dokima pull request runs all tests, with no rule skipping the owner.",
+    "source": "https://github.com/dokima-dev/dokima/issues/716",
+    "criterion": "716.1"
+   }
+  ],
+  "behaviors": [
+   {
+    "criterion": "716.1",
+    "one_behavior": true,
+    "why": "One push by the owner, one result: all tests run."
+   }
+  ],
+  "edge_cases": [
+   {
+    "criterion": "716.1",
+    "cut": [],
+    "missing": []
+   }
+  ],
+  "tests": [
+   {
+    "test": "tests/test_checks.py::test_full_suite_runs_every_test_on_every_pull_request",
+    "only_its_behavior": true,
+    "why": "Its 716.1 part plays bot and owner pushes; other asserts belong to older criteria, each named."
+   }
+  ],
+  "size": "ok"
+ },
+ "check": {
+  "passed": true,
+  "problems": []
+ },
+ "url": "https://github.com/dokima-dev/dokima/issues/716#issuecomment-6183623999"
+}
