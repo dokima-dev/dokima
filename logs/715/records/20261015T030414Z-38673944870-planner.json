@@ -1,0 +1,92 @@
+{
+ "role": "planner",
+ "stage": null,
+ "run_id": "38673944870",
+ "commit_before": "cfb11e4519569d5ea3fdade9e1ce41dad37b38bd",
+ "started_by": "dokima-runtime[bot]",
+ "models": [
+  "claude-opus-5-5"
+ ],
+ "report": {
+  "duration_ms": 183738,
+  "turns": 25,
+  "cost_usd": 1.2452448,
+  "tokens_in": 1513481,
+  "tokens_out": 17795
+ },
+ "log": "https://github.com/dokima-dev/dokima/blob/logs/logs/715/38673944870-planner.md",
+ "run": "https://github.com/dokima-dev/dokima/actions/runs/38673944870",
+ "handback": {
+  "kind": "user_story",
+  "title": "A re-plan and code review keep the owner's commits",
+  "summary": "Commits the owner pushes to a Dokima branch stay through a re-plan and reach the code review.",
+  "user_story": "Commits the owner pushes to a Dokima branch stay through a re-plan and reach the code review.",
+  "acceptance_criteria": [
+   {
+    "text": "A re-plan starts on the branch with the owner's commits still in it.",
+    "words": "a re-plan keeps my commits",
+    "source": "https://github.com/dokima-dev/dokima/issues/559",
+    "files": [
+     ".github/workflows/agent.yml"
+    ],
+    "edge_cases": [
+     {
+      "case": "The branch clashes with main, as when main moved under the owner's work.",
+      "test": "tests/test_owner_commits_kept.py::test_a_replan_starts_on_the_branch_with_the_owners_commits"
+     }
+    ]
+   },
+   {
+    "text": "The code review's diff holds the owner's commits on the branch.",
+    "words": "My work goes through the same reviews and checks as agent work.",
+    "source": "https://github.com/dokima-dev/dokima/issues/559",
+    "files": [
+     ".github/workflows/agent.yml"
+    ],
+    "edge_cases": [
+     {
+      "case": "Main moved on after the branch split off; its change is not shown as the owner's.",
+      "test": "tests/test_owner_commits_kept.py::test_the_code_reviews_diff_holds_the_owners_commits"
+     }
+    ]
+   }
+  ],
+  "non_functional": [],
+  "tests": {
+   "715.1": [
+    "tests/test_owner_commits_kept.py::test_a_replan_starts_on_the_branch_with_the_owners_commits"
+   ],
+   "715.2": [
+    "tests/test_owner_commits_kept.py::test_the_code_reviews_diff_holds_the_owners_commits"
+   ]
+  },
+  "test_changes": {},
+  "links": {
+   "blocked_by": [],
+   "blocks": [],
+   "relates_to": [
+    707,
+    716
+   ]
+  },
+  "raises": [
+   {
+    "kind": "question",
+    "to": "owner",
+    "label": "Doubt: already true",
+    "text": "Both asks already hold, so the check rejects their new tests. Close this, or allow pinning tests? Plan assumes pinning.",
+    "evidence": "Both tests in `tests/test_owner_commits_kept.py` pass on main; `passing_today()` in `dokima/planner.py` rejects them.",
+    "raised_by": "planner",
+    "id": "P1"
+   }
+  ],
+  "answers": []
+ },
+ "check": {
+  "passed": false,
+  "problems": [
+   "::error title=Planner output rejected::tests/test_owner_commits_kept.py::test_a_replan_starts_on_the_branch_with_the_owners_commits is a new test that passes today (or is skipped); every new test must fail on today's code; tests/test_owner_commits_kept.py::test_the_code_reviews_diff_holds_the_owners_commits is a new test that passes today (or is skipped); every new test must fail on today's code"
+  ]
+ },
+ "url": "https://github.com/dokima-dev/dokima/issues/715#issuecomment-6183401922"
+}
