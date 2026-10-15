@@ -1,0 +1,79 @@
+{
+ "role": "reviewer",
+ "stage": "plan",
+ "run_id": "38687598660",
+ "commit_before": "e60be0ae6a924a4fa173ffbb3237eedce2c52355",
+ "started_by": "RezaSoleymanifar",
+ "models": [
+  "claude-opus-5-5"
+ ],
+ "report": {
+  "duration_ms": 29863,
+  "turns": 6,
+  "cost_usd": 0.3040414,
+  "tokens_in": 213663,
+  "tokens_out": 2126
+ },
+ "log": "https://github.com/dokima-dev/dokima/blob/logs/logs/700/38687598660-reviewer-plan.md",
+ "run": "https://github.com/dokima-dev/dokima/actions/runs/38687598660",
+ "handback": {
+  "previous_step": {
+   "did": [
+    "The plan is unchanged: one criterion, a Codex role runs Codex CLI on its model.",
+    "The owner said the red suite was a flaky clone, now passed on rerun."
+   ],
+   "decided": [
+    "A Codex run gets its key, may change files, and fails when Codex fails."
+   ],
+   "open": []
+  },
+  "verdict": "approve",
+  "summary": "The plan still carries the one ask, and its three tests fail without the Codex adapter.",
+  "raises": [],
+  "answers": [],
+  "asks": [
+   {
+    "ask": "A role on a Codex subscription runs in Codex CLI, with the Codex model the file names.",
+    "source": "https://github.com/dokima-dev/dokima/issues/696#issuecomment-6181290061",
+    "criterion": "700.1"
+   }
+  ],
+  "behaviors": [
+   {
+    "criterion": "700.1",
+    "one_behavior": true,
+    "why": "One action, starting a Codex role, with one result: Codex runs on that model."
+   }
+  ],
+  "edge_cases": [
+   {
+    "criterion": "700.1",
+    "cut": [],
+    "missing": []
+   }
+  ],
+  "tests": [
+   {
+    "test": "tests/test_agent_codex.py::test_a_codex_role_runs_in_codex_cli_with_its_model",
+    "only_its_behavior": true,
+    "why": "Checks Codex starts once, unattended, with the prompt, model and key; fails without the adapter."
+   },
+   {
+    "test": "tests/test_agent_codex.py::test_a_codex_run_may_change_files",
+    "only_its_behavior": true,
+    "why": "Checks Codex starts with write access; fails without the adapter."
+   },
+   {
+    "test": "tests/test_agent_codex.py::test_a_failed_codex_run_fails_the_run",
+    "only_its_behavior": true,
+    "why": "Checks a failing Codex ends the run with its exit code; fails without the adapter."
+   }
+  ],
+  "size": "ok"
+ },
+ "check": {
+  "passed": true,
+  "problems": []
+ },
+ "url": "https://github.com/dokima-dev/dokima/issues/700#issuecomment-6185248584"
+}
