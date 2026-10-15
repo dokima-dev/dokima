@@ -1,0 +1,47 @@
+{
+ "role": "reviewer",
+ "stage": "pr",
+ "run_id": "38670254883",
+ "commit_before": "cc59b0ed0d8a052b8d0858688768b5afb24d1b15",
+ "started_by": "dokima-runtime[bot]",
+ "models": [
+  "claude-opus-5-5"
+ ],
+ "report": {
+  "duration_ms": 30325,
+  "turns": 9,
+  "cost_usd": 0.2994878,
+  "tokens_in": 358239,
+  "tokens_out": 2293
+ },
+ "log": "https://github.com/dokima-dev/dokima/blob/logs/logs/697/38670254883-reviewer-pr.md",
+ "run": "https://github.com/dokima-dev/dokima/actions/runs/38670254883",
+ "handback": {
+  "previous_step": {
+   "did": [
+    "The worker changed no code this round.",
+    "The worker ran the setup tests again; all eleven passed."
+   ],
+   "decided": [
+    "The worker took the owner's word that the red suite was a flake."
+   ],
+   "open": [
+    "Nothing is open."
+   ]
+  },
+  "verdict": "approve",
+  "summary": "The setup command meets all six criteria, and the full suite passed when it ran again.",
+  "raises": [],
+  "answers": [],
+  "asks": [],
+  "behaviors": [],
+  "edge_cases": [],
+  "tests": [],
+  "size": "ok"
+ },
+ "check": {
+  "passed": true,
+  "problems": []
+ },
+ "url": "https://github.com/dokima-dev/dokima/pull/702#issuecomment-6182901890"
+}
