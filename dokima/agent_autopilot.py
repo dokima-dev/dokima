@@ -434,6 +434,7 @@ def start_unblocked(repo, numbers, owners):
     starts and the issue says why."""
     started, did = [], []
     for n in numbers:
+        items = None
         if started_before(repo, n):
             d, items = conversation(repo, n)
             if not plans_again(items, owners, d.get("body") or "", n):
@@ -449,6 +450,20 @@ def start_unblocked(repo, numbers, owners):
             start_planner(repo, n)
             started.append(n)
             did.append(f"started the planner for #{n}")
+        elif not blockers and items is not None:
+            # A story whose approved plan waited its turn to build plans again once the story it waited for merged (#668).
+            from dokima import turns
+            try:
+                ended = turns.turn_ended(repo, n, records(items))
+            except subprocess.CalledProcessError as e:
+                agent_github.gh("issue", "comment", str(n), "-R", repo, "--body",
+                   f"Autopilot did not start the planner: GitHub could not list the stories sharing files with #{n}: {gh_reason(e)}.")
+                did.append(f"could not list the stories sharing files with #{n}")
+                continue
+            if ended:
+                start_planner(repo, n)
+                started.append(n)
+                did.append(f"started the planner for #{n}")
     return started, did
 
 
