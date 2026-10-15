@@ -1,0 +1,160 @@
+{
+ "role": "reviewer",
+ "stage": "plan",
+ "run_id": "38662971957",
+ "commit_before": "a4c10e8eb5fe27065469f936a1dcc5bb721c5027",
+ "started_by": "dokima-runtime[bot]",
+ "models": [
+  "claude-opus-5-5"
+ ],
+ "report": {
+  "duration_ms": 59017,
+  "turns": 11,
+  "cost_usd": 0.5481604000000001,
+  "tokens_in": 464882,
+  "tokens_out": 5572
+ },
+ "log": "https://github.com/dokima-dev/dokima/blob/logs/logs/668/38662971957-reviewer-plan.md",
+ "run": "https://github.com/dokima-dev/dokima/actions/runs/38662971957",
+ "handback": {
+  "previous_step": {
+   "did": [
+    "The planner wrote five criteria and four new tests that fail today.",
+    "It pinned the own pull request into main with an existing test."
+   ],
+   "decided": [
+    "Once the other story merges, the waiting story plans again, not building its old plan."
+   ],
+   "open": [
+    "It asked whether pinning the already true pull request rule is enough."
+   ]
+  },
+  "verdict": "approve",
+  "summary": "The plan carries every ask, each with a test that fails today because the wait is missing.",
+  "raises": [],
+  "answers": [
+   {
+    "raise": "P1",
+    "answer": "done",
+    "why": "The owner asked only to keep it so and pin it, which the existing test does.",
+    "words": "Each story already merges to main on its own pull request with no parent branch; keep it so and pin it.",
+    "source": "https://github.com/dokima-dev/dokima/issues/668",
+    "changes": false
+   }
+  ],
+  "asks": [
+   {
+    "ask": "The owner settled it: a story's turn ends when its pull request merges.",
+    "source": "https://github.com/dokima-dev/dokima/issues/668",
+    "criterion": "668.1"
+   },
+   {
+    "ask": "planner and plan-review starts must not be touched by the wait.",
+    "source": "https://github.com/dokima-dev/dokima/issues/668",
+    "criterion": "668.2"
+   },
+   {
+    "ask": "Markdown files never cause a wait.",
+    "source": "https://github.com/dokima-dev/dokima/issues/668",
+    "criterion": "668.3"
+   },
+   {
+    "ask": "Each story already merges to main on its own pull request with no parent branch; keep it so and pin it.",
+    "source": "https://github.com/dokima-dev/dokima/issues/668",
+    "criterion": "668.4"
+   },
+   {
+    "ask": "before the worker starts, the clash check runs again on the story's final file list.",
+    "source": "https://github.com/dokima-dev/dokima/issues/668",
+    "criterion": "668.5"
+   }
+  ],
+  "behaviors": [
+   {
+    "criterion": "668.1",
+    "one_behavior": true,
+    "why": "One wait, ending when the other story's pull request merges."
+   },
+   {
+    "criterion": "668.2",
+    "one_behavior": true,
+    "why": "Planning and plan review start despite a clash."
+   },
+   {
+    "criterion": "668.3",
+    "one_behavior": true,
+    "why": "A shared markdown file alone causes no wait."
+   },
+   {
+    "criterion": "668.4",
+    "one_behavior": true,
+    "why": "Each story opens its own pull request into main."
+   },
+   {
+    "criterion": "668.5",
+    "one_behavior": true,
+    "why": "The clash check uses the story's own final plan files."
+   }
+  ],
+  "edge_cases": [
+   {
+    "criterion": "668.1",
+    "cut": [],
+    "missing": []
+   },
+   {
+    "criterion": "668.2",
+    "cut": [],
+    "missing": []
+   },
+   {
+    "criterion": "668.3",
+    "cut": [],
+    "missing": []
+   },
+   {
+    "criterion": "668.4",
+    "cut": [],
+    "missing": []
+   },
+   {
+    "criterion": "668.5",
+    "cut": [],
+    "missing": []
+   }
+  ],
+  "tests": [
+   {
+    "test": "tests/test_build_turns.py::test_a_story_sharing_a_code_file_builds_only_after_the_other_story_merges",
+    "only_its_behavior": true,
+    "why": "Fails today: the worker starts while the other story builds; covers the wait and its end."
+   },
+   {
+    "test": "tests/test_build_turns.py::test_planning_and_plan_review_never_wait_on_another_story",
+    "only_its_behavior": true,
+    "why": "Planner and reviewer start beside a real clash; fails today because no clash holds."
+   },
+   {
+    "test": "tests/test_build_turns.py::test_a_shared_markdown_file_never_makes_a_build_wait",
+    "only_its_behavior": true,
+    "why": "Markdown-only sharing builds; the code-sharing case waits, failing today."
+   },
+   {
+    "test": "tests/test_worker_pr.py::test_a_worker_with_nothing_new_to_push_still_opens_its_pull_request",
+    "only_its_behavior": true,
+    "why": "Fails if the pull request were opened into any branch but main."
+   },
+   {
+    "test": "tests/test_build_turns.py::test_a_story_whose_plan_adds_files_is_checked_again_before_it_builds",
+    "only_its_behavior": true,
+    "why": "Its split never gave it the shared file, so only a check on the final plan waits."
+   }
+  ],
+  "size": "ok"
+ },
+ "check": {
+  "passed": true,
+  "problems": []
+ },
+ "url": "https://github.com/dokima-dev/dokima/issues/668#issuecomment-6181898078"
+}
