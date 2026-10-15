@@ -1,0 +1,289 @@
+{
+ "role": "planner",
+ "stage": null,
+ "run_id": "38685237520",
+ "commit_before": "959fc2357ada8534ca1cec520e795754e16d308b",
+ "started_by": "RezaSoleymanifar",
+ "models": [
+  "claude-opus-5-5"
+ ],
+ "report": {
+  "duration_ms": 1231564,
+  "turns": 23,
+  "cost_usd": 1.1479526,
+  "tokens_in": 1571224,
+  "tokens_out": 13060
+ },
+ "log": "https://github.com/dokima-dev/dokima/blob/logs/logs/707/38685237520-planner.md",
+ "run": "https://github.com/dokima-dev/dokima/actions/runs/38685237520",
+ "handback": {
+  "kind": "user_story",
+  "title": "Plan check locks owner tests and checks test docstrings",
+  "summary": "The plan check keeps the owner's tests as written and holds new tests to one docstring shape.",
+  "user_story": "Tests the owner commits stay exactly as written, and every new test explains itself in one shape.",
+  "acceptance_criteria": [
+   {
+    "text": "A plan that changes a test the owner committed is rejected, naming that test.",
+    "words": "A plan built on my tests keeps every one unchanged",
+    "source": "https://github.com/dokima-dev/dokima/issues/559",
+    "files": [
+     "dokima/planner.py"
+    ],
+    "no_edge_cases": "One change to one test; the owner named no other case."
+   },
+   {
+    "text": "A plan that deletes a test the owner committed is rejected, naming that test.",
+    "words": "agents may propose more but never change or drop mine",
+    "source": "https://github.com/dokima-dev/dokima/issues/559",
+    "files": [
+     "dokima/planner.py"
+    ],
+    "no_edge_cases": "One deleted test; the owner named no other case."
+   },
+   {
+    "text": "A plan that files no criterion for a test the owner committed is rejected, naming that test.",
+    "words": "maps each to a criterion",
+    "source": "https://github.com/dokima-dev/dokima/issues/559",
+    "files": [
+     "dokima/planner.py"
+    ],
+    "no_edge_cases": "One test left out; the owner named no other case."
+   },
+   {
+    "text": "A new or changed test with no User line in its docstring is rejected, naming the test.",
+    "words": "enforce this as a schema in test files",
+    "source": "https://github.com/dokima-dev/dokima/issues/559#issuecomment-6131843348",
+    "files": [
+     "dokima/planner.py"
+    ],
+    "edge_cases": [
+     {
+      "case": "An older test the planner rewrites is held to the shape like a new one.",
+      "test": "tests/test_owner_tests_and_docstrings.py::test_a_new_or_changed_test_with_no_user_line_is_rejected_naming_it"
+     }
+    ]
+   },
+   {
+    "text": "A new or changed test with no Verified by line is rejected, naming the test.",
+    "words": "rigor line let's name it verified by line",
+    "source": "https://github.com/dokima-dev/dokima/issues/559#issuecomment-6131843348",
+    "files": [
+     "dokima/planner.py"
+    ],
+    "edge_cases": [
+     {
+      "case": "An older test the planner rewrites is held to the shape like a new one.",
+      "test": "tests/test_owner_tests_and_docstrings.py::test_a_new_or_changed_test_with_no_verified_by_line_is_rejected_naming_it"
+     }
+    ]
+   },
+   {
+    "text": "A new or changed test with no Agent paragraph is rejected, naming the test.",
+    "words": "Agent holds the full detail, uncapped and folded on cards.",
+    "source": "https://github.com/dokima-dev/dokima/issues/559#issuecomment-6131843348",
+    "files": [
+     "dokima/planner.py"
+    ],
+    "edge_cases": [
+     {
+      "case": "An older test the planner rewrites is held to the shape like a new one.",
+      "test": "tests/test_owner_tests_and_docstrings.py::test_a_new_or_changed_test_with_no_agent_paragraph_is_rejected_naming_it"
+     }
+    ]
+   },
+   {
+    "text": "An Agent paragraph of any length that names code passes the check.",
+    "words": "Agent holds the full detail, uncapped",
+    "source": "https://github.com/dokima-dev/dokima/issues/559#issuecomment-6131843348",
+    "files": [
+     "dokima/planner.py"
+    ],
+    "no_edge_cases": "Length and code are the whole behavior; nothing else varies."
+   },
+   {
+    "text": "A User line over 15 words is rejected, naming the test and its word count.",
+    "words": "User, Verified by and Edge are short and capped",
+    "source": "https://github.com/dokima-dev/dokima/issues/559#issuecomment-6131843348",
+    "files": [
+     "dokima/planner.py"
+    ],
+    "no_edge_cases": "One line over its cap; a line at the cap is the good case."
+   },
+   {
+    "text": "A Verified by line over 15 words is rejected, naming the test and its word count.",
+    "words": "User, Verified by and Edge are short and capped",
+    "source": "https://github.com/dokima-dev/dokima/issues/559#issuecomment-6131843348",
+    "files": [
+     "dokima/planner.py"
+    ],
+    "no_edge_cases": "One line over its cap; a line at the cap is the good case."
+   },
+   {
+    "text": "An Edge line over 15 words is rejected, naming the test and its word count.",
+    "words": "User, Verified by and Edge are short and capped",
+    "source": "https://github.com/dokima-dev/dokima/issues/559#issuecomment-6131843348",
+    "files": [
+     "dokima/planner.py"
+    ],
+    "edge_cases": [
+     {
+      "case": "A test with no Edge line passes, since the line is optional.",
+      "test": "tests/test_owner_tests_and_docstrings.py::test_an_edge_line_over_its_cap_is_rejected_naming_the_test_and_count"
+     }
+    ]
+   },
+   {
+    "text": "A new test file whose opening docstring has no user line is rejected.",
+    "words": "Each test file opens with the same pair: one user line, then agent detail.",
+    "source": "https://github.com/dokima-dev/dokima/issues/559#issuecomment-6131843348",
+    "files": [
+     "dokima/planner.py"
+    ],
+    "edge_cases": [
+     {
+      "case": "The new file has no opening docstring at all.",
+      "test": "tests/test_owner_tests_and_docstrings.py::test_a_new_test_file_with_no_user_line_is_rejected"
+     }
+    ]
+   },
+   {
+    "text": "A new test file whose opening docstring has no agent detail after its user line is rejected.",
+    "words": "Each test file opens with the same pair: one user line, then agent detail.",
+    "source": "https://github.com/dokima-dev/dokima/issues/559#issuecomment-6131843348",
+    "files": [
+     "dokima/planner.py"
+    ],
+    "no_edge_cases": "Only the missing detail varies; the owner named no other case."
+   },
+   {
+    "text": "An older test left unchanged passes the check without the new docstring shape.",
+    "words": "checked by code on new and changed tests only",
+    "source": "https://github.com/dokima-dev/dokima/issues/559#issuecomment-6131843348",
+    "files": [
+     "dokima/planner.py"
+    ],
+    "no_edge_cases": "One untouched older test is the whole case."
+   },
+   {
+    "text": "A test the owner committed that misses the docstring shape goes to the owner as a question, naming it.",
+    "words": "When one of mine does not, raise it to me as a question; no agent edits it.",
+    "source": "https://github.com/dokima-dev/dokima/issues/707#issuecomment-6184903296",
+    "files": [
+     "dokima/planner.py"
+    ],
+    "edge_cases": [
+     {
+      "case": "A plan that raises no question about it is rejected, naming the test.",
+      "test": "tests/test_owner_tests_and_docstrings.py::test_the_owners_test_missing_the_docstring_shape_is_raised_to_the_owner"
+     }
+    ]
+   },
+   {
+    "text": "A test the owner committed that already passes goes to the owner as a question, naming it.",
+    "words": "When one of mine does not, raise it to me as a question; no agent edits it.",
+    "source": "https://github.com/dokima-dev/dokima/issues/707#issuecomment-6184903296",
+    "files": [
+     "dokima/planner.py"
+    ],
+    "edge_cases": [
+     {
+      "case": "A plan that raises no question about it is rejected, naming the test.",
+      "test": "tests/test_owner_tests_and_docstrings.py::test_the_owners_test_that_passes_today_is_raised_to_the_owner"
+     }
+    ]
+   }
+  ],
+  "non_functional": [
+   {
+    "text": "Any plain sentence passes as a Verified by line, with no list of test kinds.",
+    "why": "It must work in any repo, not only this one.",
+    "words": "it should be prose please don't use categories finetuned for our repo only that will not fly",
+    "source": "https://github.com/dokima-dev/dokima/issues/559#issuecomment-6131843348",
+    "files": [
+     "dokima/planner.py"
+    ],
+    "no_edge_cases": "Several unrelated sentences are the whole case."
+   }
+  ],
+  "tests": {
+   "707.1": [
+    "tests/test_owner_tests_and_docstrings.py::test_a_plan_that_changes_the_owners_test_is_rejected_naming_it"
+   ],
+   "707.2": [
+    "tests/test_owner_tests_and_docstrings.py::test_a_plan_that_deletes_the_owners_test_is_rejected_naming_it"
+   ],
+   "707.3": [
+    "tests/test_owner_tests_and_docstrings.py::test_a_plan_that_files_no_criterion_for_the_owners_test_is_rejected_naming_it"
+   ],
+   "707.4": [
+    "tests/test_owner_tests_and_docstrings.py::test_a_new_or_changed_test_with_no_user_line_is_rejected_naming_it"
+   ],
+   "707.5": [
+    "tests/test_owner_tests_and_docstrings.py::test_a_new_or_changed_test_with_no_verified_by_line_is_rejected_naming_it"
+   ],
+   "707.6": [
+    "tests/test_owner_tests_and_docstrings.py::test_a_new_or_changed_test_with_no_agent_paragraph_is_rejected_naming_it"
+   ],
+   "707.7": [
+    "tests/test_owner_tests_and_docstrings.py::test_an_agent_paragraph_of_any_length_that_names_code_passes"
+   ],
+   "707.8": [
+    "tests/test_owner_tests_and_docstrings.py::test_a_user_line_over_its_cap_is_rejected_naming_the_test_and_count"
+   ],
+   "707.9": [
+    "tests/test_owner_tests_and_docstrings.py::test_a_verified_by_line_over_its_cap_is_rejected_naming_the_test_and_count"
+   ],
+   "707.10": [
+    "tests/test_owner_tests_and_docstrings.py::test_an_edge_line_over_its_cap_is_rejected_naming_the_test_and_count"
+   ],
+   "707.11": [
+    "tests/test_owner_tests_and_docstrings.py::test_a_new_test_file_with_no_user_line_is_rejected"
+   ],
+   "707.12": [
+    "tests/test_owner_tests_and_docstrings.py::test_a_new_test_file_with_no_agent_detail_is_rejected"
+   ],
+   "707.13": [
+    "tests/test_owner_tests_and_docstrings.py::test_an_older_test_left_unchanged_is_not_held_to_the_new_shape"
+   ],
+   "707.14": [
+    "tests/test_owner_tests_and_docstrings.py::test_the_owners_test_missing_the_docstring_shape_is_raised_to_the_owner"
+   ],
+   "707.15": [
+    "tests/test_owner_tests_and_docstrings.py::test_the_owners_test_that_passes_today_is_raised_to_the_owner"
+   ],
+   "707.16": [
+    "tests/test_owner_tests_and_docstrings.py::test_any_plain_sentence_passes_as_a_verified_by_line"
+   ]
+  },
+  "test_changes": {
+   "tests/test_new_test_check.py::test_a_new_test_without_a_one_sentence_summary_is_rejected_naming_it": "Sample docstrings now take the User, Verified by and Agent shape.",
+   "tests/test_new_test_check.py::test_a_renamed_older_test_needs_a_reason_under_its_old_name_and_nothing_more": "A renamed test is a change, so its sample now carries the new shape.",
+   "tests/test_word_caps.py::test_a_docstring_the_planner_adds_is_held_to_15_words_in_its_first_line": "First lines now open with a User label, which the 15-word cap does not count."
+  },
+  "links": {
+   "blocked_by": [],
+   "blocks": [
+    710,
+    712,
+    713,
+    714
+   ],
+   "relates_to": [
+    546,
+    559
+   ]
+  },
+  "answers": [
+   {
+    "raise": "R1",
+    "answer": "done",
+    "why": "Both tests now give the owner's test a reason and still expect rejection."
+   }
+  ]
+ },
+ "check": {
+  "passed": true,
+  "problems": []
+ },
+ "url": "https://github.com/dokima-dev/dokima/issues/707#issuecomment-6184907491"
+}
