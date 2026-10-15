@@ -1,0 +1,95 @@
+{
+ "role": "reviewer",
+ "stage": "plan",
+ "run_id": "38674702249",
+ "commit_before": "9356fce79847b06a69e6354e2de92e0f8da9fbce",
+ "started_by": "dokima-runtime[bot]",
+ "models": [
+  "claude-opus-5-5"
+ ],
+ "report": {
+  "duration_ms": 77415,
+  "turns": 13,
+  "cost_usd": 0.482242,
+  "tokens_in": 491682,
+  "tokens_out": 6513
+ },
+ "log": "https://github.com/dokima-dev/dokima/blob/logs/logs/716/38674702249-reviewer-plan.md",
+ "run": "https://github.com/dokima-dev/dokima/actions/runs/38674702249",
+ "handback": {
+  "previous_step": {
+   "did": [
+    "The planner wrote one criterion: the owner's push runs all tests.",
+    "The planner extended the older merge gate check to play bot and owner pushes."
+   ],
+   "decided": [
+    "The planner reused an older check, since new tests passing today are rejected."
+   ],
+   "open": [
+    "The planner proposed an issue: a behavior already true cannot get its own new test."
+   ]
+  },
+  "verdict": "block",
+  "summary": "The check misses a rule skipping the owner by real name, so it does not pin the promise.",
+  "raises": [
+   {
+    "kind": "blocker",
+    "to": "planner",
+    "label": "716.1 weak test",
+    "text": "The 716.1 check plays the owner as a made-up name, so a rule skipping the real owner passes. Fix: play the `.github/CODEOWNERS` login and set the repository owner.",
+    "evidence": "Adding `github.actor != github.repository_owner` or the owner's login to the job's `if:` in a copy: test still passes.",
+    "raised_by": "reviewer",
+    "id": "R1"
+   }
+  ],
+  "answers": [
+   {
+    "raise": "P1",
+    "answer": "done",
+    "why": "Confirmed: the plan check fails any new test that passes today, so a pin must reuse an older check.",
+    "searched": [
+     707,
+     458,
+     207
+    ],
+    "verdict": "new"
+   }
+  ],
+  "asks": [
+   {
+    "ask": "A push by the owner to a Dokima pull request runs all tests, with no rule skipping the owner.",
+    "source": "https://github.com/dokima-dev/dokima/issues/716",
+    "criterion": "716.1"
+   }
+  ],
+  "behaviors": [
+   {
+    "criterion": "716.1",
+    "one_behavior": true,
+    "why": "One push by the owner, one result: all tests run."
+   }
+  ],
+  "edge_cases": [
+   {
+    "criterion": "716.1",
+    "cut": [],
+    "missing": [
+     "A rule that skips the owner by their real login or as repository owner."
+    ]
+   }
+  ],
+  "tests": [
+   {
+    "test": "tests/test_checks.py::test_full_suite_runs_every_test_on_every_pull_request",
+    "only_its_behavior": false,
+    "why": "It also checks 29.4 and 539.3; forced by the plan check, raised as P1."
+   }
+  ],
+  "size": "ok"
+ },
+ "check": {
+  "passed": true,
+  "problems": []
+ },
+ "url": "https://github.com/dokima-dev/dokima/issues/716#issuecomment-6183493327"
+}
