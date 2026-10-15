@@ -3,6 +3,4 @@ subscriptions:
     agent: kimi
     key: KIMI_SIGN_IN
 roles:
-  worker:
-    subscription: kimi
-    model: kimi-code/k3
+  # worker: back on Claude Code (Opus) until Kimi runs on an API key; a saved Kimi sign-in rotates on use, so it dies after one run.
