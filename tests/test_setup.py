@@ -21,7 +21,7 @@ Either way it writes `.dokima/agents.yml` in the shape #698 reads, block style:
         model: MODEL
 
 A stored sign-in is the base64 text of a gzip tar of the files the login saved, each named by its path under the home
-folder (for Kimi `.kimi/credentials/...` and `.kimi/config.toml`, where Kimi's login keeps them), so a run can unpack it
+folder (for Kimi `.kimi-code/credentials/...` and `.kimi-code/config.toml`, where Kimi's login keeps them), so a run can unpack it
 into its own home folder before the agent starts (#699).
 
 Each test runs the real command from outside in a temp folder, with HOME pointed at a temp home and stub `gh` and
@@ -54,10 +54,10 @@ STUB = textwrap.dedent('''\
             sys.stderr.write("Device code expired\\n")
             sys.exit(1)
         home = os.environ["HOME"]
-        os.makedirs(os.path.join(home, ".kimi", "credentials"), exist_ok=True)
-        with open(os.path.join(home, ".kimi", "credentials", "kimi-code.json"), "w") as f:
+        os.makedirs(os.path.join(home, ".kimi-code", "credentials"), exist_ok=True)
+        with open(os.path.join(home, ".kimi-code", "credentials", "kimi-code.json"), "w") as f:
             f.write('{{"access_token": "tok-123"}}')
-        with open(os.path.join(home, ".kimi", "config.toml"), "w") as f:
+        with open(os.path.join(home, ".kimi-code", "config.toml"), "w") as f:
             f.write('default_model = "kimi-for-coding"\\n')
 ''')
 
@@ -290,8 +290,8 @@ def test_sign_in_stored_as_secret(tmp_path, record_property):
             files = {m.name.removeprefix("./"): t.extractfile(m).read().decode() for m in t.getmembers() if m.isfile()}
     except Exception as e:  # noqa: BLE001 - any unreadable secret is this criterion's failure
         raise AssertionError(f"697.5: the stored sign-in is not base64 of a gzip tar: {e}") from e
-    want = {".kimi/credentials/kimi-code.json": '{"access_token": "tok-123"}',
-            ".kimi/config.toml": 'default_model = "kimi-for-coding"\n'}
+    want = {".kimi-code/credentials/kimi-code.json": '{"access_token": "tok-123"}',
+            ".kimi-code/config.toml": 'default_model = "kimi-for-coding"\n'}
     for name, content in want.items():
         assert files.get(name) == content, \
             f"697.5: the stored sign-in lacks {name} as Kimi's login saved it; it holds {sorted(files)}"
