@@ -44,8 +44,7 @@ def story(*criteria, nfrs=()):
         tests[f"9.{k}"] = [c["edge_cases"][0]["test"]] if c.get("edge_cases") else [f"tests/test_jobs.py::test_{k}"]
     return {"kind": "user_story", "title": "Slow calls run as jobs", "summary": "Slow calls run as jobs.",
             "user_story": "Slow calls return a job id.", "acceptance_criteria": list(criteria),
-            "non_functional": list(nfrs), "scope": sorted({f for c in [*criteria, *nfrs] for f in c["files"]}),
-            "tests": tests}
+            "non_functional": list(nfrs), "tests": tests}
 
 
 def feature(*stories):
