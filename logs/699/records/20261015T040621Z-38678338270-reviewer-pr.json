@@ -1,0 +1,76 @@
+{
+ "role": "reviewer",
+ "stage": "pr",
+ "run_id": "38678338270",
+ "commit_before": "2cb391b09e01a1e909d908eb222eff34078d8b44",
+ "started_by": "dokima-runtime[bot]",
+ "models": [
+  "claude-opus-5-5"
+ ],
+ "report": {
+  "duration_ms": 107850,
+  "turns": 14,
+  "cost_usd": 0.48131879999999994,
+  "tokens_in": 574819,
+  "tokens_out": 4492
+ },
+ "log": "https://github.com/dokima-dev/dokima/blob/logs/logs/699/38678338270-reviewer-pr.md",
+ "run": "https://github.com/dokima-dev/dokima/actions/runs/38678338270",
+ "handback": {
+  "previous_step": {
+   "did": [
+    "The worker made a Kimi role start Kimi Code CLI with its prompt and model.",
+    "The worker made each Kimi run put the stored sign-in back before Kimi starts."
+   ],
+   "decided": [
+    "A sign-in that cannot be put back stops the run and says why."
+   ],
+   "open": [
+    "Nine older agent tests fail on the runner because its settings path leaks in."
+   ]
+  },
+  "verdict": "approve",
+  "summary": "The Kimi adapter does what both criteria ask, and its tests catch it when broken.",
+  "raises": [],
+  "answers": [
+   {
+    "raise": "W1",
+    "answer": "done",
+    "why": "Confirmed: the same nine tests fail on main with the runner's settings path, and pass without it.",
+    "searched": [
+     721,
+     696,
+     515,
+     280
+    ],
+    "verdict": "new"
+   }
+  ],
+  "asks": [],
+  "behaviors": [],
+  "edge_cases": [],
+  "tests": [
+   {
+    "test": "tests/test_agent_kimi.py::test_a_kimi_role_runs_in_kimi_code_cli_with_its_model",
+    "only_its_behavior": true,
+    "why": "Fails when the model is dropped from Kimi's start."
+   },
+   {
+    "test": "tests/test_agent_kimi.py::test_a_failed_kimi_run_fails_the_run",
+    "only_its_behavior": true,
+    "why": "Fails when Kimi's exit code is swallowed."
+   },
+   {
+    "test": "tests/test_agent_kimi.py::test_a_kimi_run_writes_the_stored_sign_in_back_before_kimi_starts",
+    "only_its_behavior": true,
+    "why": "Fails when the sign-in is not put back."
+   }
+  ],
+  "size": "ok"
+ },
+ "check": {
+  "passed": true,
+  "problems": []
+ },
+ "url": "https://github.com/dokima-dev/dokima/pull/726#issuecomment-6183972175"
+}
