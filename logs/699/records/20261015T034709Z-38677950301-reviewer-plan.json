@@ -1,0 +1,94 @@
+{
+ "role": "reviewer",
+ "stage": "plan",
+ "run_id": "38677950301",
+ "commit_before": "47fdf8b9273cc4537fa1c6c53519b831606cb119",
+ "started_by": "dokima-runtime[bot]",
+ "models": [
+  "claude-opus-5-5"
+ ],
+ "report": {
+  "duration_ms": 37129,
+  "turns": 7,
+  "cost_usd": 0.35804859999999994,
+  "tokens_in": 247693,
+  "tokens_out": 3467
+ },
+ "log": "https://github.com/dokima-dev/dokima/blob/logs/logs/699/38677950301-reviewer-plan.md",
+ "run": "https://github.com/dokima-dev/dokima/actions/runs/38677950301",
+ "handback": {
+  "previous_step": {
+   "did": [
+    "Planned two criteria: a Kimi role starts with the file's model, already signed in.",
+    "Wrote three tests that run the real agent interface with a stand-in Kimi."
+   ],
+   "decided": [
+    "A failed Kimi run fails the whole run with Kimi's own exit code."
+   ],
+   "open": []
+  },
+  "verdict": "approve",
+  "summary": "The plan carries both asks, each with a test that fails today because no Kimi adapter exists yet.",
+  "raises": [],
+  "answers": [],
+  "asks": [
+   {
+    "ask": "A role on a Kimi subscription runs in Kimi Code CLI, with the Kimi model the file names.",
+    "source": "https://github.com/dokima-dev/dokima/issues/696#issuecomment-6181290061",
+    "criterion": "699.1"
+   },
+   {
+    "ask": "A Kimi run writes the stored sign-in back before Kimi starts, so no one signs in again.",
+    "source": "https://github.com/dokima-dev/dokima/issues/696#issuecomment-6181290061",
+    "criterion": "699.2"
+   }
+  ],
+  "behaviors": [
+   {
+    "criterion": "699.1",
+    "one_behavior": true,
+    "why": "One action, starting Kimi, with one result: the file's model."
+   },
+   {
+    "criterion": "699.2",
+    "one_behavior": true,
+    "why": "One result: the stored sign-in is in place when Kimi starts."
+   }
+  ],
+  "edge_cases": [
+   {
+    "criterion": "699.1",
+    "cut": [],
+    "missing": []
+   },
+   {
+    "criterion": "699.2",
+    "cut": [],
+    "missing": []
+   }
+  ],
+  "tests": [
+   {
+    "test": "tests/test_agent_kimi.py::test_a_kimi_role_runs_in_kimi_code_cli_with_its_model",
+    "only_its_behavior": true,
+    "why": "Checks Kimi starts once with the prompt and the file's model, as the owner tested it."
+   },
+   {
+    "test": "tests/test_agent_kimi.py::test_a_failed_kimi_run_fails_the_run",
+    "only_its_behavior": true,
+    "why": "Checks a failed Kimi run fails the run with Kimi's exit code."
+   },
+   {
+    "test": "tests/test_agent_kimi.py::test_a_kimi_run_writes_the_stored_sign_in_back_before_kimi_starts",
+    "only_its_behavior": true,
+    "why": "Checks the sign-in files setup stored are in the fresh home when Kimi starts."
+   }
+  ],
+  "size": "ok"
+ },
+ "check": {
+  "passed": true,
+  "problems": []
+ },
+ "url": "https://github.com/dokima-dev/dokima/issues/699#issuecomment-6183921129"
+}
