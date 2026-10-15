@@ -1,0 +1,70 @@
+{
+ "role": "reviewer",
+ "stage": "pr",
+ "run_id": "38659531955",
+ "commit_before": "1966396b34b595bffdd7c094dd5c9cda96a42905",
+ "started_by": "dokima-runtime[bot]",
+ "models": [
+  "claude-opus-5-5"
+ ],
+ "report": {
+  "duration_ms": 303076,
+  "turns": 14,
+  "cost_usd": 0.5268872,
+  "tokens_in": 568823,
+  "tokens_out": 4068
+ },
+ "log": "https://github.com/dokima-dev/dokima/blob/logs/logs/667/38659531955-reviewer-pr.md",
+ "run": "https://github.com/dokima-dev/dokima/actions/runs/38659531955",
+ "handback": {
+  "previous_step": {
+   "did": [
+    "Cleared leftover merge marks so the grouping code loads on the new main."
+   ],
+   "decided": [
+    "The grouping check stays; the old plan files check goes, as main dropped it."
+   ],
+   "open": []
+  },
+  "verdict": "approve",
+  "summary": "The approved grouping is now merged cleanly with main; all tests pass, and the new ones fail on main.",
+  "raises": [],
+  "answers": [],
+  "asks": [],
+  "behaviors": [],
+  "edge_cases": [],
+  "tests": [
+   {
+    "test": "tests/test_story_groups.py::test_criteria_sharing_a_code_file_are_put_in_the_same_story",
+    "only_its_behavior": true,
+    "why": "Fails on main: code has no way to group criteria."
+   },
+   {
+    "test": "tests/test_story_groups.py::test_criteria_with_no_code_file_in_common_become_separate_stories",
+    "only_its_behavior": true,
+    "why": "Fails on main: code has no way to group criteria."
+   },
+   {
+    "test": "tests/test_story_groups.py::test_no_count_of_criteria_or_stories_refuses_a_plan",
+    "only_its_behavior": true,
+    "why": "Fails on main: six criteria on one file are refused."
+   },
+   {
+    "test": "tests/test_story_groups.py::test_the_old_count_rules_are_gone_from_the_instructions",
+    "only_its_behavior": true,
+    "why": "Fails on main, naming each old count phrase."
+   },
+   {
+    "test": "tests/test_story_groups.py::test_a_story_of_a_split_never_splits_again",
+    "only_its_behavior": true,
+    "why": "Fails on main: a child story with two groups passes."
+   }
+  ],
+  "size": "ok"
+ },
+ "check": {
+  "passed": true,
+  "problems": []
+ },
+ "url": "https://github.com/dokima-dev/dokima/pull/695#issuecomment-6181438944"
+}
