@@ -30,6 +30,13 @@ def scope_of(issue_text):
     return paths
 
 
+def scope_from(plan):
+    """A plan's scope: every file its criteria list, plus its tests' files, sorted."""
+    files = {f.strip() for c in plan.get("acceptance_criteria", []) + plan.get("non_functional", [])
+             for f in c.get("files", [])}
+    return sorted(files | {t.split("::")[0].strip() for names in plan.get("tests", {}).values() for t in names})
+
+
 def is_test(path):
     """Say whether a path is a test or test setup file, which the worker may never change."""
     name = os.path.basename(path)
@@ -70,7 +77,7 @@ def main(argv):
     holding the plan; CLASHED lists the files that clashed with main, when that file exists. Exits 1 saying which
     clashed files still hold conflict markers."""
     text = open(argv[2]).read()
-    scope = json.loads(text).get("scope", []) if argv[2].endswith(".json") else scope_of(text)
+    scope = scope_from(json.loads(text)) if argv[2].endswith(".json") else scope_of(text)
     clashed = open(argv[3]).read().split() if len(argv) > 3 and os.path.exists(argv[3]) else []
     dropped = fence(argv[1], scope, clashed) if clashed else fence(argv[1], scope)
     for p in dropped:

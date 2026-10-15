@@ -25,6 +25,7 @@ import tarfile
 import tempfile
 
 from dokima import body as issue_body
+from dokima import fence
 from dokima import words
 from dokima.checks import PROVES, TEST_DEF
 from dokima.agent import pack_parent, problems_old, problems_raised  # noqa: E402
@@ -284,6 +285,8 @@ def from_kind(p, issue=None, said=None):
     """
     kind = p["kind"]
     bad = problems_old(p) + problems_raised("planner", p) if kind in ("feature", "user_story") else []
+    if kind in ("feature", "user_story") and "scope" in p:
+        bad.append("scope is a retired field: a plan's scope is every file its criteria list, plus the tests it names")
     if bad:
         raise Garbled("; ".join(bad))
     if kind in ("feature", "user_story") and (not isinstance(p.get("summary"), str) or not p["summary"].strip()):
@@ -325,9 +328,12 @@ def from_kind(p, issue=None, said=None):
                               f"and its {key} is not")
         check_words(f"non-functional requirement {k}", c, said)
         check_files(f"non-functional requirement {k}", c)
+<<<<<<< HEAD
     check_groups([p], isinstance(issue, tuple))
     if not strings(p.get("scope")) or not p["scope"]:
         raise Garbled("a story needs scope as a non-empty list of files")
+=======
+>>>>>>> origin/main
     tests = p.get("tests")
     if not isinstance(tests, dict) or not all(isinstance(k, str) and strings(v) for k, v in tests.items()):
         raise Garbled("a story needs tests as a map from each criterion (N.k) to its tests")
@@ -341,7 +347,7 @@ def from_kind(p, issue=None, said=None):
     return "plan", {"objective": p["user_story"].strip(),
                     "criteria": [c["text"].strip() for c in ac] + [f"{c['text'].strip()} ({c['why'].strip()})" for c in nfr],
                     "files": [c["files"] for c in ac + nfr],
-                    "scope": p["scope"], "test_changes": tc,
+                    "scope": fence.scope_from(p), "test_changes": tc,
                     "declared": tests, "raw": p}
 
 
