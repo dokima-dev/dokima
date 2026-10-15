@@ -1,0 +1,263 @@
+{
+ "role": "reviewer",
+ "stage": "plan",
+ "run_id": "38677803435",
+ "commit_before": "f6be5b28019051ad9bc8728411fb6527f33e917f",
+ "started_by": "dokima-runtime[bot]",
+ "models": [
+  "claude-opus-5-5"
+ ],
+ "report": {
+  "duration_ms": 77788,
+  "turns": 20,
+  "cost_usd": 0.7307499999999999,
+  "tokens_in": 949557,
+  "tokens_out": 7984
+ },
+ "log": "https://github.com/dokima-dev/dokima/blob/logs/logs/709/38677803435-reviewer-plan.md",
+ "run": "https://github.com/dokima-dev/dokima/actions/runs/38677803435",
+ "handback": {
+  "previous_step": {
+   "did": [
+    "The planner wrote nine criteria, one per story criterion from the parent's plan.",
+    "It named one new test per criterion and six changed tests."
+   ],
+   "decided": [
+    "Every raise and split story must carry a short half and a full half.",
+    "Short halves of blockers and issues stay plain too."
+   ],
+   "open": [
+    "Two questions wait for the owner: role prompt changes, and plain short halves for blockers."
+   ]
+  },
+  "verdict": "block",
+  "summary": "The plan's tests never reached the branch, so no criterion has a proof to judge yet.",
+  "raises": [
+   {
+    "kind": "blocker",
+    "to": "planner",
+    "label": "Tests not on branch",
+    "text": "Criteria 709.1 to 709.9 name tests in `tests/test_text_halves.py`, absent from the branch. Commit the file and declared test changes.",
+    "evidence": "Branch `try/issue-709` equals main `f6be5b2`; pytest on the 709.1 test reports file not found.",
+    "raised_by": "reviewer",
+    "id": "R1"
+   },
+   {
+    "kind": "blocker",
+    "to": "planner",
+    "label": "Undeclared test changes",
+    "text": "The planner's log shows 19 changed test files, but the plan declares six test changes. Declare each change or revert it.",
+    "evidence": "Planner log step 57: `tests/test_agent.py`, `tests/test_raises.py` and 11 more changed, absent from test_changes.",
+    "raised_by": "reviewer",
+    "id": "R2"
+   }
+  ],
+  "answers": [
+   {
+    "raise": "P3",
+    "answer": "done",
+    "why": "Confirmed: a story's issue body carries one user story and context, so full halves get lost.",
+    "searched": [
+     708,
+     710,
+     609
+    ],
+    "verdict": "new"
+   }
+  ],
+  "asks": [
+   {
+    "ask": "raises, stories, Context and questions live in the record as pairs",
+    "source": "https://github.com/dokima-dev/dokima/issues/709",
+    "criterion": "709.1"
+   },
+   {
+    "ask": "A raise with no full half is rejected, naming the raise.",
+    "source": "https://github.com/dokima-dev/dokima/issues/709",
+    "criterion": "709.2"
+   },
+   {
+    "ask": "A split story with no short half is rejected, naming the story.",
+    "source": "https://github.com/dokima-dev/dokima/issues/709",
+    "criterion": "709.3"
+   },
+   {
+    "ask": "A split story with no full half is rejected, naming the story.",
+    "source": "https://github.com/dokima-dev/dokima/issues/709",
+    "criterion": "709.4"
+   },
+   {
+    "ask": "A split story's context with no short half is rejected, naming the story.",
+    "source": "https://github.com/dokima-dev/dokima/issues/709",
+    "criterion": "709.5"
+   },
+   {
+    "ask": "A split story's context with no full half is rejected, naming the story.",
+    "source": "https://github.com/dokima-dev/dokima/issues/709",
+    "criterion": "709.6"
+   },
+   {
+    "ask": "A short text for me (capped, plain, no code)",
+    "source": "https://github.com/dokima-dev/dokima/issues/559",
+    "criterion": "709.7"
+   },
+   {
+    "ask": "a full text for agents (uncapped, may name code)",
+    "source": "https://github.com/dokima-dev/dokima/issues/559",
+    "criterion": "709.8"
+   },
+   {
+    "ask": "A full half longer than every word cap passes the check.",
+    "source": "https://github.com/dokima-dev/dokima/issues/709",
+    "criterion": "709.9"
+   }
+  ],
+  "behaviors": [
+   {
+    "criterion": "709.1",
+    "one_behavior": true,
+    "why": "One check: a raise lacking its short half is rejected."
+   },
+   {
+    "criterion": "709.2",
+    "one_behavior": true,
+    "why": "One check: a raise lacking its full half is rejected."
+   },
+   {
+    "criterion": "709.3",
+    "one_behavior": true,
+    "why": "One check: a story lacking its short half is rejected."
+   },
+   {
+    "criterion": "709.4",
+    "one_behavior": true,
+    "why": "One check: a story lacking its full half is rejected."
+   },
+   {
+    "criterion": "709.5",
+    "one_behavior": true,
+    "why": "One check: a context lacking its short half is rejected."
+   },
+   {
+    "criterion": "709.6",
+    "one_behavior": true,
+    "why": "One check: a context lacking its full half is rejected."
+   },
+   {
+    "criterion": "709.7",
+    "one_behavior": true,
+    "why": "One check: code in any short half is rejected."
+   },
+   {
+    "criterion": "709.8",
+    "one_behavior": true,
+    "why": "One result: code in a full half passes."
+   },
+   {
+    "criterion": "709.9",
+    "one_behavior": true,
+    "why": "One result: a long full half passes."
+   }
+  ],
+  "edge_cases": [
+   {
+    "criterion": "709.1",
+    "cut": [],
+    "missing": []
+   },
+   {
+    "criterion": "709.2",
+    "cut": [],
+    "missing": []
+   },
+   {
+    "criterion": "709.3",
+    "cut": [],
+    "missing": []
+   },
+   {
+    "criterion": "709.4",
+    "cut": [],
+    "missing": []
+   },
+   {
+    "criterion": "709.5",
+    "cut": [],
+    "missing": []
+   },
+   {
+    "criterion": "709.6",
+    "cut": [],
+    "missing": []
+   },
+   {
+    "criterion": "709.7",
+    "cut": [],
+    "missing": []
+   },
+   {
+    "criterion": "709.8",
+    "cut": [],
+    "missing": []
+   },
+   {
+    "criterion": "709.9",
+    "cut": [],
+    "missing": []
+   }
+  ],
+  "tests": [
+   {
+    "test": "tests/test_text_halves.py::test_a_raise_with_no_short_half_is_rejected_naming_it",
+    "only_its_behavior": false,
+    "why": "The test file is not on the branch, so it cannot be judged."
+   },
+   {
+    "test": "tests/test_text_halves.py::test_a_raise_with_no_full_half_is_rejected_naming_it",
+    "only_its_behavior": false,
+    "why": "The test file is not on the branch, so it cannot be judged."
+   },
+   {
+    "test": "tests/test_text_halves.py::test_a_split_story_with_no_short_half_is_rejected_naming_it",
+    "only_its_behavior": false,
+    "why": "The test file is not on the branch, so it cannot be judged."
+   },
+   {
+    "test": "tests/test_text_halves.py::test_a_split_story_with_no_full_half_is_rejected_naming_it",
+    "only_its_behavior": false,
+    "why": "The test file is not on the branch, so it cannot be judged."
+   },
+   {
+    "test": "tests/test_text_halves.py::test_a_split_storys_context_with_no_short_half_is_rejected_naming_it",
+    "only_its_behavior": false,
+    "why": "The test file is not on the branch, so it cannot be judged."
+   },
+   {
+    "test": "tests/test_text_halves.py::test_a_split_storys_context_with_no_full_half_is_rejected_naming_it",
+    "only_its_behavior": false,
+    "why": "The test file is not on the branch, so it cannot be judged."
+   },
+   {
+    "test": "tests/test_text_halves.py::test_a_short_half_that_names_code_is_rejected_naming_the_text",
+    "only_its_behavior": false,
+    "why": "The test file is not on the branch, so it cannot be judged."
+   },
+   {
+    "test": "tests/test_text_halves.py::test_a_full_half_that_names_code_passes_the_check",
+    "only_its_behavior": false,
+    "why": "The test file is not on the branch, so it cannot be judged."
+   },
+   {
+    "test": "tests/test_text_halves.py::test_a_full_half_longer_than_every_cap_passes_the_check",
+    "only_its_behavior": false,
+    "why": "The test file is not on the branch, so it cannot be judged."
+   }
+  ],
+  "size": "ok"
+ },
+ "check": {
+  "passed": true,
+  "problems": []
+ },
+ "url": "https://github.com/dokima-dev/dokima/issues/709#issuecomment-6183902463"
+}
