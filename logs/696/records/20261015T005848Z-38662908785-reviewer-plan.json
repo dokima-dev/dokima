@@ -1,0 +1,328 @@
+{
+ "role": "reviewer",
+ "stage": "plan",
+ "run_id": "38662908785",
+ "commit_before": "a2e94e1e645c47ea2f3ca54a3e7e441bb8f510c5",
+ "started_by": "dokima-runtime[bot]",
+ "models": [
+  "claude-opus-5-5"
+ ],
+ "report": {
+  "duration_ms": 60229,
+  "turns": 6,
+  "cost_usd": 0.44445920000000005,
+  "tokens_in": 237739,
+  "tokens_out": 5838
+ },
+ "log": "https://github.com/dokima-dev/dokima/blob/logs/logs/696/38662908785-reviewer-plan.md",
+ "run": "https://github.com/dokima-dev/dokima/actions/runs/38662908785",
+ "handback": {
+  "previous_step": {
+   "did": [
+    "The planner dropped the later rules story, as the owner asked.",
+    "The planner added a criterion that setup stores a sign-in as a secret.",
+    "The planner added a criterion that a failed agent fails the run."
+   ],
+   "decided": [
+    "The file and the one agent interface are now one story."
+   ],
+   "open": []
+  },
+  "verdict": "block",
+  "summary": "The plan carries every ask, but a role left out and an unknown name have no criterion.",
+  "raises": [
+   {
+    "kind": "blocker",
+    "to": "planner",
+    "label": "S2: missing cases",
+    "text": "Earlier blocker R1 asked for a left-out role and an unknown name. They sit only in story 2's context, so no test pins them. Add one criterion each.",
+    "evidence": "`plan.json` story 2: only S2.6 covers no file; context says the rest.",
+    "raised_by": "reviewer",
+    "id": "R4"
+   }
+  ],
+  "answers": [],
+  "asks": [
+   {
+    "ask": "Any agent, any model: planner, worker and reviewer each pick theirs.",
+    "source": "https://github.com/dokima-dev/dokima/issues/696",
+    "criterion": "S2.4"
+   },
+   {
+    "ask": "Usual suspects first: Kimi first, since I want to use up its credit, then Codex.",
+    "source": "https://github.com/dokima-dev/dokima/issues/696",
+    "criterion": "S3.1"
+   },
+   {
+    "ask": "The file is YAML-like, a structured file.",
+    "source": "https://github.com/dokima-dev/dokima/issues/696",
+    "criterion": "S2.1"
+   },
+   {
+    "ask": "It exposes a simple interface for deciding the orchestration across subscriptions.",
+    "source": "https://github.com/dokima-dev/dokima/issues/696",
+    "criterion": "S2.9"
+   },
+   {
+    "ask": "Later it may expand into other settings.",
+    "source": "https://github.com/dokima-dev/dokima/issues/696",
+    "criterion": "S2.11"
+   },
+   {
+    "ask": "No model runs inside another vendor's agent.",
+    "source": "https://github.com/dokima-dev/dokima/issues/696#issuecomment-6181290061",
+    "criterion": "S2.8"
+   },
+   {
+    "ask": "One structured file per repo, `.dokima/agents.yml`",
+    "source": "https://github.com/dokima-dev/dokima/issues/696#issuecomment-6181290061",
+    "criterion": "S2.1"
+   },
+   {
+    "ask": "`subscriptions` (agent, key)",
+    "source": "https://github.com/dokima-dev/dokima/issues/696#issuecomment-6181290061",
+    "criterion": "S2.2"
+   },
+   {
+    "ask": "`roles` (planner, worker, reviewer: which subscription and model)",
+    "source": "https://github.com/dokima-dev/dokima/issues/696#issuecomment-6181290061",
+    "criterion": "S2.3"
+   },
+   {
+    "ask": "No file means today's behavior.",
+    "source": "https://github.com/dokima-dev/dokima/issues/696#issuecomment-6181290061",
+    "criterion": "S2.6"
+   },
+   {
+    "ask": "grabbing the inputs a user needs for a subscription (membership, region, sign-in or key, model)",
+    "source": "https://github.com/dokima-dev/dokima/issues/696#issuecomment-6181290061",
+    "criterion": "S1.1"
+   },
+   {
+    "ask": "and putting them in place",
+    "source": "https://github.com/dokima-dev/dokima/issues/696#issuecomment-6181290061",
+    "criterion": "S1.2"
+   },
+   {
+    "ask": "The file and one agent interface; Claude Code moves behind it unchanged.",
+    "source": "https://github.com/dokima-dev/dokima/issues/696#issuecomment-6181290061",
+    "criterion": "S2.7"
+   },
+   {
+    "ask": "Kimi Code CLI adapter.",
+    "source": "https://github.com/dokima-dev/dokima/issues/696#issuecomment-6181290061",
+    "criterion": "S3.1"
+   },
+   {
+    "ask": "Codex CLI adapter.",
+    "source": "https://github.com/dokima-dev/dokima/issues/696#issuecomment-6181290061",
+    "criterion": "S4.1"
+   },
+   {
+    "ask": "No fallback for now.",
+    "source": "https://github.com/dokima-dev/dokima/issues/696#issuecomment-6181845677",
+    "criterion": "S2.10"
+   },
+   {
+    "ask": "The file is just a simple declaration: which model is used for which stage.",
+    "source": "https://github.com/dokima-dev/dokima/issues/696#issuecomment-6181845677",
+    "criterion": "S2.5"
+   }
+  ],
+  "behaviors": [
+   {
+    "criterion": "S1.1",
+    "one_behavior": true,
+    "why": "Setup shows one list of inputs."
+   },
+   {
+    "criterion": "S1.2",
+    "one_behavior": true,
+    "why": "A given key ends up as one repo secret."
+   },
+   {
+    "criterion": "S1.3",
+    "one_behavior": true,
+    "why": "A sign-in ends up stored as one repo secret."
+   },
+   {
+    "criterion": "S1.4",
+    "one_behavior": true,
+    "why": "Setup writes one entry into the file."
+   },
+   {
+    "criterion": "S2.1",
+    "one_behavior": true,
+    "why": "One file at one place."
+   },
+   {
+    "criterion": "S2.2",
+    "one_behavior": true,
+    "why": "One section, its fields named."
+   },
+   {
+    "criterion": "S2.3",
+    "one_behavior": true,
+    "why": "One section, each role's two fields."
+   },
+   {
+    "criterion": "S2.4",
+    "one_behavior": true,
+    "why": "Any model name is accepted."
+   },
+   {
+    "criterion": "S2.5",
+    "one_behavior": true,
+    "why": "A run starts the role's agent with its model."
+   },
+   {
+    "criterion": "S2.6",
+    "one_behavior": true,
+    "why": "No file gives today's run."
+   },
+   {
+    "criterion": "S2.7",
+    "one_behavior": true,
+    "why": "Claude Code runs as today behind the interface."
+   },
+   {
+    "criterion": "S2.8",
+    "one_behavior": true,
+    "why": "A model goes only to its own subscription's agent."
+   },
+   {
+    "criterion": "S2.9",
+    "one_behavior": true,
+    "why": "One edit moves a role."
+   },
+   {
+    "criterion": "S2.10",
+    "one_behavior": true,
+    "why": "A failed agent fails the run."
+   },
+   {
+    "criterion": "S2.11",
+    "one_behavior": true,
+    "why": "Own sections, so other settings fit."
+   },
+   {
+    "criterion": "S3.1",
+    "one_behavior": true,
+    "why": "A Kimi role runs in Kimi's tool."
+   },
+   {
+    "criterion": "S3.2",
+    "one_behavior": true,
+    "why": "The stored sign-in is put back before Kimi starts."
+   },
+   {
+    "criterion": "S4.1",
+    "one_behavior": true,
+    "why": "A Codex role runs in Codex's tool."
+   }
+  ],
+  "edge_cases": [
+   {
+    "criterion": "S1.1",
+    "cut": [],
+    "missing": []
+   },
+   {
+    "criterion": "S1.2",
+    "cut": [],
+    "missing": []
+   },
+   {
+    "criterion": "S1.3",
+    "cut": [],
+    "missing": []
+   },
+   {
+    "criterion": "S1.4",
+    "cut": [],
+    "missing": []
+   },
+   {
+    "criterion": "S2.1",
+    "cut": [],
+    "missing": []
+   },
+   {
+    "criterion": "S2.2",
+    "cut": [],
+    "missing": []
+   },
+   {
+    "criterion": "S2.3",
+    "cut": [],
+    "missing": [
+     "A role left out of the file."
+    ]
+   },
+   {
+    "criterion": "S2.4",
+    "cut": [],
+    "missing": []
+   },
+   {
+    "criterion": "S2.5",
+    "cut": [],
+    "missing": [
+     "A subscription or agent name the file does not know."
+    ]
+   },
+   {
+    "criterion": "S2.6",
+    "cut": [],
+    "missing": []
+   },
+   {
+    "criterion": "S2.7",
+    "cut": [],
+    "missing": []
+   },
+   {
+    "criterion": "S2.8",
+    "cut": [],
+    "missing": []
+   },
+   {
+    "criterion": "S2.9",
+    "cut": [],
+    "missing": []
+   },
+   {
+    "criterion": "S2.10",
+    "cut": [],
+    "missing": []
+   },
+   {
+    "criterion": "S2.11",
+    "cut": [],
+    "missing": []
+   },
+   {
+    "criterion": "S3.1",
+    "cut": [],
+    "missing": []
+   },
+   {
+    "criterion": "S3.2",
+    "cut": [],
+    "missing": []
+   },
+   {
+    "criterion": "S4.1",
+    "cut": [],
+    "missing": []
+   }
+  ],
+  "tests": [],
+  "size": "ok"
+ },
+ "check": {
+  "passed": true,
+  "problems": []
+ },
+ "url": "https://github.com/dokima-dev/dokima/issues/696#issuecomment-6181889407"
+}
