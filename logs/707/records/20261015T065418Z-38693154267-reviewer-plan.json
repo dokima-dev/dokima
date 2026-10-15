@@ -1,0 +1,371 @@
+{
+ "role": "reviewer",
+ "stage": "plan",
+ "run_id": "38693154267",
+ "commit_before": "5a23e585aebcb5baed5cb9e28e388c663335822f",
+ "started_by": "dokima-runtime[bot]",
+ "models": [
+  "claude-opus-5-5"
+ ],
+ "report": {
+  "duration_ms": 2244,
+  "turns": 1,
+  "cost_usd": 0.6500884000000001,
+  "tokens_in": 63943,
+  "tokens_out": 116
+ },
+ "log": "https://github.com/dokima-dev/dokima/blob/logs/logs/707/38693154267-reviewer-plan.md",
+ "run": "https://github.com/dokima-dev/dokima/actions/runs/38693154267",
+ "handback": {
+  "previous_step": {
+   "did": [
+    "The planner re-planned after the blocking issue merged, with the same criteria and tests."
+   ],
+   "decided": [],
+   "open": []
+  },
+  "verdict": "approve",
+  "summary": "The plan is unchanged since its approval, and every new test still fails because the feature is missing.",
+  "raises": [],
+  "answers": [],
+  "asks": [
+   {
+    "ask": "A plan built on my tests keeps every one unchanged",
+    "source": "https://github.com/dokima-dev/dokima/issues/559",
+    "criterion": "707.1"
+   },
+   {
+    "ask": "agents may propose more but never change or drop mine",
+    "source": "https://github.com/dokima-dev/dokima/issues/559",
+    "criterion": "707.2"
+   },
+   {
+    "ask": "maps each to a criterion",
+    "source": "https://github.com/dokima-dev/dokima/issues/559",
+    "criterion": "707.3"
+   },
+   {
+    "ask": "enforce this as a schema in test files",
+    "source": "https://github.com/dokima-dev/dokima/issues/559#issuecomment-6131843348",
+    "criterion": "707.4"
+   },
+   {
+    "ask": "rigor line let's name it verified by line",
+    "source": "https://github.com/dokima-dev/dokima/issues/559#issuecomment-6131843348",
+    "criterion": "707.5"
+   },
+   {
+    "ask": "Agent holds the full detail, uncapped and folded on cards.",
+    "source": "https://github.com/dokima-dev/dokima/issues/559#issuecomment-6131843348",
+    "criterion": "707.6"
+   },
+   {
+    "ask": "Agent holds the full detail, uncapped",
+    "source": "https://github.com/dokima-dev/dokima/issues/559#issuecomment-6131843348",
+    "criterion": "707.7"
+   },
+   {
+    "ask": "User, Verified by and Edge are short and capped",
+    "source": "https://github.com/dokima-dev/dokima/issues/559#issuecomment-6131843348",
+    "criterion": "707.8"
+   },
+   {
+    "ask": "User, Verified by and Edge are short and capped",
+    "source": "https://github.com/dokima-dev/dokima/issues/559#issuecomment-6131843348",
+    "criterion": "707.9"
+   },
+   {
+    "ask": "User, Verified by and Edge are short and capped",
+    "source": "https://github.com/dokima-dev/dokima/issues/559#issuecomment-6131843348",
+    "criterion": "707.10"
+   },
+   {
+    "ask": "Each test file opens with the same pair: one user line, then agent detail.",
+    "source": "https://github.com/dokima-dev/dokima/issues/559#issuecomment-6131843348",
+    "criterion": "707.11"
+   },
+   {
+    "ask": "Each test file opens with the same pair: one user line, then agent detail.",
+    "source": "https://github.com/dokima-dev/dokima/issues/559#issuecomment-6131843348",
+    "criterion": "707.12"
+   },
+   {
+    "ask": "checked by code on new and changed tests only",
+    "source": "https://github.com/dokima-dev/dokima/issues/559#issuecomment-6131843348",
+    "criterion": "707.13"
+   },
+   {
+    "ask": "When one of mine does not, raise it to me as a question; no agent edits it.",
+    "source": "https://github.com/dokima-dev/dokima/issues/707#issuecomment-6184903296",
+    "criterion": "707.14"
+   },
+   {
+    "ask": "When one of mine does not, raise it to me as a question; no agent edits it.",
+    "source": "https://github.com/dokima-dev/dokima/issues/707#issuecomment-6184903296",
+    "criterion": "707.15"
+   },
+   {
+    "ask": "it should be prose please don't use categories finetuned for our repo only that will not fly",
+    "source": "https://github.com/dokima-dev/dokima/issues/559#issuecomment-6131843348",
+    "criterion": "707.16"
+   },
+   {
+    "ask": "no agent edits it",
+    "source": "https://github.com/dokima-dev/dokima/issues/707#issuecomment-6184903296",
+    "criterion": "707.1"
+   }
+  ],
+  "behaviors": [
+   {
+    "criterion": "707.1",
+    "one_behavior": true,
+    "why": "One case, one result."
+   },
+   {
+    "criterion": "707.2",
+    "one_behavior": true,
+    "why": "One case, one result."
+   },
+   {
+    "criterion": "707.3",
+    "one_behavior": true,
+    "why": "One case, one result."
+   },
+   {
+    "criterion": "707.4",
+    "one_behavior": true,
+    "why": "One case, one result."
+   },
+   {
+    "criterion": "707.5",
+    "one_behavior": true,
+    "why": "One case, one result."
+   },
+   {
+    "criterion": "707.6",
+    "one_behavior": true,
+    "why": "One case, one result."
+   },
+   {
+    "criterion": "707.7",
+    "one_behavior": true,
+    "why": "One case, one result."
+   },
+   {
+    "criterion": "707.8",
+    "one_behavior": true,
+    "why": "One case, one result."
+   },
+   {
+    "criterion": "707.9",
+    "one_behavior": true,
+    "why": "One case, one result."
+   },
+   {
+    "criterion": "707.10",
+    "one_behavior": true,
+    "why": "One case, one result."
+   },
+   {
+    "criterion": "707.11",
+    "one_behavior": true,
+    "why": "One case, one result."
+   },
+   {
+    "criterion": "707.12",
+    "one_behavior": true,
+    "why": "One case, one result."
+   },
+   {
+    "criterion": "707.13",
+    "one_behavior": true,
+    "why": "One case, one result."
+   },
+   {
+    "criterion": "707.14",
+    "one_behavior": true,
+    "why": "One case, one result."
+   },
+   {
+    "criterion": "707.15",
+    "one_behavior": true,
+    "why": "One case, one result."
+   },
+   {
+    "criterion": "707.16",
+    "one_behavior": true,
+    "why": "One case, one result."
+   }
+  ],
+  "edge_cases": [
+   {
+    "criterion": "707.1",
+    "cut": [],
+    "missing": []
+   },
+   {
+    "criterion": "707.2",
+    "cut": [],
+    "missing": []
+   },
+   {
+    "criterion": "707.3",
+    "cut": [],
+    "missing": []
+   },
+   {
+    "criterion": "707.4",
+    "cut": [],
+    "missing": []
+   },
+   {
+    "criterion": "707.5",
+    "cut": [],
+    "missing": []
+   },
+   {
+    "criterion": "707.6",
+    "cut": [],
+    "missing": []
+   },
+   {
+    "criterion": "707.7",
+    "cut": [],
+    "missing": []
+   },
+   {
+    "criterion": "707.8",
+    "cut": [],
+    "missing": []
+   },
+   {
+    "criterion": "707.9",
+    "cut": [],
+    "missing": []
+   },
+   {
+    "criterion": "707.10",
+    "cut": [],
+    "missing": []
+   },
+   {
+    "criterion": "707.11",
+    "cut": [],
+    "missing": []
+   },
+   {
+    "criterion": "707.12",
+    "cut": [],
+    "missing": []
+   },
+   {
+    "criterion": "707.13",
+    "cut": [],
+    "missing": []
+   },
+   {
+    "criterion": "707.14",
+    "cut": [],
+    "missing": []
+   },
+   {
+    "criterion": "707.15",
+    "cut": [],
+    "missing": []
+   },
+   {
+    "criterion": "707.16",
+    "cut": [],
+    "missing": []
+   }
+  ],
+  "tests": [
+   {
+    "test": "tests/test_owner_tests_and_docstrings.py::test_a_plan_that_changes_the_owners_test_is_rejected_naming_it",
+    "only_its_behavior": true,
+    "why": "Runs the real check; fails today because the feature is missing."
+   },
+   {
+    "test": "tests/test_owner_tests_and_docstrings.py::test_a_plan_that_deletes_the_owners_test_is_rejected_naming_it",
+    "only_its_behavior": true,
+    "why": "Runs the real check; fails today because the feature is missing."
+   },
+   {
+    "test": "tests/test_owner_tests_and_docstrings.py::test_a_plan_that_files_no_criterion_for_the_owners_test_is_rejected_naming_it",
+    "only_its_behavior": true,
+    "why": "Runs the real check; fails today because the feature is missing."
+   },
+   {
+    "test": "tests/test_owner_tests_and_docstrings.py::test_a_new_or_changed_test_with_no_user_line_is_rejected_naming_it",
+    "only_its_behavior": true,
+    "why": "Runs the real check; fails today because the feature is missing."
+   },
+   {
+    "test": "tests/test_owner_tests_and_docstrings.py::test_a_new_or_changed_test_with_no_verified_by_line_is_rejected_naming_it",
+    "only_its_behavior": true,
+    "why": "Runs the real check; fails today because the feature is missing."
+   },
+   {
+    "test": "tests/test_owner_tests_and_docstrings.py::test_a_new_or_changed_test_with_no_agent_paragraph_is_rejected_naming_it",
+    "only_its_behavior": true,
+    "why": "Runs the real check; fails today because the feature is missing."
+   },
+   {
+    "test": "tests/test_owner_tests_and_docstrings.py::test_an_agent_paragraph_of_any_length_that_names_code_passes",
+    "only_its_behavior": true,
+    "why": "Runs the real check; fails today because the feature is missing."
+   },
+   {
+    "test": "tests/test_owner_tests_and_docstrings.py::test_a_user_line_over_its_cap_is_rejected_naming_the_test_and_count",
+    "only_its_behavior": true,
+    "why": "Runs the real check; fails today because the feature is missing."
+   },
+   {
+    "test": "tests/test_owner_tests_and_docstrings.py::test_a_verified_by_line_over_its_cap_is_rejected_naming_the_test_and_count",
+    "only_its_behavior": true,
+    "why": "Runs the real check; fails today because the feature is missing."
+   },
+   {
+    "test": "tests/test_owner_tests_and_docstrings.py::test_an_edge_line_over_its_cap_is_rejected_naming_the_test_and_count",
+    "only_its_behavior": true,
+    "why": "Runs the real check; fails today because the feature is missing."
+   },
+   {
+    "test": "tests/test_owner_tests_and_docstrings.py::test_a_new_test_file_with_no_user_line_is_rejected",
+    "only_its_behavior": true,
+    "why": "Runs the real check; fails today because the feature is missing."
+   },
+   {
+    "test": "tests/test_owner_tests_and_docstrings.py::test_a_new_test_file_with_no_agent_detail_is_rejected",
+    "only_its_behavior": true,
+    "why": "Runs the real check; fails today because the feature is missing."
+   },
+   {
+    "test": "tests/test_owner_tests_and_docstrings.py::test_an_older_test_left_unchanged_is_not_held_to_the_new_shape",
+    "only_its_behavior": true,
+    "why": "Runs the real check; fails today because the feature is missing."
+   },
+   {
+    "test": "tests/test_owner_tests_and_docstrings.py::test_the_owners_test_missing_the_docstring_shape_is_raised_to_the_owner",
+    "only_its_behavior": true,
+    "why": "Runs the real check; fails today because the feature is missing."
+   },
+   {
+    "test": "tests/test_owner_tests_and_docstrings.py::test_the_owners_test_that_passes_today_is_raised_to_the_owner",
+    "only_its_behavior": true,
+    "why": "Runs the real check; fails today because the feature is missing."
+   },
+   {
+    "test": "tests/test_owner_tests_and_docstrings.py::test_any_plain_sentence_passes_as_a_verified_by_line",
+    "only_its_behavior": true,
+    "why": "Runs the real check; fails today because the feature is missing."
+   }
+  ],
+  "size": "ok"
+ },
+ "check": {
+  "passed": true,
+  "problems": []
+ },
+ "url": "https://github.com/dokima-dev/dokima/issues/707#issuecomment-6186045634"
+}
