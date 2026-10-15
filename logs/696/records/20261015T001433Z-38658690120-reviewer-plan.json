@@ -1,0 +1,293 @@
+{
+ "role": "reviewer",
+ "stage": "plan",
+ "run_id": "38658690120",
+ "commit_before": "34d301ce183b7b835c2354735099149a653f8e4c",
+ "started_by": "dokima-runtime[bot]",
+ "models": [
+  "claude-opus-5-5"
+ ],
+ "report": {
+  "duration_ms": 78279,
+  "turns": 5,
+  "cost_usd": 0.38991359999999997,
+  "tokens_in": 185948,
+  "tokens_out": 8442
+ },
+ "log": "https://github.com/dokima-dev/dokima/blob/logs/logs/696/38658690120-reviewer-plan.md",
+ "run": "https://github.com/dokima-dev/dokima/actions/runs/38658690120",
+ "handback": {
+  "previous_step": {
+   "did": [
+    "The planner split the work into six stories, from setup to later rules.",
+    "The planner put no file, a left-out role and unknown names in context."
+   ],
+   "decided": [
+    "Keys go in as repo secrets; the other inputs go in the settings file.",
+    "Kimi is built before Codex, as the owner answered."
+   ],
+   "open": [
+    "Which rules across subscriptions the later story needs, asked of the owner."
+   ]
+  },
+  "verdict": "block",
+  "summary": "The plan follows the owner's agreed stories, but setup has no place for a Kimi sign-in.",
+  "raises": [
+   {
+    "kind": "blocker",
+    "to": "planner",
+    "label": "S1.2: sign-in dropped",
+    "text": "S1.2 stores only a key, but the owner said 'sign-in or key'. Kimi signs in, and runs start fresh. Split S1.2: say where a key and a sign-in each go.",
+    "evidence": "`plan.json` S1.2; owner's comment: `kimi login --region global`; `.github/workflows/agent.yml` line 49 `runs-on: ubuntu-24.04`.",
+    "raised_by": "reviewer",
+    "id": "R3"
+   }
+  ],
+  "answers": [],
+  "asks": [
+   {
+    "ask": "Any agent, any model: planner, worker and reviewer each pick theirs.",
+    "source": "https://github.com/dokima-dev/dokima/issues/696",
+    "criterion": "S2.4"
+   },
+   {
+    "ask": "Usual suspects first: Kimi first, since I want to use up its credit, then Codex.",
+    "source": "https://github.com/dokima-dev/dokima/issues/696",
+    "criterion": "S4.1"
+   },
+   {
+    "ask": "The file is YAML-like, a structured file.",
+    "source": "https://github.com/dokima-dev/dokima/issues/696",
+    "criterion": "S2.1"
+   },
+   {
+    "ask": "It exposes a simple interface for deciding the orchestration across subscriptions.",
+    "source": "https://github.com/dokima-dev/dokima/issues/696",
+    "criterion": "S3.5"
+   },
+   {
+    "ask": "Later it may expand into other settings.",
+    "source": "https://github.com/dokima-dev/dokima/issues/696",
+    "criterion": "S2.5"
+   },
+   {
+    "ask": "No model runs inside another vendor's agent.",
+    "source": "https://github.com/dokima-dev/dokima/issues/696#issuecomment-6181290061",
+    "criterion": "S3.4"
+   },
+   {
+    "ask": "One structured file per repo, `.dokima/agents.yml`",
+    "source": "https://github.com/dokima-dev/dokima/issues/696#issuecomment-6181290061",
+    "criterion": "S2.1"
+   },
+   {
+    "ask": "`subscriptions` (agent, key)",
+    "source": "https://github.com/dokima-dev/dokima/issues/696#issuecomment-6181290061",
+    "criterion": "S2.2"
+   },
+   {
+    "ask": "`roles` (planner, worker, reviewer: which subscription and model)",
+    "source": "https://github.com/dokima-dev/dokima/issues/696#issuecomment-6181290061",
+    "criterion": "S2.3"
+   },
+   {
+    "ask": "No file means today's behavior.",
+    "source": "https://github.com/dokima-dev/dokima/issues/696#issuecomment-6181290061",
+    "criterion": "S3.2"
+   },
+   {
+    "ask": "grabbing the inputs a user needs for a subscription (membership, region, sign-in or key, model)",
+    "source": "https://github.com/dokima-dev/dokima/issues/696#issuecomment-6181290061",
+    "criterion": "S1.1"
+   },
+   {
+    "ask": "and putting them in place",
+    "source": "https://github.com/dokima-dev/dokima/issues/696#issuecomment-6181290061",
+    "criterion": "S1.2"
+   },
+   {
+    "ask": "The file and one agent interface; Claude Code moves behind it unchanged.",
+    "source": "https://github.com/dokima-dev/dokima/issues/696#issuecomment-6181290061",
+    "criterion": "S3.3"
+   },
+   {
+    "ask": "Kimi Code CLI adapter.",
+    "source": "https://github.com/dokima-dev/dokima/issues/696#issuecomment-6181290061",
+    "criterion": "S4.1"
+   },
+   {
+    "ask": "Codex CLI adapter.",
+    "source": "https://github.com/dokima-dev/dokima/issues/696#issuecomment-6181290061",
+    "criterion": "S5.1"
+   },
+   {
+    "ask": "Later: rules across subscriptions, in the same file.",
+    "source": "https://github.com/dokima-dev/dokima/issues/696#issuecomment-6181290061",
+    "criterion": "S6.1"
+   }
+  ],
+  "behaviors": [
+   {
+    "criterion": "S1.1",
+    "one_behavior": true,
+    "why": "Setup shows one list of inputs."
+   },
+   {
+    "criterion": "S1.2",
+    "one_behavior": false,
+    "why": "Two results, key to a secret and the rest to the file; sign-in has none."
+   },
+   {
+    "criterion": "S2.1",
+    "one_behavior": true,
+    "why": "One file at one place."
+   },
+   {
+    "criterion": "S2.2",
+    "one_behavior": true,
+    "why": "One section, its fields named."
+   },
+   {
+    "criterion": "S2.3",
+    "one_behavior": true,
+    "why": "One section, each role's two fields."
+   },
+   {
+    "criterion": "S2.4",
+    "one_behavior": true,
+    "why": "Any model name is accepted."
+   },
+   {
+    "criterion": "S2.5",
+    "one_behavior": true,
+    "why": "Own sections, so other settings fit."
+   },
+   {
+    "criterion": "S3.1",
+    "one_behavior": true,
+    "why": "The run starts the role's agent with its model."
+   },
+   {
+    "criterion": "S3.2",
+    "one_behavior": true,
+    "why": "No file gives today's run."
+   },
+   {
+    "criterion": "S3.3",
+    "one_behavior": true,
+    "why": "Claude Code's command and record stay the same."
+   },
+   {
+    "criterion": "S3.4",
+    "one_behavior": true,
+    "why": "A model goes only to its own subscription's agent."
+   },
+   {
+    "criterion": "S3.5",
+    "one_behavior": true,
+    "why": "One edit moves a role."
+   },
+   {
+    "criterion": "S4.1",
+    "one_behavior": true,
+    "why": "A Kimi role runs in Kimi's tool."
+   },
+   {
+    "criterion": "S5.1",
+    "one_behavior": true,
+    "why": "A Codex role runs in Codex's tool."
+   },
+   {
+    "criterion": "S6.1",
+    "one_behavior": true,
+    "why": "Rules sit in the same file; waits on the owner's question."
+   }
+  ],
+  "edge_cases": [
+   {
+    "criterion": "S1.1",
+    "cut": [],
+    "missing": []
+   },
+   {
+    "criterion": "S1.2",
+    "cut": [],
+    "missing": [
+     "A subscription that signs in instead of giving a key."
+    ]
+   },
+   {
+    "criterion": "S2.1",
+    "cut": [],
+    "missing": []
+   },
+   {
+    "criterion": "S2.2",
+    "cut": [],
+    "missing": []
+   },
+   {
+    "criterion": "S2.3",
+    "cut": [],
+    "missing": []
+   },
+   {
+    "criterion": "S2.4",
+    "cut": [],
+    "missing": []
+   },
+   {
+    "criterion": "S2.5",
+    "cut": [],
+    "missing": []
+   },
+   {
+    "criterion": "S3.1",
+    "cut": [],
+    "missing": []
+   },
+   {
+    "criterion": "S3.2",
+    "cut": [],
+    "missing": []
+   },
+   {
+    "criterion": "S3.3",
+    "cut": [],
+    "missing": []
+   },
+   {
+    "criterion": "S3.4",
+    "cut": [],
+    "missing": []
+   },
+   {
+    "criterion": "S3.5",
+    "cut": [],
+    "missing": []
+   },
+   {
+    "criterion": "S4.1",
+    "cut": [],
+    "missing": []
+   },
+   {
+    "criterion": "S5.1",
+    "cut": [],
+    "missing": []
+   },
+   {
+    "criterion": "S6.1",
+    "cut": [],
+    "missing": []
+   }
+  ],
+  "tests": [],
+  "size": "S1.2 holds two results: where a key goes and where the other inputs go."
+ },
+ "check": {
+  "passed": true,
+  "problems": []
+ },
+ "url": "https://github.com/dokima-dev/dokima/issues/696#issuecomment-6181327919"
+}
