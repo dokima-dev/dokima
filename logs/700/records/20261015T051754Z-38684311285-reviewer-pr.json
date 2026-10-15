@@ -1,0 +1,91 @@
+{
+ "role": "reviewer",
+ "stage": "pr",
+ "run_id": "38684311285",
+ "commit_before": "57b5d5c247fc14879195175bca0e8a2cc7d4b089",
+ "started_by": "dokima-runtime[bot]",
+ "models": [
+  "claude-opus-5-5"
+ ],
+ "report": {
+  "duration_ms": 1086443,
+  "turns": 20,
+  "cost_usd": 0.5918905999999999,
+  "tokens_in": 895080,
+  "tokens_out": 8247
+ },
+ "log": "https://github.com/dokima-dev/dokima/blob/logs/logs/700/38684311285-reviewer-pr.md",
+ "run": "https://github.com/dokima-dev/dokima/actions/runs/38684311285",
+ "handback": {
+  "previous_step": {
+   "did": [
+    "The worker made no code change in this round.",
+    "The worker ran the full suite twice on its machine; it passed both times."
+   ],
+   "decided": [
+    "The worker kept the Codex adapter as it stands."
+   ],
+   "open": [
+    "GitHub still shows the acceptance check and the full suite failed on this commit."
+   ]
+  },
+  "verdict": "block",
+  "summary": "The Codex code meets the criterion, but GitHub shows its checks red, and only you can read why.",
+  "raises": [
+   {
+    "kind": "blocker",
+    "to": "owner",
+    "label": "700.1 red on GitHub",
+    "text": "GitHub failed the 700.1 check and the full suite on this commit, but both pass here. Please read the failed run's log, or rerun it.",
+    "evidence": "Card: runs `38681237936`, `38681237902`, `38682528031` failed on `57b5d5c`; clean local `pytest -n auto tests`: 1252 passed.",
+    "raised_by": "reviewer",
+    "id": "R1"
+   }
+  ],
+  "answers": [
+   {
+    "raise": "W1",
+    "answer": "disagree",
+    "why": "Not new: open issue 703 already files this same unexplained red suite on GitHub, so no second issue."
+   }
+  ],
+  "asks": [],
+  "behaviors": [
+   {
+    "criterion": "700.1",
+    "one_behavior": true,
+    "why": "One action, starting a Codex role, with one result: Codex runs on that model."
+   }
+  ],
+  "edge_cases": [
+   {
+    "criterion": "700.1",
+    "cut": [],
+    "missing": []
+   }
+  ],
+  "tests": [
+   {
+    "test": "tests/test_agent_codex.py::test_a_codex_role_runs_in_codex_cli_with_its_model",
+    "only_its_behavior": true,
+    "why": "Passes on the branch; fails without the adapter, naming no adapter for codex."
+   },
+   {
+    "test": "tests/test_agent_codex.py::test_a_codex_run_may_change_files",
+    "only_its_behavior": true,
+    "why": "Passes on the branch; fails without the adapter."
+   },
+   {
+    "test": "tests/test_agent_codex.py::test_a_failed_codex_run_fails_the_run",
+    "only_its_behavior": true,
+    "why": "Passes on the branch; fails without the adapter."
+   }
+  ],
+  "size": "ok"
+ },
+ "check": {
+  "passed": true,
+  "problems": []
+ },
+ "url": "https://github.com/dokima-dev/dokima/pull/728#issuecomment-6184772668"
+}
