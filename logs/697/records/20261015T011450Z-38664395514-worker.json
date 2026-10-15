@@ -1,0 +1,41 @@
+{
+ "role": "worker",
+ "stage": null,
+ "run_id": "38664395514",
+ "commit_before": "b8da839aa7c8673321f5306120ba78200e652521",
+ "started_by": "dokima-runtime[bot]",
+ "models": [
+  "claude-opus-5-5"
+ ],
+ "report": {
+  "duration_ms": 80990,
+  "turns": 11,
+  "cost_usd": 0.47543560000000007,
+  "tokens_in": 368643,
+  "tokens_out": 5969
+ },
+ "log": "https://github.com/dokima-dev/dokima/blob/logs/logs/697/38664395514-worker.md",
+ "run": "https://github.com/dokima-dev/dokima/actions/runs/38664395514",
+ "handback": {
+  "summary": "Added a setup command that stores a key or sign-in as a repo secret and writes the settings file.",
+  "criteria": {
+   "697.1": "`dokima/setup.py` `needs` prints membership, region, sign-in or key, and model.",
+   "697.2": "`add --key` reads the key from standard input, refuses an empty one, sets it with `gh secret set`, and names the secret on failure.",
+   "697.3": "`add` writes `subscriptions: SUB: {agent, key}` into `.dokima/agents.yml`, keeping earlier entries; key is the secret's name.",
+   "697.4": "`add --sign-in` runs the agent's own login from `LOGIN`, e.g. `kimi login --region REGION`.",
+   "697.5": "After the login, the files listed in `SIGN_IN` are packed as base64 gzip tar and stored as the repo secret; a failed login stores nothing.",
+   "697.6": "`add` writes `roles: ROLE: {subscription, model}` for each `--role`, keeping earlier roles."
+  },
+  "evidence": "`python3 -m pytest -q tests/test_setup.py`: 11 passed in 0.99s"
+ },
+ "check": {
+  "passed": true,
+  "problems": []
+ },
+ "dropped_by_fence": [],
+ "files_changed": [
+  "dokima/setup.py"
+ ],
+ "branch": "try/issue-697",
+ "url": "https://github.com/dokima-dev/dokima/issues/697#issuecomment-6182079274"
+}
