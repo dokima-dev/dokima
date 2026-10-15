@@ -1,0 +1,25 @@
+{
+ "role": "worker",
+ "stage": null,
+ "run_id": "38695277012",
+ "commit_before": "e30e6bc38fe4b684b263f1cc4d7eff000b224774",
+ "started_by": "dokima-runtime[bot]",
+ "models": [
+  "kimi-code/k3"
+ ],
+ "report": {},
+ "log": "https://github.com/dokima-dev/dokima/blob/logs/logs/707/38695277012-worker.md",
+ "run": "https://github.com/dokima-dev/dokima/actions/runs/38695277012",
+ "handback": {
+  "missing": "work.json: [Errno 2] No such file or directory: '/tmp/dokima-out/work.json'"
+ },
+ "check": {
+  "passed": false,
+  "problems": [
+   "work.json is missing (/tmp/dokima-out/work.json)"
+  ]
+ },
+ "files_changed": [],
+ "branch": "try/issue-707",
+ "url": "https://github.com/dokima-dev/dokima/issues/707#issuecomment-6186339978"
+}
