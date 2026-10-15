@@ -1,0 +1,48 @@
+{
+ "role": "reviewer",
+ "stage": "pr",
+ "run_id": "38664615793",
+ "commit_before": "cc59b0ed0d8a052b8d0858688768b5afb24d1b15",
+ "started_by": "dokima-runtime[bot]",
+ "models": [
+  "claude-opus-5-5"
+ ],
+ "report": {
+  "duration_ms": 753675,
+  "turns": 14,
+  "cost_usd": 0.5845750000000001,
+  "tokens_in": 647414,
+  "tokens_out": 4493
+ },
+ "log": "https://github.com/dokima-dev/dokima/blob/logs/logs/697/38664615793-reviewer-pr.md",
+ "run": "https://github.com/dokima-dev/dokima/actions/runs/38664615793",
+ "handback": {
+  "previous_step": {
+   "did": [
+    "The worker added a setup command that lists a subscription's inputs.",
+    "Setup stores a key or a saved sign-in as a repo secret.",
+    "Setup writes each subscription and role into the settings file, keeping earlier ones."
+   ],
+   "decided": [
+    "A sign-in is stored as one packed secret of the files the login saved."
+   ],
+   "open": [
+    "The card shows GitHub checks failed; the full suite passes on this machine."
+   ]
+  },
+  "verdict": "approve",
+  "summary": "The setup command does what each criterion asks, and every test passes here.",
+  "raises": [],
+  "answers": [],
+  "asks": [],
+  "behaviors": [],
+  "edge_cases": [],
+  "tests": [],
+  "size": "ok"
+ },
+ "check": {
+  "passed": true,
+  "problems": []
+ },
+ "url": "https://github.com/dokima-dev/dokima/pull/702#issuecomment-6182108457"
+}
