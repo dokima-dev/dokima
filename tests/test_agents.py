@@ -22,15 +22,16 @@ The one interface, `dokima/agents.py`, reads the file under the current folder:
     python3 -m dokima.agents run ROLE PROMPT_FILE OUT
         starts the role's agent with the prompt, the role's model and the key from DOKIMA_AGENT_KEY; its output goes
         into OUT, and its exit code is the agent's.
-Each exits 1 with a message naming the bad name when the role names an unknown subscription or agent, before any agent
-starts. In Python: `agents.run(role, prompt, out)`, `agents.models(role, out, log_dir)`, `agents.report(role, out)` and
+Each exits 1 with a message naming the bad name when the role names an unknown subscription or agent, or naming the
+role when it has no model line, before any agent starts. In Python: `agents.run(role, prompt, out)`, `agents.models(role, out, log_dir)`, `agents.report(role, out)` and
 `agents.transcript(role, log_dir, secrets)`. An agent's adapter is the module `dokima.agent_AGENT`, loaded with
 `importlib.import_module`; it offers `install()`, `run(prompt, model, out)` (returns the exit code),
 `models(out, log_dir)`, `report(out)` and `transcript(log_dir, secrets)`. Claude Code's is `dokima/agent_claude.py`.
 
 The command-line tests run the real command from outside in a temp repo folder, with stub `claude`, `npm`, `kimi` and
 `codex` commands first on PATH that log every call. The workflow tests run `.github/workflows/agent.yml` the way GitHub
-does, through tests/test_start.py's machine, with its fake Claude Code. Nothing leaves the machine.
+does, through tests/test_start.py's machine, with its fake Claude Code; some put the reviewer on zeta, a stand-in agent
+whose adapter is committed on main beside the settings file and logs every call. Nothing leaves the machine.
 """
 import importlib
 import json
@@ -60,6 +61,46 @@ STUB = textwrap.dedent('''\
     if "{name}" == "claude":
         print(json.dumps({{"num_turns": 4, "duration_ms": 5000, "usage": {{"input_tokens": 10, "output_tokens": 3}}}}))
     sys.exit(int(os.environ.get("FAKE_EXIT", "0")))
+''')
+
+
+ZETA = textwrap.dedent('''\
+    """A stand-in agent adapter, zeta: logs every call and hands back the review the test chose."""
+    import json, os, shutil
+
+
+    def log(**call):
+        """Add one call to zeta's call log, beside the fake GitHub's files."""
+        with open(os.path.join(os.environ["FAKE_GH_DIR"], "zeta-calls.jsonl"), "a") as f:
+            f.write(json.dumps(call) + "\\n")
+
+
+    def install():
+        """Log the install."""
+        log(call="install", model=None, prompt=None)
+        return 0
+
+
+    def run(prompt, model, out):
+        """Log the start and hand back the test's review."""
+        log(call="run", model=model, prompt=prompt)
+        shutil.copy(os.environ["FAKE_REVIEW"], os.path.join(str(out), "review.json"))
+        return 0
+
+
+    def models(out, log_dir):
+        """zeta always runs zeta-1."""
+        return ["zeta-1"]
+
+
+    def report(out):
+        """zeta reports no stats."""
+        return {}
+
+
+    def transcript(log_dir, secrets):
+        """zeta keeps no transcript."""
+        return ""
 ''')
 
 
@@ -295,118 +336,181 @@ def test_a_role_the_file_leaves_out_starts_claude_code_as_today(record_property,
         f"698.7: the planner the file leaves out started on {model_flag(calls[0])!r}, not {TODAY_MODEL}"
 
 
-def test_an_unknown_subscription_stops_the_run_before_any_agent_and_names_it(record_property, tmp_path):
-    """An unknown subscription stops the run before its agent, and the issue names it.
+def test_an_unknown_subscription_stops_the_run_before_any_agent(record_property, tmp_path):
+    """A role naming an unknown subscription stops the run before any agent starts.
 
     Proves 698.8. Runs the agent workflow for a plan review with a settings file putting the reviewer on
-    no-such-sub, which the file does not list. Claude Code must never start, the run must fail, and the record posted
-    on the issue must name no-such-sub."""
+    no-such-sub, which the file does not list. Claude Code must never start and the run must fail."""
     record_property("proves", "698.8")
     files = {".dokima/agents.yml": settings({"team": ("claude", TODAY_KEY)}, {"reviewer": ("no-such-sub", TODAY_MODEL)})}
     r = Run(tmp_path / "run", "reviewer", "plan", SPLIT_PROPOSED, files=files)
     assert not r.agent_started(), "698.8: Claude Code started though the reviewer names an unknown subscription"
     assert r.failed, "698.8: the run passed though the reviewer names an unknown subscription"
+
+
+def test_a_role_missing_its_model_stops_and_names_the_role(record_property, tmp_path):
+    """A role with no model line stops before any agent starts, naming the role.
+
+    Proves 698.8, edge case: a typo leaves a role without its model. The planner names its subscription but no model;
+    starting it through the interface must exit 1 naming the planner, with no agent command run, rather than fall back
+    to today's model. The worker, written in full in the same file, still starts, so the check is not refusing
+    everything."""
+    record_property("proves", "698.8")
+    box = Box(tmp_path)
+    box.write_settings(textwrap.dedent("""\
+        subscriptions:
+          team:
+            agent: claude
+            key: CLAUDE_CODE_OAUTH_TOKEN
+        roles:
+          planner:
+            subscription: team
+          worker:
+            subscription: team
+            model: claude-opus-5-5
+        """))
+    p = box.run("planner")
+    assert p.returncode == 1, f"698.8: a planner with no model line did not stop with exit 1: {said(p)}"
+    assert box.calls() == [], f"698.8: an agent command ran though the planner has no model: {box.calls()}"
+    assert "planner" in p.stdout + p.stderr, f"698.8: the stop does not name the planner, the role missing its model: {said(p)}"
+    p = box.run("worker")
+    assert p.returncode == 0 and [c["cmd"] for c in box.calls()] == ["claude"], \
+        f"698.8: the worker, written in full, did not start: {said(p)}"
+
+
+def test_the_issue_names_the_unknown_subscription(record_property, tmp_path):
+    """When a run stops on an unknown subscription, the issue names it.
+
+    Proves 698.9. Runs the agent workflow for a plan review with a settings file putting the reviewer on
+    no-such-sub, which the file does not list. Something posted on the issue must name no-such-sub."""
+    record_property("proves", "698.9")
+    files = {".dokima/agents.yml": settings({"team": ("claude", TODAY_KEY)}, {"reviewer": ("no-such-sub", TODAY_MODEL)})}
+    r = Run(tmp_path / "run", "reviewer", "plan", SPLIT_PROPOSED, files=files)
     bodies = "\n".join(p["body"] for p in r.posted())
     assert "no-such-sub" in bodies, \
-        f"698.8: nothing posted on the issue names the bad subscription no-such-sub:\n{bodies[-1500:]}\n{r.tail()}"
+        f"698.9: nothing posted on the issue names the bad subscription no-such-sub:\n{bodies[-1500:]}\n{r.tail()}"
 
 
-def test_an_unknown_agent_stops_before_any_agent_and_names_it(record_property, tmp_path):
-    """An agent with no adapter stops the run before any agent starts, naming it.
+def test_an_unknown_agent_stops_before_any_agent(record_property, tmp_path):
+    """A subscription naming an agent with no adapter stops before any agent starts.
 
-    Proves 698.8, edge case: an unknown agent. Puts the planner on a subscription whose agent is no-such-agent and
-    starts it through the interface: it must exit 1 naming no-such-agent, with no agent command run. A known agent in
-    the same file still starts, so the check is not refusing everything."""
-    record_property("proves", "698.8")
+    Proves 698.10. Puts the planner on a subscription whose agent is no-such-agent and starts it through the
+    interface: it must exit 1 with no agent command run. A known agent in the same file still starts, so the check is
+    not refusing everything."""
+    record_property("proves", "698.10")
     box = Box(tmp_path)
     box.write_settings(settings({"odd": ("no-such-agent", "ODD_KEY"), "team": ("claude", TODAY_KEY)},
                                 {"planner": ("odd", "m-1"), "worker": ("team", TODAY_MODEL)}))
     p = box.run("planner")
-    assert p.returncode == 1 and "no-such-agent" in p.stdout + p.stderr, \
-        f"698.8: an unknown agent should stop with exit 1 naming no-such-agent: {said(p)}"
-    assert box.calls() == [], f"698.8: an agent command ran though the planner's agent is unknown: {box.calls()}"
+    assert p.returncode == 1, f"698.10: an unknown agent did not stop the planner with exit 1: {said(p)}"
+    assert box.calls() == [], f"698.10: an agent command ran though the planner's agent is unknown: {box.calls()}"
     p = box.run("worker")
     assert p.returncode == 0 and [c["cmd"] for c in box.calls()] == ["claude"], \
-        f"698.8: the worker, on a known agent, did not start: {said(p)}"
+        f"698.10: the worker, on a known agent, did not start: {said(p)}"
 
 
-def test_a_role_starts_through_its_agents_own_adapter(record_property, tmp_path, monkeypatch):
-    """The interface starts a role's agent through that agent's own adapter, on its model.
+def test_the_issue_names_the_unknown_agent(record_property, tmp_path):
+    """When a run stops on an unknown agent, the issue names it.
 
-    Proves 698.9. Puts the planner on a subscription whose agent is zeta, a stand-in adapter loaded as
-    dokima.agent_zeta, and starts the planner through the interface. The zeta adapter must be asked to run the prompt
-    on zeta-1, the role's model, into the run's folder, and no Claude Code may start."""
-    record_property("proves", "698.9")
-    box = Box(tmp_path)
-    box.write_settings(settings({"z": ("zeta", "ZETA_KEY")}, {"planner": ("z", "zeta-1")}))
-    monkeypatch.chdir(box.repo)
-    monkeypatch.setenv("PATH", f"{box.bin}:{os.environ['PATH']}")
-    monkeypatch.setenv("FAKE_LOG", str(box.log))
-    calls = []
-    fake_adapter(monkeypatch, calls)
-    agents = agents_module("698.9")
-    code = agents.run("planner", "Plan issue 1.", str(box.out))
-    runs = [c for c in calls if c[0] == "run"]
-    assert runs == [("run", ("Plan issue 1.", "zeta-1", str(box.out)), {})], \
-        f"698.9: the zeta adapter was not asked once to run the prompt on zeta-1 into the run's folder: {calls}"
-    assert code == 0, f"698.9: the interface did not pass on the adapter's exit code 0: {code!r}"
-    assert box.calls() == [], f"698.9: another agent's command ran for a role on zeta: {box.calls()}"
+    Proves 698.11. Runs the agent workflow for a plan review with a settings file putting the reviewer on a
+    subscription whose agent is no-such-agent. Something posted on the issue must name no-such-agent."""
+    record_property("proves", "698.11")
+    files = {".dokima/agents.yml": workflow_settings("odd", "no-such-agent", TODAY_KEY, "m-1")}
+    r = Run(tmp_path / "run", "reviewer", "plan", SPLIT_PROPOSED, files=files)
+    bodies = "\n".join(p["body"] for p in r.posted())
+    assert "no-such-agent" in bodies, \
+        f"698.11: nothing posted on the issue names the unknown agent no-such-agent:\n{bodies[-1500:]}\n{r.tail()}"
+
+
+def zeta_run(tmp_path, broken=None):
+    """Run the plan review through the workflow with the reviewer on zeta, a stand-in.
+
+    zeta's adapter, dokima/agent_zeta.py, is committed on main next to the settings file, so the run's runtime holds
+    it. Returns the run and every call zeta's adapter got, as {call, model, prompt}."""
+    files = {".dokima/agents.yml": workflow_settings("z", "zeta", "ZETA_KEY", "zeta-1"), "dokima/agent_zeta.py": ZETA}
+    r = Run(tmp_path / "run", "reviewer", "plan", SPLIT_PROPOSED, files=files, secrets={"ZETA_KEY": "zeta-key"},
+            broken=broken)
+    log = os.path.join(r.tmp, "gh", "zeta-calls.jsonl")
+    return r, [json.loads(l) for l in open(log)] if os.path.exists(log) else []
+
+
+def test_a_run_starts_its_agent_through_its_own_adapter(record_property, tmp_path):
+    """A real run starts the role's agent through its own adapter, on its model.
+
+    Proves 698.12. Runs the agent workflow for a plan review with the reviewer on zeta, a stand-in agent whose adapter
+    logs every call. zeta's adapter must be asked once to run the reviewer's prompt on zeta-1, and Claude Code must
+    never start."""
+    record_property("proves", "698.12")
+    r, calls = zeta_run(tmp_path)
+    runs = [c for c in calls if c["call"] == "run"]
+    assert len(runs) == 1 and runs[0]["model"] == "zeta-1", \
+        f"698.12: the run did not ask zeta's adapter once to run on zeta-1: {calls}\n{r.tail()}"
+    assert "Your pack" in runs[0]["prompt"], f"698.12: zeta's adapter did not get the reviewer's prompt: {runs[0]}"
+    assert not r.agent_started(), "698.12: the run started Claude Code though the reviewer is on zeta"
 
 
 def test_claude_code_is_installed_through_the_interface_as_today(record_property, tmp_path):
-    """With no settings file, installing the planner's agent installs Claude Code as today.
+    """The run installs its agent through the interface, which installs Claude Code as today.
 
-    Proves 698.10. Runs the interface's install for the planner with no settings file and checks it ran
-    `npm install -g @anthropic-ai/claude-code`, once, and succeeded."""
-    record_property("proves", "698.10")
-    box = Box(tmp_path)
+    Proves 698.13. With no settings file, the interface's install for the planner must run
+    `npm install -g @anthropic-ai/claude-code`, once, and succeed. Then a real plan-review run with the reviewer on
+    zeta, a stand-in agent, and a broken npm: the run must call zeta's install and get past its install step, so it
+    no longer installs Claude Code by itself."""
+    record_property("proves", "698.13")
+    box = Box(tmp_path / "box")
     p = box.cli("install", "planner")
     npm = [c["argv"] for c in box.calls() if c["cmd"] == "npm"]
     assert p.returncode == 0 and npm == [["install", "-g", "@anthropic-ai/claude-code"]], \
-        f"698.10: installing the planner's agent did not install Claude Code as today: {said(p)}; npm calls {npm}"
+        f"698.13: installing the planner's agent did not install Claude Code as today: {said(p)}; npm calls {npm}"
+    r, calls = zeta_run(tmp_path, broken={"npm": "npm should not run for zeta"})
+    assert [c["call"] for c in calls if c["call"] == "install"] == ["install"], \
+        f"698.13: the run did not install its agent through the interface (zeta's install calls: {calls}); it stopped " \
+        f"at '{r.failed_step}':\n{r.tail()}"
+    assert not any("npm should not run for zeta" in step for step in r.log), \
+        f"698.13: the run still installs Claude Code by itself, outside the interface:\n{r.tail()}"
 
 
 def test_a_failed_install_fails(record_property, tmp_path):
     """When installing Claude Code fails, the install through the interface fails too.
 
-    Proves 698.10, edge case: the install fails. The stub npm exits 1, as it does when the package cannot be fetched;
+    Proves 698.13, edge case: the install fails. The stub npm exits 1, as it does when the package cannot be fetched;
     the interface's install must exit non-zero, so the run stops there."""
-    record_property("proves", "698.10")
+    record_property("proves", "698.13")
     box = Box(tmp_path)
     p = box.cli("install", "planner", FAKE_EXIT="1")
-    assert [c["cmd"] for c in box.calls()] == ["npm"], f"698.10: the install never ran npm: {box.calls()}"
-    assert p.returncode != 0, f"698.10: a failed Claude Code install still exited 0: {said(p)}"
+    assert [c["cmd"] for c in box.calls()] == ["npm"], f"698.13: the install never ran npm: {box.calls()}"
+    assert p.returncode != 0, f"698.13: a failed Claude Code install still exited 0: {said(p)}"
 
 
 def test_claude_code_starts_with_todays_command(record_property, tmp_path):
     """Claude Code starts behind the interface with exactly today's command, flags and key.
 
-    Proves 698.11. Starts the planner through the interface with no settings file and a key in DOKIMA_AGENT_KEY.
+    Proves 698.14. Starts the planner through the interface with no settings file and a key in DOKIMA_AGENT_KEY.
     Claude Code must get today's arguments, in today's order, the key as CLAUDE_CODE_OAUTH_TOKEN, and its printed
     report must land in the run's folder as claude.json, where the record reads it today."""
-    record_property("proves", "698.11")
+    record_property("proves", "698.14")
     box = Box(tmp_path)
     p = box.run("planner", prompt="Plan issue 1.\nRead the pack.", DOKIMA_AGENT_KEY="key-value-698")
     calls = box.calls()
     assert p.returncode == 0 and [c["cmd"] for c in calls] == ["claude"], \
-        f"698.11: the planner did not start Claude Code once: {said(p)}; calls {calls}"
+        f"698.14: the planner did not start Claude Code once: {said(p)}; calls {calls}"
     assert calls[0]["argv"] == ["-p", "Plan issue 1.\nRead the pack.", "--model", TODAY_MODEL,
                                 "--dangerously-skip-permissions", "--max-turns", "60", "--output-format", "json"], \
-        f"698.11: Claude Code's arguments differ from today's: {calls[0]['argv']}"
+        f"698.14: Claude Code's arguments differ from today's: {calls[0]['argv']}"
     assert calls[0]["token"] == "key-value-698", \
-        f"698.11: Claude Code got key {calls[0]['token']!r}, not the run's key, as CLAUDE_CODE_OAUTH_TOKEN"
+        f"698.14: Claude Code got key {calls[0]['token']!r}, not the run's key, as CLAUDE_CODE_OAUTH_TOKEN"
     report = box.out / "claude.json"
     assert report.exists() and json.loads(report.read_text()).get("num_turns") == 4, \
-        "698.11: Claude Code's printed report was not kept in the run's folder as claude.json"
+        "698.14: Claude Code's printed report was not kept in the run's folder as claude.json"
 
 
 def test_a_runs_record_reads_its_agent_through_the_interface(record_property, tmp_path, monkeypatch):
     """A run's record names the models and stats its own agent reports.
 
-    Proves 698.12. Puts the planner on the stand-in agent zeta, whose adapter reports model zeta-1
+    Proves 698.15. Puts the planner on the stand-in agent zeta, whose adapter reports model zeta-1
     and its own stats, then writes the planner's record the way the workflow does. The record must name zeta-1 and
     zeta's stats, not what Claude Code's logs would say."""
-    record_property("proves", "698.12")
+    record_property("proves", "698.15")
     box = Box(tmp_path)
     box.write_settings(settings({"z": ("zeta", "ZETA_KEY")}, {"planner": ("z", "zeta-1")}))
     for k in ("PACK", "BASE", "LOG_URL"):
@@ -423,115 +527,138 @@ def test_a_runs_record_reads_its_agent_through_the_interface(record_property, tm
     from dokima import agent
     agent.main(["agent", "record", "planner", "", str(box.out), str(box.out / "check.txt"), "true", str(logs)])
     rec = json.load(open(box.out / "record.json"))
-    assert rec.get("models") == ["zeta-1"], f"698.12: the record names models {rec.get('models')}, not zeta's zeta-1"
-    assert rec.get("report") == stats, f"698.12: the record's stats {rec.get('report')} are not the ones zeta reported"
+    assert rec.get("models") == ["zeta-1"], f"698.15: the record names models {rec.get('models')}, not zeta's zeta-1"
+    assert rec.get("report") == stats, f"698.15: the record's stats {rec.get('report')} are not the ones zeta reported"
 
 
-def test_claude_codes_record_reads_as_today(record_property, tmp_path, monkeypatch):
-    """Behind the interface, Claude Code's run still yields today's models, stats and transcript.
-
-    Proves 698.13. With no settings file, gives the planner a Claude session log naming two models and a Claude report,
-    and checks the interface reads the models, the stats and the readable transcript (secret removed) the way the
-    record reads them today."""
-    record_property("proves", "698.13")
-    box = Box(tmp_path)
-    monkeypatch.chdir(box.repo)
+def claude_logs(tmp_path):
+    """Write a Claude session log naming two models and a secret; return its folder."""
     logs = tmp_path / "logs" / ".claude" / "projects" / "p"
     logs.mkdir(parents=True)
     (logs / "s.jsonl").write_text(
         json.dumps({"message": {"model": "claude-opus-5-5", "role": "assistant", "content": "Hello secret-value-698."}})
         + "\n" + json.dumps({"message": {"model": "claude-haiku-5-5", "role": "assistant", "content": "Bye."}}) + "\n")
+    return str(tmp_path / "logs")
+
+
+def test_claude_codes_models_read_as_today(record_property, tmp_path, monkeypatch):
+    """Behind the interface, Claude Code's run still names the models its session log names.
+
+    Proves 698.16. With no settings file, gives the planner a Claude session log naming two models, and checks the
+    interface reads both, sorted, the way the record reads them today."""
+    record_property("proves", "698.16")
+    box = Box(tmp_path)
+    monkeypatch.chdir(box.repo)
+    logs = claude_logs(tmp_path)
+    agents = agents_module("698.16")
+    models = agents.models("planner", str(box.out), logs)
+    assert models == ["claude-haiku-5-5", "claude-opus-5-5"], f"698.16: Claude's models read as {models}"
+
+
+def test_claude_codes_stats_read_as_today(record_property, tmp_path, monkeypatch):
+    """Behind the interface, Claude Code's run still yields today's stats from its report.
+
+    Proves 698.17. With no settings file, puts Claude Code's printed report in the run's folder and checks the
+    interface reads its time, turns, cost and tokens the way the record reads them today."""
+    record_property("proves", "698.17")
+    box = Box(tmp_path)
+    monkeypatch.chdir(box.repo)
     (box.out / "claude.json").write_text(json.dumps(
         {"duration_ms": 240000, "num_turns": 23, "total_cost_usd": 3.2,
          "usage": {"input_tokens": 100, "cache_read_input_tokens": 20, "cache_creation_input_tokens": 3, "output_tokens": 9}}))
-    agents = agents_module("698.13")
-    models = agents.models("planner", str(box.out), str(tmp_path / "logs"))
-    assert models == ["claude-haiku-5-5", "claude-opus-5-5"], f"698.13: Claude's models read as {models}"
+    agents = agents_module("698.17")
     report = agents.report("planner", str(box.out))
     assert report == {"duration_ms": 240000, "turns": 23, "cost_usd": 3.2, "tokens_in": 123, "tokens_out": 9}, \
-        f"698.13: Claude's stats read as {report}"
-    text = agents.transcript("planner", str(tmp_path / "logs"), ["secret-value-698"])
+        f"698.17: Claude's stats read as {report}"
+
+
+def test_claude_codes_transcript_reads_as_today(record_property, tmp_path, monkeypatch):
+    """Behind the interface, Claude Code's run still yields today's readable transcript, secrets removed.
+
+    Proves 698.18. With no settings file, gives the planner a Claude session log that says a secret, and checks the
+    interface's transcript shows the agent's words with the secret removed, as the transcript does today."""
+    record_property("proves", "698.18")
+    box = Box(tmp_path)
+    monkeypatch.chdir(box.repo)
+    logs = claude_logs(tmp_path)
+    agents = agents_module("698.18")
+    text = agents.transcript("planner", logs, ["secret-value-698"])
     assert "**Agent:** Hello [secret removed]." in text and "secret-value-698" not in text, \
-        f"698.13: Claude's transcript does not read as today, secret removed:\n{text[:600]}"
+        f"698.18: Claude's transcript does not read as today, secret removed:\n{text[:600]}"
 
 
 def test_claude_codes_record_with_no_report_has_no_stats(record_property, tmp_path, monkeypatch):
     """A Claude Code run that left no report has no stats, as today.
 
-    Proves 698.13, edge case: the agent stopped before printing its report. With no claude.json in the run's folder
-    the interface's stats are empty, as the record's are today, while the models still read from the log."""
-    record_property("proves", "698.13")
+    Proves 698.17, edge case: the agent stopped before printing its report. With no claude.json in the run's folder
+    the interface's stats are empty, as the record's are today."""
+    record_property("proves", "698.17")
     box = Box(tmp_path)
     monkeypatch.chdir(box.repo)
-    logs = tmp_path / "logs"
-    logs.mkdir()
-    (logs / "s.jsonl").write_text(json.dumps({"message": {"model": TODAY_MODEL}}) + "\n")
-    agents = agents_module("698.13")
-    assert agents.report("planner", str(box.out)) == {}, "698.13: a run with no Claude report should have no stats"
-    assert agents.models("planner", str(box.out), str(logs)) == [TODAY_MODEL], \
-        "698.13: a run with no Claude report lost the models its log names"
+    agents = agents_module("698.17")
+    assert agents.report("planner", str(box.out)) == {}, "698.17: a run with no Claude report should have no stats"
 
 
 def test_a_model_runs_only_in_its_subscriptions_own_agent(record_property, tmp_path):
     """A role on a Claude subscription starts only Claude Code, whatever the model is called.
 
-    Proves 698.14. Puts the planner on a Claude subscription with a model named like another vendor's,
+    Proves 698.19. Puts the planner on a Claude subscription with a model named like another vendor's,
     kimi-for-coding, and starts it through the interface. Only Claude Code may start: neither Kimi Code CLI nor Codex
     CLI is run, and nothing picks the agent from the model's name."""
-    record_property("proves", "698.14")
+    record_property("proves", "698.19")
     box = Box(tmp_path)
     box.write_settings(settings({"team": ("claude", TODAY_KEY)}, {"planner": ("team", "kimi-for-coding")}))
     box.run("planner")
     cmds = [c["cmd"] for c in box.calls()]
-    assert cmds == ["claude"], f"698.14: a role on a Claude subscription started {cmds}, not only Claude Code"
+    assert cmds == ["claude"], f"698.19: a role on a Claude subscription started {cmds}, not only Claude Code"
 
 
 def test_moving_a_role_takes_one_edit_of_its_own_lines(record_property, tmp_path):
     """Changing only the worker's subscription line moves the worker, and nothing else changes.
 
-    Proves 698.15. Writes a settings file with two subscriptions, the planner and the worker both on the first. Then
+    Proves 698.20. Writes a settings file with two subscriptions, the planner and the worker both on the first. Then
     edits only the worker's subscription line to the second. The worker must now use the second subscription's
     secret, while the planner keeps the first's."""
-    record_property("proves", "698.15")
+    record_property("proves", "698.20")
     box = Box(tmp_path)
     subs = {"first": ("claude", "FIRST_KEY"), "second": ("claude", "SECOND_KEY")}
     before = settings(subs, {"planner": ("first", TODAY_MODEL), "worker": ("first", "claude-haiku-5-5")})
     box.write_settings(before)
     p = box.cli("key", "worker")
-    assert p.returncode == 0 and p.stdout.strip() == "FIRST_KEY", f"698.15: the worker should start on FIRST_KEY: {said(p)}"
+    assert p.returncode == 0 and p.stdout.strip() == "FIRST_KEY", f"698.20: the worker should start on FIRST_KEY: {said(p)}"
     after = before.replace("  worker:\n    subscription: first\n", "  worker:\n    subscription: second\n")
     assert after != before and after.count("\n") == before.count("\n")
     box.write_settings(after)
     p = box.cli("key", "worker")
     assert p.returncode == 0 and p.stdout.strip() == "SECOND_KEY", \
-        f"698.15: after editing only its line the worker should use SECOND_KEY: {said(p)}"
+        f"698.20: after editing only its line the worker should use SECOND_KEY: {said(p)}"
     p = box.cli("key", "planner")
     assert p.returncode == 0 and p.stdout.strip() == "FIRST_KEY", \
-        f"698.15: moving the worker moved the planner too: {said(p)}"
+        f"698.20: moving the worker moved the planner too: {said(p)}"
 
 
 def test_a_failed_agent_fails_the_run_with_no_fallback(record_property, tmp_path):
     """When a role's agent fails, the run fails, and no other subscription is tried.
 
-    Proves 698.16. Writes a settings file with two Claude subscriptions, the planner on the first. Claude Code exits 3;
+    Proves 698.21. Writes a settings file with two Claude subscriptions, the planner on the first. Claude Code exits 3;
     starting the planner through the interface must fail with that exit code, after exactly one agent start."""
-    record_property("proves", "698.16")
+    record_property("proves", "698.21")
     box = Box(tmp_path)
     box.write_settings(settings({"first": ("claude", "FIRST_KEY"), "spare": ("claude", "SPARE_KEY")},
                                 {"planner": ("first", TODAY_MODEL), "worker": ("spare", TODAY_MODEL)}))
     p = box.run("planner", FAKE_EXIT="3")
     calls = box.calls()
     assert len(calls) == 1 and calls[0]["cmd"] == "claude", \
-        f"698.16: a failed agent was followed by another start, or none ran: {calls}"
-    assert p.returncode == 3, f"698.16: the run did not fail with the agent's exit code 3: {said(p)}"
+        f"698.21: a failed agent was followed by another start, or none ran: {calls}"
+    assert p.returncode == 3, f"698.21: the run did not fail with the agent's exit code 3: {said(p)}"
 
 
 def test_other_sections_can_join_the_settings_file(record_property, tmp_path):
     """Other sections in the settings file leave each role's settings as written.
 
-    Proves 698.17. Writes a settings file with a section before and one after the subscriptions and roles, each with
+    Proves 698.22. Writes a settings file with a section before and one after the subscriptions and roles, each with
     nested settings that look like a role's. The planner must still get its own model and secret."""
-    record_property("proves", "698.17")
+    record_property("proves", "698.22")
     box = Box(tmp_path)
     box.write_settings(settings(
         {"team": ("claude", "TEAM_KEY")}, {"planner": ("team", "claude-sonnet-5-5")},
@@ -539,7 +666,7 @@ def test_other_sections_can_join_the_settings_file(record_property, tmp_path):
         after="checks:\n  planner:\n    subscription: not-this-one\n    model: nor-this-one\n"))
     p = box.cli("model", "planner")
     assert p.returncode == 0 and p.stdout.strip() == "claude-sonnet-5-5", \
-        f"698.17: another section changed the planner's model: {said(p)}"
+        f"698.22: another section changed the planner's model: {said(p)}"
     p = box.cli("key", "planner")
     assert p.returncode == 0 and p.stdout.strip() == "TEAM_KEY", \
-        f"698.17: another section changed the planner's secret: {said(p)}"
+        f"698.22: another section changed the planner's secret: {said(p)}"
