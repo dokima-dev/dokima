@@ -408,14 +408,20 @@ def owner_question(test):
 def owner_misses_bar(repo, crit, what, owner_file):
     """Check the owner's test missing the bar needs a question for the owner.
 
-    The owner commits `owner_file` in place of their good test. With no question the check must fail naming
-    `test_owner_id`; with a question for the owner naming it, the same plan, owner's test untouched, must pass.
+    The owner commits `owner_file` in place of their good test. With no question, or with a question for the owner
+    naming only another test, the check must fail naming `test_owner_id`; with a question for the owner naming it, the
+    same plan, owner's test untouched, must pass.
     """
     good(repo, crit)
     repo.owner(owner_file)
     rc, why = repo({"tests/test_jobs.py": PLANNER_FILE}, PLAN, crit)
     assert rc == 1, f"{crit}: the owner's test {what}, and a plan raising no question about it was accepted"
     assert naming(why, "test_owner_id"), f"{crit}: no problem names the owner's test test_owner_id, which {what}: {why!r}"
+    plan = dict(json.loads(json.dumps(PLAN)), raises=[owner_question(OLD)])
+    rc, why = repo({"tests/test_jobs.py": PLANNER_FILE}, plan, crit)
+    assert rc == 1, f"{crit}: the owner's test {what}, and a plan whose question names only another test was accepted"
+    assert naming(why, "test_owner_id"), \
+        f"{crit}: a question naming only another test, and no problem names the owner's test test_owner_id: {why!r}"
     plan = dict(json.loads(json.dumps(PLAN)), raises=[owner_question(OWNER_TEST)])
     rc, why = repo({"tests/test_jobs.py": PLANNER_FILE}, plan, crit)
     assert rc == 0 and not why, \
@@ -428,9 +434,9 @@ def test_the_owners_test_missing_the_docstring_shape_is_raised_to_the_owner(reco
 
     Agent: Proves 707.14. Uses `owner_misses_bar`: the owner commits `test_owner_id` with an old one-line docstring,
     no User, Verified by or Agent part, naming 9.1 below its first line and still failing today, so only the shape
-    is missing. A plan with no question for the owner naming it must be
-    rejected naming `test_owner_id`; the same plan carrying such a question in raises must pass, since no agent may
-    edit the owner's test.
+    is missing. A plan with no question for the owner naming it, or one naming only another test, must be rejected
+    naming `test_owner_id`; the same plan carrying such a question in raises must pass, since no agent may edit the
+    owner's test.
     """
     record_property("proves", "707.14")
     old_shape = '    """The owner\'s own test of the job id.\n\n    Proves 9.1.\n    """\n'
@@ -443,9 +449,9 @@ def test_the_owners_test_that_passes_today_is_raised_to_the_owner(record_propert
     Verified by: running the real plan check after the owner commits a test that passes today.
 
     Agent: Proves 707.15. Uses `owner_misses_bar`: the owner commits `test_owner_id` in the good docstring shape
-    whose body passes on today's code (`assert True`). A plan with no question for the owner naming it must be
-    rejected naming `test_owner_id`; the same plan carrying such a question in raises must pass, since no agent may
-    edit the owner's test.
+    whose body passes on today's code (`assert True`). A plan with no question for the owner naming it, or one naming
+    only another test, must be rejected naming `test_owner_id`; the same plan carrying such a question in raises must
+    pass, since no agent may edit the owner's test.
     """
     record_property("proves", "707.15")
     owner_misses_bar(repo, "707.15", "passes today",
