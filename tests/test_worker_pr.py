@@ -76,9 +76,11 @@ def test_a_worker_with_nothing_new_to_push_still_opens_its_pull_request(record_p
 
     The planner's branch already holds everything and the worker changes nothing, as on #244. The real push steps of
     the agent workflow run, and the test checks the run succeeded and asked GitHub to open one pull request from
-    try/issue-57 into main."""
+    try/issue-57 into main. Every story of a split is an issue built the same way, so this also pins that each story
+    merges to main on its own pull request, with no parent branch (668.4)."""
     record_property("proves", "257.1")
     record_property("proves", "257.2")
+    record_property("proves", "668.4")
     m = Finish(tmp_path, "worker")
     assert_opened_once(m, "257.1", "the worker had nothing new to push")
 

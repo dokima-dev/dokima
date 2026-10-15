@@ -120,6 +120,10 @@ def owner_words(repo, number, d, items, owners):
     return out
 
 
+class TurnHeld(Exception):
+    """The worker's pack is not built: another story holds the turn on a shared file."""
+
+
 def pack(repo, number, role, stage, dest):
     """Build the starting pack for one role and stage.
 
@@ -145,6 +149,15 @@ def pack(repo, number, role, stage, dest):
     plan = latest(recs, "planner")
     if role == "worker" and not approved(recs):
         return False
+    if role == "worker":
+        # A story's build waits while another story sharing a code file builds, until that one merges (#668).
+        from dokima import turns
+        try:
+            held = turns.holder(repo, number, recs)
+        except subprocess.CalledProcessError as e:
+            raise TurnHeld(f"GitHub could not list the stories sharing files with #{number}: {gh_reason(e)}")
+        if held:
+            raise TurnHeld(turns.waits_line(held))
     if plan:
         json.dump(plan["handback"], open(os.path.join(dest, "plan.json"), "w"), indent=1)
     if stage == "pr":
@@ -261,6 +274,9 @@ def main(argv):
             has_plan = pack(os.environ["GITHUB_REPOSITORY"], argv[2], argv[3], argv[4], argv[5])
         except RecordsUnreadable as e:
             sys.stderr.write(f"The pack has no history: {e}\n")
+            return 1
+        except TurnHeld as e:
+            sys.stderr.write(f"The worker did not start: {e}\n")
             return 1
         return 0 if has_plan or argv[3] == "planner" else 3
     if argv[1] == "check":
@@ -481,6 +497,19 @@ def main(argv):
                         if left:
                             # Nothing is built from a plan written before its blockers landed: the issue plans again.
                             step = ("waiting", f"Nothing is built: the issue plans again by itself when {named(left)} close.")
+                    if step[:2] == ("start", "worker"):
+                        # Stories sharing a code file take turns to build (#668); planning and review never wait.
+                        from dokima import turns
+                        try:
+                            held = turns.holder(repo, number, records(items))
+                        except subprocess.CalledProcessError as e:
+                            held, step = None, ("stop", f"GitHub could not list the stories sharing files with #{number}, "
+                                                        f"so the worker did not start: {gh_reason(e)}. Say `/work` once GitHub answers.")
+                        if held and step[3:] == ("autopilot",):
+                            step = ("waiting", f"Nothing is built: {turns.waits_line(held)} The story plans again by "
+                                               f"itself once #{held[0]} merges.")
+                        elif held:
+                            step = ("stop", f"Nothing is built: {turns.waits_line(held)} Say `/work` once #{held[0]} merges.")
         except subprocess.CalledProcessError as e:
             # Deciding what runs next needs GitHub; a call it refused, after the one wait for its rate limit, stops
             # for the owner with GitHub's own words, and nothing starts.
