@@ -1,0 +1,70 @@
+{
+ "role": "reviewer",
+ "stage": "pr",
+ "run_id": "38667600235",
+ "commit_before": "cc59b0ed0d8a052b8d0858688768b5afb24d1b15",
+ "started_by": "dokima-runtime[bot]",
+ "models": [
+  "claude-opus-5-5"
+ ],
+ "report": {
+  "duration_ms": 380814,
+  "turns": 16,
+  "cost_usd": 0.588559,
+  "tokens_in": 768422,
+  "tokens_out": 5874
+ },
+ "log": "https://github.com/dokima-dev/dokima/blob/logs/logs/697/38667600235-reviewer-pr.md",
+ "run": "https://github.com/dokima-dev/dokima/actions/runs/38667600235",
+ "handback": {
+  "previous_step": {
+   "did": [
+    "The worker changed no code this round.",
+    "The worker ran the full suite twice on its own machine; every test passed."
+   ],
+   "decided": [
+    "The worker judged the failed suite run on GitHub a flaky test."
+   ],
+   "open": [
+    "The full suite is still red on GitHub for the latest commit, cause unknown."
+   ]
+  },
+  "verdict": "block",
+  "summary": "The code meets every criterion, but GitHub still shows the full suite failed, and nobody here can see why.",
+  "raises": [
+   {
+    "kind": "blocker",
+    "to": "owner",
+    "label": "Suite red on GitHub",
+    "text": "GitHub's full suite run failed on the latest commit. It passes here, and the code shows no cause. Please read that run's log or run it again.",
+    "evidence": "Job 116197539255 failed on `cc59b0e`; here `pytest -q -n auto tests` gives 1215 passed.",
+    "raised_by": "reviewer",
+    "id": "R2"
+   }
+  ],
+  "answers": [
+   {
+    "raise": "W1",
+    "answer": "done",
+    "why": "The suite passes here on the same commit; no open issue names this failure.",
+    "searched": [
+     620,
+     658,
+     678,
+     574
+    ],
+    "verdict": "new"
+   }
+  ],
+  "asks": [],
+  "behaviors": [],
+  "edge_cases": [],
+  "tests": [],
+  "size": "ok"
+ },
+ "check": {
+  "passed": true,
+  "problems": []
+ },
+ "url": "https://github.com/dokima-dev/dokima/pull/702#issuecomment-6182514284"
+}
