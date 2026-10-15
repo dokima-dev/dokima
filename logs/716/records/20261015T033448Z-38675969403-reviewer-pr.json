@@ -1,0 +1,64 @@
+{
+ "role": "reviewer",
+ "stage": "pr",
+ "run_id": "38675969403",
+ "commit_before": "76337df52ac69ab0ff91e88cfeb25b8930e9696b",
+ "started_by": "dokima-runtime[bot]",
+ "models": [
+  "claude-opus-5-5"
+ ],
+ "report": {
+  "duration_ms": 306797,
+  "turns": 10,
+  "cost_usd": 0.36698340000000007,
+  "tokens_in": 355502,
+  "tokens_out": 3845
+ },
+ "log": "https://github.com/dokima-dev/dokima/blob/logs/logs/716/38675969403-reviewer-pr.md",
+ "run": "https://github.com/dokima-dev/dokima/actions/runs/38675969403",
+ "handback": {
+  "previous_step": {
+   "did": [
+    "The worker changed no code; the pinned check already passes."
+   ],
+   "decided": [
+    "The all tests check already runs on the owner's pushes, so nothing needed building."
+   ],
+   "open": [
+    "The issue card shows the GitHub checks as failed; the reviewer cannot see why."
+   ]
+  },
+  "verdict": "approve",
+  "summary": "Nothing to build: the owner's pushes already run all tests, and the check catches any rule skipping them.",
+  "raises": [],
+  "answers": [],
+  "asks": [],
+  "behaviors": [
+   {
+    "criterion": "716.1",
+    "one_behavior": true,
+    "why": "One push by the owner, one result: all tests run."
+   }
+  ],
+  "edge_cases": [
+   {
+    "criterion": "716.1",
+    "cut": [],
+    "missing": []
+   }
+  ],
+  "tests": [
+   {
+    "test": "tests/test_checks.py::test_full_suite_runs_every_test_on_every_pull_request",
+    "only_its_behavior": true,
+    "why": "Fails when a rule skips the owner by name, by bot type, or skips everyone."
+   }
+  ],
+  "size": "ok"
+ },
+ "check": {
+  "passed": true,
+  "problems": []
+ },
+ "url": "https://github.com/dokima-dev/dokima/pull/720#issuecomment-6183662412"
+}
