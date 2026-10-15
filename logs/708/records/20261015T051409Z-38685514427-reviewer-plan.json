@@ -1,0 +1,199 @@
+{
+ "role": "reviewer",
+ "stage": "plan",
+ "run_id": "38685514427",
+ "commit_before": "d5c4b603b8d186077378f026ddc08ee7c93d4532",
+ "started_by": "dokima-runtime[bot]",
+ "models": [
+  "claude-opus-5-5"
+ ],
+ "report": {
+  "duration_ms": 59236,
+  "turns": 8,
+  "cost_usd": 0.44995060000000003,
+  "tokens_in": 336186,
+  "tokens_out": 4384
+ },
+ "log": "https://github.com/dokima-dev/dokima/blob/logs/logs/708/38685514427-reviewer-plan.md",
+ "run": "https://github.com/dokima-dev/dokima/actions/runs/38685514427",
+ "handback": {
+  "previous_step": {
+   "did": [
+    "The planner added /review on a later line to the older routing test.",
+    "The older pack test now finds the owner's /plan comment in the planner's pack."
+   ],
+   "decided": [
+    "The planner kept the older tests for the two already-built asks, as the owner said."
+   ],
+   "open": []
+  },
+  "verdict": "approve",
+  "summary": "The plan carries every ask; five new tests fail for the missing feature; two older tests pin what works.",
+  "raises": [],
+  "answers": [],
+  "asks": [
+   {
+    "ask": "Every role working on a split story gets the parent's original issue and my comments, which only the planner gets today.",
+    "source": "https://github.com/dokima-dev/dokima/issues/559",
+    "criterion": "708.1"
+   },
+   {
+    "ask": "Every role working on a split story gets the parent's original issue and my comments, which only the planner gets today.",
+    "source": "https://github.com/dokima-dev/dokima/issues/559",
+    "criterion": "708.2"
+   },
+   {
+    "ask": "Every role working on a split story gets the parent's original issue and my comments, which only the planner gets today.",
+    "source": "https://github.com/dokima-dev/dokima/issues/559",
+    "criterion": "708.3"
+   },
+   {
+    "ask": "Every role working on a split story gets the parent's original issue and my comments, which only the planner gets today.",
+    "source": "https://github.com/dokima-dev/dokima/issues/559",
+    "criterion": "708.4"
+   },
+   {
+    "ask": "Anything I write counts as my words",
+    "source": "https://github.com/dokima-dev/dokima/issues/559",
+    "criterion": "708.5"
+   },
+   {
+    "ask": "I can add, change or delete tests, plan and code on Dokima's branches, then say /review.",
+    "source": "https://github.com/dokima-dev/dokima/issues/559",
+    "criterion": "708.6"
+   },
+   {
+    "ask": "Yes, plans live off the branch; I edit them by comment.",
+    "source": "https://github.com/dokima-dev/dokima/issues/559#issuecomment-6183274943",
+    "criterion": "708.7"
+   },
+   {
+    "ask": "Yes. Both already work, so just pin them with tests.",
+    "source": "https://github.com/dokima-dev/dokima/issues/708",
+    "criterion": "708.6"
+   },
+   {
+    "ask": "Yes. Both already work, so just pin them with tests.",
+    "source": "https://github.com/dokima-dev/dokima/issues/708",
+    "criterion": "708.7"
+   }
+  ],
+  "behaviors": [
+   {
+    "criterion": "708.1",
+    "one_behavior": true,
+    "why": "One role, one thing found in its pack."
+   },
+   {
+    "criterion": "708.2",
+    "one_behavior": true,
+    "why": "One role, one thing found in its pack."
+   },
+   {
+    "criterion": "708.3",
+    "one_behavior": true,
+    "why": "One role, one thing found in its pack."
+   },
+   {
+    "criterion": "708.4",
+    "one_behavior": true,
+    "why": "One role, one thing found in its pack."
+   },
+   {
+    "criterion": "708.5",
+    "one_behavior": true,
+    "why": "Committed owner text accepted as a quote."
+   },
+   {
+    "criterion": "708.6",
+    "one_behavior": true,
+    "why": "One command starts one stage."
+   },
+   {
+    "criterion": "708.7",
+    "one_behavior": true,
+    "why": "One comment reaches one role's pack."
+   }
+  ],
+  "edge_cases": [
+   {
+    "criterion": "708.1",
+    "cut": [],
+    "missing": []
+   },
+   {
+    "criterion": "708.2",
+    "cut": [],
+    "missing": []
+   },
+   {
+    "criterion": "708.3",
+    "cut": [],
+    "missing": []
+   },
+   {
+    "criterion": "708.4",
+    "cut": [],
+    "missing": []
+   },
+   {
+    "criterion": "708.5",
+    "cut": [],
+    "missing": []
+   },
+   {
+    "criterion": "708.6",
+    "cut": [],
+    "missing": []
+   },
+   {
+    "criterion": "708.7",
+    "cut": [],
+    "missing": []
+   }
+  ],
+  "tests": [
+   {
+    "test": "tests/test_story_reads_parent.py::test_a_worker_on_a_split_story_finds_the_parents_original_issue",
+    "only_its_behavior": true,
+    "why": "Builds the worker's real pack; fails today on the missing ask."
+   },
+   {
+    "test": "tests/test_story_reads_parent.py::test_a_worker_on_a_split_story_finds_the_owners_comments_on_the_parent",
+    "only_its_behavior": true,
+    "why": "Builds the worker's real pack; fails today on the missing comment."
+   },
+   {
+    "test": "tests/test_story_reads_parent.py::test_a_reviewer_on_a_split_story_finds_the_parents_original_issue",
+    "only_its_behavior": true,
+    "why": "Builds both reviewer packs; fails today on the missing ask."
+   },
+   {
+    "test": "tests/test_story_reads_parent.py::test_a_reviewer_on_a_split_story_finds_the_owners_comments_on_the_parent",
+    "only_its_behavior": true,
+    "why": "Builds both reviewer packs; fails today on the missing comment."
+   },
+   {
+    "test": "tests/test_story_reads_parent.py::test_text_the_owner_committed_on_the_branch_counts_as_their_words",
+    "only_its_behavior": true,
+    "why": "Owner's line accepted, stranger's refused; fails today on the source check."
+   },
+   {
+    "test": "tests/test_agent.py::test_a_command_starts_its_stage_and_anything_else_starts_nothing",
+    "only_its_behavior": true,
+    "why": "Owner chose to pin with the older test; it now covers /review on a later line."
+   },
+   {
+    "test": "tests/test_agent.py::test_the_pack_reads_the_issue_and_its_pr_as_one_conversation",
+    "only_its_behavior": true,
+    "why": "Owner chose to pin with the older test; it now builds the planner's pack."
+   }
+  ],
+  "size": "ok"
+ },
+ "check": {
+  "passed": true,
+  "problems": []
+ },
+ "url": "https://github.com/dokima-dev/dokima/issues/708#issuecomment-6184942094"
+}
