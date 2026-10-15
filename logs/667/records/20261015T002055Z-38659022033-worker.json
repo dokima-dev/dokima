@@ -1,0 +1,42 @@
+{
+ "role": "worker",
+ "stage": null,
+ "run_id": "38659022033",
+ "commit_before": "f51d6e5e5b0ed4fedafd5abcb0d4d81d3463825e",
+ "started_by": "dokima-runtime[bot]",
+ "models": [
+  "claude-opus-5-5"
+ ],
+ "report": {
+  "duration_ms": 6247,
+  "turns": 2,
+  "cost_usd": 0.38529880000000005,
+  "tokens_in": 82754,
+  "tokens_out": 459
+ },
+ "log": "https://github.com/dokima-dev/dokima/blob/logs/logs/667/38659022033-worker.md",
+ "run": "https://github.com/dokima-dev/dokima/actions/runs/38659022033",
+ "handback": {
+  "summary": "Removed leftover merge markers so grouping by shared code files works on the new main.",
+  "criteria": {
+   "667.1": "`story_groups` in `dokima/planner.py` joins criteria sharing a code file; `check_groups` refuses splitting them.",
+   "667.2": "`check_groups` refuses a story whose criteria form two groups; markdown never joins criteria.",
+   "667.3": "`check_size` in `dokima/planner.py` refuses only empty stories; every count cap is gone.",
+   "667.4": "Count rules replaced by the grouping rule in the role files, `rules/splitting.md` and `dokima/agent_checks.py`.",
+   "667.5": "A story of a parent is refused as never splitting again when split or its criteria form two groups."
+  },
+  "evidence": "`pytest -q` on `test_story_groups.py` and six neighbour files: 167 passed.",
+  "raises": [],
+  "answers": []
+ },
+ "check": {
+  "passed": true,
+  "problems": []
+ },
+ "dropped_by_fence": [],
+ "files_changed": [
+  "dokima/planner.py"
+ ],
+ "branch": "try/issue-667",
+ "url": "https://github.com/dokima-dev/dokima/pull/695#issuecomment-6181371250"
+}
