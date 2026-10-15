@@ -1,0 +1,38 @@
+{
+ "role": "worker",
+ "stage": null,
+ "run_id": "38681125861",
+ "commit_before": "67f04a0a7dcf5bb2eb5a691f336c3eb0dad551ff",
+ "started_by": "dokima-runtime[bot]",
+ "models": [
+  "claude-opus-5-5"
+ ],
+ "report": {
+  "duration_ms": 32728,
+  "turns": 9,
+  "cost_usd": 0.3192748,
+  "tokens_in": 263256,
+  "tokens_out": 3217
+ },
+ "log": "https://github.com/dokima-dev/dokima/blob/logs/logs/700/38681125861-worker.md",
+ "run": "https://github.com/dokima-dev/dokima/actions/runs/38681125861",
+ "handback": {
+  "summary": "Added a Codex adapter so a role on a Codex subscription runs Codex CLI with its model.",
+  "criteria": {
+   "700.1": "New `dokima/agent_codex.py` runs `codex exec --model MODEL --full-auto --json PROMPT`, key as `CODEX_API_KEY`, returning Codex's exit code."
+  },
+  "evidence": "`pytest -q tests/test_agent_codex.py`: 3 passed",
+  "raises": [],
+  "answers": []
+ },
+ "check": {
+  "passed": true,
+  "problems": []
+ },
+ "dropped_by_fence": [],
+ "files_changed": [
+  "dokima/agent_codex.py"
+ ],
+ "branch": "try/issue-700",
+ "url": "https://github.com/dokima-dev/dokima/issues/700#issuecomment-6184352589"
+}
