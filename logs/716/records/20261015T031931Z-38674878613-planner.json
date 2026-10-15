@@ -1,0 +1,64 @@
+{
+ "role": "planner",
+ "stage": null,
+ "run_id": "38674878613",
+ "commit_before": "9356fce79847b06a69e6354e2de92e0f8da9fbce",
+ "started_by": "dokima-runtime[bot]",
+ "models": [
+  "claude-opus-5-5"
+ ],
+ "report": {
+  "duration_ms": 27891,
+  "turns": 3,
+  "cost_usd": 0.4853462,
+  "tokens_in": 131976,
+  "tokens_out": 435
+ },
+ "log": "https://github.com/dokima-dev/dokima/blob/logs/logs/716/38674878613-planner.md",
+ "run": "https://github.com/dokima-dev/dokima/actions/runs/38674878613",
+ "handback": {
+  "kind": "user_story",
+  "title": "All tests run on the owner's commits",
+  "summary": "Pins that the owner's pushes to a Dokima pull request run all tests, like agent pushes.",
+  "user_story": "The owner's pushes to a Dokima pull request get the same all tests check as agent work.",
+  "acceptance_criteria": [
+   {
+    "text": "A push by the owner to a Dokima pull request runs all tests, with no rule skipping the owner.",
+    "words": "My work goes through the same reviews and checks as agent work.",
+    "source": "https://github.com/dokima-dev/dokima/issues/559",
+    "files": [
+     ".github/workflows/full-suite.yml"
+    ],
+    "no_edge_cases": "One push, one pusher; the bot's same push is checked beside it as the good case."
+   }
+  ],
+  "non_functional": [],
+  "tests": {
+   "716.1": [
+    "tests/test_checks.py::test_full_suite_runs_every_test_on_every_pull_request"
+   ]
+  },
+  "test_changes": {
+   "tests/test_checks.py::test_full_suite_runs_every_test_on_every_pull_request": "Already true, so this older check pins it, playing the owner's real login."
+  },
+  "links": {
+   "blocked_by": [],
+   "blocks": [],
+   "relates_to": [
+    715
+   ]
+  },
+  "answers": [
+   {
+    "raise": "R1",
+    "answer": "done",
+    "why": "The check now plays the owner's login from the code owners file as the repository's owner."
+   }
+  ]
+ },
+ "check": {
+  "passed": true,
+  "problems": []
+ },
+ "url": "https://github.com/dokima-dev/dokima/issues/716#issuecomment-6183517613"
+}
