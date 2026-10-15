@@ -328,12 +328,7 @@ def from_kind(p, issue=None, said=None):
                               f"and its {key} is not")
         check_words(f"non-functional requirement {k}", c, said)
         check_files(f"non-functional requirement {k}", c)
-<<<<<<< HEAD
     check_groups([p], isinstance(issue, tuple))
-    if not strings(p.get("scope")) or not p["scope"]:
-        raise Garbled("a story needs scope as a non-empty list of files")
-=======
->>>>>>> origin/main
     tests = p.get("tests")
     if not isinstance(tests, dict) or not all(isinstance(k, str) and strings(v) for k, v in tests.items()):
         raise Garbled("a story needs tests as a map from each criterion (N.k) to its tests")
