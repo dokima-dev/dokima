@@ -1,0 +1,46 @@
+{
+ "role": "reviewer",
+ "stage": "pr",
+ "run_id": "38665308445",
+ "commit_before": "718d60f784439073698e00f389b556bf51bbc600",
+ "started_by": "dokima-runtime[bot]",
+ "models": [
+  "claude-opus-5-5"
+ ],
+ "report": {
+  "duration_ms": 1981,
+  "turns": 1,
+  "cost_usd": 0.8468889999999999,
+  "tokens_in": 72938,
+  "tokens_out": 58
+ },
+ "log": "https://github.com/dokima-dev/dokima/blob/logs/logs/668/38665308445-reviewer-pr.md",
+ "run": "https://github.com/dokima-dev/dokima/actions/runs/38665308445",
+ "handback": {
+  "previous_step": {
+   "did": [
+    "The worker made a story hold its build turn from the moment its worker starts."
+   ],
+   "decided": [
+    "A story counts as building once a worker started, ran, or its pull request opened."
+   ],
+   "open": [
+    "Nothing was left open."
+   ]
+  },
+  "verdict": "approve",
+  "summary": "A story's build now waits while another story building a shared code file runs, until it merges.",
+  "raises": [],
+  "answers": [],
+  "asks": [],
+  "behaviors": [],
+  "edge_cases": [],
+  "tests": [],
+  "size": "ok"
+ },
+ "check": {
+  "passed": true,
+  "problems": []
+ },
+ "url": "https://github.com/dokima-dev/dokima/pull/701#issuecomment-6182201083"
+}
