@@ -1,0 +1,345 @@
+{
+ "role": "reviewer",
+ "stage": "plan",
+ "run_id": "38676692581",
+ "commit_before": "1b90279db90c47195e27a721c96dd7c2eec2bf75",
+ "started_by": "dokima-runtime[bot]",
+ "models": [
+  "claude-opus-5-5"
+ ],
+ "report": {
+  "duration_ms": 152952,
+  "turns": 14,
+  "cost_usd": 0.7057511999999999,
+  "tokens_in": 688359,
+  "tokens_out": 7832
+ },
+ "log": "https://github.com/dokima-dev/dokima/blob/logs/logs/707/38676692581-reviewer-plan.md",
+ "run": "https://github.com/dokima-dev/dokima/actions/runs/38676692581",
+ "handback": {
+  "previous_step": {
+   "did": [
+    "The planner wrote fourteen criteria, each with one test that fails today.",
+    "The planner moved sample tests in older test files to the new docstring shape."
+   ],
+   "decided": [
+    "Each User, Verified by and Edge line holds fifteen words, not counting its label."
+   ],
+   "open": [
+    "The planner asks whether the owner's own tests skip the new docstring rules."
+   ]
+  },
+  "verdict": "block",
+  "summary": "The plan covers every ask, but the owner-test lock can still be opened by giving a reason.",
+  "raises": [
+   {
+    "kind": "blocker",
+    "to": "planner",
+    "label": "707.1 and 707.2: weak",
+    "text": "Code letting a stated reason unlock your tests passes both. Fix: also give the owner's test a reason, and still expect rejection.",
+    "evidence": "`dokima/planner.py:442` says `changed or deleted, with no reason`, which holds both `chang` and `delet`; both tests set no reason.",
+    "raised_by": "reviewer",
+    "id": "R1"
+   }
+  ],
+  "answers": [],
+  "asks": [
+   {
+    "ask": "A plan that changes a test the owner committed is rejected, naming that test.",
+    "source": "https://github.com/dokima-dev/dokima/issues/559",
+    "criterion": "707.1"
+   },
+   {
+    "ask": "A plan that deletes a test the owner committed is rejected, naming that test.",
+    "source": "https://github.com/dokima-dev/dokima/issues/559",
+    "criterion": "707.2"
+   },
+   {
+    "ask": "A plan that files no criterion for a test the owner committed is rejected, naming that test.",
+    "source": "https://github.com/dokima-dev/dokima/issues/559",
+    "criterion": "707.3"
+   },
+   {
+    "ask": "A new or changed test with no User line in its docstring is rejected, naming the test.",
+    "source": "https://github.com/dokima-dev/dokima/issues/559#issuecomment-6131843348",
+    "criterion": "707.4"
+   },
+   {
+    "ask": "A new or changed test with no Verified by line is rejected, naming the test.",
+    "source": "https://github.com/dokima-dev/dokima/issues/559#issuecomment-6131843348",
+    "criterion": "707.5"
+   },
+   {
+    "ask": "A new or changed test with no Agent paragraph is rejected, naming the test.",
+    "source": "https://github.com/dokima-dev/dokima/issues/559#issuecomment-6131843348",
+    "criterion": "707.6"
+   },
+   {
+    "ask": "An Agent paragraph of any length that names code passes the check.",
+    "source": "https://github.com/dokima-dev/dokima/issues/559#issuecomment-6131843348",
+    "criterion": "707.7"
+   },
+   {
+    "ask": "A User line over its word cap is rejected, naming the test and its word count.",
+    "source": "https://github.com/dokima-dev/dokima/issues/559#issuecomment-6131843348",
+    "criterion": "707.8"
+   },
+   {
+    "ask": "A Verified by line over its word cap is rejected, naming the test and its word count.",
+    "source": "https://github.com/dokima-dev/dokima/issues/559#issuecomment-6131843348",
+    "criterion": "707.9"
+   },
+   {
+    "ask": "An Edge line over its word cap is rejected, naming the test and its word count.",
+    "source": "https://github.com/dokima-dev/dokima/issues/559#issuecomment-6131843348",
+    "criterion": "707.10"
+   },
+   {
+    "ask": "A new test file whose opening docstring has no user line is rejected.",
+    "source": "https://github.com/dokima-dev/dokima/issues/559#issuecomment-6131843348",
+    "criterion": "707.11"
+   },
+   {
+    "ask": "A new test file whose opening docstring has no agent detail after its user line is rejected.",
+    "source": "https://github.com/dokima-dev/dokima/issues/559#issuecomment-6131843348",
+    "criterion": "707.12"
+   },
+   {
+    "ask": "An older test left unchanged passes the check without the new docstring shape.",
+    "source": "https://github.com/dokima-dev/dokima/issues/559#issuecomment-6131843348",
+    "criterion": "707.13"
+   },
+   {
+    "ask": "Any plain sentence passes as a Verified by line; no list of test kinds is required.",
+    "source": "https://github.com/dokima-dev/dokima/issues/559#issuecomment-6131843348",
+    "criterion": "707.14"
+   }
+  ],
+  "behaviors": [
+   {
+    "criterion": "707.1",
+    "one_behavior": true,
+    "why": "One check, one result."
+   },
+   {
+    "criterion": "707.2",
+    "one_behavior": true,
+    "why": "One check, one result."
+   },
+   {
+    "criterion": "707.3",
+    "one_behavior": true,
+    "why": "One check, one result."
+   },
+   {
+    "criterion": "707.4",
+    "one_behavior": true,
+    "why": "One check, one result."
+   },
+   {
+    "criterion": "707.5",
+    "one_behavior": true,
+    "why": "One check, one result."
+   },
+   {
+    "criterion": "707.6",
+    "one_behavior": true,
+    "why": "One check, one result."
+   },
+   {
+    "criterion": "707.7",
+    "one_behavior": true,
+    "why": "One check, one result."
+   },
+   {
+    "criterion": "707.8",
+    "one_behavior": true,
+    "why": "One check, one result."
+   },
+   {
+    "criterion": "707.9",
+    "one_behavior": true,
+    "why": "One check, one result."
+   },
+   {
+    "criterion": "707.10",
+    "one_behavior": true,
+    "why": "One check, one result."
+   },
+   {
+    "criterion": "707.11",
+    "one_behavior": true,
+    "why": "One check, one result."
+   },
+   {
+    "criterion": "707.12",
+    "one_behavior": true,
+    "why": "One check, one result."
+   },
+   {
+    "criterion": "707.13",
+    "one_behavior": true,
+    "why": "One check, one result."
+   },
+   {
+    "criterion": "707.14",
+    "one_behavior": true,
+    "why": "One check, one result."
+   }
+  ],
+  "edge_cases": [
+   {
+    "criterion": "707.1",
+    "cut": [],
+    "missing": [
+     "The planner gives a reason for changing the owner's test."
+    ]
+   },
+   {
+    "criterion": "707.2",
+    "cut": [],
+    "missing": [
+     "The planner gives a reason for deleting the owner's test."
+    ]
+   },
+   {
+    "criterion": "707.3",
+    "cut": [],
+    "missing": []
+   },
+   {
+    "criterion": "707.4",
+    "cut": [],
+    "missing": []
+   },
+   {
+    "criterion": "707.5",
+    "cut": [],
+    "missing": []
+   },
+   {
+    "criterion": "707.6",
+    "cut": [],
+    "missing": []
+   },
+   {
+    "criterion": "707.7",
+    "cut": [],
+    "missing": []
+   },
+   {
+    "criterion": "707.8",
+    "cut": [],
+    "missing": []
+   },
+   {
+    "criterion": "707.9",
+    "cut": [],
+    "missing": []
+   },
+   {
+    "criterion": "707.10",
+    "cut": [],
+    "missing": []
+   },
+   {
+    "criterion": "707.11",
+    "cut": [],
+    "missing": []
+   },
+   {
+    "criterion": "707.12",
+    "cut": [],
+    "missing": []
+   },
+   {
+    "criterion": "707.13",
+    "cut": [],
+    "missing": []
+   },
+   {
+    "criterion": "707.14",
+    "cut": [],
+    "missing": []
+   }
+  ],
+  "tests": [
+   {
+    "test": "tests/test_owner_tests_and_docstrings.py::test_a_plan_that_changes_the_owners_test_is_rejected_naming_it",
+    "only_its_behavior": true,
+    "why": "Runs the real check; misses the case where a reason is given."
+   },
+   {
+    "test": "tests/test_owner_tests_and_docstrings.py::test_a_plan_that_deletes_the_owners_test_is_rejected_naming_it",
+    "only_its_behavior": true,
+    "why": "Runs the real check; misses the case where a reason is given."
+   },
+   {
+    "test": "tests/test_owner_tests_and_docstrings.py::test_a_plan_that_files_no_criterion_for_the_owners_test_is_rejected_naming_it",
+    "only_its_behavior": true,
+    "why": "Runs the real check and names only its criterion's problem."
+   },
+   {
+    "test": "tests/test_owner_tests_and_docstrings.py::test_a_new_or_changed_test_with_no_user_line_is_rejected_naming_it",
+    "only_its_behavior": true,
+    "why": "Runs the real check and names only its criterion's problem."
+   },
+   {
+    "test": "tests/test_owner_tests_and_docstrings.py::test_a_new_or_changed_test_with_no_verified_by_line_is_rejected_naming_it",
+    "only_its_behavior": true,
+    "why": "Runs the real check and names only its criterion's problem."
+   },
+   {
+    "test": "tests/test_owner_tests_and_docstrings.py::test_a_new_or_changed_test_with_no_agent_paragraph_is_rejected_naming_it",
+    "only_its_behavior": true,
+    "why": "Runs the real check and names only its criterion's problem."
+   },
+   {
+    "test": "tests/test_owner_tests_and_docstrings.py::test_an_agent_paragraph_of_any_length_that_names_code_passes",
+    "only_its_behavior": true,
+    "why": "Runs the real check and names only its criterion's problem."
+   },
+   {
+    "test": "tests/test_owner_tests_and_docstrings.py::test_a_user_line_over_its_cap_is_rejected_naming_the_test_and_count",
+    "only_its_behavior": true,
+    "why": "Runs the real check and names only its criterion's problem."
+   },
+   {
+    "test": "tests/test_owner_tests_and_docstrings.py::test_a_verified_by_line_over_its_cap_is_rejected_naming_the_test_and_count",
+    "only_its_behavior": true,
+    "why": "Runs the real check and names only its criterion's problem."
+   },
+   {
+    "test": "tests/test_owner_tests_and_docstrings.py::test_an_edge_line_over_its_cap_is_rejected_naming_the_test_and_count",
+    "only_its_behavior": true,
+    "why": "Runs the real check and names only its criterion's problem."
+   },
+   {
+    "test": "tests/test_owner_tests_and_docstrings.py::test_a_new_test_file_with_no_user_line_is_rejected",
+    "only_its_behavior": true,
+    "why": "Runs the real check and names only its criterion's problem."
+   },
+   {
+    "test": "tests/test_owner_tests_and_docstrings.py::test_a_new_test_file_with_no_agent_detail_is_rejected",
+    "only_its_behavior": true,
+    "why": "Runs the real check and names only its criterion's problem."
+   },
+   {
+    "test": "tests/test_owner_tests_and_docstrings.py::test_an_older_test_left_unchanged_is_not_held_to_the_new_shape",
+    "only_its_behavior": true,
+    "why": "Runs the real check and names only its criterion's problem."
+   },
+   {
+    "test": "tests/test_owner_tests_and_docstrings.py::test_any_plain_sentence_passes_as_a_verified_by_line",
+    "only_its_behavior": true,
+    "why": "Runs the real check and names only its criterion's problem."
+   }
+  ],
+  "size": "ok"
+ },
+ "check": {
+  "passed": true,
+  "problems": []
+ },
+ "url": "https://github.com/dokima-dev/dokima/issues/707#issuecomment-6183759498"
+}
