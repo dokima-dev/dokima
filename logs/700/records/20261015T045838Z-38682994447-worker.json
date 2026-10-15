@@ -1,0 +1,44 @@
+{
+ "role": "worker",
+ "stage": null,
+ "run_id": "38682994447",
+ "commit_before": "57b5d5c247fc14879195175bca0e8a2cc7d4b089",
+ "started_by": "dokima-runtime[bot]",
+ "models": [
+  "claude-opus-5-5"
+ ],
+ "report": {
+  "duration_ms": 834779,
+  "turns": 35,
+  "cost_usd": 0.8586102,
+  "tokens_in": 1531437,
+  "tokens_out": 9758
+ },
+ "log": "https://github.com/dokima-dev/dokima/blob/logs/logs/700/38682994447-worker.md",
+ "run": "https://github.com/dokima-dev/dokima/actions/runs/38682994447",
+ "handback": {
+  "summary": "No code change: the Codex adapter stands; the failed full suite run did not repeat in two runs here.",
+  "criteria": {
+   "700.1": "`dokima/agent_codex.py` runs `codex exec --model MODEL --full-auto --json PROMPT`, key as `CODEX_API_KEY`, returning Codex's exit code."
+  },
+  "evidence": "`pytest -q -n auto tests`: 1252 passed, run twice",
+  "raises": [
+   {
+    "kind": "issue",
+    "label": "Unexplained red suite",
+    "text": "The full suite failed once on this branch's head, but the same commit passes it twice here; its log needs a token to read.",
+    "evidence": "Run 38682528031 failed on `57b5d5c`; local `pytest -q -n auto tests` passed 1252 twice.",
+    "raised_by": "worker",
+    "id": "W1"
+   }
+  ]
+ },
+ "check": {
+  "passed": true,
+  "problems": []
+ },
+ "dropped_by_fence": [],
+ "files_changed": [],
+ "branch": "try/issue-700",
+ "url": "https://github.com/dokima-dev/dokima/pull/728#issuecomment-6184599846"
+}
