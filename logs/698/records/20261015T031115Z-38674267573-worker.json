@@ -1,0 +1,70 @@
+{
+ "role": "worker",
+ "stage": null,
+ "run_id": "38674267573",
+ "commit_before": "b152caa4ccb06c7d5ff9c5fa5e38d2bfdb8966b3",
+ "started_by": "dokima-runtime[bot]",
+ "models": [
+  "claude-opus-5-5"
+ ],
+ "report": {
+  "duration_ms": 402302,
+  "turns": 32,
+  "cost_usd": 1.9523586,
+  "tokens_in": 2764577,
+  "tokens_out": 21318
+ },
+ "log": "https://github.com/dokima-dev/dokima/blob/logs/logs/698/38674267573-worker.md",
+ "run": "https://github.com/dokima-dev/dokima/actions/runs/38674267573",
+ "handback": {
+  "summary": "Each role now starts its agent through one interface, on the model and key the settings file names.",
+  "criteria": {
+   "698.1": "`dokima/agents.py` reads `.dokima/agents.yml`; the workflow points it at main's copy.",
+   "698.2": "The workflow puts the secret named by `agents key ROLE` in `DOKIMA_AGENT_KEY`; the Claude adapter passes it on.",
+   "698.3": "`role_settings()` in `dokima/agents.py` reads each role's subscription and model.",
+   "698.4": "`dokima/agents.py` checks no model name; any name reaches the adapter.",
+   "698.5": "The workflow sets `MODEL` from `agents model ROLE`, and the run starts on it.",
+   "698.6": "With no file, `role_settings()` returns Claude Code, `claude-opus-5-5`, `CLAUDE_CODE_OAUTH_TOKEN`.",
+   "698.7": "A role missing from `roles` gets the same defaults in `role_settings()`.",
+   "698.8": "An unknown subscription or a missing model raises `Stop`, exiting 1 before any agent.",
+   "698.9": "The new settings step writes the stop message to `/tmp/why.txt`, which the not-started record posts.",
+   "698.10": "`adapter()` stops when `dokima.agent_NAME` is missing or lacks the adapter functions.",
+   "698.11": "The stop names the agent and reaches the issue the same way as 698.9.",
+   "698.12": "The workflow's agent step runs `python3 -m dokima.agents run`, which calls the adapter's `run`.",
+   "698.13": "The install step runs `agents install ROLE`; `dokima/agent_claude.py` runs today's npm install and returns its code.",
+   "698.14": "`agent_claude.run` uses today's flags and order, writing its stdout to `claude.json`.",
+   "698.15": "`record` and `cancelled` in `dokima/agent_roles.py` read models and stats through `agents.models` and `agents.report`.",
+   "698.16": "`agent_claude.models` uses today's `models_used`.",
+   "698.17": "`agent_claude.report` uses today's `run_report`, which is empty with no `claude.json`.",
+   "698.18": "`agent_claude.transcript` uses today's `transcript`; the workflow passes the role and scrubs the role's key.",
+   "698.19": "The adapter comes only from the subscription's `agent` line, never from the model's name.",
+   "698.20": "Each role's key comes only from its own subscription line.",
+   "698.21": "`agents run` exits with the agent's own code and tries nothing else.",
+   "698.22": "Only the `subscriptions` and `roles` sections are read; other sections are ignored."
+  },
+  "evidence": "`pytest -q -n 8 tests/test_agents.py`: 25 passed in 5.32s",
+  "raises": [
+   {
+    "kind": "issue",
+    "label": "Outside this issue",
+    "text": "The settings reader keeps an inline comment as part of a value, so a commented agent line names a wrong agent.",
+    "evidence": "`dokima/setup.py` `read_settings()` keeps text after `#`: `agent: claude  # x` reads as `claude  # x`.",
+    "raised_by": "worker",
+    "id": "W1"
+   }
+  ]
+ },
+ "check": {
+  "passed": true,
+  "problems": []
+ },
+ "dropped_by_fence": [],
+ "files_changed": [
+  ".github/workflows/agent.yml",
+  "dokima/agent_claude.py",
+  "dokima/agent_roles.py",
+  "dokima/agents.py"
+ ],
+ "branch": "try/issue-698",
+ "url": "https://github.com/dokima-dev/dokima/issues/698#issuecomment-6183435895"
+}
