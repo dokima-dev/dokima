@@ -1,0 +1,384 @@
+{
+ "role": "planner",
+ "stage": null,
+ "run_id": "38673559162",
+ "commit_before": "2b65f78a91042d81feed3ab9fc958efb8e91210f",
+ "started_by": "dokima-runtime[bot]",
+ "models": [
+  "claude-opus-5-5"
+ ],
+ "report": {
+  "duration_ms": 256612,
+  "turns": 20,
+  "cost_usd": 1.5600645999999998,
+  "tokens_in": 1664343,
+  "tokens_out": 19864
+ },
+ "log": "https://github.com/dokima-dev/dokima/blob/logs/logs/698/38673559162-planner.md",
+ "run": "https://github.com/dokima-dev/dokima/actions/runs/38673559162",
+ "handback": {
+  "kind": "user_story",
+  "title": "One settings file picks each role's agent and model",
+  "summary": "A settings file names each role's subscription and model, and every agent runs behind one interface.",
+  "user_story": "Each role runs on the subscription and model the owner names in one file; Claude Code works as today.",
+  "acceptance_criteria": [
+   {
+    "text": "Each repo keeps its agent settings in one file in its Dokima folder.",
+    "words": "One structured file per repo, `.dokima/agents.yml`",
+    "source": "https://github.com/dokima-dev/dokima/issues/696#issuecomment-6181290061",
+    "files": [
+     "dokima/agents.py"
+    ],
+    "no_edge_cases": "Having no file at all is its own criterion."
+   },
+   {
+    "text": "A run's agent gets its key from the secret its role's subscription names.",
+    "words": "`subscriptions` (agent, key)",
+    "source": "https://github.com/dokima-dev/dokima/issues/696#issuecomment-6181290061",
+    "files": [
+     "dokima/agents.py",
+     "dokima/agent_claude.py",
+     ".github/workflows/agent.yml"
+    ],
+    "no_edge_cases": "A missing secret fails inside the agent, as today."
+   },
+   {
+    "text": "The planner, the worker and the reviewer each get their own subscription and model from the file.",
+    "words": "`roles` (planner, worker, reviewer: which subscription and model)",
+    "source": "https://github.com/dokima-dev/dokima/issues/696#issuecomment-6181290061",
+    "files": [
+     "dokima/agents.py"
+    ],
+    "no_edge_cases": "Left-out roles and bad names are their own criteria."
+   },
+   {
+    "text": "A role may name any model; Dokima keeps no list of allowed models.",
+    "words": "Any agent, any model: planner, worker and reviewer each pick theirs.",
+    "source": "https://github.com/dokima-dev/dokima/issues/696",
+    "files": [
+     "dokima/agents.py",
+     "dokima/agent_claude.py"
+    ],
+    "no_edge_cases": "Any name passes; the agent itself refuses a model it lacks."
+   },
+   {
+    "text": "Each run starts its role's agent on the model the file names.",
+    "words": "The file is just a simple declaration: which model is used for which stage.",
+    "source": "https://github.com/dokima-dev/dokima/issues/696#issuecomment-6181845677",
+    "files": [
+     "dokima/agents.py",
+     "dokima/agent_claude.py",
+     ".github/workflows/agent.yml"
+    ],
+    "no_edge_cases": "Bad names and failing agents are their own criteria."
+   },
+   {
+    "text": "With no settings file, every run starts Claude Code with today's model and key.",
+    "words": "No file means today's behavior.",
+    "source": "https://github.com/dokima-dev/dokima/issues/696#issuecomment-6181290061",
+    "files": [
+     "dokima/agents.py",
+     "dokima/agent_claude.py"
+    ],
+    "no_edge_cases": "This criterion is itself the empty case."
+   },
+   {
+    "text": "A role the file leaves out starts Claude Code with today's model and key.",
+    "words": "No file means today's behavior.",
+    "source": "https://github.com/dokima-dev/dokima/issues/696#issuecomment-6181290061",
+    "files": [
+     "dokima/agents.py",
+     "dokima/agent_claude.py"
+    ],
+    "no_edge_cases": "This criterion is itself the empty case for one role."
+   },
+   {
+    "text": "A role naming an unknown subscription stops the run before any agent starts.",
+    "words": "No fallback for now.",
+    "source": "https://github.com/dokima-dev/dokima/issues/696#issuecomment-6181845677",
+    "files": [
+     "dokima/agents.py",
+     ".github/workflows/agent.yml"
+    ],
+    "edge_cases": [
+     {
+      "case": "A role missing its model line, a normal typo, stops too, naming the role.",
+      "test": "tests/test_agents.py::test_a_role_missing_its_model_stops_and_names_the_role"
+     }
+    ]
+   },
+   {
+    "text": "The issue names the unknown subscription that stopped the run.",
+    "words": "No fallback for now.",
+    "source": "https://github.com/dokima-dev/dokima/issues/696#issuecomment-6181845677",
+    "files": [
+     "dokima/agents.py",
+     ".github/workflows/agent.yml"
+    ],
+    "no_edge_cases": "It only follows a stop by criterion 698.8."
+   },
+   {
+    "text": "A subscription naming an agent with no adapter stops the run before any agent starts.",
+    "words": "No fallback for now.",
+    "source": "https://github.com/dokima-dev/dokima/issues/696#issuecomment-6181845677",
+    "files": [
+     "dokima/agents.py"
+    ],
+    "no_edge_cases": "One case: an agent name with no adapter."
+   },
+   {
+    "text": "The issue names the unknown agent that stopped the run.",
+    "words": "No fallback for now.",
+    "source": "https://github.com/dokima-dev/dokima/issues/696#issuecomment-6181845677",
+    "files": [
+     "dokima/agents.py",
+     ".github/workflows/agent.yml"
+    ],
+    "no_edge_cases": "It only follows a stop by criterion 698.10."
+   },
+   {
+    "text": "A run starts its role's agent through the one agent interface, by that agent's own adapter.",
+    "words": "The file and one agent interface",
+    "source": "https://github.com/dokima-dev/dokima/issues/696#issuecomment-6181290061",
+    "files": [
+     "dokima/agents.py",
+     ".github/workflows/agent.yml"
+    ],
+    "no_edge_cases": "Unknown agents are criteria 698.10 and 698.11."
+   },
+   {
+    "text": "Claude Code is installed through the one agent interface, as today.",
+    "words": "Claude Code moves behind it unchanged.",
+    "source": "https://github.com/dokima-dev/dokima/issues/696#issuecomment-6181290061",
+    "files": [
+     "dokima/agents.py",
+     "dokima/agent_claude.py",
+     ".github/workflows/agent.yml"
+    ],
+    "edge_cases": [
+     {
+      "case": "The install fails, as when the package cannot be fetched.",
+      "test": "tests/test_agents.py::test_a_failed_install_fails"
+     }
+    ]
+   },
+   {
+    "text": "Claude Code starts with today's command, flags and key.",
+    "words": "Claude Code moves behind it unchanged.",
+    "source": "https://github.com/dokima-dev/dokima/issues/696#issuecomment-6181290061",
+    "files": [
+     "dokima/agents.py",
+     "dokima/agent_claude.py",
+     ".github/workflows/agent.yml"
+    ],
+    "no_edge_cases": "Failing starts are criterion 698.21."
+   },
+   {
+    "text": "A run's record names the models and stats its own agent reports.",
+    "words": "The file and one agent interface",
+    "source": "https://github.com/dokima-dev/dokima/issues/696#issuecomment-6181290061",
+    "files": [
+     "dokima/agents.py",
+     "dokima/agent_roles.py"
+    ],
+    "no_edge_cases": "A run with no report is covered under 698.17."
+   },
+   {
+    "text": "A Claude Code run's record names the same models as today.",
+    "words": "Claude Code moves behind it unchanged.",
+    "source": "https://github.com/dokima-dev/dokima/issues/696#issuecomment-6181290061",
+    "files": [
+     "dokima/agents.py",
+     "dokima/agent_claude.py",
+     "dokima/agent_roles.py"
+    ],
+    "no_edge_cases": "A log naming two models is the normal case tested."
+   },
+   {
+    "text": "A Claude Code run's record shows the same stats as today.",
+    "words": "Claude Code moves behind it unchanged.",
+    "source": "https://github.com/dokima-dev/dokima/issues/696#issuecomment-6181290061",
+    "files": [
+     "dokima/agents.py",
+     "dokima/agent_claude.py",
+     "dokima/agent_roles.py"
+    ],
+    "edge_cases": [
+     {
+      "case": "The agent stopped before printing its report.",
+      "test": "tests/test_agents.py::test_claude_codes_record_with_no_report_has_no_stats"
+     }
+    ]
+   },
+   {
+    "text": "A Claude Code run's transcript reads the same as today, secrets removed.",
+    "words": "Claude Code moves behind it unchanged.",
+    "source": "https://github.com/dokima-dev/dokima/issues/696#issuecomment-6181290061",
+    "files": [
+     "dokima/agents.py",
+     "dokima/agent_claude.py",
+     "dokima/agent_roles.py"
+    ],
+    "no_edge_cases": "A secret in the log is the normal case tested."
+   },
+   {
+    "text": "A role starts only its subscription's own agent, never another vendor's agent.",
+    "words": "No model runs inside another vendor's agent.",
+    "source": "https://github.com/dokima-dev/dokima/issues/696#issuecomment-6181290061",
+    "files": [
+     "dokima/agents.py",
+     "dokima/agent_claude.py"
+    ],
+    "no_edge_cases": "One case: a model named like another vendor's."
+   },
+   {
+    "text": "Moving a role to another subscription takes one edit: that role's subscription line.",
+    "words": "It exposes a simple interface for deciding the orchestration across subscriptions.",
+    "source": "https://github.com/dokima-dev/dokima/issues/696",
+    "files": [
+     "dokima/agents.py"
+    ],
+    "no_edge_cases": "Bad names after an edit are criterion 698.8."
+   },
+   {
+    "text": "When a role's agent fails, the run fails; no other subscription takes over.",
+    "words": "No fallback for now.",
+    "source": "https://github.com/dokima-dev/dokima/issues/696#issuecomment-6181845677",
+    "files": [
+     "dokima/agents.py",
+     "dokima/agent_claude.py"
+    ],
+    "no_edge_cases": "This criterion is itself the error case."
+   }
+  ],
+  "non_functional": [
+   {
+    "text": "Subscriptions and roles sit in their own sections, so other settings can join the file.",
+    "why": "The owner expects the file to hold other settings later.",
+    "words": "Later it may expand into other settings.",
+    "source": "https://github.com/dokima-dev/dokima/issues/696",
+    "files": [
+     "dokima/agents.py"
+    ],
+    "no_edge_cases": "Other sections are the case itself."
+   }
+  ],
+  "tests": {
+   "698.1": [
+    "tests/test_agents.py::test_settings_come_from_one_file_in_the_dokima_folder"
+   ],
+   "698.2": [
+    "tests/test_agents.py::test_a_run_gets_its_key_from_the_secret_its_subscription_names"
+   ],
+   "698.3": [
+    "tests/test_agents.py::test_each_role_has_its_own_subscription_and_model"
+   ],
+   "698.4": [
+    "tests/test_agents.py::test_any_model_the_role_names_is_passed_to_its_agent"
+   ],
+   "698.5": [
+    "tests/test_agents.py::test_a_run_starts_with_the_model_the_file_names"
+   ],
+   "698.6": [
+    "tests/test_agents.py::test_with_no_settings_file_a_run_starts_claude_code_as_today"
+   ],
+   "698.7": [
+    "tests/test_agents.py::test_a_role_the_file_leaves_out_starts_claude_code_as_today"
+   ],
+   "698.8": [
+    "tests/test_agents.py::test_an_unknown_subscription_stops_the_run_before_any_agent",
+    "tests/test_agents.py::test_a_role_missing_its_model_stops_and_names_the_role"
+   ],
+   "698.9": [
+    "tests/test_agents.py::test_the_issue_names_the_unknown_subscription"
+   ],
+   "698.10": [
+    "tests/test_agents.py::test_an_unknown_agent_stops_before_any_agent"
+   ],
+   "698.11": [
+    "tests/test_agents.py::test_the_issue_names_the_unknown_agent"
+   ],
+   "698.12": [
+    "tests/test_agents.py::test_a_run_starts_its_agent_through_its_own_adapter"
+   ],
+   "698.13": [
+    "tests/test_agents.py::test_claude_code_is_installed_through_the_interface_as_today",
+    "tests/test_agents.py::test_a_failed_install_fails"
+   ],
+   "698.14": [
+    "tests/test_agents.py::test_claude_code_starts_with_todays_command"
+   ],
+   "698.15": [
+    "tests/test_agents.py::test_a_runs_record_reads_its_agent_through_the_interface"
+   ],
+   "698.16": [
+    "tests/test_agents.py::test_claude_codes_models_read_as_today"
+   ],
+   "698.17": [
+    "tests/test_agents.py::test_claude_codes_stats_read_as_today",
+    "tests/test_agents.py::test_claude_codes_record_with_no_report_has_no_stats"
+   ],
+   "698.18": [
+    "tests/test_agents.py::test_claude_codes_transcript_reads_as_today"
+   ],
+   "698.19": [
+    "tests/test_agents.py::test_a_model_runs_only_in_its_subscriptions_own_agent"
+   ],
+   "698.20": [
+    "tests/test_agents.py::test_moving_a_role_takes_one_edit_of_its_own_lines"
+   ],
+   "698.21": [
+    "tests/test_agents.py::test_a_failed_agent_fails_the_run_with_no_fallback"
+   ],
+   "698.22": [
+    "tests/test_agents.py::test_other_sections_can_join_the_settings_file"
+   ]
+  },
+  "test_changes": {
+   "tests/test_start.py::FAKE_CLAUDE": "The fake agent logs the model from --model and keeps its arguments.",
+   "tests/test_start.py::Machine": "Machine can commit extra files on main, such as a settings file.",
+   "tests/test_start.py::Run": "Run can add repo secrets, so a run can use another key.",
+   "tests/test_live_queue.py::FAKE_CLAUDE_ANY": "The fake agent logs the model from --model, as Claude Code does.",
+   "tests/test_one_order.py::WORKER": "The fake agent logs the model from --model, as Claude Code does."
+  },
+  "links": {
+   "blocked_by": [],
+   "blocks": [
+    699,
+    700
+   ],
+   "relates_to": [
+    696,
+    39
+   ]
+  },
+  "raises": [],
+  "answers": [
+   {
+    "raise": "R1",
+    "answer": "done",
+    "why": "New run test puts the reviewer on a stand-in agent; its adapter must run, Claude Code never."
+   },
+   {
+    "raise": "R2",
+    "answer": "done",
+    "why": "The install test now also runs the workflow with the stand-in agent and a broken npm."
+   },
+   {
+    "raise": "R3",
+    "answer": "done",
+    "why": "Split into stopping and naming for each bad name, and models, stats and transcript, one test each."
+   },
+   {
+    "raise": "R4",
+    "answer": "done",
+    "why": "New edge case: a role with no model line stops, naming the role, with no agent started."
+   }
+  ]
+ },
+ "check": {
+  "passed": true,
+  "problems": []
+ },
+ "url": "https://github.com/dokima-dev/dokima/issues/698#issuecomment-6183338577"
+}
