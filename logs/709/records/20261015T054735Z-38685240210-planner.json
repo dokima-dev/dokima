@@ -1,0 +1,382 @@
+{
+ "role": "planner",
+ "stage": null,
+ "run_id": "38685240210",
+ "commit_before": "f71d144d2bd98ab2068596b1eb49ecf40534e27a",
+ "started_by": "RezaSoleymanifar",
+ "models": [
+  "claude-opus-5-5"
+ ],
+ "report": {
+  "duration_ms": 497890,
+  "turns": 11,
+  "cost_usd": 4.1141848,
+  "tokens_in": 1800806,
+  "tokens_out": 8269
+ },
+ "log": "https://github.com/dokima-dev/dokima/blob/logs/logs/709/38685240210-planner.md",
+ "run": "https://github.com/dokima-dev/dokima/actions/runs/38685240210",
+ "handback": {
+  "kind": "user_story",
+  "title": "Every raise and story has a short and full half",
+  "summary": "Raises and split stories each carry a short plain half for the owner and a full half for agents.",
+  "user_story": "Every raise and split story the owner reads comes short and plain, with full detail kept for agents.",
+  "acceptance_criteria": [
+   {
+    "text": "A raise with no short half is rejected, naming the raise.",
+    "words": "raises, stories, Context and questions live in the record as pairs",
+    "source": "https://github.com/dokima-dev/dokima/issues/559",
+    "files": [
+     "dokima/raises.py"
+    ],
+    "edge_cases": [
+     {
+      "case": "The short half is left out.",
+      "test": "tests/test_text_halves.py::test_a_raise_with_no_short_half_is_rejected_naming_it"
+     },
+     {
+      "case": "The short half is blank.",
+      "test": "tests/test_text_halves.py::test_a_raise_with_no_short_half_is_rejected_naming_it"
+     },
+     {
+      "case": "A reviewer's raise has no short half.",
+      "test": "tests/test_text_halves.py::test_a_raise_with_no_short_half_is_rejected_naming_it"
+     }
+    ]
+   },
+   {
+    "text": "A raise with no full half is rejected, naming the raise.",
+    "words": "raises, stories, Context and questions live in the record as pairs",
+    "source": "https://github.com/dokima-dev/dokima/issues/559",
+    "files": [
+     "dokima/raises.py",
+     "rules/raising.md"
+    ],
+    "edge_cases": [
+     {
+      "case": "The full half is left out.",
+      "test": "tests/test_text_halves.py::test_a_raise_with_no_full_half_is_rejected_naming_it"
+     },
+     {
+      "case": "The full half is empty.",
+      "test": "tests/test_text_halves.py::test_a_raise_with_no_full_half_is_rejected_naming_it"
+     },
+     {
+      "case": "The full half is a list, not text.",
+      "test": "tests/test_text_halves.py::test_a_raise_with_no_full_half_is_rejected_naming_it"
+     },
+     {
+      "case": "A reviewer's raise has no full half.",
+      "test": "tests/test_text_halves.py::test_a_raise_with_no_full_half_is_rejected_naming_it"
+     }
+    ]
+   },
+   {
+    "text": "A split story with no short half is rejected, naming the story.",
+    "words": "raises, stories, Context and questions live in the record as pairs",
+    "source": "https://github.com/dokima-dev/dokima/issues/559",
+    "files": [
+     "dokima/planner.py",
+     "dokima/words.py",
+     "dokima/agent_autopilot.py",
+     "dokima/agent_records.py"
+    ],
+    "edge_cases": [
+     {
+      "case": "The short half is left out.",
+      "test": "tests/test_text_halves.py::test_a_split_story_with_no_short_half_is_rejected_naming_it"
+     },
+     {
+      "case": "The short half is blank.",
+      "test": "tests/test_text_halves.py::test_a_split_story_with_no_short_half_is_rejected_naming_it"
+     },
+     {
+      "case": "The story has no user story at all.",
+      "test": "tests/test_text_halves.py::test_a_split_story_with_no_short_half_is_rejected_naming_it"
+     }
+    ]
+   },
+   {
+    "text": "A split story with no full half is rejected, naming the story.",
+    "words": "raises, stories, Context and questions live in the record as pairs",
+    "source": "https://github.com/dokima-dev/dokima/issues/559",
+    "files": [
+     "dokima/planner.py",
+     "dokima/agent_autopilot.py",
+     "dokima/agent_records.py"
+    ],
+    "edge_cases": [
+     {
+      "case": "The full half is left out.",
+      "test": "tests/test_text_halves.py::test_a_split_story_with_no_full_half_is_rejected_naming_it"
+     },
+     {
+      "case": "The full half is empty.",
+      "test": "tests/test_text_halves.py::test_a_split_story_with_no_full_half_is_rejected_naming_it"
+     },
+     {
+      "case": "The user story is one plain sentence, as before.",
+      "test": "tests/test_text_halves.py::test_a_split_story_with_no_full_half_is_rejected_naming_it"
+     }
+    ]
+   },
+   {
+    "text": "A split story's context with no short half is rejected, naming the story.",
+    "words": "raises, stories, Context and questions live in the record as pairs",
+    "source": "https://github.com/dokima-dev/dokima/issues/559",
+    "files": [
+     "dokima/planner.py",
+     "dokima/words.py",
+     "dokima/agent_autopilot.py"
+    ],
+    "edge_cases": [
+     {
+      "case": "The short half is left out.",
+      "test": "tests/test_text_halves.py::test_a_split_storys_context_with_no_short_half_is_rejected_naming_it"
+     },
+     {
+      "case": "The short half is empty.",
+      "test": "tests/test_text_halves.py::test_a_split_storys_context_with_no_short_half_is_rejected_naming_it"
+     }
+    ]
+   },
+   {
+    "text": "A split story's context with no full half is rejected, naming the story.",
+    "words": "raises, stories, Context and questions live in the record as pairs",
+    "source": "https://github.com/dokima-dev/dokima/issues/559",
+    "files": [
+     "dokima/planner.py",
+     "dokima/agent_autopilot.py"
+    ],
+    "edge_cases": [
+     {
+      "case": "The full half is left out.",
+      "test": "tests/test_text_halves.py::test_a_split_storys_context_with_no_full_half_is_rejected_naming_it"
+     },
+     {
+      "case": "The full half is blank.",
+      "test": "tests/test_text_halves.py::test_a_split_storys_context_with_no_full_half_is_rejected_naming_it"
+     },
+     {
+      "case": "The context is one plain sentence, as before.",
+      "test": "tests/test_text_halves.py::test_a_split_storys_context_with_no_full_half_is_rejected_naming_it"
+     }
+    ]
+   },
+   {
+    "text": "A short half that names code is rejected, naming the text.",
+    "words": "short halves are plain words too",
+    "source": "https://github.com/dokima-dev/dokima/issues/709#issuecomment-6184903734",
+    "files": [
+     "dokima/words.py",
+     "dokima/roles/style.md"
+    ],
+    "edge_cases": [
+     {
+      "case": "A question names code.",
+      "test": "tests/test_text_halves.py::test_a_short_half_that_names_code_is_rejected_naming_the_text"
+     },
+     {
+      "case": "A blocker names code.",
+      "test": "tests/test_text_halves.py::test_a_short_half_that_names_code_is_rejected_naming_the_text"
+     },
+     {
+      "case": "An issue found names code.",
+      "test": "tests/test_text_halves.py::test_a_short_half_that_names_code_is_rejected_naming_the_text"
+     },
+     {
+      "case": "A story's user story names code.",
+      "test": "tests/test_text_halves.py::test_a_short_half_that_names_code_is_rejected_naming_the_text"
+     },
+     {
+      "case": "A story's context names code.",
+      "test": "tests/test_text_halves.py::test_a_short_half_that_names_code_is_rejected_naming_the_text"
+     }
+    ]
+   },
+   {
+    "text": "A full half that names code passes the check.",
+    "words": "code names stay in the full half",
+    "source": "https://github.com/dokima-dev/dokima/issues/709#issuecomment-6184903734",
+    "files": [
+     "dokima/words.py",
+     "dokima/raises.py"
+    ],
+    "edge_cases": [
+     {
+      "case": "A reviewer's blocker names code in its full half.",
+      "test": "tests/test_text_halves.py::test_a_full_half_that_names_code_passes_the_check"
+     }
+    ]
+   },
+   {
+    "text": "A full half longer than every word cap passes the check.",
+    "words": "a full text for agents (uncapped, may name code)",
+    "source": "https://github.com/dokima-dev/dokima/issues/559",
+    "files": [
+     "dokima/words.py",
+     "dokima/raises.py"
+    ],
+    "edge_cases": [
+     {
+      "case": "A reviewer's blocker has a 300-word full half.",
+      "test": "tests/test_text_halves.py::test_a_full_half_longer_than_every_cap_passes_the_check"
+     }
+    ]
+   },
+   {
+    "text": "Every example raise in the role prompts has both halves and passes the check.",
+    "words": "change the role prompts so agents write both halves",
+    "source": "https://github.com/dokima-dev/dokima/issues/709#issuecomment-6184903734",
+    "files": [
+     "dokima/raises.py",
+     "dokima/words.py",
+     "dokima/roles/planner.md",
+     "dokima/roles/worker.md",
+     "dokima/roles/reviewer.md",
+     "rules/raising.md"
+    ],
+    "edge_cases": [
+     {
+      "case": "An example's short half names code.",
+      "test": "tests/test_text_halves.py::test_every_example_raise_in_the_role_prompts_passes_the_two_halves_check"
+     }
+    ]
+   },
+   {
+    "text": "The planner prompt shows a split story's user story and context as two halves.",
+    "words": "change the role prompts so agents write both halves",
+    "source": "https://github.com/dokima-dev/dokima/issues/709#issuecomment-6184903734",
+    "files": [
+     "dokima/planner.py",
+     "dokima/roles/planner.md"
+    ],
+    "no_edge_cases": "It reads one fixed prompt; no input varies."
+   }
+  ],
+  "non_functional": [],
+  "tests": {
+   "709.1": [
+    "tests/test_text_halves.py::test_a_raise_with_no_short_half_is_rejected_naming_it"
+   ],
+   "709.2": [
+    "tests/test_text_halves.py::test_a_raise_with_no_full_half_is_rejected_naming_it"
+   ],
+   "709.3": [
+    "tests/test_text_halves.py::test_a_split_story_with_no_short_half_is_rejected_naming_it"
+   ],
+   "709.4": [
+    "tests/test_text_halves.py::test_a_split_story_with_no_full_half_is_rejected_naming_it"
+   ],
+   "709.5": [
+    "tests/test_text_halves.py::test_a_split_storys_context_with_no_short_half_is_rejected_naming_it"
+   ],
+   "709.6": [
+    "tests/test_text_halves.py::test_a_split_storys_context_with_no_full_half_is_rejected_naming_it"
+   ],
+   "709.7": [
+    "tests/test_text_halves.py::test_a_short_half_that_names_code_is_rejected_naming_the_text"
+   ],
+   "709.8": [
+    "tests/test_text_halves.py::test_a_full_half_that_names_code_passes_the_check"
+   ],
+   "709.9": [
+    "tests/test_text_halves.py::test_a_full_half_longer_than_every_cap_passes_the_check"
+   ],
+   "709.10": [
+    "tests/test_text_halves.py::test_every_example_raise_in_the_role_prompts_passes_the_two_halves_check"
+   ],
+   "709.11": [
+    "tests/test_text_halves.py::test_the_planner_prompt_shows_a_split_storys_two_halves"
+   ]
+  },
+  "test_changes": {
+   "tests/test_agent.py::test_a_good_review_passes_and_each_malformation_is_named": "Its sample raises now carry the full half every raise needs.",
+   "tests/test_agent.py::test_check_fails_closed_on_missing_or_broken_files": "Its sample raises now carry the full half every raise needs.",
+   "tests/test_autopilot_river.py::test_on_autopilot_an_accepted_assumption_goes_on_and_one_not_accepted_stops": "Its sample raises now carry the full half every raise needs.",
+   "tests/test_autopilot_river.py::test_on_autopilot_the_river_still_stops_where_the_owner_must_decide": "Its sample raises now carry the full half every raise needs.",
+   "tests/test_cancelled_run.py::test_nothing_starts_by_itself_after_a_cancel_or_a_failure": "Its sample raises now carry the full half every raise needs.",
+   "tests/test_card_status.py::test_a_plan_without_a_summary_is_rejected_naming_the_field": "Its sample split stories now write user_story as a short and full pair.",
+   "tests/test_card_status.py::test_the_planner_check_command_rejects_a_split_without_a_summary": "Its sample split stories now write user_story as a short and full pair.",
+   "tests/test_criterion_files.py::test_a_criterion_with_no_files_is_rejected_by_name": "Its sample split stories now write user_story as a short and full pair.",
+   "tests/test_failed_run_card.py::test_a_failed_run_lands_in_its_stage_column_with_needs_you": "Its sample raises now carry the full half every raise needs.",
+   "tests/test_feature_check.py::test_a_bad_dependency_is_rejected_naming_the_story": "Its sample split stories now write user_story as a short and full pair.",
+   "tests/test_feature_check.py::test_a_story_criterion_missing_its_text_or_source_is_rejected": "Its sample split stories now write user_story as a short and full pair.",
+   "tests/test_feature_check.py::test_a_story_criterion_that_is_not_an_object_is_rejected_not_crashed": "Its sample split stories now write user_story as a short and full pair.",
+   "tests/test_feature_check.py::test_a_story_missing_a_field_is_rejected_naming_story_and_field": "Its sample split stories now write user_story as a short and full pair.",
+   "tests/test_feature_check.py::test_a_story_that_is_not_an_object_is_rejected_not_crashed": "Its sample split stories now write user_story as a short and full pair.",
+   "tests/test_feature_check.py::test_a_valid_chain_of_dependencies_passes": "Its sample split stories now write user_story as a short and full pair.",
+   "tests/test_feature_check.py::test_a_well_formed_feature_passes": "Its sample split stories now write user_story as a short and full pair.",
+   "tests/test_feature_check.py::test_the_check_command_rejects_a_broken_feature_and_says_why": "Its sample split stories now write user_story as a short and full pair.",
+   "tests/test_feature_check.py::test_the_check_command_rejects_a_loop_and_says_why": "Its sample split stories now write user_story as a short and full pair.",
+   "tests/test_fixer.py::test_every_review_blocker_names_the_worker_or_the_planner": "Its sample raises now carry the full half every raise needs.",
+   "tests/test_handback_check.py::test_well_formed_hand_backs_pass_and_every_malformed_field_is_named": "Its sample raises now carry the full half every raise needs.",
+   "tests/test_live_queue.py::test_a_hand_off_card_says_when_it_waits_for_another_run": "Its sample raises now carry the full half every raise needs.",
+   "tests/test_live_queue.py::test_every_hand_off_and_split_uses_the_same_one_card": "Its sample raises now carry the full half every raise needs.",
+   "tests/test_parent_source.py::test_a_criterion_may_cite_its_own_issue_its_parent_or_a_comment_on_either": "Its sample split stories now write user_story as a short and full pair.",
+   "tests/test_parent_source.py::test_any_other_issue_is_still_rejected_naming_the_criterion_and_the_source": "Its sample split stories now write user_story as a short and full pair.",
+   "tests/test_plan_check.py::test_a_source_outside_this_issue_inside_a_split_is_rejected_and_named": "Its sample raises now carry the full half every raise needs.",
+   "tests/test_plan_check.py::test_a_value_of_the_wrong_type_is_rejected_naming_the_field": "Its sample raises now carry the full half every raise needs.",
+   "tests/test_plan_check.py::test_anything_but_a_story_or_a_feature_is_rejected_saying_the_planner_always_hands_back_a_plan": "Its good raise gains a full half; its good split's stories become pairs.",
+   "tests/test_plan_shape.py::test_a_feature_is_shown_as_handed_back": "Its sample split stories now write user_story as a short and full pair.",
+   "tests/test_raise_handbacks.py::test_a_doubt_about_the_ask_reaches_you_as_a_question_with_its_evidence": "Its sample raises now carry the full half every raise needs.",
+   "tests/test_raise_handbacks.py::test_every_old_field_is_rejected_by_name_in_every_agents_hand_back": "Its raises gain full halves; its split reuses stories now written as pairs.",
+   "tests/test_raise_handbacks.py::test_raises_in_every_hand_back_are_checked_against_the_kinds_and_the_table": "Its sample raises now carry the full half every raise needs.",
+   "tests/test_raises.py::test_a_raiser_or_id_written_by_the_model_is_rejected": "Its sample raises now carry the full half every raise needs.",
+   "tests/test_raises.py::test_any_label_passes_and_changes_nothing": "Its sample raises now carry the full half every raise needs.",
+   "tests/test_raises.py::test_every_row_of_the_table_passes": "Its sample raises now carry the full half every raise needs.",
+   "tests/test_raises.py::test_only_question_blocker_and_issue_are_kinds": "Its sample raises now carry the full half every raise needs.",
+   "tests/test_review_asks.py::test_a_plan_review_must_list_every_ask_well_formed": "Its sample raises now carry the full half every raise needs.",
+   "tests/test_review_asks.py::test_a_plan_review_with_a_missing_ask_cannot_approve": "Its sample raises now carry the full half every raise needs.",
+   "tests/test_review_asks.py::test_real_hand_backs_are_kept_as_samples_and_pass_their_checkers": "The kept sample `tests/samples/132/plan.json` now gives each question a full half.",
+   "tests/test_review_edge_cases.py::test_a_plan_review_lists_the_exotic_cases_it_cuts_and_the_normal_use_cases_missing": "It reuses samples from other tests whose raises and stories now have both halves.",
+   "tests/test_reviewer_open_issues.py::test_a_review_naming_a_searched_issue_not_in_its_pack_is_rejected_saying_why": "It reuses samples from other tests whose raises and stories now have both halves.",
+   "tests/test_reviewer_open_issues.py::test_searched_issues_are_rejected_when_the_pack_has_no_open_issues": "It reuses samples from other tests whose raises and stories now have both halves.",
+   "tests/test_reviewer_open_issues.py::test_searched_issues_that_are_not_a_list_of_numbers_are_rejected": "It reuses samples from other tests whose raises and stories now have both halves.",
+   "tests/test_reviewer_verdict.py::test_a_review_filing_its_own_issue_without_one_of_the_three_verdicts_is_rejected": "It reuses samples from other tests whose raises and stories now have both halves.",
+   "tests/test_reviewer_verdict.py::test_a_review_filing_its_own_issue_without_the_issues_it_searched_is_rejected": "It reuses samples from other tests whose raises and stories now have both halves.",
+   "tests/test_story_groups.py::test_a_story_of_a_split_never_splits_again": "Its sample split stories now write user_story as a short and full pair.",
+   "tests/test_story_groups.py::test_criteria_sharing_a_code_file_are_put_in_the_same_story": "Its sample split stories now write user_story as a short and full pair.",
+   "tests/test_story_groups.py::test_criteria_with_no_code_file_in_common_become_separate_stories": "Its sample split stories now write user_story as a short and full pair.",
+   "tests/test_story_groups.py::test_no_count_of_criteria_or_stories_refuses_a_plan": "Its sample split stories now write user_story as a short and full pair.",
+   "tests/test_summary_caps.py::test_the_planners_summary_is_one_sentence_of_at_most_20_words": "It reuses samples from other tests whose raises and stories now have both halves.",
+   "tests/test_summary_caps.py::test_the_reviewers_summary_is_one_sentence_of_at_most_25_words": "It reuses samples from other tests whose raises and stories now have both halves.",
+   "tests/test_summary_caps.py::test_the_worker_and_reviewer_checks_list_every_text_over_its_cap_and_reject_only_past_20_percent": "It reuses samples from other tests whose raises and stories now have both halves.",
+   "tests/test_symptoms_join_cause.py::test_a_root_cause_naming_no_symptoms_is_rejected": "It reuses samples from other tests whose raises and stories now have both halves.",
+   "tests/test_symptoms_join_cause.py::test_a_symptom_naming_no_cause_is_rejected": "It reuses samples from other tests whose raises and stories now have both halves.",
+   "tests/test_unrecorded_run.py::test_a_run_that_dies_before_its_record_gets_a_failed_record_linking_the_run": "It reuses samples from other tests whose raises and stories now have both halves.",
+   "tests/test_unrecorded_run.py::test_a_run_that_dies_before_its_record_shows_needs_you": "It reuses samples from other tests whose raises and stories now have both halves."
+  },
+  "links": {
+   "blocked_by": [],
+   "blocks": [
+    710,
+    711
+   ],
+   "relates_to": [
+    559,
+    707,
+    470,
+    725
+   ]
+  },
+  "raises": [],
+  "answers": [
+   {
+    "raise": "R1",
+    "answer": "done",
+    "why": "The new test file is written again and left in the tree for the run to push."
+   },
+   {
+    "raise": "R2",
+    "answer": "done",
+    "why": "Only older tests that break are changed now, and each one is declared with its reason."
+   }
+  ]
+ },
+ "check": {
+  "passed": true,
+  "problems": []
+ },
+ "url": "https://github.com/dokima-dev/dokima/issues/709#issuecomment-6184907814"
+}
