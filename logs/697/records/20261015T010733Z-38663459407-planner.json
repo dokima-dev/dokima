@@ -1,0 +1,143 @@
+{
+ "role": "planner",
+ "stage": null,
+ "run_id": "38663459407",
+ "commit_before": "a2e94e1e645c47ea2f3ca54a3e7e441bb8f510c5",
+ "started_by": "dokima-runtime[bot]",
+ "models": [
+  "claude-opus-5-5"
+ ],
+ "report": {
+  "duration_ms": 230139,
+  "turns": 19,
+  "cost_usd": 1.1516403999999998,
+  "tokens_in": 1056838,
+  "tokens_out": 22523
+ },
+ "log": "https://github.com/dokima-dev/dokima/blob/logs/logs/697/38663459407-planner.md",
+ "run": "https://github.com/dokima-dev/dokima/actions/runs/38663459407",
+ "handback": {
+  "kind": "user_story",
+  "title": "Setup gathers and stores a subscription's inputs",
+  "summary": "A setup command takes a subscription's inputs once and puts each where runs find it.",
+  "user_story": "The owner gives a subscription's inputs once; setup stores the key or sign-in and writes the settings file.",
+  "acceptance_criteria": [
+   {
+    "text": "Setup lists the inputs a subscription needs: membership, region, sign-in or key, and model.",
+    "words": "grabbing the inputs a user needs for a subscription (membership, region, sign-in or key, model)",
+    "source": "https://github.com/dokima-dev/dokima/issues/696#issuecomment-6181290061",
+    "files": [
+     "dokima/setup.py"
+    ],
+    "no_edge_cases": "It takes no input, so there is nothing missing or malformed to handle."
+   },
+   {
+    "text": "Setup stores a key the owner gives as a repo secret, under the name the owner chooses.",
+    "words": "sign-in or key, model) and putting them in place",
+    "source": "https://github.com/dokima-dev/dokima/issues/696#issuecomment-6181290061",
+    "files": [
+     "dokima/setup.py"
+    ],
+    "edge_cases": [
+     {
+      "case": "An empty key is refused and nothing is stored.",
+      "test": "tests/test_setup.py::test_empty_key_stores_nothing"
+     },
+     {
+      "case": "GitHub refuses the secret: setup fails and names it.",
+      "test": "tests/test_setup.py::test_secret_refused_fails"
+     }
+    ]
+   },
+   {
+    "text": "The settings file lists the subscription with its agent and its secret's name, never the key itself.",
+    "words": "`subscriptions` (agent, key)",
+    "source": "https://github.com/dokima-dev/dokima/issues/696#issuecomment-6181290061",
+    "files": [
+     "dokima/setup.py"
+    ],
+    "edge_cases": [
+     {
+      "case": "Adding a second subscription keeps the first one and its roles.",
+      "test": "tests/test_setup.py::test_settings_keep_other_subscription"
+     }
+    ]
+   },
+   {
+    "text": "Setup signs the agent in through its own login, with the region the owner gives.",
+    "words": "signed in with `kimi login --region global`",
+    "source": "https://github.com/dokima-dev/dokima/issues/696#issuecomment-6181290061",
+    "files": [
+     "dokima/setup.py"
+    ],
+    "no_edge_cases": "A failed login is covered where the sign-in is stored: nothing is stored."
+   },
+   {
+    "text": "Setup stores the files the agent's login saved as a repo secret.",
+    "words": "region, sign-in or key, model) and putting them in place",
+    "source": "https://github.com/dokima-dev/dokima/issues/696#issuecomment-6181290061",
+    "files": [
+     "dokima/setup.py"
+    ],
+    "edge_cases": [
+     {
+      "case": "The login fails: setup fails and stores nothing.",
+      "test": "tests/test_setup.py::test_failed_sign_in_stores_nothing"
+     }
+    ]
+   },
+   {
+    "text": "The settings file gives each role the owner names the subscription and model the owner gives.",
+    "words": "`roles` (planner, worker, reviewer: which subscription and model)",
+    "source": "https://github.com/dokima-dev/dokima/issues/696#issuecomment-6181290061",
+    "files": [
+     "dokima/setup.py"
+    ],
+    "no_edge_cases": "Keeping earlier roles is covered under the subscription criterion; the inputs are plain names."
+   }
+  ],
+  "non_functional": [],
+  "tests": {
+   "697.1": [
+    "tests/test_setup.py::test_lists_inputs"
+   ],
+   "697.2": [
+    "tests/test_setup.py::test_key_stored_as_secret",
+    "tests/test_setup.py::test_empty_key_stores_nothing",
+    "tests/test_setup.py::test_secret_refused_fails"
+   ],
+   "697.3": [
+    "tests/test_setup.py::test_settings_name_key_secret",
+    "tests/test_setup.py::test_settings_keep_other_subscription"
+   ],
+   "697.4": [
+    "tests/test_setup.py::test_sign_in_uses_region"
+   ],
+   "697.5": [
+    "tests/test_setup.py::test_sign_in_stored_as_secret",
+    "tests/test_setup.py::test_failed_sign_in_stores_nothing"
+   ],
+   "697.6": [
+    "tests/test_setup.py::test_settings_give_roles"
+   ]
+  },
+  "test_changes": {},
+  "links": {
+   "blocked_by": [],
+   "blocks": [
+    698,
+    699
+   ],
+   "relates_to": [
+    700
+   ]
+  },
+  "raises": [],
+  "answers": []
+ },
+ "check": {
+  "passed": true,
+  "problems": []
+ },
+ "url": "https://github.com/dokima-dev/dokima/issues/697#issuecomment-6181962855"
+}
