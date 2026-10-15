@@ -394,9 +394,18 @@ def sh(cwd, *args):
 
 
 def git_env(base):
-    """An environment where git has an identity."""
-    return {**base, "GIT_AUTHOR_NAME": "t", "GIT_AUTHOR_EMAIL": "t@example.com",
-            "GIT_COMMITTER_NAME": "t", "GIT_COMMITTER_EMAIL": "t@example.com"}
+    """An environment where git has an identity and never tidies a repo in the background.
+
+    A background auto-gc packing origin.git while a clone copies its object files made the clone fail at random."""
+    env = {**base, "GIT_AUTHOR_NAME": "t", "GIT_AUTHOR_EMAIL": "t@example.com",
+           "GIT_COMMITTER_NAME": "t", "GIT_COMMITTER_EMAIL": "t@example.com"}
+    n = int(env.get("GIT_CONFIG_COUNT") or 0)
+    if not any(env.get(f"GIT_CONFIG_KEY_{i}") == "gc.auto" for i in range(n)):
+        for k, v in (("gc.auto", "0"), ("receive.autogc", "false")):
+            env[f"GIT_CONFIG_KEY_{n}"], env[f"GIT_CONFIG_VALUE_{n}"] = k, v
+            n += 1
+        env["GIT_CONFIG_COUNT"] = str(n)
+    return env
 
 
 def record_comment(rec, t):
@@ -509,7 +518,7 @@ class Machine:
         for _, b in paths:
             os.makedirs(b, exist_ok=True)
         ws = f"{t}/jobs/{name}/ws"
-        sh(t, "git", "clone", "-q", f"{t}/origin.git", ws)
+        sh(t, "git", "clone", "-q", "--no-local", f"{t}/origin.git", ws)
         status = {"failed": False}
         steps_ctx, added = {}, {}
         job_env = {k: moved(fill(v, {**ctx, "env": Ctx()}, status)) for k, v in (job.get("env") or {}).items()}
