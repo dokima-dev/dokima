@@ -11,12 +11,24 @@ DEFAULT_TYPES = ("opened", "synchronize", "reopened")  # GitHub's pull_request_t
 FILTERS = ("branches", "branches-ignore", "paths", "paths-ignore")  # trigger filters push_runs_all_tests does not play
 
 
-def push_runs_all_tests(pusher):
-    """Whether all tests run when `pusher` pushes to a ready Dokima pull request (#716).
+def real_owner():
+    """The owner's real login, read from the repo's own `.github/CODEOWNERS`.
+
+    716.1 plays the owner by this login, so a rule that skips the owner by name is caught, not just a made-up one."""
+    path = os.path.join(os.path.dirname(__file__), "..", ".github", "CODEOWNERS")
+    for line in open(path):
+        words = line.split("#")[0].split()
+        if len(words) > 1 and words[0] == "*":
+            return words[1].lstrip("@")
+    raise AssertionError("716.1: .github/CODEOWNERS names no owner for every file")
+
+
+def push_runs_all_tests(pusher, owner):
+    """Whether all tests run when `pusher` pushes to a Dokima pull request in `owner`'s repo.
 
     Plays GitHub's part the way test_one_order.py does: reads the workflow's own `on:` and the all tests job's `if:`
-    (with test_start.py's expression reader) against a synchronize event sent by `pusher`. Returns (runs, why): why
-    names what stopped it, in plain words, when it does not run."""
+    (with test_start.py's expression reader) against a synchronize event sent by `pusher`, with `owner` as the
+    repository's owner. Returns (runs, why): why names what stopped it, in plain words, when it does not run."""
     wf = ts.workflow("full-suite.yml")
     on = wf.get("on") or wf.get(True) or {}
     if "pull_request_target" not in on:
@@ -30,13 +42,16 @@ def push_runs_all_tests(pusher):
     types = [types] if isinstance(types, str) else types
     if "synchronize" not in types:
         return False, "full-suite.yml no longer runs when a pull request gets a new push"
+    repo = f"{owner}/dokima"
     sender = {"login": pusher, "type": "Bot" if pusher.endswith("[bot]") else "User"}
     pr = {"number": 60, "draft": False, "state": "open", "labels": [], "user": {"login": BOT},
-          "head": {"sha": "a1" * 20, "ref": f"try/issue-{ts.N}", "repo": {"full_name": "o/r"}},
-          "base": {"ref": "main", "repo": {"full_name": "o/r"}}, "merged": False}
-    event = {"action": "synchronize", "number": 60, "pull_request": pr, "sender": sender}
-    github = ts.Ctx(event_name="pull_request_target", event=event, repository="o/r", sha="a1" * 20, actor=pusher,
-                    triggering_actor=pusher, ref="refs/heads/main")
+          "author_association": "NONE",
+          "head": {"sha": "a1" * 20, "ref": f"try/issue-{ts.N}", "repo": {"full_name": repo}},
+          "base": {"ref": "main", "repo": {"full_name": repo}}, "merged": False}
+    event = {"action": "synchronize", "number": 60, "pull_request": pr, "sender": sender,
+             "repository": {"full_name": repo, "owner": {"login": owner}}}
+    github = ts.Ctx(event_name="pull_request_target", event=event, repository=repo, repository_owner=owner,
+                    sha="a1" * 20, actor=pusher, triggering_actor=pusher, ref="refs/heads/main")
     job = next((j for j in wf["jobs"].values() if (j.get("name") or "") == "all tests"), None)
     if job is None:
         return False, "full-suite.yml has no job named all tests"
@@ -70,13 +85,16 @@ def test_full_suite_runs_every_test_on_every_pull_request(record_property):
     still runs every test spread over all cores with `-n auto`, and never uses testmon, which only code reviews use.
     For 716.1 it plays GitHub's part on a new push to a ready Dokima pull request, once by Dokima's bot and once by
     the owner, and checks the all tests job runs for both: no trigger filter or condition on who pushed skips the
-    owner. The bot's push is the good case beside it, so a workflow that ran for no one fails too."""
+    owner. The owner is played by their real login from `.github/CODEOWNERS`, as the repository's owner, so a rule
+    naming them or `github.repository_owner` is caught. The bot's push is the good case beside it, so a workflow that
+    ran for no one fails too."""
     record_property("proves", "29.4")
     record_property("proves", "539.3")
     record_property("proves", "716.1")
-    runs, why = push_runs_all_tests(BOT)
+    owner = real_owner()
+    runs, why = push_runs_all_tests(BOT, owner)
     assert runs, f"716.1: a push by Dokima to its pull request no longer runs all tests: {why}"
-    runs, why = push_runs_all_tests(ts.OWNER)
+    runs, why = push_runs_all_tests(owner, owner)
     assert runs, f"716.1: a push by the owner to a Dokima pull request does not run all tests: {why}"
     path = os.path.join(os.path.dirname(__file__), "..", ".github/workflows/full-suite.yml")
     lines = [line.strip() for line in open(path)]
