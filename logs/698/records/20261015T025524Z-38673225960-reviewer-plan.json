@@ -1,0 +1,451 @@
+{
+ "role": "reviewer",
+ "stage": "plan",
+ "run_id": "38673225960",
+ "commit_before": "2b65f78a91042d81feed3ab9fc958efb8e91210f",
+ "started_by": "dokima-runtime[bot]",
+ "models": [
+  "claude-opus-5-5"
+ ],
+ "report": {
+  "duration_ms": 179568,
+  "turns": 18,
+  "cost_usd": 1.0858628000000001,
+  "tokens_in": 1108106,
+  "tokens_out": 14729
+ },
+ "log": "https://github.com/dokima-dev/dokima/blob/logs/logs/698/38673225960-reviewer-plan.md",
+ "run": "https://github.com/dokima-dev/dokima/actions/runs/38673225960",
+ "handback": {
+  "previous_step": {
+   "did": [
+    "Planned 16 criteria and one requirement, each with a failing test.",
+    "Taught the test machine to add a settings file and extra secrets."
+   ],
+   "decided": [
+    "A role on a subscription starts only that subscription's agent, whatever the model."
+   ],
+   "open": [
+    "Asks the owner whether that is enough to keep models in their own vendor's agent.",
+    "Proposes a new issue: logs hide only Claude's key."
+   ]
+  },
+  "verdict": "block",
+  "summary": "Blocked: no test proves a real run starts and installs the agent through the one interface; two criteria bundle behaviors.",
+  "raises": [
+   {
+    "kind": "blocker",
+    "to": "planner",
+    "label": "698.9: run bypasses interface",
+    "text": "No test proves a real run starts its agent through the interface; a run calling Claude Code directly passes all. Fix: a run test with a stand-in agent's adapter.",
+    "evidence": "`tests/test_agents.py::test_a_role_starts_through_its_agents_own_adapter` calls `agents.run` in-process; `.github/workflows/agent.yml` line 321 starts `claude -p` directly today.",
+    "raised_by": "reviewer",
+    "id": "R1"
+   },
+   {
+    "kind": "blocker",
+    "to": "planner",
+    "label": "698.10: install bypasses interface",
+    "text": "No test proves a real run installs through the interface; keeping today's own install line passes. Fix: a run test where the stand-in agent's install is called.",
+    "evidence": "`tests/test_agents.py::test_claude_code_is_installed_through_the_interface_as_today` runs `python3 -m dokima.agents install planner`; `.github/workflows/agent.yml` line 253 runs `npm install -g @anthropic-ai/claude-code` itself.",
+    "raised_by": "reviewer",
+    "id": "R2"
+   },
+   {
+    "kind": "blocker",
+    "to": "planner",
+    "label": "698.8, 698.13: bundled",
+    "text": "698.8 holds two cases and two results; 698.13 holds three results: models, stats, transcript. Split each into single behaviors, one test each.",
+    "evidence": "plan.json criteria 8 and 13; `test_claude_codes_record_reads_as_today` checks `models`, `report` and `transcript` in one test.",
+    "raised_by": "reviewer",
+    "id": "R3"
+   },
+   {
+    "kind": "blocker",
+    "to": "planner",
+    "label": "698.8: broken file case",
+    "text": "A role missing its model line is a normal typo; nothing proves it stops instead of falling back. Fix: a test that it stops, naming the role.",
+    "evidence": "The owner: 'No fallback for now.' (#696 comment 6181845677); 698.8's tests cover only unknown names.",
+    "raised_by": "reviewer",
+    "id": "R4"
+   }
+  ],
+  "answers": [
+   {
+    "raise": "P1",
+    "answer": "done",
+    "why": "The owner said the file only declares each stage's model, with no rules beyond it.",
+    "words": "The file is just a simple declaration: which model is used for which stage.",
+    "source": "https://github.com/dokima-dev/dokima/issues/696#issuecomment-6181845677",
+    "changes": false
+   },
+   {
+    "raise": "P2",
+    "answer": "done",
+    "why": "Confirmed: scrubbing reads only Claude's secret; a key named in the file would show once this lands.",
+    "searched": [
+     680,
+     696,
+     699,
+     700
+    ],
+    "verdict": "new"
+   }
+  ],
+  "asks": [
+   {
+    "ask": "Each repo keeps its agent settings in one YAML file in its Dokima folder.",
+    "source": "https://github.com/dokima-dev/dokima/issues/696#issuecomment-6181290061",
+    "criterion": "698.1"
+   },
+   {
+    "ask": "The file lists subscriptions, each naming its agent and the secret holding its key.",
+    "source": "https://github.com/dokima-dev/dokima/issues/696#issuecomment-6181290061",
+    "criterion": "698.2"
+   },
+   {
+    "ask": "The file gives the planner, the worker and the reviewer each a subscription and a model.",
+    "source": "https://github.com/dokima-dev/dokima/issues/696#issuecomment-6181290061",
+    "criterion": "698.3"
+   },
+   {
+    "ask": "A role may name any model its agent takes; Dokima keeps no list of allowed models.",
+    "source": "https://github.com/dokima-dev/dokima/issues/696",
+    "criterion": "698.4"
+   },
+   {
+    "ask": "Each run starts the agent of its role's subscription, with the model the file names.",
+    "source": "https://github.com/dokima-dev/dokima/issues/696#issuecomment-6181845677",
+    "criterion": "698.5"
+   },
+   {
+    "ask": "With no settings file, every run starts Claude Code with today's model, as now.",
+    "source": "https://github.com/dokima-dev/dokima/issues/696#issuecomment-6181290061",
+    "criterion": "698.6"
+   },
+   {
+    "ask": "A role the file leaves out starts Claude Code with today's model, as now.",
+    "source": "https://github.com/dokima-dev/dokima/issues/696#issuecomment-6181290061",
+    "criterion": "698.7"
+   },
+   {
+    "ask": "A role naming an unknown subscription or agent stops before any agent starts, and the run names the bad name.",
+    "source": "https://github.com/dokima-dev/dokima/issues/696#issuecomment-6181845677",
+    "criterion": "698.8"
+   },
+   {
+    "ask": "Claude Code runs behind the one agent interface with the same command, record and stats as today.",
+    "source": "https://github.com/dokima-dev/dokima/issues/696#issuecomment-6181290061",
+    "criterion": "698.11"
+   },
+   {
+    "ask": "A model always runs in its own vendor's agent, never inside another vendor's agent.",
+    "source": "https://github.com/dokima-dev/dokima/issues/696#issuecomment-6181290061",
+    "criterion": "698.14"
+   },
+   {
+    "ask": "Moving a role to another subscription takes one edit: that role's lines in the file.",
+    "source": "https://github.com/dokima-dev/dokima/issues/696",
+    "criterion": "698.15"
+   },
+   {
+    "ask": "When a role's agent fails, the run fails; no other subscription takes over.",
+    "source": "https://github.com/dokima-dev/dokima/issues/696#issuecomment-6181845677",
+    "criterion": "698.16"
+   },
+   {
+    "ask": "Later it may expand into other settings.",
+    "source": "https://github.com/dokima-dev/dokima/issues/696",
+    "criterion": "698.17"
+   }
+  ],
+  "behaviors": [
+   {
+    "criterion": "698.1",
+    "one_behavior": true,
+    "why": "The file's place decides the settings."
+   },
+   {
+    "criterion": "698.2",
+    "one_behavior": true,
+    "why": "One result: the key comes from the named secret."
+   },
+   {
+    "criterion": "698.3",
+    "one_behavior": true,
+    "why": "One lookup, applied to each role."
+   },
+   {
+    "criterion": "698.4",
+    "one_behavior": true,
+    "why": "Any model name passes through."
+   },
+   {
+    "criterion": "698.5",
+    "one_behavior": true,
+    "why": "A run starts on the file's model."
+   },
+   {
+    "criterion": "698.6",
+    "one_behavior": true,
+    "why": "No file gives today's start."
+   },
+   {
+    "criterion": "698.7",
+    "one_behavior": true,
+    "why": "A left-out role gives today's start."
+   },
+   {
+    "criterion": "698.8",
+    "one_behavior": false,
+    "why": "Two cases, unknown subscription and unknown agent, and two results."
+   },
+   {
+    "criterion": "698.9",
+    "one_behavior": true,
+    "why": "The start goes through the agent's adapter."
+   },
+   {
+    "criterion": "698.10",
+    "one_behavior": true,
+    "why": "Install goes through the interface."
+   },
+   {
+    "criterion": "698.11",
+    "one_behavior": true,
+    "why": "One start, as today."
+   },
+   {
+    "criterion": "698.12",
+    "one_behavior": true,
+    "why": "The record reads the role's own agent."
+   },
+   {
+    "criterion": "698.13",
+    "one_behavior": false,
+    "why": "Three results: models, stats and transcript."
+   },
+   {
+    "criterion": "698.14",
+    "one_behavior": true,
+    "why": "Only the subscription's agent starts."
+   },
+   {
+    "criterion": "698.15",
+    "one_behavior": true,
+    "why": "One line edit moves one role."
+   },
+   {
+    "criterion": "698.16",
+    "one_behavior": true,
+    "why": "A failed agent fails the run."
+   },
+   {
+    "criterion": "698.17",
+    "one_behavior": true,
+    "why": "Other sections leave roles as written."
+   }
+  ],
+  "edge_cases": [
+   {
+    "criterion": "698.1",
+    "cut": [],
+    "missing": []
+   },
+   {
+    "criterion": "698.2",
+    "cut": [],
+    "missing": []
+   },
+   {
+    "criterion": "698.3",
+    "cut": [],
+    "missing": []
+   },
+   {
+    "criterion": "698.4",
+    "cut": [],
+    "missing": []
+   },
+   {
+    "criterion": "698.5",
+    "cut": [],
+    "missing": []
+   },
+   {
+    "criterion": "698.6",
+    "cut": [],
+    "missing": []
+   },
+   {
+    "criterion": "698.7",
+    "cut": [],
+    "missing": []
+   },
+   {
+    "criterion": "698.8",
+    "cut": [],
+    "missing": [
+     "A role missing its model line stops instead of falling back to today's."
+    ]
+   },
+   {
+    "criterion": "698.9",
+    "cut": [],
+    "missing": [
+     "A real run starts the agent through the interface."
+    ]
+   },
+   {
+    "criterion": "698.10",
+    "cut": [],
+    "missing": [
+     "A real run installs the agent through the interface."
+    ]
+   },
+   {
+    "criterion": "698.11",
+    "cut": [],
+    "missing": []
+   },
+   {
+    "criterion": "698.12",
+    "cut": [],
+    "missing": []
+   },
+   {
+    "criterion": "698.13",
+    "cut": [],
+    "missing": []
+   },
+   {
+    "criterion": "698.14",
+    "cut": [],
+    "missing": []
+   },
+   {
+    "criterion": "698.15",
+    "cut": [],
+    "missing": []
+   },
+   {
+    "criterion": "698.16",
+    "cut": [],
+    "missing": []
+   },
+   {
+    "criterion": "698.17",
+    "cut": [],
+    "missing": []
+   }
+  ],
+  "tests": [
+   {
+    "test": "tests/test_agents.py::test_settings_come_from_one_file_in_the_dokima_folder",
+    "only_its_behavior": true,
+    "why": "File in the Dokima folder is read; elsewhere it is not."
+   },
+   {
+    "test": "tests/test_agents.py::test_a_run_gets_its_key_from_the_secret_its_subscription_names",
+    "only_its_behavior": true,
+    "why": "A real run gets the named secret's value."
+   },
+   {
+    "test": "tests/test_agents.py::test_each_role_has_its_own_subscription_and_model",
+    "only_its_behavior": true,
+    "why": "Each role's own model and secret."
+   },
+   {
+    "test": "tests/test_agents.py::test_any_model_the_role_names_is_passed_to_its_agent",
+    "only_its_behavior": true,
+    "why": "A made-up model reaches Claude Code."
+   },
+   {
+    "test": "tests/test_agents.py::test_a_run_starts_with_the_model_the_file_names",
+    "only_its_behavior": true,
+    "why": "A real run starts on the file's model."
+   },
+   {
+    "test": "tests/test_agents.py::test_with_no_settings_file_a_run_starts_claude_code_as_today",
+    "only_its_behavior": true,
+    "why": "No file gives today's model and key."
+   },
+   {
+    "test": "tests/test_agents.py::test_a_role_the_file_leaves_out_starts_claude_code_as_today",
+    "only_its_behavior": true,
+    "why": "Left-out role on today's start, named role as control."
+   },
+   {
+    "test": "tests/test_agents.py::test_an_unknown_subscription_stops_the_run_before_any_agent_and_names_it",
+    "only_its_behavior": true,
+    "why": "A real run stops and the issue names the bad subscription."
+   },
+   {
+    "test": "tests/test_agents.py::test_an_unknown_agent_stops_before_any_agent_and_names_it",
+    "only_its_behavior": true,
+    "why": "Unknown agent stops; known agent still starts."
+   },
+   {
+    "test": "tests/test_agents.py::test_a_role_starts_through_its_agents_own_adapter",
+    "only_its_behavior": true,
+    "why": "Checks the adapter is used, but only when called directly."
+   },
+   {
+    "test": "tests/test_agents.py::test_claude_code_is_installed_through_the_interface_as_today",
+    "only_its_behavior": true,
+    "why": "Checks today's install, but only when called directly."
+   },
+   {
+    "test": "tests/test_agents.py::test_a_failed_install_fails",
+    "only_its_behavior": true,
+    "why": "A failed install exits non-zero."
+   },
+   {
+    "test": "tests/test_agents.py::test_claude_code_starts_with_todays_command",
+    "only_its_behavior": true,
+    "why": "Exact arguments, key and report place."
+   },
+   {
+    "test": "tests/test_agents.py::test_a_runs_record_reads_its_agent_through_the_interface",
+    "only_its_behavior": true,
+    "why": "Record names the stand-in agent's models and stats."
+   },
+   {
+    "test": "tests/test_agents.py::test_claude_codes_record_reads_as_today",
+    "only_its_behavior": true,
+    "why": "Matches its bundled criterion; split with it."
+   },
+   {
+    "test": "tests/test_agents.py::test_claude_codes_record_with_no_report_has_no_stats",
+    "only_its_behavior": true,
+    "why": "No report gives no stats."
+   },
+   {
+    "test": "tests/test_agents.py::test_a_model_runs_only_in_its_subscriptions_own_agent",
+    "only_its_behavior": true,
+    "why": "Model named like another vendor's still starts only Claude Code."
+   },
+   {
+    "test": "tests/test_agents.py::test_moving_a_role_takes_one_edit_of_its_own_lines",
+    "only_its_behavior": true,
+    "why": "One line edit moves the worker only."
+   },
+   {
+    "test": "tests/test_agents.py::test_a_failed_agent_fails_the_run_with_no_fallback",
+    "only_its_behavior": true,
+    "why": "One start, the agent's exit code passed on."
+   },
+   {
+    "test": "tests/test_agents.py::test_other_sections_can_join_the_settings_file",
+    "only_its_behavior": true,
+    "why": "Look-alike sections leave the planner's settings alone."
+   }
+  ],
+  "size": "Criteria 698.8 and 698.13 each bundle more than one behavior."
+ },
+ "check": {
+  "passed": true,
+  "problems": []
+ },
+ "url": "https://github.com/dokima-dev/dokima/issues/698#issuecomment-6183292074"
+}
