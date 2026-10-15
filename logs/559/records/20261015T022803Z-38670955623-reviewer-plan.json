@@ -1,0 +1,533 @@
+{
+ "role": "reviewer",
+ "stage": "plan",
+ "run_id": "38670955623",
+ "commit_before": "c5c273b6069b0c983dc85f48268f990fcb278d0b",
+ "started_by": "dokima-runtime[bot]",
+ "models": [
+  "claude-opus-5-5"
+ ],
+ "report": {
+  "duration_ms": 85870,
+  "turns": 10,
+  "cost_usd": 0.6113173999999999,
+  "tokens_in": 430799,
+  "tokens_out": 9456
+ },
+ "log": "https://github.com/dokima-dev/dokima/blob/logs/logs/559/38670955623-reviewer-plan.md",
+ "run": "https://github.com/dokima-dev/dokima/actions/runs/38670955623",
+ "handback": {
+  "previous_step": {
+   "did": [
+    "The planner proposed a split into six stories with 29 criteria.",
+    "It raised three questions for the owner."
+   ],
+   "decided": [
+    "Re-plans keeping the owner's commits, and the owner's work getting checks, are left as true."
+   ],
+   "open": [
+    "Whether to close the branch clean-up issue, how plans are edited, and where criteria live."
+   ]
+  },
+  "verdict": "block",
+  "summary": "Three of the owner's asks have no criterion, and five criteria each hold two cases or two things.",
+  "raises": [
+   {
+    "kind": "blocker",
+    "to": "planner",
+    "label": "No criterion",
+    "text": "No criterion carries three asks: a re-plan keeps my commits; my work gets the same checks; I edit then say /review. Pin each with a test, or ask the owner.",
+    "evidence": "Issue: `a re-plan keeps my commits`, `My work goes through the same reviews and checks`; no story names either.",
+    "raised_by": "reviewer",
+    "id": "R1"
+   },
+   {
+    "kind": "blocker",
+    "to": "planner",
+    "label": "Prompt ask reworded",
+    "text": "Criterion 1.6 turns the owner's prompt ask into a rejection message and bundles two prompts. Make it two criteria: planner prompt says it; worker prompt says it.",
+    "evidence": "Comment 6132026430: `The planner and worker prompts say: Verified by explains how the test proves the behavior`.",
+    "raised_by": "reviewer",
+    "id": "R2"
+   },
+   {
+    "kind": "blocker",
+    "to": "planner",
+    "label": "Two cases in one",
+    "text": "Criteria 3.1, 3.2 and 3.3 each hold two cases, no short half or no full half; 3.5 holds names code and past every cap. Split each in two.",
+    "evidence": "`plan.json` story 3 criteria texts: `no short half or no full half`, `names code and runs past every cap`.",
+    "raised_by": "reviewer",
+    "id": "R3"
+   }
+  ],
+  "answers": [],
+  "asks": [
+   {
+    "ask": "I write tests, as many or as few as I like, or none.",
+    "source": "https://github.com/dokima-dev/dokima/issues/559",
+    "criterion": "S1.3"
+   },
+   {
+    "ask": "The planner groups tests into criteria, fills gaps with its own tests, and splits work that is too big.",
+    "source": "https://github.com/dokima-dev/dokima/issues/559",
+    "criterion": "S1.3"
+   },
+   {
+    "ask": "My tests are locked: agents may propose more but never change or drop mine.",
+    "source": "https://github.com/dokima-dev/dokima/issues/559",
+    "criterion": "S1.1"
+   },
+   {
+    "ask": "my tests cannot be changed by an agent",
+    "source": "https://github.com/dokima-dev/dokima/issues/559",
+    "criterion": "S1.2"
+   },
+   {
+    "ask": "A plan built on my tests keeps every one unchanged and maps each to a criterion.",
+    "source": "https://github.com/dokima-dev/dokima/issues/559",
+    "criterion": "S1.3"
+   },
+   {
+    "ask": "A short text for me (capped, plain, no code)",
+    "source": "https://github.com/dokima-dev/dokima/issues/559",
+    "criterion": "S3.4"
+   },
+   {
+    "ask": "a full text for agents (uncapped, may name code)",
+    "source": "https://github.com/dokima-dev/dokima/issues/559",
+    "criterion": "S3.5"
+   },
+   {
+    "ask": "anything tied to a test lives in its docstring (first line short, paragraph full) and the record points to the test",
+    "source": "https://github.com/dokima-dev/dokima/issues/559",
+    "criterion": "S4.3"
+   },
+   {
+    "ask": "raises, stories, Context and questions live in the record as pairs.",
+    "source": "https://github.com/dokima-dev/dokima/issues/559",
+    "criterion": "S3.1"
+   },
+   {
+    "ask": "Cards show short texts and fold full ones.",
+    "source": "https://github.com/dokima-dev/dokima/issues/559",
+    "criterion": "S4.1"
+   },
+   {
+    "ask": "The plan reviewer checks each short text matches its full text",
+    "source": "https://github.com/dokima-dev/dokima/issues/559",
+    "criterion": "S5.1"
+   },
+   {
+    "ask": "each docstring matches what its test does",
+    "source": "https://github.com/dokima-dev/dokima/issues/559",
+    "criterion": "S6.1"
+   },
+   {
+    "ask": "Every role working on a split story gets the parent's original issue and my comments",
+    "source": "https://github.com/dokima-dev/dokima/issues/559",
+    "criterion": "S2.3"
+   },
+   {
+    "ask": "A worker on a split story reads the parent's original issue and my comments.",
+    "source": "https://github.com/dokima-dev/dokima/issues/559",
+    "criterion": "S2.1"
+   },
+   {
+    "ask": "I can add, change or delete tests, plan and code on Dokima's branches, then say /review.",
+    "source": "https://github.com/dokima-dev/dokima/issues/559",
+    "criterion": "missing"
+   },
+   {
+    "ask": "Anything I write counts as my words",
+    "source": "https://github.com/dokima-dev/dokima/issues/559",
+    "criterion": "S2.5"
+   },
+   {
+    "ask": "a re-plan keeps my commits",
+    "source": "https://github.com/dokima-dev/dokima/issues/559",
+    "criterion": "missing"
+   },
+   {
+    "ask": "My work goes through the same reviews and checks as agent work.",
+    "source": "https://github.com/dokima-dev/dokima/issues/559",
+    "criterion": "missing"
+   },
+   {
+    "ask": "those json models should print out user facing and agent facing information",
+    "source": "https://github.com/dokima-dev/dokima/issues/559",
+    "criterion": "S4.2"
+   },
+   {
+    "ask": "enforce this as a schema in test files",
+    "source": "https://github.com/dokima-dev/dokima/issues/559#issuecomment-6131843348",
+    "criterion": "S1.4"
+   },
+   {
+    "ask": "rigor line let's name it verified by line:",
+    "source": "https://github.com/dokima-dev/dokima/issues/559#issuecomment-6131843348",
+    "criterion": "S1.5"
+   },
+   {
+    "ask": "test docstrings user facing and agent facing",
+    "source": "https://github.com/dokima-dev/dokima/issues/559#issuecomment-6131843348",
+    "criterion": "S1.7"
+   },
+   {
+    "ask": "Agent holds the full detail, uncapped and folded on cards.",
+    "source": "https://github.com/dokima-dev/dokima/issues/559#issuecomment-6131843348",
+    "criterion": "S4.5"
+   },
+   {
+    "ask": "User, Verified by and Edge are short and capped",
+    "source": "https://github.com/dokima-dev/dokima/issues/559#issuecomment-6131843348",
+    "criterion": "S1.9"
+   },
+   {
+    "ask": "Each test file opens with the same pair: one user line, then agent detail.",
+    "source": "https://github.com/dokima-dev/dokima/issues/559#issuecomment-6131843348",
+    "criterion": "S1.12"
+   },
+   {
+    "ask": "checked by code on new and changed tests only",
+    "source": "https://github.com/dokima-dev/dokima/issues/559#issuecomment-6131843348",
+    "criterion": "S1.13"
+   },
+   {
+    "ask": "user facing for tests of course the methodology of testing so you know the rigor of test right of the bat.",
+    "source": "https://github.com/dokima-dev/dokima/issues/559#issuecomment-6131843348",
+    "criterion": "S4.4"
+   },
+   {
+    "ask": "please don't use categories finetuned for our repo only that will not fly. think longterm.",
+    "source": "https://github.com/dokima-dev/dokima/issues/559#issuecomment-6131843348",
+    "criterion": "S1.14"
+   },
+   {
+    "ask": "verified by and agent should know to explain how test is done so we know instantly the rigor of the test and have comparable expectations",
+    "source": "https://github.com/dokima-dev/dokima/issues/559#issuecomment-6132026430",
+    "criterion": "S1.6"
+   }
+  ],
+  "behaviors": [
+   {
+    "criterion": "S1.1",
+    "one_behavior": true,
+    "why": "One action with one visible result."
+   },
+   {
+    "criterion": "S1.2",
+    "one_behavior": true,
+    "why": "One action with one visible result."
+   },
+   {
+    "criterion": "S1.3",
+    "one_behavior": true,
+    "why": "One action with one visible result."
+   },
+   {
+    "criterion": "S1.4",
+    "one_behavior": true,
+    "why": "One action with one visible result."
+   },
+   {
+    "criterion": "S1.5",
+    "one_behavior": true,
+    "why": "One action with one visible result."
+   },
+   {
+    "criterion": "S1.6",
+    "one_behavior": false,
+    "why": "Bundles a rejection message with two prompt lines."
+   },
+   {
+    "criterion": "S1.7",
+    "one_behavior": true,
+    "why": "One action with one visible result."
+   },
+   {
+    "criterion": "S1.8",
+    "one_behavior": true,
+    "why": "One action with one visible result."
+   },
+   {
+    "criterion": "S1.9",
+    "one_behavior": true,
+    "why": "One action with one visible result."
+   },
+   {
+    "criterion": "S1.10",
+    "one_behavior": true,
+    "why": "One action with one visible result."
+   },
+   {
+    "criterion": "S1.11",
+    "one_behavior": true,
+    "why": "One action with one visible result."
+   },
+   {
+    "criterion": "S1.12",
+    "one_behavior": true,
+    "why": "One action with one visible result."
+   },
+   {
+    "criterion": "S1.13",
+    "one_behavior": true,
+    "why": "One action with one visible result."
+   },
+   {
+    "criterion": "S1.14",
+    "one_behavior": true,
+    "why": "One action with one visible result."
+   },
+   {
+    "criterion": "S2.1",
+    "one_behavior": true,
+    "why": "One action with one visible result."
+   },
+   {
+    "criterion": "S2.2",
+    "one_behavior": true,
+    "why": "One action with one visible result."
+   },
+   {
+    "criterion": "S2.3",
+    "one_behavior": true,
+    "why": "One action with one visible result."
+   },
+   {
+    "criterion": "S2.4",
+    "one_behavior": true,
+    "why": "One action with one visible result."
+   },
+   {
+    "criterion": "S2.5",
+    "one_behavior": true,
+    "why": "One action with one visible result."
+   },
+   {
+    "criterion": "S3.1",
+    "one_behavior": false,
+    "why": "Two cases: no short half, or no full half."
+   },
+   {
+    "criterion": "S3.2",
+    "one_behavior": false,
+    "why": "Two cases: no short half, or no full half."
+   },
+   {
+    "criterion": "S3.3",
+    "one_behavior": false,
+    "why": "Two cases: no short half, or no full half."
+   },
+   {
+    "criterion": "S3.4",
+    "one_behavior": true,
+    "why": "One action with one visible result."
+   },
+   {
+    "criterion": "S3.5",
+    "one_behavior": false,
+    "why": "Two things: names code, and runs past every cap."
+   },
+   {
+    "criterion": "S4.1",
+    "one_behavior": true,
+    "why": "One action with one visible result."
+   },
+   {
+    "criterion": "S4.2",
+    "one_behavior": true,
+    "why": "One action with one visible result."
+   },
+   {
+    "criterion": "S4.3",
+    "one_behavior": true,
+    "why": "One action with one visible result."
+   },
+   {
+    "criterion": "S4.4",
+    "one_behavior": true,
+    "why": "One action with one visible result."
+   },
+   {
+    "criterion": "S4.5",
+    "one_behavior": true,
+    "why": "One action with one visible result."
+   },
+   {
+    "criterion": "S5.1",
+    "one_behavior": true,
+    "why": "One action with one visible result."
+   },
+   {
+    "criterion": "S6.1",
+    "one_behavior": true,
+    "why": "One action with one visible result."
+   }
+  ],
+  "edge_cases": [
+   {
+    "criterion": "S1.1",
+    "cut": [],
+    "missing": []
+   },
+   {
+    "criterion": "S1.2",
+    "cut": [],
+    "missing": []
+   },
+   {
+    "criterion": "S1.3",
+    "cut": [],
+    "missing": []
+   },
+   {
+    "criterion": "S1.4",
+    "cut": [],
+    "missing": []
+   },
+   {
+    "criterion": "S1.5",
+    "cut": [],
+    "missing": []
+   },
+   {
+    "criterion": "S1.6",
+    "cut": [],
+    "missing": []
+   },
+   {
+    "criterion": "S1.7",
+    "cut": [],
+    "missing": []
+   },
+   {
+    "criterion": "S1.8",
+    "cut": [],
+    "missing": []
+   },
+   {
+    "criterion": "S1.9",
+    "cut": [],
+    "missing": []
+   },
+   {
+    "criterion": "S1.10",
+    "cut": [],
+    "missing": []
+   },
+   {
+    "criterion": "S1.11",
+    "cut": [],
+    "missing": []
+   },
+   {
+    "criterion": "S1.12",
+    "cut": [],
+    "missing": []
+   },
+   {
+    "criterion": "S1.13",
+    "cut": [],
+    "missing": []
+   },
+   {
+    "criterion": "S1.14",
+    "cut": [],
+    "missing": []
+   },
+   {
+    "criterion": "S2.1",
+    "cut": [],
+    "missing": []
+   },
+   {
+    "criterion": "S2.2",
+    "cut": [],
+    "missing": []
+   },
+   {
+    "criterion": "S2.3",
+    "cut": [],
+    "missing": []
+   },
+   {
+    "criterion": "S2.4",
+    "cut": [],
+    "missing": []
+   },
+   {
+    "criterion": "S2.5",
+    "cut": [],
+    "missing": []
+   },
+   {
+    "criterion": "S3.1",
+    "cut": [],
+    "missing": []
+   },
+   {
+    "criterion": "S3.2",
+    "cut": [],
+    "missing": []
+   },
+   {
+    "criterion": "S3.3",
+    "cut": [],
+    "missing": []
+   },
+   {
+    "criterion": "S3.4",
+    "cut": [],
+    "missing": []
+   },
+   {
+    "criterion": "S3.5",
+    "cut": [],
+    "missing": []
+   },
+   {
+    "criterion": "S4.1",
+    "cut": [],
+    "missing": []
+   },
+   {
+    "criterion": "S4.2",
+    "cut": [],
+    "missing": []
+   },
+   {
+    "criterion": "S4.3",
+    "cut": [],
+    "missing": []
+   },
+   {
+    "criterion": "S4.4",
+    "cut": [],
+    "missing": []
+   },
+   {
+    "criterion": "S4.5",
+    "cut": [],
+    "missing": []
+   },
+   {
+    "criterion": "S5.1",
+    "cut": [],
+    "missing": []
+   },
+   {
+    "criterion": "S6.1",
+    "cut": [],
+    "missing": []
+   }
+  ],
+  "tests": [],
+  "size": "Criteria 1.6, 3.1, 3.2, 3.3 and 3.5 each hold two cases or two things."
+ },
+ "check": {
+  "passed": true,
+  "problems": []
+ },
+ "url": "https://github.com/dokima-dev/dokima/issues/559#issuecomment-6182992987"
+}
