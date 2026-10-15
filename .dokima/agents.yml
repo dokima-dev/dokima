@@ -1,0 +1,8 @@
+subscriptions:
+  kimi:
+    agent: kimi
+    key: KIMI_SIGN_IN
+roles:
+  worker:
+    subscription: kimi
+    model: kimi-code/k3
