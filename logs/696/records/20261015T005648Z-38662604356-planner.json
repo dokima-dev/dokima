@@ -1,0 +1,255 @@
+{
+ "role": "planner",
+ "stage": null,
+ "run_id": "38662604356",
+ "commit_before": "a2e94e1e645c47ea2f3ca54a3e7e441bb8f510c5",
+ "started_by": "RezaSoleymanifar",
+ "models": [
+  "claude-opus-5-5"
+ ],
+ "report": {
+  "duration_ms": 130118,
+  "turns": 11,
+  "cost_usd": 0.8445643999999999,
+  "tokens_in": 563809,
+  "tokens_out": 13925
+ },
+ "log": "https://github.com/dokima-dev/dokima/blob/logs/logs/696/38662604356-planner.md",
+ "run": "https://github.com/dokima-dev/dokima/actions/runs/38662604356",
+ "handback": {
+  "kind": "feature",
+  "title": "A settings file picks each role's agent and model",
+  "summary": "One settings file per repo says which subscription and model the planner, worker and reviewer use; Kimi first, then Codex.",
+  "feature": "Each role runs on the subscription and model the owner declares in one file. Stories: setup, the file with one agent interface, Kimi, Codex.",
+  "stories": [
+   {
+    "title": "Setup gathers and stores a subscription's inputs",
+    "user_story": "The owner adds a subscription by giving its inputs once; setup puts each where runs find it.",
+    "context": "All of this story lives in a new `dokima/setup.py`, a command the owner runs once per subscription on their own machine. The owner did it by hand once for Kimi (comment of 2026-10-15): Kimi Code CLI 2.2.0 installed, `kimi login --region global` approved by a browser device code, then one unattended `kimi -p ... --output-format stream-json` run. Plan: Max, model access K3, default model kimi-for-coding. Agent runs start on a fresh `ubuntu-24.04` machine (`.github/workflows/agent.yml` line 49), so nothing saved on the owner's machine reaches them except through a repo secret. Hence: a key goes into a repo secret; a sign-in is done once by the agent's own login on the owner's machine (with the region the owner gives), and the files that login saves are stored as a repo secret too; the run writes them back before the agent starts (stories 3 and 4). `dokima/setup.py` holds, per agent, where its login saves the sign-in, so the adapters read the same place. Setup writes the subscription and the model into `.dokima/agents.yml` in the shape story 2 fixes: `subscriptions: <name>: {agent, key}` and `roles: <role>: {subscription, model}`, where key names the repo secret, never the secret itself. Secrets are set with `gh secret set`; tests fake `gh` with a stub on PATH and the login with a stub command.",
+    "acceptance_criteria": [
+     {
+      "text": "Setup lists each input a subscription needs: membership, region, sign-in or key, and model.",
+      "words": "grabbing the inputs a user needs for a subscription (membership, region, sign-in or key, model)",
+      "source": "https://github.com/dokima-dev/dokima/issues/696#issuecomment-6181290061",
+      "files": [
+       "dokima/setup.py"
+      ]
+     },
+     {
+      "text": "Setup stores a key the owner gives as a repo secret, named in the settings file.",
+      "words": "and putting them in place",
+      "source": "https://github.com/dokima-dev/dokima/issues/696#issuecomment-6181290061",
+      "files": [
+       "dokima/setup.py"
+      ]
+     },
+     {
+      "text": "Setup signs the agent in with the owner's region and stores the saved sign-in as a repo secret.",
+      "words": "and putting them in place",
+      "source": "https://github.com/dokima-dev/dokima/issues/696#issuecomment-6181290061",
+      "files": [
+       "dokima/setup.py"
+      ]
+     },
+     {
+      "text": "Setup writes the subscription and the model the owner gives into the repo's settings file.",
+      "words": "and putting them in place",
+      "source": "https://github.com/dokima-dev/dokima/issues/696#issuecomment-6181290061",
+      "files": [
+       "dokima/setup.py"
+      ]
+     }
+    ],
+    "non_functional": [],
+    "depends_on": []
+   },
+   {
+    "title": "One settings file and one agent interface",
+    "user_story": "Each role runs on the subscription and model the owner declares in one file; Claude Code works as today.",
+    "context": "Today `.github/workflows/agent.yml` fixes `MODEL: claude-opus-5-5` (line 59), installs Claude Code (line 253), runs `claude -p ... --model \"$MODEL\"` (line 321) and fails a run whose logs name another model (line 565). `dokima/agent_records.py` `models_used`, `run_report` and `transcript` read Claude's logs and `claude.json`; `dokima/agent_roles.py` calls them. New: `dokima/settings.py` reads `.dokima/agents.yml` (no dependencies may be added and PyYAML is absent, so a small reader of its own; `tests/test_start.py` `load_yaml` shows a subset reader). `dokima/agents.py` is the one interface: given the role, it installs, starts and reads the agent the role's subscription names, by loading the adapter module `dokima/agent_<agent>.py`, so a new agent needs only its own module. Claude Code moves into `dokima/agent_claude.py` with today's command, flags, record and stats. The workflow reads the role's key secret by name (`secrets[...]`), so new agents need no workflow change; the owner allowed the workflow change (answer 2). Cases from the plan review: no file or a role left out runs as today; an unknown subscription or agent stops the run before the agent starts, naming the bad name. The owner's newest words: no fallback, and the file only declares which model each stage uses; no rules across subscriptions.",
+    "acceptance_criteria": [
+     {
+      "text": "Each repo keeps its agent settings in one YAML file in its Dokima folder.",
+      "words": "One structured file per repo, `.dokima/agents.yml`",
+      "source": "https://github.com/dokima-dev/dokima/issues/696#issuecomment-6181290061",
+      "files": [
+       "dokima/settings.py",
+       ".dokima/agents.yml"
+      ]
+     },
+     {
+      "text": "The file lists subscriptions, each naming its agent and the secret holding its key.",
+      "words": "`subscriptions` (agent, key)",
+      "source": "https://github.com/dokima-dev/dokima/issues/696#issuecomment-6181290061",
+      "files": [
+       "dokima/settings.py",
+       ".dokima/agents.yml"
+      ]
+     },
+     {
+      "text": "The file gives the planner, the worker and the reviewer each a subscription and a model.",
+      "words": "`roles` (planner, worker, reviewer: which subscription and model)",
+      "source": "https://github.com/dokima-dev/dokima/issues/696#issuecomment-6181290061",
+      "files": [
+       "dokima/settings.py",
+       ".dokima/agents.yml"
+      ]
+     },
+     {
+      "text": "A role may name any model its agent takes; Dokima keeps no list of allowed models.",
+      "words": "Any agent, any model: planner, worker and reviewer each pick theirs.",
+      "source": "https://github.com/dokima-dev/dokima/issues/696",
+      "files": [
+       "dokima/settings.py"
+      ]
+     },
+     {
+      "text": "Each run starts the agent of its role's subscription, with the model the file names.",
+      "words": "The file is just a simple declaration: which model is used for which stage.",
+      "source": "https://github.com/dokima-dev/dokima/issues/696#issuecomment-6181845677",
+      "files": [
+       ".github/workflows/agent.yml",
+       "dokima/agents.py",
+       "dokima/settings.py",
+       "dokima/agent_records.py",
+       "dokima/agent_roles.py"
+      ]
+     },
+     {
+      "text": "With no settings file, every run starts Claude Code with today's model, as now.",
+      "words": "No file means today's behavior.",
+      "source": "https://github.com/dokima-dev/dokima/issues/696#issuecomment-6181290061",
+      "files": [
+       ".github/workflows/agent.yml",
+       "dokima/agents.py",
+       "dokima/settings.py"
+      ]
+     },
+     {
+      "text": "Claude Code runs behind the one agent interface with the same command, record and stats as today.",
+      "words": "The file and one agent interface; Claude Code moves behind it unchanged.",
+      "source": "https://github.com/dokima-dev/dokima/issues/696#issuecomment-6181290061",
+      "files": [
+       ".github/workflows/agent.yml",
+       "dokima/agents.py",
+       "dokima/agent_claude.py",
+       "dokima/agent_records.py",
+       "dokima/agent_roles.py"
+      ]
+     },
+     {
+      "text": "A model always runs in its own vendor's agent, never inside another vendor's agent.",
+      "words": "No model runs inside another vendor's agent.",
+      "source": "https://github.com/dokima-dev/dokima/issues/696#issuecomment-6181290061",
+      "files": [
+       "dokima/agents.py",
+       "dokima/settings.py"
+      ]
+     },
+     {
+      "text": "Moving a role to another subscription takes one edit: that role's lines in the file.",
+      "words": "It exposes a simple interface for deciding the orchestration across subscriptions.",
+      "source": "https://github.com/dokima-dev/dokima/issues/696",
+      "files": [
+       "dokima/agents.py",
+       "dokima/settings.py"
+      ]
+     },
+     {
+      "text": "When a role's agent fails, the run fails; no other subscription takes over.",
+      "words": "No fallback for now.",
+      "source": "https://github.com/dokima-dev/dokima/issues/696#issuecomment-6181845677",
+      "files": [
+       "dokima/agents.py",
+       ".github/workflows/agent.yml"
+      ]
+     }
+    ],
+    "non_functional": [
+     {
+      "text": "Subscriptions and roles sit in their own sections, so other settings can join the file later.",
+      "why": "The owner expects the file to hold other settings later.",
+      "words": "Later it may expand into other settings.",
+      "source": "https://github.com/dokima-dev/dokima/issues/696",
+      "files": [
+       "dokima/settings.py",
+       ".dokima/agents.yml"
+      ]
+     }
+    ],
+    "depends_on": [
+     0
+    ]
+   },
+   {
+    "title": "A role can run on Kimi Code CLI",
+    "user_story": "The owner moves any role to Kimi by naming a Kimi subscription for it, and spends Kimi's credit.",
+    "context": "Built first of the new agents, as the owner ordered (answer 1: build Kimi first, to use up its credit). All of it lives in a new `dokima/agent_kimi.py`, loaded by story 2's interface. The owner's tested command: `kimi -p ... --output-format stream-json`, Kimi Code CLI 2.2.0, model kimi-for-coding. The adapter installs Kimi's command line, writes the saved sign-in from its repo secret back where Kimi's login keeps it (the place `dokima/setup.py` names, story 1) or passes the key, and reads Kimi's stream so the record names the model used and the run's stats still show.",
+    "acceptance_criteria": [
+     {
+      "text": "A role on a Kimi subscription runs in Kimi Code CLI, with the Kimi model the file names.",
+      "words": "Kimi Code CLI adapter.",
+      "source": "https://github.com/dokima-dev/dokima/issues/696#issuecomment-6181290061",
+      "files": [
+       "dokima/agent_kimi.py"
+      ]
+     },
+     {
+      "text": "A Kimi run writes the stored sign-in back before Kimi starts, so no one signs in again.",
+      "words": "sign-in or key",
+      "source": "https://github.com/dokima-dev/dokima/issues/696#issuecomment-6181290061",
+      "files": [
+       "dokima/agent_kimi.py"
+      ]
+     }
+    ],
+    "non_functional": [],
+    "depends_on": [
+     0,
+     1
+    ]
+   },
+   {
+    "title": "A role can run on Codex CLI",
+    "user_story": "The owner moves any role to Codex by naming a Codex subscription for it.",
+    "context": "Built after Kimi, as the owner ordered ('Kimi first ... then Codex'). All of it lives in a new `dokima/agent_codex.py`, loaded by story 2's interface, following story 3's pattern: install Codex's command line, write back its stored sign-in or pass its key, read its output for the model used and the stats. Open issue 39 stays the general rule for adapters (answer 3).",
+    "acceptance_criteria": [
+     {
+      "text": "A role on a Codex subscription runs in Codex CLI, with the Codex model the file names.",
+      "words": "Codex CLI adapter.",
+      "source": "https://github.com/dokima-dev/dokima/issues/696#issuecomment-6181290061",
+      "files": [
+       "dokima/agent_codex.py"
+      ]
+     }
+    ],
+    "non_functional": [],
+    "depends_on": [
+     1,
+     2
+    ]
+   }
+  ],
+  "links": {
+   "blocked_by": [],
+   "blocks": [],
+   "relates_to": [
+    39,
+    148
+   ]
+  },
+  "raises": [],
+  "answers": [
+   {
+    "raise": "R3",
+    "answer": "done",
+    "why": "Setup now signs in and stores the saved sign-in as a secret; Kimi writes it back each run."
+   }
+  ]
+ },
+ "check": {
+  "passed": true,
+  "problems": []
+ },
+ "url": "https://github.com/dokima-dev/dokima/issues/696#issuecomment-6181850312"
+}
