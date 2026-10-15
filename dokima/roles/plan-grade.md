@@ -43,3 +43,15 @@ Bad: the plan promised seven outcomes and the tests proved one of each kind. Cod
 Good: one test per promised outcome, the outside service faked on a local port.
 Bad: a temp git repo with no user identity, so every test failed on git, not on the feature.
 Good: one test that runs the real tool from outside and names its criterion on each failure.
+Older tests (item 6). Block:
+Bad: an older test expected an error on empty input; the plan changed it to accept anything, reason "too strict for the
+new parser". The owner never asked to allow empty input: the promise was weakened so new code passes. Block.
+Bad: an older test for CSV export was deleted, reason "export moved to a new module". The owner still wants CSV export
+and nothing tests it now. Block, unless the same promise is tested in the new place.
+Bad: an older test now mocks the payment service it used to call, reason "flaky". Flaky is a fix to the test, not a
+reason to stop proving the call works. Block, unless the new test still proves the same outcome.
+Unclear whether the owner wants an old behavior gone: never guess, raise a question for the owner.
+Older tests (item 6). Pass:
+Good: a test renamed or moved with the same checks, or made stricter.
+Good: a broken test fixed so it runs anywhere, proving the same thing.
+Good: the owner asked to remove the CSV export, so its test goes with it, the owner's words cited as the reason.
