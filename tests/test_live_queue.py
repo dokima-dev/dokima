@@ -78,7 +78,7 @@ FAKE_CLAUDE_ANY = r'''#!/usr/bin/env python3
 """A stand-in for Claude Code that hands back whatever files the test put in FAKE_HANDBACK_DIR, else the review.
 
 Like test_start.py's, it keeps what GitHub showed when it started and leaves a session log naming its model."""
-import json, os, shutil, time
+import json, os, shutil, sys, time
 d = os.environ["FAKE_GH_DIR"]
 store = os.path.join(d, "comments.json")
 json.dump(json.load(open(store)) if os.path.exists(store) else [], open(os.path.join(d, "at-agent-start.json"), "w"))
@@ -92,7 +92,7 @@ else:
     shutil.copy(os.environ["FAKE_REVIEW"], os.path.join(os.environ["OUT"], "review.json"))
 logs = os.path.join(os.environ["HOME"], ".claude", "projects", "p")
 os.makedirs(logs, exist_ok=True)
-open(os.path.join(logs, "s.jsonl"), "w").write(json.dumps({"message": {"model": os.environ["MODEL"], "role": "assistant", "content": "Done."}}) + "\n")
+open(os.path.join(logs, "s.jsonl"), "w").write(json.dumps({"message": {"model": sys.argv[sys.argv.index("--model") + 1] if "--model" in sys.argv[:-1] else os.environ.get("MODEL", ""), "role": "assistant", "content": "Done."}}) + "\n")
 print(json.dumps({"num_turns": 1, "duration_ms": 1000, "usage": {}}))
 '''
 

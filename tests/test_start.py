@@ -191,14 +191,17 @@ FAKE_CLAUDE = r'''#!/usr/bin/env python3
 """A stand-in for Claude Code: hands back the review the test chose and leaves a session log naming its model.
 
 When it starts it keeps what GitHub showed at that moment (every comment and every version, at-agent-start.json),
-its own environment (agent-env.json) and the time it started (agent-started-at), so a test can see the run as the
-agent found it. With FAKE_CANCELLED set, the run is being cancelled: it stops there, as Claude Code does when its step
-is stopped, and hands back nothing."""
+its own environment (agent-env.json), its arguments (agent-argv.json) and the time it started (agent-started-at), so
+a test can see the run as the agent found it. Its session log names the model it was started with (`--model`), as
+Claude Code's does. With FAKE_CANCELLED set, the run is being cancelled: it stops there, as Claude Code does when its
+step is stopped, and hands back nothing."""
 import json, os, shutil, sys, time
 d = os.environ["FAKE_GH_DIR"]
 store = os.path.join(d, "comments.json")
 json.dump(json.load(open(store)) if os.path.exists(store) else [], open(os.path.join(d, "at-agent-start.json"), "w"))
 json.dump(dict(os.environ), open(os.path.join(d, "agent-env.json"), "w"))
+json.dump(sys.argv[1:], open(os.path.join(d, "agent-argv.json"), "w"))
+model = sys.argv[sys.argv.index("--model") + 1] if "--model" in sys.argv[:-1] else os.environ.get("MODEL", "")
 open(os.path.join(d, "agent-started-at"), "w").write(str(time.time()))
 open(os.environ["FAKE_CLAUDE_MARK"], "w").write("started")
 if os.environ.get("FAKE_CANCELLED"):
@@ -206,7 +209,7 @@ if os.environ.get("FAKE_CANCELLED"):
 shutil.copy(os.environ["FAKE_REVIEW"], os.path.join(os.environ["OUT"], "review.json"))
 logs = os.path.join(os.environ["HOME"], ".claude", "projects", "p")
 os.makedirs(logs, exist_ok=True)
-open(os.path.join(logs, "s.jsonl"), "w").write(json.dumps({"message": {"model": os.environ["MODEL"], "role": "assistant", "content": "Done."}}) + "\n")
+open(os.path.join(logs, "s.jsonl"), "w").write(json.dumps({"message": {"model": model, "role": "assistant", "content": "Done."}}) + "\n")
 print(json.dumps({"num_turns": 1, "duration_ms": 1000, "usage": {}}))
 '''
 
@@ -421,7 +424,11 @@ def review_record(handback):
 class Machine:
     """A temp repo with fake GitHub, Claude, pip and npm, on which workflow jobs run the way GitHub runs them."""
 
-    def __init__(self, tmp, comments, try_branch=False, actor=OWNER, gh_fail="", broken=None, options=None, cancel_at=None):
+    def __init__(self, tmp, comments, try_branch=False, actor=OWNER, gh_fail="", broken=None, options=None, cancel_at=None,
+                 files=None):
+        """Set up the machine; `files` ({path: text}) are committed on main too.
+
+        A test puts a settings file there, as a repo would."""
         self.tmp = t = str(tmp)
         self.cancel_at = cancel_at
         for d in ("bin", "gh", "home", "runner-temp", "jobs"):
@@ -447,6 +454,9 @@ class Machine:
             shutil.copy(os.path.join(ROOT, rule), f"{src}/{rule}")
         os.makedirs(f"{src}/.github")
         open(f"{src}/.github/CODEOWNERS", "w").write(f"* @{OWNER}\n")
+        for path, text in (files or {}).items():
+            os.makedirs(os.path.dirname(f"{src}/{path}") or src, exist_ok=True)
+            open(f"{src}/{path}", "w").write(text)
         sh(t, "git", "init", "-q", "--bare", "-b", "main", f"{t}/origin.git")
         sh(src, "git", "init", "-q", "-b", "main")
         sh(src, "git", "add", "-A")
@@ -585,8 +595,10 @@ class Run(Machine):
     """One run of the agent workflow (agent.yml), started by hand by the actor."""
 
     def __init__(self, tmp, role, stage, comments, try_branch=False, actor=OWNER, broken=None, options=None, review=None,
-                 cancel_at=None):
-        super().__init__(tmp, comments, try_branch, actor, broken=broken, options=options, cancel_at=cancel_at)
+                 cancel_at=None, files=None, secrets=None):
+        """Run agent.yml for ROLE at STAGE, with extra main files and repo secrets."""
+        super().__init__(tmp, comments, try_branch, actor, broken=broken, options=options, cancel_at=cancel_at,
+                         files=files)
         if review is not None:
             json.dump(review, open(f"{self.tmp}/review.json", "w"))
         t = self.tmp
@@ -594,7 +606,7 @@ class Run(Machine):
         ctx = {"inputs": Ctx(role=role, stage=stage, issue=N),
                "github": Ctx(event_name="workflow_dispatch", actor=actor, event=Ctx(), run_id="42", run_attempt="1",
                              server_url="https://github.com", repository="o/r", token="fake-github-token"),
-               "secrets": Ctx(CLAUDE_CODE_OAUTH_TOKEN="fake-claude-token", DOKIMA_APP_KEY="k"),
+               "secrets": Ctx(CLAUDE_CODE_OAUTH_TOKEN="fake-claude-token", DOKIMA_APP_KEY="k", **(secrets or {})),
                "vars": Ctx(DOKIMA_APP_ID="1"), "needs": Ctx()}
         wf = workflow("agent.yml")
         self.result, _ = self.run_job("run", wf["jobs"]["run"], ctx, "workflow_dispatch",
