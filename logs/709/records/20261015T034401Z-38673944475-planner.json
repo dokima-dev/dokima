@@ -1,0 +1,317 @@
+{
+ "role": "planner",
+ "stage": null,
+ "run_id": "38673944475",
+ "commit_before": "cfb11e4519569d5ea3fdade9e1ce41dad37b38bd",
+ "started_by": "dokima-runtime[bot]",
+ "models": [
+  "claude-opus-5-5"
+ ],
+ "report": {
+  "duration_ms": 2578501,
+  "turns": 61,
+  "cost_usd": 3.5877943999999995,
+  "tokens_in": 6666294,
+  "tokens_out": 53002
+ },
+ "log": "https://github.com/dokima-dev/dokima/blob/logs/logs/709/38673944475-planner.md",
+ "run": "https://github.com/dokima-dev/dokima/actions/runs/38673944475",
+ "handback": {
+  "kind": "user_story",
+  "title": "Every raise and story has a short and full half",
+  "summary": "Raises and split stories each carry a short plain half for the owner and a full half for agents.",
+  "user_story": "Every raise and split story the owner reads comes short and plain, with full detail kept for agents.",
+  "acceptance_criteria": [
+   {
+    "text": "A raise with no short half is rejected, naming the raise.",
+    "words": "raises, stories, Context and questions live in the record as pairs",
+    "source": "https://github.com/dokima-dev/dokima/issues/559",
+    "files": [
+     "dokima/raises.py",
+     "dokima/roles/planner.md",
+     "dokima/roles/worker.md",
+     "dokima/roles/reviewer.md"
+    ],
+    "edge_cases": [
+     {
+      "case": "The short half is left out.",
+      "test": "tests/test_text_halves.py::test_a_raise_with_no_short_half_is_rejected_naming_it"
+     },
+     {
+      "case": "The short half is blank.",
+      "test": "tests/test_text_halves.py::test_a_raise_with_no_short_half_is_rejected_naming_it"
+     },
+     {
+      "case": "A reviewer's raise has no short half.",
+      "test": "tests/test_text_halves.py::test_a_raise_with_no_short_half_is_rejected_naming_it"
+     }
+    ]
+   },
+   {
+    "text": "A raise with no full half is rejected, naming the raise.",
+    "words": "raises, stories, Context and questions live in the record as pairs",
+    "source": "https://github.com/dokima-dev/dokima/issues/559",
+    "files": [
+     "dokima/raises.py",
+     "dokima/roles/planner.md",
+     "dokima/roles/worker.md",
+     "dokima/roles/reviewer.md"
+    ],
+    "edge_cases": [
+     {
+      "case": "The full half is left out.",
+      "test": "tests/test_text_halves.py::test_a_raise_with_no_full_half_is_rejected_naming_it"
+     },
+     {
+      "case": "The full half is empty.",
+      "test": "tests/test_text_halves.py::test_a_raise_with_no_full_half_is_rejected_naming_it"
+     },
+     {
+      "case": "The full half is a list, not text.",
+      "test": "tests/test_text_halves.py::test_a_raise_with_no_full_half_is_rejected_naming_it"
+     },
+     {
+      "case": "A reviewer's raise has no full half.",
+      "test": "tests/test_text_halves.py::test_a_raise_with_no_full_half_is_rejected_naming_it"
+     }
+    ]
+   },
+   {
+    "text": "A split story with no short half is rejected, naming the story.",
+    "words": "raises, stories, Context and questions live in the record as pairs",
+    "source": "https://github.com/dokima-dev/dokima/issues/559",
+    "files": [
+     "dokima/planner.py",
+     "dokima/words.py",
+     "dokima/agent_autopilot.py",
+     "dokima/agent_records.py",
+     "dokima/roles/planner.md"
+    ],
+    "edge_cases": [
+     {
+      "case": "The short half is left out.",
+      "test": "tests/test_text_halves.py::test_a_split_story_with_no_short_half_is_rejected_naming_it"
+     },
+     {
+      "case": "The short half is blank.",
+      "test": "tests/test_text_halves.py::test_a_split_story_with_no_short_half_is_rejected_naming_it"
+     },
+     {
+      "case": "The story has no user story at all.",
+      "test": "tests/test_text_halves.py::test_a_split_story_with_no_short_half_is_rejected_naming_it"
+     }
+    ]
+   },
+   {
+    "text": "A split story with no full half is rejected, naming the story.",
+    "words": "raises, stories, Context and questions live in the record as pairs",
+    "source": "https://github.com/dokima-dev/dokima/issues/559",
+    "files": [
+     "dokima/planner.py",
+     "dokima/agent_autopilot.py",
+     "dokima/agent_records.py",
+     "dokima/roles/planner.md"
+    ],
+    "edge_cases": [
+     {
+      "case": "The full half is left out.",
+      "test": "tests/test_text_halves.py::test_a_split_story_with_no_full_half_is_rejected_naming_it"
+     },
+     {
+      "case": "The full half is empty.",
+      "test": "tests/test_text_halves.py::test_a_split_story_with_no_full_half_is_rejected_naming_it"
+     },
+     {
+      "case": "The user story is one plain sentence, as before.",
+      "test": "tests/test_text_halves.py::test_a_split_story_with_no_full_half_is_rejected_naming_it"
+     }
+    ]
+   },
+   {
+    "text": "A split story's context with no short half is rejected, naming the story.",
+    "words": "raises, stories, Context and questions live in the record as pairs",
+    "source": "https://github.com/dokima-dev/dokima/issues/559",
+    "files": [
+     "dokima/planner.py",
+     "dokima/agent_autopilot.py",
+     "dokima/roles/planner.md"
+    ],
+    "edge_cases": [
+     {
+      "case": "The short half is left out.",
+      "test": "tests/test_text_halves.py::test_a_split_storys_context_with_no_short_half_is_rejected_naming_it"
+     },
+     {
+      "case": "The short half is empty.",
+      "test": "tests/test_text_halves.py::test_a_split_storys_context_with_no_short_half_is_rejected_naming_it"
+     }
+    ]
+   },
+   {
+    "text": "A split story's context with no full half is rejected, naming the story.",
+    "words": "raises, stories, Context and questions live in the record as pairs",
+    "source": "https://github.com/dokima-dev/dokima/issues/559",
+    "files": [
+     "dokima/planner.py",
+     "dokima/agent_autopilot.py",
+     "dokima/roles/planner.md"
+    ],
+    "edge_cases": [
+     {
+      "case": "The full half is left out.",
+      "test": "tests/test_text_halves.py::test_a_split_storys_context_with_no_full_half_is_rejected_naming_it"
+     },
+     {
+      "case": "The full half is blank.",
+      "test": "tests/test_text_halves.py::test_a_split_storys_context_with_no_full_half_is_rejected_naming_it"
+     },
+     {
+      "case": "The context is one plain sentence, as before.",
+      "test": "tests/test_text_halves.py::test_a_split_storys_context_with_no_full_half_is_rejected_naming_it"
+     }
+    ]
+   },
+   {
+    "text": "A short half that names code is rejected, naming the text.",
+    "words": "A short text for me (capped, plain, no code)",
+    "source": "https://github.com/dokima-dev/dokima/issues/559",
+    "files": [
+     "dokima/words.py",
+     "dokima/roles/style.md"
+    ],
+    "edge_cases": [
+     {
+      "case": "A question names code.",
+      "test": "tests/test_text_halves.py::test_a_short_half_that_names_code_is_rejected_naming_the_text"
+     },
+     {
+      "case": "An issue found names code.",
+      "test": "tests/test_text_halves.py::test_a_short_half_that_names_code_is_rejected_naming_the_text"
+     },
+     {
+      "case": "A story's user story names code.",
+      "test": "tests/test_text_halves.py::test_a_short_half_that_names_code_is_rejected_naming_the_text"
+     },
+     {
+      "case": "A story's context names code.",
+      "test": "tests/test_text_halves.py::test_a_short_half_that_names_code_is_rejected_naming_the_text"
+     }
+    ]
+   },
+   {
+    "text": "A full half that names code passes the check.",
+    "words": "a full text for agents (uncapped, may name code)",
+    "source": "https://github.com/dokima-dev/dokima/issues/559",
+    "files": [
+     "dokima/words.py",
+     "dokima/raises.py"
+    ],
+    "edge_cases": [
+     {
+      "case": "A reviewer's blocker names code in its full half.",
+      "test": "tests/test_text_halves.py::test_a_full_half_that_names_code_passes_the_check"
+     }
+    ]
+   },
+   {
+    "text": "A full half longer than every word cap passes the check.",
+    "words": "a full text for agents (uncapped, may name code)",
+    "source": "https://github.com/dokima-dev/dokima/issues/559",
+    "files": [
+     "dokima/words.py",
+     "dokima/raises.py"
+    ],
+    "edge_cases": [
+     {
+      "case": "A reviewer's blocker has a 300-word full half.",
+      "test": "tests/test_text_halves.py::test_a_full_half_longer_than_every_cap_passes_the_check"
+     }
+    ]
+   }
+  ],
+  "non_functional": [],
+  "tests": {
+   "709.1": [
+    "tests/test_text_halves.py::test_a_raise_with_no_short_half_is_rejected_naming_it"
+   ],
+   "709.2": [
+    "tests/test_text_halves.py::test_a_raise_with_no_full_half_is_rejected_naming_it"
+   ],
+   "709.3": [
+    "tests/test_text_halves.py::test_a_split_story_with_no_short_half_is_rejected_naming_it"
+   ],
+   "709.4": [
+    "tests/test_text_halves.py::test_a_split_story_with_no_full_half_is_rejected_naming_it"
+   ],
+   "709.5": [
+    "tests/test_text_halves.py::test_a_split_storys_context_with_no_short_half_is_rejected_naming_it"
+   ],
+   "709.6": [
+    "tests/test_text_halves.py::test_a_split_storys_context_with_no_full_half_is_rejected_naming_it"
+   ],
+   "709.7": [
+    "tests/test_text_halves.py::test_a_short_half_that_names_code_is_rejected_naming_the_text"
+   ],
+   "709.8": [
+    "tests/test_text_halves.py::test_a_full_half_that_names_code_passes_the_check"
+   ],
+   "709.9": [
+    "tests/test_text_halves.py::test_a_full_half_longer_than_every_cap_passes_the_check"
+   ]
+  },
+  "test_changes": {
+   "tests/test_fixer.py::test_every_review_blocker_names_the_worker_or_the_planner": "Its sample blockers now carry the full half every raise needs.",
+   "tests/test_handback_check.py::test_well_formed_hand_backs_pass_and_every_malformed_field_is_named": "Its well-formed review's raises now carry the full half every raise needs.",
+   "tests/test_handback_check.py::test_the_round_check_never_crashes_on_a_malformed_review": "Its open blocker now carries a full half, as stamped raises will.",
+   "tests/test_plan_check.py::test_anything_but_a_story_or_a_feature_is_rejected_saying_the_planner_always_hands_back_a_plan": "Its good plan's question now carries the full half every raise needs.",
+   "tests/test_plan_shape.py::test_a_feature_is_shown_as_handed_back": "Its story's user story is now a short and full pair.",
+   "tests/test_raise_handbacks.py::test_the_round_check_rejects_a_hand_back_that_skips_a_raise_naming_each_one": "Its old blocker now carries a full half, as stamped raises will."
+  },
+  "links": {
+   "blocked_by": [],
+   "blocks": [
+    710,
+    711
+   ],
+   "relates_to": [
+    559,
+    707,
+    470
+   ]
+  },
+  "raises": [
+   {
+    "kind": "question",
+    "to": "owner",
+    "label": "Prompts must change",
+    "text": "Agents must learn to write both halves. May this change the role prompts? The plan assumes yes.",
+    "evidence": "`AGENTS.md` bars `dokima/roles/` changes unless asked; `tests/test_raise_design.py` checks the prompts' example raises.",
+    "raised_by": "planner",
+    "id": "P1"
+   },
+   {
+    "kind": "question",
+    "to": "owner",
+    "label": "Two rules disagree",
+    "text": "Blockers and issues may name code today. Should their short halves be plain too? The plan assumes yes.",
+    "evidence": "`dokima/words.py` leaves blocker and issue texts out of the plain rule; #559 says short texts hold no code.",
+    "raised_by": "planner",
+    "id": "P2"
+   },
+   {
+    "kind": "issue",
+    "label": "Full halves stop short",
+    "text": "No step carries a split story's full halves into the issue its planner reads.",
+    "evidence": "`dokima/agent_autopilot.py`, `story_body()` writes the story's issue body.",
+    "raised_by": "planner",
+    "id": "P3"
+   }
+  ],
+  "answers": []
+ },
+ "check": {
+  "passed": true,
+  "problems": []
+ },
+ "url": "https://github.com/dokima-dev/dokima/issues/709#issuecomment-6183398918"
+}
