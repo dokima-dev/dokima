@@ -1,0 +1,213 @@
+{
+ "role": "reviewer",
+ "stage": "plan",
+ "run_id": "38674488301",
+ "commit_before": "11ae9e04aba3309ef8fd8b7389327053abfef260",
+ "started_by": "dokima-runtime[bot]",
+ "models": [
+  "claude-opus-5-5"
+ ],
+ "report": {
+  "duration_ms": 59808,
+  "turns": 10,
+  "cost_usd": 0.4950455999999999,
+  "tokens_in": 366600,
+  "tokens_out": 6468
+ },
+ "log": "https://github.com/dokima-dev/dokima/blob/logs/logs/708/38674488301-reviewer-plan.md",
+ "run": "https://github.com/dokima-dev/dokima/actions/runs/38674488301",
+ "handback": {
+  "previous_step": {
+   "did": [
+    "The planner wrote seven criteria from the parent story's list.",
+    "The planner wrote five new tests that fail today.",
+    "The planner pinned two already-built criteria with older tests."
+   ],
+   "decided": [
+    "Committed text counts as the owner's words only when the owner made the commit."
+   ],
+   "open": [
+    "The planner asks the owner whether two already-built asks need only the older tests."
+   ]
+  },
+  "verdict": "block",
+  "summary": "Two criteria lean on older tests that prove a neighbour or much more than their one behavior.",
+  "raises": [
+   {
+    "kind": "blocker",
+    "to": "planner",
+    "label": "708.7 wrong role",
+    "text": "The 708.7 test builds the reviewer's pack, not the planner's. Fix: a test building the planner's pack that finds the owner's /plan comment word for word.",
+    "evidence": "`tests/test_agent.py::test_the_pack_reads_the_issue_and_its_pr_as_one_conversation` calls `agent.pack(\"o/r\", 7, \"reviewer\", \"plan\", ...)` (line 194).",
+    "raised_by": "reviewer",
+    "id": "R1"
+   },
+   {
+    "kind": "blocker",
+    "to": "planner",
+    "label": "708.6 test too broad",
+    "text": "The 708.6 test also checks /plan, /work, prose and unlinked pull requests. Fix: a test for /review on a pull request, and /review on a later line.",
+    "evidence": "`tests/test_agent.py::test_a_command_starts_its_stage_and_anything_else_starts_nothing` has nine asserts; one covers /review on a pull request (line 211).",
+    "raised_by": "reviewer",
+    "id": "R2"
+   }
+  ],
+  "answers": [],
+  "asks": [
+   {
+    "ask": "Every role working on a split story gets the parent's original issue and my comments, which only the planner gets today.",
+    "source": "https://github.com/dokima-dev/dokima/issues/559",
+    "criterion": "708.1"
+   },
+   {
+    "ask": "Every role working on a split story gets the parent's original issue and my comments, which only the planner gets today.",
+    "source": "https://github.com/dokima-dev/dokima/issues/559",
+    "criterion": "708.2"
+   },
+   {
+    "ask": "Every role working on a split story gets the parent's original issue and my comments, which only the planner gets today.",
+    "source": "https://github.com/dokima-dev/dokima/issues/559",
+    "criterion": "708.3"
+   },
+   {
+    "ask": "Every role working on a split story gets the parent's original issue and my comments, which only the planner gets today.",
+    "source": "https://github.com/dokima-dev/dokima/issues/559",
+    "criterion": "708.4"
+   },
+   {
+    "ask": "Anything I write counts as my words",
+    "source": "https://github.com/dokima-dev/dokima/issues/559",
+    "criterion": "708.5"
+   },
+   {
+    "ask": "I can add, change or delete tests, plan and code on Dokima's branches, then say /review.",
+    "source": "https://github.com/dokima-dev/dokima/issues/559",
+    "criterion": "708.6"
+   },
+   {
+    "ask": "Yes, plans live off the branch; I edit them by comment.",
+    "source": "https://github.com/dokima-dev/dokima/issues/559#issuecomment-6183274943",
+    "criterion": "708.7"
+   }
+  ],
+  "behaviors": [
+   {
+    "criterion": "708.1",
+    "one_behavior": true,
+    "why": "One role, one thing found in its pack."
+   },
+   {
+    "criterion": "708.2",
+    "one_behavior": true,
+    "why": "One role, one thing found in its pack."
+   },
+   {
+    "criterion": "708.3",
+    "one_behavior": true,
+    "why": "One role, one thing found in its pack."
+   },
+   {
+    "criterion": "708.4",
+    "one_behavior": true,
+    "why": "One role, one thing found in its pack."
+   },
+   {
+    "criterion": "708.5",
+    "one_behavior": true,
+    "why": "Committed owner text accepted as a quote."
+   },
+   {
+    "criterion": "708.6",
+    "one_behavior": true,
+    "why": "One command starts one stage."
+   },
+   {
+    "criterion": "708.7",
+    "one_behavior": true,
+    "why": "One comment reaches one role's pack."
+   }
+  ],
+  "edge_cases": [
+   {
+    "criterion": "708.1",
+    "cut": [],
+    "missing": []
+   },
+   {
+    "criterion": "708.2",
+    "cut": [],
+    "missing": []
+   },
+   {
+    "criterion": "708.3",
+    "cut": [],
+    "missing": []
+   },
+   {
+    "criterion": "708.4",
+    "cut": [],
+    "missing": []
+   },
+   {
+    "criterion": "708.5",
+    "cut": [],
+    "missing": []
+   },
+   {
+    "criterion": "708.6",
+    "cut": [],
+    "missing": [
+     "/review on a later line of a pull request comment starts nothing"
+    ]
+   },
+   {
+    "criterion": "708.7",
+    "cut": [],
+    "missing": []
+   }
+  ],
+  "tests": [
+   {
+    "test": "tests/test_story_reads_parent.py::test_a_worker_on_a_split_story_finds_the_parents_original_issue",
+    "only_its_behavior": true,
+    "why": "Builds the worker's real pack; fails today on the missing ask."
+   },
+   {
+    "test": "tests/test_story_reads_parent.py::test_a_worker_on_a_split_story_finds_the_owners_comments_on_the_parent",
+    "only_its_behavior": true,
+    "why": "Builds the worker's real pack; fails today on the missing comment."
+   },
+   {
+    "test": "tests/test_story_reads_parent.py::test_a_reviewer_on_a_split_story_finds_the_parents_original_issue",
+    "only_its_behavior": true,
+    "why": "Builds both reviewer packs; fails today on the missing ask."
+   },
+   {
+    "test": "tests/test_story_reads_parent.py::test_a_reviewer_on_a_split_story_finds_the_owners_comments_on_the_parent",
+    "only_its_behavior": true,
+    "why": "Builds both reviewer packs; fails today on the missing comment."
+   },
+   {
+    "test": "tests/test_story_reads_parent.py::test_text_the_owner_committed_on_the_branch_counts_as_their_words",
+    "only_its_behavior": true,
+    "why": "Owner's line accepted, stranger's refused; fails today on the source check."
+   },
+   {
+    "test": "tests/test_agent.py::test_a_command_starts_its_stage_and_anything_else_starts_nothing",
+    "only_its_behavior": false,
+    "why": "Also checks /plan, /work, prose and unlinked pull requests."
+   },
+   {
+    "test": "tests/test_agent.py::test_the_pack_reads_the_issue_and_its_pr_as_one_conversation",
+    "only_its_behavior": false,
+    "why": "Builds the reviewer's pack, not the planner's, and checks ordering and records."
+   }
+  ],
+  "size": "Tests for 708.6 and 708.7 check more than their one behavior."
+ },
+ "check": {
+  "passed": true,
+  "problems": []
+ },
+ "url": "https://github.com/dokima-dev/dokima/issues/708#issuecomment-6183464241"
+}
