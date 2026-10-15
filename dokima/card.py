@@ -473,12 +473,22 @@ def criterion_item(repo, label, c, check, tests, number=None, all_tests=None, so
     return out
 
 
+def acceptance_tests(c, filed):
+    """The tests filed under criterion C that prove the criterion itself, not only one of its edge cases.
+
+    An edge case's own test shows in the Edge cases fold, never again as an Acceptance test. When every filed test
+    also covers an edge case, the first one filed is the criterion's acceptance test."""
+    edge = {(e.get("test") or "").strip() for e in c.get("edge_cases") or [] if isinstance(e, dict)}
+    own = [t for t in filed if t.strip() not in edge]
+    return own or filed[:1]
+
+
 def criteria_list(repo, number, start, label, criteria, plan_tests, by_key, tests, sources=None):
     """The bullet list of criteria numbered from `start`, each with its own check and tests."""
     out = []
     for k, c in enumerate(criteria, start):
         key = f"{number}.{k}"
-        out += criterion_item(repo, label, c, by_key.get(key), [tests.get(t) for t in plan_tests.get(key, [])],
+        out += criterion_item(repo, label, c, by_key.get(key), [tests.get(t) for t in acceptance_tests(c, plan_tests.get(key, []))],
                               number, tests, sources)
     return out
 
