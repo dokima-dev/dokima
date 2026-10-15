@@ -70,12 +70,14 @@ APPROVE = {"previous_step": {"did": ["Planned one story."], "decided": [], "open
 # Raises as an agent writes them, and as code stamps them on the issue.
 DOUBT = {"kind": "question", "to": "owner", "label": "Doubt about the ask",
          "text": "Is this already fixed? The board draws the column from the record since #339.",
+         "full": "The board's column() reads the record since #339, so the ask may be done.",
          "evidence": "dokima/board.py, column(), line 120"}
 TO_PLANNER = {"kind": "blocker", "to": "planner", "label": "Weak test", "text": "The test for 9.1 passes on a stub.",
-              "evidence": "tests/test_x.py::test_a"}
+              "full": "tests/test_x.py::test_a passes with dokima/x.py emptied.", "evidence": "tests/test_x.py::test_a"}
 TO_WORKER = {"kind": "blocker", "to": "worker", "label": "Criterion 9.2", "text": "The job id is never returned.",
-             "evidence": "dokima/x.py line 4"}
-FOUND = {"kind": "issue", "label": "Docs", "text": "The README still names the old command.", "evidence": "README.md"}
+             "full": "dokima/x.py builds the job id on line 4 but never returns it.", "evidence": "dokima/x.py line 4"}
+FOUND = {"kind": "issue", "label": "Docs", "text": "The README still names the old command.",
+         "full": "README.md still says to run the retired command.", "evidence": "README.md"}
 
 
 def stamped(r, by, rid):

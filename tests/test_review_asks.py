@@ -24,9 +24,9 @@ STORY = {"kind": "user_story", "user_story": "u",
          "out_of_scope": [],
          "tests": {"9.1": ["tests/test_x.py::test_a"], "9.2": ["tests/test_x.py::test_b"], "9.3": ["tests/test_x.py::test_c"]}}
 SPLIT = {"kind": "feature", "feature": "f", "stories": [
-    {"title": "One", "user_story": "u1", "acceptance_criteria": [{"text": "a", "source": "https://x/9"}],
+    {"title": "One", "user_story": {"short": "u1", "full": "u1, in full."}, "acceptance_criteria": [{"text": "a", "source": "https://x/9"}],
      "non_functional": [], "depends_on": []},
-    {"title": "Two", "user_story": "u2", "acceptance_criteria": [{"text": "b", "source": "https://x/9"}],
+    {"title": "Two", "user_story": {"short": "u2", "full": "u2, in full."}, "acceptance_criteria": [{"text": "b", "source": "https://x/9"}],
      "non_functional": [], "depends_on": [0]}]}
 
 ASKS = [{"ask": "Paint the door blue", "source": "https://github.com/o/r/issues/9", "criterion": "9.1"},
@@ -34,7 +34,7 @@ ASKS = [{"ask": "Paint the door blue", "source": "https://github.com/o/r/issues/
 APPROVE = {"previous_step": {"did": ["Wrote three criteria."], "decided": [], "open": []},
            "verdict": "approve", "summary": "Every ask has a criterion and a test.", "asks": ASKS, "tests": [{"test": t, "only_its_behavior": True, "why": "one result"} for t in ("tests/test_x.py::test_a", "tests/test_x.py::test_b", "tests/test_x.py::test_c")], "size": "ok", "behaviors": [{"criterion": c, "one_behavior": True, "why": "one result"} for c in ("9.1", "9.2", "9.3", "57.1", "57.2", "57.3", "S1.1", "S1.2", "S1.3", "S2.1", "S2.2", "S2.3")], "edge_cases": [{"criterion": c, "cut": [], "missing": []} for c in ("9.1", "9.2", "9.3", "57.1", "57.2", "57.3", "S1.1", "S1.2", "S1.3", "S2.1", "S2.2", "S2.3")]}
 BLOCK = {**APPROVE, "verdict": "block", "summary": "One ask has no criterion.",
-         "raises": [{"kind": "blocker", "to": "planner", "label": "9.1", "text": "An ask is dropped.",
+         "raises": [{"kind": "blocker", "to": "planner", "label": "9.1", "text": "An ask is dropped.", "full": "The whole detail, for agents.",
                      "evidence": "issue #9"}]}
 
 

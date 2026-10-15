@@ -12,7 +12,7 @@ import record_seed  # noqa: E402
 GOOD_REVIEW = {"previous_step": {"did": ["Split the issue into four stories."], "decided": [], "open": ["Three questions."]},
                "stage": "plan", "round": 1, "verdict": "block", "summary": "One test is missing.",
                "raises": [{"kind": "blocker", "to": "worker", "label": "9.1", "text": "No good-case test.",
-                           "evidence": "18 passed against a stub."}]}
+                           "full": "Criterion 9.1 has no test of the good case.", "evidence": "18 passed against a stub."}]}
 # A review posted before #300, with the old blockers field; records like it are still read.
 OLD_REVIEW = {"previous_step": {"did": ["Split the issue into four stories."], "decided": [], "open": []},
               "stage": "plan", "round": 1, "verdict": "block", "summary": "One test is missing.",
@@ -35,7 +35,8 @@ def test_a_good_review_passes_and_each_malformation_is_named(record_property, tm
     assert code == 1 and "approve" in out, f"an approve raising a blocker passed: {out}"
     code, out = checked({**GOOD_REVIEW, "raises": []})
     assert code == 1 and "block" in out, f"a block raising no blocker passed: {out}"
-    found = {"kind": "issue", "text": "Board ignores closed PRs: cards go stale", "evidence": "board.py:40"}
+    found = {"kind": "issue", "text": "Board ignores closed PRs: cards go stale",
+             "full": "The board reads only open pull requests, so closed ones keep stale cards.", "evidence": "board.py:40"}
     assert checked({**GOOD_REVIEW, "verdict": "approve", "raises": [found]}) == (0, ""), "an approve raising an issue was rejected"
     code, out = checked({**GOOD_REVIEW, "notes": [{"text": "n", "evidence": "e"}]})
     assert code == 1 and "notes" in out, f"a review with the old notes field passed: {out}"

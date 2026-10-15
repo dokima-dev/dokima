@@ -55,7 +55,7 @@ def feature(*stories):
         return cs if isinstance(cs, tuple) else (cs, [])
     return {"kind": "feature", "title": "Slow calls run as jobs", "summary": "Slow calls run as jobs.",
             "feature": "A split.",
-            "stories": [{"title": f"Story {n}", "user_story": f"Owners get part {n}.",
+            "stories": [{"title": f"Story {n}", "user_story": {"short": f"Owners get part {n}.", "full": f"Owners get part {n}, in full."},
                          "acceptance_criteria": list(parts(cs)[0]), "non_functional": list(parts(cs)[1]),
                          "depends_on": []} for n, cs in enumerate(stories, 1)]}
 

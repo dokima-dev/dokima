@@ -9,7 +9,7 @@ The module these tests run, as the plan fixes it:
 - `TABLE`: a read-only mapping from each raiser to the tuple of whom it may send a question or blocker:
   planner -> owner; worker -> planner; reviewer -> planner, worker, owner. An issue is for no one.
 - `check_raises(role, raises)`: the problems with the raises an agent of that role wrote, as plain sentences; empty
-  when they are fine. A raise is {"kind", "to", "label", "text", "evidence"}; label and evidence are optional and an
+  when they are fine. A raise is {"kind", "to", "label", "text", "full", "evidence"}; label and evidence are optional and an
   issue has no "to".
 - `sent_to(raise_)`: the one who must answer a raise first: its "to", except the reviewer for a worker's raise to the
   planner (it goes through the reviewer); None for an issue.
@@ -47,7 +47,7 @@ def raises_module():
 
 def one(kind, to=None, **more):
     """One raise as an agent would write it."""
-    r = {"kind": kind, "text": f"A {kind} with something to say.", **more}
+    r = {"kind": kind, "text": f"A {kind} with something to say.", "full": f"The whole {kind}, for agents.", **more}
     if to is not None:
         r["to"] = to
     return r

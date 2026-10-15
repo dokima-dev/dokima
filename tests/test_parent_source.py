@@ -57,10 +57,10 @@ def story(sources):
 def feature(sources):
     """A two-story split of #331 whose first story's criteria cite these sources."""
     return {"kind": "feature", "summary": "Two stories.", "feature": "Cards show what is true now.",
-            "stories": [{"title": "One", "user_story": "u1", "non_functional": [], "depends_on": [],
+            "stories": [{"title": "One", "user_story": {"short": "u1", "full": "u1, in full."}, "non_functional": [], "depends_on": [],
                          "acceptance_criteria": [{"text": f"Criterion {k} holds.", "source": s, "files": ["dokima/x.py"]}
                                                  for k, s in enumerate(sources[:3], 1)]},
-                        {"title": "Two", "user_story": "u2", "non_functional": [], "depends_on": [0],
+                        {"title": "Two", "user_story": {"short": "u2", "full": "u2, in full."}, "non_functional": [], "depends_on": [0],
                          "acceptance_criteria": [{"text": f"Criterion {k} holds.", "source": s, "files": ["dokima/x.py"]}
                                                  for k, s in enumerate(sources[3:], 4)]
                                                 + [{"text": "Two holds.", "source": url(STORY_N), "files": ["dokima/x.py"]}]}],

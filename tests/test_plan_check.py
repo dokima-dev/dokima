@@ -37,11 +37,11 @@ STORY = {"kind": "user_story", "title": "Slow calls hand back a job id", "summar
                    "9.3": ["tests/test_jobs.py::test_unique"]},
          "test_changes": {}}
 FEATURE = {"kind": "feature", "title": "Slow calls run as jobs", "summary": "Slow calls hand back a job id instead of timing out.", "feature": "Slow calls run as jobs.",
-           "stories": [{"title": "Job ids", "user_story": "Slow calls return a job id.",
+           "stories": [{"title": "Job ids", "user_story": {"short": "Slow calls return a job id.", "full": "Slow calls return a job id., in full."},
                         "acceptance_criteria": [{"text": "A slow call returns a job id.", "source": ISSUE, "files": ["dokima/jobs.py"]},
                                                 {"text": "A fast call returns its result.", "source": ISSUE, "files": ["dokima/jobs.py"]}],
                         "non_functional": [], "depends_on": []},
-                       {"title": "Job status", "user_story": "Owners see each job's status.",
+                       {"title": "Job status", "user_story": {"short": "Owners see each job's status.", "full": "Owners see each job's status., in full."},
                         "acceptance_criteria": [{"text": "A job's status is shown.", "source": ISSUE, "files": ["dokima/status.py"]},
                                                 {"text": "A finished job shows its result.", "source": ISSUE, "files": ["dokima/status.py"]}],
                         "non_functional": [], "depends_on": [0]}]}
@@ -118,7 +118,7 @@ def test_anything_but_a_story_or_a_feature_is_rejected_saying_the_planner_always
     hands back a plan, a user_story or a feature.
     """
     record_property("proves", "154.1")
-    for good in (STORY, FEATURE, dict(STORY, raises=[{"kind": "question", "to": "owner", "text": "Should ids be numbers? The plan assumes strings."}])):
+    for good in (STORY, FEATURE, dict(STORY, raises=[{"kind": "question", "to": "owner", "text": "Should ids be numbers? The plan assumes strings.", "full": "The whole detail, for agents."}])):
         rc, why = check({"plan.json": good}, "154.1")
         assert rc == 0 and not why, f"154.1: a good {good['kind']} was rejected: {why!r}"
     rc, why = check(files, "154.1")

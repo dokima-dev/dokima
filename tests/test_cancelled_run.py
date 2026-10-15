@@ -25,7 +25,7 @@ BAD_REVIEW = {"verdict": "maybe"}
 # A blocking review of the one-story plan (only criterion: 57.1), so every ask it lists is matched to 57.1 (#215).
 BLOCK = dict(APPROVE, verdict="block", summary="57.1 has no test that would fail without the work.",
              asks=[dict(a, criterion="57.1") for a in APPROVE["asks"]],
-             raises=[{"kind": "blocker", "to": "planner", "label": "57.1", "text": "The test only checks a file exists.", "evidence": "tests/test_x.py::test_a"}])
+             raises=[{"kind": "blocker", "to": "planner", "label": "57.1", "text": "The test only checks a file exists.", "full": "The whole detail, for agents.", "evidence": "tests/test_x.py::test_a"}])
 AGENT = "The agent (Claude Code)"
 
 # Runs cancelled part way: name -> (role, stage, history, options, review, the step it is cancelled at, where its card is).

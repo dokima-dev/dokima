@@ -22,7 +22,7 @@ SRC = "https://github.com/o/r/issues/9"
 
 def story(title, deps):
     """One well-formed story with the given title and dependencies."""
-    return {"title": title, "user_story": f"Owners get {title}.",
+    return {"title": title, "user_story": {"short": f"Owners get {title}.", "full": f"Owners get {title}, in full."},
             "acceptance_criteria": [{"text": f"{title} works {k}.", "source": SRC, "files": [f"dokima/{title.lower().replace(' ', '_')}.py"]} for k in (1, 2, 3)],
             "non_functional": [], "depends_on": deps}
 

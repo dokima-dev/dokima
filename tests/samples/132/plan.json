@@ -46,6 +46,7 @@
    "to": "owner",
    "label": "Doubt about the ask",
    "text": "Most of this ask already holds on main: a failed planner, worker or code review run already ends in its stage's column with Needs you, through the always-run \"Move the card on the board\" step. The gap left is when \"Decide what follows\" fails: board.txt is never written, `agent board` crashes on the missing file, and the card stays where it was without the pill. This plan covers only that gap, and its 132.1 tests also guard the cases that already work.",
+   "full": "The whole detail of this question, kept for agents.",
    "evidence": "dokima/agent.py board_place() and main() 'board' (reads board.txt with no fallback); .github/workflows/agent.yml steps 'Decide what follows' (`|| NEXT=stop`) and 'Move the card on the board'; tests/test_start.py 176.3 already checks Needs you after start failures."
   },
   {
@@ -53,6 +54,7 @@
    "to": "owner",
    "label": "Doubt about the ask",
    "text": "The issue's own scope (dokima/board.py, .github/workflows/board.yml, tests/test_board.py) comes from the old label flow. Run results now move cards from agent.py, so this plan changes agent.py instead and touches no workflow file.",
+   "full": "The whole detail of this question, kept for agents.",
    "evidence": "commit 77c5b21 (#162) added board_place/move_card in dokima/agent.py; board.py's decide() only reacts to labels, PR events and done-whens."
   },
   {
@@ -60,6 +62,7 @@
    "to": "owner",
    "label": "Doubt about the ask",
    "text": "A command that fails in the listener before any agent starts (route failure, split filing refused) posts a failed record that mentions the owner, but never touches the board. That breaks AGENTS.md's rule that Needs you is set exactly when the river stops for the owner. Fixing it means changing commands.yml, so it is left out here; it is recommended as its own issue.",
+   "full": "The whole detail of this question, kept for agents.",
    "evidence": ".github/workflows/commands.yml job say-why has no board step; tests/test_start.py test 176.4 passes board=False."
   }
  ]

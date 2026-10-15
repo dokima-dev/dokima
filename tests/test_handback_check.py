@@ -18,9 +18,9 @@ STORY = {"kind": "user_story", "user_story": "u",
          "scope": ["dokima/x.py"], "out_of_scope": [],
          "tests": {"9.1": ["tests/test_x.py::test_a"], "9.2": ["tests/test_x.py::test_b"], "9.3": ["tests/test_x.py::test_c"]}}
 SPLIT = {"kind": "feature", "feature": "f", "stories": [
-    {"title": "One", "user_story": "u1", "acceptance_criteria": [{"text": "a", "source": "https://x/9"}],
+    {"title": "One", "user_story": {"short": "u1", "full": "u1, in full."}, "acceptance_criteria": [{"text": "a", "source": "https://x/9"}],
      "non_functional": [{"text": "n", "why": "w"}], "depends_on": []},
-    {"title": "Two", "user_story": "u2", "acceptance_criteria": [{"text": "b", "source": "https://x/9"}],
+    {"title": "Two", "user_story": {"short": "u2", "full": "u2, in full."}, "acceptance_criteria": [{"text": "b", "source": "https://x/9"}],
      "non_functional": [], "depends_on": [0]}]}
 
 # Every ask a plan review lists, matched to the story's 9.1 or a split's S1.1: a plan review must list them, a code
@@ -31,8 +31,8 @@ STAGES = ("", "plan", "pr")  # the stage a machine may run on: none (CI), a plan
 
 REVIEW = {"previous_step": {"did": ["Wrote three criteria."], "decided": [], "open": []},
           "verdict": "block", "summary": "One proof is missing.",
-          "raises": [{"kind": "blocker", "to": "worker", "label": "9.1", "text": "No test.", "evidence": "plan.json"},
-                     {"kind": "issue", "text": "t: w", "evidence": "e"}],
+          "raises": [{"kind": "blocker", "to": "worker", "label": "9.1", "text": "No test.", "full": "The whole detail, for agents.", "evidence": "plan.json"},
+                     {"kind": "issue", "text": "t: w", "full": "The whole detail, for agents.", "evidence": "e"}],
           "answers": [{"raise": "W1", "answer": "done", "why": "The test is weak."}], "asks": ASKS,
           "size": "ok",
           "behaviors": [{"criterion": c, "one_behavior": True, "why": "one result"} for c in ("9.1", "9.2", "9.3")], "edge_cases": [{"criterion": c, "cut": [], "missing": []} for c in ("9.1", "9.2", "9.3")],
@@ -133,7 +133,7 @@ def test_well_formed_hand_backs_pass_and_every_malformed_field_is_named(record_p
                   ("evidence", 5), ("raises", 5), ("answers", 5)]
     for field, value in work_cases:
         assert_rejected_naming(tmp_path, "work", {**WORK, field: value}, field, "157.1")
-    raised = {"kind": "blocker", "to": "planner", "text": "test_a reads a file nothing writes.", "evidence": "e"}
+    raised = {"kind": "blocker", "to": "planner", "text": "test_a reads a file nothing writes.", "full": "The whole detail, for agents.", "evidence": "e"}
     code, out, err = check(tmp_path, "work", {**WORK, "raises": [raised]})
     assert (code, out.strip()) == (0, ""), f"157.1: a work.json raising a blocker for the planner was rejected: {out}{err[-400:]}"
     for kind, good in (("review", REVIEW), ("work", WORK)):

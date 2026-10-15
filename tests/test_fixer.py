@@ -81,7 +81,7 @@ def test_every_review_blocker_names_the_worker_or_the_planner(record_property, t
     naming that raise, and no crash, also when the other blocker is well formed."""
     record_property("proves", "166.1")
     record_property("proves", "244.1")
-    raised = lambda to: {"kind": "blocker", "to": to, "text": f"problem for {to}", "evidence": "e"}
+    raised = lambda to: {"kind": "blocker", "to": to, "text": f"problem for {to}", "full": "The whole detail, for agents.", "evidence": "e"}
     blocking = lambda *rs: {**{k: v for k, v in review().items() if k not in ("blockers", "notes", "outside_plan", "resolved")},
                             "raises": list(rs)}
     for stage in ("", "plan", "pr"):

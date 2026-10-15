@@ -41,7 +41,8 @@ def story(*files):
 def feature(files):
     """A well-formed split of two stories, the second story's only criterion carrying the given files."""
     def one(title, f):
-        return {"title": title, "user_story": f"Owners get {title}.", "non_functional": [], "depends_on": [],
+        return {"title": title, "user_story": {"short": f"Owners get {title}.", "full": f"Owners get {title}, in full."},
+                "non_functional": [], "depends_on": [],
                 "acceptance_criteria": [{"text": f"{title} works.", "source": SRC, "files": f}]}
     return {"kind": "feature", "title": "Slow calls run as jobs", "summary": "Slow calls run as jobs.",
             "feature": "A split.", "stories": [one("Jobs", ["dokima/jobs.py"]), one("Ids", files)]}
