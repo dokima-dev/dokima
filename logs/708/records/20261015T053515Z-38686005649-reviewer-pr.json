@@ -1,0 +1,166 @@
+{
+ "role": "reviewer",
+ "stage": "pr",
+ "run_id": "38686005649",
+ "commit_before": "2b539f0b5858180f57df24868835bee1e2277bc5",
+ "started_by": "dokima-runtime[bot]",
+ "models": [
+  "claude-opus-5-5"
+ ],
+ "report": {
+  "duration_ms": 586614,
+  "turns": 32,
+  "cost_usd": 1.0939698,
+  "tokens_in": 1983214,
+  "tokens_out": 9847
+ },
+ "log": "https://github.com/dokima-dev/dokima/blob/logs/logs/708/38686005649-reviewer-pr.md",
+ "run": "https://github.com/dokima-dev/dokima/actions/runs/38686005649",
+ "handback": {
+  "previous_step": {
+   "did": [
+    "Workers and both reviewers now get the parent's ask and the owner's comments.",
+    "Lines the owner commits on the branch now count as the owner's words."
+   ],
+   "decided": [
+    "/review and /plan comments already worked, so tests only pin them."
+   ],
+   "open": [
+    "Answers on autopilot still refuse a commit link as the owner's words."
+   ]
+  },
+  "verdict": "approve",
+  "summary": "Every criterion is built and proven; the full test suite passes on the branch.",
+  "raises": [],
+  "answers": [
+   {
+    "raise": "W1",
+    "answer": "done",
+    "why": "Agreed: it lies outside this issue and stays a proposal for the owner to file.",
+    "searched": [
+     612,
+     110
+    ],
+    "verdict": "new"
+   }
+  ],
+  "asks": [],
+  "behaviors": [
+   {
+    "criterion": "708.1",
+    "one_behavior": true,
+    "why": "One role finds one thing in its pack."
+   },
+   {
+    "criterion": "708.2",
+    "one_behavior": true,
+    "why": "One role finds one thing in its pack."
+   },
+   {
+    "criterion": "708.3",
+    "one_behavior": true,
+    "why": "One role finds one thing in its pack."
+   },
+   {
+    "criterion": "708.4",
+    "one_behavior": true,
+    "why": "One role finds one thing in its pack."
+   },
+   {
+    "criterion": "708.5",
+    "one_behavior": true,
+    "why": "Committed owner text is accepted as a quote."
+   },
+   {
+    "criterion": "708.6",
+    "one_behavior": true,
+    "why": "One command starts one stage."
+   },
+   {
+    "criterion": "708.7",
+    "one_behavior": true,
+    "why": "One comment reaches one role's pack."
+   }
+  ],
+  "edge_cases": [
+   {
+    "criterion": "708.1",
+    "cut": [],
+    "missing": []
+   },
+   {
+    "criterion": "708.2",
+    "cut": [],
+    "missing": []
+   },
+   {
+    "criterion": "708.3",
+    "cut": [],
+    "missing": []
+   },
+   {
+    "criterion": "708.4",
+    "cut": [],
+    "missing": []
+   },
+   {
+    "criterion": "708.5",
+    "cut": [],
+    "missing": []
+   },
+   {
+    "criterion": "708.6",
+    "cut": [],
+    "missing": []
+   },
+   {
+    "criterion": "708.7",
+    "cut": [],
+    "missing": []
+   }
+  ],
+  "tests": [
+   {
+    "test": "tests/test_story_reads_parent.py::test_a_worker_on_a_split_story_finds_the_parents_original_issue",
+    "only_its_behavior": true,
+    "why": "Fails on main, passes on the branch."
+   },
+   {
+    "test": "tests/test_story_reads_parent.py::test_a_worker_on_a_split_story_finds_the_owners_comments_on_the_parent",
+    "only_its_behavior": true,
+    "why": "Fails on main, passes on the branch."
+   },
+   {
+    "test": "tests/test_story_reads_parent.py::test_a_reviewer_on_a_split_story_finds_the_parents_original_issue",
+    "only_its_behavior": true,
+    "why": "Fails on main, passes on the branch."
+   },
+   {
+    "test": "tests/test_story_reads_parent.py::test_a_reviewer_on_a_split_story_finds_the_owners_comments_on_the_parent",
+    "only_its_behavior": true,
+    "why": "Fails on main, passes on the branch."
+   },
+   {
+    "test": "tests/test_story_reads_parent.py::test_text_the_owner_committed_on_the_branch_counts_as_their_words",
+    "only_its_behavior": true,
+    "why": "Owner's commit accepted, stranger's refused; fails on main."
+   },
+   {
+    "test": "tests/test_agent.py::test_a_command_starts_its_stage_and_anything_else_starts_nothing",
+    "only_its_behavior": true,
+    "why": "Pins the existing behavior, as the owner asked."
+   },
+   {
+    "test": "tests/test_agent.py::test_the_pack_reads_the_issue_and_its_pr_as_one_conversation",
+    "only_its_behavior": true,
+    "why": "Pins the existing behavior, as the owner asked."
+   }
+  ],
+  "size": "ok"
+ },
+ "check": {
+  "passed": true,
+  "problems": []
+ },
+ "url": "https://github.com/dokima-dev/dokima/pull/731#issuecomment-6185010117"
+}
