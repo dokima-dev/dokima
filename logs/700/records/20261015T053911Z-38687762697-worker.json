@@ -1,0 +1,30 @@
+{
+ "role": "worker",
+ "stage": null,
+ "run_id": "38687762697",
+ "commit_before": "e60be0ae6a924a4fa173ffbb3237eedce2c52355",
+ "started_by": "dokima-runtime[bot]",
+ "models": [
+  "kimi-code/k3"
+ ],
+ "report": {
+  "turns": 9
+ },
+ "log": "https://github.com/dokima-dev/dokima/blob/logs/logs/700/38687762697-worker.md",
+ "run": "https://github.com/dokima-dev/dokima/actions/runs/38687762697",
+ "handback": {
+  "summary": "No code change: the Codex adapter stands and its tests pass; the red run was a test flake.",
+  "criteria": {
+   "700.1": "`dokima/agent_codex.py` runs `codex exec --model MODEL --full-auto --json PROMPT`, key as `CODEX_API_KEY`, returning Codex's exit code."
+  },
+  "evidence": "`pytest -q tests/test_agent_codex.py`: 3 passed"
+ },
+ "check": {
+  "passed": true,
+  "problems": []
+ },
+ "dropped_by_fence": [],
+ "files_changed": [],
+ "branch": "try/issue-700",
+ "url": "https://github.com/dokima-dev/dokima/pull/728#issuecomment-6185266781"
+}
