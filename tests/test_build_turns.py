@@ -35,6 +35,10 @@ P, A, B, C = 700, 701, 702, 703
 PARENT = f"https://github.com/o/r/issues/{P}"
 SHARED, OWN_A, OWN_B, DOC = "dokima/shared.py", "dokima/a_only.py", "dokima/b_only.py", "rules/flow.md"
 ERROR = "HTTP 502: Server Error (sub_issues)"
+# What the bot puts on a story when its worker starts on autopilot, and the run's live card while the agent works.
+AUTOPILOT_START = "Autopilot: plan approved, starting work"
+LIVE_WORKER = (agent.LIVE + "\n**Worker** · agent working since 2026-10-15 01:00 UTC\n\nThe agent is working; "
+               "[watch it live](https://github.com/o/r/actions/runs/77) on GitHub.\n")
 
 # The fake GitHub of test_plan_links_recorded, with a tree of issues and pull requests on top. Each name it redefines
 # is looked up when called, so its own routes below use these.
@@ -235,6 +239,18 @@ class Tree:
         s["prs"].append({"number": n + 100, "head": f"try/issue-{n}", "state": "OPEN"})
         self.save()
 
+    def running(self, n, files):
+        """#n's plan changes these files and its worker started, still running.
+
+        As on GitHub while a worker runs: the bot's line starting the work and the run's live Worker card are on #n,
+        while its record and its pull request come only once the run ends."""
+        self.planned(n, files)
+        s = self.load()
+        comments = s["issues"][str(n)]["comments"]
+        for body in (AUTOPILOT_START, LIVE_WORKER):
+            comments.append({"author": {"login": pl.BOT}, "body": body, "createdAt": f"2026-10-09T{len(comments) + 1:02d}:00:00Z"})
+        self.save()
+
     def merged(self, n):
         """#n's pull request merged, which closed #n."""
         s = self.load()
@@ -334,7 +350,8 @@ def test_a_story_sharing_a_code_file_builds_only_after_the_other_story_merges(tm
     #701 is building `dokima/shared.py`; #702's approved plan changes it too. On autopilot the approval starts no
     worker and the card's Next line names #701, mentioning no one; the owner's `/work` builds no pack for the worker,
     and says #701. Once #701's pull request merges and #701 closes, autopilot's close run starts #702 again (its
-    planner, so no plan goes stale), and `/work` builds the pack. Beside it, normal cases: #703 shares the file but its
+    planner, so no plan goes stale), and `/work` builds the pack. #701 holds the turn from the moment its worker starts:
+    while that worker still runs, with no record or pull request yet, #702 waits the same way. Beside it, normal cases: #703 shares the file but its
     build never started, so it holds no turn; an issue with no parent builds as usual; and when GitHub cannot list the
     parent's stories nothing builds and the card quotes GitHub's error. Proves 668.1."""
     record_property("proves", "668.1")
@@ -353,6 +370,14 @@ def test_a_story_sharing_a_code_file_builds_only_after_the_other_story_merges(tm
     assert t.dispatches(B, "worker") == [], f"{crit} (merged): #{B}'s old plan was built instead of planned again"
     code, err = t.pack(B, "worker")
     assert code == 0, f"{crit} (merged): `/work` still refused #{B}'s build after #{A} merged: {err[-600:]!r}"
+
+    t = Tree(tmp_path / "running")
+    t.running(A, [SHARED])
+    assert_waits(t, B, A, t.approve(B, [SHARED, OWN_B]), crit, f"#{A}'s worker is still running")
+    code, err = t.pack(B, "worker")
+    assert code != 0, f"{crit} (running): the worker's pack was built while #{A}'s worker is still running"
+    assert f"#{A}" in err.strip().splitlines()[-1], \
+        f"{crit} (running): the reason the build did not start does not name #{A}: {err[-600:]!r}"
 
     t = Tree(tmp_path / "not-started")
     t.planned(C, [SHARED])
