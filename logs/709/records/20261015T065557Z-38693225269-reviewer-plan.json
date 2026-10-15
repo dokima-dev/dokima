@@ -1,0 +1,274 @@
+{
+ "role": "reviewer",
+ "stage": "plan",
+ "run_id": "38693225269",
+ "commit_before": "e17fb85102e67b00a70413f7d8306d0616f1901d",
+ "started_by": "RezaSoleymanifar",
+ "models": [
+  "claude-opus-5-5"
+ ],
+ "report": {
+  "duration_ms": 722202,
+  "turns": 22,
+  "cost_usd": 0.7425134,
+  "tokens_in": 1125529,
+  "tokens_out": 6924
+ },
+ "log": "https://github.com/dokima-dev/dokima/blob/logs/logs/709/38693225269-reviewer-plan.md",
+ "run": "https://github.com/dokima-dev/dokima/actions/runs/38693225269",
+ "handback": {
+  "previous_step": {
+   "did": [
+    "The planner left the plan as it was approved this morning."
+   ],
+   "decided": [
+    "Raises keep their short text and gain a full half.",
+    "A split story's user story and context become short and full pairs."
+   ],
+   "open": []
+  },
+  "verdict": "approve",
+  "summary": "Checked again: every ask has a criterion, and every new test fails today for the right reason.",
+  "raises": [],
+  "answers": [],
+  "asks": [
+   {
+    "ask": "A raise with no short half is rejected, naming the raise.",
+    "source": "https://github.com/dokima-dev/dokima/issues/709",
+    "criterion": "709.1"
+   },
+   {
+    "ask": "A raise with no full half is rejected, naming the raise.",
+    "source": "https://github.com/dokima-dev/dokima/issues/709",
+    "criterion": "709.2"
+   },
+   {
+    "ask": "A split story with no short half is rejected, naming the story.",
+    "source": "https://github.com/dokima-dev/dokima/issues/709",
+    "criterion": "709.3"
+   },
+   {
+    "ask": "A split story with no full half is rejected, naming the story.",
+    "source": "https://github.com/dokima-dev/dokima/issues/709",
+    "criterion": "709.4"
+   },
+   {
+    "ask": "A split story's context with no short half is rejected, naming the story.",
+    "source": "https://github.com/dokima-dev/dokima/issues/709",
+    "criterion": "709.5"
+   },
+   {
+    "ask": "A split story's context with no full half is rejected, naming the story.",
+    "source": "https://github.com/dokima-dev/dokima/issues/709",
+    "criterion": "709.6"
+   },
+   {
+    "ask": "A short half that names code is rejected, naming the text.",
+    "source": "https://github.com/dokima-dev/dokima/issues/709",
+    "criterion": "709.7"
+   },
+   {
+    "ask": "A full half that names code passes the check.",
+    "source": "https://github.com/dokima-dev/dokima/issues/709",
+    "criterion": "709.8"
+   },
+   {
+    "ask": "A full half longer than every word cap passes the check.",
+    "source": "https://github.com/dokima-dev/dokima/issues/709",
+    "criterion": "709.9"
+   },
+   {
+    "ask": "Yes, change the role prompts so agents write both halves.",
+    "source": "https://github.com/dokima-dev/dokima/issues/709#issuecomment-6184903734",
+    "criterion": "709.10"
+   },
+   {
+    "ask": "Yes, short halves are plain words too",
+    "source": "https://github.com/dokima-dev/dokima/issues/709#issuecomment-6184903734",
+    "criterion": "709.7"
+   },
+   {
+    "ask": "code names stay in the full half",
+    "source": "https://github.com/dokima-dev/dokima/issues/709#issuecomment-6184903734",
+    "criterion": "709.8"
+   }
+  ],
+  "behaviors": [
+   {
+    "criterion": "709.1",
+    "one_behavior": true,
+    "why": "One result: the raise is rejected by name."
+   },
+   {
+    "criterion": "709.2",
+    "one_behavior": true,
+    "why": "One result: the raise is rejected by name."
+   },
+   {
+    "criterion": "709.3",
+    "one_behavior": true,
+    "why": "One result: the story is rejected by name."
+   },
+   {
+    "criterion": "709.4",
+    "one_behavior": true,
+    "why": "One result: the story is rejected by name."
+   },
+   {
+    "criterion": "709.5",
+    "one_behavior": true,
+    "why": "One result: the story is rejected by name."
+   },
+   {
+    "criterion": "709.6",
+    "one_behavior": true,
+    "why": "One result: the story is rejected by name."
+   },
+   {
+    "criterion": "709.7",
+    "one_behavior": true,
+    "why": "One rule for every short half; kinds are its cases."
+   },
+   {
+    "criterion": "709.8",
+    "one_behavior": true,
+    "why": "One result: the check passes."
+   },
+   {
+    "criterion": "709.9",
+    "one_behavior": true,
+    "why": "One result: the check passes."
+   },
+   {
+    "criterion": "709.10",
+    "one_behavior": true,
+    "why": "One result: every example passes the new check."
+   },
+   {
+    "criterion": "709.11",
+    "one_behavior": true,
+    "why": "One result: the story shape is written as pairs."
+   }
+  ],
+  "edge_cases": [
+   {
+    "criterion": "709.1",
+    "cut": [],
+    "missing": []
+   },
+   {
+    "criterion": "709.2",
+    "cut": [],
+    "missing": []
+   },
+   {
+    "criterion": "709.3",
+    "cut": [],
+    "missing": []
+   },
+   {
+    "criterion": "709.4",
+    "cut": [],
+    "missing": []
+   },
+   {
+    "criterion": "709.5",
+    "cut": [],
+    "missing": []
+   },
+   {
+    "criterion": "709.6",
+    "cut": [],
+    "missing": []
+   },
+   {
+    "criterion": "709.7",
+    "cut": [],
+    "missing": []
+   },
+   {
+    "criterion": "709.8",
+    "cut": [],
+    "missing": []
+   },
+   {
+    "criterion": "709.9",
+    "cut": [],
+    "missing": []
+   },
+   {
+    "criterion": "709.10",
+    "cut": [],
+    "missing": []
+   },
+   {
+    "criterion": "709.11",
+    "cut": [],
+    "missing": []
+   }
+  ],
+  "tests": [
+   {
+    "test": "tests/test_text_halves.py::test_a_raise_with_no_short_half_is_rejected_naming_it",
+    "only_its_behavior": true,
+    "why": "Good raises pass, then a missing or blank short half is named."
+   },
+   {
+    "test": "tests/test_text_halves.py::test_a_raise_with_no_full_half_is_rejected_naming_it",
+    "only_its_behavior": true,
+    "why": "Good raises pass, then a missing, empty or listed full half is named."
+   },
+   {
+    "test": "tests/test_text_halves.py::test_a_split_story_with_no_short_half_is_rejected_naming_it",
+    "only_its_behavior": true,
+    "why": "Good split passes, then a missing short half names story 2."
+   },
+   {
+    "test": "tests/test_text_halves.py::test_a_split_story_with_no_full_half_is_rejected_naming_it",
+    "only_its_behavior": true,
+    "why": "Good split passes, then a missing full half names story 2."
+   },
+   {
+    "test": "tests/test_text_halves.py::test_a_split_storys_context_with_no_short_half_is_rejected_naming_it",
+    "only_its_behavior": true,
+    "why": "Good split passes, then a missing context short half names story 2."
+   },
+   {
+    "test": "tests/test_text_halves.py::test_a_split_storys_context_with_no_full_half_is_rejected_naming_it",
+    "only_its_behavior": true,
+    "why": "Good split passes, then a missing context full half names story 2."
+   },
+   {
+    "test": "tests/test_text_halves.py::test_a_short_half_that_names_code_is_rejected_naming_the_text",
+    "only_its_behavior": true,
+    "why": "Plain texts pass, then code in each kind's short half is named."
+   },
+   {
+    "test": "tests/test_text_halves.py::test_a_full_half_that_names_code_passes_the_check",
+    "only_its_behavior": true,
+    "why": "Full halves naming code pass both checks."
+   },
+   {
+    "test": "tests/test_text_halves.py::test_a_full_half_longer_than_every_cap_passes_the_check",
+    "only_its_behavior": true,
+    "why": "Full halves of 300 words pass both checks."
+   },
+   {
+    "test": "tests/test_text_halves.py::test_every_example_raise_in_the_role_prompts_passes_the_two_halves_check",
+    "only_its_behavior": true,
+    "why": "Each prompt example needs a full half and plain short text."
+   },
+   {
+    "test": "tests/test_text_halves.py::test_the_planner_prompt_shows_a_split_storys_two_halves",
+    "only_its_behavior": true,
+    "why": "Reads the planner's story shape for both pairs."
+   }
+  ],
+  "size": "ok"
+ },
+ "check": {
+  "passed": true,
+  "problems": []
+ },
+ "url": "https://github.com/dokima-dev/dokima/issues/709#issuecomment-6186061157"
+}
