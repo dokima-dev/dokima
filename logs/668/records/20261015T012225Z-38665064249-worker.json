@@ -1,0 +1,40 @@
+{
+ "role": "worker",
+ "stage": null,
+ "run_id": "38665064249",
+ "commit_before": "43278041a6b1971b0ccb0adab4d8182dcdfaa763",
+ "started_by": "dokima-runtime[bot]",
+ "models": [
+  "claude-opus-5-5"
+ ],
+ "report": {
+  "duration_ms": 95716,
+  "turns": 12,
+  "cost_usd": 0.5094806,
+  "tokens_in": 481927,
+  "tokens_out": 5136
+ },
+ "log": "https://github.com/dokima-dev/dokima/blob/logs/logs/668/38665064249-worker.md",
+ "run": "https://github.com/dokima-dev/dokima/actions/runs/38665064249",
+ "handback": {
+  "summary": "A story now holds its build turn from the moment its worker starts, not only once it ends.",
+  "criteria": {
+   "668.1": "`dokima/turns.py` `holder` finds a sibling building: worker started, worker record or open pull request, until merged.",
+   "668.2": "Only the worker's start and the worker's pack check turns; planner and plan review are unchanged.",
+   "668.3": "`turns.plan_code_files` uses `planner.code_files`, which drops markdown files.",
+   "668.4": "Unchanged: every pull request still opens into main; the existing test pins it.",
+   "668.5": "Turns compare each story's own newest plan's files, not the split's assigned files."
+  },
+  "evidence": "`pytest -q tests/test_build_turns.py tests/test_worker_pr.py`: 6 passed"
+ },
+ "check": {
+  "passed": true,
+  "problems": []
+ },
+ "dropped_by_fence": [],
+ "files_changed": [
+  "dokima/turns.py"
+ ],
+ "branch": "try/issue-668",
+ "url": "https://github.com/dokima-dev/dokima/pull/701#issuecomment-6182170042"
+}
