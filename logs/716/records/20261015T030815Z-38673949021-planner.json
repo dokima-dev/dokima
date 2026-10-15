@@ -1,0 +1,68 @@
+{
+ "role": "planner",
+ "stage": null,
+ "run_id": "38673949021",
+ "commit_before": "cfb11e4519569d5ea3fdade9e1ce41dad37b38bd",
+ "started_by": "dokima-runtime[bot]",
+ "models": [
+  "claude-opus-5-5"
+ ],
+ "report": {
+  "duration_ms": 417318,
+  "turns": 25,
+  "cost_usd": 0.8953514,
+  "tokens_in": 1161783,
+  "tokens_out": 13088
+ },
+ "log": "https://github.com/dokima-dev/dokima/blob/logs/logs/716/38673949021-planner.md",
+ "run": "https://github.com/dokima-dev/dokima/actions/runs/38673949021",
+ "handback": {
+  "kind": "user_story",
+  "title": "All tests run on the owner's commits",
+  "summary": "Pins that the owner's pushes to a Dokima pull request run all tests, like agent pushes.",
+  "user_story": "The owner's pushes to a Dokima pull request get the same all tests check as agent work.",
+  "acceptance_criteria": [
+   {
+    "text": "A push by the owner to a Dokima pull request runs all tests, with no rule skipping the owner.",
+    "words": "My work goes through the same reviews and checks as agent work.",
+    "source": "https://github.com/dokima-dev/dokima/issues/559",
+    "files": [
+     ".github/workflows/full-suite.yml"
+    ],
+    "no_edge_cases": "One push, one pusher; the bot's same push is checked beside it as the good case."
+   }
+  ],
+  "non_functional": [],
+  "tests": {
+   "716.1": [
+    "tests/test_checks.py::test_full_suite_runs_every_test_on_every_pull_request"
+   ]
+  },
+  "test_changes": {
+   "tests/test_checks.py::test_full_suite_runs_every_test_on_every_pull_request": "Already true, so a new test would pass today; this older check now pins it."
+  },
+  "links": {
+   "blocked_by": [],
+   "blocks": [],
+   "relates_to": [
+    715
+   ]
+  },
+  "raises": [
+   {
+    "kind": "issue",
+    "label": "No way to pin",
+    "text": "The plan check rejects any new test that passes today, so a behavior already true cannot get its own test.",
+    "evidence": "`dokima/planner.py`, `passing_today()`; a new test pinning 716.1 was rejected.",
+    "raised_by": "planner",
+    "id": "P1"
+   }
+  ],
+  "answers": []
+ },
+ "check": {
+  "passed": true,
+  "problems": []
+ },
+ "url": "https://github.com/dokima-dev/dokima/issues/716#issuecomment-6183402422"
+}
