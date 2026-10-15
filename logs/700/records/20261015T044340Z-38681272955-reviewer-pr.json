@@ -1,0 +1,73 @@
+{
+ "role": "reviewer",
+ "stage": "pr",
+ "run_id": "38681272955",
+ "commit_before": "57b5d5c247fc14879195175bca0e8a2cc7d4b089",
+ "started_by": "dokima-runtime[bot]",
+ "models": [
+  "claude-opus-5-5"
+ ],
+ "report": {
+  "duration_ms": 811370,
+  "turns": 14,
+  "cost_usd": 0.4590712,
+  "tokens_in": 541087,
+  "tokens_out": 4752
+ },
+ "log": "https://github.com/dokima-dev/dokima/blob/logs/logs/700/38681272955-reviewer-pr.md",
+ "run": "https://github.com/dokima-dev/dokima/actions/runs/38681272955",
+ "handback": {
+  "previous_step": {
+   "did": [
+    "The worker added a Codex adapter that starts Codex CLI with the role's model.",
+    "The worker passes the run's key to Codex and returns Codex's exit code."
+   ],
+   "decided": [
+    "A Codex run may change files, so a worker on Codex can build."
+   ],
+   "open": []
+  },
+  "verdict": "approve",
+  "summary": "The Codex adapter delivers the one criterion, its three tests pass on the branch and fail on main.",
+  "raises": [],
+  "answers": [],
+  "asks": [],
+  "behaviors": [
+   {
+    "criterion": "700.1",
+    "one_behavior": true,
+    "why": "One action, starting a Codex role, with one result: Codex runs on that model."
+   }
+  ],
+  "edge_cases": [
+   {
+    "criterion": "700.1",
+    "cut": [],
+    "missing": []
+   }
+  ],
+  "tests": [
+   {
+    "test": "tests/test_agent_codex.py::test_a_codex_role_runs_in_codex_cli_with_its_model",
+    "only_its_behavior": true,
+    "why": "Checks Codex starts once, unattended, with the prompt, model and key."
+   },
+   {
+    "test": "tests/test_agent_codex.py::test_a_codex_run_may_change_files",
+    "only_its_behavior": true,
+    "why": "Checks Codex is started with write access."
+   },
+   {
+    "test": "tests/test_agent_codex.py::test_a_failed_codex_run_fails_the_run",
+    "only_its_behavior": true,
+    "why": "Checks a failed Codex run ends with its own exit code."
+   }
+  ],
+  "size": "ok"
+ },
+ "check": {
+  "passed": true,
+  "problems": []
+ },
+ "url": "https://github.com/dokima-dev/dokima/pull/728#issuecomment-6184371918"
+}
