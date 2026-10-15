@@ -1,0 +1,38 @@
+{
+ "role": "worker",
+ "stage": null,
+ "run_id": "38666513921",
+ "commit_before": "718d60f784439073698e00f389b556bf51bbc600",
+ "started_by": "dokima-runtime[bot]",
+ "models": [
+  "claude-opus-5-5"
+ ],
+ "report": {
+  "duration_ms": 567146,
+  "turns": 15,
+  "cost_usd": 0.5227668000000001,
+  "tokens_in": 628129,
+  "tokens_out": 4015
+ },
+ "log": "https://github.com/dokima-dev/dokima/blob/logs/logs/668/38666513921-worker.md",
+ "run": "https://github.com/dokima-dev/dokima/actions/runs/38666513921",
+ "handback": {
+  "summary": "No code change: the full suite passes here, so the merge gate failure could not be reproduced.",
+  "criteria": {
+   "668.1": "`dokima/turns.py` `holder` finds a sibling building: worker started, worker record or open pull request, until merged.",
+   "668.2": "Only the worker's start and the worker's pack check turns; planner and plan review are unchanged.",
+   "668.3": "`turns.plan_code_files` uses `planner.code_files`, which drops markdown files.",
+   "668.4": "Unchanged: every pull request still opens into main; the existing test pins it.",
+   "668.5": "Turns compare each story's own newest plan's files, not the split's assigned files."
+  },
+  "evidence": "`pytest -q -p no:cacheprovider -n auto tests`: 1208 passed in 194.42s"
+ },
+ "check": {
+  "passed": true,
+  "problems": []
+ },
+ "dropped_by_fence": [],
+ "files_changed": [],
+ "branch": "try/issue-668",
+ "url": "https://github.com/dokima-dev/dokima/pull/701#issuecomment-6182366549"
+}
