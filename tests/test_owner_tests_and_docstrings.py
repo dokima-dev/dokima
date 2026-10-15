@@ -106,6 +106,14 @@ def repo(tmp_path, monkeypatch):
             pytest.fail(f"{crit}: the check crashed with {type(e).__name__}: {e}, instead of rejecting with a reason")
         rejected = out / "rejected.txt"
         return rc, (rejected.read_text().split("; ") if rejected.exists() else [])
+
+    def owner(text):
+        """Commit the owner's new version of their test and start the run after it."""
+        (root / "tests" / "test_owner.py").write_text(text)
+        git("add", "-A")
+        git("-c", "user.name=Owner", "-c", "user.email=owner@example.com", "commit", "-qm", "owner: my test again")
+        monkeypatch.setenv("PLANNER_RUN_BASE", git("rev-parse", "HEAD").strip())
+    run.owner = owner
     return run
 
 
@@ -125,13 +133,16 @@ def test_a_plan_that_changes_the_owners_test_is_rejected_naming_it(record_proper
     Verified by: running the real plan check on a temp branch after editing the owner's test.
 
     Agent: Proves 707.1. First checks the good plan, which leaves `tests/test_owner.py` as the owner committed it,
-    passes. Then the planner rewrites the owner's test body (a different assertion message) and still files it under
-    9.1; the check must fail with a problem that names `test_owner_id` and says it was changed.
+    passes. Then the planner rewrites the owner's test body (a different assertion message), still files it under
+    9.1 and gives a reason in test_changes, which unlocks an older test but never the owner's; the check must fail
+    with a problem that names `test_owner_id` and says it was changed.
     """
     record_property("proves", "707.1")
     good(repo, "707.1")
     changed = FILE_DOC + fn_src("test_owner_id", "9.1", body='    assert False, "9.1: rewritten by the planner"\n')
-    rc, why = repo({"tests/test_jobs.py": PLANNER_FILE, "tests/test_owner.py": changed}, PLAN, "707.1")
+    plan = json.loads(json.dumps(PLAN))
+    plan["test_changes"] = {OWNER_TEST: "the planner thinks its own wording is clearer"}
+    rc, why = repo({"tests/test_jobs.py": PLANNER_FILE, "tests/test_owner.py": changed}, plan, "707.1")
     assert rc == 1, "707.1: a plan that changes a test the owner committed was accepted"
     assert naming(why, "test_owner_id", "chang"), \
         f"707.1: no problem names the owner's test test_owner_id and says the plan changed it: {why!r}"
@@ -142,13 +153,15 @@ def test_a_plan_that_deletes_the_owners_test_is_rejected_naming_it(record_proper
     Verified by: running the real plan check on a temp branch after removing the owner's test.
 
     Agent: Proves 707.2. First checks the good plan passes. Then the planner deletes `test_owner_id` from
-    `tests/test_owner.py`, proving 9.1 with its own new test instead, so nothing else is wrong; the check must fail with
-    a problem that names `test_owner_id` and says it was deleted.
+    `tests/test_owner.py`, proving 9.1 with its own new test instead, and gives a reason in test_changes, which unlocks
+    an older test but never the owner's; the check must fail with a problem that names `test_owner_id` and says it was
+    deleted.
     """
     record_property("proves", "707.2")
     good(repo, "707.2")
     plan = json.loads(json.dumps(PLAN))
     plan["tests"]["9.1"] = ["tests/test_jobs.py::test_id"]
+    plan["test_changes"] = {OWNER_TEST: "the planner's own test covers it"}
     files = {"tests/test_jobs.py": PLANNER_FILE + fn_src("test_id", "9.1"), "tests/test_owner.py": FILE_DOC}
     rc, why = repo(files, plan, "707.2")
     assert rc == 1, "707.2: a plan that deletes a test the owner committed was accepted"
@@ -364,18 +377,76 @@ def test_any_plain_sentence_passes_as_a_verified_by_line(record_property, repo):
     """User: Any plain sentence passes as a Verified by line, with no test kinds.
     Verified by: running the real plan check on Verified by lines written in several unrelated ways.
 
-    Agent: Proves 707.14. First checks the shape check is live: a test with no Verified by line is rejected naming it.
+    Agent: Proves 707.16. First checks the shape check is live: a test with no Verified by line is rejected naming it.
     Then, one at a time, `test_unique` carries a Verified by line from a different kind of repo (a web page, a data
     job, a phone app, a hand check); none uses a fixed category word. Each plan must pass with no reason.
     """
-    record_property("proves", "707.14")
-    rc, why = repo({"tests/test_jobs.py": FILE_DOC + fn_src("test_unique", "9.2", doc(verified=None))}, PLAN, "707.14")
+    record_property("proves", "707.16")
+    rc, why = repo({"tests/test_jobs.py": FILE_DOC + fn_src("test_unique", "9.2", doc(verified=None))}, PLAN, "707.16")
     assert rc == 1 and naming(why, "test_unique", "Verified by"), \
-        f"707.14: setup: a test with no Verified by line was not rejected naming it, so the shape check is not live: {why!r}"
+        f"707.16: setup: a test with no Verified by line was not rejected naming it, so the shape check is not live: {why!r}"
     for line in ("loading the sign-up page in a headless browser and reading the error it shows.",
                  "feeding last month's sales file through the nightly job and comparing totals.",
                  "tapping through the app on a simulated phone",
                  "Someone reads the report by hand."):
         rc, why = repo({"tests/test_jobs.py": FILE_DOC + fn_src("test_unique", "9.2", doc(verified=line))},
-                       PLAN, "707.14")
-        assert rc == 0 and not why, f"707.14: the plain Verified by line {line!r} was rejected: {why!r}"
+                       PLAN, "707.16")
+        assert rc == 0 and not why, f"707.16: the plain Verified by line {line!r} was rejected: {why!r}"
+
+
+
+def owner_question(test):
+    """A question for the owner, naming the owner's test in its evidence.
+
+    The text of a raise may not name code, so the test's path::name sits in the evidence.
+    """
+    return {"kind": "question", "to": "owner", "label": "Your test misses",
+            "text": "Your test of the job id misses the bar. Will you fix it? The plan keeps it as is.",
+            "evidence": f"`{test}`, as the owner committed it."}
+
+
+def owner_misses_bar(repo, crit, what, owner_file):
+    """Check the owner's test missing the bar needs a question for the owner.
+
+    The owner commits `owner_file` in place of their good test. With no question the check must fail naming
+    `test_owner_id`; with a question for the owner naming it, the same plan, owner's test untouched, must pass.
+    """
+    good(repo, crit)
+    repo.owner(owner_file)
+    rc, why = repo({"tests/test_jobs.py": PLANNER_FILE}, PLAN, crit)
+    assert rc == 1, f"{crit}: the owner's test {what}, and a plan raising no question about it was accepted"
+    assert naming(why, "test_owner_id"), f"{crit}: no problem names the owner's test test_owner_id, which {what}: {why!r}"
+    plan = dict(json.loads(json.dumps(PLAN)), raises=[owner_question(OWNER_TEST)])
+    rc, why = repo({"tests/test_jobs.py": PLANNER_FILE}, plan, crit)
+    assert rc == 0 and not why, \
+        f"{crit}: the owner's test {what}, and a plan raising it to the owner as a question was still rejected: {why!r}"
+
+
+def test_the_owners_test_missing_the_docstring_shape_is_raised_to_the_owner(record_property, repo):
+    """User: The owner's test missing the docstring shape goes to the owner as a question.
+    Verified by: running the real plan check after the owner commits a test with no User line.
+
+    Agent: Proves 707.14. Uses `owner_misses_bar`: the owner commits `test_owner_id` with an old one-line docstring,
+    no User, Verified by or Agent part, naming 9.1 below its first line and still failing today, so only the shape
+    is missing. A plan with no question for the owner naming it must be
+    rejected naming `test_owner_id`; the same plan carrying such a question in raises must pass, since no agent may
+    edit the owner's test.
+    """
+    record_property("proves", "707.14")
+    old_shape = '    """The owner\'s own test of the job id.\n\n    Proves 9.1.\n    """\n'
+    owner_misses_bar(repo, "707.14", "misses the docstring shape",
+                     FILE_DOC + fn_src("test_owner_id", "9.1", old_shape))
+
+
+def test_the_owners_test_that_passes_today_is_raised_to_the_owner(record_property, repo):
+    """User: The owner's test that already passes goes to the owner as a question.
+    Verified by: running the real plan check after the owner commits a test that passes today.
+
+    Agent: Proves 707.15. Uses `owner_misses_bar`: the owner commits `test_owner_id` in the good docstring shape
+    whose body passes on today's code (`assert True`). A plan with no question for the owner naming it must be
+    rejected naming `test_owner_id`; the same plan carrying such a question in raises must pass, since no agent may
+    edit the owner's test.
+    """
+    record_property("proves", "707.15")
+    owner_misses_bar(repo, "707.15", "passes today",
+                     FILE_DOC + fn_src("test_owner_id", "9.1", body="    assert True\n"))
