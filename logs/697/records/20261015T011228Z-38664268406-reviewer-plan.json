@@ -1,0 +1,196 @@
+{
+ "role": "reviewer",
+ "stage": "plan",
+ "run_id": "38664268406",
+ "commit_before": "b8da839aa7c8673321f5306120ba78200e652521",
+ "started_by": "dokima-runtime[bot]",
+ "models": [
+  "claude-opus-5-5"
+ ],
+ "report": {
+  "duration_ms": 30897,
+  "turns": 5,
+  "cost_usd": 0.3570772,
+  "tokens_in": 192642,
+  "tokens_out": 2866
+ },
+ "log": "https://github.com/dokima-dev/dokima/blob/logs/logs/697/38664268406-reviewer-plan.md",
+ "run": "https://github.com/dokima-dev/dokima/actions/runs/38664268406",
+ "handback": {
+  "previous_step": {
+   "did": [
+    "The planner moved the role check from the subscription test into a new roles test.",
+    "All eleven tests fail today because the setup command does not exist yet."
+   ],
+   "decided": [
+    "Keeping earlier roles when a second subscription is added is now a roles edge case."
+   ],
+   "open": [
+    "Nothing was raised for the owner."
+   ]
+  },
+  "verdict": "approve",
+  "summary": "Each of the six criteria now has tests that check only its own behavior; the plan is ready to build.",
+  "raises": [],
+  "answers": [],
+  "asks": [
+   {
+    "ask": "grabbing the inputs a user needs for a subscription (membership, region, sign-in or key, model)",
+    "source": "https://github.com/dokima-dev/dokima/issues/696#issuecomment-6181290061",
+    "criterion": "697.1"
+   },
+   {
+    "ask": "sign-in or key, model) and putting them in place (key)",
+    "source": "https://github.com/dokima-dev/dokima/issues/696#issuecomment-6181290061",
+    "criterion": "697.2"
+   },
+   {
+    "ask": "`subscriptions` (agent, key)",
+    "source": "https://github.com/dokima-dev/dokima/issues/696#issuecomment-6181290061",
+    "criterion": "697.3"
+   },
+   {
+    "ask": "signed in with `kimi login --region global`",
+    "source": "https://github.com/dokima-dev/dokima/issues/696#issuecomment-6181290061",
+    "criterion": "697.4"
+   },
+   {
+    "ask": "region, sign-in or key, model) and putting them in place (sign-in)",
+    "source": "https://github.com/dokima-dev/dokima/issues/696#issuecomment-6181290061",
+    "criterion": "697.5"
+   },
+   {
+    "ask": "`roles` (planner, worker, reviewer: which subscription and model)",
+    "source": "https://github.com/dokima-dev/dokima/issues/696#issuecomment-6181290061",
+    "criterion": "697.6"
+   }
+  ],
+  "behaviors": [
+   {
+    "criterion": "697.1",
+    "one_behavior": true,
+    "why": "One listing of the four inputs."
+   },
+   {
+    "criterion": "697.2",
+    "one_behavior": true,
+    "why": "One action: the key becomes a named secret."
+   },
+   {
+    "criterion": "697.3",
+    "one_behavior": true,
+    "why": "One record: what the file holds for a subscription."
+   },
+   {
+    "criterion": "697.4",
+    "one_behavior": true,
+    "why": "One action: run the agent's login with the region."
+   },
+   {
+    "criterion": "697.5",
+    "one_behavior": true,
+    "why": "One action: saved sign-in files become one secret."
+   },
+   {
+    "criterion": "697.6",
+    "one_behavior": true,
+    "why": "One record: each named role gets subscription and model."
+   }
+  ],
+  "edge_cases": [
+   {
+    "criterion": "697.1",
+    "cut": [],
+    "missing": []
+   },
+   {
+    "criterion": "697.2",
+    "cut": [],
+    "missing": []
+   },
+   {
+    "criterion": "697.3",
+    "cut": [],
+    "missing": []
+   },
+   {
+    "criterion": "697.4",
+    "cut": [],
+    "missing": []
+   },
+   {
+    "criterion": "697.5",
+    "cut": [],
+    "missing": []
+   },
+   {
+    "criterion": "697.6",
+    "cut": [],
+    "missing": []
+   }
+  ],
+  "tests": [
+   {
+    "test": "tests/test_setup.py::test_lists_inputs",
+    "only_its_behavior": true,
+    "why": "Runs the command and checks each input is named."
+   },
+   {
+    "test": "tests/test_setup.py::test_key_stored_as_secret",
+    "only_its_behavior": true,
+    "why": "Checks the secret holds exactly the given key."
+   },
+   {
+    "test": "tests/test_setup.py::test_empty_key_stores_nothing",
+    "only_its_behavior": true,
+    "why": "Refusal paired with a good key control."
+   },
+   {
+    "test": "tests/test_setup.py::test_secret_refused_fails",
+    "only_its_behavior": true,
+    "why": "GitHub refusal must fail and name the secret."
+   },
+   {
+    "test": "tests/test_setup.py::test_settings_name_key_secret",
+    "only_its_behavior": true,
+    "why": "Checks agent and secret name, and no key."
+   },
+   {
+    "test": "tests/test_setup.py::test_settings_keep_other_subscription",
+    "only_its_behavior": true,
+    "why": "Now checks only both subscriptions survive."
+   },
+   {
+    "test": "tests/test_setup.py::test_sign_in_uses_region",
+    "only_its_behavior": true,
+    "why": "Checks the login ran with the given region."
+   },
+   {
+    "test": "tests/test_setup.py::test_sign_in_stored_as_secret",
+    "only_its_behavior": true,
+    "why": "Unpacks the secret and compares the saved files."
+   },
+   {
+    "test": "tests/test_setup.py::test_failed_sign_in_stores_nothing",
+    "only_its_behavior": true,
+    "why": "Failed login must fail and store no secret."
+   },
+   {
+    "test": "tests/test_setup.py::test_settings_give_roles",
+    "only_its_behavior": true,
+    "why": "Checks both named roles get subscription and model."
+   },
+   {
+    "test": "tests/test_setup.py::test_settings_keep_other_roles",
+    "only_its_behavior": true,
+    "why": "Checks the first role survives a second add."
+   }
+  ],
+  "size": "ok"
+ },
+ "check": {
+  "passed": true,
+  "problems": []
+ },
+ "url": "https://github.com/dokima-dev/dokima/issues/697#issuecomment-6182062864"
+}
