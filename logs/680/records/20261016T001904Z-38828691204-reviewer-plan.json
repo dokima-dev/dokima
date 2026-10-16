@@ -1,0 +1,89 @@
+{
+ "role": "reviewer",
+ "stage": "plan",
+ "run_id": "38828691204",
+ "commit_before": "504d3c47fd4c3152cc38bf57fdd98241993b4aca",
+ "started_by": "dokima-runtime[bot]",
+ "models": [
+  "claude-opus-5-5"
+ ],
+ "report": {
+  "duration_ms": 25706,
+  "turns": 6,
+  "cost_usd": 0.255935,
+  "tokens_in": 183500,
+  "tokens_out": 2585
+ },
+ "log": "https://github.com/dokima-dev/dokima/blob/logs/logs/680/38828691204-reviewer-plan.md",
+ "run": "https://github.com/dokima-dev/dokima/actions/runs/38828691204",
+ "handback": {
+  "previous_step": {
+   "did": [
+    "The planner wrote two criteria: a secret across the input cut, and the result cut.",
+    "The planner wrote one test for each, placing a 40-character token across the cut."
+   ],
+   "decided": [
+    "Secrets are removed before the cut, and the cut lengths stay the same."
+   ],
+   "open": []
+  },
+  "verdict": "approve",
+  "summary": "The plan covers both cuts the owner named, and each test fails today for the right reason.",
+  "raises": [],
+  "answers": [],
+  "asks": [
+   {
+    "ask": "cuts tool input and results to 2000 and 1500 characters before secrets are removed. A token cut in half no longer matches and its start gets published. Reproduced with a 40-character token. Remove secrets first, then cut.",
+    "source": "https://github.com/dokima-dev/dokima/issues/680",
+    "criterion": "680.1"
+   },
+   {
+    "ask": "cuts tool input and results to 2000 and 1500 characters before secrets are removed. A token cut in half no longer matches and its start gets published. Remove secrets first, then cut.",
+    "source": "https://github.com/dokima-dev/dokima/issues/680",
+    "criterion": "680.2"
+   }
+  ],
+  "behaviors": [
+   {
+    "criterion": "680.1",
+    "one_behavior": true,
+    "why": "One cut, tool input; one result, no part of the secret shows."
+   },
+   {
+    "criterion": "680.2",
+    "one_behavior": true,
+    "why": "One cut, tool result; one result, no part of the secret shows."
+   }
+  ],
+  "edge_cases": [
+   {
+    "criterion": "680.1",
+    "cut": [],
+    "missing": []
+   },
+   {
+    "criterion": "680.2",
+    "cut": [],
+    "missing": []
+   }
+  ],
+  "tests": [
+   {
+    "test": "tests/test_transcript_cut.py::test_a_secret_across_the_tool_input_cut_shows_none_of_its_start",
+    "only_its_behavior": true,
+    "why": "Fails today showing the token's start; passes once secrets go first; also checks the cut still holds."
+   },
+   {
+    "test": "tests/test_transcript_cut.py::test_a_secret_across_the_tool_result_cut_shows_none_of_its_start",
+    "only_its_behavior": true,
+    "why": "Fails today showing the token's start; passes once secrets go first; also checks the cut still holds."
+   }
+  ],
+  "size": "ok"
+ },
+ "check": {
+  "passed": true,
+  "problems": []
+ },
+ "url": "https://github.com/dokima-dev/dokima/issues/680#issuecomment-6205065068"
+}
