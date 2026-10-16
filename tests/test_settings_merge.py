@@ -56,7 +56,7 @@ def name(entry):
 
 
 def probe_package(tmp_path, text):
-    """A copy of Dokima whose defaults file holds TEXT; the folder to put on Python's path."""
+    """A copy of Dokima whose defaults file holds TEXT; returns the folder for Python's path."""
     pkg = tmp_path / "pkg"
     shutil.copytree(os.path.join(ROOT, "dokima"), pkg / "dokima",
                     ignore=shutil.ignore_patterns("__pycache__", "icons", "roles"))
