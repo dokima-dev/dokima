@@ -1,0 +1,167 @@
+{
+ "role": "reviewer",
+ "stage": "plan",
+ "run_id": "38833111858",
+ "commit_before": "0704cf6805e80260d5f1a5eaca427f3f4eae822a",
+ "started_by": "dokima-runtime[bot]",
+ "models": [
+  "claude-opus-5-5"
+ ],
+ "report": {
+  "duration_ms": 744108,
+  "turns": 12,
+  "cost_usd": 0.5712308,
+  "tokens_in": 511919,
+  "tokens_out": 7190
+ },
+ "log": "https://github.com/dokima-dev/dokima/blob/logs/logs/761/38833111858-reviewer-plan.md",
+ "run": "https://github.com/dokima-dev/dokima/actions/runs/38833111858",
+ "handback": {
+  "previous_step": {
+   "did": [
+    "Wrote five tests, one per criterion; all five fail today.",
+    "Deleted nine old tests that only checked the old steps, and trimmed four more."
+   ],
+   "decided": [
+    "Asking for a deleted step now counts as done when nothing is posted."
+   ],
+   "open": [
+    "Asks the owner whether the test for deleted tests may wait on the code going."
+   ]
+  },
+  "verdict": "block",
+  "summary": "Four criteria are well proven; the last test re-checks two other criteria instead of its own.",
+  "raises": [
+   {
+    "kind": "blocker",
+    "to": "planner",
+    "label": "761.5 test overlaps",
+    "text": "The 761.5 test fails today only by re-checking 761.3 and 761.4. Fix: drop that check; mark 761.5 manual, since the plan itself deletes the tests.",
+    "evidence": "`tests/test_planner_old_steps.py::test_no_test_reaches_the_old_steps` fails only on `left == []`, the same `hasattr` as `test_the_plan_writer_is_gone`.",
+    "raised_by": "reviewer",
+    "id": "R1"
+   }
+  ],
+  "answers": [
+   {
+    "raise": "P1",
+    "answer": "disagree",
+    "why": "No need to ask the owner: the deleting is done in the plan itself, so 761.5 can be marked manual."
+   }
+  ],
+  "asks": [
+   {
+    "ask": "The planner's old post step is deleted.",
+    "source": "https://github.com/dokima-dev/dokima/issues/739",
+    "criterion": "761.1"
+   },
+   {
+    "ask": "The planner's old reject step is deleted.",
+    "source": "https://github.com/dokima-dev/dokima/issues/739",
+    "criterion": "761.2"
+   },
+   {
+    "ask": "The old writer of a plan into the issue's text is deleted.",
+    "source": "https://github.com/dokima-dev/dokima/issues/739",
+    "criterion": "761.3"
+   },
+   {
+    "ask": "The old plan text builder is deleted.",
+    "source": "https://github.com/dokima-dev/dokima/issues/739",
+    "criterion": "761.4"
+   },
+   {
+    "ask": "Tests that only check the deleted code are deleted too.",
+    "source": "https://github.com/dokima-dev/dokima/issues/739",
+    "criterion": "761.5"
+   }
+  ],
+  "behaviors": [
+   {
+    "criterion": "761.1",
+    "one_behavior": true,
+    "why": "One action, posting a plan, and one result, nothing posted."
+   },
+   {
+    "criterion": "761.2",
+    "one_behavior": true,
+    "why": "One action, reporting a rejection, and one result, nothing posted."
+   },
+   {
+    "criterion": "761.3",
+    "one_behavior": true,
+    "why": "One piece of code gone."
+   },
+   {
+    "criterion": "761.4",
+    "one_behavior": true,
+    "why": "One piece of code gone."
+   },
+   {
+    "criterion": "761.5",
+    "one_behavior": true,
+    "why": "One result: no test left calling the deleted code."
+   }
+  ],
+  "edge_cases": [
+   {
+    "criterion": "761.1",
+    "cut": [],
+    "missing": []
+   },
+   {
+    "criterion": "761.2",
+    "cut": [],
+    "missing": []
+   },
+   {
+    "criterion": "761.3",
+    "cut": [],
+    "missing": []
+   },
+   {
+    "criterion": "761.4",
+    "cut": [],
+    "missing": []
+   },
+   {
+    "criterion": "761.5",
+    "cut": [],
+    "missing": []
+   }
+  ],
+  "tests": [
+   {
+    "test": "tests/test_planner_old_steps.py::test_the_post_step_posts_nothing",
+    "only_its_behavior": true,
+    "why": "Runs the real command with a logging fake gh; fails today on the posted split."
+   },
+   {
+    "test": "tests/test_planner_old_steps.py::test_the_reject_step_posts_nothing",
+    "only_its_behavior": true,
+    "why": "Runs the real command; fails today on the posted rejection."
+   },
+   {
+    "test": "tests/test_planner_old_steps.py::test_the_plan_writer_is_gone",
+    "only_its_behavior": true,
+    "why": "Fails today because the writer is still there."
+   },
+   {
+    "test": "tests/test_planner_old_steps.py::test_the_plan_text_builder_is_gone",
+    "only_its_behavior": true,
+    "why": "Fails today because the builder is still there."
+   },
+   {
+    "test": "tests/test_planner_old_steps.py::test_no_test_reaches_the_old_steps",
+    "only_its_behavior": false,
+    "why": "Its only failing check today re-proves 761.3 and 761.4."
+   }
+  ],
+  "size": "The test for 761.5 checks the behavior of 761.3 and 761.4."
+ },
+ "check": {
+  "passed": true,
+  "problems": []
+ },
+ "url": "https://github.com/dokima-dev/dokima/issues/761#issuecomment-6205648173"
+}
