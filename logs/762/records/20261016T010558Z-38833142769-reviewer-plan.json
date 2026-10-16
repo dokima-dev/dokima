@@ -1,0 +1,89 @@
+{
+ "role": "reviewer",
+ "stage": "plan",
+ "run_id": "38833142769",
+ "commit_before": "a8cc57c28e3c2220e71b52c71c3dd17cc0e252f6",
+ "started_by": "dokima-runtime[bot]",
+ "models": [
+  "claude-opus-5-5"
+ ],
+ "report": {
+  "duration_ms": 28890,
+  "turns": 7,
+  "cost_usd": 0.31132980000000005,
+  "tokens_in": 236170,
+  "tokens_out": 2802
+ },
+ "log": "https://github.com/dokima-dev/dokima/blob/logs/logs/762/38833142769-reviewer-plan.md",
+ "run": "https://github.com/dokima-dev/dokima/actions/runs/38833142769",
+ "handback": {
+  "previous_step": {
+   "did": [
+    "The planner wrote two criteria, one test each, and both fail today.",
+    "The planner deleted the old reader's one test and moved two tests off it."
+   ],
+   "decided": [
+    "The fence takes its scope only from the plan file."
+   ],
+   "open": []
+  },
+  "verdict": "approve",
+  "summary": "The plan carries both asks of story three, and each test fails today for the right reason.",
+  "raises": [],
+  "answers": [],
+  "asks": [
+   {
+    "ask": "`dokima/fence.py:17-30` and the `scope_of` branch at `:80`: reads Scope from issue text; agent.yml always passes plan.json.",
+    "source": "https://github.com/dokima-dev/dokima/issues/739",
+    "criterion": "762.1"
+   },
+   {
+    "ask": "Delete it, plus the tests that only exercise it.",
+    "source": "https://github.com/dokima-dev/dokima/issues/739",
+    "criterion": "762.2"
+   }
+  ],
+  "behaviors": [
+   {
+    "criterion": "762.1",
+    "one_behavior": true,
+    "why": "One result: the issue's text no longer sets the fence's scope."
+   },
+   {
+    "criterion": "762.2",
+    "one_behavior": true,
+    "why": "One result: no test of the deleted reader is left."
+   }
+  ],
+  "edge_cases": [
+   {
+    "criterion": "762.1",
+    "cut": [],
+    "missing": []
+   },
+   {
+    "criterion": "762.2",
+    "cut": [],
+    "missing": []
+   }
+  ],
+  "tests": [
+   {
+    "test": "tests/test_fence_plan_only.py::test_the_fence_ignores_a_scope_in_the_issue_text",
+    "only_its_behavior": true,
+    "why": "Runs the fence on issue text, fails today as it keeps the change; plan file still works."
+   },
+   {
+    "test": "tests/test_fence_plan_only.py::test_the_issue_text_reader_and_its_tests_are_gone",
+    "only_its_behavior": true,
+    "why": "Fails today naming the fence file; passes only once no code or test names the reader."
+   }
+  ],
+  "size": "ok"
+ },
+ "check": {
+  "passed": true,
+  "problems": []
+ },
+ "url": "https://github.com/dokima-dev/dokima/issues/762#issuecomment-6205652033"
+}
