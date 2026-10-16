@@ -1,0 +1,64 @@
+{
+ "role": "reviewer",
+ "stage": "pr",
+ "run_id": "38829280354",
+ "commit_before": "a0227db60da5c712ee8c4e39e8f9e08d9c1e127a",
+ "started_by": "dokima-runtime[bot]",
+ "models": [
+  "claude-opus-5-5"
+ ],
+ "report": {
+  "duration_ms": 111972,
+  "turns": 14,
+  "cost_usd": 0.5245282,
+  "tokens_in": 576855,
+  "tokens_out": 5872
+ },
+ "log": "https://github.com/dokima-dev/dokima/blob/logs/logs/620/38829280354-reviewer-pr.md",
+ "run": "https://github.com/dokima-dev/dokima/actions/runs/38829280354",
+ "handback": {
+  "previous_step": {
+   "did": [
+    "When GitHub refuses a re-run after approval, the pull request turns back into a draft.",
+    "The merge gate then readies it, so every check starts again on the approved plan.",
+    "The refusal comment now says it is a draft again, or why not."
+   ],
+   "decided": [
+    "Any refusal, not only a missing permission, turns the pull request back into a draft."
+   ],
+   "open": []
+  },
+  "verdict": "approve",
+  "summary": "Approve: a check that failed before approval now starts again at the merge gate, and the test proves it.",
+  "raises": [],
+  "answers": [],
+  "asks": [],
+  "behaviors": [
+   {
+    "criterion": "620.1",
+    "one_behavior": true,
+    "why": "One case: an old failed check no longer fails the merge gate."
+   }
+  ],
+  "edge_cases": [
+   {
+    "criterion": "620.1",
+    "cut": [],
+    "missing": []
+   }
+  ],
+  "tests": [
+   {
+    "test": "tests/test_stale_check_after_approval.py::test_a_check_failed_before_approval_does_not_fail_the_merge_gate",
+    "only_its_behavior": true,
+    "why": "Fails on main with no fresh start; passes on the branch only because checks restart."
+   }
+  ],
+  "size": "ok"
+ },
+ "check": {
+  "passed": true,
+  "problems": []
+ },
+ "url": "https://github.com/dokima-dev/dokima/pull/759#issuecomment-6205145990"
+}
