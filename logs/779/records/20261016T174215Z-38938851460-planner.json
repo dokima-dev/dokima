@@ -1,0 +1,29 @@
+{
+ "role": "planner",
+ "stage": null,
+ "run_id": "38938851460",
+ "commit_before": "432297fa389892058bfe69ff4bc0cf595c17bdb7",
+ "started_by": "dokima-runtime[bot]",
+ "models": [
+  "claude-opus-5-5"
+ ],
+ "report": {
+  "duration_ms": 1280163,
+  "turns": 61,
+  "cost_usd": 6.7053026,
+  "tokens_in": 10544363,
+  "tokens_out": 129206
+ },
+ "log": "https://github.com/dokima-dev/dokima/blob/logs/logs/779/38938851460-planner.md",
+ "run": "https://github.com/dokima-dev/dokima/actions/runs/38938851460",
+ "handback": {
+  "missing": "plan.json: [Errno 2] No such file or directory: '/tmp/dokima-out/plan.json'"
+ },
+ "check": {
+  "passed": false,
+  "problems": [
+   "::error title=Planner output rejected::found no plan.json: the planner always hands back a plan, a plan.json of kind user_story or feature, raising its questions for the owner in raises"
+  ]
+ },
+ "url": "https://github.com/dokima-dev/dokima/issues/779#issuecomment-6220898483"
+}
