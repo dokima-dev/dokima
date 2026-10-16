@@ -170,8 +170,8 @@ def open_setup(body="Old drift\n"):
 def drifted():
     """A repo with seven differences from the manifest, one of each kind."""
     g = GitHub()
-    del g.label_list["plan"]
-    g.label_list["work"]["color"] = "000000"
+    del g.label_list["filed-by-dokima"]
+    g.label_list["autopilot"]["color"] = "000000"
     del g.field_map["Action"]["Autopilot"]
     g.field_map["Priority"]["Blocker"]["color"] = "ORANGE"
     g.view_map["Autopilot"]["filter"] = "label:autopilot"
@@ -204,7 +204,7 @@ def codeowners(tmp_path, text):
 def test_each_difference_gets_one_line_saying_what_is_off_and_what_dokima_needs(record_property):
     """Each setting that differs gets one line saying what is off and what Dokima needs.
 
-    Proves 283.1. The faked repo differs in seven ways: the plan label is missing, the work label's color is 000000, the Action field
+    Proves 283.1. The faked repo differs in seven ways: the filed-by-dokima label is missing, the autopilot label's color is 000000, the Action field
     has no Autopilot option, the Blocker priority option is ORANGE, the Autopilot view filters on label:autopilot, main's
     rule lacks the Acceptance criteria check, and the app has issues: read. The audit returns seven single lines, one
     per difference, each naming the setting and the value Dokima needs (with the live value where there is one; a
@@ -213,8 +213,8 @@ def test_each_difference_gets_one_line_saying_what_is_off_and_what_dokima_needs(
     a = audit("283.1")
     lines = a.compare(drifted(), REPO)
     assert all("\n" not in l and l.strip() for l in lines), f"283.1: every difference must be one plain line: {lines}"
-    one_line(lines, "283.1", "the missing plan label", "plan", "1d76db")
-    one_line(lines, "283.1", "the work label's color", "work", "000000", "0e8a16")
+    one_line(lines, "283.1", "the missing filed-by-dokima label", "filed-by-dokima", "bfd4f2")
+    one_line(lines, "283.1", "the autopilot label's color", "autopilot", "000000", "8250df")
     one_line(lines, "283.1", "the missing Autopilot option of the Action field", "Action", "Autopilot", "PURPLE")
     one_line(lines, "283.1", "the Blocker option's color", "Blocker", "ORANGE", "RED")
     one_line(lines, "283.1", "the Autopilot view's filter", "label:autopilot is:open")
@@ -260,18 +260,18 @@ def test_a_missing_branch_rule_and_a_missing_view_are_reported(record_property):
 def test_descriptions_and_layouts_are_compared_too(record_property):
     """A changed label description, option description and view layout each get one line.
 
-    Proves 283.1. The faked repo matches the manifest except that the work label's description reads "Old words", the Status field's
+    Proves 283.1. The faked repo matches the manifest except that the autopilot label's description reads "Old words", the Status field's
     Plan option's description reads "Old words", and the Autopilot view is a board. The audit returns three lines,
     each naming the setting, what it is now and what Dokima needs."""
     record_property("proves", "283.1")
     a = audit("283.1")
     g = GitHub()
-    g.label_list["work"]["description"] = "Old words"
+    g.label_list["autopilot"]["description"] = "Old words"
     g.field_map["Status"]["Plan"]["description"] = "Old words"
     g.view_map["Autopilot"]["layout"] = "board"
     lines = a.compare(g, REPO)
-    one_line(lines, "283.1", "the work label's description", "work", "Old words",
-             manifest.LABELS["work"]["description"])
+    one_line(lines, "283.1", "the autopilot label's description", "autopilot", "Old words",
+             manifest.LABELS["autopilot"]["description"])
     one_line(lines, "283.1", "the Plan option's description", "Plan", "Old words",
              manifest.FIELDS["Status"]["Plan"]["description"])
     one_line(lines, "283.1", "the Autopilot view's layout", "Autopilot", "board", "table")
@@ -317,16 +317,16 @@ def test_drift_opens_one_pinned_setup_issue_marked_needs_you(record_property, tm
 def test_a_later_run_updates_the_same_setup_issue(record_property, tmp_path):
     """A later run updates the open Setup issue with what is off now.
 
-    Proves 283.2. A first run opens the Setup issue for a missing plan label. The label is then put back and the autopilot label's
-    color changes. The second run opens no issue; the same issue now lists the autopilot label and no longer the plan label,
+    Proves 283.2. A first run opens the Setup issue for a missing filed-by-dokima label. The label is then put back and the autopilot label's
+    color changes. The second run opens no issue; the same issue now lists the autopilot label and no longer the filed-by-dokima label,
     and is still marked Needs you."""
     record_property("proves", "283.2")
     a = audit("283.2")
     root = codeowners(tmp_path, "* @alice\n")
     g = GitHub()
-    del g.label_list["plan"]
+    del g.label_list["filed-by-dokima"]
     n = a.run(g, REPO, root)
-    g.label_list["plan"] = copy.deepcopy(manifest.LABELS["plan"])
+    g.label_list["filed-by-dokima"] = copy.deepcopy(manifest.LABELS["filed-by-dokima"])
     g.label_list["autopilot"]["color"] = "000000"
     g.issues[n]["needs_you"] = False
     again = a.run(g, REPO, root)
@@ -334,7 +334,7 @@ def test_a_later_run_updates_the_same_setup_issue(record_property, tmp_path):
     assert again == n, f"283.2: the second run returned {again!r}, not the open Setup issue #{n}"
     body = g.issues[n]["body"]
     one_line(body_lines(body), "283.2", "the autopilot label's new color", "autopilot", "000000")
-    assert "1d76db" not in body, f"283.2: the plan label, now fixed, is still listed on the Setup issue:\n{body}"
+    assert "bfd4f2" not in body, f"283.2: the filed-by-dokima label, now fixed, is still listed on the Setup issue:\n{body}"
     assert g.issues[n]["needs_you"], "283.2: the updated Setup issue is not marked Needs you"
 
 
@@ -426,7 +426,7 @@ def test_the_audit_posts_only_on_the_repo_it_runs_on(record_property, tmp_path):
         g = drifted()
         root = codeowners(tmp_path / repo.replace("/", "-"), "* @alice\n")
         a.run(g, repo, root)
-        g.label_list["plan"] = copy.deepcopy(manifest.LABELS["plan"])
+        g.label_list["filed-by-dokima"] = copy.deepcopy(manifest.LABELS["filed-by-dokima"])
         a.run(g, repo, root)
         clean = GitHub(issues={n: i for n, i in g.issues.items()})
         a.run(clean, repo, root)

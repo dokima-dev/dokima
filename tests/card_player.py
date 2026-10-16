@@ -301,7 +301,7 @@ if a[:1] == ["api"]:
     method = (flag("-X", "--method") or ("POST" if f and route != "graphql" else "GET")).upper()
     if route == "graphql":
         q = f.get("query", "")
-        if "userContentEdits" in q and "issue(" in q:
+        if "issue(" in q and "body" in q:  # the issue read of dokima/plan.py fetch_issue
             n = int(f["i"])
             refuse("read-issue", n)
             i = issue(n)
@@ -650,16 +650,6 @@ def checks_finished(n, p, workflow="Acceptance criteria"):
            "event": "pull_request_target", "status": "completed", "conclusion": "success",
            "pull_requests": [{"number": p, "head": {"ref": f"try/issue-{n}", "sha": f"sha{p}"}, "base": {"ref": "main"}}]}
     return "workflow_run", {"action": "completed", "workflow": {"name": workflow}, "workflow_run": run,
-                            "sender": sender("bot"), "repository": REPOSITORY}
-
-
-def worker_finished(n):
-    """A workflow_run event: the worker finished building issue n.
-
-    Its run is named `worker for #n` and ran on main, with no pull request."""
-    run = {"name": "worker", "head_sha": "mainsha", "head_branch": "main", "display_title": f"worker for #{n}",
-           "event": "issues", "status": "completed", "conclusion": "success", "pull_requests": []}
-    return "workflow_run", {"action": "completed", "workflow": {"name": "worker"}, "workflow_run": run,
                             "sender": sender("bot"), "repository": REPOSITORY}
 
 
