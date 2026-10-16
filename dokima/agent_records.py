@@ -974,11 +974,11 @@ def transcript(log_dir, secrets=()):
                     n += 1
                     i = b.get("input") or {}
                     what = i.get("command") or i.get("file_path") or i.get("pattern") or json.dumps(i)
-                    out.append(f"`{n}. {b.get('name')}`\n```\n{str(what)[:2000]}\n```")
+                    out.append(f"`{n}. {b.get('name')}`\n```\n{scrub(str(what), secrets)[:2000]}\n```")
                 elif kind == "tool_result":
                     r = b.get("content")
                     r = r if isinstance(r, str) else " ".join(x.get("text", "") for x in (r or []) if isinstance(x, dict))
-                    out.append("> " + r.strip()[:1500].replace("\n", "\n> "))
+                    out.append("> " + scrub(r.strip(), secrets)[:1500].replace("\n", "\n> "))
     return scrub("\n\n".join(out) + "\n", secrets)
 
 
