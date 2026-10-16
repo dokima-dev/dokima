@@ -1,0 +1,69 @@
+{
+ "role": "reviewer",
+ "stage": "plan",
+ "run_id": "38831790273",
+ "commit_before": "2e60db0b0f42d11bcb83c296242f594fa6109f61",
+ "started_by": "dokima-runtime[bot]",
+ "models": [
+  "claude-opus-5-5"
+ ],
+ "report": {
+  "duration_ms": 24991,
+  "turns": 5,
+  "cost_usd": 0.2205774,
+  "tokens_in": 147035,
+  "tokens_out": 1578
+ },
+ "log": "https://github.com/dokima-dev/dokima/blob/logs/logs/765/38831790273-reviewer-plan.md",
+ "run": "https://github.com/dokima-dev/dokima/actions/runs/38831790273",
+ "handback": {
+  "previous_step": {
+   "did": [
+    "The planner wrote one criterion: the unused test finder is deleted from the checks.",
+    "The planner wrote one test that fails today because the finder is still there."
+   ],
+   "decided": [
+    "The test also checks the planner still reads test names and their criteria."
+   ],
+   "open": []
+  },
+  "verdict": "approve",
+  "summary": "The plan deletes the unused test finder, with one test that fails today for the right reason.",
+  "raises": [],
+  "answers": [],
+  "asks": [
+   {
+    "ask": "`dokima/checks.py:31-44`: `find_tests`, no caller.",
+    "source": "https://github.com/dokima-dev/dokima/issues/739",
+    "criterion": "765.1"
+   }
+  ],
+  "behaviors": [
+   {
+    "criterion": "765.1",
+    "one_behavior": true,
+    "why": "One action, deleting the finder, checked by one result."
+   }
+  ],
+  "edge_cases": [
+   {
+    "criterion": "765.1",
+    "cut": [],
+    "missing": []
+   }
+  ],
+  "tests": [
+   {
+    "test": "tests/test_unused_test_finder.py::test_the_unused_test_finder_is_deleted",
+    "only_its_behavior": true,
+    "why": "Fails while the finder exists; also guards the two patterns the planner still imports."
+   }
+  ],
+  "size": "ok"
+ },
+ "check": {
+  "passed": true,
+  "problems": []
+ },
+ "url": "https://github.com/dokima-dev/dokima/issues/765#issuecomment-6205485066"
+}
