@@ -1,0 +1,144 @@
+{
+ "role": "reviewer",
+ "stage": "plan",
+ "run_id": "38836984338",
+ "commit_before": "e0c8e548cacf530b98195c3a23c6fe9204ddc23a",
+ "started_by": "dokima-runtime[bot]",
+ "models": [
+  "claude-opus-5-5"
+ ],
+ "report": {
+  "duration_ms": 328125,
+  "turns": 5,
+  "cost_usd": 0.6027358,
+  "tokens_in": 256140,
+  "tokens_out": 1226
+ },
+ "log": "https://github.com/dokima-dev/dokima/blob/logs/logs/761/38836984338-reviewer-plan.md",
+ "run": "https://github.com/dokima-dev/dokima/actions/runs/38836984338",
+ "handback": {
+  "previous_step": {
+   "did": [
+    "Dropped the test for deleting the old tests, as the owner said.",
+    "Dropped the criterion for deleting the old tests too."
+   ],
+   "decided": [
+    "The plan's own test changes delete the old tests, so no criterion carries it."
+   ],
+   "open": []
+  },
+  "verdict": "block",
+  "summary": "Four criteria are well proven, but the owner's ask to delete the old tests lost its criterion.",
+  "raises": [
+   {
+    "kind": "blocker",
+    "to": "planner",
+    "label": "761.5 dropped",
+    "text": "The owner said drop the useless test, not the ask. Fix: restore 761.5, marked manual, since the plan's own test changes delete those tests.",
+    "evidence": "#739: `the tests that only exercise it`; owner: `drop it if it is useless`; `plan.json` stops at 761.4.",
+    "raised_by": "reviewer",
+    "id": "R2"
+   }
+  ],
+  "answers": [],
+  "asks": [
+   {
+    "ask": "the `post` and `rejected` actions",
+    "source": "https://github.com/dokima-dev/dokima/issues/739",
+    "criterion": "761.1"
+   },
+   {
+    "ask": "the `post` and `rejected` actions (rejected)",
+    "source": "https://github.com/dokima-dev/dokima/issues/739",
+    "criterion": "761.2"
+   },
+   {
+    "ask": "`render` and `plan_text` (render)",
+    "source": "https://github.com/dokima-dev/dokima/issues/739",
+    "criterion": "761.3"
+   },
+   {
+    "ask": "`render` and `plan_text` (plan_text)",
+    "source": "https://github.com/dokima-dev/dokima/issues/739",
+    "criterion": "761.4"
+   },
+   {
+    "ask": "Delete it, plus the tests that only exercise it.",
+    "source": "https://github.com/dokima-dev/dokima/issues/739",
+    "criterion": "missing"
+   }
+  ],
+  "behaviors": [
+   {
+    "criterion": "761.1",
+    "one_behavior": true,
+    "why": "One step asked for, one result: nothing posted."
+   },
+   {
+    "criterion": "761.2",
+    "one_behavior": true,
+    "why": "One step asked for, one result: nothing posted."
+   },
+   {
+    "criterion": "761.3",
+    "one_behavior": true,
+    "why": "One piece of code gone."
+   },
+   {
+    "criterion": "761.4",
+    "one_behavior": true,
+    "why": "One piece of code gone."
+   }
+  ],
+  "edge_cases": [
+   {
+    "criterion": "761.1",
+    "cut": [],
+    "missing": []
+   },
+   {
+    "criterion": "761.2",
+    "cut": [],
+    "missing": []
+   },
+   {
+    "criterion": "761.3",
+    "cut": [],
+    "missing": []
+   },
+   {
+    "criterion": "761.4",
+    "cut": [],
+    "missing": []
+   }
+  ],
+  "tests": [
+   {
+    "test": "tests/test_planner_old_steps.py::test_the_post_step_posts_nothing",
+    "only_its_behavior": true,
+    "why": "Fails today: the post step calls the fake gh."
+   },
+   {
+    "test": "tests/test_planner_old_steps.py::test_the_reject_step_posts_nothing",
+    "only_its_behavior": true,
+    "why": "Fails today: the reject step posts a comment."
+   },
+   {
+    "test": "tests/test_planner_old_steps.py::test_the_plan_writer_is_gone",
+    "only_its_behavior": true,
+    "why": "Fails today: render is still there."
+   },
+   {
+    "test": "tests/test_planner_old_steps.py::test_the_plan_text_builder_is_gone",
+    "only_its_behavior": true,
+    "why": "Fails today: plan_text is still there."
+   }
+  ],
+  "size": "ok"
+ },
+ "check": {
+  "passed": true,
+  "problems": []
+ },
+ "url": "https://github.com/dokima-dev/dokima/issues/761#issuecomment-6206164434"
+}
