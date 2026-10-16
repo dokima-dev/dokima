@@ -1,0 +1,83 @@
+# Dokima's shipped defaults (#779). A repo's .dokima/settings.yaml names only what differs; dokima/settings.py merges
+# it over this file. Groups merge key by key, lists are replaced whole, gates and prompt additions merge by name.
+tests:
+  tag: record_property
+  dir: tests
+  file_pattern: test_*.py
+  run_one: python -m pytest -q -p no:cacheprovider {test}
+  run_all: pytest -q -p no:cacheprovider -n auto tests
+  new_test_timeout_s: 60
+  affected: testmon
+setup:
+  python: "3.12"
+  test_tools: pytest pytest-xdist pytest-testmon
+  install: ""
+fence:
+  test_setup_files: [conftest.py, pytest.ini, tox.ini, setup.cfg, pyproject.toml]
+protected_paths: [.github/]
+text_only:
+  not_text: [tests/, .github/]
+branch:
+  default: main
+records:
+  branch: logs
+owner_docs: AGENTS.md
+style:
+  docstrings: required
+  docstring_cap: 15
+  code_docstring_cap: 15
+  caps:
+    summary: 20
+    user_story: 20
+    criterion: 20
+    nfr_why: 12
+    feature: 25
+    story_title: 10
+    story_user_story: 20
+    raise_label: 4
+    question: 20
+    blocker: 30
+    issue: 25
+    evidence: 20
+    answer_why: 20
+    previous_step: 15
+    work_evidence: 15
+    test_change: 15
+river:
+  max_blocks: 3
+planner:
+  max_questions: 3
+gates:
+  required: [all tests, Acceptance criteria]
+gate:
+  checks_wait_min: 45
+  exclude: [card, board wait]
+merge:
+  method: squash
+labels:
+  plan: plan
+  work: work
+  autopilot: autopilot
+  filed: filed-by-dokima
+roles:
+  planner:
+    max_turns: 100
+  worker:
+    max_turns: 100
+  reviewer:
+    max_turns: 100
+prompts:
+  append:
+    - name: house-rules
+      file: .dokima/house-rules.md
+bot:
+  slug: dokima-runtime
+card:
+  icon_base: https://raw.githubusercontent.com/{repo}/main/dokima/icons/
+# Locked: a repo's settings file may not set any of these; the run fails, naming it.
+integrity:
+  app_only_identity: true
+  keys_from_main: true
+  fence: true
+  judge_runs_main_copy: true
+  owner_approval: true

@@ -18,7 +18,7 @@ jobs:
       - uses: actions/setup-python@v6
         with:
           python-version: "3.12"
-      - run: pip install -q pytest pytest-xdist pytest-testmon
+      - run: pip install -q pytest pytest-xdist pytest-testmon pyyaml
       # A failing test still records its baseline (exit 1): testmon runs it again on the next review. Any other
       # non-zero exit is a crash and fails this job, so a missing baseline is never silent. testmon needs pytest's
       # cache plugin, so it is not turned off here.
