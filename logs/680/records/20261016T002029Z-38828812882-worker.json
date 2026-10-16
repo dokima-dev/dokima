@@ -1,0 +1,39 @@
+{
+ "role": "worker",
+ "stage": null,
+ "run_id": "38828812882",
+ "commit_before": "504d3c47fd4c3152cc38bf57fdd98241993b4aca",
+ "started_by": "dokima-runtime[bot]",
+ "models": [
+  "claude-opus-5-5"
+ ],
+ "report": {
+  "duration_ms": 24837,
+  "turns": 5,
+  "cost_usd": 0.20103360000000003,
+  "tokens_in": 141428,
+  "tokens_out": 1362
+ },
+ "log": "https://github.com/dokima-dev/dokima/blob/logs/logs/680/38828812882-worker.md",
+ "run": "https://github.com/dokima-dev/dokima/actions/runs/38828812882",
+ "handback": {
+  "summary": "Transcripts now remove secrets from each tool input and result before cutting it.",
+  "criteria": {
+   "680.1": "`transcript` in `dokima/agent_records.py` scrubs the tool input before the 2000-character cut.",
+   "680.2": "`transcript` in `dokima/agent_records.py` scrubs the tool result before the 1500-character cut."
+  },
+  "evidence": "`pytest -q tests/test_transcript_cut.py`: 2 passed; both failed before the change.",
+  "raises": [],
+  "answers": []
+ },
+ "check": {
+  "passed": true,
+  "problems": []
+ },
+ "dropped_by_fence": [],
+ "files_changed": [
+  "dokima/agent_records.py"
+ ],
+ "branch": "try/issue-680",
+ "url": "https://github.com/dokima-dev/dokima/issues/680#issuecomment-6205081621"
+}
