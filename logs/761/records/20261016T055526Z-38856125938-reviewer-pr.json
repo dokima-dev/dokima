@@ -1,0 +1,66 @@
+{
+ "role": "reviewer",
+ "stage": "pr",
+ "run_id": "38856125938",
+ "commit_before": "ab18a770d4693cbb5431457cb7713ef7f023f23c",
+ "started_by": "dokima-runtime[bot]",
+ "models": [
+  "claude-opus-5-5"
+ ],
+ "report": {
+  "duration_ms": 1014079,
+  "turns": 19,
+  "cost_usd": 0.5660634,
+  "tokens_in": 776072,
+  "tokens_out": 5069
+ },
+ "log": "https://github.com/dokima-dev/dokima/blob/logs/logs/761/38856125938-reviewer-pr.md",
+ "run": "https://github.com/dokima-dev/dokima/actions/runs/38856125938",
+ "handback": {
+  "previous_step": {
+   "did": [
+    "Deleted the planner's post and reject steps.",
+    "Deleted the old plan writer and plan text builder."
+   ],
+   "decided": [
+    "Any planner step but the check now fails with an error and posts nothing."
+   ],
+   "open": []
+  },
+  "verdict": "approve",
+  "summary": "The planner keeps only its check; all four criteria are proven and nothing else changed.",
+  "raises": [],
+  "answers": [],
+  "asks": [],
+  "behaviors": [],
+  "edge_cases": [],
+  "tests": [
+   {
+    "test": "tests/test_planner_old_steps.py::test_the_post_step_posts_nothing",
+    "only_its_behavior": true,
+    "why": "Fails if the post step still calls GitHub on a good plan."
+   },
+   {
+    "test": "tests/test_planner_old_steps.py::test_the_reject_step_posts_nothing",
+    "only_its_behavior": true,
+    "why": "Fails if the reject step still calls GitHub."
+   },
+   {
+    "test": "tests/test_planner_old_steps.py::test_the_plan_writer_is_gone",
+    "only_its_behavior": true,
+    "why": "Fails while the old writer remains."
+   },
+   {
+    "test": "tests/test_planner_old_steps.py::test_the_plan_text_builder_is_gone",
+    "only_its_behavior": true,
+    "why": "Fails while the old text builder remains."
+   }
+  ],
+  "size": "ok"
+ },
+ "check": {
+  "passed": true,
+  "problems": []
+ },
+ "url": "https://github.com/dokima-dev/dokima/pull/777#issuecomment-6208801759"
+}
