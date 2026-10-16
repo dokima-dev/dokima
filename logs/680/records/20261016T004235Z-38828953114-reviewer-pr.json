@@ -1,0 +1,80 @@
+{
+ "role": "reviewer",
+ "stage": "pr",
+ "run_id": "38828953114",
+ "commit_before": "734de8d473d44c2120358c368f5ed55081fb07f8",
+ "started_by": "dokima-runtime[bot]",
+ "models": [
+  "claude-opus-5-5"
+ ],
+ "report": {
+  "duration_ms": 110026,
+  "turns": 10,
+  "cost_usd": 0.3420024,
+  "tokens_in": 341784,
+  "tokens_out": 3526
+ },
+ "log": "https://github.com/dokima-dev/dokima/blob/logs/logs/680/38828953114-reviewer-pr.md",
+ "run": "https://github.com/dokima-dev/dokima/actions/runs/38828953114",
+ "handback": {
+  "previous_step": {
+   "did": [
+    "The worker made transcripts remove secrets from each tool input before cutting it.",
+    "The worker made transcripts remove secrets from each tool result before cutting it."
+   ],
+   "decided": [
+    "The whole transcript still has secrets removed once more at the end."
+   ],
+   "open": [
+    "The issue card shows the acceptance tests failed; both tests pass here."
+   ]
+  },
+  "verdict": "approve",
+  "summary": "Secrets are now removed before tool text is cut, so no part of a cut token shows.",
+  "raises": [],
+  "answers": [],
+  "asks": [],
+  "behaviors": [
+   {
+    "criterion": "680.1",
+    "one_behavior": true,
+    "why": "One cut, the tool input, and one result."
+   },
+   {
+    "criterion": "680.2",
+    "one_behavior": true,
+    "why": "One cut, the tool result, and one result."
+   }
+  ],
+  "edge_cases": [
+   {
+    "criterion": "680.1",
+    "cut": [],
+    "missing": []
+   },
+   {
+    "criterion": "680.2",
+    "cut": [],
+    "missing": []
+   }
+  ],
+  "tests": [
+   {
+    "test": "tests/test_transcript_cut.py::test_a_secret_across_the_tool_input_cut_shows_none_of_its_start",
+    "only_its_behavior": true,
+    "why": "Fails on main, passes on the branch, and checks the cut still holds."
+   },
+   {
+    "test": "tests/test_transcript_cut.py::test_a_secret_across_the_tool_result_cut_shows_none_of_its_start",
+    "only_its_behavior": true,
+    "why": "Fails on main, passes on the branch, and checks the cut still holds."
+   }
+  ],
+  "size": "ok"
+ },
+ "check": {
+  "passed": true,
+  "problems": []
+ },
+ "url": "https://github.com/dokima-dev/dokima/pull/757#issuecomment-6205100604"
+}
