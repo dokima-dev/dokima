@@ -1,0 +1,1111 @@
+{
+ "role": "reviewer",
+ "stage": "plan",
+ "run_id": "38934269841",
+ "commit_before": "951ca4ab41468782d94c975e6e17d877163884d9",
+ "started_by": "dokima-runtime[bot]",
+ "models": [
+  "claude-opus-5-5"
+ ],
+ "report": {
+  "duration_ms": 90629,
+  "turns": 13,
+  "cost_usd": 0.626682,
+  "tokens_in": 584143,
+  "tokens_out": 7568
+ },
+ "log": "https://github.com/dokima-dev/dokima/blob/logs/logs/740/38934269841-reviewer-plan.md",
+ "run": "https://github.com/dokima-dev/dokima/actions/runs/38934269841",
+ "handback": {
+  "previous_step": {
+   "did": [
+    "The planner split both docstring caps: set from settings, and off when empty.",
+    "It made each default the one the owner's list names."
+   ],
+   "decided": [
+    "The repo's file ends in .yaml unless the owner says otherwise."
+   ],
+   "open": [
+    "One question for the owner: .yaml or .yml."
+   ]
+  },
+  "verdict": "approve",
+  "summary": "The plan carries every ask and all 41 rows; only the file name question waits for you.",
+  "raises": [],
+  "answers": [],
+  "asks": [
+   {
+    "ask": "Dokima ships one defaults file.",
+    "source": "https://github.com/dokima-dev/dokima/issues/740",
+    "criterion": "S1.1"
+   },
+   {
+    "ask": "A repo overrides only what differs in `.dokima/settings.yaml`.",
+    "source": "https://github.com/dokima-dev/dokima/issues/740",
+    "criterion": "S1.2"
+   },
+   {
+    "ask": "Dokima's own repo becomes just another adopter with its own override file.",
+    "source": "https://github.com/dokima-dev/dokima/issues/740",
+    "criterion": "S2.1"
+   },
+   {
+    "ask": "Today's reader only handles flat key: value and cannot read lists",
+    "source": "https://github.com/dokima-dev/dokima/issues/740",
+    "criterion": "S1.4"
+   },
+   {
+    "ask": "it rewrites the whole file on save",
+    "source": "https://github.com/dokima-dev/dokima/issues/740",
+    "criterion": "S1.7"
+   },
+   {
+    "ask": "`.dokima/agents.yml` folds into `settings.yaml` under `agents:`.",
+    "source": "https://github.com/dokima-dev/dokima/issues/740",
+    "criterion": "S1.8"
+   },
+   {
+    "ask": "Old path keeps working for one version.",
+    "source": "https://github.com/dokima-dev/dokima/issues/740",
+    "criterion": "S1.9"
+   },
+   {
+    "ask": "default branch",
+    "source": "https://github.com/dokima-dev/dokima/issues/740",
+    "criterion": "S9.1"
+   },
+   {
+    "ask": "records branch",
+    "source": "https://github.com/dokima-dev/dokima/issues/740",
+    "criterion": "S5.3"
+   },
+   {
+    "ask": "rules file name",
+    "source": "https://github.com/dokima-dev/dokima/issues/740",
+    "criterion": "S5.6"
+   },
+   {
+    "ask": "bot identity",
+    "source": "https://github.com/dokima-dev/dokima/issues/740",
+    "criterion": "S11.2"
+   },
+   {
+    "ask": "co-author trailer (#110)",
+    "source": "https://github.com/dokima-dev/dokima/issues/740",
+    "criterion": "S1.31"
+   },
+   {
+    "ask": "test install/run_all/run_one commands and test folder (#384)",
+    "source": "https://github.com/dokima-dev/dokima/issues/740",
+    "criterion": "S1.18"
+   },
+   {
+    "ask": "merge gate exclude list",
+    "source": "https://github.com/dokima-dev/dokima/issues/740",
+    "criterion": "S1.26"
+   },
+   {
+    "ask": "merge queue (#375)",
+    "source": "https://github.com/dokima-dev/dokima/issues/740",
+    "criterion": "S6.2"
+   },
+   {
+    "ask": "labels",
+    "source": "https://github.com/dokima-dev/dokima/issues/740",
+    "criterion": "S6.3"
+   },
+   {
+    "ask": "check names",
+    "source": "https://github.com/dokima-dev/dokima/issues/740",
+    "criterion": "S6.1"
+   },
+   {
+    "ask": "turn limits",
+    "source": "https://github.com/dokima-dev/dokima/issues/740",
+    "criterion": "S10.1"
+   },
+   {
+    "ask": "word caps",
+    "source": "https://github.com/dokima-dev/dokima/issues/740",
+    "criterion": "S12.1"
+   },
+   {
+    "ask": "card icon source",
+    "source": "https://github.com/dokima-dev/dokima/issues/740",
+    "criterion": "S7.2"
+   },
+   {
+    "ask": "A repo cannot override them; trying fails the run.",
+    "source": "https://github.com/dokima-dev/dokima/issues/740",
+    "criterion": "S1.16"
+   },
+   {
+    "ask": "maps merge key by key, repo wins",
+    "source": "https://github.com/dokima-dev/dokima/issues/740",
+    "criterion": "S1.10"
+   },
+   {
+    "ask": "lists replace",
+    "source": "https://github.com/dokima-dev/dokima/issues/740",
+    "criterion": "S1.11"
+   },
+   {
+    "ask": "`gates` and `prompts.append` merge by entry name",
+    "source": "https://github.com/dokima-dev/dokima/issues/740",
+    "criterion": "S1.12"
+   },
+   {
+    "ask": "Unknown key warns with a suggestion",
+    "source": "https://github.com/dokima-dev/dokima/issues/740",
+    "criterion": "S1.14"
+   },
+   {
+    "ask": "is ignored; never stops a run",
+    "source": "https://github.com/dokima-dev/dokima/issues/740",
+    "criterion": "S1.15"
+   },
+   {
+    "ask": "Pipeline order (plan, review, build, review, merge) stays fixed.",
+    "source": "https://github.com/dokima-dev/dokima/issues/740",
+    "criterion": "S1.17"
+   },
+   {
+    "ask": "#721 (inline comments)",
+    "source": "https://github.com/dokima-dev/dokima/issues/740",
+    "criterion": "S1.6"
+   },
+   {
+    "ask": "#326 and #424 (audit false alarms)",
+    "source": "https://github.com/dokima-dev/dokima/issues/740",
+    "criterion": "S6.4"
+   },
+   {
+    "ask": "#515 (labels still declared as starting agents)",
+    "source": "https://github.com/dokima-dev/dokima/issues/740",
+    "criterion": "S6.6"
+   },
+   {
+    "ask": "a scan finds no Dokima value left in runtime code",
+    "source": "https://github.com/dokima-dev/dokima/issues/740",
+    "criterion": "S13.1"
+   },
+   {
+    "ask": "Dokima merges its next 5 PRs purely through its own override file",
+    "source": "https://github.com/dokima-dev/dokima/issues/740",
+    "criterion": "S2.2"
+   },
+   {
+    "ask": "Each row is one setting, its default (today's behaviour)",
+    "source": "https://github.com/dokima-dev/dokima/issues/740#issuecomment-6219928729",
+    "criterion": "S1.3"
+   }
+  ],
+  "behaviors": [
+   {
+    "criterion": "S1.1",
+    "one_behavior": true,
+    "why": "One action with one result the owner can see."
+   },
+   {
+    "criterion": "S1.2",
+    "one_behavior": true,
+    "why": "One action with one result the owner can see."
+   },
+   {
+    "criterion": "S1.3",
+    "one_behavior": true,
+    "why": "One action with one result the owner can see."
+   },
+   {
+    "criterion": "S1.4",
+    "one_behavior": true,
+    "why": "One action with one result the owner can see."
+   },
+   {
+    "criterion": "S1.5",
+    "one_behavior": true,
+    "why": "One action with one result the owner can see."
+   },
+   {
+    "criterion": "S1.6",
+    "one_behavior": true,
+    "why": "One action with one result the owner can see."
+   },
+   {
+    "criterion": "S1.7",
+    "one_behavior": true,
+    "why": "One action with one result the owner can see."
+   },
+   {
+    "criterion": "S1.8",
+    "one_behavior": true,
+    "why": "One action with one result the owner can see."
+   },
+   {
+    "criterion": "S1.9",
+    "one_behavior": true,
+    "why": "One action with one result the owner can see."
+   },
+   {
+    "criterion": "S1.10",
+    "one_behavior": true,
+    "why": "One action with one result the owner can see."
+   },
+   {
+    "criterion": "S1.11",
+    "one_behavior": true,
+    "why": "One action with one result the owner can see."
+   },
+   {
+    "criterion": "S1.12",
+    "one_behavior": true,
+    "why": "One action with one result the owner can see."
+   },
+   {
+    "criterion": "S1.13",
+    "one_behavior": true,
+    "why": "One action with one result the owner can see."
+   },
+   {
+    "criterion": "S1.14",
+    "one_behavior": true,
+    "why": "One action with one result the owner can see."
+   },
+   {
+    "criterion": "S1.15",
+    "one_behavior": true,
+    "why": "One action with one result the owner can see."
+   },
+   {
+    "criterion": "S1.16",
+    "one_behavior": true,
+    "why": "One action with one result the owner can see."
+   },
+   {
+    "criterion": "S1.17",
+    "one_behavior": true,
+    "why": "One action with one result the owner can see."
+   },
+   {
+    "criterion": "S1.18",
+    "one_behavior": true,
+    "why": "One action with one result the owner can see."
+   },
+   {
+    "criterion": "S1.19",
+    "one_behavior": true,
+    "why": "One action with one result the owner can see."
+   },
+   {
+    "criterion": "S1.20",
+    "one_behavior": true,
+    "why": "One action with one result the owner can see."
+   },
+   {
+    "criterion": "S1.21",
+    "one_behavior": true,
+    "why": "One action with one result the owner can see."
+   },
+   {
+    "criterion": "S1.22",
+    "one_behavior": true,
+    "why": "One action with one result the owner can see."
+   },
+   {
+    "criterion": "S1.23",
+    "one_behavior": true,
+    "why": "One action with one result the owner can see."
+   },
+   {
+    "criterion": "S1.24",
+    "one_behavior": true,
+    "why": "One action with one result the owner can see."
+   },
+   {
+    "criterion": "S1.25",
+    "one_behavior": true,
+    "why": "One action with one result the owner can see."
+   },
+   {
+    "criterion": "S1.26",
+    "one_behavior": true,
+    "why": "One action with one result the owner can see."
+   },
+   {
+    "criterion": "S1.27",
+    "one_behavior": true,
+    "why": "One action with one result the owner can see."
+   },
+   {
+    "criterion": "S1.28",
+    "one_behavior": true,
+    "why": "One action with one result the owner can see."
+   },
+   {
+    "criterion": "S1.29",
+    "one_behavior": true,
+    "why": "One action with one result the owner can see."
+   },
+   {
+    "criterion": "S1.30",
+    "one_behavior": true,
+    "why": "One action with one result the owner can see."
+   },
+   {
+    "criterion": "S1.31",
+    "one_behavior": true,
+    "why": "One action with one result the owner can see."
+   },
+   {
+    "criterion": "S1.32",
+    "one_behavior": true,
+    "why": "One action with one result the owner can see."
+   },
+   {
+    "criterion": "S1.33",
+    "one_behavior": true,
+    "why": "One action with one result the owner can see."
+   },
+   {
+    "criterion": "S1.34",
+    "one_behavior": true,
+    "why": "One action with one result the owner can see."
+   },
+   {
+    "criterion": "S1.35",
+    "one_behavior": true,
+    "why": "One action with one result the owner can see."
+   },
+   {
+    "criterion": "S1.36",
+    "one_behavior": true,
+    "why": "One action with one result the owner can see."
+   },
+   {
+    "criterion": "S1.37",
+    "one_behavior": true,
+    "why": "One action with one result the owner can see."
+   },
+   {
+    "criterion": "S1.38",
+    "one_behavior": true,
+    "why": "One action with one result the owner can see."
+   },
+   {
+    "criterion": "S2.1",
+    "one_behavior": true,
+    "why": "One action with one result the owner can see."
+   },
+   {
+    "criterion": "S2.2",
+    "one_behavior": true,
+    "why": "One action with one result the owner can see."
+   },
+   {
+    "criterion": "S3.1",
+    "one_behavior": true,
+    "why": "One action with one result the owner can see."
+   },
+   {
+    "criterion": "S3.2",
+    "one_behavior": true,
+    "why": "One action with one result the owner can see."
+   },
+   {
+    "criterion": "S3.3",
+    "one_behavior": true,
+    "why": "One action with one result the owner can see."
+   },
+   {
+    "criterion": "S3.4",
+    "one_behavior": true,
+    "why": "One action with one result the owner can see."
+   },
+   {
+    "criterion": "S3.5",
+    "one_behavior": true,
+    "why": "One action with one result the owner can see."
+   },
+   {
+    "criterion": "S3.6",
+    "one_behavior": true,
+    "why": "One action with one result the owner can see."
+   },
+   {
+    "criterion": "S3.7",
+    "one_behavior": true,
+    "why": "One action with one result the owner can see."
+   },
+   {
+    "criterion": "S3.8",
+    "one_behavior": true,
+    "why": "One action with one result the owner can see."
+   },
+   {
+    "criterion": "S3.9",
+    "one_behavior": true,
+    "why": "One action with one result the owner can see."
+   },
+   {
+    "criterion": "S3.10",
+    "one_behavior": true,
+    "why": "One action with one result the owner can see."
+   },
+   {
+    "criterion": "S3.11",
+    "one_behavior": true,
+    "why": "One action with one result the owner can see."
+   },
+   {
+    "criterion": "S3.12",
+    "one_behavior": true,
+    "why": "One action with one result the owner can see."
+   },
+   {
+    "criterion": "S3.13",
+    "one_behavior": true,
+    "why": "One action with one result the owner can see."
+   },
+   {
+    "criterion": "S3.14",
+    "one_behavior": true,
+    "why": "One action with one result the owner can see."
+   },
+   {
+    "criterion": "S3.15",
+    "one_behavior": true,
+    "why": "One action with one result the owner can see."
+   },
+   {
+    "criterion": "S4.1",
+    "one_behavior": true,
+    "why": "One action with one result the owner can see."
+   },
+   {
+    "criterion": "S4.2",
+    "one_behavior": true,
+    "why": "One action with one result the owner can see."
+   },
+   {
+    "criterion": "S4.3",
+    "one_behavior": true,
+    "why": "One action with one result the owner can see."
+   },
+   {
+    "criterion": "S4.4",
+    "one_behavior": true,
+    "why": "One action with one result the owner can see."
+   },
+   {
+    "criterion": "S5.1",
+    "one_behavior": true,
+    "why": "One action with one result the owner can see."
+   },
+   {
+    "criterion": "S5.2",
+    "one_behavior": true,
+    "why": "One action with one result the owner can see."
+   },
+   {
+    "criterion": "S5.3",
+    "one_behavior": true,
+    "why": "One action with one result the owner can see."
+   },
+   {
+    "criterion": "S5.4",
+    "one_behavior": true,
+    "why": "One action with one result the owner can see."
+   },
+   {
+    "criterion": "S5.5",
+    "one_behavior": true,
+    "why": "One action with one result the owner can see."
+   },
+   {
+    "criterion": "S5.6",
+    "one_behavior": true,
+    "why": "One action with one result the owner can see."
+   },
+   {
+    "criterion": "S5.7",
+    "one_behavior": true,
+    "why": "One action with one result the owner can see."
+   },
+   {
+    "criterion": "S5.8",
+    "one_behavior": true,
+    "why": "One action with one result the owner can see."
+   },
+   {
+    "criterion": "S5.9",
+    "one_behavior": true,
+    "why": "One action with one result the owner can see."
+   },
+   {
+    "criterion": "S6.1",
+    "one_behavior": true,
+    "why": "One action with one result the owner can see."
+   },
+   {
+    "criterion": "S6.2",
+    "one_behavior": true,
+    "why": "One action with one result the owner can see."
+   },
+   {
+    "criterion": "S6.3",
+    "one_behavior": true,
+    "why": "One action with one result the owner can see."
+   },
+   {
+    "criterion": "S6.4",
+    "one_behavior": true,
+    "why": "One action with one result the owner can see."
+   },
+   {
+    "criterion": "S6.5",
+    "one_behavior": true,
+    "why": "One action with one result the owner can see."
+   },
+   {
+    "criterion": "S6.6",
+    "one_behavior": true,
+    "why": "One action with one result the owner can see."
+   },
+   {
+    "criterion": "S7.1",
+    "one_behavior": true,
+    "why": "One action with one result the owner can see."
+   },
+   {
+    "criterion": "S7.2",
+    "one_behavior": true,
+    "why": "One action with one result the owner can see."
+   },
+   {
+    "criterion": "S8.1",
+    "one_behavior": true,
+    "why": "One action with one result the owner can see."
+   },
+   {
+    "criterion": "S9.1",
+    "one_behavior": true,
+    "why": "One action with one result the owner can see."
+   },
+   {
+    "criterion": "S9.2",
+    "one_behavior": true,
+    "why": "One action with one result the owner can see."
+   },
+   {
+    "criterion": "S9.3",
+    "one_behavior": true,
+    "why": "One action with one result the owner can see."
+   },
+   {
+    "criterion": "S9.4",
+    "one_behavior": true,
+    "why": "One action with one result the owner can see."
+   },
+   {
+    "criterion": "S9.5",
+    "one_behavior": true,
+    "why": "One action with one result the owner can see."
+   },
+   {
+    "criterion": "S9.6",
+    "one_behavior": true,
+    "why": "One action with one result the owner can see."
+   },
+   {
+    "criterion": "S10.1",
+    "one_behavior": true,
+    "why": "One action with one result the owner can see."
+   },
+   {
+    "criterion": "S11.1",
+    "one_behavior": true,
+    "why": "One action with one result the owner can see."
+   },
+   {
+    "criterion": "S11.2",
+    "one_behavior": true,
+    "why": "One action with one result the owner can see."
+   },
+   {
+    "criterion": "S12.1",
+    "one_behavior": true,
+    "why": "One action with one result the owner can see."
+   },
+   {
+    "criterion": "S13.1",
+    "one_behavior": true,
+    "why": "One action with one result the owner can see."
+   }
+  ],
+  "edge_cases": [
+   {
+    "criterion": "S1.1",
+    "cut": [],
+    "missing": []
+   },
+   {
+    "criterion": "S1.2",
+    "cut": [],
+    "missing": []
+   },
+   {
+    "criterion": "S1.3",
+    "cut": [],
+    "missing": []
+   },
+   {
+    "criterion": "S1.4",
+    "cut": [],
+    "missing": []
+   },
+   {
+    "criterion": "S1.5",
+    "cut": [],
+    "missing": []
+   },
+   {
+    "criterion": "S1.6",
+    "cut": [],
+    "missing": []
+   },
+   {
+    "criterion": "S1.7",
+    "cut": [],
+    "missing": []
+   },
+   {
+    "criterion": "S1.8",
+    "cut": [],
+    "missing": []
+   },
+   {
+    "criterion": "S1.9",
+    "cut": [],
+    "missing": []
+   },
+   {
+    "criterion": "S1.10",
+    "cut": [],
+    "missing": []
+   },
+   {
+    "criterion": "S1.11",
+    "cut": [],
+    "missing": []
+   },
+   {
+    "criterion": "S1.12",
+    "cut": [],
+    "missing": []
+   },
+   {
+    "criterion": "S1.13",
+    "cut": [],
+    "missing": []
+   },
+   {
+    "criterion": "S1.14",
+    "cut": [],
+    "missing": []
+   },
+   {
+    "criterion": "S1.15",
+    "cut": [],
+    "missing": []
+   },
+   {
+    "criterion": "S1.16",
+    "cut": [],
+    "missing": []
+   },
+   {
+    "criterion": "S1.17",
+    "cut": [],
+    "missing": []
+   },
+   {
+    "criterion": "S1.18",
+    "cut": [],
+    "missing": []
+   },
+   {
+    "criterion": "S1.19",
+    "cut": [],
+    "missing": []
+   },
+   {
+    "criterion": "S1.20",
+    "cut": [],
+    "missing": []
+   },
+   {
+    "criterion": "S1.21",
+    "cut": [],
+    "missing": []
+   },
+   {
+    "criterion": "S1.22",
+    "cut": [],
+    "missing": []
+   },
+   {
+    "criterion": "S1.23",
+    "cut": [],
+    "missing": []
+   },
+   {
+    "criterion": "S1.24",
+    "cut": [],
+    "missing": []
+   },
+   {
+    "criterion": "S1.25",
+    "cut": [],
+    "missing": []
+   },
+   {
+    "criterion": "S1.26",
+    "cut": [],
+    "missing": []
+   },
+   {
+    "criterion": "S1.27",
+    "cut": [],
+    "missing": []
+   },
+   {
+    "criterion": "S1.28",
+    "cut": [],
+    "missing": []
+   },
+   {
+    "criterion": "S1.29",
+    "cut": [],
+    "missing": []
+   },
+   {
+    "criterion": "S1.30",
+    "cut": [],
+    "missing": []
+   },
+   {
+    "criterion": "S1.31",
+    "cut": [],
+    "missing": []
+   },
+   {
+    "criterion": "S1.32",
+    "cut": [],
+    "missing": []
+   },
+   {
+    "criterion": "S1.33",
+    "cut": [],
+    "missing": []
+   },
+   {
+    "criterion": "S1.34",
+    "cut": [],
+    "missing": []
+   },
+   {
+    "criterion": "S1.35",
+    "cut": [],
+    "missing": []
+   },
+   {
+    "criterion": "S1.36",
+    "cut": [],
+    "missing": []
+   },
+   {
+    "criterion": "S1.37",
+    "cut": [],
+    "missing": []
+   },
+   {
+    "criterion": "S1.38",
+    "cut": [],
+    "missing": []
+   },
+   {
+    "criterion": "S2.1",
+    "cut": [],
+    "missing": []
+   },
+   {
+    "criterion": "S2.2",
+    "cut": [],
+    "missing": []
+   },
+   {
+    "criterion": "S3.1",
+    "cut": [],
+    "missing": []
+   },
+   {
+    "criterion": "S3.2",
+    "cut": [],
+    "missing": []
+   },
+   {
+    "criterion": "S3.3",
+    "cut": [],
+    "missing": []
+   },
+   {
+    "criterion": "S3.4",
+    "cut": [],
+    "missing": []
+   },
+   {
+    "criterion": "S3.5",
+    "cut": [],
+    "missing": []
+   },
+   {
+    "criterion": "S3.6",
+    "cut": [],
+    "missing": []
+   },
+   {
+    "criterion": "S3.7",
+    "cut": [],
+    "missing": []
+   },
+   {
+    "criterion": "S3.8",
+    "cut": [],
+    "missing": []
+   },
+   {
+    "criterion": "S3.9",
+    "cut": [],
+    "missing": []
+   },
+   {
+    "criterion": "S3.10",
+    "cut": [],
+    "missing": []
+   },
+   {
+    "criterion": "S3.11",
+    "cut": [],
+    "missing": []
+   },
+   {
+    "criterion": "S3.12",
+    "cut": [],
+    "missing": []
+   },
+   {
+    "criterion": "S3.13",
+    "cut": [],
+    "missing": []
+   },
+   {
+    "criterion": "S3.14",
+    "cut": [],
+    "missing": []
+   },
+   {
+    "criterion": "S3.15",
+    "cut": [],
+    "missing": []
+   },
+   {
+    "criterion": "S4.1",
+    "cut": [],
+    "missing": []
+   },
+   {
+    "criterion": "S4.2",
+    "cut": [],
+    "missing": []
+   },
+   {
+    "criterion": "S4.3",
+    "cut": [],
+    "missing": []
+   },
+   {
+    "criterion": "S4.4",
+    "cut": [],
+    "missing": []
+   },
+   {
+    "criterion": "S5.1",
+    "cut": [],
+    "missing": []
+   },
+   {
+    "criterion": "S5.2",
+    "cut": [],
+    "missing": []
+   },
+   {
+    "criterion": "S5.3",
+    "cut": [],
+    "missing": []
+   },
+   {
+    "criterion": "S5.4",
+    "cut": [],
+    "missing": []
+   },
+   {
+    "criterion": "S5.5",
+    "cut": [],
+    "missing": []
+   },
+   {
+    "criterion": "S5.6",
+    "cut": [],
+    "missing": []
+   },
+   {
+    "criterion": "S5.7",
+    "cut": [],
+    "missing": []
+   },
+   {
+    "criterion": "S5.8",
+    "cut": [],
+    "missing": []
+   },
+   {
+    "criterion": "S5.9",
+    "cut": [],
+    "missing": []
+   },
+   {
+    "criterion": "S6.1",
+    "cut": [],
+    "missing": []
+   },
+   {
+    "criterion": "S6.2",
+    "cut": [],
+    "missing": []
+   },
+   {
+    "criterion": "S6.3",
+    "cut": [],
+    "missing": []
+   },
+   {
+    "criterion": "S6.4",
+    "cut": [],
+    "missing": []
+   },
+   {
+    "criterion": "S6.5",
+    "cut": [],
+    "missing": []
+   },
+   {
+    "criterion": "S6.6",
+    "cut": [],
+    "missing": []
+   },
+   {
+    "criterion": "S7.1",
+    "cut": [],
+    "missing": []
+   },
+   {
+    "criterion": "S7.2",
+    "cut": [],
+    "missing": []
+   },
+   {
+    "criterion": "S8.1",
+    "cut": [],
+    "missing": []
+   },
+   {
+    "criterion": "S9.1",
+    "cut": [],
+    "missing": []
+   },
+   {
+    "criterion": "S9.2",
+    "cut": [],
+    "missing": []
+   },
+   {
+    "criterion": "S9.3",
+    "cut": [],
+    "missing": []
+   },
+   {
+    "criterion": "S9.4",
+    "cut": [],
+    "missing": []
+   },
+   {
+    "criterion": "S9.5",
+    "cut": [],
+    "missing": []
+   },
+   {
+    "criterion": "S9.6",
+    "cut": [],
+    "missing": []
+   },
+   {
+    "criterion": "S10.1",
+    "cut": [],
+    "missing": []
+   },
+   {
+    "criterion": "S11.1",
+    "cut": [],
+    "missing": []
+   },
+   {
+    "criterion": "S11.2",
+    "cut": [],
+    "missing": []
+   },
+   {
+    "criterion": "S12.1",
+    "cut": [],
+    "missing": []
+   },
+   {
+    "criterion": "S13.1",
+    "cut": [],
+    "missing": []
+   }
+  ],
+  "tests": [
+   {
+    "test": "tests/test_settings.py::test_no_settings_file_uses_defaults",
+    "only_its_behavior": true,
+    "why": "Checks only that a repo with no file runs on defaults."
+   },
+   {
+    "test": "tests/test_settings.py::test_broken_settings_file_fails_naming_it",
+    "only_its_behavior": true,
+    "why": "Checks only that broken YAML fails, naming the file."
+   },
+   {
+    "test": "tests/test_agents.py::test_settings_file_wins_over_old_agents_file",
+    "only_its_behavior": true,
+    "why": "Checks only that the settings file wins over the old file."
+   }
+  ],
+  "size": "ok"
+ },
+ "check": {
+  "passed": true,
+  "problems": []
+ },
+ "url": "https://github.com/dokima-dev/dokima/issues/740#issuecomment-6220269325"
+}
