@@ -49,6 +49,16 @@ MOVED = {
     "tests/test_size_rule.py::test_too_big_too_small_or_too_many_is_refused":
         "tests/test_size_rule.py::test_a_story_over_five_or_empty_is_refused",
 }
+# Tests a later issue deleted with the code they checked, with the issue that did it.
+DROPPED = {
+    # #760: the old label approval, checkbox plan parser and plain text plan writer are deleted.
+    "tests/test_card.py::test_card_says_criteria_and_is_read_back_as_the_plan",
+    "tests/test_open_ask.py::test_the_owners_text_is_never_read_as_plan",
+    "tests/test_plan.py::test_card_and_checkbox_formats_read_the_same_plan",
+    "tests/test_plan.py::test_the_plan_is_frozen_when_the_label_is_added",
+    "tests/test_terms.py::test_context_fold_is_kept_and_never_read_as_plan",
+    "tests/test_terms.py::test_old_and_new_words_read_as_the_same_plan",
+}
 
 
 def topic_files():
@@ -111,12 +121,12 @@ def test_every_test_from_before_the_first_split_still_runs(record_property):
 
     Checks the rules file is split, then collects every test as pytest would run them and compares with the 1,127
     test cases on main before the first split. Each test there must still be collected, with at least as many cases
-    as before; a test another issue renamed counts when its new name runs. Tests added since do not count against
-    it. Proves 638.3."""
+    as before; a test another issue renamed counts when its new name runs, and one another issue deleted with the code
+    it checked is left out. Tests added since do not count against it. Proves 638.3."""
     record_property("proves", "638.3")
     require_split("638.3")
     before = Counter(l.strip().split("[")[0] for l in open(BEFORE) if l.strip())
     now = Counter(n.split("[")[0] for n in collected())
-    lost = [f"{t} ({k} before, {now[t]} now)" for t, k in sorted(before.items()) if t not in MOVED and now[t] < k]
+    lost = [f"{t} ({k} before, {now[t]} now)" for t, k in sorted(before.items()) if t not in MOVED and t not in DROPPED and now[t] < k]
     lost += [f"{t}, renamed {new}, (none now)" for t, new in MOVED.items() if not now[new]]
     assert not lost, "638.3: these tests no longer run as they did before the first split:\n" + "\n".join(lost)
