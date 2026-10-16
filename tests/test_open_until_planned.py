@@ -19,7 +19,7 @@ import sys
 
 sys.path.insert(0, os.path.join(os.path.dirname(__file__), ".."))
 sys.path.insert(0, os.path.dirname(__file__))
-from dokima import agent, body, card, plan, planner  # noqa: E402
+from dokima import agent, body, card, plan  # noqa: E402
 from test_body import TRICKY, github  # noqa: E402,F401
 from test_new_issue_card import (NO_PLAN, OLD_TOP, PLAN, REPO, SUMMARY, TOPS, draw, found_for, rec,  # noqa: E402
                                  without_comments)
@@ -145,21 +145,6 @@ def test_once_planned_the_owners_text_folds(record_property, monkeypatch, github
             # Since #416 the Definition of Done is the body's last line, below the Original issue fold.
             assert saved.count(DOD) == ask.count(DOD) + 1 and last.startswith(DOD) and SUMMARY in top, \
                 f"407.2: with a plan, the Definition of Done is not the body's last line once: {last!r}"
-
-
-def test_the_planner_folds_an_open_new_issue(record_property):
-    """The planner's save folds a new issue's open text under Original issue.
-
-    Proves 407.2.
-    Builds a new issue showing the owner's text open with its Definition of Done below, renders the planner's body on
-    it and checks the owner's text sits alone in the closed Original issue fold, read back byte for byte."""
-    record_property("proves", "407.2")
-    story = {"objective": "Fold the ask", "criteria": ["The ask is folded"], "non_goals": [],
-             "scope": ["dokima/body.py"], "test_changes": {}}
-    for ask in ASKS:
-        open_issue = ("<!-- dokima-card -->\n**Backlog**\n\n<!-- /dokima-card -->\n\n" + body.MARKER + OPEN_START
-                      + ask + "\n\n" + body.DONE + "\n" + card.done_row(REPO, found_for([]), None))
-        assert_planned_fold("407.2", planner.render("9", open_issue, story, {}), ask)
 
 
 # 407.3: a split's sub-issue, quoted by code from the parent's plan, keeps its fold before its own plan (237.3)

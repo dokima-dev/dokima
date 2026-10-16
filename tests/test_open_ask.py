@@ -139,4 +139,3 @@ def test_a_refused_save_leaves_the_body_and_says_why(record_property, github):
         assert len(github.saves) == 1 and body.ask(github.saves[0]) == "My ask.", "237.4: a good save changed the owner's text"
         assert len(github.comments) == 1, "237.4: a good save posted a refusal"
         assert_folded("237.4", github.saves[0], "My ask.")
-
