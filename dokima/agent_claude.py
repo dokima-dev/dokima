@@ -23,7 +23,7 @@ def run(prompt, model, out):
         env["CLAUDE_CODE_OAUTH_TOKEN"] = env.pop("DOKIMA_AGENT_KEY")
     with open(os.path.join(str(out), "claude.json"), "w") as f:
         return subprocess.run(["claude", "-p", prompt, "--model", model, "--dangerously-skip-permissions",
-                               "--max-turns", "60", "--output-format", "json"], stdout=f, env=env).returncode
+                               "--max-turns", os.environ.get("DOKIMA_MAX_TURNS") or "100", "--output-format", "json"], stdout=f, env=env).returncode
 
 
 def models(out, log_dir):

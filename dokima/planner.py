@@ -133,11 +133,23 @@ def count(s):
     return len(s.get("acceptance_criteria") or []) + len(s.get("non_functional") or [])
 
 
-def check_size(stories, nested=False):
-    """Garbled unless every story holds a criterion, and a parent's story stays one.
+MAX_CRITERIA = int(os.environ.get("DOKIMA_MAX_CRITERIA") or 10)
 
-    No count caps a story or how many stories an issue splits into; the code files criteria share decide the stories."""
-    if nested and len(stories) > 1:
+
+def check_size(stories, nested=False):
+    """Garbled unless every story holds a criterion and at most MAX_CRITERIA of them, and a parent's story stays one
+    unless it holds more than MAX_CRITERIA.
+
+    A story over the cap is handed back as a split into consecutive stories of at most MAX_CRITERIA each, the way any
+    plan splits, so every story is born within the cap and never needs to split again."""
+    over = [(n, count(s)) for n, s in enumerate(stories, 1) if count(s) > MAX_CRITERIA]
+    if over:
+        n, k = over[0]
+        where = "this story" if len(stories) == 1 else f"story {n}"
+        raise Garbled(f"{where} holds {k} criteria, more than the {MAX_CRITERIA} a story may hold: hand back a split "
+                      f"into stories of at most {MAX_CRITERIA} criteria, each later story of the same code files "
+                      "depending on the one before")
+    if nested and len(stories) > 1 and sum(count(s) for s in stories) <= MAX_CRITERIA:
         raise Garbled("this issue is already a story of its parent, so it never splits again: hand back one story, and "
                       "ask the owner, in a question, which criteria to drop")
     empty = [n for n, s in enumerate(stories, 1) if not count(s)]
@@ -175,25 +187,47 @@ def story_groups(criteria):
 
 
 def check_groups(stories, nested=False):
-    """Garbled unless the stories are exactly code's groups of criteria by shared code files.
+    """Garbled unless the stories follow code's groups of criteria by shared code files.
 
-    Each story's criteria share code files, and no code file is changed by criteria in different stories."""
-    owner = {}  # code file -> the first story whose criteria change it
+    Each story's criteria lie in one group. A group of at most MAX_CRITERIA criteria is one story; a larger group is
+    cut into consecutive stories of at most MAX_CRITERIA each, every later one depending on the one before, so stories
+    sharing code files take turns."""
+    crits, story_of = [], []
     for n, s in enumerate(stories, 1):
-        criteria = (s.get("acceptance_criteria") or []) + (s.get("non_functional") or [])
-        if len(story_groups(criteria)) > 1:
-            if nested:
+        for c in (s.get("acceptance_criteria") or []) + (s.get("non_functional") or []):
+            crits.append(c)
+            story_of.append(n)
+    group_of = {}
+    for g, members in enumerate(story_groups(crits)):
+        for i in members:
+            group_of[i] = g
+    for n in range(1, len(stories) + 1):
+        if len({group_of[i] for i, m in enumerate(story_of) if m == n}) > 1:
+            if nested and len(stories) == 1:
                 raise Garbled("this issue is already a story of its parent, so it never splits again, but its criteria "
                               "share no code file: hand back the criteria that share one, and ask the owner, in a "
                               "question, which to drop")
             where = "this story" if len(stories) == 1 else f"story {n}"
             raise Garbled(f"{where} holds criteria with no code file in common: put them in separate stories")
-        for c in criteria:
-            for f in sorted(code_files(c)):
-                m = owner.setdefault(f, n)
-                if m != n:
-                    raise Garbled(f"stories {m} and {n} both change {f}: criteria sharing a code file belong in the "
-                                  "same story")
+    for members in story_groups(crits):
+        ss = sorted({story_of[i] for i in members})
+        if len(ss) < 2:
+            continue
+        if len(members) <= MAX_CRITERIA:
+            first = {}  # code file -> the first story whose criteria change it
+            for i in members:
+                for f in sorted(code_files(crits[i])):
+                    m = first.setdefault(f, story_of[i])
+                    if m != story_of[i]:
+                        raise Garbled(f"stories {m} and {story_of[i]} both change {f}, holding {len(members)} criteria "
+                                      f"together, within the {MAX_CRITERIA} a story may hold: criteria sharing a code "
+                                      "file belong in the same story")
+            raise Garbled(f"stories {ss[0]} and {ss[1]} hold {len(members)} criteria joined by shared code files, within "
+                          f"the {MAX_CRITERIA} a story may hold: criteria sharing a code file belong in the same story")
+        for prev, cur in zip(ss, ss[1:]):
+            if (prev - 1) not in (stories[cur - 1].get("depends_on") or []):
+                raise Garbled(f"stories {prev} and {cur} share code files, so story {cur} must depend on story {prev} "
+                              "to take its turn")
 
 
 def check_stories(stories, issue=None, said=None):
