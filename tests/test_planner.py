@@ -6,7 +6,7 @@ import sys
 import pytest
 
 sys.path.insert(0, os.path.join(os.path.dirname(__file__), ".."))
-from dokima import plan, planner  # noqa: E402
+from dokima import planner  # noqa: E402
 
 WORKFLOWS = os.path.join(os.path.dirname(__file__), "..", ".github", "workflows")
 PLAN = {"objective": "Slow calls return a job id", "criteria": ["A slow call returns a job id within 20 s", "The job id is unique"],
@@ -29,12 +29,12 @@ def test_plan_is_written_into_the_issue_as_goal_criteria_and_scope(record_proper
     record_property("proves", "80.1")
     body = planner.render("9", "Make slow calls async.\n- [ ] Goal: old goal", PLAN, TAGS)
     assert body.startswith("- [ ] Objective: Slow calls return a job id\n  - [ ] Acceptance criteria: "), "80.1: not in the Objective / Acceptance criteria format"
-    parsed = plan.parse(body)
-    assert [g["text"] for g in parsed["goals"]] == ["Slow calls return a job id"], "80.1: goal not read back"
-    crits = parsed["goals"][0]["criteria"]
-    assert [c["text"] for c in crits] == PLAN["criteria"], "80.1: criteria not read back in order"
-    assert crits[0]["verified_by"] == "`tests/test_jobs.py::test_id`", "80.1: criterion 1 not linked to its test"
-    assert "- `dokima/jobs.py`" in parsed["notes"], "80.1: scope missing"
+    lines = body.splitlines()
+    assert lines[1:5] == ["  - [ ] Acceptance criteria: A slow call returns a job id within 20 s",
+                          "    Verified by: `tests/test_jobs.py::test_id`",
+                          "  - [ ] Acceptance criteria: The job id is unique",
+                          "    Verified by: `tests/test_jobs.py::test_unique`"], "80.1: criteria not written in order with their tests"
+    assert "**Scope:**\n- `dokima/jobs.py`" in body, "80.1: scope missing"
 
 
 def test_planning_again_keeps_the_owner_text_once(record_property):

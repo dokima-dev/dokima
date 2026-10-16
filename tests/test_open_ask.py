@@ -1,10 +1,10 @@
-"""The owner's folded text is never changed by a redraw, nor read as the plan.
+"""The owner's folded text is never changed by a redraw.
 
 Issue #237, story 4 of #230, opened the owner's ask below the card; issue #373 folds every ask again under a closed
 `<details><summary>Original issue</summary>` (tests/test_card_folds.py proves that). What #237 kept still holds: an
 issue whose body is a split's story, quoted by code from the parent's approved plan (dokima/agent.py story_body),
-keeps the fold; a redraw that would change the owner's text is refused, leaving the body as it was and saying why on
-the issue; and the owner's old checkboxes are never read as the plan.
+keeps the fold; and a redraw that would change the owner's text is refused, leaving the body as it was and saying why
+on the issue.
 
 GitHub is faked by the same recorder tests/test_body.py uses; the card's main runs as in those tests.
 """
@@ -16,7 +16,7 @@ import pytest
 
 sys.path.insert(0, os.path.join(os.path.dirname(__file__), ".."))
 sys.path.insert(0, os.path.dirname(__file__))
-from dokima import agent, body, plan, planner  # noqa: E402
+from dokima import agent, body  # noqa: E402
 from test_body import NUMBER, PLAN_TOP, REPO, TRICKY, github, run_card  # noqa: E402,F401
 
 FOLD_SUMMARY = "<summary>Original issue</summary>"
@@ -140,22 +140,3 @@ def test_a_refused_save_leaves_the_body_and_says_why(record_property, github):
         assert len(github.comments) == 1, "237.4: a good save posted a refusal"
         assert_folded("237.4", github.saves[0], "My ask.")
 
-
-def test_the_owners_text_is_never_read_as_plan(record_property):
-    """The owner's old checkboxes, folded, never become plan goals or criteria.
-
-    Writes a plan into an issue whose ask holds old plan checkboxes and checks the plan reads back with only the
-    planner's one goal and criterion, the same as for an ask with no checkboxes."""
-    record_property("proves", "237.5")
-    story = {"objective": "Slow calls return a job id", "criteria": ["A slow call returns a job id within 20 s"],
-             "non_goals": [], "scope": ["dokima/jobs.py"], "test_changes": {}}
-    ask = "- [ ] Goal: an old goal\n  - [ ] Done when: an old criterion\n- [ ] Objective: another old goal\n"
-    new = planner.render("9", ask, story, {})
-    assert_folded("237.5", new, ask)
-    parsed = plan.parse(new)
-    assert [g["text"] for g in parsed["goals"]] == ["Slow calls return a job id"], \
-        "237.5: the owner's old checkboxes were read as plan goals"
-    assert [c["text"] for c in parsed["goals"][0]["criteria"]] == ["A slow call returns a job id within 20 s"], \
-        "237.5: the owner's old checkboxes were read as plan criteria"
-    plain = plan.parse(planner.render("9", "No checkboxes here.", story, {}))
-    assert [g["text"] for g in plain["goals"]] == ["Slow calls return a job id"], "237.5: a plain ask lost the plan's goal"
