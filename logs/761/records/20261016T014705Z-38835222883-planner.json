@@ -1,0 +1,116 @@
+{
+ "role": "planner",
+ "stage": null,
+ "run_id": "38835222883",
+ "commit_before": "0704cf6805e80260d5f1a5eaca427f3f4eae822a",
+ "started_by": "RezaSoleymanifar",
+ "models": [
+  "claude-opus-5-5"
+ ],
+ "report": {
+  "duration_ms": 11138,
+  "turns": 3,
+  "cost_usd": 0.6427434,
+  "tokens_in": 167656,
+  "tokens_out": 838
+ },
+ "log": "https://github.com/dokima-dev/dokima/blob/logs/logs/761/38835222883-planner.md",
+ "run": "https://github.com/dokima-dev/dokima/actions/runs/38835222883",
+ "handback": {
+  "kind": "user_story",
+  "title": "Delete the planner's old post and reject steps",
+  "summary": "Deletes the planner's unused post and reject steps and its old plan writer, with their tests.",
+  "user_story": "The planner keeps only its check, so no unused code can post plans or rejections on issues.",
+  "acceptance_criteria": [
+   {
+    "text": "Asking the planner to post a plan no longer posts anything on the issue.",
+    "words": "the `post` and `rejected` actions",
+    "source": "https://github.com/dokima-dev/dokima/issues/739",
+    "files": [
+     "dokima/planner.py"
+    ],
+    "no_edge_cases": "A deleted step takes no input left to vary."
+   },
+   {
+    "text": "Asking the planner to report a rejected plan no longer posts anything on the issue.",
+    "words": "the `post` and `rejected` actions",
+    "source": "https://github.com/dokima-dev/dokima/issues/739",
+    "files": [
+     "dokima/planner.py"
+    ],
+    "no_edge_cases": "A deleted step takes no input left to vary."
+   },
+   {
+    "text": "The old writer of a plan into the issue's text is deleted from the planner.",
+    "words": "`render` and `plan_text`",
+    "source": "https://github.com/dokima-dev/dokima/issues/739",
+    "files": [
+     "dokima/planner.py"
+    ],
+    "no_edge_cases": "Deleted code takes no input left to vary."
+   },
+   {
+    "text": "The old plan text builder is deleted from the planner.",
+    "words": "`render` and `plan_text`",
+    "source": "https://github.com/dokima-dev/dokima/issues/739",
+    "files": [
+     "dokima/planner.py"
+    ],
+    "no_edge_cases": "Deleted code takes no input left to vary."
+   }
+  ],
+  "non_functional": [],
+  "tests": {
+   "761.1": [
+    "tests/test_planner_old_steps.py::test_the_post_step_posts_nothing"
+   ],
+   "761.2": [
+    "tests/test_planner_old_steps.py::test_the_reject_step_posts_nothing"
+   ],
+   "761.3": [
+    "tests/test_planner_old_steps.py::test_the_plan_writer_is_gone"
+   ],
+   "761.4": [
+    "tests/test_planner_old_steps.py::test_the_plan_text_builder_is_gone"
+   ]
+  },
+  "test_changes": {
+   "tests/test_card_every_change.py::test_only_card_yml_writes_the_card": "Dropped the half that ran the deleted post step.",
+   "tests/test_card_folds.py::test_the_card_and_the_planner_fold_the_owners_text": "Dropped the line that called the deleted plan writer.",
+   "tests/test_planner.py::test_rejected_output_fails_the_run_and_posts_nothing": "Runs the check instead of the deleted post step.",
+   "tests/test_rules_split.py::test_every_test_from_before_the_first_split_still_runs": "Skips the older tests this issue deletes with their code.",
+   "tests/test_body.py::test_a_first_plan_adds_the_marker_to_a_fresh_ask": "Only checked the deleted plan writer.",
+   "tests/test_body.py::test_replanning_never_changes_the_owner_part": "Only checked the deleted plan writer.",
+   "tests/test_open_ask.py::test_the_owners_text_is_never_read_as_plan": "Only checked the deleted plan writer.",
+   "tests/test_open_until_planned.py::test_the_planner_folds_an_open_new_issue": "Only checked the deleted plan writer.",
+   "tests/test_planner.py::test_a_run_that_failed_before_handing_back_still_says_so": "Only checked the deleted reject step.",
+   "tests/test_planner.py::test_plan_is_written_into_the_issue_as_goal_criteria_and_scope": "Only checked the deleted plan writer.",
+   "tests/test_planner.py::test_planning_again_keeps_the_owner_text_once": "Only checked the deleted plan writer.",
+   "tests/test_planner.py::test_rejection_reason_is_saved_and_posted_with_a_run_link": "Only checked the deleted reject step.",
+   "tests/test_planner.py::test_the_plan_lists_every_older_test_change_with_its_reason": "Only checked the deleted plan text builder."
+  },
+  "links": {
+   "blocked_by": [],
+   "blocks": [],
+   "relates_to": [
+    739,
+    760,
+    762,
+    718,
+    765
+   ]
+  },
+  "answers": [
+   {
+    "raise": "R1",
+    "answer": "done",
+    "why": "Dropped the useless test and its criterion, per the owner; the plan itself deletes those tests."
+   }
+  ]
+ },
+ "check": {
+  "passed": true,
+  "problems": []
+ },
+ "url": "https://github.com/dokima-dev/dokima/issues/761#issuecomment-6205930721"
+}
