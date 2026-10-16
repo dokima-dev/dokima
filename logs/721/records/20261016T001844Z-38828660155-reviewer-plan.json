@@ -1,0 +1,79 @@
+{
+ "role": "reviewer",
+ "stage": "plan",
+ "run_id": "38828660155",
+ "commit_before": "d46a8f55599b912ce7db38ff8ceec3315395a425",
+ "started_by": "dokima-runtime[bot]",
+ "models": [
+  "claude-opus-5-5"
+ ],
+ "report": {
+  "duration_ms": 28033,
+  "turns": 7,
+  "cost_usd": 0.2683806,
+  "tokens_in": 216196,
+  "tokens_out": 2550
+ },
+ "log": "https://github.com/dokima-dev/dokima/blob/logs/logs/721/38828660155-reviewer-plan.md",
+ "run": "https://github.com/dokima-dev/dokima/actions/runs/38828660155",
+ "handback": {
+  "previous_step": {
+   "did": [
+    "The planner wrote one criterion: a comment after a settings value is dropped.",
+    "The planner wrote three tests: commented lines, a quoted name, a section line."
+   ],
+   "decided": [
+    "The planner tests through the same call a run makes to learn its agent."
+   ],
+   "open": []
+  },
+  "verdict": "approve",
+  "summary": "The plan carries the one ask, and its three tests fail today because comments are still read into values.",
+  "raises": [],
+  "answers": [],
+  "asks": [
+   {
+    "ask": "The settings reader keeps an inline comment as part of a value, so a commented agent line names a wrong agent.",
+    "source": "https://github.com/dokima-dev/dokima/issues/721",
+    "criterion": "721.1"
+   }
+  ],
+  "behaviors": [
+   {
+    "criterion": "721.1",
+    "one_behavior": true,
+    "why": "One result: a comment after a value is left out of it."
+   }
+  ],
+  "edge_cases": [
+   {
+    "criterion": "721.1",
+    "cut": [],
+    "missing": []
+   }
+  ],
+  "tests": [
+   {
+    "test": "tests/test_settings_comments.py::test_inline_comment_not_in_value",
+    "only_its_behavior": true,
+    "why": "Fails today with each value carrying its comment; passes only on bare values."
+   },
+   {
+    "test": "tests/test_settings_comments.py::test_quoted_value_with_comment",
+    "only_its_behavior": true,
+    "why": "Fails today reading the agent with a stray quote and comment."
+   },
+   {
+    "test": "tests/test_settings_comments.py::test_comment_on_section_line",
+    "only_its_behavior": true,
+    "why": "Fails today: the commented roles line hides the planner, so it falls back to the default."
+   }
+  ],
+  "size": "ok"
+ },
+ "check": {
+  "passed": true,
+  "problems": []
+ },
+ "url": "https://github.com/dokima-dev/dokima/issues/721#issuecomment-6205060989"
+}
