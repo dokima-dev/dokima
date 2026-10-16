@@ -1,0 +1,70 @@
+{
+ "role": "reviewer",
+ "stage": "pr",
+ "run_id": "38831805087",
+ "commit_before": "5ef514f763dce343dc353037625646df7bb8d063",
+ "started_by": "dokima-runtime[bot]",
+ "models": [
+  "claude-opus-5-5"
+ ],
+ "report": {
+  "duration_ms": 93413,
+  "turns": 7,
+  "cost_usd": 0.3875648,
+  "tokens_in": 271355,
+  "tokens_out": 3606
+ },
+ "log": "https://github.com/dokima-dev/dokima/blob/logs/logs/706/38831805087-reviewer-pr.md",
+ "run": "https://github.com/dokima-dev/dokima/actions/runs/38831805087",
+ "handback": {
+  "previous_step": {
+   "did": [
+    "Card steps now also remove the role's agent key.",
+    "The record step now removes every given secret from the card and saved record.",
+    "Cancelled and unstarted records are cleaned the same way."
+   ],
+   "decided": [
+    "Transcripts were left as they are, per the plan's assumption."
+   ],
+   "open": [
+    "Nine settings tests fail on this machine, on main too."
+   ]
+  },
+  "verdict": "approve",
+  "summary": "Cards and records now hide the role's agent key; all three proofs pass here and failed on main.",
+  "raises": [],
+  "answers": [
+   {
+    "raise": "W1",
+    "answer": "disagree",
+    "why": "The nine failures come from this machine's settings path, not the code; they pass with it unset, on main too."
+   }
+  ],
+  "asks": [],
+  "behaviors": [],
+  "edge_cases": [],
+  "tests": [
+   {
+    "test": "tests/test_agent_key_scrubbed.py::test_every_step_that_hides_claudes_token_hides_the_agent_key",
+    "only_its_behavior": true,
+    "why": "Passes on the branch; on main it names the four card steps missing the key."
+   },
+   {
+    "test": "tests/test_agent_key_scrubbed.py::test_the_runs_record_card_hides_the_agent_key",
+    "only_its_behavior": true,
+    "why": "Passes on the branch; on main the record step lacks the key."
+   },
+   {
+    "test": "tests/test_agent_key_scrubbed.py::test_the_saved_record_file_hides_the_agent_key",
+    "only_its_behavior": true,
+    "why": "Passes on the branch; on main the saved record holds the key."
+   }
+  ],
+  "size": "ok"
+ },
+ "check": {
+  "passed": true,
+  "problems": []
+ },
+ "url": "https://github.com/dokima-dev/dokima/pull/767#issuecomment-6205486969"
+}
