@@ -1,0 +1,247 @@
+{
+ "role": "planner",
+ "stage": null,
+ "run_id": "38972830830",
+ "commit_before": "f32b5fd3b3e8fd1add03f8219088989ceb7e7294",
+ "started_by": "dokima-runtime[bot]",
+ "models": [
+  "claude-opus-5-5"
+ ],
+ "report": {
+  "duration_ms": 437698,
+  "turns": 44,
+  "cost_usd": 2.4492333999999993,
+  "tokens_in": 3663825,
+  "tokens_out": 37747
+ },
+ "log": "https://github.com/dokima-dev/dokima/blob/logs/logs/793/38972830830-planner.md",
+ "run": "https://github.com/dokima-dev/dokima/actions/runs/38972830830",
+ "handback": {
+  "kind": "user_story",
+  "title": "Settings read from shipped defaults, merged and checked",
+  "summary": "Dokima reads its shipped defaults, merges a repo's settings over them, warns on typos and refuses locked settings.",
+  "user_story": "A repo writes only what differs, and Dokima merges it over its defaults, warning on typos.",
+  "acceptance_criteria": [
+   {
+    "text": "A repo with no settings file runs on Dokima's one shipped defaults file.",
+    "words": "Dokima ships one defaults file that every repo's settings fall back to.",
+    "source": "https://github.com/dokima-dev/dokima/issues/779",
+    "files": [
+     "dokima/settings.py",
+     "dokima/defaults.yaml",
+     ".github/workflows/full-suite.yml",
+     ".github/workflows/acceptance-criteria.yml",
+     ".github/workflows/testmon.yml",
+     ".github/workflows/agent.yml"
+    ],
+    "edge_cases": [
+     {
+      "case": "An empty settings file still gives the shipped defaults.",
+      "test": "tests/test_settings_merge.py::test_an_empty_settings_file_falls_back_to_the_shipped_defaults"
+     }
+    ]
+   },
+   {
+    "text": "A repo's settings file changes only the settings it names; every other keeps its default.",
+    "words": "A repo's settings file changes only the settings it names; every other keeps its default.",
+    "source": "https://github.com/dokima-dev/dokima/issues/779",
+    "files": [
+     "dokima/settings.py"
+    ],
+    "no_edge_cases": "Other groups and keys of the same group are checked in one test; no other case is named."
+   },
+   {
+    "text": "The defaults file holds every setting of the owner's list, each with the default the list names.",
+    "words": "The defaults file holds every setting of the owner's 41-row list, each with the default the list names.",
+    "source": "https://github.com/dokima-dev/dokima/issues/779",
+    "files": [
+     "dokima/settings.py",
+     "dokima/defaults.yaml"
+    ],
+    "no_edge_cases": "One test checks each setting by name; the list itself holds no other case."
+   },
+   {
+    "text": "A settings group in a repo's file merges with the defaults key by key, the repo winning.",
+    "words": "A settings group in a repo's file merges with the defaults key by key, the repo winning.",
+    "source": "https://github.com/dokima-dev/dokima/issues/779",
+    "files": [
+     "dokima/settings.py"
+    ],
+    "edge_cases": [
+     {
+      "case": "A key two levels down, one word cap, keeps every other cap.",
+      "test": "tests/test_settings_merge.py::test_a_group_two_levels_down_merges_key_by_key"
+     }
+    ]
+   },
+   {
+    "text": "A list in a repo's file replaces the default list whole.",
+    "words": "A list in a repo's file replaces the default list whole.",
+    "source": "https://github.com/dokima-dev/dokima/issues/779",
+    "files": [
+     "dokima/settings.py"
+    ],
+    "edge_cases": [
+     {
+      "case": "An empty list empties the setting.",
+      "test": "tests/test_settings_merge.py::test_an_empty_list_in_the_repo_file_empties_the_setting"
+     }
+    ]
+   },
+   {
+    "text": "Gates in a repo's file merge with the default gates by name.",
+    "words": "Gates in a repo's file merge with the default gates by name.",
+    "source": "https://github.com/dokima-dev/dokima/issues/779",
+    "files": [
+     "dokima/settings.py"
+    ],
+    "edge_cases": [
+     {
+      "case": "A gate named like a default one takes its place.",
+      "test": "tests/test_settings_merge.py::test_a_gate_named_like_a_default_replaces_it_in_place"
+     }
+    ]
+   },
+   {
+    "text": "Prompt additions in a repo's file merge with the default ones by name.",
+    "words": "Prompt additions in a repo's file merge with the default ones by name.",
+    "source": "https://github.com/dokima-dev/dokima/issues/779",
+    "files": [
+     "dokima/settings.py",
+     "dokima/defaults.yaml"
+    ],
+    "edge_cases": [
+     {
+      "case": "An addition named like a default one takes its place.",
+      "test": "tests/test_settings_merge.py::test_a_prompt_addition_named_like_a_default_replaces_it"
+     }
+    ]
+   },
+   {
+    "text": "An unknown setting shows a warning that suggests the closest known name.",
+    "words": "An unknown setting shows a warning that suggests the closest known name.",
+    "source": "https://github.com/dokima-dev/dokima/issues/779",
+    "files": [
+     "dokima/settings.py"
+    ],
+    "edge_cases": [
+     {
+      "case": "A misspelt group name gets the closest group suggested.",
+      "test": "tests/test_settings_merge.py::test_an_unknown_group_warns_with_the_closest_known_group"
+     }
+    ]
+   },
+   {
+    "text": "An unknown setting is ignored and the run goes on.",
+    "words": "An unknown setting is ignored and the run goes on.",
+    "source": "https://github.com/dokima-dev/dokima/issues/779",
+    "files": [
+     "dokima/settings.py"
+    ],
+    "edge_cases": [
+     {
+      "case": "A whole unknown group is ignored too.",
+      "test": "tests/test_settings_merge.py::test_an_unknown_group_is_ignored_and_the_run_goes_on"
+     }
+    ]
+   },
+   {
+    "text": "Setting any of the five locked settings in a repo's file fails the run, naming it.",
+    "words": "Setting any of the five locked settings in a repo's file fails the run, naming it.",
+    "source": "https://github.com/dokima-dev/dokima/issues/779",
+    "files": [
+     "dokima/settings.py",
+     "dokima/defaults.yaml"
+    ],
+    "no_edge_cases": "Each of the five is set in turn in one test; no other case is named."
+   }
+  ],
+  "non_functional": [],
+  "tests": {
+   "793.1": [
+    "tests/test_settings_merge.py::test_a_repo_with_no_settings_file_runs_on_the_shipped_defaults_file",
+    "tests/test_settings_merge.py::test_an_empty_settings_file_falls_back_to_the_shipped_defaults"
+   ],
+   "793.2": [
+    "tests/test_settings_merge.py::test_a_repo_file_changes_only_the_setting_it_names"
+   ],
+   "793.3": [
+    "tests/test_settings_merge.py::test_the_shipped_defaults_hold_the_owners_list"
+   ],
+   "793.4": [
+    "tests/test_settings_merge.py::test_a_group_in_the_repo_file_merges_key_by_key",
+    "tests/test_settings_merge.py::test_a_group_two_levels_down_merges_key_by_key"
+   ],
+   "793.5": [
+    "tests/test_settings_merge.py::test_a_list_in_the_repo_file_replaces_the_default_list",
+    "tests/test_settings_merge.py::test_an_empty_list_in_the_repo_file_empties_the_setting"
+   ],
+   "793.6": [
+    "tests/test_settings_merge.py::test_gates_in_the_repo_file_merge_with_the_default_gates_by_name",
+    "tests/test_settings_merge.py::test_a_gate_named_like_a_default_replaces_it_in_place"
+   ],
+   "793.7": [
+    "tests/test_settings_merge.py::test_prompt_additions_in_the_repo_file_merge_with_the_default_ones_by_name",
+    "tests/test_settings_merge.py::test_a_prompt_addition_named_like_a_default_replaces_it"
+   ],
+   "793.8": [
+    "tests/test_settings_merge.py::test_an_unknown_setting_warns_with_the_closest_known_name",
+    "tests/test_settings_merge.py::test_an_unknown_group_warns_with_the_closest_known_group"
+   ],
+   "793.9": [
+    "tests/test_settings_merge.py::test_an_unknown_setting_is_ignored_and_the_run_goes_on",
+    "tests/test_settings_merge.py::test_an_unknown_group_is_ignored_and_the_run_goes_on"
+   ],
+   "793.10": [
+    "tests/test_settings_merge.py::test_setting_a_locked_setting_fails_the_run_naming_it"
+   ]
+  },
+  "test_changes": {},
+  "links": {
+   "blocked_by": [],
+   "blocks": [
+    794
+   ],
+   "relates_to": [
+    779,
+    740,
+    741
+   ]
+  },
+  "raises": [
+   {
+    "kind": "question",
+    "to": "owner",
+    "label": "Install the YAML reader",
+    "text": "Test machines lack the YAML library. The plan adds it to four test setups, awaiting your approval.",
+    "evidence": "`full-suite.yml:27` installs only pytest and pytest-xdist; story [#794](https://github.com/dokima-dev/dokima/issues/794) installs later.",
+    "raised_by": "planner",
+    "id": "P1"
+   },
+   {
+    "kind": "question",
+    "to": "owner",
+    "label": "List not in reach",
+    "text": "Your 41-row list was not in my pack. The test checks 32 settings rebuilt from earlier quotes. Enough?",
+    "evidence": "`owner_words.json` lacks the #740 comment; co-author, merge queue and check name rows were never quoted.",
+    "raised_by": "planner",
+    "id": "P2"
+   },
+   {
+    "kind": "question",
+    "to": "owner",
+    "label": "Turn limit default",
+    "text": "Your list says agents get 60 turns; a newer change set 100. The plan assumes 100.",
+    "evidence": "Commit `f32b5fd` sets 100 in `dokima/agent_claude.py:26`, until the settings file holds it.",
+    "raised_by": "planner",
+    "id": "P3"
+   }
+  ],
+  "answers": []
+ },
+ "check": {
+  "passed": true,
+  "problems": []
+ },
+ "url": "https://github.com/dokima-dev/dokima/issues/793#issuecomment-6225481830"
+}
