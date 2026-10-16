@@ -1,0 +1,52 @@
+{
+ "role": "worker",
+ "stage": null,
+ "run_id": "38834602432",
+ "commit_before": "5342e696f85ef047968c94af9e88acccb4b35c11",
+ "started_by": "dokima-runtime[bot]",
+ "models": [
+  "claude-opus-5-5"
+ ],
+ "report": {
+  "duration_ms": 68273,
+  "turns": 9,
+  "cost_usd": 0.4127436,
+  "tokens_in": 356448,
+  "tokens_out": 3555
+ },
+ "log": "https://github.com/dokima-dev/dokima/blob/logs/logs/763/38834602432-worker.md",
+ "run": "https://github.com/dokima-dev/dokima/actions/runs/38834602432",
+ "handback": {
+  "summary": "Dropped the old work branch lookups, the run title lookup and the old worker run lookup.",
+  "criteria": {
+   "763.1": "`linked_prs` in `dokima/agent_github.py` and `issue_pr` in `dokima/card.py` ask only for `try/issue-N`.",
+   "763.2": "Same two lookups keep `try/issue-N`; this test already passed before the change.",
+   "763.3": "`find_work` in `dokima/card.py` no longer reads `RUN_TITLE`.",
+   "763.4": "`latest_worker_run` deleted; `gather` no longer sets `worker`; `render` reads `found.get(\"worker\")`.",
+   "763.5": "`latest_worker_run` is gone from `dokima/card.py`; the planner already removed the tests.",
+   "763.6": "`issue_of_pr` in `dokima/agent_github.py` matches only `try/issue-N`."
+  },
+  "evidence": "`pytest -q` on the four card, body and old lookup test files: 78 passed.",
+  "raises": [
+   {
+    "kind": "issue",
+    "label": "Old branch leftovers",
+    "text": "Two more old work branch traces remain: an unused branch pattern and a plan comment naming the old branch.",
+    "evidence": "`dokima/plan.py:23` `WORK_BRANCH` is unused; `dokima/planner.py:688` says `work/issue-N`.",
+    "raised_by": "worker",
+    "id": "W1"
+   }
+  ]
+ },
+ "check": {
+  "passed": true,
+  "problems": []
+ },
+ "dropped_by_fence": [],
+ "files_changed": [
+  "dokima/agent_github.py",
+  "dokima/card.py"
+ ],
+ "branch": "try/issue-763",
+ "url": "https://github.com/dokima-dev/dokima/issues/763#issuecomment-6205844086"
+}
