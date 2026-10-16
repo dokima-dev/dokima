@@ -1,0 +1,38 @@
+{
+ "role": "worker",
+ "stage": null,
+ "run_id": "38829033344",
+ "commit_before": "309aebe41042183d1a20e4b3ec26d6272e6b0c79",
+ "started_by": "dokima-runtime[bot]",
+ "models": [
+  "claude-opus-5-5"
+ ],
+ "report": {
+  "duration_ms": 88342,
+  "turns": 9,
+  "cost_usd": 0.35362960000000004,
+  "tokens_in": 319888,
+  "tokens_out": 3106
+ },
+ "log": "https://github.com/dokima-dev/dokima/blob/logs/logs/620/38829033344-worker.md",
+ "run": "https://github.com/dokima-dev/dokima/actions/runs/38829033344",
+ "handback": {
+  "summary": "When GitHub refuses to re-run checks after approval, the pull request becomes a draft so the merge gate restarts them.",
+  "criteria": {
+   "620.1": "`rerun_checks` in `dokima/agent_autopilot.py` turns the pull request back into a draft after any refused re-run; `merge_gate` readies it, starting fresh checks."
+  },
+  "evidence": "`pytest -q tests/test_stale_check_after_approval.py`: 1 passed in 0.05s",
+  "raises": [],
+  "answers": []
+ },
+ "check": {
+  "passed": true,
+  "problems": []
+ },
+ "dropped_by_fence": [],
+ "files_changed": [
+  "dokima/agent_autopilot.py"
+ ],
+ "branch": "try/issue-620",
+ "url": "https://github.com/dokima-dev/dokima/issues/620#issuecomment-6205112042"
+}
