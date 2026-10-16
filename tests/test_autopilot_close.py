@@ -257,6 +257,15 @@ def closes_on_issue_close(wf):
     return not types or "closed" in (types if isinstance(types, list) else [types])
 
 
+def starts_on_issue_labeled(wf):
+    """True when GitHub starts this workflow when a label is added to an issue."""
+    on = wf.get("on")
+    if not isinstance(on, dict) or not isinstance(on.get("issues"), dict):
+        return False
+    types = on["issues"].get("types")
+    return "labeled" in (types if isinstance(types, list) else [types])
+
+
 class Repo(ts.Machine):
     """A repo whose fake GitHub knows one issue tree: who is under whom, labels, states, blocked-by links, comments."""
 
@@ -330,7 +339,22 @@ class Repo(ts.Machine):
         Returns the names of the jobs that ran (were not skipped). Every job that changed something on GitHub (sent a
         signal, wrote a comment, changed a label or closed an issue) is kept in self.acted as (file, job name, job, workflow)."""
         self.close_quietly(n)
+        return self.fire(self.close_context(n), closes_on_issue_close)
+
+    def add_label(self, n, name=LABEL, sender_type="User"):
+        """Someone adds label `name` to issue n (a person, or Dokima's app when sender_type is "Bot"); every workflow
+        GitHub starts on `issues: labeled` runs with the event GitHub sends. Returns the names of the jobs that ran."""
+        labels = self._json("labels.json")
+        labels[str(n)] = sorted(set(labels.get(str(n), [])) | {name})
+        json.dump(labels, open(f"{self.tmp}/gh/labels.json", "w"))
         base = self.close_context(n)
+        event = dict(base["github"]["event"], action="labeled", label={"name": name},
+                     sender={"login": OWNER if sender_type == "User" else "dokima-runtime[bot]", "type": sender_type})
+        base["github"]["event"] = event
+        return self.fire(base, starts_on_issue_labeled)
+
+    def fire(self, base, starts_here):
+        """Run every workflow in .github/workflows/ that `starts_here` says GitHub starts on this event."""
         github = base["github"]
         open(f"{self.tmp}/event.json", "w").write(json.dumps(github["event"]))
         ran = []
@@ -338,7 +362,7 @@ class Repo(ts.Machine):
             if not fname.endswith((".yml", ".yaml")) or fname in NOT_RUN_HERE:
                 continue
             wf = ts.load_yaml(open(os.path.join(WORKFLOWS, fname)).read())
-            if not closes_on_issue_close(wf):
+            if not starts_here(wf):
                 continue
             jobs, results, outputs = wf.get("jobs") or {}, {}, {}
             while len(results) < len(jobs):
