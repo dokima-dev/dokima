@@ -1,0 +1,99 @@
+{
+ "role": "planner",
+ "stage": null,
+ "run_id": "38828453987",
+ "commit_before": "e05e426b73487841e18151b08976155d7ab4ae5c",
+ "started_by": "RezaSoleymanifar",
+ "models": [
+  "claude-opus-5-5"
+ ],
+ "report": {
+  "duration_ms": 140040,
+  "turns": 21,
+  "cost_usd": 0.9267848,
+  "tokens_in": 1076370,
+  "tokens_out": 12501
+ },
+ "log": "https://github.com/dokima-dev/dokima/blob/logs/logs/706/38828453987-planner.md",
+ "run": "https://github.com/dokima-dev/dokima/actions/runs/38828453987",
+ "handback": {
+  "kind": "user_story",
+  "title": "Every agent's key stays out of public cards and records",
+  "summary": "Public cards and records hide the key of whichever agent ran, not only Claude's.",
+  "user_story": "Owners can run a role on any agent without its key ever showing on a card or record.",
+  "acceptance_criteria": [
+   {
+    "text": "Every workflow step that hides Claude's token also hides the role's agent key.",
+    "words": "Public logs scrub only Claude's token",
+    "source": "https://github.com/dokima-dev/dokima/issues/706",
+    "files": [
+     ".github/workflows/agent.yml"
+    ],
+    "no_edge_cases": "The workflow file is fixed text with no input, so only its steps are checked."
+   },
+   {
+    "text": "The run's record card shows the role's agent key as removed.",
+    "words": "a key from another secret could leak into transcripts and cards",
+    "source": "https://github.com/dokima-dev/dokima/issues/706",
+    "files": [
+     "dokima/agent_roles.py",
+     ".github/workflows/agent.yml"
+    ],
+    "edge_cases": [
+     {
+      "case": "No agent key is set: the record is still written with its text intact.",
+      "test": "tests/test_agent_key_scrubbed.py::test_the_runs_record_card_hides_the_agent_key"
+     }
+    ]
+   },
+   {
+    "text": "The run's record file saved on the logs branch shows the role's agent key as removed.",
+    "words": "Public logs scrub only Claude's token, so a key from another secret could leak",
+    "source": "https://github.com/dokima-dev/dokima/issues/706",
+    "files": [
+     "dokima/agent_roles.py"
+    ],
+    "no_edge_cases": "The same record step writes this file; its empty key case is covered by 706.2."
+   }
+  ],
+  "non_functional": [],
+  "tests": {
+   "706.1": [
+    "tests/test_agent_key_scrubbed.py::test_every_step_that_hides_claudes_token_hides_the_agent_key"
+   ],
+   "706.2": [
+    "tests/test_agent_key_scrubbed.py::test_the_runs_record_card_hides_the_agent_key"
+   ],
+   "706.3": [
+    "tests/test_agent_key_scrubbed.py::test_the_saved_record_file_hides_the_agent_key"
+   ]
+  },
+  "test_changes": {},
+  "links": {
+   "blocked_by": [],
+   "blocks": [
+    746
+   ],
+   "relates_to": [
+    680
+   ]
+  },
+  "raises": [
+   {
+    "kind": "question",
+    "to": "owner",
+    "label": "Doubt: partly fixed",
+    "text": "Transcripts already hide the agent key since #719. Should the plan fix only cards and records? It assumes so.",
+    "evidence": "`.github/workflows/agent.yml` lines 449 and 476 pass `SCRUB_AGENT` since #719; card and record steps do not.",
+    "raised_by": "planner",
+    "id": "P1"
+   }
+  ],
+  "answers": []
+ },
+ "check": {
+  "passed": true,
+  "problems": []
+ },
+ "url": "https://github.com/dokima-dev/dokima/issues/706#issuecomment-6205038882"
+}
