@@ -1,0 +1,68 @@
+{
+ "role": "planner",
+ "stage": null,
+ "run_id": "38828450480",
+ "commit_before": "e05e426b73487841e18151b08976155d7ab4ae5c",
+ "started_by": "RezaSoleymanifar",
+ "models": [
+  "claude-opus-5-5"
+ ],
+ "report": {
+  "duration_ms": 56722,
+  "turns": 10,
+  "cost_usd": 0.44716239999999996,
+  "tokens_in": 373628,
+  "tokens_out": 5578
+ },
+ "log": "https://github.com/dokima-dev/dokima/blob/logs/logs/721/38828450480-planner.md",
+ "run": "https://github.com/dokima-dev/dokima/actions/runs/38828450480",
+ "handback": {
+  "kind": "user_story",
+  "title": "Settings ignore a comment after a value",
+  "summary": "A comment after a value in the settings file no longer becomes part of that value.",
+  "user_story": "A role named on a commented settings line runs on the agent the line names.",
+  "acceptance_criteria": [
+   {
+    "text": "A comment after a value in the settings file is no longer read as part of that value.",
+    "words": "The settings reader keeps an inline comment as part of a value, so a commented agent line names a wrong agent.",
+    "source": "https://github.com/dokima-dev/dokima/issues/721",
+    "files": [
+     "dokima/setup.py"
+    ],
+    "edge_cases": [
+     {
+      "case": "A quoted agent name with a comment after it",
+      "test": "tests/test_settings_comments.py::test_quoted_value_with_comment"
+     },
+     {
+      "case": "A comment on a section line above the roles",
+      "test": "tests/test_settings_comments.py::test_comment_on_section_line"
+     }
+    ]
+   }
+  ],
+  "non_functional": [],
+  "tests": {
+   "721.1": [
+    "tests/test_settings_comments.py::test_inline_comment_not_in_value",
+    "tests/test_settings_comments.py::test_quoted_value_with_comment",
+    "tests/test_settings_comments.py::test_comment_on_section_line"
+   ]
+  },
+  "test_changes": {},
+  "links": {
+   "blocked_by": [],
+   "blocks": [
+    746
+   ],
+   "relates_to": [
+    740
+   ]
+  }
+ },
+ "check": {
+  "passed": true,
+  "problems": []
+ },
+ "url": "https://github.com/dokima-dev/dokima/issues/721#issuecomment-6205037588"
+}
