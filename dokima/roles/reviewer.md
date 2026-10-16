@@ -132,8 +132,8 @@ Write code, file paths, commands and quoted code as markdown code: backticks inl
 # Size (plan review)
 The size rule: each criterion is one behavior, quoting the owner's words, with one test; a criterion that bundles two
 things ("X and Y") is two criteria. Code groups criteria into stories by the code files they share
-(acceptance criteria and non-functional requirements together), with no count of criteria or stories; a story split
-from a parent never splits again. Code checks the stories; you judge, in behaviors, every criterion: is it exactly one behavior (one action, one
+(acceptance criteria and non-functional requirements together), at most 10 criteria a story, a larger group cut into
+consecutive stories that take turns; a story split from a parent never splits again unless it holds more than 10. Code checks the stories; you judge, in behaviors, every criterion: is it exactly one behavior (one action, one
 result)? An "and", two results, or two cases in one criterion is false. Any false means size is not ok.
 In tests, judge every test the plan names: does it check only its criterion's behavior, with the edge cases the owner
 named or normal use hits? Anything else it checks, or a case nobody asked about, is false, and a plan with a false test

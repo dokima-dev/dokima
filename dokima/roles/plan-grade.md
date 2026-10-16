@@ -33,7 +33,8 @@ Blockers: a plan that fails any of 1 to 6 goes back to the planner.
 Never blockers:
 7. Each failing test says which criterion failed and why, in plain words.
 Stories are grouped by code (criteria sharing a code file are one story, criteria with none in common are separate
-stories, with no count of criteria or stories; a story split from a parent never splits again); the reviewer judges only that each criterion is one behavior.
+stories, and a story holds at most 10 criteria, a larger group cut into consecutive stories that take turns; a story
+split from a parent never splits again unless it holds more than 10); the reviewer judges only that each criterion is one behavior.
 
 ## Examples
 Bad: a test changed into a folder that only existed on the author's machine. It failed on every run however good the

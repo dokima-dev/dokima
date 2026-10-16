@@ -495,7 +495,7 @@ def test_claude_code_starts_with_todays_command(record_property, tmp_path):
     assert p.returncode == 0 and [c["cmd"] for c in calls] == ["claude"], \
         f"698.14: the planner did not start Claude Code once: {said(p)}; calls {calls}"
     assert calls[0]["argv"] == ["-p", "Plan issue 1.\nRead the pack.", "--model", TODAY_MODEL,
-                                "--dangerously-skip-permissions", "--max-turns", "60", "--output-format", "json"], \
+                                "--dangerously-skip-permissions", "--max-turns", "100", "--output-format", "json"], \
         f"698.14: Claude Code's arguments differ from today's: {calls[0]['argv']}"
     assert calls[0]["token"] == "key-value-698", \
         f"698.14: Claude Code got key {calls[0]['token']!r}, not the run's key, as CLAUDE_CODE_OAUTH_TOKEN"
