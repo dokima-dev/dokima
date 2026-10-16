@@ -1,0 +1,170 @@
+{
+ "role": "reviewer",
+ "stage": "plan",
+ "run_id": "38833886252",
+ "commit_before": "5342e696f85ef047968c94af9e88acccb4b35c11",
+ "started_by": "dokima-runtime[bot]",
+ "models": [
+  "claude-opus-5-5"
+ ],
+ "report": {
+  "duration_ms": 406856,
+  "turns": 10,
+  "cost_usd": 0.5213902000000001,
+  "tokens_in": 428943,
+  "tokens_out": 5805
+ },
+ "log": "https://github.com/dokima-dev/dokima/blob/logs/logs/763/38833886252-reviewer-plan.md",
+ "run": "https://github.com/dokima-dev/dokima/actions/runs/38833886252",
+ "handback": {
+  "previous_step": {
+   "did": [
+    "Planned six criteria to stop old branch and old run lookups, each with a test.",
+    "Removed old worker run fakes and one unused test helper from the tests."
+   ],
+   "decided": [
+    "The try branch lookup stays and is proven by an updated existing test.",
+    "The run link row is drawn only when a latest run exists."
+   ],
+   "open": []
+  },
+  "verdict": "approve",
+  "summary": "The plan carries every ask from the parent's story, and each new test fails today for the right reason.",
+  "raises": [],
+  "answers": [],
+  "asks": [
+   {
+    "ask": "Finding an issue's pull requests no longer looks up the old work branch.",
+    "source": "https://github.com/dokima-dev/dokima/issues/739",
+    "criterion": "763.1"
+   },
+   {
+    "ask": "Keep `try/issue-N`.",
+    "source": "https://github.com/dokima-dev/dokima/issues/739",
+    "criterion": "763.2"
+   },
+   {
+    "ask": "The card no longer finds its issue from an old worker run's title.",
+    "source": "https://github.com/dokima-dev/dokima/issues/739",
+    "criterion": "763.3"
+   },
+   {
+    "ask": "Redrawing a card no longer asks GitHub for old worker runs.",
+    "source": "https://github.com/dokima-dev/dokima/issues/739",
+    "criterion": "763.4"
+   },
+   {
+    "ask": "Tests that only check the deleted code are deleted too.",
+    "source": "https://github.com/dokima-dev/dokima/issues/739",
+    "criterion": "763.5"
+   },
+   {
+    "ask": "`:72` (the `issue_of_pr` docstring and pattern)",
+    "source": "https://github.com/dokima-dev/dokima/issues/739",
+    "criterion": "763.6"
+   }
+  ],
+  "behaviors": [
+   {
+    "criterion": "763.1",
+    "one_behavior": true,
+    "why": "One result: no lookup of the old work branch."
+   },
+   {
+    "criterion": "763.2",
+    "one_behavior": true,
+    "why": "One result: the try branch's pull request is still found."
+   },
+   {
+    "criterion": "763.3",
+    "one_behavior": true,
+    "why": "One result: a run title no longer names the issue."
+   },
+   {
+    "criterion": "763.4",
+    "one_behavior": true,
+    "why": "One result: no request for old worker runs on redraw."
+   },
+   {
+    "criterion": "763.5",
+    "one_behavior": true,
+    "why": "One result: tests of the deleted code are gone."
+   },
+   {
+    "criterion": "763.6",
+    "one_behavior": true,
+    "why": "One result: an old branch no longer names its issue."
+   }
+  ],
+  "edge_cases": [
+   {
+    "criterion": "763.1",
+    "cut": [],
+    "missing": []
+   },
+   {
+    "criterion": "763.2",
+    "cut": [],
+    "missing": []
+   },
+   {
+    "criterion": "763.3",
+    "cut": [],
+    "missing": []
+   },
+   {
+    "criterion": "763.4",
+    "cut": [],
+    "missing": []
+   },
+   {
+    "criterion": "763.5",
+    "cut": [],
+    "missing": []
+   },
+   {
+    "criterion": "763.6",
+    "cut": [],
+    "missing": []
+   }
+  ],
+  "tests": [
+   {
+    "test": "tests/test_card_old_lookups.py::test_finding_an_issues_prs_never_looks_up_the_old_work_branch",
+    "only_its_behavior": true,
+    "why": "Records every call to a faked GitHub; fails today naming both old branch lookups."
+   },
+   {
+    "test": "tests/test_card_records.py::test_the_card_finds_the_pr_on_either_branch",
+    "only_its_behavior": true,
+    "why": "Both lookups must still find the try branch pull request; passes today, as a keep should."
+   },
+   {
+    "test": "tests/test_card_old_lookups.py::test_the_card_never_finds_its_issue_from_an_old_worker_runs_title",
+    "only_its_behavior": true,
+    "why": "Runs the real event lookup; fails today returning issue 40 from the title."
+   },
+   {
+    "test": "tests/test_card_old_lookups.py::test_a_redraw_never_asks_github_for_old_worker_runs",
+    "only_its_behavior": true,
+    "why": "Runs real gather and render; fails today on the worker.yml request."
+   },
+   {
+    "test": "tests/test_card_old_lookups.py::test_no_test_still_fakes_the_deleted_lookups",
+    "only_its_behavior": true,
+    "why": "Checks the lookup is gone and no test still fakes it; fails today on the lookup."
+   },
+   {
+    "test": "tests/test_card_old_lookups.py::test_an_old_work_branch_no_longer_names_a_pull_requests_issue",
+    "only_its_behavior": true,
+    "why": "Calls the real matcher on both branches; fails today matching issue 12."
+   }
+  ],
+  "size": "ok"
+ },
+ "check": {
+  "passed": true,
+  "problems": []
+ },
+ "url": "https://github.com/dokima-dev/dokima/issues/763#issuecomment-6205749465"
+}
