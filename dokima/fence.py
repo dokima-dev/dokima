@@ -14,22 +14,6 @@ import sys
 TEST_SETUP = {"conftest.py", "pytest.ini", "tox.ini", "setup.cfg", "pyproject.toml"}
 
 
-def scope_of(issue_text):
-    """Return the file paths listed under the plan's Scope heading."""
-    paths, inside = [], False
-    for line in issue_text.splitlines():
-        if re.match(r"\s*\*\*Scope:\*\*", line):
-            inside = True
-            continue
-        if inside:
-            m = re.match(r"\s*-\s*`([^`]+)`", line)
-            if m:
-                paths.append(m.group(1))
-            elif line.strip():
-                break
-    return paths
-
-
 def scope_from(plan):
     """A plan's scope: every file its criteria list, plus its tests' files, sorted."""
     files = {f.strip() for c in plan.get("acceptance_criteria", []) + plan.get("non_functional", [])
@@ -73,11 +57,11 @@ def marked(paths):
 
 
 def main(argv):
-    """fence BASE PLAN [CLASHED]: apply the fence and print each dropped path. PLAN is plan.json, or the issue text
-    holding the plan; CLASHED lists the files that clashed with main, when that file exists. Exits 1 saying which
+    """fence BASE PLAN [CLASHED]: apply the fence and print each dropped path.
+
+    PLAN is plan.json; CLASHED lists the files that clashed with main, when that file exists. Exits 1 saying which
     clashed files still hold conflict markers."""
-    text = open(argv[2]).read()
-    scope = scope_from(json.loads(text)) if argv[2].endswith(".json") else scope_of(text)
+    scope = scope_from(json.load(open(argv[2])))
     clashed = open(argv[3]).read().split() if len(argv) > 3 and os.path.exists(argv[3]) else []
     dropped = fence(argv[1], scope, clashed) if clashed else fence(argv[1], scope)
     for p in dropped:
