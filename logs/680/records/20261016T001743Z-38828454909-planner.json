@@ -1,0 +1,81 @@
+{
+ "role": "planner",
+ "stage": null,
+ "run_id": "38828454909",
+ "commit_before": "e05e426b73487841e18151b08976155d7ab4ae5c",
+ "started_by": "RezaSoleymanifar",
+ "models": [
+  "claude-opus-5-5"
+ ],
+ "report": {
+  "duration_ms": 64259,
+  "turns": 11,
+  "cost_usd": 0.46084400000000003,
+  "tokens_in": 407340,
+  "tokens_out": 6501
+ },
+ "log": "https://github.com/dokima-dev/dokima/blob/logs/logs/680/38828454909-planner.md",
+ "run": "https://github.com/dokima-dev/dokima/actions/runs/38828454909",
+ "handback": {
+  "kind": "user_story",
+  "title": "Remove secrets before cutting run transcripts",
+  "summary": "Run transcripts cut tool text before removing secrets, so a cut token's start gets published.",
+  "user_story": "No part of a secret token ever shows in a published run transcript.",
+  "acceptance_criteria": [
+   {
+    "text": "A secret running across the cut of a tool's input shows none of its start in the transcript.",
+    "words": "cuts tool input and results to 2000 and 1500 characters before secrets are removed. A token cut in half no longer matches and its start gets published. Reproduced with a 40-character token. Remove secrets first, then cut.",
+    "source": "https://github.com/dokima-dev/dokima/issues/680",
+    "files": [
+     "dokima/agent_records.py"
+    ],
+    "edge_cases": [
+     {
+      "case": "Tool input longer than the cut is still cut after secrets are removed.",
+      "test": "tests/test_transcript_cut.py::test_a_secret_across_the_tool_input_cut_shows_none_of_its_start"
+     }
+    ]
+   },
+   {
+    "text": "A secret running across the cut of a tool's result shows none of its start in the transcript.",
+    "words": "cuts tool input and results to 2000 and 1500 characters before secrets are removed. A token cut in half no longer matches and its start gets published. Reproduced with a 40-character token. Remove secrets first, then cut.",
+    "source": "https://github.com/dokima-dev/dokima/issues/680",
+    "files": [
+     "dokima/agent_records.py"
+    ],
+    "edge_cases": [
+     {
+      "case": "A tool result longer than the cut is still cut after secrets are removed.",
+      "test": "tests/test_transcript_cut.py::test_a_secret_across_the_tool_result_cut_shows_none_of_its_start"
+     }
+    ]
+   }
+  ],
+  "non_functional": [],
+  "tests": {
+   "680.1": [
+    "tests/test_transcript_cut.py::test_a_secret_across_the_tool_input_cut_shows_none_of_its_start"
+   ],
+   "680.2": [
+    "tests/test_transcript_cut.py::test_a_secret_across_the_tool_result_cut_shows_none_of_its_start"
+   ]
+  },
+  "test_changes": {},
+  "links": {
+   "blocked_by": [],
+   "blocks": [
+    746
+   ],
+   "relates_to": [
+    706
+   ]
+  },
+  "raises": [],
+  "answers": []
+ },
+ "check": {
+  "passed": true,
+  "problems": []
+ },
+ "url": "https://github.com/dokima-dev/dokima/issues/680#issuecomment-6205039215"
+}
