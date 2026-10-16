@@ -25,5 +25,6 @@ jobs:
         with:
           python-version: "3.12"
       - run: pip install -q pytest pytest-xdist
+      - run: pip install -q pyyaml  # the settings reader (#793)
       # Every test, spread over all the runner's cores.
       - run: pytest -q -p no:cacheprovider -n auto tests
