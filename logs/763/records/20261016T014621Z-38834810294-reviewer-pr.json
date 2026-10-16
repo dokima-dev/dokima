@@ -1,0 +1,92 @@
+{
+ "role": "reviewer",
+ "stage": "pr",
+ "run_id": "38834810294",
+ "commit_before": "31943d8288cbf9e0bee1b91f0124609ad09f1b28",
+ "started_by": "dokima-runtime[bot]",
+ "models": [
+  "claude-opus-5-5"
+ ],
+ "report": {
+  "duration_ms": 386300,
+  "turns": 20,
+  "cost_usd": 0.746599,
+  "tokens_in": 1005074,
+  "tokens_out": 7694
+ },
+ "log": "https://github.com/dokima-dev/dokima/blob/logs/logs/763/38834810294-reviewer-pr.md",
+ "run": "https://github.com/dokima-dev/dokima/actions/runs/38834810294",
+ "handback": {
+  "previous_step": {
+   "did": [
+    "Pull requests are now found only on the try branch.",
+    "The card stops reading old worker run titles and old worker runs."
+   ],
+   "decided": [
+    "The card draws without a latest run link when none is given."
+   ],
+   "open": [
+    "The worker proposes an issue for two leftover old branch traces."
+   ]
+  },
+  "verdict": "approve",
+  "summary": "The change delivers all six criteria; every test passes on the branch and the new ones fail on main.",
+  "raises": [],
+  "answers": [
+   {
+    "raise": "W1",
+    "answer": "done",
+    "why": "Both leftovers are real; the planner one sits in the post step #761 deletes.",
+    "searched": [
+     739,
+     760,
+     761,
+     764
+    ],
+    "verdict": "symptom",
+    "cause": 739
+   }
+  ],
+  "asks": [],
+  "behaviors": [],
+  "edge_cases": [],
+  "tests": [
+   {
+    "test": "tests/test_card_old_lookups.py::test_finding_an_issues_prs_never_looks_up_the_old_work_branch",
+    "only_its_behavior": true,
+    "why": "Fails on the old code; passes on the branch."
+   },
+   {
+    "test": "tests/test_card_records.py::test_the_card_finds_the_pr_on_either_branch",
+    "only_its_behavior": true,
+    "why": "Passes on both, as it guards the kept try branch."
+   },
+   {
+    "test": "tests/test_card_old_lookups.py::test_the_card_never_finds_its_issue_from_an_old_worker_runs_title",
+    "only_its_behavior": true,
+    "why": "Fails on the old code; passes on the branch."
+   },
+   {
+    "test": "tests/test_card_old_lookups.py::test_a_redraw_never_asks_github_for_old_worker_runs",
+    "only_its_behavior": true,
+    "why": "Fails on the old code; passes on the branch."
+   },
+   {
+    "test": "tests/test_card_old_lookups.py::test_no_test_still_fakes_the_deleted_lookups",
+    "only_its_behavior": true,
+    "why": "Fails on the old code; passes on the branch."
+   },
+   {
+    "test": "tests/test_card_old_lookups.py::test_an_old_work_branch_no_longer_names_a_pull_requests_issue",
+    "only_its_behavior": true,
+    "why": "Fails on the old code; passes on the branch."
+   }
+  ],
+  "size": "ok"
+ },
+ "check": {
+  "passed": true,
+  "problems": []
+ },
+ "url": "https://github.com/dokima-dev/dokima/pull/772#issuecomment-6205870666"
+}
