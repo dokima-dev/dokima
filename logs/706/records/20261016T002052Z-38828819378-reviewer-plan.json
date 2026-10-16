@@ -1,0 +1,111 @@
+{
+ "role": "reviewer",
+ "stage": "plan",
+ "run_id": "38828819378",
+ "commit_before": "056f2120628628f766259aa4883a2ca792ff2f12",
+ "started_by": "dokima-runtime[bot]",
+ "models": [
+  "claude-opus-5-5"
+ ],
+ "report": {
+  "duration_ms": 56168,
+  "turns": 10,
+  "cost_usd": 0.3921998,
+  "tokens_in": 370230,
+  "tokens_out": 3872
+ },
+ "log": "https://github.com/dokima-dev/dokima/blob/logs/logs/706/38828819378-reviewer-plan.md",
+ "run": "https://github.com/dokima-dev/dokima/actions/runs/38828819378",
+ "handback": {
+  "previous_step": {
+   "did": [
+    "The planner wrote three criteria: hiding steps, the record card, the saved record.",
+    "The planner wrote one failing test for each criterion."
+   ],
+   "decided": [
+    "Transcripts already hide the agent key, so only cards and records are fixed."
+   ],
+   "open": [
+    "The planner asks the owner whether fixing only cards and records is right."
+   ]
+  },
+  "verdict": "approve",
+  "summary": "The plan covers the ask, and each test fails today because the agent key is not yet hidden.",
+  "raises": [],
+  "answers": [],
+  "asks": [
+   {
+    "ask": "Public logs scrub only Claude's token",
+    "source": "https://github.com/dokima-dev/dokima/issues/706",
+    "criterion": "706.1"
+   },
+   {
+    "ask": "a key from another secret could leak into transcripts and cards",
+    "source": "https://github.com/dokima-dev/dokima/issues/706",
+    "criterion": "706.2"
+   },
+   {
+    "ask": "Public logs scrub only Claude's token, so a key from another secret could leak",
+    "source": "https://github.com/dokima-dev/dokima/issues/706",
+    "criterion": "706.3"
+   }
+  ],
+  "behaviors": [
+   {
+    "criterion": "706.1",
+    "one_behavior": true,
+    "why": "Each step hiding Claude's token also hides the agent key."
+   },
+   {
+    "criterion": "706.2",
+    "one_behavior": true,
+    "why": "The record card shows the agent key as removed."
+   },
+   {
+    "criterion": "706.3",
+    "one_behavior": true,
+    "why": "The saved record file shows the agent key as removed."
+   }
+  ],
+  "edge_cases": [
+   {
+    "criterion": "706.1",
+    "cut": [],
+    "missing": []
+   },
+   {
+    "criterion": "706.2",
+    "cut": [],
+    "missing": []
+   },
+   {
+    "criterion": "706.3",
+    "cut": [],
+    "missing": []
+   }
+  ],
+  "tests": [
+   {
+    "test": "tests/test_agent_key_scrubbed.py::test_every_step_that_hides_claudes_token_hides_the_agent_key",
+    "only_its_behavior": true,
+    "why": "Fails today naming the four card steps that lack the agent key."
+   },
+   {
+    "test": "tests/test_agent_key_scrubbed.py::test_the_runs_record_card_hides_the_agent_key",
+    "only_its_behavior": true,
+    "why": "Fails today: the record step is not given the key; runs the real record command."
+   },
+   {
+    "test": "tests/test_agent_key_scrubbed.py::test_the_saved_record_file_hides_the_agent_key",
+    "only_its_behavior": true,
+    "why": "Fails today: the record file, which the logs branch saves as is, holds the key."
+   }
+  ],
+  "size": "ok"
+ },
+ "check": {
+  "passed": true,
+  "problems": []
+ },
+ "url": "https://github.com/dokima-dev/dokima/issues/706#issuecomment-6205082459"
+}
