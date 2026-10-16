@@ -1,0 +1,480 @@
+{
+ "role": "planner",
+ "stage": null,
+ "run_id": "38972342016",
+ "commit_before": "f32b5fd3b3e8fd1add03f8219088989ceb7e7294",
+ "started_by": "RezaSoleymanifar",
+ "models": [
+  "claude-opus-5-5"
+ ],
+ "report": {
+  "duration_ms": 102888,
+  "turns": 13,
+  "cost_usd": 0.6902876000000001,
+  "tokens_in": 607466,
+  "tokens_out": 9480
+ },
+ "log": "https://github.com/dokima-dev/dokima/blob/logs/logs/779/38972342016-planner.md",
+ "run": "https://github.com/dokima-dev/dokima/actions/runs/38972342016",
+ "handback": {
+  "kind": "feature",
+  "title": "Settings file over shipped defaults, read by every workflow",
+  "summary": "One settings file per repo over shipped defaults, read by every workflow, in four turns.",
+  "feature": "A repo overrides shipped defaults in one settings file, and setup, agents, workflows and prompts follow it, built in four stories taking turns.",
+  "stories": [
+   {
+    "title": "Settings read from shipped defaults, merged and checked",
+    "user_story": "A repo writes only what differs, and Dokima merges it over its defaults, warning on typos.",
+    "depends_on": [],
+    "context": "New `dokima/settings.py` reads `dokima/defaults.yaml` and `.dokima/settings.yaml` with PyYAML (owner allowed it in #740). Defaults come from the owner's 41-row list on #740. Locked keys: app-only identity, keys only from main, fence, judge runs main's copy, owner approval by default.",
+    "acceptance_criteria": [
+     {
+      "text": "Dokima ships one defaults file that every repo's settings fall back to.",
+      "words": "Dokima ships one defaults file.",
+      "source": "https://github.com/dokima-dev/dokima/issues/740",
+      "files": [
+       "dokima/settings.py",
+       "dokima/defaults.yaml"
+      ],
+      "no_edge_cases": "Its own planner lists its edge cases with its tests."
+     },
+     {
+      "text": "A repo's settings file changes only the settings it names; every other keeps its default.",
+      "words": "A repo overrides only what differs in `.dokima/settings.yaml`.",
+      "source": "https://github.com/dokima-dev/dokima/issues/740",
+      "files": [
+       "dokima/settings.py"
+      ],
+      "no_edge_cases": "Its own planner lists its edge cases with its tests."
+     },
+     {
+      "text": "The defaults file holds every setting of the owner's 41-row list, each with the default the list names.",
+      "words": "Each row is one setting, its default (today's behaviour), and where it is hardcoded today.",
+      "source": "https://github.com/dokima-dev/dokima/issues/740#issuecomment-6219928729",
+      "files": [
+       "dokima/defaults.yaml"
+      ],
+      "no_edge_cases": "Its own planner lists its edge cases with its tests."
+     },
+     {
+      "text": "A settings group in a repo's file merges with the defaults key by key, the repo winning.",
+      "words": "maps merge key by key, repo wins",
+      "source": "https://github.com/dokima-dev/dokima/issues/740",
+      "files": [
+       "dokima/settings.py"
+      ],
+      "no_edge_cases": "Its own planner lists its edge cases with its tests."
+     },
+     {
+      "text": "A list in a repo's file replaces the default list whole.",
+      "words": "lists replace",
+      "source": "https://github.com/dokima-dev/dokima/issues/740",
+      "files": [
+       "dokima/settings.py"
+      ],
+      "no_edge_cases": "Its own planner lists its edge cases with its tests."
+     },
+     {
+      "text": "Gates in a repo's file merge with the default gates by name.",
+      "words": "`gates` and `prompts.append` merge by entry name",
+      "source": "https://github.com/dokima-dev/dokima/issues/740",
+      "files": [
+       "dokima/settings.py"
+      ],
+      "no_edge_cases": "Its own planner lists its edge cases with its tests."
+     },
+     {
+      "text": "Prompt additions in a repo's file merge with the default ones by name.",
+      "words": "`gates` and `prompts.append` merge by entry name",
+      "source": "https://github.com/dokima-dev/dokima/issues/740",
+      "files": [
+       "dokima/settings.py"
+      ],
+      "no_edge_cases": "Its own planner lists its edge cases with its tests."
+     },
+     {
+      "text": "An unknown setting shows a warning that suggests the closest known name.",
+      "words": "Unknown key warns with a suggestion and is ignored",
+      "source": "https://github.com/dokima-dev/dokima/issues/740",
+      "files": [
+       "dokima/settings.py"
+      ],
+      "no_edge_cases": "Its own planner lists its edge cases with its tests."
+     },
+     {
+      "text": "An unknown setting is ignored and the run goes on.",
+      "words": "is ignored; never stops a run",
+      "source": "https://github.com/dokima-dev/dokima/issues/740",
+      "files": [
+       "dokima/settings.py"
+      ],
+      "no_edge_cases": "Its own planner lists its edge cases with its tests."
+     },
+     {
+      "text": "Setting any of the five locked settings in a repo's file fails the run, naming it.",
+      "words": "A repo cannot override them; trying fails the run.",
+      "source": "https://github.com/dokima-dev/dokima/issues/740",
+      "files": [
+       "dokima/settings.py"
+      ],
+      "no_edge_cases": "Its own planner lists its edge cases with its tests."
+     }
+    ],
+    "non_functional": []
+   },
+   {
+    "title": "Setup saves safely; agents and test setup follow settings",
+    "user_story": "Setup keeps a settings file intact, agents come from it, and test workflows install what it names.",
+    "depends_on": [
+     0
+    ],
+    "context": "`dokima/setup.py` `read_settings()` (line 66) reads only flat maps and `write_settings()` rewrites the file. `dokima/agents.py` reads `.dokima/agents.yml`. Test installs live in `agent.yml:259-263`, `acceptance-criteria.yml:53`, `full-suite.yml:27`, `testmon.yml:21`.",
+    "acceptance_criteria": [
+     {
+      "text": "A settings file holding lists is read in full, on every machine that runs Dokima.",
+      "words": "Today's reader only handles flat key: value and cannot read lists (`setup.py:65`)",
+      "source": "https://github.com/dokima-dev/dokima/issues/740",
+      "files": [
+       "dokima/settings.py",
+       "dokima/setup.py",
+       ".github/workflows/agent.yml"
+      ],
+      "no_edge_cases": "Its own planner lists its edge cases with its tests."
+     },
+     {
+      "text": "Saving a setting through setup keeps the file's comments.",
+      "words": "it rewrites the whole file on save (`setup.py:84`)",
+      "source": "https://github.com/dokima-dev/dokima/issues/740",
+      "files": [
+       "dokima/setup.py"
+      ],
+      "no_edge_cases": "Its own planner lists its edge cases with its tests."
+     },
+     {
+      "text": "Saving a setting through setup keeps comments written at the end of a line.",
+      "words": "#721 (inline comments)",
+      "source": "https://github.com/dokima-dev/dokima/issues/740",
+      "files": [
+       "dokima/setup.py"
+      ],
+      "no_edge_cases": "Its own planner lists its edge cases with its tests."
+     },
+     {
+      "text": "Saving one setting through setup leaves every other setting as it was.",
+      "words": "it rewrites the whole file on save (`setup.py:84`)",
+      "source": "https://github.com/dokima-dev/dokima/issues/740",
+      "files": [
+       "dokima/setup.py"
+      ],
+      "no_edge_cases": "Its own planner lists its edge cases with its tests."
+     },
+     {
+      "text": "The agents section of the settings file picks each role's agent and model.",
+      "words": "`.dokima/agents.yml` folds into `settings.yaml` under `agents:`.",
+      "source": "https://github.com/dokima-dev/dokima/issues/740",
+      "files": [
+       "dokima/agents.py",
+       "dokima/settings.py",
+       ".github/workflows/agent.yml"
+      ],
+      "no_edge_cases": "Its own planner lists its edge cases with its tests."
+     },
+     {
+      "text": "A repo with only the old agents file still runs each role's agent as named there.",
+      "words": "Old path keeps working for one version.",
+      "source": "https://github.com/dokima-dev/dokima/issues/740",
+      "files": [
+       "dokima/agents.py",
+       "dokima/settings.py"
+      ],
+      "no_edge_cases": "Its own planner lists its edge cases with its tests."
+     },
+     {
+      "text": "No setting in a repo's file changes the order: plan, review, build, review, merge.",
+      "words": "Pipeline order (plan, review, build, review, merge) stays fixed.",
+      "source": "https://github.com/dokima-dev/dokima/issues/740",
+      "files": [
+       "dokima/settings.py"
+      ],
+      "no_edge_cases": "Its own planner lists its edge cases with its tests."
+     },
+     {
+      "text": "The repo's own install command runs before its tests in every test workflow.",
+      "words": "runs before tests in agent.yml, acceptance-criteria.yml, full-suite.yml, testmon.yml",
+      "source": "https://github.com/dokima-dev/dokima/issues/740#issuecomment-6219928729",
+      "files": [
+       "dokima/settings.py",
+       ".github/workflows/agent.yml",
+       ".github/workflows/acceptance-criteria.yml",
+       ".github/workflows/full-suite.yml",
+       ".github/workflows/testmon.yml"
+      ],
+      "no_edge_cases": "Its own planner lists its edge cases with its tests."
+     },
+     {
+      "text": "The test tools each test workflow installs come from the test tools setting.",
+      "words": "`setup.test_tools: \"pytest pytest-xdist pytest-testmon\"`",
+      "source": "https://github.com/dokima-dev/dokima/issues/740#issuecomment-6219928729",
+      "files": [
+       "dokima/settings.py",
+       ".github/workflows/agent.yml",
+       ".github/workflows/acceptance-criteria.yml",
+       ".github/workflows/full-suite.yml",
+       ".github/workflows/testmon.yml"
+      ],
+      "no_edge_cases": "Its own planner lists its edge cases with its tests."
+     },
+     {
+      "text": "The repo's tests run on the Python version the settings name.",
+      "words": "`setup.python: \"3.12\"` for the repo's tests",
+      "source": "https://github.com/dokima-dev/dokima/issues/740#issuecomment-6219928729",
+      "files": [
+       "dokima/settings.py",
+       ".github/workflows/agent.yml",
+       ".github/workflows/acceptance-criteria.yml",
+       ".github/workflows/full-suite.yml",
+       ".github/workflows/testmon.yml"
+      ],
+      "no_edge_cases": "Its own planner lists its edge cases with its tests."
+     }
+    ],
+    "non_functional": []
+   },
+   {
+    "title": "Test commands, branches and the bot follow settings",
+    "user_story": "Workflows run the repo's test commands and use its branches and bot, as its settings name.",
+    "depends_on": [
+     1
+    ],
+    "context": "Rows A16 to A19, B3, B5, C3, C4 of the owner's list on #740 give each place: `full-suite.yml:29`, `acceptance-criteria.yml:62`, `agent.yml:265-288` and `testmon.yml`, `agent.yml:174,195,400`, `agent.yml` origin/main and `--base main`, `fix.yml:35-37`, `agent.yml:96`, `agent.yml:165-225`, `wiki.yml:21-22`. No exclude list exists today.",
+    "acceptance_criteria": [
+     {
+      "text": "The all tests check runs the all-tests command from settings.",
+      "words": "The \"all tests\" command",
+      "source": "https://github.com/dokima-dev/dokima/issues/740#issuecomment-6219928729",
+      "files": [
+       "dokima/settings.py",
+       ".github/workflows/full-suite.yml"
+      ],
+      "no_edge_cases": "Its own planner lists its edge cases with its tests."
+     },
+     {
+      "text": "Each criterion's check runs the per-criterion command from settings.",
+      "words": "Per-criterion command with JUnit xunit1",
+      "source": "https://github.com/dokima-dev/dokima/issues/740#issuecomment-6219928729",
+      "files": [
+       "dokima/settings.py",
+       ".github/workflows/acceptance-criteria.yml"
+      ],
+      "no_edge_cases": "Its own planner lists its edge cases with its tests."
+     },
+     {
+      "text": "Setting affected tests to all runs every test before review, with no saved baseline.",
+      "words": "`tests.affected: testmon` (`all` = skip baseline, run everything)",
+      "source": "https://github.com/dokima-dev/dokima/issues/740#issuecomment-6219928729",
+      "files": [
+       "dokima/settings.py",
+       ".github/workflows/agent.yml",
+       ".github/workflows/testmon.yml"
+      ],
+      "no_edge_cases": "Its own planner lists its edge cases with its tests."
+     },
+     {
+      "text": "Handling a clash with main keeps the test folder named in settings.",
+      "words": "Clash handling and planner push limited to `tests/`",
+      "source": "https://github.com/dokima-dev/dokima/issues/740#issuecomment-6219928729",
+      "files": [
+       "dokima/settings.py",
+       ".github/workflows/agent.yml"
+      ],
+      "no_edge_cases": "Its own planner lists its edge cases with its tests."
+     },
+     {
+      "text": "The planner's push holds only files in the test folder named in settings.",
+      "words": "Clash handling and planner push limited to `tests/`",
+      "source": "https://github.com/dokima-dev/dokima/issues/740#issuecomment-6219928729",
+      "files": [
+       "dokima/settings.py",
+       ".github/workflows/agent.yml"
+      ],
+      "no_edge_cases": "Its own planner lists its edge cases with its tests."
+     },
+     {
+      "text": "Tests on the merge gate exclude list stay out of the all tests check.",
+      "words": "merge gate exclude list",
+      "source": "https://github.com/dokima-dev/dokima/issues/740",
+      "files": [
+       "dokima/settings.py",
+       ".github/workflows/full-suite.yml"
+      ],
+      "no_edge_cases": "Its own planner lists its edge cases with its tests."
+     },
+     {
+      "text": "Agents base their branches and pull requests on the default branch setting.",
+      "words": "`branch.default: main`",
+      "source": "https://github.com/dokima-dev/dokima/issues/740#issuecomment-6219928729",
+      "files": [
+       "dokima/settings.py",
+       ".github/workflows/agent.yml",
+       ".github/workflows/fix.yml"
+      ],
+      "no_edge_cases": "Its own planner lists its edge cases with its tests."
+     },
+     {
+      "text": "Each run's conversation is saved on the records branch the settings name.",
+      "words": "`records.branch: logs`",
+      "source": "https://github.com/dokima-dev/dokima/issues/740#issuecomment-6219928729",
+      "files": [
+       "dokima/settings.py",
+       ".github/workflows/agent.yml"
+      ],
+      "no_edge_cases": "Its own planner lists its edge cases with its tests."
+     },
+     {
+      "text": "Only the bot named in settings may send the next-step signal.",
+      "words": "Only Dokima's bot may send `dokima-next`",
+      "source": "https://github.com/dokima-dev/dokima/issues/740#issuecomment-6219928729",
+      "files": [
+       "dokima/settings.py",
+       ".github/workflows/agent.yml"
+      ],
+      "no_edge_cases": "Its own planner lists its edge cases with its tests."
+     },
+     {
+      "text": "Commits Dokima makes carry the git identity of the bot named in settings.",
+      "words": "Git identity with **Dokima's numeric user id 337511017**",
+      "source": "https://github.com/dokima-dev/dokima/issues/740#issuecomment-6219928729",
+      "files": [
+       "dokima/settings.py",
+       ".github/workflows/agent.yml",
+       ".github/workflows/wiki.yml"
+      ],
+      "no_edge_cases": "Its own planner lists its edge cases with its tests."
+     }
+    ],
+    "non_functional": []
+   },
+   {
+    "title": "Co-author, owner docs and prompts follow settings",
+    "user_story": "Commits credit the co-author, and agent prompts follow the repo's docs, paths, caps and house rules.",
+    "depends_on": [
+     2
+    ],
+    "context": "Co-author trailer at `agent.yml:408` and `wiki.yml:27`. Prompts are joined at `agent.yml:334` from `dokima/roles/`. Rows E1, E2, E4, E8, E11, E15 of the owner's list on #740.",
+    "acceptance_criteria": [
+     {
+      "text": "The co-author line on Dokima's commits comes from the co-author setting.",
+      "words": "co-author trailer (#110)",
+      "source": "https://github.com/dokima-dev/dokima/issues/740",
+      "files": [
+       "dokima/settings.py",
+       ".github/workflows/agent.yml",
+       ".github/workflows/wiki.yml"
+      ],
+      "no_edge_cases": "Its own planner lists its edge cases with its tests."
+     },
+     {
+      "text": "Agents copy the owner docs file the settings name, in place of the rules file.",
+      "words": "AGENTS.md (+ linked .md) is copied from main and accepted as a source of the owner's words",
+      "source": "https://github.com/dokima-dev/dokima/issues/740#issuecomment-6219928729",
+      "files": [
+       "dokima/settings.py",
+       ".github/workflows/agent.yml"
+      ],
+      "no_edge_cases": "Its own planner lists its edge cases with its tests."
+     },
+     {
+      "text": "The planner and worker prompts name the owner docs file the settings name.",
+      "words": "Agents told to read AGENTS.md",
+      "source": "https://github.com/dokima-dev/dokima/issues/740#issuecomment-6219928729",
+      "files": [
+       "dokima/settings.py",
+       ".github/workflows/agent.yml"
+      ],
+      "no_edge_cases": "Its own planner lists its edge cases with its tests."
+     },
+     {
+      "text": "The worker's prompt lists the protected paths the settings name.",
+      "words": "`protected_paths: [\".github/\"]` + tests (rendered into the prompt; fence enforces)",
+      "source": "https://github.com/dokima-dev/dokima/issues/740#issuecomment-6219928729",
+      "files": [
+       "dokima/settings.py",
+       ".github/workflows/agent.yml"
+      ],
+      "no_edge_cases": "Its own planner lists its edge cases with its tests."
+     },
+     {
+      "text": "The planner prompt's runner line is drawn from the test settings.",
+      "words": "Runner hardcoded in prose",
+      "source": "https://github.com/dokima-dev/dokima/issues/740#issuecomment-6219928729",
+      "files": [
+       "dokima/settings.py",
+       ".github/workflows/agent.yml"
+      ],
+      "no_edge_cases": "Its own planner lists its edge cases with its tests."
+     },
+     {
+      "text": "The style prompt's caps table is drawn from the caps setting.",
+      "words": "`style.caps: {...today's table...}`; style.md table rendered from it",
+      "source": "https://github.com/dokima-dev/dokima/issues/740#issuecomment-6219928729",
+      "files": [
+       "dokima/settings.py",
+       ".github/workflows/agent.yml"
+      ],
+      "no_edge_cases": "Its own planner lists its edge cases with its tests."
+     },
+     {
+      "text": "A repo's house rules file is added after the shipped prompt.",
+      "words": "appended after the shipped text",
+      "source": "https://github.com/dokima-dev/dokima/issues/740#issuecomment-6219928729",
+      "files": [
+       "dokima/settings.py",
+       ".github/workflows/agent.yml"
+      ],
+      "no_edge_cases": "Its own planner lists its edge cases with its tests."
+     },
+     {
+      "text": "A house rules section named for a role is added only to that role's prompt.",
+      "words": "optional `## planner/worker/reviewer/plan-grade/result-grade` sections",
+      "source": "https://github.com/dokima-dev/dokima/issues/740#issuecomment-6219928729",
+      "files": [
+       "dokima/settings.py",
+       ".github/workflows/agent.yml"
+      ],
+      "no_edge_cases": "Its own planner lists its edge cases with its tests."
+     }
+    ],
+    "non_functional": []
+   }
+  ],
+  "links": {
+   "blocked_by": [],
+   "blocks": [
+    780,
+    781,
+    782,
+    783,
+    784,
+    785,
+    786,
+    787,
+    788,
+    789,
+    790,
+    791
+   ],
+   "relates_to": [
+    740,
+    110,
+    384
+   ]
+  },
+  "raises": [],
+  "answers": []
+ },
+ "check": {
+  "passed": true,
+  "problems": []
+ },
+ "url": "https://github.com/dokima-dev/dokima/issues/779#issuecomment-6225407623"
+}
