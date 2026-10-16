@@ -653,16 +653,6 @@ def checks_finished(n, p, workflow="Acceptance criteria"):
                             "sender": sender("bot"), "repository": REPOSITORY}
 
 
-def worker_finished(n):
-    """A workflow_run event: the worker finished building issue n.
-
-    Its run is named `worker for #n` and ran on main, with no pull request."""
-    run = {"name": "worker", "head_sha": "mainsha", "head_branch": "main", "display_title": f"worker for #{n}",
-           "event": "issues", "status": "completed", "conclusion": "success", "pull_requests": []}
-    return "workflow_run", {"action": "completed", "workflow": {"name": "worker"}, "workflow_run": run,
-                            "sender": sender("bot"), "repository": REPOSITORY}
-
-
 def schedule():
     """The 15-minute schedule."""
     return "schedule", {"schedule": "*/15 * * * *"}
