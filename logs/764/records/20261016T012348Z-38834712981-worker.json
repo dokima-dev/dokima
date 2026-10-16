@@ -1,0 +1,47 @@
+{
+ "role": "worker",
+ "stage": null,
+ "run_id": "38834712981",
+ "commit_before": "0e8f34f13b0661084f6deb013f9718d09d319ec1",
+ "started_by": "dokima-runtime[bot]",
+ "models": [
+  "claude-opus-5-5"
+ ],
+ "report": {
+  "duration_ms": 43812,
+  "turns": 6,
+  "cost_usd": 0.23163400000000003,
+  "tokens_in": 183246,
+  "tokens_out": 1376
+ },
+ "log": "https://github.com/dokima-dev/dokima/blob/logs/logs/764/38834712981-worker.md",
+ "run": "https://github.com/dokima-dev/dokima/actions/runs/38834712981",
+ "handback": {
+  "summary": "Removed the old plan and work labels from the settings.",
+  "criteria": {
+   "764.1": "The plan entry is deleted from the label list in the settings file.",
+   "764.2": "The work entry is deleted from the label list in the settings file."
+  },
+  "evidence": "`pytest -q` on the five touched test files: 89 passed in 13.38s",
+  "raises": [
+   {
+    "kind": "issue",
+    "label": "Old work label read",
+    "text": "The plan reader still looks for past work label events, which may now be dead code.",
+    "evidence": "`dokima/plan.py:22` sets `LABEL = \"work\"`, used at lines 144 and 146.",
+    "raised_by": "worker",
+    "id": "W1"
+   }
+  ]
+ },
+ "check": {
+  "passed": true,
+  "problems": []
+ },
+ "dropped_by_fence": [],
+ "files_changed": [
+  "dokima/manifest.py"
+ ],
+ "branch": "try/issue-764",
+ "url": "https://github.com/dokima-dev/dokima/issues/764#issuecomment-6205858392"
+}
