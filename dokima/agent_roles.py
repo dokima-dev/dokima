@@ -275,6 +275,17 @@ def route(body, on_pr, number, head="", pr_body=""):
     return {"role": role, "stage": stage, "issue": issue}
 
 
+def scrubbed(value, secrets):
+    """value with every secret removed from each string it holds, in the same shape."""
+    if isinstance(value, str):
+        return scrub(value, secrets)
+    if isinstance(value, list):
+        return [scrubbed(v, secrets) for v in value]
+    if isinstance(value, dict):
+        return {scrubbed(k, secrets): scrubbed(v, secrets) for k, v in value.items()}
+    return value
+
+
 def main(argv):
     """agent pack N ROLE STAGE DIR | agent check-pack ROLE STAGE DIR | agent check
     review|work FILE PLAN N | agent record ROLE STAGE OUT CHECK_FILE PASSED LOG_DIR  (writes OUT/record.json and
@@ -335,6 +346,9 @@ def main(argv):
             # Kept in the record, so the comment redrawn once its pull request opens still names them.
             rec["files_changed"] = files_changed(os.environ.get("BASE"))
             rec["branch"] = f"try/issue-{os.environ.get('N', '')}"
+        # The record is public: every secret the step was given to remove (SCRUB_*) shows as [secret removed].
+        secrets = [v for k, v in os.environ.items() if k.startswith("SCRUB_")]
+        rec = scrubbed(rec, secrets)
         json.dump(rec, open(os.path.join(out, "record.json"), "w"), indent=1)
         reviewed = os.path.join(os.environ.get("PACK", ""), "plan.json")
         plan = None
@@ -343,14 +357,15 @@ def main(argv):
                 plan = json.load(open(reviewed))
             except (OSError, json.JSONDecodeError):
                 plan = None
-        open(os.path.join(out, "comment.md"), "w").write(render(rec, plan=plan if isinstance(plan, dict) else None,
-                                                                earlier=earlier))
+        open(os.path.join(out, "comment.md"), "w").write(scrub(render(rec, plan=plan if isinstance(plan, dict) else None,
+                                                                      earlier=earlier), secrets))
         return 0
     if argv[1] == "not-started":
         role, stage, out, why_file = argv[2:6]
         meta = {"run_id": os.environ.get("GITHUB_RUN_ID"), "started_by": os.environ.get("GITHUB_ACTOR"),
                 "run": f"{os.environ.get('GITHUB_SERVER_URL', 'https://github.com')}/{os.environ.get('GITHUB_REPOSITORY', '')}/actions/runs/{os.environ.get('GITHUB_RUN_ID', '')}"}
         rec = not_started(role, stage, open(why_file).read() if os.path.exists(why_file) else "", meta)
+        rec = scrubbed(rec, [v for k, v in os.environ.items() if k.startswith("SCRUB_")])
         json.dump(rec, open(os.path.join(out, "record.json"), "w"), indent=1)
         open(os.path.join(out, "comment.md"), "w").write(render(rec))
         return 0
@@ -361,7 +376,8 @@ def main(argv):
         if started == "true":
             meta.update({"models": agents.models(role, out, log_dir), "report": agents.report(role, out),
                          "log": os.environ.get("LOG_URL")})
-        rec = cancelled(role, stage, started == "true", meta)
+        rec = scrubbed(cancelled(role, stage, started == "true", meta),
+                       [v for k, v in os.environ.items() if k.startswith("SCRUB_")])
         json.dump(rec, open(os.path.join(out, "record.json"), "w"), indent=1)
         open(os.path.join(out, "comment.md"), "w").write(render(rec))
         return 0
