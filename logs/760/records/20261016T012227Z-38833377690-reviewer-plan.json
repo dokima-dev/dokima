@@ -1,0 +1,209 @@
+{
+ "role": "reviewer",
+ "stage": "plan",
+ "run_id": "38833377690",
+ "commit_before": "b1dcce1236f302e740c3b88e482d355234cfec54",
+ "started_by": "dokima-runtime[bot]",
+ "models": [
+  "claude-opus-5-5"
+ ],
+ "report": {
+  "duration_ms": 41563,
+  "turns": 3,
+  "cost_usd": 0.8274352,
+  "tokens_in": 201259,
+  "tokens_out": 943
+ },
+ "log": "https://github.com/dokima-dev/dokima/blob/logs/logs/760/38833377690-reviewer-plan.md",
+ "run": "https://github.com/dokima-dev/dokima/actions/runs/38833377690",
+ "handback": {
+  "previous_step": {
+   "did": [
+    "Wrote eight criteria for deleting the old plan code, each with a test.",
+    "Deleted six tests that only checked the old code; rewrote card test issues without it."
+   ],
+   "decided": [
+    "Fetching an issue keeps its number, title, text and link for the card and scan."
+   ],
+   "open": []
+  },
+  "verdict": "approve",
+  "summary": "The plan carries every ask of this story; each new test fails today because the old code remains.",
+  "raises": [],
+  "answers": [],
+  "asks": [
+   {
+    "ask": "`fetch_issue` still makes a paginated events call and parses edit history on every card draw and scan, and no caller reads `plan`, `changes` or `approved_at`. Keep the body and url fetch.",
+    "source": "https://github.com/dokima-dev/dokima/issues/739",
+    "criterion": "760.1"
+   },
+   {
+    "ask": "label approval (`LABEL = \"work\"`, `approved_at`, `approved_version`)",
+    "source": "https://github.com/dokima-dev/dokima/issues/739",
+    "criterion": "760.2"
+   },
+   {
+    "ask": "`WORK_BRANCH`, never used.",
+    "source": "https://github.com/dokima-dev/dokima/issues/739",
+    "criterion": "760.3"
+   },
+   {
+    "ask": "the checkbox plan parser (`parse`, `lines`, `changes`)",
+    "source": "https://github.com/dokima-dev/dokima/issues/739",
+    "criterion": "760.4"
+   },
+   {
+    "ask": "`as_text`",
+    "source": "https://github.com/dokima-dev/dokima/issues/739",
+    "criterion": "760.5"
+   },
+   {
+    "ask": "the `plan issue` command",
+    "source": "https://github.com/dokima-dev/dokima/issues/739",
+    "criterion": "760.6"
+   },
+   {
+    "ask": "Keep `approvers`.",
+    "source": "https://github.com/dokima-dev/dokima/issues/739",
+    "criterion": "760.7"
+   },
+   {
+    "ask": "Delete it, plus the tests that only exercise it.",
+    "source": "https://github.com/dokima-dev/dokima/issues/739",
+    "criterion": "760.8"
+   }
+  ],
+  "behaviors": [
+   {
+    "criterion": "760.1",
+    "one_behavior": true,
+    "why": "One fetch asks only for the issue's text and link."
+   },
+   {
+    "criterion": "760.2",
+    "one_behavior": true,
+    "why": "One deletion: the label approval code."
+   },
+   {
+    "criterion": "760.3",
+    "one_behavior": true,
+    "why": "One deletion: the work branch pattern."
+   },
+   {
+    "criterion": "760.4",
+    "one_behavior": true,
+    "why": "One deletion: the checkbox plan parser."
+   },
+   {
+    "criterion": "760.5",
+    "one_behavior": true,
+    "why": "One deletion: the plain text plan writer."
+   },
+   {
+    "criterion": "760.6",
+    "one_behavior": true,
+    "why": "One deletion: the command that prints a plan."
+   },
+   {
+    "criterion": "760.7",
+    "one_behavior": true,
+    "why": "Listing the code owners gives the same names as before."
+   },
+   {
+    "criterion": "760.8",
+    "one_behavior": true,
+    "why": "No test still reads the deleted code."
+   }
+  ],
+  "edge_cases": [
+   {
+    "criterion": "760.1",
+    "cut": [],
+    "missing": []
+   },
+   {
+    "criterion": "760.2",
+    "cut": [],
+    "missing": []
+   },
+   {
+    "criterion": "760.3",
+    "cut": [],
+    "missing": []
+   },
+   {
+    "criterion": "760.4",
+    "cut": [],
+    "missing": []
+   },
+   {
+    "criterion": "760.5",
+    "cut": [],
+    "missing": []
+   },
+   {
+    "criterion": "760.6",
+    "cut": [],
+    "missing": []
+   },
+   {
+    "criterion": "760.7",
+    "cut": [],
+    "missing": []
+   },
+   {
+    "criterion": "760.8",
+    "cut": [],
+    "missing": []
+   }
+  ],
+  "tests": [
+   {
+    "test": "tests/test_old_plan_gone.py::test_fetching_an_issue_asks_github_only_for_its_text_and_link",
+    "only_its_behavior": true,
+    "why": "Fakes GitHub, counts one call with no events or edit history, keeps text and link."
+   },
+   {
+    "test": "tests/test_old_plan_gone.py::test_the_old_label_approval_code_is_deleted",
+    "only_its_behavior": true,
+    "why": "Fails while any label approval name is left in the plan module."
+   },
+   {
+    "test": "tests/test_old_plan_gone.py::test_the_unused_work_branch_pattern_is_deleted",
+    "only_its_behavior": true,
+    "why": "Fails while the work branch pattern is left."
+   },
+   {
+    "test": "tests/test_old_plan_gone.py::test_the_old_checkbox_plan_parser_is_deleted",
+    "only_its_behavior": true,
+    "why": "Fails while the parser or its patterns are left."
+   },
+   {
+    "test": "tests/test_old_plan_gone.py::test_the_old_plain_text_plan_writer_is_deleted",
+    "only_its_behavior": true,
+    "why": "Fails while the plain text writer is left."
+   },
+   {
+    "test": "tests/test_old_plan_gone.py::test_the_old_command_that_prints_an_issues_plan_is_deleted",
+    "only_its_behavior": true,
+    "why": "Runs the real command with a fake GitHub; fails if it prints or asks."
+   },
+   {
+    "test": "tests/test_assign.py::test_new_issues_are_assigned_to_the_code_owners",
+    "only_its_behavior": true,
+    "why": "Runs the real command with and without a code owners file; passes today as a guard."
+   },
+   {
+    "test": "tests/test_old_plan_gone.py::test_no_test_reads_the_deleted_plan_code",
+    "only_its_behavior": true,
+    "why": "Reads every test file and names any use of the deleted names."
+   }
+  ],
+  "size": "ok"
+ },
+ "check": {
+  "passed": true,
+  "problems": []
+ },
+ "url": "https://github.com/dokima-dev/dokima/issues/760#issuecomment-6205683376"
+}
