@@ -1,0 +1,64 @@
+{
+ "role": "reviewer",
+ "stage": "pr",
+ "run_id": "38834915258",
+ "commit_before": "16894b945a43697d97ec0d4d071d1878975e1e21",
+ "started_by": "dokima-runtime[bot]",
+ "models": [
+  "claude-opus-5-5"
+ ],
+ "report": {
+  "duration_ms": 100158,
+  "turns": 14,
+  "cost_usd": 0.47073620000000005,
+  "tokens_in": 586510,
+  "tokens_out": 3860
+ },
+ "log": "https://github.com/dokima-dev/dokima/blob/logs/logs/764/38834915258-reviewer-pr.md",
+ "run": "https://github.com/dokima-dev/dokima/actions/runs/38834915258",
+ "handback": {
+  "previous_step": {
+   "did": [
+    "The worker removed the plan and work labels from the settings.",
+    "The worker left every other file as the plan wrote it."
+   ],
+   "decided": [
+    "The worker changed nothing else in the code."
+   ],
+   "open": [
+    "The plan reader still checks the old work label; issue 760 covers it."
+   ]
+  },
+  "verdict": "approve",
+  "summary": "The settings no longer declare the old plan and work labels, and both new tests prove it.",
+  "raises": [],
+  "answers": [
+   {
+    "raise": "W1",
+    "answer": "disagree",
+    "why": "No new issue needed: open issue 760 already deletes the old label approval the plan reader uses."
+   }
+  ],
+  "asks": [],
+  "behaviors": [],
+  "edge_cases": [],
+  "tests": [
+   {
+    "test": "tests/test_manifest.py::test_the_settings_no_longer_declare_the_plan_label",
+    "only_its_behavior": true,
+    "why": "Fails on main, which still has the plan label; passes on the branch."
+   },
+   {
+    "test": "tests/test_manifest.py::test_the_settings_no_longer_declare_the_work_label",
+    "only_its_behavior": true,
+    "why": "Fails on main, which still has the work label; passes on the branch."
+   }
+  ],
+  "size": "ok"
+ },
+ "check": {
+  "passed": true,
+  "problems": []
+ },
+ "url": "https://github.com/dokima-dev/dokima/pull/773#issuecomment-6205883760"
+}
