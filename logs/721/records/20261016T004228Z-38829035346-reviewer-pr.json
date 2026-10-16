@@ -1,0 +1,74 @@
+{
+ "role": "reviewer",
+ "stage": "pr",
+ "run_id": "38829035346",
+ "commit_before": "93204bc94e9e3156d98629578f862456df568f8b",
+ "started_by": "dokima-runtime[bot]",
+ "models": [
+  "claude-opus-5-5"
+ ],
+ "report": {
+  "duration_ms": 132669,
+  "turns": 18,
+  "cost_usd": 0.5252107999999999,
+  "tokens_in": 703427,
+  "tokens_out": 5399
+ },
+ "log": "https://github.com/dokima-dev/dokima/blob/logs/logs/721/38829035346-reviewer-pr.md",
+ "run": "https://github.com/dokima-dev/dokima/actions/runs/38829035346",
+ "handback": {
+  "previous_step": {
+   "did": [
+    "The settings reader drops a comment after a value, quoted values and section lines included."
+   ],
+   "decided": [
+    "A quoted value keeps only what is inside its quotes."
+   ],
+   "open": [
+    "The checks on GitHub were skipped while the pull request is a draft."
+   ]
+  },
+  "verdict": "approve",
+  "summary": "The settings reader now leaves comments out of values; all three new tests pass and nothing else broke.",
+  "raises": [],
+  "answers": [],
+  "asks": [],
+  "behaviors": [
+   {
+    "criterion": "721.1",
+    "one_behavior": true,
+    "why": "One result: a comment after a value is left out of it."
+   }
+  ],
+  "edge_cases": [
+   {
+    "criterion": "721.1",
+    "cut": [],
+    "missing": []
+   }
+  ],
+  "tests": [
+   {
+    "test": "tests/test_settings_comments.py::test_inline_comment_not_in_value",
+    "only_its_behavior": true,
+    "why": "Fails on main, passes on the branch."
+   },
+   {
+    "test": "tests/test_settings_comments.py::test_quoted_value_with_comment",
+    "only_its_behavior": true,
+    "why": "Fails on main, passes on the branch."
+   },
+   {
+    "test": "tests/test_settings_comments.py::test_comment_on_section_line",
+    "only_its_behavior": true,
+    "why": "Fails on main, passes on the branch."
+   }
+  ],
+  "size": "ok"
+ },
+ "check": {
+  "passed": true,
+  "problems": []
+ },
+ "url": "https://github.com/dokima-dev/dokima/pull/758#issuecomment-6205112470"
+}
