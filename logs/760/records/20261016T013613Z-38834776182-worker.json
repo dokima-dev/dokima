@@ -1,0 +1,45 @@
+{
+ "role": "worker",
+ "stage": null,
+ "run_id": "38834776182",
+ "commit_before": "b1dcce1236f302e740c3b88e482d355234cfec54",
+ "started_by": "dokima-runtime[bot]",
+ "models": [
+  "claude-opus-5-5"
+ ],
+ "report": {
+  "duration_ms": 761271,
+  "turns": 17,
+  "cost_usd": 0.6051918,
+  "tokens_in": 797419,
+  "tokens_out": 5101
+ },
+ "log": "https://github.com/dokima-dev/dokima/blob/logs/logs/760/38834776182-worker.md",
+ "run": "https://github.com/dokima-dev/dokima/actions/runs/38834776182",
+ "handback": {
+  "summary": "Cut the plan module down to the issue fetch, approvers, pull request lookup and card markers.",
+  "criteria": {
+   "760.1": "`fetch_issue` in `dokima/plan.py` makes one GraphQL call for number, title, body and url, and sets `current_body`.",
+   "760.2": "Removed `LABEL`, `approved_at` and `approved_version` from `dokima/plan.py`.",
+   "760.3": "Removed the unused `WORK_BRANCH` pattern from `dokima/plan.py`.",
+   "760.4": "Removed `parse`, `lines`, `changes`, their patterns and `ASK_MARKER` from `dokima/plan.py`.",
+   "760.5": "Removed `as_text` from `dokima/plan.py`.",
+   "760.6": "`main` in `dokima/plan.py` now handles only `approvers`, so `plan issue` prints nothing and calls nothing.",
+   "760.7": "`approvers` and `repo_approvers` are kept unchanged; `python3 -m dokima.plan approvers` works as before.",
+   "760.8": "The planner already removed the tests for deleted code; no test reads the removed names now."
+  },
+  "evidence": "`pytest -q tests/test_old_plan_gone.py tests/test_assign.py`: 8 passed",
+  "raises": [],
+  "answers": []
+ },
+ "check": {
+  "passed": true,
+  "problems": []
+ },
+ "dropped_by_fence": [],
+ "files_changed": [
+  "dokima/plan.py"
+ ],
+ "branch": "try/issue-760",
+ "url": "https://github.com/dokima-dev/dokima/issues/760#issuecomment-6205866410"
+}
