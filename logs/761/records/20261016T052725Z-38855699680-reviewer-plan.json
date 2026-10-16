@@ -1,0 +1,139 @@
+{
+ "role": "reviewer",
+ "stage": "plan",
+ "run_id": "38855699680",
+ "commit_before": "089e5a181bdb3f4631a339f75b79b8c54802e7ed",
+ "started_by": "dokima-runtime[bot]",
+ "models": [
+  "claude-opus-5-5"
+ ],
+ "report": {
+  "duration_ms": 78977,
+  "turns": 12,
+  "cost_usd": 0.553084,
+  "tokens_in": 546884,
+  "tokens_out": 4857
+ },
+ "log": "https://github.com/dokima-dev/dokima/blob/logs/logs/761/38855699680-reviewer-plan.md",
+ "run": "https://github.com/dokima-dev/dokima/actions/runs/38855699680",
+ "handback": {
+  "previous_step": {
+   "did": [
+    "Kept the four criteria and their tests unchanged.",
+    "Moved one old test to the earlier issue that already deleted it."
+   ],
+   "decided": [
+    "Covers deleting the old tests through its list of deleted tests, as the owner agreed."
+   ],
+   "open": []
+  },
+  "verdict": "approve",
+  "summary": "The plan deletes the old post, reject and writer code, and the old tests, as the owner agreed.",
+  "raises": [],
+  "answers": [],
+  "asks": [
+   {
+    "ask": "the `post` and `rejected` actions",
+    "source": "https://github.com/dokima-dev/dokima/issues/739",
+    "criterion": "761.1"
+   },
+   {
+    "ask": "the `post` and `rejected` actions (rejected)",
+    "source": "https://github.com/dokima-dev/dokima/issues/739",
+    "criterion": "761.2"
+   },
+   {
+    "ask": "`render` and `plan_text` (render)",
+    "source": "https://github.com/dokima-dev/dokima/issues/739",
+    "criterion": "761.3"
+   },
+   {
+    "ask": "`render` and `plan_text` (plan_text)",
+    "source": "https://github.com/dokima-dev/dokima/issues/739",
+    "criterion": "761.4"
+   },
+   {
+    "ask": "Delete it, plus the tests that only exercise it.",
+    "source": "https://github.com/dokima-dev/dokima/issues/739",
+    "criterion": "761.1"
+   },
+   {
+    "ask": "yes",
+    "source": "https://github.com/dokima-dev/dokima/issues/761#issuecomment-6208414876",
+    "criterion": "761.1"
+   }
+  ],
+  "behaviors": [
+   {
+    "criterion": "761.1",
+    "one_behavior": true,
+    "why": "One step asked for, one result: nothing posted."
+   },
+   {
+    "criterion": "761.2",
+    "one_behavior": true,
+    "why": "One step asked for, one result: nothing posted."
+   },
+   {
+    "criterion": "761.3",
+    "one_behavior": true,
+    "why": "One piece of code gone."
+   },
+   {
+    "criterion": "761.4",
+    "one_behavior": true,
+    "why": "One piece of code gone."
+   }
+  ],
+  "edge_cases": [
+   {
+    "criterion": "761.1",
+    "cut": [],
+    "missing": []
+   },
+   {
+    "criterion": "761.2",
+    "cut": [],
+    "missing": []
+   },
+   {
+    "criterion": "761.3",
+    "cut": [],
+    "missing": []
+   },
+   {
+    "criterion": "761.4",
+    "cut": [],
+    "missing": []
+   }
+  ],
+  "tests": [
+   {
+    "test": "tests/test_planner_old_steps.py::test_the_post_step_posts_nothing",
+    "only_its_behavior": true,
+    "why": "Fails today: the post step still comments through the fake gh."
+   },
+   {
+    "test": "tests/test_planner_old_steps.py::test_the_reject_step_posts_nothing",
+    "only_its_behavior": true,
+    "why": "Fails today: the reject step still comments through the fake gh."
+   },
+   {
+    "test": "tests/test_planner_old_steps.py::test_the_plan_writer_is_gone",
+    "only_its_behavior": true,
+    "why": "Fails today: render is still there."
+   },
+   {
+    "test": "tests/test_planner_old_steps.py::test_the_plan_text_builder_is_gone",
+    "only_its_behavior": true,
+    "why": "Fails today: plan_text is still there."
+   }
+  ],
+  "size": "ok"
+ },
+ "check": {
+  "passed": true,
+  "problems": []
+ },
+ "url": "https://github.com/dokima-dev/dokima/issues/761#issuecomment-6208743929"
+}
