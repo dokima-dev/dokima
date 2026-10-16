@@ -1,0 +1,45 @@
+{
+ "role": "reviewer",
+ "stage": "pr",
+ "run_id": "38836028941",
+ "commit_before": "b31fc7a0a022d5ad9423615bf91ae2c7debfcf69",
+ "started_by": "dokima-runtime[bot]",
+ "models": [
+  "claude-opus-5-5"
+ ],
+ "report": {
+  "duration_ms": 104825,
+  "turns": 18,
+  "cost_usd": 0.5275988,
+  "tokens_in": 721936,
+  "tokens_out": 4737
+ },
+ "log": "https://github.com/dokima-dev/dokima/blob/logs/logs/760/38836028941-reviewer-pr.md",
+ "run": "https://github.com/dokima-dev/dokima/actions/runs/38836028941",
+ "handback": {
+  "previous_step": {
+   "did": [
+    "The worker removed the old label approval, plan reader, plan writer and old command.",
+    "Fetching an issue now asks GitHub one question for its number, title, text and link."
+   ],
+   "decided": [
+    "The old command now only lists approvers, which the workflows still call."
+   ],
+   "open": []
+  },
+  "verdict": "approve",
+  "summary": "The old plan code is gone, card and scan fetch only what they read, and every test passes.",
+  "raises": [],
+  "answers": [],
+  "asks": [],
+  "behaviors": [],
+  "edge_cases": [],
+  "tests": [],
+  "size": "ok"
+ },
+ "check": {
+  "passed": true,
+  "problems": []
+ },
+ "url": "https://github.com/dokima-dev/dokima/pull/774#issuecomment-6206029789"
+}
