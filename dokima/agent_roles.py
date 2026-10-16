@@ -677,6 +677,13 @@ def main(argv):
         for line in close_done_parents(repo, argv[2]) + autopilot_closed(repo) or [f"#{argv[2]} closed: nothing on autopilot to do."]:
             print(line)
         return 0
+    if argv[1] == "labeled":
+        # A person put the autopilot label on by hand: the issue starts its planner as `/autopilot start` would start it,
+        # when it waits on nothing open and nothing started on it yet.
+        repo = os.environ["GITHUB_REPOSITORY"]
+        started = start_waiting(repo, [int(argv[2])], line=AUTOPILOT_START_LINE)
+        print(f"started the planner for #{argv[2]}" if started else f"#{argv[2]} on autopilot: nothing to start yet.")
+        return 0
     if argv[1] == "route":
         on_pr = os.environ.get("ON_PR") == "true"
         head, pr_body = os.environ.get("HEAD", ""), ""
