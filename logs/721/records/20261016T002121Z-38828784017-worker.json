@@ -1,0 +1,37 @@
+{
+ "role": "worker",
+ "stage": null,
+ "run_id": "38828784017",
+ "commit_before": "d46a8f55599b912ce7db38ff8ceec3315395a425",
+ "started_by": "dokima-runtime[bot]",
+ "models": [
+  "claude-opus-5-5"
+ ],
+ "report": {
+  "duration_ms": 90702,
+  "turns": 10,
+  "cost_usd": 0.2833624,
+  "tokens_in": 306111,
+  "tokens_out": 2547
+ },
+ "log": "https://github.com/dokima-dev/dokima/blob/logs/logs/721/38828784017-worker.md",
+ "run": "https://github.com/dokima-dev/dokima/actions/runs/38828784017",
+ "handback": {
+  "summary": "The settings reader now drops a comment after a value, including on quoted values and section lines.",
+  "criteria": {
+   "721.1": "`read_settings` in `dokima/setup.py` cuts text after a spaced `#`, and keeps only the inside of a quoted value."
+  },
+  "evidence": "`pytest -q tests/test_settings_comments.py tests/test_setup.py tests/test_agents.py`: 39 passed",
+  "raises": []
+ },
+ "check": {
+  "passed": true,
+  "problems": []
+ },
+ "dropped_by_fence": [],
+ "files_changed": [
+  "dokima/setup.py"
+ ],
+ "branch": "try/issue-721",
+ "url": "https://github.com/dokima-dev/dokima/issues/721#issuecomment-6205077637"
+}
