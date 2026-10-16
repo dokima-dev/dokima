@@ -122,6 +122,7 @@ jobs:
         env:
           GH_TOKEN: ${{ steps.card-key.outputs.token }}
           SCRUB_CLAUDE: ${{ secrets.CLAUDE_CODE_OAUTH_TOKEN }}
+          SCRUB_AGENT: ${{ secrets[env.AGENT_KEY || 'CLAUDE_CODE_OAUTH_TOKEN'] }}
           SCRUB_GITHUB: ${{ github.token }}
         run: |
           # Where the record will go: the PR once there is one, for the worker and the PR reviewer.
@@ -147,6 +148,7 @@ jobs:
         env:
           GH_TOKEN: ${{ steps.setup-key.outputs.token }}
           SCRUB_CLAUDE: ${{ secrets.CLAUDE_CODE_OAUTH_TOKEN }}
+          SCRUB_AGENT: ${{ secrets[env.AGENT_KEY || 'CLAUDE_CODE_OAUTH_TOKEN'] }}
           SCRUB_GITHUB: ${{ github.token }}
         run: |
           python3 -m dokima.agent card "$ROLE" "$STAGE" setting-up > /tmp/card.md
@@ -306,6 +308,7 @@ jobs:
         env:
           GH_TOKEN: ${{ steps.working-key.outputs.token }}
           SCRUB_CLAUDE: ${{ secrets.CLAUDE_CODE_OAUTH_TOKEN }}
+          SCRUB_AGENT: ${{ secrets[env.AGENT_KEY || 'CLAUDE_CODE_OAUTH_TOKEN'] }}
           SCRUB_GITHUB: ${{ github.token }}
         run: |
           python3 -m dokima.agent card "$ROLE" "$STAGE" working > /tmp/card.md
@@ -356,6 +359,7 @@ jobs:
         env:
           GH_TOKEN: ${{ steps.checking-key.outputs.token }}
           SCRUB_CLAUDE: ${{ secrets.CLAUDE_CODE_OAUTH_TOKEN }}
+          SCRUB_AGENT: ${{ secrets[env.AGENT_KEY || 'CLAUDE_CODE_OAUTH_TOKEN'] }}
           SCRUB_GITHUB: ${{ github.token }}
         run: |
           python3 -m dokima.agent card "$ROLE" "$STAGE" checking > /tmp/card.md
@@ -427,6 +431,9 @@ jobs:
         env:
           GH_TOKEN: ${{ github.token }}
           JOB_STATUS: ${{ job.status }}
+          SCRUB_CLAUDE: ${{ secrets.CLAUDE_CODE_OAUTH_TOKEN }}
+          SCRUB_AGENT: ${{ secrets[env.AGENT_KEY || 'CLAUDE_CODE_OAUTH_TOKEN'] }}
+          SCRUB_GITHUB: ${{ github.token }}
         run: |
           if [ "$JOB_STATUS" = cancelled ]; then
             # Someone cancelled the run: its card says so, mentions no one, and nothing starts after it.
