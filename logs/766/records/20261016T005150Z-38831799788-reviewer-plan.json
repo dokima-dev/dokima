@@ -1,0 +1,69 @@
+{
+ "role": "reviewer",
+ "stage": "plan",
+ "run_id": "38831799788",
+ "commit_before": "631075109fa6db68bfbf98dba2527c58c89b5196",
+ "started_by": "dokima-runtime[bot]",
+ "models": [
+  "claude-opus-5-5"
+ ],
+ "report": {
+  "duration_ms": 17137,
+  "turns": 5,
+  "cost_usd": 0.1849542,
+  "tokens_in": 135936,
+  "tokens_out": 1391
+ },
+ "log": "https://github.com/dokima-dev/dokima/blob/logs/logs/766/38831799788-reviewer-plan.md",
+ "run": "https://github.com/dokima-dev/dokima/actions/runs/38831799788",
+ "handback": {
+  "previous_step": {
+   "did": [
+    "The planner planned one criterion: the unused card sample for issue 455 is deleted.",
+    "The planner added one test that fails while the sample is still there."
+   ],
+   "decided": [
+    "Nothing else in the repo uses the sample, so only that file changes."
+   ],
+   "open": []
+  },
+  "verdict": "approve",
+  "summary": "The plan deletes the one unused card sample, and its test fails today because the sample still exists.",
+  "raises": [],
+  "answers": [],
+  "asks": [
+   {
+    "ask": "The unused card sample for issue 455 is deleted.",
+    "source": "https://github.com/dokima-dev/dokima/issues/739",
+    "criterion": "766.1"
+   }
+  ],
+  "behaviors": [
+   {
+    "criterion": "766.1",
+    "one_behavior": true,
+    "why": "One file is removed; nothing else changes."
+   }
+  ],
+  "edge_cases": [
+   {
+    "criterion": "766.1",
+    "cut": [],
+    "missing": []
+   }
+  ],
+  "tests": [
+   {
+    "test": "tests/test_card_sample_gone.py::test_unused_card_sample_is_deleted",
+    "only_its_behavior": true,
+    "why": "Fails only while the sample exists; passes once it is deleted."
+   }
+  ],
+  "size": "ok"
+ },
+ "check": {
+  "passed": true,
+  "problems": []
+ },
+ "url": "https://github.com/dokima-dev/dokima/issues/766#issuecomment-6205486281"
+}
