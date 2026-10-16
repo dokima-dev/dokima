@@ -1,0 +1,78 @@
+{
+ "role": "reviewer",
+ "stage": "pr",
+ "run_id": "38833424166",
+ "commit_before": "6a35dee1969846e13321005094d36cb0afda83a4",
+ "started_by": "dokima-runtime[bot]",
+ "models": [
+  "claude-opus-5-5"
+ ],
+ "report": {
+  "duration_ms": 79885,
+  "turns": 11,
+  "cost_usd": 0.38115540000000003,
+  "tokens_in": 408691,
+  "tokens_out": 3496
+ },
+ "log": "https://github.com/dokima-dev/dokima/blob/logs/logs/762/38833424166-reviewer-pr.md",
+ "run": "https://github.com/dokima-dev/dokima/actions/runs/38833424166",
+ "handback": {
+  "previous_step": {
+   "did": [
+    "The worker deleted the fence's reader of a scope in the issue's text.",
+    "The fence now always reads its scope from the plan file."
+   ],
+   "decided": [
+    "A file that is not a plan file now makes the fence fail loudly."
+   ],
+   "open": []
+  },
+  "verdict": "approve",
+  "summary": "The fence now reads its scope only from the plan file, and its old reader is gone.",
+  "raises": [],
+  "answers": [],
+  "asks": [],
+  "behaviors": [
+   {
+    "criterion": "762.1",
+    "one_behavior": true,
+    "why": "One result: the issue's text no longer sets the scope."
+   },
+   {
+    "criterion": "762.2",
+    "one_behavior": true,
+    "why": "One result: no test of the deleted reader remains."
+   }
+  ],
+  "edge_cases": [
+   {
+    "criterion": "762.1",
+    "cut": [],
+    "missing": []
+   },
+   {
+    "criterion": "762.2",
+    "cut": [],
+    "missing": []
+   }
+  ],
+  "tests": [
+   {
+    "test": "tests/test_fence_plan_only.py::test_the_fence_ignores_a_scope_in_the_issue_text",
+    "only_its_behavior": true,
+    "why": "Runs the fence on issue text, then on a plan file."
+   },
+   {
+    "test": "tests/test_fence_plan_only.py::test_the_issue_text_reader_and_its_tests_are_gone",
+    "only_its_behavior": true,
+    "why": "Fails while any code or test still names the old reader."
+   }
+  ],
+  "size": "ok"
+ },
+ "check": {
+  "passed": true,
+  "problems": []
+ },
+ "url": "https://github.com/dokima-dev/dokima/pull/770#issuecomment-6205689682"
+}
