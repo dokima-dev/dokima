@@ -214,7 +214,6 @@ def write_main(monkeypatch, tmp_path, current, found=FOUND):
     monkeypatch.setattr(card, "gh", gh)
     monkeypatch.setattr(body, "gh", gh)
     monkeypatch.setattr(card, "find_work", lambda repo: (40, 5))
-    monkeypatch.setattr(card, "latest_worker_run", lambda repo, n: DONE)
     monkeypatch.setattr(plan, "fetch_issue", lambda repo, n: issue)
     if not hasattr(card, "gather"):
         pytest.fail("180.1: the card is not drawn from the records yet: card.gather does not exist")
@@ -305,10 +304,7 @@ def fake_github(monkeypatch, tmp_path, issue_text, reviews):
                    "repos/o/r/pulls/5/reviews": reviews, "repos/o/r/pulls/5/comments": [],
                    f"repos/o/r/commits/{HEAD}/check-runs": {"total_count": 2, "check_runs": HEAD_RUNS},
                    f"repos/o/r/commits/{OLD}/check-runs": {"total_count": 2, "check_runs": OLD_RUNS},
-                   "repos/o/r/pulls": [{"number": 5}] if "try/issue-40" in query.replace("%2F", "/") else [],
-                   "repos/o/r/actions/workflows/worker.yml/runs": {"workflow_runs": [
-                       {"display_title": "worker for #40", "status": "completed", "conclusion": "success",
-                        "html_url": "https://github.com/o/r/actions/runs/13"}]}}
+                   "repos/o/r/pulls": [{"number": 5}] if "try/issue-40" in query.replace("%2F", "/") else []}
         if path not in answers:
             raise AssertionError(f"180.1: card.gather asked GitHub something the fake does not serve: {args}")
         return json.dumps(answers[path])
@@ -375,15 +371,20 @@ def test_the_issue_and_its_pr_show_the_same_card(record_property, monkeypatch, t
 
 
 def test_the_card_finds_the_pr_on_either_branch(record_property, monkeypatch):
-    """The card finds the issue's PR whether the worker built it on try/issue-N or on work/issue-N.
+    """The card finds the issue's PR the worker built on try/issue-N.
 
-    Fakes GitHub so only one of the two branches has a PR, and checks the card finds it each time, so the card
-    reaches the PR the agents open today."""
+    Fakes GitHub so only the try branch has a PR, and checks the card finds it, so the card reaches the PR the agents
+    open today, and checks the agents' list of the issue's pull requests holds it too. Proves 763.2: the old
+    work/issue-N branch is no longer looked up (#763), and the try branch must stay."""
     record_property("proves", "180.1")
+    record_property("proves", "763.2")
+    from dokima import agent_github
     monkeypatch.setenv("ISSUE_NUMBER", "40")
-    for branch in ("try/issue-40", "work/issue-40"):
-        monkeypatch.setattr(card, "gh", lambda *a, b=branch: '[{"number": 7}]' if any(f"head=o:{b}" in x for x in a) else "[]")
-        assert card.find_work(REPO) == (40, 7), f"180.1: the card did not find the PR built on {branch}"
+    fake = lambda *a: '[{"number": 7}]' if any(x == "try/issue-40" or "head=o:try/issue-40" in x for x in a) else "[]"
+    monkeypatch.setattr(card, "gh", fake)
+    monkeypatch.setattr(agent_github, "gh", fake)
+    assert card.find_work(REPO) == (40, 7), "180.1: the card did not find the PR built on try/issue-40"
+    assert agent_github.linked_prs(REPO, 40) == [7], "763.2: the issue's pull requests no longer include the try branch's"
 
 
 

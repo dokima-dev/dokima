@@ -559,10 +559,10 @@ def done_row(repo, found, all_tests, planned=False):
 
 def render(repo, issue, found, page="issue"):
     """The card for `issue`, drawn only from `found`: the agents' records, the PR, its latest commit's checks, its
-    reviews, the code owners, the plan's tests and the latest worker run. It is the same on either `page`, but for the
+    reviews, the code owners, the plan's tests and, when given, the latest worker run. It is the same on either `page`, but for the
     PR's top row, which also links the issue."""
     from dokima import agent
-    recs, pr, check_runs, worker = found["recs"], found["pr"], found["check_runs"], found["worker"]
+    recs, pr, check_runs, worker = found["recs"], found["pr"], found["check_runs"], found.get("worker")
     by_key = checks_by_key(check_runs)
     all_tests = next((r for r in check_runs if r["name"] == ALL_TESTS), None)
     planned = agent.latest(recs, "planner")
@@ -650,13 +650,9 @@ def gh(*args):
 
 
 def issue_pr(repo, n):
-    """The PR built for issue n from its try or work branch, or None."""
-    owner = repo.split("/")[0]
-    for branch in (f"try/issue-{n}", f"work/issue-{n}"):
-        prs = json.loads(gh("api", f"repos/{repo}/pulls?head={owner}:{branch}&state=all"))
-        if prs:
-            return prs[0]["number"]
-    return None
+    """The PR built for issue n from its try branch, or None."""
+    prs = json.loads(gh("api", f"repos/{repo}/pulls?head={repo.split('/')[0]}:try/issue-{n}&state=all"))
+    return prs[0]["number"] if prs else None
 
 
 def find_work(repo):
@@ -668,10 +664,6 @@ def find_work(repo):
     if os.environ.get("ISSUE_NUMBER"):
         n = int(os.environ["ISSUE_NUMBER"])
         return n, issue_pr(repo, n)
-    title = re.match(r"worker for #(\d+)$", os.environ.get("RUN_TITLE", ""))
-    if title:
-        n = int(title.group(1))
-        return n, issue_pr(repo, n)
     pr = os.environ.get("PR_NUMBER")
     if not pr:
         prs = json.loads(gh("api", f"repos/{repo}/commits/{os.environ['HEAD_SHA']}/pulls"))
@@ -679,12 +671,6 @@ def find_work(repo):
     if not pr:
         return None, None
     return plan.pr_issue_number(repo, pr), int(pr)
-
-
-def latest_worker_run(repo, number):
-    runs = json.loads(gh("api", f"repos/{repo}/actions/workflows/worker.yml/runs?per_page=50"))["workflow_runs"]
-    run = next((r for r in runs if r["display_title"] == f"worker for #{number}"), None)
-    return {"status": run["status"], "conclusion": run["conclusion"], "html_url": run["html_url"]} if run else None
 
 
 def test_entry(repo, ref, path, source, name):
@@ -751,7 +737,7 @@ def gather(repo, number, pr_number):
     children = [{"number": st["issue"], "title": st.get("title"), "stage": child_stage(repo, st["issue"], owners)}
                 for st in (split["handback"].get("stories") or [] if split else [])]
     return {"recs": recs, "items": items, "pr": pr, "check_runs": check_runs, "reviews": reviews, "owners": owners,
-            "tests": tests, "worker": latest_worker_run(repo, number), "children": children}
+            "tests": tests, "children": children}
 
 
 def gallery(repo, out):
