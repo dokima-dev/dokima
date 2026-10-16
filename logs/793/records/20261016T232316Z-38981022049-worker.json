@@ -1,0 +1,43 @@
+{
+ "role": "worker",
+ "stage": null,
+ "run_id": "38981022049",
+ "commit_before": "7a3e5ecac501a7ca992bb4a81ca89287ca9ec792",
+ "started_by": "dokima-runtime[bot]",
+ "models": [
+  "claude-opus-5-5"
+ ],
+ "report": {
+  "duration_ms": 26350,
+  "turns": 7,
+  "cost_usd": 0.2641052,
+  "tokens_in": 216994,
+  "tokens_out": 1675
+ },
+ "log": "https://github.com/dokima-dev/dokima/blob/logs/logs/793/38981022049-worker.md",
+ "run": "https://github.com/dokima-dev/dokima/actions/runs/38981022049",
+ "handback": {
+  "summary": "No code change this round: the settings reader stands, and main now installs the YAML library.",
+  "criteria": {
+   "793.1": "`dokima/settings.py` reads `dokima/defaults.yaml` beside it; a missing or empty repo file gives the defaults.",
+   "793.2": "`merge()` copies the defaults and changes only the keys the repo file names.",
+   "793.3": "`dokima/defaults.yaml` holds every setting of the owner's list with its default.",
+   "793.4": "`merge()` recurses into nested maps, key by key, the repo winning at each level.",
+   "793.5": "`merge()` replaces any list whole with the repo's, an empty list included.",
+   "793.6": "`by_name()` merges `gates.required` by name: same name replaces in place, new ones come after.",
+   "793.7": "`by_name()` merges `prompts.append` the same way.",
+   "793.8": "`merge()` warns naming the unknown key and the closest sibling key, via `difflib`.",
+   "793.9": "`merge()` leaves unknown keys and groups out and the run goes on.",
+   "793.10": "`read()` raises when the repo sets anything under `integrity`; `main()` exits 1 naming each locked key."
+  },
+  "evidence": "`pytest -q tests/test_settings_merge.py`: 17 passed"
+ },
+ "check": {
+  "passed": true,
+  "problems": []
+ },
+ "dropped_by_fence": [],
+ "files_changed": [],
+ "branch": "try/issue-793",
+ "url": "https://github.com/dokima-dev/dokima/pull/797#issuecomment-6226529798"
+}
