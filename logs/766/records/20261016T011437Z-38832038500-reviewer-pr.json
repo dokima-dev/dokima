@@ -1,0 +1,80 @@
+{
+ "role": "reviewer",
+ "stage": "pr",
+ "run_id": "38832038500",
+ "commit_before": "e343cb1ace50fd687bfcd578ead8b59dc5559251",
+ "started_by": "dokima-runtime[bot]",
+ "models": [
+  "claude-opus-5-5"
+ ],
+ "report": {
+  "duration_ms": 107914,
+  "turns": 17,
+  "cost_usd": 0.4922366,
+  "tokens_in": 653647,
+  "tokens_out": 5117
+ },
+ "log": "https://github.com/dokima-dev/dokima/blob/logs/logs/766/38832038500-reviewer-pr.md",
+ "run": "https://github.com/dokima-dev/dokima/actions/runs/38832038500",
+ "handback": {
+  "previous_step": {
+   "did": [
+    "The worker deleted the unused card sample for issue 455."
+   ],
+   "decided": [
+    "The worker changed nothing else."
+   ],
+   "open": [
+    "The full test suite is red on main for reasons outside this issue."
+   ]
+  },
+  "verdict": "approve",
+  "summary": "The unused card sample is deleted, its test passes, and nothing else changed.",
+  "raises": [
+   {
+    "kind": "issue",
+    "label": "Skipped shows as failed",
+    "text": "The card shows a skipped check as failed, so a draft's unrun acceptance check looks red.",
+    "evidence": "`dokima/card.py:221` marks any conclusion but success, including skipped, as failed.",
+    "searched": [
+     763,
+     710,
+     703,
+     681
+    ],
+    "verdict": "new",
+    "raised_by": "reviewer",
+    "id": "R1"
+   }
+  ],
+  "answers": [],
+  "asks": [],
+  "behaviors": [
+   {
+    "criterion": "766.1",
+    "one_behavior": true,
+    "why": "One file is deleted."
+   }
+  ],
+  "edge_cases": [
+   {
+    "criterion": "766.1",
+    "cut": [],
+    "missing": []
+   }
+  ],
+  "tests": [
+   {
+    "test": "tests/test_card_sample_gone.py::test_unused_card_sample_is_deleted",
+    "only_its_behavior": true,
+    "why": "Fails while the sample exists, passes once it is gone."
+   }
+  ],
+  "size": "ok"
+ },
+ "check": {
+  "passed": true,
+  "problems": []
+ },
+ "url": "https://github.com/dokima-dev/dokima/pull/768#issuecomment-6205516351"
+}
