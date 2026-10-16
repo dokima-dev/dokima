@@ -1,0 +1,156 @@
+{
+ "role": "planner",
+ "stage": null,
+ "run_id": "38831583008",
+ "commit_before": "e05e426b73487841e18151b08976155d7ab4ae5c",
+ "started_by": "dokima-runtime[bot]",
+ "models": [
+  "claude-opus-5-5"
+ ],
+ "report": {
+  "duration_ms": 1058588,
+  "turns": 59,
+  "cost_usd": 2.6616698000000003,
+  "tokens_in": 4693007,
+  "tokens_out": 43355
+ },
+ "log": "https://github.com/dokima-dev/dokima/blob/logs/logs/760/38831583008-planner.md",
+ "run": "https://github.com/dokima-dev/dokima/actions/runs/38831583008",
+ "handback": {
+  "kind": "user_story",
+  "title": "Delete the old label approval and plan parser",
+  "summary": "Card draws and scans fetch only the issue's text and link, and the old plan code is gone.",
+  "user_story": "Card draws and scans ask GitHub less, and the old label approval and plan reader are gone.",
+  "acceptance_criteria": [
+   {
+    "text": "Fetching an issue for a card or a scan asks GitHub only for its text and link.",
+    "words": "`fetch_issue` still makes a paginated events call and parses edit history on every card draw and scan, and no caller reads `plan`, `changes` or `approved_at`. Keep the body and url fetch.",
+    "source": "https://github.com/dokima-dev/dokima/issues/739",
+    "files": [
+     "dokima/plan.py"
+    ],
+    "no_edge_cases": "One fixed call with no input that varies; what the card reads is unchanged."
+   },
+   {
+    "text": "The old label approval code is deleted.",
+    "words": "label approval (`LABEL = \"work\"`, `approved_at`, `approved_version`)",
+    "source": "https://github.com/dokima-dev/dokima/issues/739",
+    "files": [
+     "dokima/plan.py"
+    ],
+    "no_edge_cases": "A deletion takes no input, so it has no edge cases."
+   },
+   {
+    "text": "The unused old work branch pattern is deleted.",
+    "words": "`WORK_BRANCH`, never used.",
+    "source": "https://github.com/dokima-dev/dokima/issues/739",
+    "files": [
+     "dokima/plan.py"
+    ],
+    "no_edge_cases": "A deletion takes no input, so it has no edge cases."
+   },
+   {
+    "text": "The old checkbox plan parser is deleted.",
+    "words": "the checkbox plan parser (`parse`, `lines`, `changes`)",
+    "source": "https://github.com/dokima-dev/dokima/issues/739",
+    "files": [
+     "dokima/plan.py"
+    ],
+    "no_edge_cases": "A deletion takes no input, so it has no edge cases."
+   },
+   {
+    "text": "The old plain text plan writer is deleted.",
+    "words": "`as_text` and the `plan issue` command",
+    "source": "https://github.com/dokima-dev/dokima/issues/739",
+    "files": [
+     "dokima/plan.py"
+    ],
+    "no_edge_cases": "A deletion takes no input, so it has no edge cases."
+   },
+   {
+    "text": "The old command that prints an issue's plan is deleted.",
+    "words": "`as_text` and the `plan issue` command. No workflow calls them; only tests do.",
+    "source": "https://github.com/dokima-dev/dokima/issues/739",
+    "files": [
+     "dokima/plan.py"
+    ],
+    "no_edge_cases": "A deletion takes no input, so it has no edge cases."
+   },
+   {
+    "text": "Listing the code owners still works as before.",
+    "words": "Keep `approvers`.",
+    "source": "https://github.com/dokima-dev/dokima/issues/739",
+    "files": [
+     "dokima/plan.py"
+    ],
+    "edge_cases": [
+     {
+      "case": "A repo with no code owners file lists the repository owner.",
+      "test": "tests/test_assign.py::test_new_issues_are_assigned_to_the_code_owners"
+     }
+    ]
+   },
+   {
+    "text": "Tests that only check the deleted code are deleted too.",
+    "words": "Delete it, plus the tests that only exercise it.",
+    "source": "https://github.com/dokima-dev/dokima/issues/739",
+    "files": [
+     "dokima/plan.py"
+    ],
+    "no_edge_cases": "Every test file is read the same way; there is no input to vary."
+   }
+  ],
+  "non_functional": [],
+  "tests": {
+   "760.1": [
+    "tests/test_old_plan_gone.py::test_fetching_an_issue_asks_github_only_for_its_text_and_link"
+   ],
+   "760.2": [
+    "tests/test_old_plan_gone.py::test_the_old_label_approval_code_is_deleted"
+   ],
+   "760.3": [
+    "tests/test_old_plan_gone.py::test_the_unused_work_branch_pattern_is_deleted"
+   ],
+   "760.4": [
+    "tests/test_old_plan_gone.py::test_the_old_checkbox_plan_parser_is_deleted"
+   ],
+   "760.5": [
+    "tests/test_old_plan_gone.py::test_the_old_plain_text_plan_writer_is_deleted"
+   ],
+   "760.6": [
+    "tests/test_old_plan_gone.py::test_the_old_command_that_prints_an_issues_plan_is_deleted"
+   ],
+   "760.7": [
+    "tests/test_assign.py::test_new_issues_are_assigned_to_the_code_owners"
+   ],
+   "760.8": [
+    "tests/test_old_plan_gone.py::test_no_test_reads_the_deleted_plan_code"
+   ]
+  },
+  "test_changes": {
+   "tests/test_terms.py::test_old_and_new_words_read_as_the_same_plan": "Only checked the old checkbox plan parser, which this issue deletes.",
+   "tests/test_terms.py::test_context_fold_is_kept_and_never_read_as_plan": "Only checked the old checkbox plan parser, which this issue deletes.",
+   "tests/test_plan.py::test_the_plan_is_frozen_when_the_label_is_added": "Only checked the old label approval, which this issue deletes.",
+   "tests/test_plan.py::test_card_and_checkbox_formats_read_the_same_plan": "Only checked the old checkbox plan parser, which this issue deletes.",
+   "tests/test_card.py::test_card_says_criteria_and_is_read_back_as_the_plan": "Read the card back through the old parser and plain text writer, both deleted.",
+   "tests/test_open_ask.py::test_the_owners_text_is_never_read_as_plan": "Only checked the old parser skips the owner's text; the parser is deleted.",
+   "tests/test_planner.py::test_plan_is_written_into_the_issue_as_goal_criteria_and_scope": "Read the plan back with the deleted parser; now checks the written lines directly.",
+   "tests/test_assign.py::test_new_issues_are_assigned_to_the_code_owners": "Also proves listing the code owners still works, run in temp repos.",
+   "tests/test_rules_split.py::test_every_test_from_before_the_first_split_still_runs": "Leaves out the tests this issue deletes with the code they checked."
+  },
+  "links": {
+   "blocked_by": [],
+   "blocks": [],
+   "relates_to": [
+    739,
+    761,
+    763
+   ]
+  }
+ },
+ "check": {
+  "passed": true,
+  "problems": []
+ },
+ "url": "https://github.com/dokima-dev/dokima/issues/760#issuecomment-6205461757"
+}
