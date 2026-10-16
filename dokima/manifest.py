@@ -16,8 +16,6 @@ import re
 import sys
 
 LABELS = {
-    "plan": {"color": "1d76db", "description": "Starts the planner"},
-    "work": {"color": "0e8a16", "description": "Starts the worker on the approved plan"},
     "autopilot": {"color": "8250df", "description": "Running on its own"},
     "filed-by-dokima": {"color": "bfd4f2", "description": "Created automatically, not by a person"},
 }

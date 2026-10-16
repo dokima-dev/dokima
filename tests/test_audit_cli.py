@@ -45,8 +45,8 @@ def clean():
 def drifted():
     """A fake GitHub off in one setting of each kind the audit reads."""
     s = clean()
-    del s["labels"]["plan"]
-    s["labels"]["work"]["description"] = "Old words"
+    del s["labels"]["filed-by-dokima"]
+    s["labels"]["autopilot"]["description"] = "Old words"
     del s["fields"]["Action"]["Autopilot"]
     s["fields"]["Priority"]["Blocker"]["color"] = "ORANGE"
     s["views"]["Autopilot"]["filter"] = "label:autopilot"
@@ -122,7 +122,7 @@ def test_the_audit_command_reads_every_live_setting_through_gh(record_property, 
     """The audit command reads labels, board, main's rule and app permissions from GitHub.
 
     Proves 283.1. Runs `python3 -m dokima.audit acme/widgets` against a fake gh whose repo is off in one setting of each kind: a
-    missing plan label, the work label's description, the Action field's missing Autopilot option, the Blocker option's
+    missing filed-by-dokima label, the autopilot label's description, the Action field's missing Autopilot option, the Blocker option's
     color, the Autopilot view's filter, main's missing required check and the app's issues permission. Each can only
     be found by reading it through gh, and each must be its own line on the Setup issue the command opens."""
     record_property("proves", "283.1")
@@ -130,8 +130,8 @@ def test_the_audit_command_reads_every_live_setting_through_gh(record_property, 
     a.run("283.1")
     n, issue = created(a, "283.1")
     lines = body_lines(issue["body"])
-    one_line(lines, "283.1", "the missing plan label", "plan", "1d76db")
-    one_line(lines, "283.1", "the work label's description", "work", "Old words", "Starts the worker on the approved plan")
+    one_line(lines, "283.1", "the missing filed-by-dokima label", "filed-by-dokima", "bfd4f2")
+    one_line(lines, "283.1", "the autopilot label's description", "autopilot", "Old words", "Running on its own")
     one_line(lines, "283.1", "the missing Autopilot option of the Action field", "Action", "Autopilot", "PURPLE")
     one_line(lines, "283.1", "the Blocker option's color", "Blocker", "ORANGE", "RED")
     one_line(lines, "283.1", "the Autopilot view's filter", "label:autopilot is:open")
@@ -165,15 +165,15 @@ def manifest_option(field, option):
 def test_a_second_audit_command_updates_the_same_setup_issue(record_property, tmp_path):
     """A second run updates the Setup issue it opened instead of opening another.
 
-    Proves 283.2. Runs the command on the drifted repo, then puts the plan label back, changes the autopilot label's color and runs it
-    again. Still only one issue was ever opened; it lists the autopilot label and no longer the plan label, and its card is
+    Proves 283.2. Runs the command on the drifted repo, then puts the filed-by-dokima label back, changes the autopilot label's color and runs it
+    again. Still only one issue was ever opened; it lists the autopilot label and no longer the filed-by-dokima label, and its card is
     still Needs you."""
     record_property("proves", "283.2")
     a = Audit(tmp_path, drifted())
     a.run("283.2")
     n, _ = created(a, "283.2")
     s = a.state()
-    s["labels"]["plan"] = copy.deepcopy(manifest.LABELS["plan"])
+    s["labels"]["filed-by-dokima"] = copy.deepcopy(manifest.LABELS["filed-by-dokima"])
     s["labels"]["autopilot"]["color"] = "000000"
     s["items"].get(f"PVTI_I_{n}", {}).pop("Action", None)
     a.save(s)
@@ -181,7 +181,7 @@ def test_a_second_audit_command_updates_the_same_setup_issue(record_property, tm
     n2, issue = created(a, "283.2")
     assert n2 == n and issue["state"] == "open", f"283.2: the Setup issue #{n} was not kept open\n{a.why()}"
     one_line(body_lines(issue["body"]), "283.2", "the autopilot label's new color", "autopilot", "000000")
-    assert "1d76db" not in issue["body"], f"283.2: the fixed plan label is still listed:\n{issue['body']}"
+    assert "bfd4f2" not in issue["body"], f"283.2: the fixed filed-by-dokima label is still listed:\n{issue['body']}"
     card = a.state()["items"].get(f"PVTI_I_{n}", {})
     assert card.get("Action") == manifest_option("Action", "Needs you"), \
         f"283.2: the updated Setup issue's card is not marked Needs you: {card}\n{a.why()}"
