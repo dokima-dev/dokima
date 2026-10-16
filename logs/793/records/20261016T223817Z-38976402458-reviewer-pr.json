@@ -1,0 +1,57 @@
+{
+ "role": "reviewer",
+ "stage": "pr",
+ "run_id": "38976402458",
+ "commit_before": "897f4312fc318c3206b81f9951ecd593ad5e055f",
+ "started_by": "dokima-runtime[bot]",
+ "models": [
+  "claude-opus-5-5"
+ ],
+ "report": {
+  "duration_ms": 47675,
+  "turns": 3,
+  "cost_usd": 0.7514857999999999,
+  "tokens_in": 191696,
+  "tokens_out": 1085
+ },
+ "log": "https://github.com/dokima-dev/dokima/blob/logs/logs/793/38976402458-reviewer-pr.md",
+ "run": "https://github.com/dokima-dev/dokima/actions/runs/38976402458",
+ "handback": {
+  "previous_step": {
+   "did": [
+    "The worker added the settings reader and the shipped defaults file.",
+    "The worker added the YAML reader to four test setups."
+   ],
+   "decided": [
+    "Agents get 100 turns by default, as the owner approved."
+   ],
+   "open": [
+    "GitHub's acceptance tests and test suite are red on the pull request."
+   ]
+  },
+  "verdict": "block",
+  "summary": "The code works, but GitHub's checks stay red: they run main's setup, which lacks the YAML reader.",
+  "raises": [
+   {
+    "kind": "blocker",
+    "to": "owner",
+    "label": "Checks cannot pass",
+    "text": "Criteria 793.1 to 793.10 are red on GitHub. Checks run main's setups, so this pull request's YAML install never runs. Fix: land the install on main first, then rerun.",
+    "evidence": "`full-suite.yml` and `acceptance-criteria.yml` use `pull_request_target`; locally all 17 fail with `No module named 'yaml'`.",
+    "raised_by": "reviewer",
+    "id": "R1"
+   }
+  ],
+  "answers": [],
+  "asks": [],
+  "behaviors": [],
+  "edge_cases": [],
+  "tests": [],
+  "size": "ok"
+ },
+ "check": {
+  "passed": true,
+  "problems": []
+ },
+ "url": "https://github.com/dokima-dev/dokima/pull/797#issuecomment-6225951165"
+}
