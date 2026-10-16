@@ -1,0 +1,82 @@
+{
+ "role": "planner",
+ "stage": null,
+ "run_id": "38831595886",
+ "commit_before": "e05e426b73487841e18151b08976155d7ab4ae5c",
+ "started_by": "dokima-runtime[bot]",
+ "models": [
+  "claude-opus-5-5"
+ ],
+ "report": {
+  "duration_ms": 266410,
+  "turns": 9,
+  "cost_usd": 1.0562062,
+  "tokens_in": 624606,
+  "tokens_out": 2704
+ },
+ "log": "https://github.com/dokima-dev/dokima/blob/logs/logs/764/38831595886-planner.md",
+ "run": "https://github.com/dokima-dev/dokima/actions/runs/38831595886",
+ "handback": {
+  "kind": "user_story",
+  "title": "The settings stop declaring the plan and work labels",
+  "summary": "The settings drop the old plan and work labels, which nothing reads since commands replaced them.",
+  "user_story": "The settings no longer list the old plan and work labels, so no repo is asked to create them.",
+  "acceptance_criteria": [
+   {
+    "text": "The settings no longer declare the old plan label.",
+    "words": "`dokima/manifest.py:19-20`: the `plan` and `work` labels; no workflow reads them.",
+    "source": "https://github.com/dokima-dev/dokima/issues/739",
+    "files": [
+     "dokima/manifest.py"
+    ],
+    "no_edge_cases": "A fixed entry in plain data; there is no input, call or failure to vary."
+   },
+   {
+    "text": "The settings no longer declare the old work label.",
+    "words": "`dokima/manifest.py:19-20`: the `plan` and `work` labels; no workflow reads them.",
+    "source": "https://github.com/dokima-dev/dokima/issues/739",
+    "files": [
+     "dokima/manifest.py"
+    ],
+    "no_edge_cases": "A fixed entry in plain data; there is no input, call or failure to vary."
+   }
+  ],
+  "non_functional": [],
+  "tests": {
+   "764.1": [
+    "tests/test_manifest.py::test_the_settings_no_longer_declare_the_plan_label"
+   ],
+   "764.2": [
+    "tests/test_manifest.py::test_the_settings_no_longer_declare_the_work_label"
+   ]
+  },
+  "test_changes": {
+   "tests/test_manifest.py::test_the_manifest_declares_every_label_dokima_uses": "The declared labels lose plan and work, so the expected set shrinks.",
+   "tests/test_audit.py::test_each_difference_gets_one_line_saying_what_is_off_and_what_dokima_needs": "Sample drift uses filed-by-dokima and autopilot, since plan and work go.",
+   "tests/test_audit.py::test_descriptions_and_layouts_are_compared_too": "Sample drift uses the autopilot label, since the work label goes.",
+   "tests/test_audit.py::test_a_later_run_updates_the_same_setup_issue": "Sample missing label is filed-by-dokima, since the plan label goes.",
+   "tests/test_audit.py::test_the_audit_posts_only_on_the_repo_it_runs_on": "Restores filed-by-dokima, the new sample missing label, instead of plan.",
+   "tests/test_audit_cli.py::test_the_audit_command_reads_every_live_setting_through_gh": "Sample drift uses filed-by-dokima and autopilot, since plan and work go.",
+   "tests/test_audit_cli.py::test_a_second_audit_command_updates_the_same_setup_issue": "Restores filed-by-dokima, the new sample missing label, instead of plan.",
+   "tests/test_up_to_date_rule.py::test_setup_issue_names_main_not_demanding_an_up_to_date_branch": "Sample missing label is filed-by-dokima, since the plan label goes.",
+   "tests/test_manifest.py::test_the_guard_passes_settings_the_manifest_declares": "Sample workflow keys on filed-by-dokima, since the plan label goes.",
+   "tests/test_audit_auto_merge.py::test_with_the_app_on_both_lists_the_setup_issue_says_auto_merge_is_on": "Sample missing label is filed-by-dokima, since the plan label goes.",
+   "tests/test_audit_auto_merge.py::test_with_the_app_on_neither_list_the_setup_issue_says_auto_merge_is_off": "Sample missing label is filed-by-dokima, since the plan label goes.",
+   "tests/test_audit_auto_merge.py::test_the_app_no_longer_asks_to_read_repo_variables": "Sample missing label is filed-by-dokima, since the plan label goes."
+  },
+  "links": {
+   "blocked_by": [],
+   "blocks": [],
+   "relates_to": [
+    739,
+    515,
+    740
+   ]
+  }
+ },
+ "check": {
+  "passed": true,
+  "problems": []
+ },
+ "url": "https://github.com/dokima-dev/dokima/issues/764#issuecomment-6205463223"
+}
