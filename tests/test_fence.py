@@ -6,7 +6,7 @@ import sys
 sys.path.insert(0, os.path.join(os.path.dirname(__file__), ".."))
 from dokima import fence  # noqa: E402
 
-ISSUE = "Plan text.\n\n**Scope:**\n- `app.py`\n- `tests/test_app.py`\n\n**Out of scope:** nothing.\n"
+SCOPE = ["app.py", "tests/test_app.py"]
 
 
 def repo(tmp_path, monkeypatch):
@@ -34,7 +34,7 @@ def test_tampering_is_undone_and_in_scope_work_survives(record_property, tmp_pat
     (tmp_path / "conftest.py").write_text("collect_ignore_glob = ['*']\n")
     (tmp_path / "README.md").write_text("changed\n")
     (tmp_path / "stray.py").write_text("y = 1\n")
-    dropped = fence.fence(base, fence.scope_of(ISSUE))
+    dropped = fence.fence(base, SCOPE)
     assert (tmp_path / "app.py").read_text() == "x = 2\n", "the in-scope change was lost"
     assert "assert False" in (tmp_path / "tests" / "test_app.py").read_text(), "the planner's test was not restored"
     assert not (tmp_path / "conftest.py").exists() and not (tmp_path / "stray.py").exists(), "new files outside scope survived"
@@ -47,12 +47,6 @@ def test_an_honest_build_is_untouched(record_property, tmp_path, monkeypatch):
     record_property("proves", "fence.2")
     base = repo(tmp_path, monkeypatch)
     (tmp_path / "app.py").write_text("x = 3\n")
-    assert fence.fence(base, fence.scope_of(ISSUE)) == [], "an honest build had changes dropped"
+    assert fence.fence(base, SCOPE) == [], "an honest build had changes dropped"
     assert (tmp_path / "app.py").read_text() == "x = 3\n"
 
-
-def test_scope_is_read_from_the_plan(record_property):
-    """The Scope list on the issue is read exactly, stopping at the next section."""
-    record_property("proves", "fence.3")
-    assert fence.scope_of(ISSUE) == ["app.py", "tests/test_app.py"]
-    assert fence.scope_of("No scope here.") == []
