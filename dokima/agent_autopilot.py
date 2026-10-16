@@ -315,7 +315,8 @@ def rerun_checks(repo, number):
     runs again, once; one still going is stopped first, since it may have read the plan before its approval. Runs on
     older commits and runs a review, a comment or another workflow started are left alone. With no open pull request
     nothing runs. A refusal for lack of permission gets one comment naming the app's setting; any other gets one
-    comment with GitHub's own words. Returns what happened, one line."""
+    comment with GitHub's own words. After any refusal the pull request becomes a draft again, so its merge gate
+    readies it and GitHub starts every check afresh (#620). Returns what happened, one line."""
     pr = agent_github.gh("pr", "list", "-R", repo, "--head", f"try/issue-{number}", "--state", "open", "--json", "number",
             "-q", ".[0].number").strip()
     if not pr.isdigit():
@@ -347,15 +348,23 @@ def rerun_checks(repo, number):
                 denied.append(name)
                 continue
         refused.append(f"- {name} ({url}): {why}")
+    drafted = ""
+    if denied or refused:
+        # A draft's checks start again when the merge gate readies it, so the gate never reads the ones from before.
+        try:
+            agent_github.gh("pr", "ready", pr, "-R", repo, "--undo")
+            drafted = " It is a draft again, so its checks start afresh when its merge gate readies it."
+        except subprocess.CalledProcessError as e:
+            drafted = f" GitHub could not make it a draft again, so its old checks stay: {gh_reason(e)}"
     if denied:
         agent_github.gh("pr", "comment", pr, "-R", repo, "--body",
            f"The plan of #{number} is approved, but GitHub refused to run its checks on {sha[:7]} again: Dokima's GitHub "
            f"App may not re-run workflows. Set the app's Actions permission to Read and write, then accept the new "
-           f"permission on its installation: {installations_link(repo)}")
+           f"permission on its installation: {installations_link(repo)}" + (drafted if not refused else ""))
     if refused:
         agent_github.gh("pr", "comment", pr, "-R", repo, "--body",
            f"The plan of #{number} is approved, but these checks on {sha[:7]} could not run again, in GitHub's own "
-           f"words:\n\n" + "\n".join(refused))
+           f"words:\n\n" + "\n".join(refused) + ("\n\n" + drafted.strip() if drafted else ""))
     did = f"Ran {len(ran)} check(s) on {sha[:7]} of PR #{pr} again"
     if denied or refused:
         did += f"; {len(denied) + len(refused)} could not run again, and PR #{pr} says why"
