@@ -47,7 +47,7 @@ def repo(review, queue, drift=True):
     s["review_bypass_apps"] = [APP] if review else [42]
     s["rulesets"] = [merge_queue(ADMIN_BYPASS, *([APP_BYPASS] if queue else []))]
     if drift:
-        del s["labels"]["plan"]
+        del s["labels"]["filed-by-dokima"]
     return s
 
 
