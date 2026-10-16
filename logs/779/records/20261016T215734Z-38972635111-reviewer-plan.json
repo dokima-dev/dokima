@@ -1,0 +1,618 @@
+{
+ "role": "reviewer",
+ "stage": "plan",
+ "run_id": "38972635111",
+ "commit_before": "f32b5fd3b3e8fd1add03f8219088989ceb7e7294",
+ "started_by": "dokima-runtime[bot]",
+ "models": [
+  "claude-opus-5-5"
+ ],
+ "report": {
+  "duration_ms": 40740,
+  "turns": 8,
+  "cost_usd": 0.35700360000000003,
+  "tokens_in": 272307,
+  "tokens_out": 3692
+ },
+ "log": "https://github.com/dokima-dev/dokima/blob/logs/logs/779/38972635111-reviewer-plan.md",
+ "run": "https://github.com/dokima-dev/dokima/actions/runs/38972635111",
+ "handback": {
+  "previous_step": {
+   "did": [
+    "The planner split the 38 criteria into four stories that take turns."
+   ],
+   "decided": [
+    "Each story keeps its criteria word for word from the issue.",
+    "Each story's own planner writes its tests and edge cases."
+   ],
+   "open": []
+  },
+  "verdict": "approve",
+  "summary": "The split keeps all 38 criteria word for word, in four stories of ten or fewer.",
+  "raises": [],
+  "answers": [],
+  "asks": [
+   {
+    "ask": "Dokima ships one defaults file that every repo's settings fall back to.",
+    "source": "https://github.com/dokima-dev/dokima/issues/740",
+    "criterion": "S1.1"
+   },
+   {
+    "ask": "A repo's settings file changes only the settings it names; every other keeps its default.",
+    "source": "https://github.com/dokima-dev/dokima/issues/740",
+    "criterion": "S1.2"
+   },
+   {
+    "ask": "The defaults file holds every setting of the owner's 41-row list, each with the default the list names.",
+    "source": "https://github.com/dokima-dev/dokima/issues/740#issuecomment-6219928729",
+    "criterion": "S1.3"
+   },
+   {
+    "ask": "A settings file holding lists is read in full, on every machine that runs Dokima.",
+    "source": "https://github.com/dokima-dev/dokima/issues/740",
+    "criterion": "S2.1"
+   },
+   {
+    "ask": "Saving a setting through setup keeps the file's comments.",
+    "source": "https://github.com/dokima-dev/dokima/issues/740",
+    "criterion": "S2.2"
+   },
+   {
+    "ask": "Saving a setting through setup keeps comments written at the end of a line.",
+    "source": "https://github.com/dokima-dev/dokima/issues/740",
+    "criterion": "S2.3"
+   },
+   {
+    "ask": "Saving one setting through setup leaves every other setting as it was.",
+    "source": "https://github.com/dokima-dev/dokima/issues/740",
+    "criterion": "S2.4"
+   },
+   {
+    "ask": "The agents section of the settings file picks each role's agent and model.",
+    "source": "https://github.com/dokima-dev/dokima/issues/740",
+    "criterion": "S2.5"
+   },
+   {
+    "ask": "A repo with only the old agents file still runs each role's agent as named there.",
+    "source": "https://github.com/dokima-dev/dokima/issues/740",
+    "criterion": "S2.6"
+   },
+   {
+    "ask": "A settings group in a repo's file merges with the defaults key by key, the repo winning.",
+    "source": "https://github.com/dokima-dev/dokima/issues/740",
+    "criterion": "S1.4"
+   },
+   {
+    "ask": "A list in a repo's file replaces the default list whole.",
+    "source": "https://github.com/dokima-dev/dokima/issues/740",
+    "criterion": "S1.5"
+   },
+   {
+    "ask": "Gates in a repo's file merge with the default gates by name.",
+    "source": "https://github.com/dokima-dev/dokima/issues/740",
+    "criterion": "S1.6"
+   },
+   {
+    "ask": "Prompt additions in a repo's file merge with the default ones by name.",
+    "source": "https://github.com/dokima-dev/dokima/issues/740",
+    "criterion": "S1.7"
+   },
+   {
+    "ask": "An unknown setting shows a warning that suggests the closest known name.",
+    "source": "https://github.com/dokima-dev/dokima/issues/740",
+    "criterion": "S1.8"
+   },
+   {
+    "ask": "An unknown setting is ignored and the run goes on.",
+    "source": "https://github.com/dokima-dev/dokima/issues/740",
+    "criterion": "S1.9"
+   },
+   {
+    "ask": "Setting any of the five locked settings in a repo's file fails the run, naming it.",
+    "source": "https://github.com/dokima-dev/dokima/issues/740",
+    "criterion": "S1.10"
+   },
+   {
+    "ask": "No setting in a repo's file changes the order: plan, review, build, review, merge.",
+    "source": "https://github.com/dokima-dev/dokima/issues/740",
+    "criterion": "S2.7"
+   },
+   {
+    "ask": "The repo's own install command runs before its tests in every test workflow.",
+    "source": "https://github.com/dokima-dev/dokima/issues/740#issuecomment-6219928729",
+    "criterion": "S2.8"
+   },
+   {
+    "ask": "The test tools each test workflow installs come from the test tools setting.",
+    "source": "https://github.com/dokima-dev/dokima/issues/740#issuecomment-6219928729",
+    "criterion": "S2.9"
+   },
+   {
+    "ask": "The repo's tests run on the Python version the settings name.",
+    "source": "https://github.com/dokima-dev/dokima/issues/740#issuecomment-6219928729",
+    "criterion": "S2.10"
+   },
+   {
+    "ask": "The all tests check runs the all-tests command from settings.",
+    "source": "https://github.com/dokima-dev/dokima/issues/740#issuecomment-6219928729",
+    "criterion": "S3.1"
+   },
+   {
+    "ask": "Each criterion's check runs the per-criterion command from settings.",
+    "source": "https://github.com/dokima-dev/dokima/issues/740#issuecomment-6219928729",
+    "criterion": "S3.2"
+   },
+   {
+    "ask": "Setting affected tests to all runs every test before review, with no saved baseline.",
+    "source": "https://github.com/dokima-dev/dokima/issues/740#issuecomment-6219928729",
+    "criterion": "S3.3"
+   },
+   {
+    "ask": "Handling a clash with main keeps the test folder named in settings.",
+    "source": "https://github.com/dokima-dev/dokima/issues/740#issuecomment-6219928729",
+    "criterion": "S3.4"
+   },
+   {
+    "ask": "The planner's push holds only files in the test folder named in settings.",
+    "source": "https://github.com/dokima-dev/dokima/issues/740#issuecomment-6219928729",
+    "criterion": "S3.5"
+   },
+   {
+    "ask": "Tests on the merge gate exclude list stay out of the all tests check.",
+    "source": "https://github.com/dokima-dev/dokima/issues/740",
+    "criterion": "S3.6"
+   },
+   {
+    "ask": "Agents base their branches and pull requests on the default branch setting.",
+    "source": "https://github.com/dokima-dev/dokima/issues/740#issuecomment-6219928729",
+    "criterion": "S3.7"
+   },
+   {
+    "ask": "Each run's conversation is saved on the records branch the settings name.",
+    "source": "https://github.com/dokima-dev/dokima/issues/740#issuecomment-6219928729",
+    "criterion": "S3.8"
+   },
+   {
+    "ask": "Only the bot named in settings may send the next-step signal.",
+    "source": "https://github.com/dokima-dev/dokima/issues/740#issuecomment-6219928729",
+    "criterion": "S3.9"
+   },
+   {
+    "ask": "Commits Dokima makes carry the git identity of the bot named in settings.",
+    "source": "https://github.com/dokima-dev/dokima/issues/740#issuecomment-6219928729",
+    "criterion": "S3.10"
+   },
+   {
+    "ask": "The co-author line on Dokima's commits comes from the co-author setting.",
+    "source": "https://github.com/dokima-dev/dokima/issues/740",
+    "criterion": "S4.1"
+   },
+   {
+    "ask": "Agents copy the owner docs file the settings name, in place of the rules file.",
+    "source": "https://github.com/dokima-dev/dokima/issues/740#issuecomment-6219928729",
+    "criterion": "S4.2"
+   },
+   {
+    "ask": "The planner and worker prompts name the owner docs file the settings name.",
+    "source": "https://github.com/dokima-dev/dokima/issues/740#issuecomment-6219928729",
+    "criterion": "S4.3"
+   },
+   {
+    "ask": "The worker's prompt lists the protected paths the settings name.",
+    "source": "https://github.com/dokima-dev/dokima/issues/740#issuecomment-6219928729",
+    "criterion": "S4.4"
+   },
+   {
+    "ask": "The planner prompt's runner line is drawn from the test settings.",
+    "source": "https://github.com/dokima-dev/dokima/issues/740#issuecomment-6219928729",
+    "criterion": "S4.5"
+   },
+   {
+    "ask": "The style prompt's caps table is drawn from the caps setting.",
+    "source": "https://github.com/dokima-dev/dokima/issues/740#issuecomment-6219928729",
+    "criterion": "S4.6"
+   },
+   {
+    "ask": "A repo's house rules file is added after the shipped prompt.",
+    "source": "https://github.com/dokima-dev/dokima/issues/740#issuecomment-6219928729",
+    "criterion": "S4.7"
+   },
+   {
+    "ask": "A house rules section named for a role is added only to that role's prompt.",
+    "source": "https://github.com/dokima-dev/dokima/issues/740#issuecomment-6219928729",
+    "criterion": "S4.8"
+   }
+  ],
+  "behaviors": [
+   {
+    "criterion": "S1.1",
+    "one_behavior": true,
+    "why": "One action and one result, as the approved parent plan wrote it."
+   },
+   {
+    "criterion": "S1.2",
+    "one_behavior": true,
+    "why": "One action and one result, as the approved parent plan wrote it."
+   },
+   {
+    "criterion": "S1.3",
+    "one_behavior": true,
+    "why": "One action and one result, as the approved parent plan wrote it."
+   },
+   {
+    "criterion": "S1.4",
+    "one_behavior": true,
+    "why": "One action and one result, as the approved parent plan wrote it."
+   },
+   {
+    "criterion": "S1.5",
+    "one_behavior": true,
+    "why": "One action and one result, as the approved parent plan wrote it."
+   },
+   {
+    "criterion": "S1.6",
+    "one_behavior": true,
+    "why": "One action and one result, as the approved parent plan wrote it."
+   },
+   {
+    "criterion": "S1.7",
+    "one_behavior": true,
+    "why": "One action and one result, as the approved parent plan wrote it."
+   },
+   {
+    "criterion": "S1.8",
+    "one_behavior": true,
+    "why": "One action and one result, as the approved parent plan wrote it."
+   },
+   {
+    "criterion": "S1.9",
+    "one_behavior": true,
+    "why": "One action and one result, as the approved parent plan wrote it."
+   },
+   {
+    "criterion": "S1.10",
+    "one_behavior": true,
+    "why": "One action and one result, as the approved parent plan wrote it."
+   },
+   {
+    "criterion": "S2.1",
+    "one_behavior": true,
+    "why": "One action and one result, as the approved parent plan wrote it."
+   },
+   {
+    "criterion": "S2.2",
+    "one_behavior": true,
+    "why": "One action and one result, as the approved parent plan wrote it."
+   },
+   {
+    "criterion": "S2.3",
+    "one_behavior": true,
+    "why": "One action and one result, as the approved parent plan wrote it."
+   },
+   {
+    "criterion": "S2.4",
+    "one_behavior": true,
+    "why": "One action and one result, as the approved parent plan wrote it."
+   },
+   {
+    "criterion": "S2.5",
+    "one_behavior": true,
+    "why": "One action and one result, as the approved parent plan wrote it."
+   },
+   {
+    "criterion": "S2.6",
+    "one_behavior": true,
+    "why": "One action and one result, as the approved parent plan wrote it."
+   },
+   {
+    "criterion": "S2.7",
+    "one_behavior": true,
+    "why": "One action and one result, as the approved parent plan wrote it."
+   },
+   {
+    "criterion": "S2.8",
+    "one_behavior": true,
+    "why": "One action and one result, as the approved parent plan wrote it."
+   },
+   {
+    "criterion": "S2.9",
+    "one_behavior": true,
+    "why": "One action and one result, as the approved parent plan wrote it."
+   },
+   {
+    "criterion": "S2.10",
+    "one_behavior": true,
+    "why": "One action and one result, as the approved parent plan wrote it."
+   },
+   {
+    "criterion": "S3.1",
+    "one_behavior": true,
+    "why": "One action and one result, as the approved parent plan wrote it."
+   },
+   {
+    "criterion": "S3.2",
+    "one_behavior": true,
+    "why": "One action and one result, as the approved parent plan wrote it."
+   },
+   {
+    "criterion": "S3.3",
+    "one_behavior": true,
+    "why": "One action and one result, as the approved parent plan wrote it."
+   },
+   {
+    "criterion": "S3.4",
+    "one_behavior": true,
+    "why": "One action and one result, as the approved parent plan wrote it."
+   },
+   {
+    "criterion": "S3.5",
+    "one_behavior": true,
+    "why": "One action and one result, as the approved parent plan wrote it."
+   },
+   {
+    "criterion": "S3.6",
+    "one_behavior": true,
+    "why": "One action and one result, as the approved parent plan wrote it."
+   },
+   {
+    "criterion": "S3.7",
+    "one_behavior": true,
+    "why": "One action and one result, as the approved parent plan wrote it."
+   },
+   {
+    "criterion": "S3.8",
+    "one_behavior": true,
+    "why": "One action and one result, as the approved parent plan wrote it."
+   },
+   {
+    "criterion": "S3.9",
+    "one_behavior": true,
+    "why": "One action and one result, as the approved parent plan wrote it."
+   },
+   {
+    "criterion": "S3.10",
+    "one_behavior": true,
+    "why": "One action and one result, as the approved parent plan wrote it."
+   },
+   {
+    "criterion": "S4.1",
+    "one_behavior": true,
+    "why": "One action and one result, as the approved parent plan wrote it."
+   },
+   {
+    "criterion": "S4.2",
+    "one_behavior": true,
+    "why": "One action and one result, as the approved parent plan wrote it."
+   },
+   {
+    "criterion": "S4.3",
+    "one_behavior": true,
+    "why": "One action and one result, as the approved parent plan wrote it."
+   },
+   {
+    "criterion": "S4.4",
+    "one_behavior": true,
+    "why": "One action and one result, as the approved parent plan wrote it."
+   },
+   {
+    "criterion": "S4.5",
+    "one_behavior": true,
+    "why": "One action and one result, as the approved parent plan wrote it."
+   },
+   {
+    "criterion": "S4.6",
+    "one_behavior": true,
+    "why": "One action and one result, as the approved parent plan wrote it."
+   },
+   {
+    "criterion": "S4.7",
+    "one_behavior": true,
+    "why": "One action and one result, as the approved parent plan wrote it."
+   },
+   {
+    "criterion": "S4.8",
+    "one_behavior": true,
+    "why": "One action and one result, as the approved parent plan wrote it."
+   }
+  ],
+  "edge_cases": [
+   {
+    "criterion": "S1.1",
+    "cut": [],
+    "missing": []
+   },
+   {
+    "criterion": "S1.2",
+    "cut": [],
+    "missing": []
+   },
+   {
+    "criterion": "S1.3",
+    "cut": [],
+    "missing": []
+   },
+   {
+    "criterion": "S1.4",
+    "cut": [],
+    "missing": []
+   },
+   {
+    "criterion": "S1.5",
+    "cut": [],
+    "missing": []
+   },
+   {
+    "criterion": "S1.6",
+    "cut": [],
+    "missing": []
+   },
+   {
+    "criterion": "S1.7",
+    "cut": [],
+    "missing": []
+   },
+   {
+    "criterion": "S1.8",
+    "cut": [],
+    "missing": []
+   },
+   {
+    "criterion": "S1.9",
+    "cut": [],
+    "missing": []
+   },
+   {
+    "criterion": "S1.10",
+    "cut": [],
+    "missing": []
+   },
+   {
+    "criterion": "S2.1",
+    "cut": [],
+    "missing": []
+   },
+   {
+    "criterion": "S2.2",
+    "cut": [],
+    "missing": []
+   },
+   {
+    "criterion": "S2.3",
+    "cut": [],
+    "missing": []
+   },
+   {
+    "criterion": "S2.4",
+    "cut": [],
+    "missing": []
+   },
+   {
+    "criterion": "S2.5",
+    "cut": [],
+    "missing": []
+   },
+   {
+    "criterion": "S2.6",
+    "cut": [],
+    "missing": []
+   },
+   {
+    "criterion": "S2.7",
+    "cut": [],
+    "missing": []
+   },
+   {
+    "criterion": "S2.8",
+    "cut": [],
+    "missing": []
+   },
+   {
+    "criterion": "S2.9",
+    "cut": [],
+    "missing": []
+   },
+   {
+    "criterion": "S2.10",
+    "cut": [],
+    "missing": []
+   },
+   {
+    "criterion": "S3.1",
+    "cut": [],
+    "missing": []
+   },
+   {
+    "criterion": "S3.2",
+    "cut": [],
+    "missing": []
+   },
+   {
+    "criterion": "S3.3",
+    "cut": [],
+    "missing": []
+   },
+   {
+    "criterion": "S3.4",
+    "cut": [],
+    "missing": []
+   },
+   {
+    "criterion": "S3.5",
+    "cut": [],
+    "missing": []
+   },
+   {
+    "criterion": "S3.6",
+    "cut": [],
+    "missing": []
+   },
+   {
+    "criterion": "S3.7",
+    "cut": [],
+    "missing": []
+   },
+   {
+    "criterion": "S3.8",
+    "cut": [],
+    "missing": []
+   },
+   {
+    "criterion": "S3.9",
+    "cut": [],
+    "missing": []
+   },
+   {
+    "criterion": "S3.10",
+    "cut": [],
+    "missing": []
+   },
+   {
+    "criterion": "S4.1",
+    "cut": [],
+    "missing": []
+   },
+   {
+    "criterion": "S4.2",
+    "cut": [],
+    "missing": []
+   },
+   {
+    "criterion": "S4.3",
+    "cut": [],
+    "missing": []
+   },
+   {
+    "criterion": "S4.4",
+    "cut": [],
+    "missing": []
+   },
+   {
+    "criterion": "S4.5",
+    "cut": [],
+    "missing": []
+   },
+   {
+    "criterion": "S4.6",
+    "cut": [],
+    "missing": []
+   },
+   {
+    "criterion": "S4.7",
+    "cut": [],
+    "missing": []
+   },
+   {
+    "criterion": "S4.8",
+    "cut": [],
+    "missing": []
+   }
+  ],
+  "tests": [],
+  "size": "ok"
+ },
+ "check": {
+  "passed": true,
+  "problems": []
+ },
+ "url": "https://github.com/dokima-dev/dokima/issues/779#issuecomment-6225446935"
+}
