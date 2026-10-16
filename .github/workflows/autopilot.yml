@@ -1,5 +1,5 @@
 name: autopilot
-run-name: "autopilot after #${{ github.event.issue.number }} closed"
+run-name: "autopilot after #${{ github.event.issue.number }} ${{ github.event.action }}"
 # Autopilot's reaction to an issue closing, usually because its pull request merged. Code reads every issue on
 # autopilot from GitHub: a parent whose last sub-issue closed closes too, saying its whole tree is done, and that
 # close counts one level up; a done tree (its top issue closed) goes off autopilot; and every issue left on autopilot
@@ -8,9 +8,12 @@ run-name: "autopilot after #${{ github.event.issue.number }} closed"
 # Every close waits in one queue for the whole repo, which a newer run never cancels, so two merges that close
 # together never read the tree at the same moment; and since each run works from the state of every tree, the run
 # that goes also does the work of any close whose run GitHub dropped from the queue. A failure says why on the issue.
+# A person adding the autopilot label by hand switches that one issue on the way `/autopilot start` does: its planner
+# starts when nothing open blocks it and nothing started on it yet. A label Dokima's app adds (as `/autopilot start`
+# does) starts nothing here, since that command already started what it should.
 on:
   issues:
-    types: [closed]
+    types: [closed, labeled]
 concurrency:
   group: autopilot
   cancel-in-progress: false
@@ -19,6 +22,7 @@ permissions:
   issues: read
 jobs:
   closed:
+    if: github.event.action == 'closed' || (github.event.label.name == 'autopilot' && github.event.sender.type != 'Bot')
     environment: keys
     runs-on: ubuntu-24.04
     steps:
@@ -38,19 +42,21 @@ jobs:
         with:
           app-id: ${{ vars.DOKIMA_APP_ID }}
           private-key: ${{ secrets.DOKIMA_APP_KEY }}
-      - name: Close done parents, switch done trees off, start what the close unblocked
+      - name: Close done parents, switch done trees off, start what the close or the new label unblocked
         env:
           GH_TOKEN: ${{ steps.app.outputs.token }}
           N: ${{ github.event.issue.number }}
-        run: python3 -m dokima.agent closed "$N" 2> /tmp/why.txt || { cat /tmp/why.txt >&2; exit 1; }
+          ACTION: ${{ github.event.action }}
+        run: python3 -m dokima.agent "$ACTION" "$N" 2> /tmp/why.txt || { cat /tmp/why.txt >&2; exit 1; }
       - name: Say why autopilot stopped, on the issue that closed
         if: failure()
         env:
           GH_TOKEN: ${{ steps.app.outputs.token }}
           N: ${{ github.event.issue.number }}
+          ACTION: ${{ github.event.action }}
           RUN: ${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }}
         run: |
-          printf 'Autopilot could not finish after #%s closed: %s ([run](%s))\n' "$N" "$(paste -sd' ' /tmp/why.txt 2>/dev/null)" "$RUN" > /tmp/autopilot.md
+          printf 'Autopilot could not finish after #%s %s: %s ([run](%s))\n' "$N" "$ACTION" "$(paste -sd' ' /tmp/why.txt 2>/dev/null)" "$RUN" > /tmp/autopilot.md
           gh issue comment "$N" -R "$GITHUB_REPOSITORY" --body-file /tmp/autopilot.md
       - name: Report this run's GitHub calls
         if: always()
