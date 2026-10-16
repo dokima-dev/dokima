@@ -13,7 +13,7 @@ import sys
 import pytest
 
 sys.path.insert(0, os.path.join(os.path.dirname(__file__), ".."))
-from dokima import fence, planner  # noqa: E402
+from dokima import planner  # noqa: E402
 
 ROOT = os.path.abspath(os.path.join(os.path.dirname(__file__), ".."))
 SRC = "https://github.com/o/r/issues/9"
@@ -39,10 +39,10 @@ def hand_back(tmp_path, content):
 
 
 def posted_scope(tmp_path, content):
-    """The files under the Scope heading the plan check writes for this hand-back."""
+    """The scope the plan check records for this hand-back."""
     kind, p = hand_back(tmp_path, content)
     assert kind == "plan", f"the sample story was read as {kind}"
-    return fence.scope_of(planner.plan_text(9, p, {}))
+    return p["scope"]
 
 
 def test_scope_is_the_criteria_files_plus_the_tests(record_property, tmp_path):

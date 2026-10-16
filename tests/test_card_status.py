@@ -473,8 +473,6 @@ def fake_github(monkeypatch, tmp_path, broken=()):
         m = re.fullmatch(r"repos/o/r/commits/sha(\d+)/(check-runs|pulls)", path)
         if m:
             return json.dumps({"total_count": 0, "check_runs": []} if m.group(2) == "check-runs" else [pull(int(m.group(1)))])
-        if path == "repos/o/r/actions/workflows/worker.yml/runs":
-            return json.dumps({"workflow_runs": []})
         raise AssertionError(f"181.3: card.gather asked GitHub something the fake does not serve: {args}")
 
     (tmp_path / ".github").mkdir(exist_ok=True)
