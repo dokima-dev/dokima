@@ -33,7 +33,7 @@ and put each issue in one list at most; empty lists are fine when there are none
 
 # Before you finish: the plan grade
 The plan grade comes first in this prompt. Walk its list yourself before you finish; the reviewer grades your plan
-against the same list and sends it back on 1 to 5.
+against the same list and sends it back on 1 to 6.
 
 # The plan
 Write the plan the way a product manager writes a story, in these terms:
