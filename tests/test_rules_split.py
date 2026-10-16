@@ -49,6 +49,19 @@ MOVED = {
     "tests/test_size_rule.py::test_too_big_too_small_or_too_many_is_refused":
         "tests/test_size_rule.py::test_a_story_over_five_or_empty_is_refused",
 }
+# Tests another issue deleted with the code they alone checked, with the issue that did it.
+DROPPED = {
+    # #761: the planner's old post and reject steps, its plan writer and its plan text are gone.
+    "tests/test_body.py::test_replanning_never_changes_the_owner_part",
+    "tests/test_body.py::test_a_first_plan_adds_the_marker_to_a_fresh_ask",
+    "tests/test_open_ask.py::test_the_owners_text_is_never_read_as_plan",
+    "tests/test_open_until_planned.py::test_the_planner_folds_an_open_new_issue",
+    "tests/test_planner.py::test_plan_is_written_into_the_issue_as_goal_criteria_and_scope",
+    "tests/test_planner.py::test_planning_again_keeps_the_owner_text_once",
+    "tests/test_planner.py::test_the_plan_lists_every_older_test_change_with_its_reason",
+    "tests/test_planner.py::test_rejection_reason_is_saved_and_posted_with_a_run_link",
+    "tests/test_planner.py::test_a_run_that_failed_before_handing_back_still_says_so",
+}
 
 
 def topic_files():
@@ -111,12 +124,12 @@ def test_every_test_from_before_the_first_split_still_runs(record_property):
 
     Checks the rules file is split, then collects every test as pytest would run them and compares with the 1,127
     test cases on main before the first split. Each test there must still be collected, with at least as many cases
-    as before; a test another issue renamed counts when its new name runs. Tests added since do not count against
-    it. Proves 638.3."""
+    as before; a test another issue renamed counts when its new name runs, and one it deleted with its code is
+    skipped. Tests added since do not count against it. Proves 638.3."""
     record_property("proves", "638.3")
     require_split("638.3")
     before = Counter(l.strip().split("[")[0] for l in open(BEFORE) if l.strip())
     now = Counter(n.split("[")[0] for n in collected())
-    lost = [f"{t} ({k} before, {now[t]} now)" for t, k in sorted(before.items()) if t not in MOVED and now[t] < k]
+    lost = [f"{t} ({k} before, {now[t]} now)" for t, k in sorted(before.items()) if t not in MOVED and t not in DROPPED and now[t] < k]
     lost += [f"{t}, renamed {new}, (none now)" for t, new in MOVED.items() if not now[new]]
     assert not lost, "638.3: these tests no longer run as they did before the first split:\n" + "\n".join(lost)

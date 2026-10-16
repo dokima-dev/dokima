@@ -39,10 +39,10 @@ def hand_back(tmp_path, content):
 
 
 def posted_scope(tmp_path, content):
-    """The files under the Scope heading the plan check writes for this hand-back."""
+    """The scope the fence takes from this hand-back's plan file."""
     kind, p = hand_back(tmp_path, content)
     assert kind == "plan", f"the sample story was read as {kind}"
-    return fence.scope_of(planner.plan_text(9, p, {}))
+    return fence.scope_from(p["raw"])
 
 
 def test_scope_is_the_criteria_files_plus_the_tests(record_property, tmp_path):

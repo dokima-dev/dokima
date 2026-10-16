@@ -12,19 +12,16 @@ Issue #179. One helper, dokima/body.py, owns the issue body:
                                 leaves the body alone, comments the reason on the issue and returns False
     Refused                     the exception redraw raises, its message saying why
 
-Every code path that redraws the issue body goes through it: the card (dokima/card.py main) and the planner's
-post (dokima/planner.py render, saved by planner.main "post"). GitHub is faked in every test by a recorder standing in
-for the `gh` calls; the planner's post runs inside a temp git repo holding the plan's tests, as a real run does.
+Every code path that redraws the issue body goes through it: the card (dokima/card.py main). GitHub is faked in every
+test by a recorder standing in for the `gh` calls.
 """
-import json
 import os
-import subprocess
 import sys
 
 import pytest
 
 sys.path.insert(0, os.path.join(os.path.dirname(__file__), ".."))
-from dokima import card, plan, planner  # noqa: E402
+from dokima import card, plan  # noqa: E402
 
 REPO = "o/r"
 NUMBER = 40
@@ -107,7 +104,6 @@ def github(monkeypatch, tmp_path):
     except ImportError:
         pass
     monkeypatch.setattr(card, "gh", fake)
-    monkeypatch.setattr(planner, "gh", fake)
     return fake
 
 
@@ -134,46 +130,6 @@ def run_card(monkeypatch, github, current):
 
 
 REASON = "the owner's part below the marker would change"
-
-PLAN_TESTS = ('def test_card(record_property):\n    """The card shows.\n\n    Proves 40.1.\n    """\n'
-              '    record_property("proves", "40.1")\n    assert False\n')
-PLAN = {"kind": "user_story", "title": "Every issue shows a card", "summary": "Every issue shows a card.", "user_story": "Owners see a card on every issue.",
-        "acceptance_criteria": [{"text": "The issue shows a card on top.", "source": f"https://github.com/{REPO}/issues/{NUMBER}", "no_edge_cases": "a sample criterion", "files": ["dokima/card.py"]}],
-        "non_functional": [], "out_of_scope": [],
-        "tests": {"40.1": ["tests/test_cardshow.py::test_card"]}, "test_changes": {}}
-
-
-def run_planner_post(monkeypatch, tmp_path, github, current):
-    """Run the planner's post, as the planner workflow does, on an issue whose body is `current`.
-
-    Builds a temp git repo whose planner run added one named test, hands back a good plan for issue #40, and runs
-    planner.main "post" against the faked GitHub. Returns what the run raised, or None; GitHub's record holds the rest.
-    """
-    repo, out = tmp_path / "repo", tmp_path / "out"
-    repo.mkdir(parents=True)
-    out.mkdir(parents=True)
-    git = lambda *a: subprocess.run(["git", *a], cwd=repo, check=True, capture_output=True, text=True).stdout
-    git("init", "-q")
-    git("config", "user.name", "t")
-    git("config", "user.email", "t@t")
-    (repo / "README.md").write_text("repo\n")
-    git("add", "-A")
-    git("commit", "-qm", "base")
-    base = git("rev-parse", "HEAD").strip()
-    monkeypatch.setenv("PLANNER_BASE", base)
-    monkeypatch.setenv("PLANNER_RUN_BASE", base)
-    monkeypatch.setenv("GITHUB_REPOSITORY", REPO)
-    (repo / "tests").mkdir()
-    (repo / "tests" / "test_cardshow.py").write_text(PLAN_TESTS)
-    (out / "plan.json").write_text(json.dumps(PLAN))
-    monkeypatch.chdir(repo)
-    github.body = current
-    try:
-        planner.main(["x", "post", str(NUMBER), str(out)])
-    except (SystemExit, Exception) as e:
-        return e
-    return None
-
 
 def refuse(monkeypatch, body):
     """Make the helper find that the owner's part would change, so every redraw through it is refused."""
@@ -252,26 +208,6 @@ def test_the_card_never_changes_the_owner_part(record_property, monkeypatch, git
         assert "first thing works" in saved.split(body.MARKER, 1)[0], f"179.2: card run {k + 1} lost the plan above"
         current = saved
     assert not github.comments, "179.2: a good redraw was refused"
-
-
-def test_replanning_never_changes_the_owner_part(record_property):
-    """Writing a plan into the issue, again and again, leaves the owner's part byte for byte as it was.
-
-    Runs the planner's render three times on an issue with an ask the card cannot read, and checks the ask and every
-    byte below the marker never change while the plan above it does."""
-    record_property("proves", "179.2")
-    body = helper("179.2")
-    story = {"objective": "Slow calls return a job id", "criteria": ["A slow call returns a job id within 20 s"],
-             "non_goals": [], "scope": ["dokima/jobs.py"], "test_changes": {}}
-    current = planner.render("9", TRICKY, story, {})
-    below = current.split(body.MARKER, 1)[1] if body.MARKER in current else None
-    assert body.ask(current) == TRICKY, "179.2: the first plan changed the owner's ask"
-    for k in range(3):
-        current = planner.render("9", current, dict(story, objective=f"Plan {k}"), {})
-        assert current.count(body.MARKER) == 1, f"179.2: re-plan {k + 1} does not have exactly one marker"
-        assert body.ask(current) == TRICKY, f"179.2: re-plan {k + 1} changed the owner's ask"
-        assert current.split(body.MARKER, 1)[1] == below, f"179.2: re-plan {k + 1} changed the part below the marker"
-        assert f"Plan {k}" in current.split(body.MARKER, 1)[0], f"179.2: re-plan {k + 1} did not write the plan above"
 
 
 # 179.3: when the owner's part would change, code refuses, says why on the issue, and leaves the body alone
@@ -355,20 +291,6 @@ def test_the_card_adds_the_marker_to_a_fresh_ask(record_property, monkeypatch, g
     assert saved.startswith(plan.CARD_START), "179.4: the card is not at the top of a fresh issue"
     assert saved.count(body.MARKER) == 1, "179.4: a fresh issue did not get exactly one marker"
     assert body.ask(saved) == TRICKY, "179.4: the fresh issue's whole body was not kept as the owner's ask"
-
-
-def test_a_first_plan_adds_the_marker_to_a_fresh_ask(record_property):
-    """The first plan written into a fresh issue adds the marker and keeps the whole ask below it.
-
-    Runs the planner's render on an issue with no marker and checks one marker and the whole original body, byte
-    for byte, as the owner's ask."""
-    record_property("proves", "179.4")
-    body = helper("179.4")
-    story = {"objective": "Slow calls return a job id", "criteria": ["A slow call returns a job id within 20 s"],
-             "non_goals": [], "scope": ["dokima/jobs.py"], "test_changes": {}}
-    new = planner.render("9", TRICKY, story, {})
-    assert new.count(body.MARKER) == 1, "179.4: the first plan did not add exactly one marker"
-    assert body.ask(new) == TRICKY, "179.4: the first plan did not keep the whole body as the owner's ask"
 
 
 # 179.5: a refused save always says why on the issue, never only in a log

@@ -6,7 +6,7 @@ import sys
 import pytest
 
 sys.path.insert(0, os.path.join(os.path.dirname(__file__), ".."))
-from dokima import plan, planner  # noqa: E402
+from dokima import planner  # noqa: E402
 
 WORKFLOWS = os.path.join(os.path.dirname(__file__), "..", ".github", "workflows")
 PLAN = {"objective": "Slow calls return a job id", "criteria": ["A slow call returns a job id within 20 s", "The job id is unique"],
@@ -21,27 +21,6 @@ TAGS = {"tests/test_jobs.py::test_id": ["9.1"], "tests/test_jobs.py::test_unique
 def write(tmp_path, name, content):
     (tmp_path / name).write_text(content if isinstance(content, str) else json.dumps(content))
     return str(tmp_path)
-
-
-# 80.1: the plan lands in the issue in the format the rest of Dokima reads
-
-def test_plan_is_written_into_the_issue_as_goal_criteria_and_scope(record_property):
-    record_property("proves", "80.1")
-    body = planner.render("9", "Make slow calls async.\n- [ ] Goal: old goal", PLAN, TAGS)
-    assert body.startswith("- [ ] Objective: Slow calls return a job id\n  - [ ] Acceptance criteria: "), "80.1: not in the Objective / Acceptance criteria format"
-    parsed = plan.parse(body)
-    assert [g["text"] for g in parsed["goals"]] == ["Slow calls return a job id"], "80.1: goal not read back"
-    crits = parsed["goals"][0]["criteria"]
-    assert [c["text"] for c in crits] == PLAN["criteria"], "80.1: criteria not read back in order"
-    assert crits[0]["verified_by"] == "`tests/test_jobs.py::test_id`", "80.1: criterion 1 not linked to its test"
-    assert "- `dokima/jobs.py`" in parsed["notes"], "80.1: scope missing"
-
-
-def test_planning_again_keeps_the_owner_text_once(record_property):
-    record_property("proves", "80.1")
-    first = planner.render("9", "Make slow calls async.", PLAN, TAGS)
-    second = planner.render("9", first, PLAN, TAGS)
-    assert second == first, "80.1: a second plan nested or lost the owner's original text"
 
 
 # 80.2: tests come with the plan, each tagged with a criterion of the plan
@@ -115,12 +94,9 @@ def test_garbled_output_is_rejected_with_its_reason(record_property, tmp_path, f
         planner.read_output(str(tmp_path))
 
 
-def test_rejected_output_fails_the_run_and_posts_nothing(record_property, tmp_path, monkeypatch, capsys):
+def test_rejected_output_fails_the_run_and_posts_nothing(record_property, tmp_path, capsys):
     record_property("proves", "80.3")
-    calls = []
-    monkeypatch.setattr(planner, "gh", lambda *a, **k: calls.append(a))
-    assert planner.main(["x", "post", "9", write(tmp_path, "question.md", "no question here")]) == 1
-    assert calls == [], "80.3: something was posted for rejected output"
+    assert planner.main(["x", "check", "9", write(tmp_path, "question.md", "no question here")]) == 1
     assert "::error title=Planner output rejected::" in capsys.readouterr().out
 
 
@@ -184,40 +160,7 @@ def test_a_changed_older_test_may_not_take_on_a_stranger_criterion(record_proper
     assert any("now proves 61.3" in b for b in bad), f"100.2: got {bad}"
 
 
-def test_the_plan_lists_every_older_test_change_with_its_reason(record_property):
-    record_property("proves", "100.2")
-    plan_ = dict(PLAN, test_changes={"tests/t.py::test_b": "it checked exact wording"})
-    body = planner.render("9", "x", plan_, TAGS, ["tests/t.py::test_b"])
-    assert "**Changes to older tests:**\n- `tests/t.py::test_b`: it checked exact wording" in body, "100.2: change not listed"
-    assert "Changes to older tests" not in planner.render("9", "x", plan_, TAGS), "100.2: listed with no older changes"
-
-
 def test_bad_test_changes_shape_is_rejected(record_property, tmp_path):
     record_property("proves", "100.2")
     with pytest.raises(planner.Garbled, match="test_changes"):
         planner.read_output(write(tmp_path, "plan.json", dict(STORY, test_changes={"tests/t.py::test_b": ""})))
-
-
-# 100.3: a rejected run says why on the issue
-
-def test_rejection_reason_is_saved_and_posted_with_a_run_link(record_property, tmp_path, monkeypatch):
-    record_property("proves", "100.3")
-    calls = []
-    monkeypatch.setattr(planner, "gh", lambda *a, **k: calls.append(a) or "")
-    monkeypatch.setenv("GITHUB_REPOSITORY", "o/r"); monkeypatch.setenv("GITHUB_RUN_ID", "42")
-    out = write(tmp_path, "plan.json", "{not json")
-    assert planner.main(["x", "check", "9", out]) == 1
-    assert calls == [], "100.3: something was posted by the check itself"
-    assert planner.main(["x", "rejected", "9", out]) == 0
-    assert [c[:2] for c in calls] == [("issue", "comment")]
-    assert "**Plan rejected:** plan.json is not valid JSON" in calls[0][-1], f"100.3: {calls[0][-1]}"
-    assert "https://github.com/o/r/actions/runs/42" in calls[0][-1], "100.3: no link to the run"
-
-
-def test_a_run_that_failed_before_handing_back_still_says_so(record_property, tmp_path, monkeypatch):
-    record_property("proves", "100.3")
-    calls = []
-    monkeypatch.setattr(planner, "gh", lambda *a, **k: calls.append(a) or "")
-    monkeypatch.setenv("GITHUB_REPOSITORY", "o/r")
-    planner.main(["x", "rejected", "9", str(tmp_path)])
-    assert "the planner run failed before handing anything back" in calls[0][-1]

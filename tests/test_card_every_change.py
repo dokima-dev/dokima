@@ -5,12 +5,11 @@ Story 2 of #425, re-planned as one story of three criteria.
 #419: the code review had passed, yet the card said Code review running for 30 minutes. card.yml picked its moments:
 it skipped the bot's own edits and comments (except a code review's run card on a pull request) and redrew on a run's
 start only for the full suite. The review's record is the bot's edit of its run card, so nothing redrew. Beside
-card.yml, the old planner (dokima/planner.py, `post`) saved its own plan above the marker, and the plan approval
-(`python3 -m dokima.agent next`, dokima/agent.py record_links) drew the cards of the issues its links touched. The
-play-through (.github/workflows/playthrough.yml) ran only from the Run workflow button.
+card.yml, the plan approval (`python3 -m dokima.agent next`, dokima/agent.py record_links) drew the cards of the issues
+its links touched. The play-through (.github/workflows/playthrough.yml) ran only from the Run workflow button.
 
-These tests play card.yml one event at a time on the fake GitHub of tests/card_player.py, run the old planner's post
-and the plan approval against fakes, read .github/workflows/playthrough.yml, and run `python3 -m dokima.playthrough`
+These tests play card.yml one event at a time on the fake GitHub of tests/card_player.py, run the plan approval
+against a fake, read .github/workflows/playthrough.yml, and run `python3 -m dokima.playthrough`
 with a temp git repo standing in for a pull request. Nothing calls real GitHub.
 """
 import os
@@ -180,40 +179,16 @@ def approval_saves_no_card(tmp_path):
         assert body.ask(hub.body(n)) == hub.asks[n], f"438.2: the owner's ask on #{n} changed"
 
 
-def planner_saves_no_card(monkeypatch, tmp_path):
-    """The planner saves no card of its own; it still says it planned.
-
-    Runs the old planner's post (`dokima/planner.py`, as planner.yml does) for a good plan on an issue that already
-    has a card, against tests/test_body.py's fake GitHub. It must save no issue body, and must still finish without
-    error and post its comment on the issue, so the post did run."""
-    import test_body as tb
-    from dokima import card, planner
-    fake = tb.FakeGitHub()
-    monkeypatch.setenv("REPO", tb.REPO)
-    monkeypatch.setattr(body, "gh", fake)
-    monkeypatch.setattr(card, "gh", fake)
-    monkeypatch.setattr(planner, "gh", fake)
-    current = body.redraw("My ask.", tb.PLAN_TOP)
-    raised = tb.run_planner_post(monkeypatch, tmp_path, fake, current)
-    assert raised is None, f"438.2: the planner's post failed on a good plan: {raised!r}"
-    assert fake.saves == [], f"438.2: the planner saved a card of its own above the marker: {fake.saves[0][:300]!r}"
-    assert fake.comments, "438.2: the planner's post said nothing on the issue, so it did not run"
-
-
-def test_only_card_yml_writes_the_card(tmp_path, monkeypatch, record_property):
-    """Neither the planner nor the plan approval saves a card; card.yml shows their links.
+def test_only_card_yml_writes_the_card(tmp_path, record_property):
+    """The plan approval saves no card; card.yml shows its links.
 
     Proves 438.2.
     Runs the plan approval (`python3 -m dokima.agent next` on an approving plan review) on the fake GitHub of
     tests/test_plan_links_recorded.py, for a plan that says #252 is blocked by #301, blocks #302 and relates to #303:
     it must still record the blocking links and write no issue body, and card.yml's own redraw of #252 must then show
-    all three links on every card involved. Then runs the old planner's post (`dokima/planner.py`, as planner.yml
-    does) for a good plan against tests/test_body.py's fake GitHub: it must save no issue body and still post its
-    comment, so the post did run."""
+    all three links on every card involved."""
     record_property("proves", "438.2")
     approval_saves_no_card(tmp_path / "approval")
-    (tmp_path / "planner").mkdir()
-    planner_saves_no_card(monkeypatch, tmp_path / "planner")
 
 
 # --- 438.3: the play-through runs by itself on a pull request changing card, board or workflow code -----------------
