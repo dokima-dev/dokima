@@ -1,0 +1,66 @@
+{
+ "role": "planner",
+ "stage": null,
+ "run_id": "38831602149",
+ "commit_before": "e05e426b73487841e18151b08976155d7ab4ae5c",
+ "started_by": "dokima-runtime[bot]",
+ "models": [
+  "claude-opus-5-5"
+ ],
+ "report": {
+  "duration_ms": 41062,
+  "turns": 9,
+  "cost_usd": 0.3850678,
+  "tokens_in": 336455,
+  "tokens_out": 3648
+ },
+ "log": "https://github.com/dokima-dev/dokima/blob/logs/logs/765/38831602149-planner.md",
+ "run": "https://github.com/dokima-dev/dokima/actions/runs/38831602149",
+ "handback": {
+  "kind": "user_story",
+  "title": "Delete the unused test finder",
+  "summary": "The checks hold a test finder nothing calls; this deletes it.",
+  "user_story": "The unused test finder in the checks is gone, with nothing else changed.",
+  "acceptance_criteria": [
+   {
+    "text": "The unused test finder is deleted from the checks.",
+    "words": "`dokima/checks.py:31-44`: `find_tests`, no caller.",
+    "source": "https://github.com/dokima-dev/dokima/issues/739",
+    "files": [
+     "dokima/checks.py"
+    ],
+    "edge_cases": [
+     {
+      "case": "The planner still reads test names and their criteria after the delete.",
+      "test": "tests/test_unused_test_finder.py::test_the_unused_test_finder_is_deleted"
+     }
+    ]
+   }
+  ],
+  "non_functional": [],
+  "tests": {
+   "765.1": [
+    "tests/test_unused_test_finder.py::test_the_unused_test_finder_is_deleted"
+   ]
+  },
+  "test_changes": {},
+  "links": {
+   "blocked_by": [],
+   "blocks": [],
+   "relates_to": [
+    739,
+    760,
+    761,
+    762,
+    763,
+    764,
+    766
+   ]
+  }
+ },
+ "check": {
+  "passed": true,
+  "problems": []
+ },
+ "url": "https://github.com/dokima-dev/dokima/issues/765#issuecomment-6205469754"
+}
