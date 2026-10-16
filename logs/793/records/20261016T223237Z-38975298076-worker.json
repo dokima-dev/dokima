@@ -1,0 +1,50 @@
+{
+ "role": "worker",
+ "stage": null,
+ "run_id": "38975298076",
+ "commit_before": "84dff82e10ec800fcef15e1145e629d3d140b920",
+ "started_by": "dokima-runtime[bot]",
+ "models": [
+  "claude-opus-5-5"
+ ],
+ "report": {
+  "duration_ms": 258397,
+  "turns": 7,
+  "cost_usd": 1.0343255999999998,
+  "tokens_in": 480881,
+  "tokens_out": 1563
+ },
+ "log": "https://github.com/dokima-dev/dokima/blob/logs/logs/793/38975298076-worker.md",
+ "run": "https://github.com/dokima-dev/dokima/actions/runs/38975298076",
+ "handback": {
+  "summary": "Added the settings reader and shipped defaults file, and installed the YAML reader in four test setups.",
+  "criteria": {
+   "793.1": "`dokima/settings.py` reads `dokima/defaults.yaml` beside it; a missing or empty repo file gives the defaults. Four workflows install `pyyaml`.",
+   "793.2": "`merge()` copies the defaults and changes only the keys the repo file names.",
+   "793.3": "`dokima/defaults.yaml` holds every setting the test lists, with turns at 100 as the owner approved.",
+   "793.4": "`merge()` recurses into nested maps, key by key, the repo winning at each level.",
+   "793.5": "`merge()` replaces any list whole with the repo's, an empty list included.",
+   "793.6": "`by_name()` merges `gates.required` by name: same name replaces in place, new ones come after.",
+   "793.7": "`by_name()` merges `prompts.append` the same way; the default addition is the house rules file.",
+   "793.8": "`merge()` warns on standard error naming the unknown key and the closest sibling key, via `difflib`.",
+   "793.9": "`merge()` leaves unknown keys and groups out and the reader exits 0.",
+   "793.10": "`read()` raises when the repo sets anything under `integrity`; `main()` exits 1 naming each locked key."
+  },
+  "evidence": "`pytest -q tests/test_settings_merge.py tests/test_checks.py tests/test_manual_fix_installs.py`: 21 passed"
+ },
+ "check": {
+  "passed": true,
+  "problems": []
+ },
+ "dropped_by_fence": [],
+ "files_changed": [
+  ".github/workflows/acceptance-criteria.yml",
+  ".github/workflows/agent.yml",
+  ".github/workflows/full-suite.yml",
+  ".github/workflows/testmon.yml",
+  "dokima/defaults.yaml",
+  "dokima/settings.py"
+ ],
+ "branch": "try/issue-793",
+ "url": "https://github.com/dokima-dev/dokima/issues/793#issuecomment-6225813715"
+}
