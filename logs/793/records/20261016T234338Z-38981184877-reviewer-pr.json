@@ -1,0 +1,47 @@
+{
+ "role": "reviewer",
+ "stage": "pr",
+ "run_id": "38981184877",
+ "commit_before": "7a3e5ecac501a7ca992bb4a81ca89287ca9ec792",
+ "started_by": "dokima-runtime[bot]",
+ "models": [
+  "claude-opus-5-5"
+ ],
+ "report": {
+  "duration_ms": 130644,
+  "turns": 16,
+  "cost_usd": 0.5622242000000001,
+  "tokens_in": 649810,
+  "tokens_out": 5376
+ },
+ "log": "https://github.com/dokima-dev/dokima/blob/logs/logs/793/38981184877-reviewer-pr.md",
+ "run": "https://github.com/dokima-dev/dokima/actions/runs/38981184877",
+ "handback": {
+  "previous_step": {
+   "did": [
+    "The worker changed no code this round.",
+    "Main now installs the YAML reader for the test setups."
+   ],
+   "decided": [
+    "The settings reader and defaults file stand as built last round."
+   ],
+   "open": [
+    "GitHub's checks must rerun on the final commit at the merge gate."
+   ]
+  },
+  "verdict": "approve",
+  "summary": "The settings reader meets all ten criteria; its tests and the full agent tests pass on the branch.",
+  "raises": [],
+  "answers": [],
+  "asks": [],
+  "behaviors": [],
+  "edge_cases": [],
+  "tests": [],
+  "size": "ok"
+ },
+ "check": {
+  "passed": true,
+  "problems": []
+ },
+ "url": "https://github.com/dokima-dev/dokima/pull/797#issuecomment-6226548564"
+}
