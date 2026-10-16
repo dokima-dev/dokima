@@ -74,15 +74,15 @@ def workflow_job_names():
 # 282.1: one manifest module declares every setting Dokima needs
 
 def test_the_manifest_declares_every_label_dokima_uses(record_property):
-    """The manifest declares exactly the labels Dokima uses: plan, work, autopilot, filed-by-dokima.
+    """The manifest declares exactly the labels Dokima uses: autopilot, filed-by-dokima.
 
     Proves 282.1. Each has a six-digit hex color and a description, and the board's own label name (autopilot) is among
     them. No label sets priority, so there is no high or parked label."""
     record_property("proves", "282.1")
     m = manifest("282.1")
     from dokima import board
-    assert set(m.LABELS) == {"plan", "work", "autopilot", "filed-by-dokima"}, \
-        f"282.1: the manifest declares the labels {sorted(m.LABELS)}, not plan, work, autopilot, filed-by-dokima"
+    assert set(m.LABELS) == {"autopilot", "filed-by-dokima"}, \
+        f"282.1: the manifest declares the labels {sorted(m.LABELS)}, not autopilot, filed-by-dokima"
     for name, label in m.LABELS.items():
         color = label.get("color", "")
         assert len(color) == 6 and all(c in "0123456789abcdefABCDEF" for c in color), \
@@ -369,7 +369,7 @@ def test_the_guard_passes_settings_the_manifest_declares(record_property, tmp_pa
             types: [labeled]
         jobs:
           go:
-            if: github.event.label.name == 'plan'
+            if: github.event.label.name == 'filed-by-dokima'
             runs-on: ubuntu-24.04
             steps:
               - uses: actions/create-github-app-token@v2
@@ -647,3 +647,27 @@ def test_the_manifest_is_read_with_no_network_and_no_github_calls(record_propert
                          env={**os.environ, "GH_TOKEN": "", "GITHUB_TOKEN": "", "PYTHONPATH": ROOT})
     assert run.returncode == 0 and run.stdout.strip() == "ok", \
         f"282.5: reading the manifest needed the network, a command or non-JSON data: {run.stderr.strip()[-800:]}"
+
+
+# 764.1 and 764.2: the settings stop declaring the old plan and work labels, which nothing reads
+
+def test_the_settings_no_longer_declare_the_plan_label(record_property):
+    """The settings no longer declare the old plan label.
+
+    Proves 764.1. Since commands replaced labels, no workflow or code reads the plan label, yet the manifest still listed
+    it, so the audit asked every repo to create it. Loads the manifest and checks its labels hold no plan label."""
+    record_property("proves", "764.1")
+    m = manifest("764.1")
+    assert "plan" not in m.LABELS, \
+        f"764.1: the settings still declare the old plan label: {m.LABELS.get('plan')}"
+
+
+def test_the_settings_no_longer_declare_the_work_label(record_property):
+    """The settings no longer declare the old work label.
+
+    Proves 764.2. Since commands replaced labels, no workflow or code reads the work label, yet the manifest still listed
+    it, so the audit asked every repo to create it. Loads the manifest and checks its labels hold no work label."""
+    record_property("proves", "764.2")
+    m = manifest("764.2")
+    assert "work" not in m.LABELS, \
+        f"764.2: the settings still declare the old work label: {m.LABELS.get('work')}"

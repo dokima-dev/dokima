@@ -31,7 +31,7 @@ def test_setup_issue_names_main_not_demanding_an_up_to_date_branch(record_proper
     record_property("proves", "600.1")
     good = clean()
     good["strict"] = {"main": True}
-    del good["labels"]["plan"]
+    del good["labels"]["filed-by-dokima"]
     a = Audit(tmp_path / "good", good)
     a.run("600.1")
     _, issue = created(a, "600.1")
