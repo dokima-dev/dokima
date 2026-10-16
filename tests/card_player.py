@@ -301,7 +301,7 @@ if a[:1] == ["api"]:
     method = (flag("-X", "--method") or ("POST" if f and route != "graphql" else "GET")).upper()
     if route == "graphql":
         q = f.get("query", "")
-        if "userContentEdits" in q and "issue(" in q:
+        if "issue(" in q and "body" in q:  # the issue read of dokima/plan.py fetch_issue
             n = int(f["i"])
             refuse("read-issue", n)
             i = issue(n)

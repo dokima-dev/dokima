@@ -283,8 +283,7 @@ def write_main(monkeypatch, tmp_path, found):
                 saved["pr"] = open(a[len("body=@"):]).read()
         return ""
 
-    issue = {"number": 40, "title": "t", "url": ISSUE["url"], "approved_at": None, "changes": [],
-             "plan": plan.parse("My ask."), "current_body": "My ask.", "body": "My ask."}
+    issue = {"number": 40, "title": "t", "url": ISSUE["url"], "current_body": "My ask.", "body": "My ask."}
     monkeypatch.chdir(tmp_path)
     monkeypatch.setenv("REPO", REPO)
     monkeypatch.setattr(card, "gh", gh)

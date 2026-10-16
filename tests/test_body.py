@@ -113,8 +113,8 @@ def github(monkeypatch, tmp_path):
 
 def run_card(monkeypatch, github, current):
     """Run the card's main on an issue whose body is `current`, with no PR and no worker run; the saved body or None."""
-    issue = {"number": NUMBER, "title": "t", "url": f"https://github.com/{REPO}/issues/{NUMBER}", "approved_at": None,
-             "changes": [], "plan": plan.parse(current), "current_body": current, "body": current}
+    issue = {"number": NUMBER, "title": "t", "url": f"https://github.com/{REPO}/issues/{NUMBER}",
+             "current_body": current, "body": current}
     monkeypatch.setattr(card, "find_work", lambda repo: (NUMBER, None))
     monkeypatch.setattr(card, "latest_worker_run", lambda repo, n: None)
     monkeypatch.setattr(plan, "fetch_issue", lambda repo, n: issue)

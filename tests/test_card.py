@@ -3,7 +3,7 @@ import re
 import sys
 
 sys.path.insert(0, os.path.join(os.path.dirname(__file__), ".."))
-from dokima import body, card, plan  # noqa: E402
+from dokima import body, card  # noqa: E402
 from test_start import load_yaml  # noqa: E402
 
 REPO = "o/r"
@@ -16,7 +16,6 @@ BODY = ("- [ ] Goal: show a card\n"
         "Requested in chat.\n")
 ISSUE = {"number": 40, "url": "https://github.com/o/r/issues/40"}
 PR = {"number": 5, "merged": False, "state": "open"}
-WORDS = plan.parse(BODY)
 PLAN = {"kind": "user_story", "user_story": "Owners see a card.",
         "acceptance_criteria": [{"text": "first thing works", "source": ISSUE["url"]},
                                 {"text": "second thing works", "source": ISSUE["url"]}],
@@ -107,14 +106,6 @@ def test_no_footer_and_no_gap(record_property):
         assert lines[i].startswith("  *")
         above = next(line for line in reversed(lines[:i]) if line.startswith("- "))
         assert "first thing works" in above or "second thing works" in above
-
-
-def test_card_says_criteria_and_is_read_back_as_the_plan(record_property):
-    record_property("proves", "74.5")
-    body = render()
-    assert "Done when" not in body and "first thing works" in body
-    text = plan.as_text(40, "T", WORDS)
-    assert "Criterion 40.1: first thing works" in text and "Done when" not in text
 
 
 def test_same_card_on_issue_and_pr_and_only_icons_change(record_property):
