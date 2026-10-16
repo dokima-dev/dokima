@@ -1,0 +1,336 @@
+{
+ "role": "planner",
+ "stage": null,
+ "run_id": "38828448314",
+ "commit_before": "e05e426b73487841e18151b08976155d7ab4ae5c",
+ "started_by": "RezaSoleymanifar",
+ "models": [
+  "claude-opus-5-5"
+ ],
+ "report": {
+  "duration_ms": 235153,
+  "turns": 26,
+  "cost_usd": 1.3854744000000003,
+  "tokens_in": 1704385,
+  "tokens_out": 18882
+ },
+ "log": "https://github.com/dokima-dev/dokima/blob/logs/logs/739/38828448314-planner.md",
+ "run": "https://github.com/dokima-dev/dokima/actions/runs/38828448314",
+ "handback": {
+  "kind": "feature",
+  "title": "Delete dead code from the old label flow",
+  "summary": "Deletes code left from the old label flow and Dokima's own repo, which nothing calls.",
+  "feature": "Dead code goes, one story per file area: plan reader, planner steps, fence, card lookups, labels, test finder, card sample.",
+  "stories": [
+   {
+    "title": "Delete the old label approval and plan parser",
+    "user_story": "Card draws and scans fetch only the issue's text and link, and the old plan reader is gone.",
+    "context": "All in `dokima/plan.py`. `fetch_issue` is called by `dokima/card.py:999` and `dokima/scan.py:27`; both read only `current_body`, `url`, `number` and `title`, so keep those keys. No code reads `plan`, `changes` or `approved_at`. Keep `approvers`, `repo_approvers`, `pr_issue_number` and the card markers (`CARD_START`, `CARD_END`), which `dokima/card.py` uses. `main` keeps only `approvers`, which `agent.yml`, `commands.yml` and `assign.yml` call. Tests that only exercise the deleted code: `tests/test_plan.py` (label approval), `tests/test_terms.py` (parser), the `as_text` test in `tests/test_card.py`. Many card tests build fake issues with `plan.parse(...)`, `approved_at` and `changes` keys (`tests/test_card_bullets.py`, `tests/test_card_records.py`, `tests/test_body.py`, `tests/test_open_ask.py`, `tests/test_planner.py`): rewrite those fixtures, do not delete those tests. Module docstring describes label approval; rewrite it.",
+    "acceptance_criteria": [
+     {
+      "text": "Fetching an issue for a card or a scan asks GitHub only for its text and link.",
+      "words": "Keep the body and url fetch.",
+      "source": "https://github.com/dokima-dev/dokima/issues/739",
+      "files": [
+       "dokima/plan.py"
+      ],
+      "no_edge_cases": "Deleting code that nothing calls has no inputs to vary."
+     },
+     {
+      "text": "The old label approval code is deleted.",
+      "words": "label approval (`LABEL = \"work\"`, `approved_at`, `approved_version`)",
+      "source": "https://github.com/dokima-dev/dokima/issues/739",
+      "files": [
+       "dokima/plan.py"
+      ],
+      "no_edge_cases": "Deleting code that nothing calls has no inputs to vary."
+     },
+     {
+      "text": "The unused old work branch pattern is deleted.",
+      "words": "`WORK_BRANCH`, never used.",
+      "source": "https://github.com/dokima-dev/dokima/issues/739",
+      "files": [
+       "dokima/plan.py"
+      ],
+      "no_edge_cases": "Deleting code that nothing calls has no inputs to vary."
+     },
+     {
+      "text": "The old checkbox plan parser is deleted.",
+      "words": "the checkbox plan parser (`parse`, `lines`, `changes`)",
+      "source": "https://github.com/dokima-dev/dokima/issues/739",
+      "files": [
+       "dokima/plan.py"
+      ],
+      "no_edge_cases": "Deleting code that nothing calls has no inputs to vary."
+     },
+     {
+      "text": "The old plain text plan writer is deleted.",
+      "words": "`as_text` and the `plan issue` command",
+      "source": "https://github.com/dokima-dev/dokima/issues/739",
+      "files": [
+       "dokima/plan.py"
+      ],
+      "no_edge_cases": "Deleting code that nothing calls has no inputs to vary."
+     },
+     {
+      "text": "The old command that prints an issue's plan is deleted.",
+      "words": "the `plan issue` command",
+      "source": "https://github.com/dokima-dev/dokima/issues/739",
+      "files": [
+       "dokima/plan.py"
+      ],
+      "no_edge_cases": "Deleting code that nothing calls has no inputs to vary."
+     },
+     {
+      "text": "Listing the code owners still works as before.",
+      "words": "Keep `approvers`.",
+      "source": "https://github.com/dokima-dev/dokima/issues/739",
+      "files": [
+       "dokima/plan.py"
+      ],
+      "no_edge_cases": "Deleting code that nothing calls has no inputs to vary."
+     },
+     {
+      "text": "Tests that only check the deleted code are deleted too.",
+      "words": "Delete it, plus the tests that only exercise it.",
+      "source": "https://github.com/dokima-dev/dokima/issues/739",
+      "files": [
+       "dokima/plan.py"
+      ],
+      "no_edge_cases": "Deleting code that nothing calls has no inputs to vary."
+     }
+    ],
+    "non_functional": [],
+    "depends_on": []
+   },
+   {
+    "title": "Delete the planner's old post and reject steps",
+    "user_story": "The planner keeps only its check; the old post and reject steps and the plan writer are gone.",
+    "context": "All in `dokima/planner.py`. Workflows call only `python3 -m dokima.planner check` (`agent.yml:324`). Delete the `post` and `rejected` branches of `main`, `render` and `plan_text`, and fix the module docstring's usage lines. Tests touching them: `tests/test_planner.py` (render, post, rejected tests), `tests/test_open_ask.py`, `tests/test_open_until_planned.py:162`, `tests/test_card_folds.py:182`, `tests/test_body.py` (render and post), `tests/test_scope_from_files.py` (reads scope through `plan_text`; story 3 deletes `fence.scope_of` too, so rewrite it to read `fence.scope_from`). Delete tests that only exercise the deleted code; rewrite the rest.",
+    "acceptance_criteria": [
+     {
+      "text": "The planner's old post step is deleted.",
+      "words": "the `post` and `rejected` actions",
+      "source": "https://github.com/dokima-dev/dokima/issues/739",
+      "files": [
+       "dokima/planner.py"
+      ],
+      "no_edge_cases": "Deleting code that nothing calls has no inputs to vary."
+     },
+     {
+      "text": "The planner's old reject step is deleted.",
+      "words": "the `post` and `rejected` actions",
+      "source": "https://github.com/dokima-dev/dokima/issues/739",
+      "files": [
+       "dokima/planner.py"
+      ],
+      "no_edge_cases": "Deleting code that nothing calls has no inputs to vary."
+     },
+     {
+      "text": "The old writer of a plan into the issue's text is deleted.",
+      "words": "`render` and `plan_text`",
+      "source": "https://github.com/dokima-dev/dokima/issues/739",
+      "files": [
+       "dokima/planner.py"
+      ],
+      "no_edge_cases": "Deleting code that nothing calls has no inputs to vary."
+     },
+     {
+      "text": "The old plan text builder is deleted.",
+      "words": "`render` and `plan_text`",
+      "source": "https://github.com/dokima-dev/dokima/issues/739",
+      "files": [
+       "dokima/planner.py"
+      ],
+      "no_edge_cases": "Deleting code that nothing calls has no inputs to vary."
+     },
+     {
+      "text": "Tests that only check the deleted code are deleted too.",
+      "words": "Delete it, plus the tests that only exercise it.",
+      "source": "https://github.com/dokima-dev/dokima/issues/739",
+      "files": [
+       "dokima/planner.py"
+      ],
+      "no_edge_cases": "Deleting code that nothing calls has no inputs to vary."
+     }
+    ],
+    "non_functional": [],
+    "depends_on": []
+   },
+   {
+    "title": "The fence reads its scope only from the plan file",
+    "user_story": "The fence takes its scope only from the plan file, as every run already passes it.",
+    "context": "`dokima/fence.py`: delete `scope_of` and the issue-text branch in `main`; `agent.yml:370` always passes `$PACK/plan.json`. Tests touching it: `tests/test_fence.py` (uses `scope_of` on issue text to build scopes; rewrite to pass lists or `scope_from`), `tests/test_scope_from_files.py` (also touched by story 2). Delete tests that only exercise the deleted code.",
+    "acceptance_criteria": [
+     {
+      "text": "The fence no longer reads its scope from the issue's text.",
+      "words": "reads Scope from issue text; agent.yml always passes plan.json.",
+      "source": "https://github.com/dokima-dev/dokima/issues/739",
+      "files": [
+       "dokima/fence.py"
+      ],
+      "no_edge_cases": "Deleting code that nothing calls has no inputs to vary."
+     },
+     {
+      "text": "Tests that only check the deleted code are deleted too.",
+      "words": "Delete it, plus the tests that only exercise it.",
+      "source": "https://github.com/dokima-dev/dokima/issues/739",
+      "files": [
+       "dokima/fence.py"
+      ],
+      "no_edge_cases": "Deleting code that nothing calls has no inputs to vary."
+     }
+    ],
+    "non_functional": [],
+    "depends_on": []
+   },
+   {
+    "title": "Cards stop looking up old work branches and worker runs",
+    "user_story": "Each redraw stops asking GitHub about old work branches and old worker runs.",
+    "context": "The owner asks for these `dokima/card.py` changes explicitly. Work branch lookups: `dokima/agent_github.py:26` (`linked_prs`), `:72` (the `issue_of_pr` docstring and pattern), `dokima/card.py:655` (`issue_pr`). Keep `try/issue-N`. Run title: `find_work` at `dokima/card.py:671-673`; `card.yml:107` still sets `RUN_TITLE`, which is harmless, and workflows are not to be changed. Worker runs: `latest_worker_run` at `dokima/card.py:684-687` and its use in `gather` at `:754`; `render` reads `found[\"worker\"]` for the links row, so make that optional. Overlaps open issues #515 and #681. Tests touching it: `tests/test_card_records.py` (the worker.yml fake at 309, the work branch test at 378), `tests/test_card_status.py:476`, `tests/test_body.py:119`, `tests/card_player.py:659`.",
+    "acceptance_criteria": [
+     {
+      "text": "Finding an issue's pull requests no longer looks up the old work branch.",
+      "words": "lookups of `work/issue-N` branches.",
+      "source": "https://github.com/dokima-dev/dokima/issues/739",
+      "files": [
+       "dokima/agent_github.py",
+       "dokima/card.py"
+      ],
+      "no_edge_cases": "Deleting code that nothing calls has no inputs to vary."
+     },
+     {
+      "text": "Finding an issue's pull requests still looks up its try branch.",
+      "words": "Keep `try/issue-N`.",
+      "source": "https://github.com/dokima-dev/dokima/issues/739",
+      "files": [
+       "dokima/agent_github.py",
+       "dokima/card.py"
+      ],
+      "no_edge_cases": "Deleting code that nothing calls has no inputs to vary."
+     },
+     {
+      "text": "The card no longer finds its issue from an old worker run's title.",
+      "words": "`RUN_TITLE \"worker for #N\"`",
+      "source": "https://github.com/dokima-dev/dokima/issues/739",
+      "files": [
+       "dokima/card.py"
+      ],
+      "no_edge_cases": "Deleting code that nothing calls has no inputs to vary."
+     },
+     {
+      "text": "Redrawing a card no longer asks GitHub for old worker runs.",
+      "words": "worker.yml no longer exists, so this is a wasted API call on every redraw.",
+      "source": "https://github.com/dokima-dev/dokima/issues/739",
+      "files": [
+       "dokima/card.py"
+      ],
+      "no_edge_cases": "Deleting code that nothing calls has no inputs to vary."
+     },
+     {
+      "text": "Tests that only check the deleted code are deleted too.",
+      "words": "Delete it, plus the tests that only exercise it.",
+      "source": "https://github.com/dokima-dev/dokima/issues/739",
+      "files": [
+       "dokima/card.py"
+      ],
+      "no_edge_cases": "Deleting code that nothing calls has no inputs to vary."
+     }
+    ],
+    "non_functional": [],
+    "depends_on": []
+   },
+   {
+    "title": "The settings stop declaring the plan and work labels",
+    "user_story": "The settings stop declaring the old plan and work labels, which nothing reads.",
+    "context": "`dokima/manifest.py:19-20`. With both removed, `python3 -m dokima.manifest .` still reports nothing missing (tried on a copy). `tests/test_manifest.py:84` asserts both labels are declared and must change; `tests/test_audit.py:274,329,429` and `tests/test_audit_cli.py:176` use `manifest.LABELS[\"plan\"]` or `[\"work\"]` as sample data and need another label. Overlaps open issues #515 and #740.",
+    "acceptance_criteria": [
+     {
+      "text": "The settings no longer declare the old plan label.",
+      "words": "the `plan` and `work` labels; no workflow reads them.",
+      "source": "https://github.com/dokima-dev/dokima/issues/739",
+      "files": [
+       "dokima/manifest.py"
+      ],
+      "no_edge_cases": "Deleting code that nothing calls has no inputs to vary."
+     },
+     {
+      "text": "The settings no longer declare the old work label.",
+      "words": "the `plan` and `work` labels; no workflow reads them.",
+      "source": "https://github.com/dokima-dev/dokima/issues/739",
+      "files": [
+       "dokima/manifest.py"
+      ],
+      "no_edge_cases": "Deleting code that nothing calls has no inputs to vary."
+     }
+    ],
+    "non_functional": [],
+    "depends_on": []
+   },
+   {
+    "title": "Delete the unused test finder",
+    "user_story": "The unused test finder in the checks is gone.",
+    "context": "`dokima/checks.py:31-44`, `find_tests`. No caller in `dokima/`, `.github/workflows/` or `tests/`. Keep `PROVES` and `TEST_DEF`, which `dokima/planner.py` imports.",
+    "acceptance_criteria": [
+     {
+      "text": "The unused test finder is deleted.",
+      "words": "`find_tests`, no caller.",
+      "source": "https://github.com/dokima-dev/dokima/issues/739",
+      "files": [
+       "dokima/checks.py"
+      ],
+      "no_edge_cases": "Deleting code that nothing calls has no inputs to vary."
+     }
+    ],
+    "non_functional": [],
+    "depends_on": []
+   },
+   {
+    "title": "Delete the unused card sample",
+    "user_story": "The card sample for issue 455 that nothing uses is gone.",
+    "context": "`docs/rendered/455.json` is the only file in `docs/rendered/`. Nothing in `dokima/`, `tests/` or `.github/` names it.",
+    "acceptance_criteria": [
+     {
+      "text": "The unused card sample for issue 455 is deleted.",
+      "words": "card fixture nothing references.",
+      "source": "https://github.com/dokima-dev/dokima/issues/739",
+      "files": [
+       "docs/rendered/455.json"
+      ],
+      "no_edge_cases": "Deleting code that nothing calls has no inputs to vary."
+     }
+    ],
+    "non_functional": [],
+    "depends_on": []
+   }
+  ],
+  "links": {
+   "blocked_by": [],
+   "blocks": [
+    740
+   ],
+   "relates_to": [
+    272,
+    515,
+    681
+   ]
+  },
+  "raises": [
+   {
+    "kind": "question",
+    "to": "owner",
+    "label": "Doubt: overlaps open issues",
+    "text": "This covers the old labels and worker runs two open issues name. Should both close with it? Assumed yes.",
+    "evidence": "#515 names the same labels and worker runs; #681 the same worker run lookup; #740 also claims #515.",
+    "raised_by": "planner",
+    "id": "P1"
+   }
+  ],
+  "answers": []
+ },
+ "check": {
+  "passed": true,
+  "problems": []
+ },
+ "url": "https://github.com/dokima-dev/dokima/issues/739#issuecomment-6205038317"
+}
