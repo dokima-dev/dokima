@@ -1,0 +1,89 @@
+{
+ "role": "reviewer",
+ "stage": "plan",
+ "run_id": "38833390305",
+ "commit_before": "0e8f34f13b0661084f6deb013f9718d09d319ec1",
+ "started_by": "dokima-runtime[bot]",
+ "models": [
+  "claude-opus-5-5"
+ ],
+ "report": {
+  "duration_ms": 6087,
+  "turns": 2,
+  "cost_usd": 0.4004314000000001,
+  "tokens_in": 82514,
+  "tokens_out": 454
+ },
+ "log": "https://github.com/dokima-dev/dokima/blob/logs/logs/764/38833390305-reviewer-plan.md",
+ "run": "https://github.com/dokima-dev/dokima/actions/runs/38833390305",
+ "handback": {
+  "previous_step": {
+   "did": [
+    "The planner wrote two criteria: drop the old plan label, drop the work label.",
+    "It added one test each and moved other tests' sample data to kept labels."
+   ],
+   "decided": [
+    "Dropping both labels needs no change outside the settings file."
+   ],
+   "open": []
+  },
+  "verdict": "approve",
+  "summary": "The plan carries both asks, each with one test that fails today because the label is still declared.",
+  "raises": [],
+  "answers": [],
+  "asks": [
+   {
+    "ask": "The settings no longer declare the old plan label.",
+    "source": "https://github.com/dokima-dev/dokima/issues/764",
+    "criterion": "764.1"
+   },
+   {
+    "ask": "The settings no longer declare the old work label.",
+    "source": "https://github.com/dokima-dev/dokima/issues/764",
+    "criterion": "764.2"
+   }
+  ],
+  "behaviors": [
+   {
+    "criterion": "764.1",
+    "one_behavior": true,
+    "why": "One label leaves the settings."
+   },
+   {
+    "criterion": "764.2",
+    "one_behavior": true,
+    "why": "One label leaves the settings."
+   }
+  ],
+  "edge_cases": [
+   {
+    "criterion": "764.1",
+    "cut": [],
+    "missing": []
+   },
+   {
+    "criterion": "764.2",
+    "cut": [],
+    "missing": []
+   }
+  ],
+  "tests": [
+   {
+    "test": "tests/test_manifest.py::test_the_settings_no_longer_declare_the_plan_label",
+    "only_its_behavior": true,
+    "why": "Fails today naming 764.1; passes once the plan label is gone."
+   },
+   {
+    "test": "tests/test_manifest.py::test_the_settings_no_longer_declare_the_work_label",
+    "only_its_behavior": true,
+    "why": "Fails today naming 764.2; passes once the work label is gone."
+   }
+  ],
+  "size": "ok"
+ },
+ "check": {
+  "passed": true,
+  "problems": []
+ },
+ "url": "https://github.com/dokima-dev/dokima/issues/764#issuecomment-6205684813"
+}
