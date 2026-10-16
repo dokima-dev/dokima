@@ -1,0 +1,150 @@
+{
+ "role": "planner",
+ "stage": null,
+ "run_id": "38831592519",
+ "commit_before": "e05e426b73487841e18151b08976155d7ab4ae5c",
+ "started_by": "dokima-runtime[bot]",
+ "models": [
+  "claude-opus-5-5"
+ ],
+ "report": {
+  "duration_ms": 1397144,
+  "turns": 28,
+  "cost_usd": 1.3543534000000002,
+  "tokens_in": 1690229,
+  "tokens_out": 22332
+ },
+ "log": "https://github.com/dokima-dev/dokima/blob/logs/logs/763/38831592519-planner.md",
+ "run": "https://github.com/dokima-dev/dokima/actions/runs/38831592519",
+ "handback": {
+  "kind": "user_story",
+  "title": "Cards stop looking up old work branches and worker runs",
+  "summary": "Cards and agents stop asking GitHub about old work branches and old worker runs.",
+  "user_story": "Each card redraw asks GitHub only about branches and runs that still exist.",
+  "acceptance_criteria": [
+   {
+    "text": "Finding an issue's pull requests no longer looks up its old work branch.",
+    "words": "`dokima/agent_github.py:26,72`, `dokima/card.py:655`: lookups of `work/issue-N` branches.",
+    "source": "https://github.com/dokima-dev/dokima/issues/739",
+    "files": [
+     "dokima/agent_github.py",
+     "dokima/card.py"
+    ],
+    "edge_cases": [
+     {
+      "case": "An issue whose only pull request sits on the old work branch shows none.",
+      "test": "tests/test_card_old_lookups.py::test_finding_an_issues_prs_never_looks_up_the_old_work_branch"
+     }
+    ]
+   },
+   {
+    "text": "Finding an issue's pull requests still finds the one on its try branch.",
+    "words": "Keep `try/issue-N`.",
+    "source": "https://github.com/dokima-dev/dokima/issues/739",
+    "files": [
+     "dokima/agent_github.py",
+     "dokima/card.py"
+    ],
+    "no_edge_cases": "Only the try branch is left to look up; nothing else changes."
+   },
+   {
+    "text": "The card no longer finds its issue from an old worker run's title.",
+    "words": "`RUN_TITLE \"worker for #N\"`",
+    "source": "https://github.com/dokima-dev/dokima/issues/739",
+    "files": [
+     "dokima/card.py"
+    ],
+    "edge_cases": [
+     {
+      "case": "A finished run with no pull request finds no issue.",
+      "test": "tests/test_card_old_lookups.py::test_the_card_never_finds_its_issue_from_an_old_worker_runs_title"
+     }
+    ]
+   },
+   {
+    "text": "Redrawing a card no longer asks GitHub for old worker runs.",
+    "words": "worker.yml no longer exists, so this is a wasted API call on every redraw.",
+    "source": "https://github.com/dokima-dev/dokima/issues/739",
+    "files": [
+     "dokima/card.py"
+    ],
+    "edge_cases": [
+     {
+      "case": "A card with no latest run still draws.",
+      "test": "tests/test_card_old_lookups.py::test_a_redraw_never_asks_github_for_old_worker_runs"
+     }
+    ]
+   },
+   {
+    "text": "Tests that only check the deleted code are deleted too.",
+    "words": "Delete it, plus the tests that only exercise it.",
+    "source": "https://github.com/dokima-dev/dokima/issues/739",
+    "files": [
+     "dokima/card.py",
+     "tests/test_body.py",
+     "tests/test_card_records.py",
+     "tests/test_card_status.py",
+     "tests/card_player.py"
+    ],
+    "no_edge_cases": "This plan makes those test changes itself; the check guards them."
+   },
+   {
+    "text": "A pull request on an old work branch no longer names its issue by branch.",
+    "words": "`dokima/agent_github.py:26,72`, `dokima/card.py:655`: lookups of `work/issue-N` branches.",
+    "source": "https://github.com/dokima-dev/dokima/issues/739",
+    "files": [
+     "dokima/agent_github.py"
+    ],
+    "edge_cases": [
+     {
+      "case": "A pull request on the try branch still names its issue.",
+      "test": "tests/test_card_old_lookups.py::test_an_old_work_branch_no_longer_names_a_pull_requests_issue"
+     }
+    ]
+   }
+  ],
+  "non_functional": [],
+  "tests": {
+   "763.1": [
+    "tests/test_card_old_lookups.py::test_finding_an_issues_prs_never_looks_up_the_old_work_branch"
+   ],
+   "763.2": [
+    "tests/test_card_records.py::test_the_card_finds_the_pr_on_either_branch"
+   ],
+   "763.3": [
+    "tests/test_card_old_lookups.py::test_the_card_never_finds_its_issue_from_an_old_worker_runs_title"
+   ],
+   "763.4": [
+    "tests/test_card_old_lookups.py::test_a_redraw_never_asks_github_for_old_worker_runs"
+   ],
+   "763.5": [
+    "tests/test_card_old_lookups.py::test_no_test_still_fakes_the_deleted_lookups"
+   ],
+   "763.6": [
+    "tests/test_card_old_lookups.py::test_an_old_work_branch_no_longer_names_a_pull_requests_issue"
+   ]
+  },
+  "test_changes": {
+   "tests/test_body.py::run_card": "Stops patching the deleted worker run lookup.",
+   "tests/test_card_records.py::write_main": "Stops patching the deleted worker run lookup.",
+   "tests/test_card_records.py::fake_github": "Stops serving old worker runs, so asking for them fails.",
+   "tests/test_card_records.py::test_the_card_finds_the_pr_on_either_branch": "Checks only the try branch, for both lookups; proves 763.2.",
+   "tests/test_card_status.py::fake_github": "Stops serving old worker runs, so asking for them fails.",
+   "tests/card_player.py::worker_finished": "Deleted: it only played an old worker run finishing; nothing used it."
+  },
+  "links": {
+   "blocked_by": [],
+   "blocks": [],
+   "relates_to": [
+    515,
+    681,
+    739
+   ]
+  }
+ },
+ "check": {
+  "passed": true,
+  "problems": []
+ },
+ "url": "https://github.com/dokima-dev/dokima/issues/763#issuecomment-6205462636"
+}
