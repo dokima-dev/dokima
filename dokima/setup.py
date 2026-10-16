@@ -16,6 +16,7 @@ import argparse
 import base64
 import io
 import os
+import re
 import subprocess
 import sys
 import tarfile
@@ -71,10 +72,15 @@ def read_settings(text):
             continue
         indent = len(line) - len(line.lstrip())
         key, _, rest = line.strip().partition(":")
+        rest = rest.strip()
+        if rest[:1] in ("'", '"') and rest[0] in rest[1:]:
+            rest = rest[1:rest.index(rest[0], 1)]
+        else:
+            rest = re.split(r"\s#", " " + rest, maxsplit=1)[0].strip()
         while stack[-1][0] >= indent:
             stack.pop()
-        if rest.strip():
-            stack[-1][1][key.strip()] = rest.strip().strip("'\"")
+        if rest:
+            stack[-1][1][key.strip()] = rest.strip("'\"")
         else:
             stack[-1][1][key.strip()] = {}
             stack.append((indent, stack[-1][1][key.strip()]))
