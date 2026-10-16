@@ -6,7 +6,7 @@ requirements and Out of scope sit in folds, closed by default (#527 later droppe
 added that the PR card also carries the original issue text in its own fold, so the issue and PR cards stay identical.
 
 The card is drawn by dokima/card.py render (the same card on the issue and the PR, which card.pr_body saves on the PR);
-the owner's text below the card's marker is kept by dokima/body.py redraw and saved by the card's main and the planner,
+the owner's text below the card's marker is kept by dokima/body.py redraw and saved by the card's main,
 and card.pr_body(card, pr_body, ask) puts the same Original issue fold on the PR, between the card and its Closes line.
 These tests draw the card from records the way tests/test_card_records.py does and redraw bodies the way
 tests/test_body.py does, with GitHub faked by its recorder.
@@ -19,7 +19,7 @@ import pytest
 
 sys.path.insert(0, os.path.join(os.path.dirname(__file__), ".."))
 sys.path.insert(0, os.path.dirname(__file__))
-from dokima import agent, body, card, planner  # noqa: E402
+from dokima import agent, body, card  # noqa: E402
 from test_body import PLAN_TOP, TRICKY, github, run_card, text_of  # noqa: E402,F401
 from rules_files import rules_text  # noqa: E402
 
@@ -166,20 +166,17 @@ def test_an_open_ask_folds_on_its_next_redraw(record_property):
 
 
 def test_the_card_and_the_planner_fold_the_owners_text(record_property, monkeypatch, github):
-    """The card and the planner both save the owner's text folded under Original issue.
+    """The card saves the owner's text folded under Original issue.
 
-    Proves 373.3. Runs the card's main on a fresh ask and on an ask open today, and the planner's render on a fresh
-    ask, and checks every saved body keeps the owner's text byte for byte in the closed Original issue fold with no
-    refusal posted; a split's quoted story stays folded the same way."""
+    Proves 373.3. Runs the card's main on a fresh ask and on an ask open today, and checks every saved body keeps the
+    owner's text byte for byte in the closed Original issue fold with no refusal posted; a split's quoted story stays
+    folded the same way."""
     record_property("proves", "373.3")
     for current in (TRICKY, open_body(PLAN_TOP, TRICKY)):
         saved = run_card(monkeypatch, github, current)
         assert saved is not None, "373.3: the card saved nothing on the issue"
         assert_folded("373.3", saved, TRICKY)
     assert not github.comments, "373.3: folding the owner's text posted a refusal"
-    story = {"objective": "Fold the ask", "criteria": ["The ask is folded"], "non_goals": [],
-             "scope": ["dokima/body.py"], "test_changes": {}}
-    assert_folded("373.3", planner.render("9", "My own words.", story, {}), "My own words.")
     quoted = agent.story_body(230, 4, {"title": "Folds", "user_story": "Folded.", "context": "c",
                                        "acceptance_criteria": [{"text": "Folded.", "source": SRC}],
                                        "non_functional": []}, "Cards show everything")

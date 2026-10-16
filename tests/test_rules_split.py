@@ -58,6 +58,15 @@ DROPPED = {
     "tests/test_plan.py::test_the_plan_is_frozen_when_the_label_is_added",
     "tests/test_terms.py::test_context_fold_is_kept_and_never_read_as_plan",
     "tests/test_terms.py::test_old_and_new_words_read_as_the_same_plan",
+    # #761: the planner's old post and reject steps, its plan writer and its plan text are gone.
+    "tests/test_body.py::test_replanning_never_changes_the_owner_part",
+    "tests/test_body.py::test_a_first_plan_adds_the_marker_to_a_fresh_ask",
+    "tests/test_open_until_planned.py::test_the_planner_folds_an_open_new_issue",
+    "tests/test_planner.py::test_plan_is_written_into_the_issue_as_goal_criteria_and_scope",
+    "tests/test_planner.py::test_planning_again_keeps_the_owner_text_once",
+    "tests/test_planner.py::test_the_plan_lists_every_older_test_change_with_its_reason",
+    "tests/test_planner.py::test_rejection_reason_is_saved_and_posted_with_a_run_link",
+    "tests/test_planner.py::test_a_run_that_failed_before_handing_back_still_says_so",
 }
 
 

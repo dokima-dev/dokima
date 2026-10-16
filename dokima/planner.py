@@ -1,8 +1,6 @@
-"""The planner's hand-back: check its shape, then write it into the issue.
+"""The planner's hand-back: check its shape.
 
     python3 -m dokima.planner check N OUT   # fail loudly unless OUT holds a well-formed plan
-    python3 -m dokima.planner post N OUT    # post the plan on issue N, or the proposed split
-    python3 -m dokima.planner rejected N OUT  # say on issue N why the run was rejected
 
 The planner holds no GitHub key. It ends by writing one plan.json to OUT, of kind user_story or feature (see
 dokima/roles/planner.md), raising its questions for the owner in its raises, plus its tests in tests/. Every
@@ -11,7 +9,6 @@ the repo, filed under one of the plan's criteria. Every older test it changes, r
 test_changes. Every new test has a one-sentence summary, names each criterion it proves by number below it, and fails
 on today's code. Criteria and the docstrings the planner adds are held to word caps (dokima/words.py): a little over
 is listed, far over is rejected.
-Nothing is posted unless `check` passes.
 """
 
 import ast
@@ -24,7 +21,6 @@ import sys
 import tarfile
 import tempfile
 
-from dokima import body as issue_body
 from dokima import fence
 from dokima import words
 from dokima.checks import PROVES, TEST_DEF
@@ -588,36 +584,10 @@ def passing_today(added, base="HEAD"):
     return out
 
 
-def render(number, body, plan, tags, older=()):
-    """The issue body for a plan, in the format dokima.plan reads, with the owner's part kept below the marker."""
-    return issue_body.redraw(body, plan_text(number, plan, tags, older))
-
-
-def plan_text(number, plan, tags, older=()):
-    """The plan's part of the issue body, written above the marker."""
-    lines = [f"- [ ] Objective: {plan['objective'].strip()}"]
-    for k, c in enumerate(plan["criteria"], 1):
-        tests = sorted(t for t, ks in tags.items() if f"{number}.{k}" in ks)
-        lines.append(f"  - [ ] Acceptance criteria: {c.strip()}")
-        lines.append("    Verified by: " + (", ".join(f"`{t}`" for t in tests) or "no test"))
-    lines.append("")
-    if older:
-        lines.append("**Changes to older tests:**")
-        lines += [f"- `{t}`: {plan['test_changes'].get(t, 'no reason given')}" for t in older]
-        lines.append("")
-    lines.append("**Scope:**")
-    lines += [f"- `{s.strip()}`" for s in plan["scope"]]
-    return "\n".join(lines) + "\n"
-
-
 def changed_files(base):
     """Every file the planner added or changed since `base`, committed or not, ignoring git-ignored files."""
     run = lambda *a: subprocess.run(["git", *a], check=True, capture_output=True, text=True).stdout.split("\n")
     return sorted({p for p in run("diff", "--name-only", base) + run("ls-files", "--others", "--exclude-standard") if p})
-
-
-def gh(*args, **kw):
-    return subprocess.run(["gh", *args], check=True, capture_output=True, text=True, **kw).stdout
 
 
 def git(*args):
@@ -634,13 +604,9 @@ def read_now(path):
 
 def main(argv):
     action, number, out = argv[1], argv[2], argv[3]
-    repo = os.environ.get("GITHUB_REPOSITORY", "")
-    if action == "rejected":
-        path = os.path.join(out, "rejected.txt")
-        why = open(path).read().strip() if os.path.exists(path) else "the planner run failed before handing anything back"
-        run = f"{os.environ.get('GITHUB_SERVER_URL', 'https://github.com')}/{repo}/actions/runs/{os.environ.get('GITHUB_RUN_ID', '')}"
-        gh("issue", "comment", number, "-R", repo, "--body", f"**Plan rejected:** {why}\n\n[See the run]({run})")
-        return 0
+    if action != "check":
+        print(f"::error title=Unknown planner action::{action}; the planner only checks its hand-back")
+        return 2
     try:
         kind, result = read_output(out, number)
         raw = result["raw"] if kind == "plan" else json.loads(result)
@@ -676,16 +642,6 @@ def main(argv):
         open(os.path.join(out, "rejected.txt"), "w").write(str(e))
         print(f"::error title=Planner output rejected::{e}")
         return 1
-    if action == "post":
-        if kind == "feature":
-            gh("issue", "comment", number, "-R", repo, "--body", f"**Planner proposes a split**\n\n```json\n{result}\n```")
-        else:
-            older = sorted(t for t in tc["changed"] if not set(tc["changed"][t][0]) <= {f"{number}.{k}" for k in range(1, len(result["criteria"]) + 1)}) + sorted(tc["deleted"])
-            # Only card.yml writes the card above the marker, so the plan goes in this comment.
-            tags = dict(proving(tc), **declared_by_test(result["declared"]))
-            gh("issue", "comment", number, "-R", repo, "--body",
-               f"**Plan**\n\n{plan_text(number, result, tags, older)}\n\n"
-               f"Tests on `work/issue-{number}`. Add `work` to approve it.")
     print(kind)
     return 0
 
