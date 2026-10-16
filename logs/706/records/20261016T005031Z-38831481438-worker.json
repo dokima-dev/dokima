@@ -1,0 +1,49 @@
+{
+ "role": "worker",
+ "stage": null,
+ "run_id": "38831481438",
+ "commit_before": "056f2120628628f766259aa4883a2ca792ff2f12",
+ "started_by": "RezaSoleymanifar",
+ "models": [
+  "claude-opus-5-5"
+ ],
+ "report": {
+  "duration_ms": 118457,
+  "turns": 13,
+  "cost_usd": 0.4779972,
+  "tokens_in": 501135,
+  "tokens_out": 5482
+ },
+ "log": "https://github.com/dokima-dev/dokima/blob/logs/logs/706/38831481438-worker.md",
+ "run": "https://github.com/dokima-dev/dokima/actions/runs/38831481438",
+ "handback": {
+  "summary": "Card and record steps now remove the role's agent key, and records hide every given secret.",
+  "criteria": {
+   "706.1": "`.github/workflows/agent.yml`: the queued, setting up, working and checking card steps get `SCRUB_AGENT`.",
+   "706.2": "Record step gets `SCRUB_*`; `dokima/agent_roles.py` scrubs the record and its card.",
+   "706.3": "`scrubbed()` in `dokima/agent_roles.py` cleans the record before `record.json` is written."
+  },
+  "evidence": "`pytest -q tests/test_agent_key_scrubbed.py`: 3 passed in 0.23s",
+  "raises": [
+   {
+    "kind": "issue",
+    "label": "Settings tests fail",
+    "text": "Nine settings tests fail on this branch before any change here; the model always reads as the default.",
+    "evidence": "`tests/test_agents.py::test_settings_come_from_one_file_in_the_dokima_folder` fails with the change stashed.",
+    "raised_by": "worker",
+    "id": "W1"
+   }
+  ]
+ },
+ "check": {
+  "passed": true,
+  "problems": []
+ },
+ "dropped_by_fence": [],
+ "files_changed": [
+  ".github/workflows/agent.yml",
+  "dokima/agent_roles.py"
+ ],
+ "branch": "try/issue-706",
+ "url": "https://github.com/dokima-dev/dokima/issues/706#issuecomment-6205446313"
+}
