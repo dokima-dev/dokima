@@ -1,0 +1,287 @@
+{
+ "role": "reviewer",
+ "stage": "plan",
+ "run_id": "38973712331",
+ "commit_before": "ff3f3efe6572a21c7cfd7102b99ecedfe2f9903f",
+ "started_by": "dokima-runtime[bot]",
+ "models": [
+  "claude-opus-5-5"
+ ],
+ "report": {
+  "duration_ms": 74192,
+  "turns": 9,
+  "cost_usd": 0.5635076000000001,
+  "tokens_in": 417610,
+  "tokens_out": 6495
+ },
+ "log": "https://github.com/dokima-dev/dokima/blob/logs/logs/793/38973712331-reviewer-plan.md",
+ "run": "https://github.com/dokima-dev/dokima/actions/runs/38973712331",
+ "handback": {
+  "previous_step": {
+   "did": [
+    "The planner wrote ten criteria and seventeen tests for reading and merging settings.",
+    "Every test fails today because the settings reader does not exist."
+   ],
+   "decided": [
+    "The defaults test checks 32 settings rebuilt from earlier quotes of the owner's list.",
+    "The turn limit default is taken as 100."
+   ],
+   "open": [
+    "Three questions wait for the owner: the YAML reader, the full list, the turn limit."
+   ]
+  },
+  "verdict": "approve",
+  "summary": "The plan carries every ask with tests that fail for the right reason; three questions wait for you.",
+  "raises": [],
+  "answers": [],
+  "asks": [
+   {
+    "ask": "Dokima ships one defaults file that every repo's settings fall back to.",
+    "source": "https://github.com/dokima-dev/dokima/issues/740",
+    "criterion": "793.1"
+   },
+   {
+    "ask": "A repo's settings file changes only the settings it names; every other keeps its default.",
+    "source": "https://github.com/dokima-dev/dokima/issues/740",
+    "criterion": "793.2"
+   },
+   {
+    "ask": "The defaults file holds every setting of the owner's 41-row list, each with the default the list names.",
+    "source": "https://github.com/dokima-dev/dokima/issues/740#issuecomment-6219928729",
+    "criterion": "793.3"
+   },
+   {
+    "ask": "A settings group in a repo's file merges with the defaults key by key, the repo winning.",
+    "source": "https://github.com/dokima-dev/dokima/issues/740",
+    "criterion": "793.4"
+   },
+   {
+    "ask": "A list in a repo's file replaces the default list whole.",
+    "source": "https://github.com/dokima-dev/dokima/issues/740",
+    "criterion": "793.5"
+   },
+   {
+    "ask": "Gates in a repo's file merge with the default gates by name.",
+    "source": "https://github.com/dokima-dev/dokima/issues/740",
+    "criterion": "793.6"
+   },
+   {
+    "ask": "Prompt additions in a repo's file merge with the default ones by name.",
+    "source": "https://github.com/dokima-dev/dokima/issues/740",
+    "criterion": "793.7"
+   },
+   {
+    "ask": "An unknown setting shows a warning that suggests the closest known name.",
+    "source": "https://github.com/dokima-dev/dokima/issues/740",
+    "criterion": "793.8"
+   },
+   {
+    "ask": "An unknown setting is ignored and the run goes on.",
+    "source": "https://github.com/dokima-dev/dokima/issues/740",
+    "criterion": "793.9"
+   },
+   {
+    "ask": "Setting any of the five locked settings in a repo's file fails the run, naming it.",
+    "source": "https://github.com/dokima-dev/dokima/issues/740",
+    "criterion": "793.10"
+   }
+  ],
+  "behaviors": [
+   {
+    "criterion": "793.1",
+    "one_behavior": true,
+    "why": "Reads the one shipped defaults file when the repo has none."
+   },
+   {
+    "criterion": "793.2",
+    "one_behavior": true,
+    "why": "Only the named setting changes."
+   },
+   {
+    "criterion": "793.3",
+    "one_behavior": true,
+    "why": "One result: the defaults hold the listed settings."
+   },
+   {
+    "criterion": "793.4",
+    "one_behavior": true,
+    "why": "One merge rule for groups."
+   },
+   {
+    "criterion": "793.5",
+    "one_behavior": true,
+    "why": "One merge rule for lists."
+   },
+   {
+    "criterion": "793.6",
+    "one_behavior": true,
+    "why": "One merge rule for gates."
+   },
+   {
+    "criterion": "793.7",
+    "one_behavior": true,
+    "why": "One merge rule for prompt additions."
+   },
+   {
+    "criterion": "793.8",
+    "one_behavior": true,
+    "why": "One result: a warning with a suggestion."
+   },
+   {
+    "criterion": "793.9",
+    "one_behavior": true,
+    "why": "One result: the setting is dropped and the run goes on."
+   },
+   {
+    "criterion": "793.10",
+    "one_behavior": true,
+    "why": "One result: the run fails naming the setting."
+   }
+  ],
+  "edge_cases": [
+   {
+    "criterion": "793.1",
+    "cut": [],
+    "missing": []
+   },
+   {
+    "criterion": "793.2",
+    "cut": [],
+    "missing": []
+   },
+   {
+    "criterion": "793.3",
+    "cut": [],
+    "missing": []
+   },
+   {
+    "criterion": "793.4",
+    "cut": [],
+    "missing": []
+   },
+   {
+    "criterion": "793.5",
+    "cut": [],
+    "missing": []
+   },
+   {
+    "criterion": "793.6",
+    "cut": [],
+    "missing": []
+   },
+   {
+    "criterion": "793.7",
+    "cut": [],
+    "missing": []
+   },
+   {
+    "criterion": "793.8",
+    "cut": [],
+    "missing": []
+   },
+   {
+    "criterion": "793.9",
+    "cut": [],
+    "missing": []
+   },
+   {
+    "criterion": "793.10",
+    "cut": [],
+    "missing": []
+   }
+  ],
+  "tests": [
+   {
+    "test": "tests/test_settings_merge.py::test_a_repo_with_no_settings_file_runs_on_the_shipped_defaults_file",
+    "only_its_behavior": true,
+    "why": "Swaps the shipped defaults file and checks the reader prints exactly it."
+   },
+   {
+    "test": "tests/test_settings_merge.py::test_an_empty_settings_file_falls_back_to_the_shipped_defaults",
+    "only_its_behavior": true,
+    "why": "Empty repo file still gives exactly the swapped defaults."
+   },
+   {
+    "test": "tests/test_settings_merge.py::test_a_repo_file_changes_only_the_setting_it_names",
+    "only_its_behavior": true,
+    "why": "One named setting changes; every other group and key is compared."
+   },
+   {
+    "test": "tests/test_settings_merge.py::test_the_shipped_defaults_hold_the_owners_list",
+    "only_its_behavior": true,
+    "why": "Checks each listed default by name; the list's reach is the owner's question."
+   },
+   {
+    "test": "tests/test_settings_merge.py::test_a_group_in_the_repo_file_merges_key_by_key",
+    "only_its_behavior": true,
+    "why": "One key set; the rest of the group must equal the defaults."
+   },
+   {
+    "test": "tests/test_settings_merge.py::test_a_group_two_levels_down_merges_key_by_key",
+    "only_its_behavior": true,
+    "why": "Nested caps merge key by key at both levels."
+   },
+   {
+    "test": "tests/test_settings_merge.py::test_a_list_in_the_repo_file_replaces_the_default_list",
+    "only_its_behavior": true,
+    "why": "Merged list must be exactly the repo's list."
+   },
+   {
+    "test": "tests/test_settings_merge.py::test_an_empty_list_in_the_repo_file_empties_the_setting",
+    "only_its_behavior": true,
+    "why": "An empty list must win over a non-empty default."
+   },
+   {
+    "test": "tests/test_settings_merge.py::test_gates_in_the_repo_file_merge_with_the_default_gates_by_name",
+    "only_its_behavior": true,
+    "why": "Defaults kept, repeat appears once, new gate added."
+   },
+   {
+    "test": "tests/test_settings_merge.py::test_a_gate_named_like_a_default_replaces_it_in_place",
+    "only_its_behavior": true,
+    "why": "Same-named gate replaces the default in its place."
+   },
+   {
+    "test": "tests/test_settings_merge.py::test_prompt_additions_in_the_repo_file_merge_with_the_default_ones_by_name",
+    "only_its_behavior": true,
+    "why": "New addition follows every default one, all kept."
+   },
+   {
+    "test": "tests/test_settings_merge.py::test_a_prompt_addition_named_like_a_default_replaces_it",
+    "only_its_behavior": true,
+    "why": "Same-named addition replaces the default one in place."
+   },
+   {
+    "test": "tests/test_settings_merge.py::test_an_unknown_setting_warns_with_the_closest_known_name",
+    "only_its_behavior": true,
+    "why": "Warning must name the typo and the closest setting."
+   },
+   {
+    "test": "tests/test_settings_merge.py::test_an_unknown_group_warns_with_the_closest_known_group",
+    "only_its_behavior": true,
+    "why": "Warning must name the misspelt group and suggest the right one."
+   },
+   {
+    "test": "tests/test_settings_merge.py::test_an_unknown_setting_is_ignored_and_the_run_goes_on",
+    "only_its_behavior": true,
+    "why": "Reader must succeed and print exactly the defaults."
+   },
+   {
+    "test": "tests/test_settings_merge.py::test_an_unknown_group_is_ignored_and_the_run_goes_on",
+    "only_its_behavior": true,
+    "why": "Reader must succeed with an unknown group left out."
+   },
+   {
+    "test": "tests/test_settings_merge.py::test_setting_a_locked_setting_fails_the_run_naming_it",
+    "only_its_behavior": true,
+    "why": "Each locked setting must fail naming it; an open one still passes."
+   }
+  ],
+  "size": "ok"
+ },
+ "check": {
+  "passed": true,
+  "problems": []
+ },
+ "url": "https://github.com/dokima-dev/dokima/issues/793#issuecomment-6225606074"
+}
