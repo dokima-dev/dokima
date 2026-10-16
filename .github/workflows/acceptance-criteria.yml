@@ -51,6 +51,7 @@ jobs:
         with:
           python-version: "3.12"
       - run: pip install -q pytest pytest-xdist
+      - run: pip install -q pyyaml  # the settings reader (#793)
       - name: Run this criterion's tests
         working-directory: pr
         env:

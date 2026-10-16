@@ -261,7 +261,7 @@ jobs:
       - name: Install pytest and Claude Code
         run: |
           set -o pipefail
-          { pip install pytest pytest-xdist pytest-testmon && python3 -m dokima.agents install "$ROLE"; } 2>&1 | tee /tmp/install.txt \
+          { pip install pytest pytest-xdist pytest-testmon pyyaml && python3 -m dokima.agents install "$ROLE"; } 2>&1 | tee /tmp/install.txt \
             || { echo "The step 'Install pytest and Claude Code' failed: $(tail -3 /tmp/install.txt | paste -sd' ')" > /tmp/why.txt; exit 1; }
       # The newest testmon baseline recorded on main (testmon.yml), so the review runs only the tests its change can affect.
       - name: Restore main's testmon baseline
