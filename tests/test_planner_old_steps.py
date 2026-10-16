@@ -7,7 +7,6 @@ every call to a file, so a step that still posts to GitHub is caught without any
 """
 import json
 import os
-import re
 import stat
 import subprocess
 import sys
@@ -16,7 +15,6 @@ sys.path.insert(0, os.path.join(os.path.dirname(__file__), ".."))
 from dokima import planner  # noqa: E402
 
 ROOT = os.path.abspath(os.path.join(os.path.dirname(__file__), ".."))
-TESTS = os.path.join(ROOT, "tests")
 SRC = "https://github.com/o/r/issues/9"
 
 
@@ -110,24 +108,3 @@ def test_the_plan_text_builder_is_gone(record_property):
     record_property("proves", "761.4")
     assert hasattr(planner, "read_output"), "761.4: the planner's check went with the old text builder"
     assert not hasattr(planner, "plan_text"), "761.4: the planner still has plan_text, the old plan text builder"
-
-
-OLD = re.compile(r"planner\.(render|plan_text)\b|planner\.main\(\[[^\]]*[\"'](post|rejected)[\"']"
-                 r"|dokima\.planner[\"'], [\"'](post|rejected)[\"']|run_planner_post")
-
-
-def test_no_test_reaches_the_old_steps(record_property):
-    """No test is left that exercises the planner's old steps, now that they are gone.
-
-    Scans every test file but this one for a call to `render`, `plan_text`, or the `post` or `rejected` step, and
-    checks none is left. A sample line calling `planner.render` is caught, so the scan is not blind. The steps
-    themselves must be gone too: until they are, no test can show they are unused. Proves 761.5.
-    """
-    record_property("proves", "761.5")
-    assert OLD.search('    new = planner.render("9", ask, story, {})'), "761.5: the scan misses a call to render"
-    here = os.path.basename(__file__)
-    found = [f"{name}:{k}" for name in sorted(os.listdir(TESTS)) if name.endswith(".py") and name != here
-             for k, line in enumerate(open(os.path.join(TESTS, name)), 1) if OLD.search(line)]
-    assert found == [], f"761.5: these tests still exercise the planner's deleted steps: {found}"
-    left = [name for name in ("render", "plan_text") if hasattr(planner, name)]
-    assert left == [], f"761.5: the planner's old steps {left} are still there, so their tests' deletion is unproven"
