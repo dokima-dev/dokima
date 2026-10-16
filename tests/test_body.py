@@ -116,7 +116,6 @@ def run_card(monkeypatch, github, current):
     issue = {"number": NUMBER, "title": "t", "url": f"https://github.com/{REPO}/issues/{NUMBER}", "approved_at": None,
              "changes": [], "plan": plan.parse(current), "current_body": current, "body": current}
     monkeypatch.setattr(card, "find_work", lambda repo: (NUMBER, None))
-    monkeypatch.setattr(card, "latest_worker_run", lambda repo, n: None)
     monkeypatch.setattr(plan, "fetch_issue", lambda repo, n: issue)
     # The card is drawn from the agents' records (#180): the plan record holds the same criterion as PLAN_TOP.
     planned = {"role": "planner", "stage": None, "check": {"passed": True}, "run": "https://github.com/o/r/actions/runs/1",
