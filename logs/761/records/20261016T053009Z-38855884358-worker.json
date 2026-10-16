@@ -1,0 +1,39 @@
+{
+ "role": "worker",
+ "stage": null,
+ "run_id": "38855884358",
+ "commit_before": "1fc61640cb66073aa3718c5624eff8999c7cfba3",
+ "started_by": "dokima-runtime[bot]",
+ "models": [
+  "claude-opus-5-5"
+ ],
+ "report": {
+  "duration_ms": 111379,
+  "turns": 14,
+  "cost_usd": 0.5042101999999999,
+  "tokens_in": 584338,
+  "tokens_out": 4043
+ },
+ "log": "https://github.com/dokima-dev/dokima/blob/logs/logs/761/38855884358-worker.md",
+ "run": "https://github.com/dokima-dev/dokima/actions/runs/38855884358",
+ "handback": {
+  "summary": "Deleted the planner's old post and reject steps, its plan writer and its plan text builder.",
+  "criteria": {
+   "761.1": "`dokima/planner.py` `main` drops the `post` branch; any action but `check` now fails loudly and posts nothing.",
+   "761.2": "`dokima/planner.py` `main` drops the `rejected` branch and the unused `gh` helper; that action now fails with an error.",
+   "761.3": "`render` is deleted from `dokima/planner.py`, with its now unused `body` import.",
+   "761.4": "`plan_text` is deleted from `dokima/planner.py`; the module docstring lists only `check`."
+  },
+  "evidence": "`pytest -q tests/test_planner_old_steps.py`: 4 passed in 0.17s"
+ },
+ "check": {
+  "passed": true,
+  "problems": []
+ },
+ "dropped_by_fence": [],
+ "files_changed": [
+  "dokima/planner.py"
+ ],
+ "branch": "try/issue-761",
+ "url": "https://github.com/dokima-dev/dokima/issues/761#issuecomment-6208769223"
+}
