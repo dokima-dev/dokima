@@ -28,22 +28,6 @@ NOT_TEXT = ("dokima/roles/", "tests/", ".github/")
 MANUAL_FIX = [{"id": "manual-fix", "name": "Manual fix: all tests pass", "tests": "tests"}]
 
 
-def find_tests(paths):
-    """Map each criterion key like '29.1' to the tests that prove it, as 'path::test'."""
-    found = {}
-    for path in sorted(paths):
-        current = None
-        with open(path) as f:
-            for line in f:
-                name = TEST_DEF.match(line)
-                if name:
-                    current = name.group(1)
-                for key in PROVES.findall(line):
-                    if current:
-                        found.setdefault(key, []).append(f"{path}::{current}")
-    return found
-
-
 def check_name(key, text, limit=60):
     """The check's name on GitHub: '29.1 · <criterion, shortened>'."""
     if len(text) > limit:
