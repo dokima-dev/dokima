@@ -1,0 +1,41 @@
+{
+ "role": "worker",
+ "stage": null,
+ "run_id": "39071767180",
+ "commit_before": "6fd26c1422a3e5f6255aff16109d307fbec623ea",
+ "started_by": "dokima-runtime[bot]",
+ "models": [
+  "claude-opus-5-5"
+ ],
+ "report": {
+  "duration_ms": 58044,
+  "turns": 9,
+  "cost_usd": 0.3404532,
+  "tokens_in": 311357,
+  "tokens_out": 3199
+ },
+ "log": "https://github.com/dokima-dev/dokima/blob/logs/logs/815/39071767180-worker.md",
+ "run": "https://github.com/dokima-dev/dokima/actions/runs/39071767180",
+ "handback": {
+  "summary": "The wiki install page now asks for only the thin workflow and settings file; code owners is optional.",
+  "criteria": {
+   "815.1": "`docs/wiki/Installing.md`: the old step telling adopters to copy the workflows folder and code package is gone.",
+   "815.2": "`docs/wiki/Installing.md` step 3 tells adopters to add `.github/workflows/dokima.yml`, linking the thin workflow.",
+   "815.3": "`docs/wiki/Installing.md` step 3 tells adopters to add `.dokima/settings.yaml`, linking the template.",
+   "815.4": "`docs/wiki/Installing.md` step 3 opens saying those two files are the only ones added.",
+   "815.5": "`docs/wiki/Installing.md`: the table of Dokima's own workflows is removed.",
+   "815.6": "`docs/wiki/Installing.md`: the code owners step is gone; one line calls `CODEOWNERS` optional."
+  },
+  "evidence": "`pytest -q tests/test_wiki_install.py`: 6 passed in 0.05s"
+ },
+ "check": {
+  "passed": true,
+  "problems": []
+ },
+ "dropped_by_fence": [],
+ "files_changed": [
+  "docs/wiki/Installing.md"
+ ],
+ "branch": "try/issue-815",
+ "url": "https://github.com/dokima-dev/dokima/issues/815#issuecomment-6241535555"
+}
