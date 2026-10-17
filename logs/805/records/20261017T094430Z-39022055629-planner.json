@@ -1,0 +1,131 @@
+{
+ "role": "planner",
+ "stage": null,
+ "run_id": "39022055629",
+ "commit_before": "8564320acad2062700d6367d64112e2c2da08e79",
+ "started_by": "dokima-runtime[bot]",
+ "models": [
+  "claude-opus-5-5"
+ ],
+ "report": {
+  "duration_ms": 157060,
+  "turns": 17,
+  "cost_usd": 0.8110038,
+  "tokens_in": 761519,
+  "tokens_out": 12482
+ },
+ "log": "https://github.com/dokima-dev/dokima/blob/logs/logs/805/39022055629-planner.md",
+ "run": "https://github.com/dokima-dev/dokima/actions/runs/39022055629",
+ "handback": {
+  "kind": "user_story",
+  "title": "Planner's test limits and docstrings follow settings",
+  "summary": "The planner's check reads its time limit, test files and docstring rules from the repo's settings.",
+  "user_story": "A repo's time limit, test file pattern and docstring rules decide what the planner's check accepts.",
+  "acceptance_criteria": [
+   {
+    "text": "The check that new tests fail today stops a test after the time limit setting.",
+    "words": "The check that new tests fail today stops a test after the time limit setting.",
+    "source": "https://github.com/dokima-dev/dokima/issues/781",
+    "files": [
+     "dokima/planner.py"
+    ],
+    "edge_cases": [
+     {
+      "case": "A test that ends within the limit is not stopped.",
+      "test": "tests/test_planner_settings.py::test_the_new_test_check_stops_a_test_after_the_time_limit_setting"
+     }
+    ]
+   },
+   {
+    "text": "The planner's test files are found by the test folder and file pattern settings.",
+    "words": "The planner's test files are found by the test folder and file pattern settings.",
+    "source": "https://github.com/dokima-dev/dokima/issues/781",
+    "files": [
+     "dokima/planner.py"
+    ],
+    "edge_cases": [
+     {
+      "case": "A helper file in the test folder that does not match the pattern.",
+      "test": "tests/test_planner_settings.py::test_the_planners_test_files_follow_the_test_folder_and_file_pattern_settings"
+     }
+    ]
+   },
+   {
+    "text": "Turning docstrings off in settings stops the planner's check requiring them.",
+    "words": "Turning docstrings off in settings stops the planner's check requiring them.",
+    "source": "https://github.com/dokima-dev/dokima/issues/781",
+    "files": [
+     "dokima/planner.py"
+    ],
+    "edge_cases": [
+     {
+      "case": "With no settings file, docstrings stay required.",
+      "test": "tests/test_planner_settings.py::test_turning_docstrings_off_stops_the_planners_check_requiring_them"
+     }
+    ]
+   },
+   {
+    "text": "The planner's test docstring cap comes from settings.",
+    "words": "The planner's test docstring cap comes from settings.",
+    "source": "https://github.com/dokima-dev/dokima/issues/781",
+    "files": [
+     "dokima/planner.py"
+    ],
+    "edge_cases": [
+     {
+      "case": "A docstring under the set cap still passes.",
+      "test": "tests/test_planner_settings.py::test_the_planners_docstring_cap_comes_from_settings"
+     }
+    ]
+   },
+   {
+    "text": "An empty planner test docstring cap turns that cap off.",
+    "words": "An empty planner test docstring cap turns that cap off.",
+    "source": "https://github.com/dokima-dev/dokima/issues/781",
+    "files": [
+     "dokima/planner.py"
+    ],
+    "edge_cases": [
+     {
+      "case": "With no settings file, the shipped cap still applies.",
+      "test": "tests/test_planner_settings.py::test_an_empty_docstring_cap_turns_the_cap_off"
+     }
+    ]
+   }
+  ],
+  "non_functional": [],
+  "tests": {
+   "805.1": [
+    "tests/test_planner_settings.py::test_the_new_test_check_stops_a_test_after_the_time_limit_setting"
+   ],
+   "805.2": [
+    "tests/test_planner_settings.py::test_the_planners_test_files_follow_the_test_folder_and_file_pattern_settings"
+   ],
+   "805.3": [
+    "tests/test_planner_settings.py::test_turning_docstrings_off_stops_the_planners_check_requiring_them"
+   ],
+   "805.4": [
+    "tests/test_planner_settings.py::test_the_planners_docstring_cap_comes_from_settings"
+   ],
+   "805.5": [
+    "tests/test_planner_settings.py::test_an_empty_docstring_cap_turns_the_cap_off"
+   ]
+  },
+  "test_changes": {},
+  "links": {
+   "blocked_by": [],
+   "blocks": [],
+   "relates_to": [
+    781,
+    783
+   ]
+  },
+  "raises": [],
+  "answers": []
+ },
+ "check": {
+  "passed": true,
+  "problems": []
+ },
+ "url": "https://github.com/dokima-dev/dokima/issues/805#issuecomment-6232404928"
+}
