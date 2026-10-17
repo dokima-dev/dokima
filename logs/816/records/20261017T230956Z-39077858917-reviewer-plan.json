@@ -1,0 +1,82 @@
+{
+ "role": "reviewer",
+ "stage": "plan",
+ "run_id": "39077858917",
+ "commit_before": "cdaeb995185e2ac68945d4fe625c9af6ebf5b10d",
+ "started_by": "dokima-runtime[bot]",
+ "models": [
+  "claude-opus-5-5"
+ ],
+ "report": {
+  "duration_ms": 40969,
+  "turns": 8,
+  "cost_usd": 0.35256,
+  "tokens_in": 284350,
+  "tokens_out": 3778
+ },
+ "log": "https://github.com/dokima-dev/dokima/blob/logs/logs/816/39077858917-reviewer-plan.md",
+ "run": "https://github.com/dokima-dev/dokima/actions/runs/39077858917",
+ "handback": {
+  "previous_step": {
+   "did": [
+    "The planner wrote one criterion: install docs name each required check as GitHub shows it.",
+    "The planner added one test that installs the docs' files into an empty repo."
+   ],
+   "decided": [
+    "The planner set the full first merge as a hand check, outside the tests."
+   ],
+   "open": [
+    "The owner decides if testing the branch rule step is enough proof.",
+    "The owner decides if the merge gate fix in issue 820 lands first."
+   ]
+  },
+  "verdict": "approve",
+  "summary": "One criterion with a test that fails for the right reason; two questions wait for the owner.",
+  "raises": [],
+  "answers": [],
+  "asks": [
+   {
+    "ask": "An empty repo reaches its first merged pull request following only the docs.",
+    "source": "https://github.com/dokima-dev/dokima/issues/816",
+    "criterion": "816.1"
+   }
+  ],
+  "behaviors": [
+   {
+    "criterion": "816.1",
+    "one_behavior": true,
+    "why": "One result: both install pages name the required checks by their full names."
+   }
+  ],
+  "edge_cases": [
+   {
+    "criterion": "816.1",
+    "cut": [],
+    "missing": []
+   }
+  ],
+  "tests": [
+   {
+    "test": "tests/test_first_merge_docs.py::test_the_docs_name_the_required_checks_as_an_adopters_repo_shows_them",
+    "only_its_behavior": true,
+    "why": "Fails today: both pages name only the short check names; it checks nothing else."
+   }
+  ],
+  "size": "ok",
+  "boxes": {
+   "dropped": "none",
+   "added": "none",
+   "superseded": "none",
+   "conflicts": "none",
+   "edges": {
+    "816.1": "covered"
+   },
+   "poor_tests": "none"
+  }
+ },
+ "check": {
+  "passed": true,
+  "problems": []
+ },
+ "url": "https://github.com/dokima-dev/dokima/issues/816#issuecomment-6242854749"
+}
