@@ -117,12 +117,13 @@ Requirements:
 
 Setup:
 
-1. Copy [`.github/workflows/`](.github/workflows) and [`dokima/`](dokima) into the repo.
-2. Create an Actions environment named `keys` holding the secrets `DOKIMA_APP_KEY` (the app's private key) and `CLAUDE_CODE_OAUTH_TOKEN`.
-3. Set the repo variable `DOKIMA_APP_ID`. Optionally set `DOKIMA_BOARD`.
-4. Add `.github/CODEOWNERS` with a `*` line naming who may give commands and approve.
-5. Protect `main`, requiring the checks `all tests` and `Acceptance criteria`.
-6. Open an issue and comment `/plan`.
+1. Add [`dokima/install/dokima.yml`](dokima/install/dokima.yml) to the repo as `.github/workflows/dokima.yml`. It runs δokima from this repo; nothing else of δokima is copied.
+2. Add [`dokima/install/settings.yaml`](dokima/install/settings.yaml) to the repo as `.dokima/settings.yaml`, naming only what differs from the defaults.
+3. Create an Actions environment named `keys` holding the secrets `DOKIMA_APP_KEY` (the app's private key) and `CLAUDE_CODE_OAUTH_TOKEN`.
+4. Set the repo variable `DOKIMA_APP_ID`. Optionally set `DOKIMA_BOARD`.
+5. Add `.github/CODEOWNERS` with a `*` line naming who may give commands and approve.
+6. Protect `main`, requiring the checks `all tests` and `Acceptance criteria`.
+7. Open an issue and comment `/plan`.
 
 A daily audit ([`audit.yml`](.github/workflows/audit.yml)) compares the repo's settings with what δokima needs ([`dokima/manifest.py`](dokima/manifest.py)) and reports drift on one pinned **Setup** issue.
 
