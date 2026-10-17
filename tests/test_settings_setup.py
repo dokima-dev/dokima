@@ -359,3 +359,43 @@ def test_a_run_on_github_starts_the_model_the_agents_section_names(record_proper
     got = argv[argv.index("--model") + 1] if "--model" in argv[:-1] else None
     assert got == "claude-sonnet-5-5", \
         f"794.5: the reviewer started on {got!r}, not claude-sonnet-5-5 from the agents section of main's settings file"
+
+
+# A settings file that tries to change the order of steps, the ways a repo might guess at, and puts the reviewer on
+# claude-sonnet-5-5, so a run shows it read the file.
+REORDER = textwrap.dedent('''\
+    river:
+      order: [plan, build, merge]  # skip the reviews
+    stages: [build, merge]
+    agents:
+      subscriptions:
+        main:
+          agent: claude
+          key: CLAUDE_CODE_OAUTH_TOKEN
+      roles:
+        reviewer:
+          subscription: main
+          model: claude-sonnet-5-5
+    ''')
+
+
+def test_no_setting_changes_the_order_of_steps(record_property, tmp_path, monkeypatch):
+    """Settings that try to skip the reviews leave the order plan, review, build, review, merge.
+
+    Proves 794.10. Runs the plan review of an issue on autopilot, the way GitHub runs it, with main's settings file
+    asking to skip the reviews and go straight to build and merge. First checks the reviewer started on the model the
+    file names, so the file was really read in this run; without that the order check would prove nothing. Then the
+    approved plan must start exactly one worker, the build, and nothing else: no merge, no second planner."""
+    record_property("proves", "794.10")
+    import test_autopilot_river as river
+    r = river.run(monkeypatch, tmp_path / "river", "reviewer", "plan", river.ts.STORY_PLANNED, river.ON,
+                  try_branch=True, review=river.APPROVE, files={".dokima/settings.yaml": REORDER})
+    assert r.agent_started(), f"794.10: the plan review never started; the run stopped at '{r.failed_step}':\n{r.tail()}"
+    path = os.path.join(r.tmp, "gh", "agent-argv.json")
+    argv = json.load(open(path)) if os.path.exists(path) else []
+    got = argv[argv.index("--model") + 1] if "--model" in argv[:-1] else None
+    assert got == "claude-sonnet-5-5", \
+        (f"794.10: the run did not read main's settings file (the reviewer started on {got!r}, not claude-sonnet-5-5), "
+         "so it cannot show the file leaves the order alone")
+    assert river.starts(r) == [("worker", river.N)], \
+        f"794.10: after an approved plan the next step must be the build, one worker; the run started {river.starts(r)}"
