@@ -103,8 +103,7 @@ def test_the_co_author_line_on_dokimas_commits_comes_from_the_co_author_setting(
 
     Proves 796.1. The settings name Ann Example as co-author. Runs agent.yml's planner push and wiki.yml's sync, and
     checks each pushed commit carries 'Co-authored-by: Ann Example <ann@example.com>' and not today's fixed line.
-    Then an empty co-author setting: the planner's commit carries no co-author line at all. Then no settings file:
-    the commit keeps today's co-author line, so Dokima's own repo still credits its owner."""
+    Then an empty co-author setting: the planner's commit carries no co-author line at all."""
     record_property("proves", "796.1")
     settings = f"co_author: {ANN}\n"
     message, _ = planner_push(tmp_path / "planner", settings)
@@ -118,10 +117,42 @@ def test_the_co_author_line_on_dokimas_commits_comes_from_the_co_author_setting(
     empty, _ = planner_push(tmp_path / "empty", 'co_author: ""\n')
     assert "Co-authored-by" not in empty, \
         f"796.1: with the co-author setting empty, the planner's commit still has a co-author line:\n{empty}"
-    default, _ = planner_push(tmp_path / "default", None)
-    assert f"Co-authored-by: {TODAY}" in default, \
-        f"796.1: with no settings file, the planner's commit lost today's co-author line:\n{default}"
 
+
+
+# 796.9 ------------------------------------------------------------------------------------------------------------
+
+def test_with_no_co_author_setting_commits_carry_no_co_author_line(record_property, tmp_path):
+    """A repo that names no co-author gets commits that credit no one.
+
+    Proves 796.9. Dokima's shipped defaults reach every repo, so they credit no one. Runs agent.yml's planner push
+    and wiki.yml's sync in a repo with no settings file, and checks neither pushed commit has a co-author line. Then
+    a settings file that names other settings but no co-author: the planner's commit still has none."""
+    record_property("proves", "796.9")
+    default, _ = planner_push(tmp_path / "default", None)
+    assert "Co-authored-by" not in default, \
+        f"796.9: with no settings file, the planner's commit still has a co-author line:\n{default}"
+    wiki = wiki_sync(tmp_path / "wiki", None)
+    assert "Co-authored-by" not in wiki, \
+        f"796.9: with no settings file, the wiki sync's commit still has a co-author line:\n{wiki}"
+    other, _ = planner_push(tmp_path / "other", "owner_docs: AGENTS.md\n")
+    assert "Co-authored-by" not in other, \
+        f"796.9: with settings that name no co-author, the planner's commit has a co-author line:\n{other}"
+
+
+# 796.10 -----------------------------------------------------------------------------------------------------------
+
+def test_dokimas_own_settings_file_keeps_the_owners_co_author_line(record_property, tmp_path):
+    """Dokima's own repo still credits its owner on every commit, from its own settings file.
+
+    Proves 796.10. Reads this repo's own .dokima/settings.yaml, puts it on main of a temp repo, runs agent.yml's
+    planner push and checks the pushed commit credits the owner with today's exact co-author line."""
+    record_property("proves", "796.10")
+    path = os.path.join(ts.ROOT, ".dokima", "settings.yaml")
+    assert os.path.isfile(path), "796.10: Dokima's own repo has no .dokima/settings.yaml to hold the co-author line"
+    message, _ = planner_push(tmp_path / "own", open(path).read())
+    assert f"Co-authored-by: {TODAY}" in message, \
+        f"796.10: with Dokima's own settings file, the planner's commit does not credit the owner:\n{message}"
 
 # 796.2 ------------------------------------------------------------------------------------------------------------
 
