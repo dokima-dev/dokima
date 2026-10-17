@@ -12,6 +12,7 @@ is listed, far over is rejected.
 """
 
 import ast
+import fnmatch
 import json
 import os
 import re
@@ -404,6 +405,16 @@ def tests_dir():
     return settings.read()["tests"]["dir"].rstrip("/") + "/"
 
 
+def is_test_file(path):
+    """True when PATH is in the test folder and matches the file pattern setting."""
+    return path.startswith(tests_dir()) and fnmatch.fnmatch(os.path.basename(path), settings.read()["tests"]["file_pattern"])
+
+
+def docstrings_required():
+    """True unless the style.docstrings setting turns docstrings off."""
+    return settings.read()["style"]["docstrings"] not in (False, "off")
+
+
 def test_nodes(tree):
     """Each test in a parsed file, as (its name, its node).
 
@@ -578,16 +589,19 @@ def docstrings(path, text):
     return out
 
 
-def docstring_caps(paths, before, after):
+def docstring_caps(paths, before, after, cap=DOCSTRING_CAP):
     """(listed, rejected) for each docstring the planner added or rewrote whose first line runs over its cap.
 
-    A docstring whose first line is the same as before is an older one left alone, and is not held to the cap.
+    A docstring whose first line is the same as before is an older one left alone, and is not held to the cap. An
+    empty cap (None) turns the cap off.
     """
+    if cap is None:
+        return [], []
     texts = []
     for path in paths:
         old = docstrings(path, before(path))
         texts += [(where, line) for where, line in docstrings(path, after(path)).items() if old.get(where) != line]
-    return words.check(texts, DOCSTRING_CAP, "has a docstring whose first line holds")
+    return words.check(texts, cap, "has a docstring whose first line holds")
 
 
 def unnumbered(added):
@@ -631,15 +645,22 @@ def main_with_tests(base, into):
             shutil.copyfile(p, os.path.join(into, p))
 
 
+def new_test_timeout():
+    """The repo's tests.new_test_timeout_s setting, or NEW_TEST_TIMEOUT when its settings file sets none."""
+    mine = settings.load(settings.REPO_FILE).get("tests")
+    return mine.get("new_test_timeout_s", NEW_TEST_TIMEOUT) if isinstance(mine, dict) else NEW_TEST_TIMEOUT
+
+
 def passing_today(added, base="HEAD"):
     """Run each new test (path::name) on main's code (`base`) with the planner's tests on top.
 
-    Each runs by the tests.run_one setting; a command starting `python` runs this Python. Returns the ones that pass
-    or are skipped, or run past the limit."""
+    Each runs by the tests.run_one setting; a command starting `python` runs this Python, and is stopped after the
+    tests.new_test_timeout_s setting. Returns the ones that pass or are skipped, or run past the limit."""
     out = []
     if not added:
         return out
     one = shlex.split(str(settings.read()["tests"]["run_one"]))
+    limit = new_test_timeout()
     if one[:1] == ["python"]:
         one[0] = sys.executable
     with tempfile.TemporaryDirectory() as into:
@@ -647,9 +668,9 @@ def passing_today(added, base="HEAD"):
         for t in sorted(added):
             try:
                 r = subprocess.run([t if w == "{test}" else w.replace("{test}", t) for w in one], cwd=into,
-                                   capture_output=True, text=True, timeout=NEW_TEST_TIMEOUT)
+                                   capture_output=True, text=True, timeout=limit)
             except subprocess.TimeoutExpired:
-                out.append(f"{t} is a new test still running after {NEW_TEST_TIMEOUT} s on today's code; it was stopped")
+                out.append(f"{t} is a new test still running after {limit} s on today's code; it was stopped")
                 continue
             if r.returncode in (0, 5):  # 0: passed or skipped, 5: nothing ran
                 out.append(f"{t} is a new test that passes today (or is skipped); every new test must fail on today's code")
@@ -690,7 +711,7 @@ def main(argv):
         if kind == "plan":
             base = os.environ.get("PLANNER_BASE", "HEAD")
             files = changed_files(base)
-            paths = [p for p in files if p.startswith(tests_dir()) and p.endswith(".py")]
+            paths = [p for p in files if is_test_file(p)]
             broken = unreadable(paths)
             if broken:
                 raise Garbled("; ".join(broken))
@@ -702,9 +723,11 @@ def main(argv):
             run_base = os.environ.get("PLANNER_RUN_BASE")
             own = changed_files(run_base) if run_base else files
             bad = problems(number, result, own, tc, result.get("declared")) + bad
-            more, too_long = docstring_caps(paths, read_at(base), read_now)
+            more, too_long = docstring_caps(paths, read_at(base), read_now, settings.read()["style"]["docstring_cap"])
             listed, bad = listed + more, bad + too_long
-            bad += unsummarized(tc["added"]) + unnumbered(tc["added"]) + passing_today(tc["added"], base)
+            if docstrings_required():
+                bad += unsummarized(tc["added"]) + unnumbered(tc["added"])
+            bad += passing_today(tc["added"], base)
         for line in listed:
             print(f"::warning title=Over the word cap::{line}")
         if bad:
