@@ -146,7 +146,7 @@ def test_the_shipped_defaults_hold_the_owners_list(tmp_path, record_property):
         "river.max_blocks": 3,
         "planner.max_questions": 3,
         "gates.required": ["all tests", "Acceptance criteria"],
-        "labels": {"plan": "plan", "work": "work", "autopilot": "autopilot", "filed": "filed-by-dokima"},
+        "labels": {"autopilot": "autopilot", "filed": "filed-by-dokima"},  # no plan or work label (#784, #515)
         "merge.method": "squash",
         "gate.checks_wait_min": 45,
         "roles.planner.max_turns": 100,

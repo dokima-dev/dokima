@@ -13,7 +13,9 @@ import re
 import subprocess
 import sys
 
-from dokima import board, manifest
+import yaml
+
+from dokima import board, manifest, settings
 
 TITLE = "Setup"
 MARK = "<!-- dokima-setup -->"
@@ -34,9 +36,12 @@ def unverified(what, e):
     return f"{what} could not be verified: GitHub said `{reason(e)}`."
 
 
-def compare_labels(live):
+def compare_labels(live, wanted=None):
+    """One line per label in WANTED that LIVE lacks or holds otherwise.
+
+    WANTED defaults to the manifest's labels."""
     lines = []
-    for name, want in manifest.LABELS.items():
+    for name, want in (wanted or manifest.LABELS).items():
         have = live.get(name)
         if have is None:
             lines.append(f"Label `{name}` is missing; Dokima needs it with color `{want['color']}` and description "
@@ -50,9 +55,10 @@ def compare_labels(live):
     return lines
 
 
-def compare_fields(live):
+def compare_fields(live, wanted=None):
+    """One line per board field or option in WANTED that LIVE lacks or differs on."""
     lines = []
-    for field, options in manifest.FIELDS.items():
+    for field, options in (wanted or manifest.FIELDS).items():
         have_options = live.get(field)
         if have_options is None:
             lines.append(f"Board field `{field}` is missing; Dokima needs it with the options "
@@ -118,11 +124,21 @@ def compare_permissions(live):
     return lines
 
 
-def auto_merge(github, repo, rule):
+def auto_merge(github, repo, rule, queue=True):
     """Whether auto-merge is on, read from main's two pull-request-only exemption lists: (drift lines, note).
 
     On both lists it is on, on neither it is off (the default); neither is drift, so each comes back as the note. On
-    only one list, or a list GitHub will not show, is a drift line. rule is main's rule as branch_rule() read it."""
+    only one list, or a list GitHub will not show, is a drift line. rule is main's rule as branch_rule() read it.
+    With no merge queue (queue false) only main's review exemption counts, and rulesets are never read."""
+    if not queue:
+        try:
+            app = github.app_id(repo)
+        except FAILED as e:
+            return [f"Auto-merge is not verified: GitHub said `{reason(e)}` when the audit read Dokima's app."], None
+        if app in ((rule or {}).get("review_bypass_apps") or []):
+            return [], ("Auto-merge is on: Dokima's app is on main's review exemption, so a pull request whose code "
+                        "review passed merges by itself.")
+        return [], "Auto-merge is off, the default: every pull request waits for your approval before it merges."
     try:
         app = github.app_id(repo)
         queues = [r for r in github.rulesets(repo)
@@ -143,20 +159,23 @@ def auto_merge(github, repo, rule):
             f"it off the other list to keep your approval."], None
 
 
-def check(github, repo):
-    """(lines, notes): compare()'s lines, and the auto-merge state, which is no drift."""
+def check(github, repo, root="."):
+    """(lines, notes): compare()'s lines, and the auto-merge state, which is no drift.
+
+    What Dokima needs comes from the merged settings of the repo at root."""
+    got = settings.read(root)
     rules = {}
 
     def rule(branch):
         rules[branch] = github.branch_rule(repo, branch)
         return rules[branch]
 
-    reads = [("Labels", lambda: github.labels(repo), compare_labels),
-             ("Board fields", github.fields, compare_fields),
+    reads = [("Labels", lambda: github.labels(repo), lambda live: compare_labels(live, manifest.labels(got))),
+             ("Board fields", github.fields, lambda live: compare_fields(live, manifest.fields(got))),
              ("Board views", github.views, compare_views)]
     reads += [(f"Branch rule of `{branch}`", lambda branch=branch: rule(branch),
                lambda live, branch=branch, want=want: compare_rule(branch, live, want))
-              for branch, want in manifest.BRANCH_RULES.items()]
+              for branch, want in manifest.branch_rules(got).items()]
     reads += [("App permissions", lambda: github.permissions(repo), compare_permissions)]
     lines = []
     for what, read, check_live in reads:
@@ -168,15 +187,15 @@ def check(github, repo):
         lines += check_live(live)
     notes = []
     if "main" in rules:  # an unreadable main rule already has its line
-        drift, note = auto_merge(github, repo, rules["main"])
+        drift, note = auto_merge(github, repo, rules["main"], (got.get("merge") or {}).get("queue", True) is not False)
         lines += drift
         notes += [note] if note else []
     return lines, notes
 
 
-def compare(github, repo):
+def compare(github, repo, root="."):
     """One line per setting that differs from the manifest or could not be read."""
-    return check(github, repo)[0]
+    return check(github, repo, root)[0]
 
 
 def code_owners(root):
@@ -203,7 +222,7 @@ def setup_body(lines, owners, notes=()):
 
 def run(github, repo, root="."):
     """Report the audit on the Setup issue; returns the Setup issue it touched, or None."""
-    lines, notes = check(github, repo)
+    lines, notes = check(github, repo, root)
     issue = github.setup_issue(repo)
     if not lines:
         if issue is None:
@@ -335,6 +354,9 @@ def main(argv):
         n = run(GitHub(spec), argv[0])
     except FAILED as e:
         print(f"::error::The audit could not report on the Setup issue: {reason(e)}")
+        return 1
+    except (settings.Locked, OSError, ValueError, yaml.YAMLError) as e:
+        print(f"::error::The audit could not read the repo's settings: {e}")
         return 1
     print(f"Setup issue: #{n}" if n else "Nothing is off.")
     return 0
