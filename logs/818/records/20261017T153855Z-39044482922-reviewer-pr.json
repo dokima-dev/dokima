@@ -1,0 +1,138 @@
+{
+ "role": "reviewer",
+ "stage": "pr",
+ "run_id": "39044482922",
+ "commit_before": "73145df981b33e2556ddcb9014bf6d19d5fc6226",
+ "started_by": "dokima-runtime[bot]",
+ "models": [
+  "claude-opus-5-5"
+ ],
+ "report": {
+  "duration_ms": 623922,
+  "turns": 14,
+  "cost_usd": 0.5476964000000002,
+  "tokens_in": 626338,
+  "tokens_out": 5669
+ },
+ "log": "https://github.com/dokima-dev/dokima/blob/logs/logs/818/39044482922-reviewer-pr.md",
+ "run": "https://github.com/dokima-dev/dokima/actions/runs/39044482922",
+ "handback": {
+  "previous_step": {
+   "did": [
+    "The worker added the four duties and the no-criterion rule to the reviewer's prompt.",
+    "The worker added the six required boxes, in the owner's shapes, to the reviewer's prompt."
+   ],
+   "decided": [
+    "Reviewers hand the boxes back as one field, writing none for an empty box."
+   ],
+   "open": []
+  },
+  "verdict": "approve",
+  "summary": "The reviewer's prompt now carries all four duties and the six boxes; all six tests pass.",
+  "raises": [],
+  "answers": [],
+  "asks": [],
+  "behaviors": [
+   {
+    "criterion": "818.1",
+    "one_behavior": true,
+    "why": "One duty line: each owner sentence maps or is marked not a requirement."
+   },
+   {
+    "criterion": "818.2",
+    "one_behavior": true,
+    "why": "One duty line: later owner words win."
+   },
+   {
+    "criterion": "818.3",
+    "one_behavior": true,
+    "why": "One duty line: confirm or retire a flagged criterion."
+   },
+   {
+    "criterion": "818.4",
+    "one_behavior": true,
+    "why": "One duty line: ask the owner, never pick."
+   },
+   {
+    "criterion": "818.5",
+    "one_behavior": true,
+    "why": "One rule line: a change serving no criterion blocks."
+   },
+   {
+    "criterion": "818.6",
+    "one_behavior": true,
+    "why": "One block showing the six boxes as the owner shaped them."
+   }
+  ],
+  "edge_cases": [
+   {
+    "criterion": "818.1",
+    "cut": [],
+    "missing": []
+   },
+   {
+    "criterion": "818.2",
+    "cut": [],
+    "missing": []
+   },
+   {
+    "criterion": "818.3",
+    "cut": [],
+    "missing": []
+   },
+   {
+    "criterion": "818.4",
+    "cut": [],
+    "missing": []
+   },
+   {
+    "criterion": "818.5",
+    "cut": [],
+    "missing": []
+   },
+   {
+    "criterion": "818.6",
+    "cut": [],
+    "missing": []
+   }
+  ],
+  "tests": [
+   {
+    "test": "tests/test_reviewer_duties.py::test_the_reviewers_prompt_says_every_owner_sentence_maps_or_is_not_a_requirement",
+    "only_its_behavior": true,
+    "why": "Fails on main's prompt, passes with the new duty line."
+   },
+   {
+    "test": "tests/test_reviewer_duties.py::test_the_reviewers_prompt_says_later_owner_words_win",
+    "only_its_behavior": true,
+    "why": "Fails on main's prompt, passes with the new duty line."
+   },
+   {
+    "test": "tests/test_reviewer_duties.py::test_the_reviewers_prompt_says_it_confirms_or_retires_a_stale_criterion",
+    "only_its_behavior": true,
+    "why": "Fails on main's prompt, passes with the new duty line."
+   },
+   {
+    "test": "tests/test_reviewer_duties.py::test_the_reviewers_prompt_says_it_asks_the_owner_and_never_picks",
+    "only_its_behavior": true,
+    "why": "Fails on main's prompt, passes with the new duty line."
+   },
+   {
+    "test": "tests/test_reviewer_duties.py::test_the_reviewers_prompt_says_a_change_serving_no_criterion_blocks",
+    "only_its_behavior": true,
+    "why": "Fails on main's prompt, passes with the new rule line."
+   },
+   {
+    "test": "tests/test_reviewer_duties.py::test_the_reviewers_prompt_shows_the_six_required_boxes_and_their_shapes",
+    "only_its_behavior": true,
+    "why": "Fails on main's prompt, passes with the six box lines."
+   }
+  ],
+  "size": "ok"
+ },
+ "check": {
+  "passed": true,
+  "problems": []
+ },
+ "url": "https://github.com/dokima-dev/dokima/pull/823#issuecomment-6235622927"
+}
