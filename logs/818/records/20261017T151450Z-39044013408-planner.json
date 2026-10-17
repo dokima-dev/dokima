@@ -1,0 +1,126 @@
+{
+ "role": "planner",
+ "stage": null,
+ "run_id": "39044013408",
+ "commit_before": "02394a839cbaca2282844026adf6a22cf4ef2892",
+ "started_by": "dokima-runtime[bot]",
+ "models": [
+  "claude-opus-5-5"
+ ],
+ "report": {
+  "duration_ms": 111623,
+  "turns": 14,
+  "cost_usd": 0.7908619999999998,
+  "tokens_in": 694551,
+  "tokens_out": 10895
+ },
+ "log": "https://github.com/dokima-dev/dokima/blob/logs/logs/818/39044013408-planner.md",
+ "run": "https://github.com/dokima-dev/dokima/actions/runs/39044013408",
+ "handback": {
+  "kind": "user_story",
+  "title": "The reviewer's prompt spells out its duties and boxes",
+  "summary": "The reviewer's prompt names its four duties and the six boxes it fills for them.",
+  "user_story": "The reviewer's prompt names its four duties and the boxes it fills for each.",
+  "acceptance_criteria": [
+   {
+    "text": "The reviewer's prompt says every owner sentence maps to a criterion or is marked not a requirement, with a reason.",
+    "words": "Every sentence of the owner's maps to a criterion or is marked \"not a requirement\" with a reason.",
+    "source": "https://github.com/dokima-dev/dokima/issues/741#issuecomment-6204381975",
+    "files": [
+     "dokima/roles/reviewer.md",
+     "dokima/prompt.py"
+    ],
+    "no_edge_cases": "Fixed prompt text with no input; the test checks it at both review stages."
+   },
+   {
+    "text": "The reviewer's prompt says later owner words win over older ones.",
+    "words": "Sources are append-only and later words win.",
+    "source": "https://github.com/dokima-dev/dokima/issues/741#issuecomment-6204381975",
+    "files": [
+     "dokima/roles/reviewer.md",
+     "dokima/prompt.py"
+    ],
+    "no_edge_cases": "Fixed prompt text with no input; the test checks it at both review stages."
+   },
+   {
+    "text": "The reviewer's prompt says it confirms or retires a criterion code flags as stale.",
+    "words": "A criterion whose source is older than a later owner comment on the same point is flagged by code (#743); the reviewer confirms or retires it.",
+    "source": "https://github.com/dokima-dev/dokima/issues/741#issuecomment-6204381975",
+    "files": [
+     "dokima/roles/reviewer.md",
+     "dokima/prompt.py"
+    ],
+    "no_edge_cases": "Fixed prompt text with no input; the test checks it at both review stages."
+   },
+   {
+    "text": "The reviewer's prompt says when two owner sources disagree unsettled, it asks the owner and never picks.",
+    "words": "When two owner sources disagree and no later word settles it, the reviewer asks the owner. It never picks.",
+    "source": "https://github.com/dokima-dev/dokima/issues/741#issuecomment-6204381975",
+    "files": [
+     "dokima/roles/reviewer.md",
+     "dokima/prompt.py"
+    ],
+    "no_edge_cases": "Fixed prompt text with no input; the test checks it at both review stages."
+   },
+   {
+    "text": "The reviewer's prompt says any change serving no criterion blocks.",
+    "words": "anything that serves no criterion blocks",
+    "source": "https://github.com/dokima-dev/dokima/issues/741#issuecomment-6204381975",
+    "files": [
+     "dokima/roles/reviewer.md",
+     "dokima/prompt.py"
+    ],
+    "no_edge_cases": "Fixed prompt text with no input; the test checks it at both review stages."
+   },
+   {
+    "text": "The reviewer's prompt shows the six required boxes and their entry shapes.",
+    "words": "**Reviewer: required boxes.** One per duty, every box present, entries typed, each entry a blocker unless noted.",
+    "source": "https://github.com/dokima-dev/dokima/issues/741#issuecomment-6205062350",
+    "files": [
+     "dokima/roles/reviewer.md",
+     "dokima/prompt.py"
+    ],
+    "no_edge_cases": "Fixed prompt text with no input; the test checks every box at both review stages."
+   }
+  ],
+  "non_functional": [],
+  "tests": {
+   "818.1": [
+    "tests/test_reviewer_duties.py::test_the_reviewers_prompt_says_every_owner_sentence_maps_or_is_not_a_requirement"
+   ],
+   "818.2": [
+    "tests/test_reviewer_duties.py::test_the_reviewers_prompt_says_later_owner_words_win"
+   ],
+   "818.3": [
+    "tests/test_reviewer_duties.py::test_the_reviewers_prompt_says_it_confirms_or_retires_a_stale_criterion"
+   ],
+   "818.4": [
+    "tests/test_reviewer_duties.py::test_the_reviewers_prompt_says_it_asks_the_owner_and_never_picks"
+   ],
+   "818.5": [
+    "tests/test_reviewer_duties.py::test_the_reviewers_prompt_says_a_change_serving_no_criterion_blocks"
+   ],
+   "818.6": [
+    "tests/test_reviewer_duties.py::test_the_reviewers_prompt_shows_the_six_required_boxes_and_their_shapes"
+   ]
+  },
+  "test_changes": {},
+  "links": {
+   "blocked_by": [],
+   "blocks": [
+    819
+   ],
+   "relates_to": [
+    741,
+    743
+   ]
+  },
+  "raises": [],
+  "answers": []
+ },
+ "check": {
+  "passed": true,
+  "problems": []
+ },
+ "url": "https://github.com/dokima-dev/dokima/issues/818#issuecomment-6235548158"
+}
