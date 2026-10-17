@@ -353,7 +353,8 @@ def test_a_replan_checks_tests_against_where_the_branch_left_main(record_propert
     """On every planning round the plan check compares against the branch's split from main, so earlier rounds' tests still count."""
     record_property("proves", "agent.22")
     wf = open(os.path.join(os.path.dirname(__file__), "..", ".github", "workflows", "agent.yml")).read()
-    assert 'PLANNER_BASE=$(git merge-base HEAD origin/main)' in wf
+    # Since #795 the default branch comes from the settings; 795.7 proves it is the one they name.
+    assert re.search(r'PLANNER_BASE=\$\(git merge-base HEAD "?origin/', wf), "a step no longer compares against main"
     assert "PLANNER_BASE: ${{ env.BASE }}" not in wf, "a step still compares against the branch head"
 
 
@@ -398,7 +399,9 @@ def test_the_rivers_signal_comes_only_from_dokimas_bot(record_property):
     record_property("proves", "agent.25")
     wf = open(os.path.join(os.path.dirname(__file__), "..", ".github", "workflows", "agent.yml")).read()
     assert "types: [dokima-next]" in wf
-    assert '[ "$EVENT" = repository_dispatch ] && [ "$SENDER" = "dokima-runtime[bot]" ] && exit 0' in wf
+    # Since #795 the bot comes from the settings; 795.9 proves only the bot they name skips the gate.
+    assert re.search(r'\[ "\$EVENT" = repository_dispatch \] && \[ "\$SENDER" = "[^"]*\[bot\]" \] && exit 0', wf), \
+        "only a bot's dokima-next signal may skip the code-owner gate"
     assert wf.index("name: Decide what follows") < wf.index("name: Post the record as a comment") < wf.index("name: Start the next stage")
     assert "group: agent-${{ (inputs.issue || github.event.client_payload.issue) }}" in wf
 

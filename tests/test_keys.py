@@ -63,5 +63,8 @@ def test_a_build_starts_from_todays_main(record_property):
     """
     record_property("proves", "123.1")
     agent = TEXT["agent.yml"]
-    merge = next(line for line in agent.splitlines() if "merge -q --no-edit origin/main" in line)
+    # Since #795 the default branch comes from the settings; 795.7 proves it is the one they name.
+    merge = next((line for line in agent.splitlines() if re.search(r'merge -q --no-edit "?origin/', line)
+                  and '"$ROLE" = worker' in line), None)
+    assert merge, "123.1: the worker's branch is not brought up to today's main"
     assert '"$ROLE" = worker' in merge, "123.1: the worker's branch is not brought up to today's main"
