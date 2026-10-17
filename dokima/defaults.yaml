@@ -8,6 +8,8 @@ tests:
   run_all: pytest -q -p no:cacheprovider -n auto tests
   new_test_timeout_s: 60
   affected: testmon
+  # Tests the all tests check leaves out, by id, e.g. tests/test_live.py::test_network.
+  exclude: []
 setup:
   python: "3.12"
   test_tools: pytest pytest-xdist pytest-testmon

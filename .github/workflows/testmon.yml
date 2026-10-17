@@ -37,12 +37,24 @@ jobs:
         run: |
           pip install -q $TOOLS pyyaml
           if [ -n "$INSTALL" ]; then eval "$INSTALL"; fi
+      # Affected tests set to all in the settings: reviews run every test, so main keeps no baseline (#795). A settings
+      # reader with no env mode (before #795) keeps the baseline, as before.
+      - name: Affected tests from the settings
+        run: |
+          out=; if python3 -c 'from dokima.settings import env_lines' 2>/dev/null; then out=$(python3 -m dokima.settings env); fi
+          if printf '%s\n' "$out" | grep -q '^TESTS_AFFECTED='; then printf '%s\n' "$out" >> "$GITHUB_ENV"
+          else echo "TESTS_AFFECTED=testmon" >> "$GITHUB_ENV"; fi
+      - if: env.TESTS_AFFECTED == 'all'
+        run: echo "::notice title=No baseline::Affected tests are set to all, so no testmon baseline is saved."
       # A failing test still records its baseline (exit 1): testmon runs it again on the next review. Any other
       # non-zero exit is a crash and fails this job, so a missing baseline is never silent. testmon needs pytest's
       # cache plugin, so it is not turned off here.
-      - run: python3 -m pytest -q --testmon || [ $? -eq 1 ]
-      - run: test -s .testmondata || { echo "::error title=No testmon baseline::pytest --testmon wrote no .testmondata"; exit 1; }
-      - uses: actions/cache/save@v4
+      - if: env.TESTS_AFFECTED != 'all'
+        run: python3 -m pytest -q --testmon || [ $? -eq 1 ]
+      - if: env.TESTS_AFFECTED != 'all'
+        run: test -s .testmondata || { echo "::error title=No testmon baseline::pytest --testmon wrote no .testmondata"; exit 1; }
+      - if: env.TESTS_AFFECTED != 'all'
+        uses: actions/cache/save@v4
         with:
           path: .testmondata
           key: testmon-${{ github.sha }}

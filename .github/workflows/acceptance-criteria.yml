@@ -71,6 +71,13 @@ jobs:
         run: |
           pip install -q $TOOLS pyyaml
           if [ -n "$INSTALL" ]; then eval "$INSTALL"; fi
+      # The per-criterion command from main's settings (#795). With no settings reader with an env mode (main before
+      # #795, as the merge queue may run it), the criterion's tests run as before.
+      - name: The per-criterion command from the settings
+        run: |
+          out=; if python3 -c 'from dokima.settings import env_lines' 2>/dev/null; then out=$(python3 -m dokima.settings env); fi
+          if printf '%s\n' "$out" | grep -q '^TESTS_RUN_ONE='; then printf '%s\n' "$out" >> "${GITHUB_ENV:-/dev/null}"
+          else echo "::notice title=Old settings::No settings reader with an env mode here, so the old test command is used."; fi
       - name: Run this criterion's tests
         working-directory: pr
         env:
@@ -79,7 +86,10 @@ jobs:
         run: |
           if [ "$ID" = "text-only" ] && [ -z "$TESTS" ]; then echo "::notice title=Text only::Only text files changed: no plan or tests needed."; exit 0; fi
           if [ -z "$TESTS" ]; then echo "::error title=$ID has no test::No test verifies this criterion yet."; exit 1; fi
-          pytest -rA -p no:cacheprovider -o junit_family=xunit1 --junitxml=r.xml $TESTS
+          # The criterion's tests go where the command names {test}, after the report the annotations read; with no
+          # command read from the settings, the old one.
+          RUN_ONE=${TESTS_RUN_ONE:-}; [ -n "$RUN_ONE" ] || RUN_ONE='pytest -p no:cacheprovider {test}'
+          eval "${RUN_ONE//\{test\}/-rA -o junit_family=xunit1 --junitxml=r.xml $TESTS}"
       - name: Annotate the tests that ran
         if: always() && matrix.tests != ''
         env:
