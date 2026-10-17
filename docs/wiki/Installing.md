@@ -43,30 +43,7 @@ Secrets are scrubbed from cards and saved conversations. Agents hold no GitHub k
 
 Your repo's owner gives commands and approves. Optional: a `.github/CODEOWNERS` file with a `*` line names other approvers.
 
-<<<<<<< HEAD
 ## 4. Branch rule on main
-=======
-Copy `.github/workflows/` and the `dokima/` package.
-
-| Workflow | Job |
-|---|---|
-| `commands.yml` | Listens for commands; routes them |
-| `agent.yml` | Runs one agent on a fresh machine, posts its record, starts the next stage |
-| `acceptance-criteria.yml` | One check per criterion, plus the gate check |
-| `full-suite.yml` | The **all tests** check |
-| `card.yml` | Draws the card; closes the issue when its PR merges |
-| `board.yml` | Keeps the board's columns and pills (needs `DOKIMA_BOARD`) |
-| `autopilot.yml` | Reacts to issues closing |
-| `uptodate.yml` | After each merge, updates open PRs that fell behind |
-| `reviews.yml` | Relays reviews to card and board, with no key |
-| `assign.yml` | Assigns new issues to the code owners |
-| `testmon.yml` | Baseline so code review runs only affected tests |
-| `audit.yml` | Daily check of settings against `dokima/manifest.py` |
-| `fix.yml` | Opens a manual fix as the app's PR; it names the issue it fixes (`-f issue=N`), so every fix is traceable |
-| `playthrough.yml`, `wiki.yml` | δokima's own maintenance |
-
-## 5. Branch rule on main
->>>>>>> origin/main
 
 Require these checks: **all tests** and **Acceptance criteria**. Without a required check the merge gate refuses to pass anything. Enforcing it on private repos needs a paid GitHub plan.
 
