@@ -1,0 +1,59 @@
+{
+ "role": "reviewer",
+ "stage": "pr",
+ "run_id": "39033032043",
+ "commit_before": "b3ab6d67b825f43086703f1aca0567d833f03ff4",
+ "started_by": "dokima-runtime[bot]",
+ "models": [
+  "claude-opus-5-5"
+ ],
+ "report": {
+  "duration_ms": 149526,
+  "turns": 22,
+  "cost_usd": 0.8518482,
+  "tokens_in": 1211718,
+  "tokens_out": 5712
+ },
+ "log": "https://github.com/dokima-dev/dokima/blob/logs/logs/787/39033032043-reviewer-pr.md",
+ "run": "https://github.com/dokima-dev/dokima/actions/runs/39033032043",
+ "handback": {
+  "previous_step": {
+   "did": [
+    "Split filing, the off switch and the up-to-date check read the label from settings.",
+    "Autopilot reads its branch, merge method and checks wait from settings."
+   ],
+   "decided": [
+    "The filed label needed no change; it was built by #784."
+   ],
+   "open": [
+    "The autopilot workflow still starts only on the fixed label name."
+   ]
+  },
+  "verdict": "approve",
+  "summary": "Every criterion is built and its tests pass; the two failing tests fail on main too.",
+  "raises": [],
+  "answers": [
+   {
+    "raise": "W4",
+    "answer": "done",
+    "why": "Confirmed: the autopilot workflow names the fixed label; workflow files lie outside this issue.",
+    "searched": [
+     677,
+     424,
+     324
+    ],
+    "verdict": "new"
+   }
+  ],
+  "asks": [],
+  "behaviors": [],
+  "edge_cases": [],
+  "tests": [],
+  "size": "ok"
+ },
+ "check": {
+  "passed": true,
+  "problems": []
+ },
+ "url": "https://github.com/dokima-dev/dokima/pull/810#issuecomment-6233929448"
+}
