@@ -5,7 +5,8 @@ play card.yml the same way. For one event:
 - The event starts the workflow when card.yml's `on:` lists it (and its activity type, and for workflow_run the
   workflow that finished). Then every job runs in the order its `needs` allow: a job's `if:` and every `${{ }}` are
   evaluated with tests/test_start.py's evaluator (github, vars, secrets, needs, steps, env); `uses:` steps are skipped
-  (checkout is noted with the ref it would check out, and the app token step gives a fake token); `run:` steps run with
+  (checkout is noted with the ref it would check out, a checkout of Dokima's own repo copies this repo's Dokima code
+  in, and the app token step gives a fake token); `run:` steps run with
   bash, from a copy of this repo's dokima/ and .github/, with a fake `gh` first on PATH. Values a step writes to
   GITHUB_OUTPUT or GITHUB_ENV are read as KEY=value lines, and a job's `outputs:` reach later jobs through `needs`.
 - Every concurrency group card.yml declares (the workflow's and each job's that runs) is evaluated for the event, and
@@ -26,7 +27,7 @@ import sys
 
 sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
 sys.path.insert(0, os.path.join(os.path.dirname(os.path.abspath(__file__)), ".."))
-from test_start import Ctx, Nil, condition, evaluate, fill, github_shell, load_yaml  # noqa: E402
+from test_start import Ctx, Nil, condition, dokima_checkout, evaluate, fill, github_shell, load_yaml  # noqa: E402
 from dokima import agent, body  # noqa: E402
 
 ROOT = os.path.abspath(os.path.join(os.path.dirname(__file__), ".."))
@@ -894,6 +895,8 @@ class Run:
                             into[k] = v
                 if p.returncode != 0:
                     status["failed"] = True
+            elif dokima_checkout(step, sctx, status):
+                dokima_checkout(step, sctx, status, into=lambda d: os.path.join(hub.ws, d))
             elif "actions/checkout" in uses:
                 ref = fill((step.get("with") or {}).get("ref") or "", sctx, status) or str(ctx["github"].ref)
                 self.checkouts.append(ref)

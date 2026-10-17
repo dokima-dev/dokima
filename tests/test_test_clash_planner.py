@@ -71,19 +71,21 @@ class TestClash(ts.Machine):
         job = wf["jobs"]["run"]
         steps = job["steps"]
         named = {s.get("name"): s for s in steps}
-        copy, start = named["Copy the runtime from main before touching any branch"], named["Starting branch"]
+        # Dokima's code comes from the checkout of Dokima's own repo, played before the copy step (#812).
+        dokima, copy, start = (named["Dokima's code from Dokima's own repo"],
+                               named["Copy the runtime from main before touching any branch"], named["Starting branch"])
         app = next(i for i, s in enumerate(steps) if s.get("id") == "app")
         end = next(i for i, s in enumerate(steps) if str(s.get("name", "")).startswith("Save the conversation"))
         push = next(s for s in steps if str(s.get("name", "")).startswith("Push the planner's tests"))
         fence = next(s for s in steps if str(s.get("name", "")).startswith("Fence"))
-        self.planner = self.run_as("planner", wf, job, [copy, start, {"name": "The planner", "run": planner_edits},
+        self.planner = self.run_as("planner", wf, job, [dokima, copy, start, {"name": "The planner", "run": planner_edits},
                                                          steps[app], push])
         self.planner_log = "\n".join(self.log)
         for f in ("clashed.txt", "worker_saw.py"):
             if os.path.exists(f"{t}/{f}"):
                 os.remove(f"{t}/{f}")
         self.failed_step = None
-        self.worker = self.run_as("worker", wf, job, [copy, start, {"name": "The worker", "run": worker_edits},
+        self.worker = self.run_as("worker", wf, job, [dokima, copy, start, {"name": "The worker", "run": worker_edits},
                                                        fence] + steps[app:end])
 
     def run_as(self, role, wf, job, steps):

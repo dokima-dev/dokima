@@ -23,6 +23,7 @@ import pytest
 
 sys.path.insert(0, os.path.dirname(__file__))
 sys.path.insert(0, os.path.join(os.path.dirname(__file__), ".."))
+import test_start  # noqa: E402
 from test_start import Ctx, Machine, N, SPLIT_PROPOSED, workflow  # noqa: E402
 
 LOG_LINE = 'echo "{word} $*" >> "$SETUP_LOG"'
@@ -74,10 +75,10 @@ class SetupRun(Machine):
     def __init__(self, tmp, file, job, settings, reader=None):
         """Run JOB of workflow FILE with SETTINGS as main's settings file (None for none).
 
-        READER, when given, is the text of `dokima/settings.py` on main in place of this checkout's."""
+        READER, when given, is the text of `dokima/settings.py` in the Dokima code the run checks out from Dokima's own
+        repo, in place of this checkout's: since #812 that is the only Dokima code a run uses."""
         files = {".dokima/settings.yaml": settings} if settings is not None else {}
-        if reader is not None:
-            files["dokima/settings.py"] = reader
+        self.reader = reader
         super().__init__(tmp, SPLIT_PROPOSED if file == "agent.yml" else [], files=files)
         t = self.tmp
         self.setup_log = f"{t}/setup.log"
@@ -103,8 +104,26 @@ class SetupRun(Machine):
         ctx = self.context(file)
         event = {"full-suite.yml": "pull_request_target", "acceptance-criteria.yml": "pull_request_target",
                  "testmon.yml": "push", "agent.yml": "workflow_dispatch"}[file]
-        self.result, _ = self.run_job(job, {**wf["jobs"][job], "steps": steps}, ctx, event,
-                                      [("/tmp/", f"{t}/"), ("/home/runner/", f"{t}/home/")], wf.get("defaults"))
+        real = test_start.dokima_checkout
+        test_start.dokima_checkout = self.checkout_with_reader(real)
+        try:
+            self.result, _ = self.run_job(job, {**wf["jobs"][job], "steps": steps}, ctx, event,
+                                          [("/tmp/", f"{t}/"), ("/home/runner/", f"{t}/home/")], wf.get("defaults"))
+        finally:
+            test_start.dokima_checkout = real
+
+    def checkout_with_reader(self, real):
+        """The stand-in for checking out Dokima's repo, with this run's settings reader inside."""
+        def checkout(step, ctx, status, into=None):
+            """Check out Dokima's code as the machine does, then add the run's reader."""
+            if into is None or self.reader is None:
+                return real(step, ctx, status, into)
+            dests = []
+            found = real(step, ctx, status, into=lambda p: dests.append(into(p)) or dests[-1])
+            for d in dests:
+                open(os.path.join(d, "dokima", "settings.py"), "w").write(self.reader)
+            return found
+        return checkout
 
     def base_env(self, event_name):
         """The machine's environment, plus where the stand-ins log."""
@@ -205,8 +224,9 @@ def test_a_reader_without_the_setup_mode_falls_back_to_the_old_install_list(reco
 
     Proves 794.8, as the owner asked after the merge queue broke: check for the mode, not the file. Runs each test
     workflow's job twice with a settings file naming other tools and Python 3.11. With this checkout's reader the job
-    must install the named tools. With the same reader stripped of its setup mode, as #793 left main, the job must
-    still reach the repo's tests, having installed exactly the old list on Python 3.12 and none of the named tools."""
+    must install the named tools. With the same reader stripped of its setup mode, as #793 left main, in the Dokima
+    code the run checks out (#812), the job must still reach the repo's tests, having installed exactly the old list
+    on Python 3.12 and none of the named tools."""
     record_property("proves", "794.8")
     settings = 'setup:\n  python: "3.11"\n  test_tools: odd-runner odd-plugin\n'
     r = SetupRun(tmp_path / "new", file, job, settings)

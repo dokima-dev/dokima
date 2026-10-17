@@ -10,7 +10,7 @@ They play card.yml the way GitHub runs it, for one event at a time, against a fa
 - The event starts the workflow when card.yml's `on:` lists it (and its activity type, and for workflow_run the
   workflow that finished). Then every job runs in the order its `needs` allow: a job's `if:` and every `${{ }}` are
   evaluated with tests/test_start.py's evaluator (github, vars, secrets, needs, steps, env); `uses:` steps are skipped
-  (checkout is noted with the ref it would check out, and the app token step gives a fake token); `run:` steps run with
+  (checkout is noted with the ref it would check out, Dokima's own repo is copied in, and the app token step gives a fake token); `run:` steps run with
   bash, from a copy of this repo's dokima/ and .github/, with a fake `gh` first on PATH.
 - Pull request events are sent as GitHub sends them: pull_request_target for the pull request itself (main's copy of
   the workflow), pull_request_review and pull_request_review_comment for reviews and line notes (the pull request's own
@@ -32,7 +32,7 @@ import sys
 
 sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
 sys.path.insert(0, os.path.join(os.path.dirname(os.path.abspath(__file__)), ".."))
-from test_start import Ctx, Nil, condition, evaluate, fill, github_shell, load_yaml  # noqa: E402
+from test_start import Ctx, Nil, condition, dokima_checkout, evaluate, fill, github_shell, load_yaml  # noqa: E402
 from dokima import agent, body  # noqa: E402
 
 ROOT = os.path.abspath(os.path.join(os.path.dirname(__file__), ".."))
@@ -889,6 +889,8 @@ class Run:
                             into[k] = v
                 if p.returncode != 0:
                     status["failed"] = True
+            elif dokima_checkout(step, sctx, status):
+                dokima_checkout(step, sctx, status, into=lambda d: os.path.join(hub.ws, d))
             elif "actions/checkout" in uses:
                 ref = fill((step.get("with") or {}).get("ref") or "", sctx, status) or str(ctx["github"].ref)
                 self.checkouts.append(ref)
@@ -1008,13 +1010,19 @@ def test_the_merge_redraw_runs_mains_code(tmp_path, record_property):
     """The redraw on a merge runs main's card.yml and card code, never the pull request's.
 
     card.yml starts only on events GitHub runs from main's copy of the workflow (never pull_request, a review or a
-    line note, which run the pull request's own copy with the code under review). For the merge of PR #246, by the
+    line note, which run the pull request's own copy with the code under review), and entry.yml calls it only on
+    those (#812). For the merge of PR #246, by the
     owner and by the bot, card.yml runs for an event of main's copy and every checkout step checks out main. Proves
     345.3."""
     record_property("proves", "345.3")
-    on = set(triggers(workflow()))
+    on = set(triggers(workflow())) - {"workflow_call"}
     assert on <= MAINS_COPY, \
         f"345.3: card.yml starts on {sorted(on - MAINS_COPY)}, which GitHub runs from the pull request's own copy"
+    # Since #812 an adopter's one workflow calls card.yml through entry.yml: only on events of main's copy too.
+    called = str(((load_yaml(open(os.path.join(WORKFLOWS, "entry.yml")).read()).get("jobs") or {}).get("card") or {}).get("if"))
+    events = set(re.findall(r"github\.event_name == '(\w+)'", called))
+    assert events and events <= MAINS_COPY, \
+        f"345.3: entry.yml calls card.yml on {sorted(events - MAINS_COPY)}, which GitHub runs from the pull request's own copy"
     for what, who, event in merge_events(239, 246):
         hub = Hub(tmp_path / who)
         hub.merge(239, 246)

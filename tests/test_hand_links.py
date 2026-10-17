@@ -519,7 +519,7 @@ def test_card_yml_starts_on_every_change_a_person_makes_and_on_a_schedule(record
     assigning (or lists no types), and it has an issue_comment trigger for new, edited and deleted comments. Its job's
     `if:` lets every one of those through when a person causes it, lets the schedule, workflow_run and the bot opening
     an issue through as today (the bot's own edits and comments, and comments on a pull request, are #438's). Its
-    schedule fires every hour of every day with no gap over 15 minutes, its step still runs `python3 dokima/card.py`
+    schedule fires every hour of every day with no gap over 15 minutes, its step still runs `dokima/card.py` (Dokima's own copy since #812)
     with the event's issue as ISSUE_NUMBER, and it is given DOKIMA_BOARD so a loop on autopilot can set Needs you.
     Proves 254.4."""
     record_property("proves", "254.4")
@@ -552,7 +552,7 @@ def test_card_yml_starts_on_every_change_a_person_makes_and_on_a_schedule(record
             gap = max((ms[(i + 1) % len(ms)] - ms[i]) % 60 or 60 for i in range(len(ms)))
             best = gap if best is None else min(best, gap)
     assert best is not None and best <= 15, f"254.4: card.yml's schedule {crons} leaves more than 15 minutes between runs"
-    assert re.search(r"run:\s*python3 dokima/card\.py\s*$", text, re.M), "254.4: card.yml no longer runs dokima/card.py"
+    assert re.search(r"run:\s*python3 \"?(\$RUNNER_TEMP/dokima/)?dokima/card\.py\"?\s*$", text, re.M), "254.4: card.yml no longer runs dokima/card.py"
     assert re.search(r"ISSUE_NUMBER:\s*\$\{\{\s*github\.event\.issue\.number\s*\}\}", text), \
         "254.4: card.yml's step is not given the event's issue as ISSUE_NUMBER"
     assert re.search(r"DOKIMA_BOARD:\s*\$\{\{\s*vars\.DOKIMA_BOARD\s*\}\}", text), \

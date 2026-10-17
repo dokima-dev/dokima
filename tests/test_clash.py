@@ -303,7 +303,9 @@ class Clash(ts.Machine):
         app = next(i for i, s in enumerate(steps) if s.get("id") == "app")
         end = next(i for i, s in enumerate(steps) if str(s.get("name", "")).startswith("Save the conversation"))
         fence = next(s for s in steps if str(s.get("name", "")).startswith("Fence"))
-        picked = [named["Copy the runtime from main before touching any branch"], named["Starting branch"],
+        # Dokima's code comes from the checkout of Dokima's own repo, played before the copy step (#812).
+        picked = [named["Dokima's code from Dokima's own repo"], named["Copy the runtime from main before touching any branch"],
+                  named["Starting branch"],
                   {"name": "The worker resolves and edits", "run": edits}, fence] + steps[app:end]
         open(f"{t}/event.json", "w").write('{"inputs": {"role": "worker", "stage": "", "issue": "%s"}}' % ts.N)
         ctx = {"inputs": ts.Ctx(role="worker", stage="", issue=ts.N),

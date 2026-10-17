@@ -18,6 +18,7 @@ import re
 import sys
 
 import pytest
+import yaml
 
 sys.path.insert(0, os.path.dirname(__file__))
 sys.path.insert(0, os.path.join(os.path.dirname(__file__), ".."))
@@ -112,18 +113,26 @@ def test_board_yml_runs_only_on_events_that_use_mains_copy(record_property):
     Proves 396.1. Reads board.yml's triggers. Every one must be an event GitHub always runs from the default branch's copy (issues,
     issue_comment, schedule, pull_request_target, workflow_run). Today it also runs on pull_request_review and
     pull_request_review_comment, which run the pull request's own copy while the job opens the keys environment; any
-    other trigger that runs a branch's copy (pull_request, push, workflow_dispatch) fails it the same way."""
+    other trigger that runs a branch's copy (pull_request, push, workflow_dispatch) fails it the same way. A call
+    (workflow_call, #812) counts only when entry.yml makes it on main's-copy events alone."""
     record_property("proves", "396.1")
     text = open(BOARD).read()
     assert "environment: keys" in text, "396.1: board.yml no longer opens the keys environment, so it cannot set the board"
     on = triggers(text)
     assert on, "396.1: no triggers could be read from board.yml"
-    own_copy = sorted(set(on) - MAINS_COPY)
+    own_copy = sorted(set(on) - MAINS_COPY - {"workflow_call"})
     assert not own_copy, (
         f"396.1: board.yml holds the keys and runs on {own_copy}, where GitHub runs the pull request's or branch's own "
         "copy of board.yml, so a pull request that edits board.yml changes its own keyed run")
     for kept in ("issues", "issue_comment", "schedule", "pull_request_target", "workflow_run"):
         assert kept in on, f"396.1: board.yml no longer runs on {kept}, which runs main's copy and must stay"
+    # Since #812 an adopter's one workflow calls board.yml at a release tag through entry.yml: only on main's-copy events.
+    if "workflow_call" in on:
+        entry = yaml.safe_load(open(os.path.join(WORKFLOWS, "entry.yml")).read())
+        called = set(re.findall(r"github\.event_name == '(\w+)'", str(entry["jobs"]["board"].get("if"))))
+        assert called and called <= MAINS_COPY, (
+            f"396.1: entry.yml calls board.yml on {sorted(called - MAINS_COPY)}, where GitHub runs the pull request's "
+            "own copy of the calling workflow, so a pull request could change its own keyed run")
 
 
 # 396.2: a review or a line note still puts both cards where their state says

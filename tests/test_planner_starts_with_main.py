@@ -63,7 +63,10 @@ class Branch(ts.Machine):
         app = next(s for s in job["steps"] if s.get("id") == "app")
         push = next(s for s in job["steps"] if str(s.get("name", "")).startswith("Push the planner's tests"))
         start = named["Starting branch"]
-        planner = [named["Copy the runtime from main before touching any branch"], start,
+        # Dokima's code comes from the checkout of Dokima's own repo, played before the copy step (#812).
+        dokima = named["Dokima's code from Dokima's own repo"]
+        copy = named["Copy the runtime from main before touching any branch"]
+        planner = [dokima, copy, start,
                    {"name": "The planner changes main's test", "run": edits}, app, push]
         for k in range(rounds):
             self.planner = self.run_as("planner", wf, job, planner, f"planner{k + 1}")
@@ -73,7 +76,7 @@ class Branch(ts.Machine):
         if os.path.exists(f"{t}/clashed.txt"):
             os.remove(f"{t}/clashed.txt")
         self.failed_step = None
-        self.worker = self.run_as("worker", wf, job, [named["Copy the runtime from main before touching any branch"], start])
+        self.worker = self.run_as("worker", wf, job, [dokima, copy, start])
 
     def run_as(self, role, wf, job, steps, name=None):
         """Run the given steps of agent.yml for `role` on a fresh clone; the job's result."""

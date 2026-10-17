@@ -15,14 +15,16 @@ from test_start import N, OWNER, Ctx
 
 def push_steps(change=None):
     """The steps of agent.yml that take a finished run's work to GitHub, with a step making `change` (a shell line)
-    in the worker's checkout right after the branch is checked out, as the agent would."""
+    in the worker's checkout right after the branch is checked out, as the agent would. Dokima's code comes from the
+    step checking out Dokima's own repo, played first (#812)."""
     wf = ts.workflow("agent.yml")
     job = wf["jobs"]["run"]
     steps = job["steps"]
     named = {s.get("name"): s for s in steps}
     app = next(i for i, s in enumerate(steps) if s.get("id") == "app")
     end = next(i for i, s in enumerate(steps) if s.get("name") == "Write this run's record")
-    picked = [named["Copy the runtime from main before touching any branch"], named["Starting branch"]]
+    picked = [named["Dokima's code from Dokima's own repo"], named["Copy the runtime from main before touching any branch"],
+              named["Starting branch"]]
     if change:
         picked.append({"name": "The agent changes the code", "run": change})
     return wf, job, picked + steps[app:end]
