@@ -1,0 +1,46 @@
+{
+ "role": "reviewer",
+ "stage": "pr",
+ "run_id": "39040031341",
+ "commit_before": "7ba59035a08822bcdd70b2176f2540683e89bdbd",
+ "started_by": "dokima-runtime[bot]",
+ "models": [
+  "claude-opus-5-5"
+ ],
+ "report": {
+  "duration_ms": 4849,
+  "turns": 1,
+  "cost_usd": 0.8634836,
+  "tokens_in": 68709,
+  "tokens_out": 175
+ },
+ "log": "https://github.com/dokima-dev/dokima/blob/logs/logs/817/39040031341-reviewer-pr.md",
+ "run": "https://github.com/dokima-dev/dokima/actions/runs/39040031341",
+ "handback": {
+  "previous_step": {
+   "did": [
+    "The worker moved the raising rules into one shared file with made-up examples.",
+    "The prompts now state the question and blocks-in-a-row limits from settings.",
+    "The planner's prompt gains a clarifying questions part with the owner's seven examples."
+   ],
+   "decided": [
+    "Dokima's own settings now protect its prompts folder from the worker."
+   ],
+   "open": []
+  },
+  "verdict": "approve",
+  "summary": "Every criterion is built as planned and proven; the planner's tests are untouched and pass.",
+  "raises": [],
+  "answers": [],
+  "asks": [],
+  "behaviors": [],
+  "edge_cases": [],
+  "tests": [],
+  "size": "ok"
+ },
+ "check": {
+  "passed": true,
+  "problems": []
+ },
+ "url": "https://github.com/dokima-dev/dokima/pull/821#issuecomment-6234965410"
+}
