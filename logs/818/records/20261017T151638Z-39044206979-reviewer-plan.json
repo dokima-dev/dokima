@@ -1,0 +1,177 @@
+{
+ "role": "reviewer",
+ "stage": "plan",
+ "run_id": "39044206979",
+ "commit_before": "21d5674ec81f17d9397152bf1b2dc1797b7b4d89",
+ "started_by": "dokima-runtime[bot]",
+ "models": [
+  "claude-opus-5-5"
+ ],
+ "report": {
+  "duration_ms": 59812,
+  "turns": 9,
+  "cost_usd": 0.44292679999999995,
+  "tokens_in": 360818,
+  "tokens_out": 4976
+ },
+ "log": "https://github.com/dokima-dev/dokima/blob/logs/logs/818/39044206979-reviewer-plan.md",
+ "run": "https://github.com/dokima-dev/dokima/actions/runs/39044206979",
+ "handback": {
+  "previous_step": {
+   "did": [
+    "The planner wrote six criteria, one per duty line and one for the six boxes.",
+    "The planner wrote six tests that build the reviewer's prompt for plan and code review."
+   ],
+   "decided": [
+    "Each duty must be said at both review stages.",
+    "The boxes must appear as the owner shaped them."
+   ],
+   "open": [
+    "Code checking the boxes stays with issue 819."
+   ]
+  },
+  "verdict": "approve",
+  "summary": "The plan carries all four duties and the six boxes, each with a test that fails today as it should.",
+  "raises": [],
+  "answers": [],
+  "asks": [
+   {
+    "ask": "Every sentence of the owner's maps to a criterion or is marked \"not a requirement\" with a reason.",
+    "source": "https://github.com/dokima-dev/dokima/issues/741#issuecomment-6204381975",
+    "criterion": "818.1"
+   },
+   {
+    "ask": "Sources are append-only and later words win.",
+    "source": "https://github.com/dokima-dev/dokima/issues/741#issuecomment-6204381975",
+    "criterion": "818.2"
+   },
+   {
+    "ask": "the reviewer confirms or retires it.",
+    "source": "https://github.com/dokima-dev/dokima/issues/741#issuecomment-6204381975",
+    "criterion": "818.3"
+   },
+   {
+    "ask": "When two owner sources disagree and no later word settles it, the reviewer asks the owner. It never picks.",
+    "source": "https://github.com/dokima-dev/dokima/issues/741#issuecomment-6204381975",
+    "criterion": "818.4"
+   },
+   {
+    "ask": "anything that serves no criterion blocks",
+    "source": "https://github.com/dokima-dev/dokima/issues/741#issuecomment-6204381975",
+    "criterion": "818.5"
+   },
+   {
+    "ask": "**Reviewer: required boxes.** One per duty",
+    "source": "https://github.com/dokima-dev/dokima/issues/741#issuecomment-6205062350",
+    "criterion": "818.6"
+   },
+   {
+    "ask": "both, plan review and code review.",
+    "source": "https://github.com/dokima-dev/dokima/issues/741#issuecomment-6234488387",
+    "criterion": "818.6"
+   }
+  ],
+  "behaviors": [
+   {
+    "criterion": "818.1",
+    "one_behavior": true,
+    "why": "One duty sentence in the prompt."
+   },
+   {
+    "criterion": "818.2",
+    "one_behavior": true,
+    "why": "One rule: later owner words win."
+   },
+   {
+    "criterion": "818.3",
+    "one_behavior": true,
+    "why": "One duty: confirm or retire a flagged criterion."
+   },
+   {
+    "criterion": "818.4",
+    "one_behavior": true,
+    "why": "One rule: unsettled conflicts go to the owner."
+   },
+   {
+    "criterion": "818.5",
+    "one_behavior": true,
+    "why": "One rule: unserved changes block."
+   },
+   {
+    "criterion": "818.6",
+    "one_behavior": true,
+    "why": "One block of box shapes shown in the prompt."
+   }
+  ],
+  "edge_cases": [
+   {
+    "criterion": "818.1",
+    "cut": [],
+    "missing": []
+   },
+   {
+    "criterion": "818.2",
+    "cut": [],
+    "missing": []
+   },
+   {
+    "criterion": "818.3",
+    "cut": [],
+    "missing": []
+   },
+   {
+    "criterion": "818.4",
+    "cut": [],
+    "missing": []
+   },
+   {
+    "criterion": "818.5",
+    "cut": [],
+    "missing": []
+   },
+   {
+    "criterion": "818.6",
+    "cut": [],
+    "missing": []
+   }
+  ],
+  "tests": [
+   {
+    "test": "tests/test_reviewer_duties.py::test_the_reviewers_prompt_says_every_owner_sentence_maps_or_is_not_a_requirement",
+    "only_its_behavior": true,
+    "why": "Builds both prompts and needs one sentence with all parts of the duty."
+   },
+   {
+    "test": "tests/test_reviewer_duties.py::test_the_reviewers_prompt_says_later_owner_words_win",
+    "only_its_behavior": true,
+    "why": "Builds both prompts and looks for the later-wins sentence."
+   },
+   {
+    "test": "tests/test_reviewer_duties.py::test_the_reviewers_prompt_says_it_confirms_or_retires_a_stale_criterion",
+    "only_its_behavior": true,
+    "why": "Needs confirm and retire for a criterion code flags as stale."
+   },
+   {
+    "test": "tests/test_reviewer_duties.py::test_the_reviewers_prompt_says_it_asks_the_owner_and_never_picks",
+    "only_its_behavior": true,
+    "why": "Needs disagreeing sources, no settling word, asking the owner, never picking."
+   },
+   {
+    "test": "tests/test_reviewer_duties.py::test_the_reviewers_prompt_says_a_change_serving_no_criterion_blocks",
+    "only_its_behavior": true,
+    "why": "Needs a change serving no criterion that blocks."
+   },
+   {
+    "test": "tests/test_reviewer_duties.py::test_the_reviewers_prompt_shows_the_six_required_boxes_and_their_shapes",
+    "only_its_behavior": true,
+    "why": "Checks the owner's six box lines word for word in both prompts."
+   }
+  ],
+  "size": "ok"
+ },
+ "check": {
+  "passed": true,
+  "problems": []
+ },
+ "url": "https://github.com/dokima-dev/dokima/issues/818#issuecomment-6235575573"
+}
