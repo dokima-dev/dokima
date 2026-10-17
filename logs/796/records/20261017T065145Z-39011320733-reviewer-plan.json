@@ -1,0 +1,266 @@
+{
+ "role": "reviewer",
+ "stage": "plan",
+ "run_id": "39011320733",
+ "commit_before": "3baa263c6dc15684d9dd6613f788940282df0443",
+ "started_by": "dokima-runtime[bot]",
+ "models": [
+  "claude-opus-5-5"
+ ],
+ "report": {
+  "duration_ms": 101668,
+  "turns": 13,
+  "cost_usd": 0.723773,
+  "tokens_in": 715992,
+  "tokens_out": 7394
+ },
+ "log": "https://github.com/dokima-dev/dokima/blob/logs/logs/796/39011320733-reviewer-plan.md",
+ "run": "https://github.com/dokima-dev/dokima/actions/runs/39011320733",
+ "handback": {
+  "previous_step": {
+   "did": [
+    "The planner added two criteria from the owner's answer on the co-author default.",
+    "The planner raised the shipped bot name as its own issue."
+   ],
+   "decided": [
+    "A role's house rules section is a heading naming that role, as the owner confirmed.",
+    "Shipped defaults credit no co-author; this repo's own settings file keeps the owner's line."
+   ],
+   "open": []
+  },
+  "verdict": "approve",
+  "summary": "The plan now carries the owner's two answers; all ten tests fail today because the feature is missing.",
+  "raises": [],
+  "answers": [
+   {
+    "raise": "P3",
+    "answer": "disagree",
+    "why": "Overlaps open #789 on the bot from settings; #747 plans one shared Dokima app for every repo."
+   }
+  ],
+  "asks": [
+   {
+    "ask": "The co-author line on Dokima's commits comes from the co-author setting.",
+    "source": "https://github.com/dokima-dev/dokima/issues/779",
+    "criterion": "796.1"
+   },
+   {
+    "ask": "Agents copy the owner docs file the settings name, in place of the rules file.",
+    "source": "https://github.com/dokima-dev/dokima/issues/779",
+    "criterion": "796.2"
+   },
+   {
+    "ask": "The planner and worker prompts name the owner docs file the settings name.",
+    "source": "https://github.com/dokima-dev/dokima/issues/779",
+    "criterion": "796.3"
+   },
+   {
+    "ask": "The worker's prompt lists the protected paths the settings name.",
+    "source": "https://github.com/dokima-dev/dokima/issues/779",
+    "criterion": "796.4"
+   },
+   {
+    "ask": "The planner prompt's runner line is drawn from the test settings.",
+    "source": "https://github.com/dokima-dev/dokima/issues/779",
+    "criterion": "796.5"
+   },
+   {
+    "ask": "The style prompt's caps table is drawn from the caps setting.",
+    "source": "https://github.com/dokima-dev/dokima/issues/779",
+    "criterion": "796.6"
+   },
+   {
+    "ask": "A repo's house rules file is added after the shipped prompt.",
+    "source": "https://github.com/dokima-dev/dokima/issues/779",
+    "criterion": "796.7"
+   },
+   {
+    "ask": "A house rules section named for a role is added only to that role's prompt.",
+    "source": "https://github.com/dokima-dev/dokima/issues/779",
+    "criterion": "796.8"
+   },
+   {
+    "ask": "Q1 (a role's house rules section is a heading naming the role in the house rules file): yes.",
+    "source": "https://github.com/dokima-dev/dokima/issues/796#issuecomment-6230833365",
+    "criterion": "796.8"
+   },
+   {
+    "ask": "Ship the co-author default empty (no co-author line)",
+    "source": "https://github.com/dokima-dev/dokima/issues/796#issuecomment-6230833365",
+    "criterion": "796.9"
+   },
+   {
+    "ask": "put my current line in this repo's own .dokima/settings.yaml so this repo keeps it",
+    "source": "https://github.com/dokima-dev/dokima/issues/796#issuecomment-6230833365",
+    "criterion": "796.10"
+   },
+   {
+    "ask": "Same rule for any other shipped default: nothing tuned to Dokima's own repo.",
+    "source": "https://github.com/dokima-dev/dokima/issues/796#issuecomment-6230833365",
+    "criterion": "796.9"
+   }
+  ],
+  "behaviors": [
+   {
+    "criterion": "796.1",
+    "one_behavior": true,
+    "why": "One result: the co-author line follows the setting."
+   },
+   {
+    "criterion": "796.2",
+    "one_behavior": true,
+    "why": "One result: the named owner docs file is copied."
+   },
+   {
+    "criterion": "796.3",
+    "one_behavior": true,
+    "why": "One result: prompts name the owner docs file the settings name."
+   },
+   {
+    "criterion": "796.4",
+    "one_behavior": true,
+    "why": "One result: the worker's prompt lists the named protected paths."
+   },
+   {
+    "criterion": "796.5",
+    "one_behavior": true,
+    "why": "One result: the runner line follows the test settings."
+   },
+   {
+    "criterion": "796.6",
+    "one_behavior": true,
+    "why": "One result: the caps table follows the caps setting."
+   },
+   {
+    "criterion": "796.7",
+    "one_behavior": true,
+    "why": "One result: house rules come after the shipped prompt."
+   },
+   {
+    "criterion": "796.8",
+    "one_behavior": true,
+    "why": "One result: a role's section reaches only that role."
+   },
+   {
+    "criterion": "796.9",
+    "one_behavior": true,
+    "why": "One result: no co-author setting gives no co-author line."
+   },
+   {
+    "criterion": "796.10",
+    "one_behavior": true,
+    "why": "One result: this repo's own settings keep the owner's line."
+   }
+  ],
+  "edge_cases": [
+   {
+    "criterion": "796.1",
+    "cut": [],
+    "missing": []
+   },
+   {
+    "criterion": "796.2",
+    "cut": [],
+    "missing": []
+   },
+   {
+    "criterion": "796.3",
+    "cut": [],
+    "missing": []
+   },
+   {
+    "criterion": "796.4",
+    "cut": [],
+    "missing": []
+   },
+   {
+    "criterion": "796.5",
+    "cut": [],
+    "missing": []
+   },
+   {
+    "criterion": "796.6",
+    "cut": [],
+    "missing": []
+   },
+   {
+    "criterion": "796.7",
+    "cut": [],
+    "missing": []
+   },
+   {
+    "criterion": "796.8",
+    "cut": [],
+    "missing": []
+   },
+   {
+    "criterion": "796.9",
+    "cut": [],
+    "missing": []
+   },
+   {
+    "criterion": "796.10",
+    "cut": [],
+    "missing": []
+   }
+  ],
+  "tests": [
+   {
+    "test": "tests/test_settings_prompts.py::test_the_co_author_line_on_dokimas_commits_comes_from_the_co_author_setting",
+    "only_its_behavior": true,
+    "why": "Runs both real commit steps; fails today on the fixed line."
+   },
+   {
+    "test": "tests/test_settings_prompts.py::test_agents_copy_the_owner_docs_file_the_settings_name_in_place_of_the_rules_file",
+    "only_its_behavior": true,
+    "why": "Runs the real runtime copy; fails today since only the rules file is copied."
+   },
+   {
+    "test": "tests/test_settings_prompts.py::test_the_planner_and_worker_prompts_name_the_owner_docs_file_the_settings_name",
+    "only_its_behavior": true,
+    "why": "Builds both real prompts; fails today since they name only the rules file."
+   },
+   {
+    "test": "tests/test_settings_prompts.py::test_the_workers_prompt_lists_the_protected_paths_the_settings_name",
+    "only_its_behavior": true,
+    "why": "Builds the real worker prompt; fails today without the named paths."
+   },
+   {
+    "test": "tests/test_settings_prompts.py::test_the_planner_prompts_runner_line_is_drawn_from_the_test_settings",
+    "only_its_behavior": true,
+    "why": "Builds the real planner prompt; fails today on the fixed runner line."
+   },
+   {
+    "test": "tests/test_settings_prompts.py::test_the_style_prompts_caps_table_is_drawn_from_the_caps_setting",
+    "only_its_behavior": true,
+    "why": "Reads the real caps table; fails today showing the fixed caps."
+   },
+   {
+    "test": "tests/test_settings_prompts.py::test_a_repos_house_rules_file_is_added_after_the_shipped_prompt",
+    "only_its_behavior": true,
+    "why": "Builds the real prompt; fails today since house rules never reach it."
+   },
+   {
+    "test": "tests/test_settings_prompts.py::test_a_house_rules_section_named_for_a_role_is_added_only_to_that_roles_prompt",
+    "only_its_behavior": true,
+    "why": "Builds three roles' prompts; fails today since no house rules reach them."
+   },
+   {
+    "test": "tests/test_settings_prompts.py::test_with_no_co_author_setting_commits_carry_no_co_author_line",
+    "only_its_behavior": true,
+    "why": "Runs both commit steps with no setting; fails today on the fixed line."
+   },
+   {
+    "test": "tests/test_settings_prompts.py::test_dokimas_own_settings_file_keeps_the_owners_co_author_line",
+    "only_its_behavior": true,
+    "why": "Uses this repo's own settings file; fails today since it does not exist."
+   }
+  ],
+  "size": "ok"
+ },
+ "check": {
+  "passed": true,
+  "problems": []
+ },
+ "url": "https://github.com/dokima-dev/dokima/issues/796#issuecomment-6230868424"
+}
