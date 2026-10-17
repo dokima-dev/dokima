@@ -1,0 +1,59 @@
+{
+ "role": "worker",
+ "stage": null,
+ "run_id": "38997482807",
+ "commit_before": "a914b886b515fd00fee8253768030c711a0ff4d4",
+ "started_by": "RezaSoleymanifar",
+ "models": [
+  "claude-opus-5-5"
+ ],
+ "report": {
+  "duration_ms": 142901,
+  "turns": 17,
+  "cost_usd": 0.6705824,
+  "tokens_in": 782153,
+  "tokens_out": 7384
+ },
+ "log": "https://github.com/dokima-dev/dokima/blob/logs/logs/794/38997482807-worker.md",
+ "run": "https://github.com/dokima-dev/dokima/actions/runs/38997482807",
+ "handback": {
+  "summary": "Test workflows now use the settings setup only when the reader has a setup mode, else the old install list.",
+  "criteria": {
+   "794.1": "`dokima/setup.py` `read_settings` reads YAML; every workflow job running Dokima installs PyYAML before its first Dokima step.",
+   "794.2": "`dokima/setup.py` `set_line` edits only the agents lines in place, so comment lines stay.",
+   "794.3": "`set_line` keeps a line's end comment when it changes or descends through that line.",
+   "794.4": "`saved_text` refuses to save if any other setting would change; a missing file or section is added.",
+   "794.5": "`dokima/agents.py` `agents_section` reads the agents section; `agent.yml` copies main's settings file.",
+   "794.6": "`agents_section` falls back to the old `agents.yml` beside the settings file when it has no agents section.",
+   "794.7": "Each test workflow runs the install setting after the test tools, before the tests.",
+   "794.8": "Each test workflow installs the test_tools setting when the reader has a setup mode, else the old list.",
+   "794.9": "Each test workflow sets up the python setting with a second setup-python step before tests.",
+   "794.10": "No order setting exists; `agents` in `dokima/defaults.yaml` only names agents and models."
+  },
+  "evidence": "pytest on all 25 plan tests: 25 passed",
+  "raises": [
+   {
+    "kind": "blocker",
+    "to": "planner",
+    "label": "No criterion: old reader",
+    "text": "The owner asked for a test running the setup step against a settings reader without the setup mode; no plan test does.",
+    "evidence": "Owner's comment of 2026-10-17T03:06Z on #794; the setup step in `full-suite.yml` now probes `setup_lines`, checked by hand only.",
+    "raised_by": "worker",
+    "id": "W2"
+   }
+  ]
+ },
+ "check": {
+  "passed": true,
+  "problems": []
+ },
+ "dropped_by_fence": [],
+ "files_changed": [
+  ".github/workflows/acceptance-criteria.yml",
+  ".github/workflows/agent.yml",
+  ".github/workflows/full-suite.yml",
+  ".github/workflows/testmon.yml"
+ ],
+ "branch": "try/issue-794",
+ "url": "https://github.com/dokima-dev/dokima/pull/801#issuecomment-6228850456"
+}
