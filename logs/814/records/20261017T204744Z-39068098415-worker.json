@@ -1,0 +1,38 @@
+{
+ "role": "worker",
+ "stage": null,
+ "run_id": "39068098415",
+ "commit_before": "a089b0f26f307ada4e8951f16eb4213660fe7fcf",
+ "started_by": "dokima-runtime[bot]",
+ "models": [
+  "claude-opus-5-5"
+ ],
+ "report": {
+  "duration_ms": 58762,
+  "turns": 7,
+  "cost_usd": 0.2516286,
+  "tokens_in": 212991,
+  "tokens_out": 2074
+ },
+ "log": "https://github.com/dokima-dev/dokima/blob/logs/logs/814/39068098415-worker.md",
+ "run": "https://github.com/dokima-dev/dokima/actions/runs/39068098415",
+ "handback": {
+  "summary": "The README's setup steps now add the thin workflow and settings file instead of copying Dokima.",
+  "criteria": {
+   "814.1": "`README.md` Install setup: old copy step replaced by two steps adding `dokima/install/dokima.yml` and `dokima/install/settings.yaml`; later steps renumbered."
+  },
+  "evidence": "`pytest -q tests/test_readme_install.py`: 1 passed in 0.05s",
+  "raises": [],
+  "answers": []
+ },
+ "check": {
+  "passed": true,
+  "problems": []
+ },
+ "dropped_by_fence": [],
+ "files_changed": [
+  "README.md"
+ ],
+ "branch": "try/issue-814",
+ "url": "https://github.com/dokima-dev/dokima/issues/814#issuecomment-6240758290"
+}
