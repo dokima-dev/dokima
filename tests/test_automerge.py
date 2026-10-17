@@ -364,7 +364,8 @@ def review_pr(verdict):
     """A code review's hand-back: an approval, or a block with one blocker for the worker."""
     h = {"previous_step": {"did": ["Built the fix."], "decided": [], "open": []}, "verdict": verdict,
          "summary": "Every criterion's test passes." if verdict == "approve" else "57.1's test fails.",
-         "raises": [], "answers": []}
+         "raises": [], "answers": [],
+         "boxes": {"dropped": "none", "added": "none", "superseded": "none", "conflicts": "none", "edges": {c: "covered" for c in ("57.1",)}, "poor_tests": "none"}}
     if verdict == "block":
         h["raises"] = [{"kind": "blocker", "to": "worker", "label": "57.1", "text": "The test fails.", "evidence": "tests/test_x.py::test_a"}]
     return h
