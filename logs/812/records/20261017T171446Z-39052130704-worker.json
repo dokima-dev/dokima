@@ -1,0 +1,60 @@
+{
+ "role": "worker",
+ "stage": null,
+ "run_id": "39052130704",
+ "commit_before": "af6fd0b53432340a2efc410d8c20d77e3e60708b",
+ "started_by": "dokima-runtime[bot]",
+ "models": [
+  "claude-opus-5-5"
+ ],
+ "report": {
+  "duration_ms": 562700,
+  "turns": 24,
+  "cost_usd": 0.9799338000000001,
+  "tokens_in": 1269814,
+  "tokens_out": 12290
+ },
+ "log": "https://github.com/dokima-dev/dokima/blob/logs/logs/812/39052130704-worker.md",
+ "run": "https://github.com/dokima-dev/dokima/actions/runs/39052130704",
+ "handback": {
+  "summary": "After main's merge, the queue judges with main's code, settings come from Dokima's checkout, and pushes skip the suite.",
+  "criteria": {
+   "812.1": "Every shared job checks out Dokima's repo; Dokima's own queue names main; the suite's settings reads use that checkout.",
+   "812.2": "Built last round: every job that reads a key keeps the keys environment.",
+   "812.3": "Built last round: the agent run reads the key secret the settings name.",
+   "812.4": "Built last round: an early step fails a run with no bot, saying how to set it up.",
+   "812.5": "Built last round: a step fails a run with no model key, naming the secret and the fix.",
+   "812.6": "Built last round: the default co-author line names Dokima's bot on every commit and merge.",
+   "812.7": "Built last round: an empty co-author setting leaves commits and merges with no line.",
+   "812.8": "Built last round: the adopter's file calls the entry workflow at a release tag.",
+   "812.9": "Built last round: the adopter's file is nineteen lines.",
+   "812.10": "The entry workflow routes each event; the full suite now runs only on pull requests and the queue, as main does."
+  },
+  "evidence": "Conflicts resolved in a scratch copy: 113 workflow tests and `tests/test_thin_install.py` pass.",
+  "raises": [
+   {
+    "kind": "blocker",
+    "to": "planner",
+    "label": "Tests hold conflict markers",
+    "text": "Main's merge left conflict markers in two test files, so neither loads. Main also dropped the suite's push trigger, which 191.4 still asserts.",
+    "evidence": "`tests/test_merge_queue.py` line 367 and `tests/test_manual_fix_check.py` line 80; merge `af6fd0b`; `pytest` reports SyntaxError.",
+    "raised_by": "worker",
+    "id": "W8"
+   }
+  ]
+ },
+ "check": {
+  "passed": false,
+  "problems": [
+   "Conflict markers are still in tests/test_manual_fix_check.py, tests/test_merge_queue.py: the clash with main is not resolved."
+  ]
+ },
+ "dropped_by_fence": [],
+ "files_changed": [
+  ".github/workflows/acceptance-criteria.yml",
+  ".github/workflows/entry.yml",
+  ".github/workflows/full-suite.yml"
+ ],
+ "branch": "try/issue-812",
+ "url": "https://github.com/dokima-dev/dokima/pull/824#issuecomment-6237221662"
+}
