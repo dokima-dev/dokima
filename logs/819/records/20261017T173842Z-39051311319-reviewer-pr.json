@@ -1,0 +1,58 @@
+{
+ "role": "reviewer",
+ "stage": "pr",
+ "run_id": "39051311319",
+ "commit_before": "3db2282aa2a56236c28e3877510b692325c5aa05",
+ "started_by": "dokima-runtime[bot]",
+ "models": [
+  "claude-opus-5-5"
+ ],
+ "report": {
+  "duration_ms": 932587,
+  "turns": 20,
+  "cost_usd": 0.6267061999999999,
+  "tokens_in": 811546,
+  "tokens_out": 5874
+ },
+ "log": "https://github.com/dokima-dev/dokima/blob/logs/logs/819/39051311319-reviewer-pr.md",
+ "run": "https://github.com/dokima-dev/dokima/actions/runs/39051311319",
+ "handback": {
+  "previous_step": {
+   "did": [
+    "Code now rejects a review missing any of the six boxes, at both stages.",
+    "Code now rejects a box entry missing a field, naming the box and field.",
+    "Code now rejects an approve while a box holds a blocking entry."
+   ],
+   "decided": [
+    "An added entry of kind needed never stops an approve."
+   ],
+   "open": []
+  },
+  "verdict": "approve",
+  "summary": "All six criteria are met by the code itself, and their tests pass on the branch.",
+  "raises": [],
+  "answers": [],
+  "asks": [],
+  "boxes": {
+   "dropped": "none",
+   "added": "none",
+   "superseded": "none",
+   "conflicts": "none",
+   "edges": {
+    "819.1": "covered",
+    "819.2": "covered",
+    "819.3": "covered",
+    "819.4": "covered",
+    "819.5": "covered",
+    "819.6": "covered"
+   },
+   "poor_tests": "none"
+  },
+  "size": "ok"
+ },
+ "check": {
+  "passed": true,
+  "problems": []
+ },
+ "url": "https://github.com/dokima-dev/dokima/pull/827#issuecomment-6237037177"
+}
