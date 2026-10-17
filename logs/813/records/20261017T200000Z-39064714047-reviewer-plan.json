@@ -1,0 +1,157 @@
+{
+ "role": "reviewer",
+ "stage": "plan",
+ "run_id": "39064714047",
+ "commit_before": "2259e6d7d890a496002dbca24e9caa3ee43136f4",
+ "started_by": "dokima-runtime[bot]",
+ "models": [
+  "claude-opus-5-5"
+ ],
+ "report": {
+  "duration_ms": 66298,
+  "turns": 11,
+  "cost_usd": 0.5016534,
+  "tokens_in": 462147,
+  "tokens_out": 6059
+ },
+ "log": "https://github.com/dokima-dev/dokima/blob/logs/logs/813/39064714047-reviewer-plan.md",
+ "run": "https://github.com/dokima-dev/dokima/actions/runs/39064714047",
+ "handback": {
+  "previous_step": {
+   "did": [
+    "The planner wrote three criteria: two files only, no secret values, no owner co-author line.",
+    "The planner wrote four new tests and changed one play-through test to the thin install."
+   ],
+   "decided": [
+    "The play-through install now calls the played commit instead of the release tag."
+   ],
+   "open": [
+    "An old copy left in the sandbox by earlier installs stays there."
+   ]
+  },
+  "verdict": "approve",
+  "summary": "The plan carries every ask for this story, and each new test fails today because the thin install is missing.",
+  "raises": [],
+  "answers": [
+   {
+    "raise": "P1",
+    "answer": "done",
+    "why": "A real problem outside this story; it stays an issue for the owner to file.",
+    "searched": [
+     742,
+     491,
+     457,
+     258
+    ],
+    "verdict": "new"
+   }
+  ],
+  "asks": [
+   {
+    "ask": "Nothing else. No Python.",
+    "source": "https://github.com/dokima-dev/dokima/issues/742",
+    "criterion": "813.1"
+   },
+   {
+    "ask": "`playthrough.yml` and `wiki.yml` are Dokima-project files, never installed.",
+    "source": "https://github.com/dokima-dev/dokima/issues/742",
+    "criterion": "813.1"
+   },
+   {
+    "ask": "Nothing secret is ever committed.",
+    "source": "https://github.com/dokima-dev/dokima/issues/742",
+    "criterion": "813.2"
+   },
+   {
+    "ask": "Never ship my line as a default",
+    "source": "https://github.com/dokima-dev/dokima/issues/742#issuecomment-6234488528",
+    "criterion": "813.3"
+   }
+  ],
+  "behaviors": [
+   {
+    "criterion": "813.1",
+    "one_behavior": true,
+    "why": "One result: the repo gains exactly the two files."
+   },
+   {
+    "criterion": "813.2",
+    "one_behavior": true,
+    "why": "One result: no added file holds a secret value."
+   },
+   {
+    "criterion": "813.3",
+    "one_behavior": true,
+    "why": "One result: the installed settings lack the owner's line."
+   }
+  ],
+  "edge_cases": [
+   {
+    "criterion": "813.1",
+    "cut": [],
+    "missing": []
+   },
+   {
+    "criterion": "813.2",
+    "cut": [],
+    "missing": []
+   },
+   {
+    "criterion": "813.3",
+    "cut": [],
+    "missing": []
+   }
+  ],
+  "tests": [
+   {
+    "test": "tests/test_install.py::test_installing_adds_exactly_the_one_workflow_and_the_settings_file",
+    "only_its_behavior": true,
+    "why": "Runs the real install and compares the added files to the two expected."
+   },
+   {
+    "test": "tests/test_install.py::test_installing_into_an_empty_repo_adds_exactly_the_two_files",
+    "only_its_behavior": true,
+    "why": "Same check on a repo with no commits."
+   },
+   {
+    "test": "tests/test_install.py::test_installing_writes_no_secrets_value_into_any_file_it_adds",
+    "only_its_behavior": true,
+    "why": "Sets every secret, requires the settings file, then searches added files for values."
+   },
+   {
+    "test": "tests/test_install.py::test_the_installed_settings_file_never_ships_the_owners_co_author_line",
+    "only_its_behavior": true,
+    "why": "Requires the settings file and looks for the owner's own line in it."
+   },
+   {
+    "test": "tests/test_playthrough.py::test_the_play_through_installs_the_played_commit_on_the_sandbox_before_the_first_step",
+    "only_its_behavior": true,
+    "why": "Still proves the played commit is installed first, now in the thin shape."
+   }
+  ],
+  "boxes": {
+   "dropped": "none",
+   "added": [
+    {
+     "what": "The installed workflow calls the played commit instead of the release tag.",
+     "kind": "needed",
+     "serves": "813.1"
+    }
+   ],
+   "superseded": "none",
+   "conflicts": "none",
+   "edges": {
+    "813.1": "covered",
+    "813.2": "covered",
+    "813.3": "covered"
+   },
+   "poor_tests": "none"
+  },
+  "size": "ok"
+ },
+ "check": {
+  "passed": true,
+  "problems": []
+ },
+ "url": "https://github.com/dokima-dev/dokima/issues/813#issuecomment-6240036995"
+}
