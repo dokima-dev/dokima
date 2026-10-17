@@ -1,0 +1,57 @@
+{
+ "role": "worker",
+ "stage": null,
+ "run_id": "39019566458",
+ "commit_before": "affa747a456355237569db6d617d2566657233fa",
+ "started_by": "dokima-runtime[bot]",
+ "models": [
+  "claude-opus-5-5"
+ ],
+ "report": {
+  "duration_ms": 340184,
+  "turns": 22,
+  "cost_usd": 1.0177678000000003,
+  "tokens_in": 1327836,
+  "tokens_out": 12348
+ },
+ "log": "https://github.com/dokima-dev/dokima/blob/logs/logs/804/39019566458-worker.md",
+ "run": "https://github.com/dokima-dev/dokima/actions/runs/39019566458",
+ "handback": {
+  "summary": "Test finding, tagging, folders and the new-test run now follow the repo's test settings.",
+  "criteria": {
+   "804.1": "`dokima/checks.py` `proves(tag)` builds the link call; `planner.test_functions` uses the `tests.tag` setting.",
+   "804.2": "`planner.test_nodes` walks `Test*` classes, naming methods `Class::test_x`; summary and number checks use it.",
+   "804.3": "`planner.test_nodes` takes `async def` tests as well as plain ones.",
+   "804.4": "`planner.test_nodes` looks inside any block, such as `if`, but not inside functions.",
+   "804.5": "`checks.is_text` reads `text_only.not_text`, whose default no longer lists the prompt folder.",
+   "804.6": "`checks.text_only` passes the `text_only.not_text` setting to `is_text` for every changed file.",
+   "804.7": "`checks.manual_fix()` puts the `tests.dir` setting in the manual fix's check.",
+   "804.8": "`planner.problems` and `planner.main` use `tests_dir()`, the `tests.dir` setting, not a fixed folder.",
+   "804.9": "`planner.main_with_tests` lays the `tests.dir` folder over main's code.",
+   "804.10": "`planner.passing_today` runs each test with `tests.run_one`, `{test}` filled in."
+  },
+  "evidence": "`pytest tests/test_test_settings.py tests/test_planner.py tests/test_text_only.py`: 35 passed.",
+  "raises": [
+   {
+    "kind": "issue",
+    "label": "Manual fix test red",
+    "text": "Two manual fix tests fail on main: the step runs `python -m pytest`, bypassing the test's fake `pytest`.",
+    "evidence": "`tests/test_manual_fix_check.py` fails 2 of 3 on main at `826f205`, unchanged by this branch.",
+    "raised_by": "worker",
+    "id": "W1"
+   }
+  ],
+  "answers": []
+ },
+ "check": {
+  "passed": true,
+  "problems": []
+ },
+ "dropped_by_fence": [],
+ "files_changed": [
+  "dokima/checks.py",
+  "dokima/planner.py"
+ ],
+ "branch": "try/issue-804",
+ "url": "https://github.com/dokima-dev/dokima/issues/804#issuecomment-6232052539"
+}
