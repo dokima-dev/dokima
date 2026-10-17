@@ -1,0 +1,74 @@
+{
+ "role": "worker",
+ "stage": null,
+ "run_id": "39057655792",
+ "commit_before": "1630dd8ad862b3226b5ef94c34d51a6c548dbd5a",
+ "started_by": "dokima-runtime[bot]",
+ "models": [
+  "claude-opus-5-5"
+ ],
+ "report": {
+  "duration_ms": 64492,
+  "turns": 3,
+  "cost_usd": 0.6747377999999999,
+  "tokens_in": 176998,
+  "tokens_out": 1087
+ },
+ "log": "https://github.com/dokima-dev/dokima/blob/logs/logs/812/39057655792-worker.md",
+ "run": "https://github.com/dokima-dev/dokima/actions/runs/39057655792",
+ "handback": {
+  "summary": "Shared workflows now fetch Dokima's code at the called commit, and a leftover merge conflict is resolved.",
+  "criteria": {
+   "812.1": "Built earlier: every shared job checks out Dokima's repo; the full suite's conflict is resolved keeping that.",
+   "812.2": "Built in an earlier round: every job that reads a key uses the keys environment.",
+   "812.3": "Built in an earlier round: the agent run reads the key secret its settings name.",
+   "812.4": "Built in an earlier round: an early step fails a run with no bot, saying how to set it up.",
+   "812.5": "Built in an earlier round: a step fails a run with no model key, naming the secret and the fix.",
+   "812.6": "Built in an earlier round: the default co-author line names Dokima's bot on every commit and merge.",
+   "812.7": "Built in an earlier round: turning the co-author line off leaves commits and merges with none.",
+   "812.8": "Every checkout of Dokima's repo in the shared workflows now names the commit GitHub sets for the called workflow.",
+   "812.9": "Built in an earlier round: the adopter's file is nineteen lines.",
+   "812.10": "Built in an earlier round: the entry workflow sends on every event Dokima acts on."
+  },
+  "evidence": "Workflow test files: `695 passed, 2 failed`, both `tests/test_queue_judge.py` with `NameError: job`.",
+  "raises": [
+   {
+    "kind": "blocker",
+    "to": "planner",
+    "label": "Test cannot pass",
+    "text": "The queue judge test fakes a context with no job values, so the fix the 812.8 test demands cannot pass it.",
+    "evidence": "`tests/test_queue_judge.py::context` sets `github.job_workflow_sha`, no `job`; both its tests raise `NameError: name 'job'`.",
+    "raised_by": "worker",
+    "id": "W9"
+   }
+  ],
+  "answers": [
+   {
+    "raise": "R4",
+    "answer": "done",
+    "why": "Every checkout of Dokima's code now uses the called workflow's own commit, as the reviewer asked."
+   }
+  ]
+ },
+ "check": {
+  "passed": true,
+  "problems": []
+ },
+ "dropped_by_fence": [],
+ "files_changed": [
+  ".github/workflows/acceptance-criteria.yml",
+  ".github/workflows/agent.yml",
+  ".github/workflows/assign.yml",
+  ".github/workflows/audit.yml",
+  ".github/workflows/autopilot.yml",
+  ".github/workflows/board.yml",
+  ".github/workflows/card.yml",
+  ".github/workflows/commands.yml",
+  ".github/workflows/fix.yml",
+  ".github/workflows/full-suite.yml",
+  ".github/workflows/testmon.yml",
+  ".github/workflows/uptodate.yml"
+ ],
+ "branch": "try/issue-812",
+ "url": "https://github.com/dokima-dev/dokima/pull/824#issuecomment-6238470230"
+}
