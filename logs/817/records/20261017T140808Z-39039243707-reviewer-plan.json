@@ -1,0 +1,270 @@
+{
+ "role": "reviewer",
+ "stage": "plan",
+ "run_id": "39039243707",
+ "commit_before": "d35d133c7eb0787c14015aa2b537a0677b853e57",
+ "started_by": "dokima-runtime[bot]",
+ "models": [
+  "claude-opus-5-5"
+ ],
+ "report": {
+  "duration_ms": 130610,
+  "turns": 13,
+  "cost_usd": 0.7481872,
+  "tokens_in": 640535,
+  "tokens_out": 9255
+ },
+ "log": "https://github.com/dokima-dev/dokima/blob/logs/logs/817/39039243707-reviewer-plan.md",
+ "run": "https://github.com/dokima-dev/dokima/actions/runs/39039243707",
+ "handback": {
+  "previous_step": {
+   "did": [
+    "The planner wrote ten criteria, nine new tests and two existing house rules tests.",
+    "The planner pointed six older raising tests at the built prompts, same checks."
+   ],
+   "decided": [
+    "The planner moves the worker's prompts folder rule into Dokima's own settings."
+   ],
+   "open": [
+    "The planner asked whether that folder rule may move into settings."
+   ]
+  },
+  "verdict": "approve",
+  "summary": "The plan carries every ask of this story, and each new test fails today because the feature is missing.",
+  "raises": [],
+  "answers": [
+   {
+    "raise": "P1",
+    "answer": "done",
+    "why": "Only the prompt reads the protected paths, so Dokima's worker keeps the same rule.",
+    "words": "a scan finds no Dokima file name in any shipped prompt",
+    "source": "https://github.com/dokima-dev/dokima/issues/741",
+    "changes": false
+   }
+  ],
+  "asks": [
+   {
+    "ask": "a scan finds no Dokima file name in any shipped prompt",
+    "source": "https://github.com/dokima-dev/dokima/issues/741",
+    "criterion": "817.1"
+   },
+   {
+    "ask": "moves to one shared `roles/raising.md` with neutral examples",
+    "source": "https://github.com/dokima-dev/dokima/issues/741",
+    "criterion": "817.2"
+   },
+   {
+    "ask": "The 50-line \"raising\" block copied into planner, worker and reviewer",
+    "source": "https://github.com/dokima-dev/dokima/issues/741",
+    "criterion": "817.3"
+   },
+   {
+    "ask": "Numbers written into prompts (\"more than 3 questions\"",
+    "source": "https://github.com/dokima-dev/dokima/issues/741",
+    "criterion": "817.4"
+   },
+   {
+    "ask": "\"three blocks in a row\"",
+    "source": "https://github.com/dokima-dev/dokima/issues/741",
+    "criterion": "817.5"
+   },
+   {
+    "ask": "Default criterion style in the planner prompt: \"When X, Y\".",
+    "source": "https://github.com/dokima-dev/dokima/issues/741",
+    "criterion": "817.6"
+   },
+   {
+    "ask": "The planner tries to write each criterion with a source, a result",
+    "source": "https://github.com/dokima-dev/dokima/issues/741#issuecomment-6205062350",
+    "criterion": "817.7"
+   },
+   {
+    "ask": "Each blank it cannot fill becomes one question to the owner",
+    "source": "https://github.com/dokima-dev/dokima/issues/741#issuecomment-6205062350",
+    "criterion": "817.8"
+   },
+   {
+    "ask": "Examples for the prompt:",
+    "source": "https://github.com/dokima-dev/dokima/issues/741#issuecomment-6205062350",
+    "criterion": "817.9"
+   },
+   {
+    "ask": "a repo's house rules appear after the shipped prompt for each role",
+    "source": "https://github.com/dokima-dev/dokima/issues/741#issuecomment-6234488387",
+    "criterion": "817.10"
+   },
+   {
+    "ask": "The `prompts.append` line maps to that same criterion.",
+    "source": "https://github.com/dokima-dev/dokima/issues/741#issuecomment-6234488387",
+    "criterion": "817.10"
+   }
+  ],
+  "behaviors": [
+   {
+    "criterion": "817.1",
+    "one_behavior": true,
+    "why": "One scan, one result: no Dokima file name found."
+   },
+   {
+    "criterion": "817.2",
+    "one_behavior": true,
+    "why": "The rules sit in one file, with no copies elsewhere."
+   },
+   {
+    "criterion": "817.3",
+    "one_behavior": true,
+    "why": "Each built prompt holds the shared rules once."
+   },
+   {
+    "criterion": "817.4",
+    "one_behavior": true,
+    "why": "The question limit follows its setting."
+   },
+   {
+    "criterion": "817.5",
+    "one_behavior": true,
+    "why": "The blocks limit follows its setting."
+   },
+   {
+    "criterion": "817.6",
+    "one_behavior": true,
+    "why": "One style line names the default."
+   },
+   {
+    "criterion": "817.7",
+    "one_behavior": true,
+    "why": "One rule line on what a criterion needs."
+   },
+   {
+    "criterion": "817.8",
+    "one_behavior": true,
+    "why": "One rule line on turning blanks into questions."
+   },
+   {
+    "criterion": "817.9",
+    "one_behavior": true,
+    "why": "The owner's seven examples appear."
+   },
+   {
+    "criterion": "817.10",
+    "one_behavior": true,
+    "why": "House rules come after the shipped prompt."
+   }
+  ],
+  "edge_cases": [
+   {
+    "criterion": "817.1",
+    "cut": [],
+    "missing": []
+   },
+   {
+    "criterion": "817.2",
+    "cut": [],
+    "missing": []
+   },
+   {
+    "criterion": "817.3",
+    "cut": [],
+    "missing": []
+   },
+   {
+    "criterion": "817.4",
+    "cut": [],
+    "missing": []
+   },
+   {
+    "criterion": "817.5",
+    "cut": [],
+    "missing": []
+   },
+   {
+    "criterion": "817.6",
+    "cut": [],
+    "missing": []
+   },
+   {
+    "criterion": "817.7",
+    "cut": [],
+    "missing": []
+   },
+   {
+    "criterion": "817.8",
+    "cut": [],
+    "missing": []
+   },
+   {
+    "criterion": "817.9",
+    "cut": [],
+    "missing": []
+   },
+   {
+    "criterion": "817.10",
+    "cut": [],
+    "missing": []
+   }
+  ],
+  "tests": [
+   {
+    "test": "tests/test_shipped_prompts.py::test_no_shipped_prompt_names_a_file_of_dokimas_own_code",
+    "only_its_behavior": true,
+    "why": "Scans role files and built prompts; fails today on the missing shared file."
+   },
+   {
+    "test": "tests/test_shipped_prompts.py::test_the_raising_rules_are_written_once_in_one_shared_file",
+    "only_its_behavior": true,
+    "why": "Fails today: no shared raising file exists."
+   },
+   {
+    "test": "tests/test_shipped_prompts.py::test_every_role_prompt_carries_the_shared_raising_rules",
+    "only_its_behavior": true,
+    "why": "Builds all four prompts; fails on a missing or doubled section."
+   },
+   {
+    "test": "tests/test_shipped_prompts.py::test_the_planners_prompt_states_the_question_limit_the_settings_name",
+    "only_its_behavior": true,
+    "why": "Fails today: setting 5 still shows 3."
+   },
+   {
+    "test": "tests/test_shipped_prompts.py::test_every_prompt_states_the_blocks_in_a_row_limit_the_settings_name",
+    "only_its_behavior": true,
+    "why": "Fails today: setting 7 still shows three."
+   },
+   {
+    "test": "tests/test_shipped_prompts.py::test_the_planners_prompt_gives_when_x_y_as_the_default_criterion_style",
+    "only_its_behavior": true,
+    "why": "Fails today: no default style line, and the formula ban remains."
+   },
+   {
+    "test": "tests/test_shipped_prompts.py::test_the_planners_prompt_says_each_criterion_needs_a_source_a_result_and_a_test",
+    "only_its_behavior": true,
+    "why": "Fails today: no such sentence."
+   },
+   {
+    "test": "tests/test_shipped_prompts.py::test_the_planners_prompt_turns_each_unfilled_blank_into_one_question",
+    "only_its_behavior": true,
+    "why": "Fails today: no such sentence."
+   },
+   {
+    "test": "tests/test_shipped_prompts.py::test_the_planners_prompt_shows_the_owners_seven_question_examples",
+    "only_its_behavior": true,
+    "why": "Checks each of the seven examples; fails today."
+   },
+   {
+    "test": "tests/test_settings_prompts.py::test_a_repos_house_rules_file_is_added_after_the_shipped_prompt",
+    "only_its_behavior": true,
+    "why": "Existing test the owner named as proof; passes today."
+   },
+   {
+    "test": "tests/test_settings_prompts.py::test_a_house_rules_section_named_for_a_role_is_added_only_to_that_roles_prompt",
+    "only_its_behavior": true,
+    "why": "Existing test the owner named as proof; passes today."
+   }
+  ],
+  "size": "ok"
+ },
+ "check": {
+  "passed": true,
+  "problems": []
+ },
+ "url": "https://github.com/dokima-dev/dokima/issues/817#issuecomment-6234846240"
+}
