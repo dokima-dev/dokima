@@ -529,8 +529,10 @@ def test_the_play_through_installs_the_played_commit_on_the_sandbox_before_the_f
 
     Proves 437.3.
     card.yml always runs the default branch's copy of itself and of dokima/card.py, so the cards on card-gallery are
-    drawn by the commit played only once that commit is installed there. Checks install_files() picks every file of
-    the played folder's dokima/ and .github/workflows/, with its content, and nothing else; that play() installs
+    drawn by the commit played only once that commit is installed there. Since #813 an install is the thin workflow
+    and a settings file: checks install_files() gives the played folder's `dokima/install/dokima.yml` as
+    `.github/workflows/dokima.yml`, calling the played commit instead of its release tag, and its
+    `dokima/install/settings.yaml` as `.dokima/settings.yaml`, and nothing else; that play() installs
     before it plays any step; that a refused install plays no step and returns 1 with one `FAIL: install` line giving
     the reason; that a played folder with no dokima/ fails naming it before any gh or git call; that a real run
     on the sandbox pushes with SANDBOX_TOKEN and, when GitHub refuses, exits 1 naming the commit and plays no step;
@@ -539,15 +541,20 @@ def test_the_play_through_installs_the_played_commit_on_the_sandbox_before_the_f
     record_property("proves", "437.3")
     p = playthrough("437.3")
     played = tmp_path / "played"
+    thin = "jobs:\n  dokima:\n    uses: dokima-dev/dokima/.github/workflows/entry.yml@v0.1.0\n    secrets: inherit\n"
     for rel, text in (("dokima/card.py", "CARD of the played commit"), ("dokima/icons/x.svg", "<svg/>"),
+                      ("dokima/install/dokima.yml", thin), ("dokima/install/settings.yaml", "co_author: \"{bot}\"\n"),
                       (".github/workflows/card.yml", "name: card of the played commit"),
                       ("tests/test_a.py", "def test_a(): pass"), ("README.md", "readme")):
         (played / rel).parent.mkdir(parents=True, exist_ok=True)
         (played / rel).write_text(text)
-    got = {k.replace(os.sep, "/"): (v.decode() if isinstance(v, bytes) else v) for k, v in p.install_files(str(played)).items()}
-    want = {"dokima/card.py": "CARD of the played commit", "dokima/icons/x.svg": "<svg/>",
-            ".github/workflows/card.yml": "name: card of the played commit"}
-    assert got == want, f"437.3: install_files() should give the played commit's dokima/ and .github/workflows/ files, not {sorted(got)}"
+    commit = "0123abcd4567"
+    got = {k.replace(os.sep, "/"): (v.decode() if isinstance(v, bytes) else v)
+           for k, v in p.install_files(str(played), commit).items()}
+    want = {".github/workflows/dokima.yml": thin.replace("@v0.1.0", "@" + commit),
+            ".dokima/settings.yaml": "co_author: \"{bot}\"\n"}
+    assert got == want, ("437.3: install_files() should give the played commit's thin workflow, calling that commit, "
+                         f"and its starting settings file, and nothing else, not {sorted(got)}")
     hub = FakeSandbox()
     code, lines = play(p, hub, "437.3")
     assert hub.calls[0] == ("install", None), f"437.3: play() should install the played commit before any step: {hub.calls[:3]}"
