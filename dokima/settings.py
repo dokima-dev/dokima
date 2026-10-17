@@ -3,8 +3,8 @@
 `python3 -m dokima.settings`, run in a repo, prints the merged settings as JSON on standard output;
 `python3 -m dokima.settings setup` prints the setup group as `name=value` lines for a workflow's GITHUB_OUTPUT, so
 each test workflow sets up the repo's Python, test tools and install command as they say (#794);
-`python3 -m dokima.settings env` prints the test commands, test folder, branches and bot as `NAME=value` lines for a
-workflow's GITHUB_ENV, so workflows run and push as the repo's settings say (#795). The defaults are
+`python3 -m dokima.settings env` prints the test commands, test folder, branches, bot, co-author and owner docs file as `NAME=value` lines for a
+workflow's GITHUB_ENV, so workflows run and push as the repo's settings say (#795, #796). The defaults are
 `dokima/defaults.yaml`, beside this file; the repo's file is `.dokima/settings.yaml`, and names only what differs.
 Groups merge key by key, the repo winning; a list replaces the default list whole, except gates and prompt additions,
 which merge with the default ones by name. An unknown setting is left out with a warning suggesting the closest known
@@ -108,7 +108,8 @@ def env_lines(got):
         raise ValueError(f"tests.run_one in {REPO_FILE} must name {{test}}, where each criterion's tests go")
     values = {"TESTS_RUN_ALL": run_all, "TESTS_RUN_ONE": tests["run_one"], "TESTS_AFFECTED": tests["affected"],
               "TESTS_DIR": tests["dir"], "DEFAULT_BRANCH": got["branch"]["default"],
-              "RECORDS_BRANCH": got["records"]["branch"], "BOT_SLUG": got["bot"]["slug"]}
+              "RECORDS_BRANCH": got["records"]["branch"], "BOT_SLUG": got["bot"]["slug"],
+              "CO_AUTHOR": got["co_author"], "OWNER_DOCS": got["owner_docs"]}
     lines = []
     for name, value in values.items():
         value = "" if value is None else str(value)

@@ -24,6 +24,8 @@ branch:
 records:
   branch: logs
 owner_docs: AGENTS.md
+# The Co-authored-by line on Dokima's commits, e.g. Ann Example <ann@example.com>; empty for none.
+co_author: ""
 style:
   docstrings: required
   docstring_cap: 15

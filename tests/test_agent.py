@@ -3,6 +3,9 @@ import json
 import os
 import re
 import sys
+import shutil
+import subprocess
+import tempfile
 
 sys.path.insert(0, os.path.join(os.path.dirname(__file__), ".."))
 from dokima import agent, fence  # noqa: E402
@@ -255,12 +258,31 @@ def test_open_blockers_come_from_the_newest_review_at_that_stage(record_property
 
 
 def test_dokimas_own_code_always_runs_from_main(record_property):
-    """The runtime is copied from main before any branch is checked out, every Dokima step runs from that copy, and only tests use the branch's code."""
+    """The runtime is copied from main before any branch is checked out, every Dokima step runs from that copy, and only tests use the branch's code.
+
+    Since #796 the prompt is built by `dokima.prompt` in the runtime copy, not glued from role files: the workflow must
+    build it there, and the builder, run from a branch folder with its own role files, must still read main's."""
     record_property("proves", "agent.19")
     wf = open(os.path.join(os.path.dirname(__file__), "..", ".github", "workflows", "agent.yml")).read()
     assert wf.index("cp -r dokima /tmp/runtime/dokima") < wf.index("name: Starting branch")
     assert "PYTHONPATH: /tmp/runtime" in wf and 'PYTHONSAFEPATH: "1"' in wf
-    assert "cat /tmp/runtime/dokima/roles/" in wf and "cat dokima/roles/" not in wf
+    assert '(cd /tmp/runtime && python3 -m dokima.prompt "$ROLE" "$GRADE")' in wf, "agent.19: the prompt is not built in main's runtime copy"
+    assert "cat dokima/roles/" not in wf, "agent.19: the prompt reads the branch's role files"
+    with tempfile.TemporaryDirectory() as tmp:
+        runtime, branch = os.path.join(tmp, "runtime"), os.path.join(tmp, "branch")
+        shutil.copytree(os.path.join(os.path.dirname(__file__), "..", "dokima"), os.path.join(runtime, "dokima"))
+        with open(os.path.join(runtime, "dokima", "roles", "style.md"), "a") as f:
+            f.write("\nMAIN-ROLE-MARKER\n")
+        os.makedirs(os.path.join(branch, "dokima", "roles"))
+        for name in os.listdir(os.path.join(runtime, "dokima", "roles")):
+            with open(os.path.join(branch, "dokima", "roles", name), "w") as f:
+                f.write("BRANCH-ROLE-MARKER\n")
+        env = {**os.environ, "PYTHONPATH": runtime, "PYTHONSAFEPATH": "1"}
+        out = subprocess.run([sys.executable, "-m", "dokima.prompt", "worker", "result-grade"], cwd=branch, env=env,
+                             capture_output=True, text=True)
+        assert out.returncode == 0, f"agent.19: the prompt could not be built: {out.stderr.strip()}"
+        assert "MAIN-ROLE-MARKER" in out.stdout, "agent.19: the prompt does not hold main's role files"
+        assert "BRANCH-ROLE-MARKER" not in out.stdout, "agent.19: the prompt holds the branch's role files"
     for line in wf.splitlines():
         if "python3 -m pytest" in line:
             assert "PYTHONPATH= PYTHONSAFEPATH=" in line, f"tests would run Dokima from main instead of the branch: {line.strip()}"

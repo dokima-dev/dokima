@@ -15,7 +15,7 @@ jobs:
         with:
           python-version: "3.12"
       - run: python3 -m pip install -q pyyaml  # the settings reader
-      # The bot the settings name commits the sync (#795).
+      # The bot the settings name commits the sync (#795), crediting the co-author they name (#796).
       - name: The bot from the settings
         run: python3 -m dokima.settings env >> "$GITHUB_ENV"
       - name: Copy docs/wiki to the GitHub wiki
@@ -33,6 +33,7 @@ jobs:
           if git diff --cached --quiet; then
             echo "Wiki already up to date"
           else
-            git commit -m "Sync from ${GITHUB_SHA::7}" --trailer "Co-authored-by: Reza Soleymanifar <34189616+RezaSoleymanifar@users.noreply.github.com>"
+            CREDIT=(); [ -z "$CO_AUTHOR" ] || CREDIT=(--trailer "Co-authored-by: $CO_AUTHOR")
+            git commit -m "Sync from ${GITHUB_SHA::7}" "${CREDIT[@]}"
             git push
           fi
