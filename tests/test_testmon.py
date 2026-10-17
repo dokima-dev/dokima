@@ -20,6 +20,9 @@ import sqlite3
 import subprocess
 import sys
 
+sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
+from test_settings_test_setup import SetupRun  # noqa: E402
+
 ROOT = os.path.join(os.path.dirname(os.path.abspath(__file__)), "..")
 AGENT = os.path.join(ROOT, ".github", "workflows", "agent.yml")
 BASELINE = os.path.join(ROOT, ".github", "workflows", "testmon.yml")
@@ -149,7 +152,8 @@ def test_code_review_runs_only_affected_tests(tmp_path, record_property):
     """A code review runs only the tests its change can affect, using main's testmon baseline.
 
     Proves 539.1. Checks that a workflow on every push to main runs the tests with testmon and saves `.testmondata`
-    to GitHub's cache, that agent.yml installs testmon and restores that cache, under a matching key, before its test
+    to GitHub's cache, that agent.yml installs testmon (both installs seen by running each job with the default
+    settings) and restores that cache, under a matching key, before its test
     step, and then runs that step with a readable baseline in place: the run that writes `tests.txt` and `tests.xml`
     must be testmon's, choosing only the affected test, not every test."""
     record_property("proves", "539.1")
@@ -157,8 +161,8 @@ def test_code_review_runs_only_affected_tests(tmp_path, record_property):
     text = "\n".join(base)
     assert re.search(r"^\s*push:", text, re.M) and re.search(r"branches:\s*\[\s*main\s*\]", text), \
         "539.1: testmon.yml does not run on every push to main, so no baseline is recorded there"
-    assert any("pip install" in l and "pytest-testmon" in l for l in base), \
-        "539.1: testmon.yml does not install pytest-testmon"
+    got = SetupRun(tmp_path / "base", "testmon.yml", "baseline", None).installed("539.1")
+    assert "pytest-testmon" in got, f"539.1: testmon.yml does not install pytest-testmon before its tests; it installs {got}"
     assert any("pytest" in l and "--testmon" in l for l in base), \
         "539.1: testmon.yml does not run the tests with --testmon, so it records no baseline"
     saved, _ = cache_step(base, "actions/cache/save")
@@ -166,8 +170,9 @@ def test_code_review_runs_only_affected_tests(tmp_path, record_property):
         "539.1: testmon.yml does not save .testmondata with actions/cache/save"
 
     agent = workflow_lines(AGENT)
-    assert any("pip install" in l and "pytest-testmon" in l for l in agent), \
-        "539.1: agent.yml does not install pytest-testmon on the code review's machine"
+    got = SetupRun(tmp_path / "agent", "agent.yml", "run", None).installed("539.1")
+    assert "pytest-testmon" in got, \
+        f"539.1: agent.yml does not install pytest-testmon on the code review's machine; it installs {got}"
     restored, at = cache_step(agent, "actions/cache/restore")
     assert restored and restored.get("path") == ".testmondata", \
         "539.1: agent.yml does not restore .testmondata with actions/cache/restore"

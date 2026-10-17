@@ -9,16 +9,18 @@ Setup is a command the owner runs once per subscription on their own machine, fr
     python3 -m dokima.setup add SUB --agent kimi --secret SECRET --model MODEL --role ROLE --sign-in --region REGION
         runs the agent's own login with the region, then stores the files it saved as the repo secret SECRET.
 
-Either way it writes `.dokima/agents.yml` in the shape #698 reads, block style:
+Either way it saves into the agents section of the settings file, `.dokima/settings.yaml` (#794), in the shape #698
+reads:
 
-    subscriptions:
-      SUB:
-        agent: AGENT
-        key: SECRET
-    roles:
-      ROLE:
-        subscription: SUB
-        model: MODEL
+    agents:
+      subscriptions:
+        SUB:
+          agent: AGENT
+          key: SECRET
+      roles:
+        ROLE:
+          subscription: SUB
+          model: MODEL
 
 A stored sign-in is the base64 text of a gzip tar of the files the login saved, each named by its path under the home
 folder (for Kimi `.kimi-code/credentials/...` and `.kimi-code/config.toml`, where Kimi's login keeps them), so a run can unpack it
@@ -112,9 +114,9 @@ class Box:
         return out
 
     def settings(self):
-        """The settings file read as nested maps, or None when setup wrote none."""
-        p = self.repo / ".dokima" / "agents.yml"
-        return read_yaml(p.read_text()) if p.exists() else None
+        """The settings file's agents section read as nested maps, or None when setup wrote none."""
+        p = self.repo / ".dokima" / "settings.yaml"
+        return read_yaml(p.read_text()).get("agents") if p.exists() else None
 
 
 def read_yaml(text):
@@ -226,17 +228,17 @@ def test_secret_refused_fails(tmp_path, record_property):
 def test_settings_name_key_secret(tmp_path, record_property):
     """The settings file names the subscription's agent and secret, never the key.
 
-    Adds a subscription with a key and checks `.dokima/agents.yml` has codex-pro with agent codex and key CODEX_KEY,
+    Adds a subscription with a key and checks the settings file has codex-pro with agent codex and key CODEX_KEY,
     and that the key itself is nowhere in the file. Proves 697.3."""
     record_property("proves", "697.3")
     box = Box(tmp_path)
     p = add_with_key(box)
     s = box.settings()
-    assert s is not None, f"697.3: setup wrote no .dokima/agents.yml.\n{said(p)}"
+    assert s is not None, f"697.3: setup wrote no agents section into .dokima/settings.yaml.\n{said(p)}"
     sub = (s.get("subscriptions") or {}).get("codex-pro")
     assert sub == {"agent": "codex", "key": "CODEX_KEY"}, \
         f"697.3: the settings file lists the subscription as {sub!r}, not agent codex with key CODEX_KEY."
-    assert KEY not in (box.repo / ".dokima" / "agents.yml").read_text(), \
+    assert KEY not in (box.repo / ".dokima" / "settings.yaml").read_text(), \
         "697.3: the settings file holds the key itself, not just its secret's name."
 
 
@@ -319,7 +321,7 @@ def test_settings_give_roles(tmp_path, record_property):
     box = Box(tmp_path)
     p = add_with_key(box)
     s = box.settings()
-    assert s is not None, f"697.6: setup wrote no .dokima/agents.yml.\n{said(p)}"
+    assert s is not None, f"697.6: setup wrote no agents section into .dokima/settings.yaml.\n{said(p)}"
     roles = s.get("roles") or {}
     for role in ("worker", "reviewer"):
         assert roles.get(role) == {"subscription": "codex-pro", "model": "gpt-5-codex"}, \
