@@ -1,0 +1,141 @@
+{
+ "role": "planner",
+ "stage": null,
+ "run_id": "39074713725",
+ "commit_before": "b450ccca6ccdb1e8a1d58e1b06f08af5eceeb5a2",
+ "started_by": "dokima-runtime[bot]",
+ "models": [
+  "claude-opus-5-5"
+ ],
+ "report": {
+  "duration_ms": 37538,
+  "turns": 8,
+  "cost_usd": 0.46792400000000006,
+  "tokens_in": 358799,
+  "tokens_out": 2605
+ },
+ "log": "https://github.com/dokima-dev/dokima/blob/logs/logs/815/39074713725-planner.md",
+ "run": "https://github.com/dokima-dev/dokima/actions/runs/39074713725",
+ "handback": {
+  "kind": "user_story",
+  "title": "Wiki install page uses the thin workflow",
+  "summary": "The wiki's install page tells adopters to add one workflow and one settings file, never a copy of Dokima.",
+  "user_story": "Adopters following the wiki install page add only the thin workflow and settings file, never Dokima's code.",
+  "acceptance_criteria": [
+   {
+    "text": "When an adopter reads the wiki install page, no line tells them to add Dokima's workflows or code folder.",
+    "words": "The 815.1 test must fail on any line telling adopters to put Dokima's `.github/workflows/` or `dokima/` folders in their repo, whatever the verb.",
+    "source": "https://github.com/dokima-dev/dokima/issues/815#issuecomment-6241293967",
+    "files": [
+     "docs/wiki/Installing.md",
+     "tests/test_wiki_install.py"
+    ],
+    "edge_cases": [
+     {
+      "case": "The step uses another verb than copy, like put or add.",
+      "test": "tests/test_wiki_install.py::test_the_install_page_never_tells_adopters_to_put_dokimas_folders_in_their_repo"
+     }
+    ]
+   },
+   {
+    "text": "When an adopter reads the wiki install page, it tells them to add the one thin workflow file.",
+    "words": "the page tells adopters to add the one workflow and the settings file",
+    "source": "https://github.com/dokima-dev/dokima/issues/815#issuecomment-6241293967",
+    "files": [
+     "docs/wiki/Installing.md",
+     "tests/test_wiki_install.py"
+    ],
+    "no_edge_cases": "One fixed page with no input; the test reads every line."
+   },
+   {
+    "text": "When an adopter reads the wiki install page, it tells them to add the settings file.",
+    "words": "the page tells adopters to add the one workflow and the settings file",
+    "source": "https://github.com/dokima-dev/dokima/issues/815#issuecomment-6241293967",
+    "files": [
+     "docs/wiki/Installing.md",
+     "tests/test_wiki_install.py"
+    ],
+    "no_edge_cases": "One fixed page with no input; the test reads every line."
+   },
+   {
+    "text": "When an adopter reads the wiki install page, it says the workflow and settings file are the whole install.",
+    "words": "The page names those two files as the whole install.",
+    "source": "https://github.com/dokima-dev/dokima/issues/815#issuecomment-6241293967",
+    "files": [
+     "docs/wiki/Installing.md",
+     "tests/test_wiki_install.py"
+    ],
+    "no_edge_cases": "One fixed page with no input; the test reads every line."
+   },
+   {
+    "text": "When an adopter reads the wiki install page, it lists none of Dokima's own workflows as files to add.",
+    "words": "It stops listing Dokima's own workflows, including `playthrough.yml` and `wiki.yml`, as things to add.",
+    "source": "https://github.com/dokima-dev/dokima/issues/815#issuecomment-6241293967",
+    "files": [
+     "docs/wiki/Installing.md",
+     "tests/test_wiki_install.py"
+    ],
+    "edge_cases": [
+     {
+      "case": "The play-through and wiki workflows the owner named are not listed.",
+      "test": "tests/test_wiki_install.py::test_the_install_page_lists_none_of_dokimas_own_workflows_to_add"
+     }
+    ]
+   },
+   {
+    "text": "When an adopter reads the wiki install page, it never lists the code owners file among the files to add.",
+    "words": "The page may mention it once as optional, for naming approvers other than the owner, but never among the files to add.",
+    "source": "https://github.com/dokima-dev/dokima/issues/815#issuecomment-6241461863",
+    "files": [
+     "docs/wiki/Installing.md",
+     "tests/test_wiki_install.py"
+    ],
+    "edge_cases": [
+     {
+      "case": "The page mentions the file once, saying it is optional.",
+      "test": "tests/test_wiki_install.py::test_the_install_page_never_lists_the_code_owners_file_to_add"
+     }
+    ]
+   }
+  ],
+  "non_functional": [],
+  "tests": {
+   "815.1": [
+    "tests/test_wiki_install.py::test_the_install_page_never_tells_adopters_to_put_dokimas_folders_in_their_repo"
+   ],
+   "815.2": [
+    "tests/test_wiki_install.py::test_the_install_page_tells_adopters_to_add_the_thin_workflow"
+   ],
+   "815.3": [
+    "tests/test_wiki_install.py::test_the_install_page_tells_adopters_to_add_the_settings_file"
+   ],
+   "815.4": [
+    "tests/test_wiki_install.py::test_the_install_page_says_the_two_files_are_the_whole_install"
+   ],
+   "815.5": [
+    "tests/test_wiki_install.py::test_the_install_page_lists_none_of_dokimas_own_workflows_to_add"
+   ],
+   "815.6": [
+    "tests/test_wiki_install.py::test_the_install_page_never_lists_the_code_owners_file_to_add"
+   ]
+  },
+  "test_changes": {},
+  "links": {
+   "blocked_by": [],
+   "blocks": [
+    816
+   ],
+   "relates_to": [
+    742,
+    272
+   ]
+  },
+  "raises": [],
+  "answers": []
+ },
+ "check": {
+  "passed": true,
+  "problems": []
+ },
+ "url": "https://github.com/dokima-dev/dokima/issues/815#issuecomment-6242146815"
+}
