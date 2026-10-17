@@ -1,0 +1,305 @@
+{
+ "role": "reviewer",
+ "stage": "plan",
+ "run_id": "39003233968",
+ "commit_before": "5997fbdc6c6aee308f4dad8b253522890231764b",
+ "started_by": "dokima-runtime[bot]",
+ "models": [
+  "claude-opus-5-5"
+ ],
+ "report": {
+  "duration_ms": 114372,
+  "turns": 13,
+  "cost_usd": 0.8555516000000001,
+  "tokens_in": 694875,
+  "tokens_out": 9814
+ },
+ "log": "https://github.com/dokima-dev/dokima/blob/logs/logs/795/39003233968-reviewer-plan.md",
+ "run": "https://github.com/dokima-dev/dokima/actions/runs/39003233968",
+ "handback": {
+  "previous_step": {
+   "did": [
+    "Planned ten criteria, one per ask, with fourteen new tests running real workflow steps.",
+    "Changed five older tests so they read the branch, bot and command from settings."
+   ],
+   "decided": [
+    "The test exclude list is built here, apart from the gate's list of checks."
+   ],
+   "open": [
+    "Asks the owner about the overlap, two exclude lists and pushed commits' name."
+   ]
+  },
+  "verdict": "block",
+  "summary": "Every new test fails today for the right reason; three tests leave part of their promise unproven.",
+  "raises": [
+   {
+    "kind": "blocker",
+    "to": "planner",
+    "label": "795.7: new branch",
+    "text": "No test checks a new branch starts from the default branch setting, so fixing only merges passes. Add a planner run with no branch, checking it starts from trunk.",
+    "evidence": "`agent.yml:236` `checkout -B try/issue-$N origin/main`; neither 795.7 test runs it.",
+    "raised_by": "reviewer",
+    "id": "R1"
+   },
+   {
+    "kind": "blocker",
+    "to": "planner",
+    "label": "795.10: planner merge",
+    "text": "Only the worker's merge is checked; the planner's merge of main keeps the fixed name. Add the planner's merge to the 795.10 test.",
+    "evidence": "`agent.yml:198`, `:228`, `:231` hardcode `dokima-runtime[bot]`; no 795.10 test runs them.",
+    "raised_by": "reviewer",
+    "id": "R2"
+   },
+   {
+    "kind": "blocker",
+    "to": "planner",
+    "label": "795.8: conversation link",
+    "text": "The conversation link on each record still points to the logs branch, so it breaks. Have the 795.8 test check the link names history.",
+    "evidence": "`agent.yml:250` writes `LOG_URL=.../blob/logs/$LOG`; the 795.8 test never reads it.",
+    "raised_by": "reviewer",
+    "id": "R3"
+   }
+  ],
+  "answers": [],
+  "asks": [
+   {
+    "ask": "The all tests check runs the all-tests command from settings.",
+    "source": "https://github.com/dokima-dev/dokima/issues/740#issuecomment-6219928729",
+    "criterion": "795.1"
+   },
+   {
+    "ask": "Each criterion's check runs the per-criterion command from settings.",
+    "source": "https://github.com/dokima-dev/dokima/issues/740#issuecomment-6219928729",
+    "criterion": "795.2"
+   },
+   {
+    "ask": "Setting affected tests to all runs every test before review, with no saved baseline.",
+    "source": "https://github.com/dokima-dev/dokima/issues/740#issuecomment-6219928729",
+    "criterion": "795.3"
+   },
+   {
+    "ask": "Handling a clash with main keeps the test folder named in settings.",
+    "source": "https://github.com/dokima-dev/dokima/issues/740#issuecomment-6219928729",
+    "criterion": "795.4"
+   },
+   {
+    "ask": "The planner's push holds only files in the test folder named in settings.",
+    "source": "https://github.com/dokima-dev/dokima/issues/740#issuecomment-6219928729",
+    "criterion": "795.5"
+   },
+   {
+    "ask": "Tests on the merge gate exclude list stay out of the all tests check.",
+    "source": "https://github.com/dokima-dev/dokima/issues/740",
+    "criterion": "795.6"
+   },
+   {
+    "ask": "Agents base their branches and pull requests on the default branch setting.",
+    "source": "https://github.com/dokima-dev/dokima/issues/740#issuecomment-6219928729",
+    "criterion": "795.7"
+   },
+   {
+    "ask": "Each run's conversation is saved on the records branch the settings name.",
+    "source": "https://github.com/dokima-dev/dokima/issues/740#issuecomment-6219928729",
+    "criterion": "795.8"
+   },
+   {
+    "ask": "Only the bot named in settings may send the next-step signal.",
+    "source": "https://github.com/dokima-dev/dokima/issues/740#issuecomment-6219928729",
+    "criterion": "795.9"
+   },
+   {
+    "ask": "Commits Dokima makes carry the git identity of the bot named in settings.",
+    "source": "https://github.com/dokima-dev/dokima/issues/740#issuecomment-6219928729",
+    "criterion": "795.10"
+   }
+  ],
+  "behaviors": [
+   {
+    "criterion": "795.1",
+    "one_behavior": true,
+    "why": "One command run by one check."
+   },
+   {
+    "criterion": "795.2",
+    "one_behavior": true,
+    "why": "One command run by each criterion's check."
+   },
+   {
+    "criterion": "795.3",
+    "one_behavior": true,
+    "why": "One setting value turning testmon off; the owner's own words."
+   },
+   {
+    "criterion": "795.4",
+    "one_behavior": true,
+    "why": "Clash handling follows one folder setting."
+   },
+   {
+    "criterion": "795.5",
+    "one_behavior": true,
+    "why": "The push is limited to one folder."
+   },
+   {
+    "criterion": "795.6",
+    "one_behavior": true,
+    "why": "Listed tests are left out of one check."
+   },
+   {
+    "criterion": "795.7",
+    "one_behavior": true,
+    "why": "Everything uses one default branch setting; the owner's own words."
+   },
+   {
+    "criterion": "795.8",
+    "one_behavior": true,
+    "why": "Conversations saved on one branch."
+   },
+   {
+    "criterion": "795.9",
+    "one_behavior": true,
+    "why": "One sender allowed to send one signal."
+   },
+   {
+    "criterion": "795.10",
+    "one_behavior": true,
+    "why": "Commits carry one identity."
+   }
+  ],
+  "edge_cases": [
+   {
+    "criterion": "795.1",
+    "cut": [],
+    "missing": []
+   },
+   {
+    "criterion": "795.2",
+    "cut": [],
+    "missing": []
+   },
+   {
+    "criterion": "795.3",
+    "cut": [],
+    "missing": []
+   },
+   {
+    "criterion": "795.4",
+    "cut": [],
+    "missing": []
+   },
+   {
+    "criterion": "795.5",
+    "cut": [],
+    "missing": []
+   },
+   {
+    "criterion": "795.6",
+    "cut": [],
+    "missing": []
+   },
+   {
+    "criterion": "795.7",
+    "cut": [],
+    "missing": [
+     "A new issue's branch starts from the default branch"
+    ]
+   },
+   {
+    "criterion": "795.8",
+    "cut": [],
+    "missing": [
+     "The record's conversation link points to the records branch"
+    ]
+   },
+   {
+    "criterion": "795.9",
+    "cut": [],
+    "missing": []
+   },
+   {
+    "criterion": "795.10",
+    "cut": [],
+    "missing": [
+     "The planner's merge of main"
+    ]
+   }
+  ],
+  "tests": [
+   {
+    "test": "tests/test_settings_workflows.py::test_the_all_tests_check_runs_the_all_tests_command_from_settings",
+    "only_its_behavior": true,
+    "why": "Runs the job with a setting and without; fails today, right reason."
+   },
+   {
+    "test": "tests/test_settings_workflows.py::test_each_criterions_check_runs_the_per_criterion_command_from_settings",
+    "only_its_behavior": true,
+    "why": "Runs the check job with the setting, default and main's older reader."
+   },
+   {
+    "test": "tests/test_settings_workflows.py::test_setting_affected_tests_to_all_runs_every_test_before_review",
+    "only_its_behavior": true,
+    "why": "Runs the review steps; testmon must not run with all."
+   },
+   {
+    "test": "tests/test_settings_workflows.py::test_setting_affected_tests_to_all_saves_no_baseline_on_main",
+    "only_its_behavior": true,
+    "why": "Runs every testmon job on a push; no baseline saved with all."
+   },
+   {
+    "test": "tests/test_settings_workflows.py::test_a_planners_clash_with_main_takes_mains_tests_from_the_settings_test_folder",
+    "only_its_behavior": true,
+    "why": "Runs the planner's clash path with spec as the folder."
+   },
+   {
+    "test": "tests/test_settings_workflows.py::test_a_workers_clash_with_main_keeps_the_planners_test_in_the_settings_test_folder",
+    "only_its_behavior": true,
+    "why": "Runs the worker's clash path with spec as the folder."
+   },
+   {
+    "test": "tests/test_settings_workflows.py::test_the_planners_push_holds_only_files_in_the_settings_test_folder",
+    "only_its_behavior": true,
+    "why": "Runs the real push and reads the pushed branch."
+   },
+   {
+    "test": "tests/test_settings_workflows.py::test_tests_on_the_exclude_list_stay_out_of_the_all_tests_check",
+    "only_its_behavior": true,
+    "why": "Runs real tests; listed one skipped, default list runs it."
+   },
+   {
+    "test": "tests/test_settings_workflows.py::test_agents_base_their_branches_and_pull_requests_on_the_default_branch_setting",
+    "only_its_behavior": true,
+    "why": "Checks merge and pull request base; misses a new branch's start."
+   },
+   {
+    "test": "tests/test_settings_workflows.py::test_a_manual_fix_opens_against_the_default_branch_setting",
+    "only_its_behavior": true,
+    "why": "Runs the manual fix workflow; checks list and create bases."
+   },
+   {
+    "test": "tests/test_settings_workflows.py::test_each_runs_conversation_is_saved_on_the_records_branch_the_settings_name",
+    "only_its_behavior": true,
+    "why": "Runs the save step; checks the named branch and not logs."
+   },
+   {
+    "test": "tests/test_settings_workflows.py::test_only_the_bot_named_in_settings_may_send_the_next_step_signal",
+    "only_its_behavior": true,
+    "why": "Named bot passes, usual bot refused, default still passes."
+   },
+   {
+    "test": "tests/test_settings_workflows.py::test_a_workers_merge_of_main_carries_the_git_identity_of_the_bot_named_in_settings",
+    "only_its_behavior": true,
+    "why": "Real merge with no machine identity; reads the author."
+   },
+   {
+    "test": "tests/test_settings_workflows.py::test_the_wiki_sync_commits_as_the_bot_named_in_settings",
+    "only_its_behavior": true,
+    "why": "Runs the wiki sync against a local wiki; reads the author."
+   }
+  ],
+  "size": "ok"
+ },
+ "check": {
+  "passed": true,
+  "problems": []
+ },
+ "url": "https://github.com/dokima-dev/dokima/issues/795#issuecomment-6229707316"
+}
