@@ -69,7 +69,12 @@ def file_split(repo, parent, recs, labels=()):
     return {"role": "split", "stage": None, "handback": {"stories": filed}, "check": {"passed": True, "problems": []}}
 
 
-AUTOPILOT = "autopilot"
+AUTOPILOT = "autopilot"  # the autopilot label's default name; the repo's is in the labels setting (#787)
+
+
+def autopilot_label():
+    """The autopilot label's name in the labels setting."""
+    return str((settings.read().get("labels") or {}).get("autopilot") or AUTOPILOT)
 
 
 def issue_tree(repo, number):
@@ -87,16 +92,16 @@ def issue_tree(repo, number):
 
 def switch_autopilot(repo, number, switch):
     """Put the issue's tree on autopilot ("start") or take it off ("stop"), touching no other label; returns the
-    issues switched: those whose `autopilot` label was added or removed."""
-    switched = []
+    issues switched: those whose autopilot label, by its name in settings, was added or removed."""
+    switched, name = [], autopilot_label()
     for n in issue_tree(repo, number):
         labels = {l["name"] for l in json.loads(agent_github.gh("api", f"repos/{repo}/issues/{n}")).get("labels", [])}
-        if switch == "start" and AUTOPILOT not in labels:
+        if switch == "start" and name not in labels:
             # Adding a label GitHub does not have yet creates it.
-            agent_github.gh("api", "-X", "POST", f"repos/{repo}/issues/{n}/labels", "-f", f"labels[]={AUTOPILOT}")
+            agent_github.gh("api", "-X", "POST", f"repos/{repo}/issues/{n}/labels", "-f", f"labels[]={name}")
             switched.append(n)
-        elif switch == "stop" and AUTOPILOT in labels:
-            agent_github.gh("api", "-X", "DELETE", f"repos/{repo}/issues/{n}/labels/{AUTOPILOT}")
+        elif switch == "stop" and name in labels:
+            agent_github.gh("api", "-X", "DELETE", f"repos/{repo}/issues/{n}/labels/{urllib.parse.quote(name, safe='')}")
             switched.append(n)
     return switched
 
@@ -557,7 +562,7 @@ def autopilot_closed(repo):
     did = []
     while True:
         issues = {i["number"]: i for i in json.loads(agent_github.gh(
-            "api", f"repos/{repo}/issues?labels={AUTOPILOT}&state=all&per_page=100", "--paginate") or "[]")
+            "api", f"repos/{repo}/issues?labels={urllib.parse.quote(autopilot_label(), safe='')}&state=all&per_page=100", "--paginate") or "[]")
             if "pull_request" not in i}
         subs = {n: sub_issues(repo, n) for n in sorted(issues)}
         done = [p for p, cs in subs.items() if cs and issues[p]["state"] == "open" and all(c["state"] == "closed" for c in cs)]
@@ -601,7 +606,8 @@ def on_autopilot(repo, number, strict=False):
         return None
     if not isinstance(labels, list):
         return None
-    return any((l.get("name") if isinstance(l, dict) else l) == AUTOPILOT for l in labels)
+    name = autopilot_label()
+    return any((l.get("name") if isinstance(l, dict) else l) == name for l in labels)
 
 
 WORKFLOWS = ".github/workflows/"
@@ -621,8 +627,38 @@ def work_approved(recs):
     return at is not None and approves_work(recs[at]) and not settled(recs[:at], recs[at].get("handback") or {})
 
 
-# How long autopilot waits for checks still running on a head before it stops for the owner, and how often it looks.
+# How long autopilot waits for checks still running on a head before it stops for the owner, and how often it looks;
+# the gate's wait is the repo's in settings (#787).
 CHECKS_WAIT, CHECKS_PAUSE = 45 * 60, 30
+
+
+def checks_wait():
+    """How many seconds the merge gate waits for checks still running, from the settings' minutes."""
+    return int((settings.read().get("gate") or {}).get("checks_wait_min") or CHECKS_WAIT // 60) * 60
+
+
+MERGE_METHODS = ("squash", "merge", "rebase")
+
+
+def merge_method():
+    """The merge method in settings: squash, merge or rebase; raises ValueError on any other."""
+    method = str((settings.read().get("merge") or {}).get("method") or "squash")
+    if method not in MERGE_METHODS:
+        raise ValueError(f"merge.method in settings is {method!r}; it must be squash, merge or rebase")
+    return method
+
+
+def default_branch(repo):
+    """The branch autopilot merges into: the settings' one, else GitHub's default branch (#787).
+
+    Raises subprocess.CalledProcessError when GitHub refuses, and ValueError when it names none."""
+    name = (settings.read().get("branch") or {}).get("default")
+    if name:
+        return str(name)
+    name = json.loads(agent_github.gh("api", f"repos/{repo}")).get("default_branch")
+    if not name:
+        raise ValueError("the default branch is unknown: branch.default is empty and GitHub gave no default branch")
+    return name
 
 
 BOARD_WAIT = "board wait"  # board.yml's job that waits a minute, cancelled by a newer event about the issue (#533)
@@ -695,11 +731,12 @@ def proof(repo, sha, wait=CHECKS_WAIT, pause=CHECKS_PAUSE, branch="main"):
 UPDATE_WAIT, UPDATE_PAUSE = 5 * 60, 5
 
 
-def merge_gate(repo, pr):
+def merge_gate(repo, pr, branch=None):
     """The merge gate, run once the code review approved the pull request (#596).
 
-    A branch behind main is brought up to date with it first (GitHub's Update branch), so the checks main requires
-    are read on the code as it would land. A draft is then readied, which starts its tests: none ran during the code
+    The branch is the default one, from settings or GitHub (#787); main below stands for it. A branch behind main is
+    brought up to date with it first (GitHub's Update branch), so the checks main requires are read on the code as it
+    would land; the checks get the settings' wait. A draft is then readied, which starts its tests: none ran during the code
     review (#597). Returns ("passed", head, None) once every one passed on that head,
     ("failed", head, why) when one failed there, or ("stopped", head, why) when GitHub would not update the branch, the
     checks never finished or GitHub could not say."""
@@ -707,16 +744,26 @@ def merge_gate(repo, pr):
     draft = agent_github.gh("pr", "view", str(pr), "-R", repo, "--json", "isDraft", "-q", ".isDraft").strip() == "true"
     if not head:
         return "stopped", "", "GitHub did not say which commit is its head"
-    if behind_main(repo, head):
+    try:
+        branch = branch or default_branch(repo)
+    except subprocess.CalledProcessError as e:
+        return "stopped", head, f"GitHub did not give the repo's default branch: {gh_reason(e)}"
+    except (ValueError, AttributeError) as e:
+        return "stopped", head, str(e)
+    try:
+        behind = behind_main(repo, head, branch)
+    except subprocess.CalledProcessError as e:
+        return "stopped", head, f"GitHub could not compare it with {branch}, the default branch: {gh_reason(e)}"
+    if behind:
         try:
             agent_github.gh("api", "-X", "PUT", f"repos/{repo}/pulls/{pr}/update-branch", "-f", f"expected_head_sha={head}")
         except subprocess.CalledProcessError as e:
-            return "stopped", head, f"GitHub could not bring its branch up to date with main: {gh_reason(e)}"
+            return "stopped", head, f"GitHub could not bring its branch up to date with {branch}: {gh_reason(e)}"
         # GitHub updates the branch after it answers: the new head is the commit that holds main's newest one.
         old, deadline = head, time.monotonic() + UPDATE_WAIT
         while head == old:
             if time.monotonic() >= deadline:
-                return "stopped", old, (f"GitHub did not bring its branch up to date with main within "
+                return "stopped", old, (f"GitHub did not bring its branch up to date with {branch} within "
                                         f"{UPDATE_WAIT // 60} minutes")
             time.sleep(UPDATE_PAUSE)
             head = agent_github.gh("pr", "view", str(pr), "-R", repo, "--json", "headRefOid", "-q", ".headRefOid").strip() or old
@@ -725,13 +772,13 @@ def merge_gate(repo, pr):
             agent_github.gh("pr", "ready", str(pr), "-R", repo)
         except subprocess.CalledProcessError as e:
             return "stopped", head, f"GitHub could not mark it ready, so its tests never started: {gh_reason(e)}"
-    state, why = proof(repo, head)
+    state, why = proof(repo, head, wait=checks_wait(), branch=branch)
     return state, head, why
 
 
-def behind_main(repo, head):
-    """True when the commit misses main's newest commit, as GitHub's comparison with main says."""
-    cmp = json.loads(agent_github.gh("api", f"repos/{repo}/compare/main...{head}"))
+def behind_main(repo, head, branch="main"):
+    """True when the commit misses the branch's newest commit, as GitHub's comparison with it says."""
+    cmp = json.loads(agent_github.gh("api", f"repos/{repo}/compare/{branch}...{head}"))
     return cmp.get("status") in ("behind", "diverged") or (cmp.get("behind_by") or 0) > 0
 
 
@@ -753,11 +800,12 @@ def try_merge(repo, pr, tested=None):
         flows = [f for f in files if f.startswith(WORKFLOWS)]
         if flows:
             return False, f"it changes a workflow file ({', '.join(flows)}), and only the owner merges those"
-        state, head, why = ("passed", tested, None) if tested else merge_gate(repo, pr)
+        branch, method = default_branch(repo), merge_method()
+        state, head, why = ("passed", tested, None) if tested else merge_gate(repo, pr, branch)
         if state != "passed":
             return False, why
         # Pinned to the head whose checks passed: a commit pushed since makes GitHub refuse.
-        merge = ("pr", "merge", str(pr), "-R", repo, "--squash", "--match-head-commit", head)
+        merge = ("pr", "merge", str(pr), "-R", repo, f"--{method}", "--match-head-commit", head)
         try:
             agent_github.gh(*merge)
             refused = False
@@ -767,8 +815,9 @@ def try_merge(repo, pr, tested=None):
             refused = True
         if not refused and merge_outcome(repo, pr)[0] != "waits":
             return True, head
-        if behind_main(repo, head):
-            return False, "its branch is behind main and misses main's newest commit; bring it up to date with main"
+        if behind_main(repo, head, branch):
+            return False, (f"its branch is behind {branch} and misses {branch}'s newest commit; "
+                           f"bring it up to date with {branch}")
         try:
             agent_github.gh(*merge, "--admin")
         except subprocess.CalledProcessError as e:
@@ -781,6 +830,8 @@ def try_merge(repo, pr, tested=None):
         return False, " ".join((e.stderr or str(e)).split())
     except (json.JSONDecodeError, AttributeError, KeyError, TypeError) as e:
         return False, f"GitHub's answer could not be read: {e}"
+    except ValueError as e:
+        return False, str(e)
 
 
 def open_pr(repo, number):

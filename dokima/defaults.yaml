@@ -20,7 +20,8 @@ protected_paths: [.github/]
 text_only:
   not_text: [tests/, .github/]
 branch:
-  default: main
+  # Empty asks GitHub for the repo's default branch (#787).
+  default: ""
 records:
   branch: logs
 owner_docs: AGENTS.md
