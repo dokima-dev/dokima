@@ -1,0 +1,72 @@
+{
+ "role": "worker",
+ "stage": null,
+ "run_id": "38987971294",
+ "commit_before": "c97f3fc8691d56d36d96c2c21f54f94291370125",
+ "started_by": "dokima-runtime[bot]",
+ "models": [
+  "claude-opus-5-5"
+ ],
+ "report": {
+  "duration_ms": 1548698,
+  "turns": 77,
+  "cost_usd": 4.3702782,
+  "tokens_in": 9590519,
+  "tokens_out": 55322
+ },
+ "log": "https://github.com/dokima-dev/dokima/blob/logs/logs/794/38987971294-worker.md",
+ "run": "https://github.com/dokima-dev/dokima/actions/runs/38987971294",
+ "handback": {
+  "summary": "Setup edits only the agents lines of the settings file; agents read it; test workflows follow its setup group.",
+  "criteria": {
+   "794.1": "`dokima/setup.py` `read_settings` reads YAML; every workflow job running Dokima installs PyYAML first.",
+   "794.2": "`dokima/setup.py` `set_line` edits only the agents lines in place, so comment lines stay.",
+   "794.3": "`set_line` keeps a line's trailing comment when it changes or descends through that line.",
+   "794.4": "`saved_text` refuses to save if any other setting would change; a missing file or section is added.",
+   "794.5": "`dokima/agents.py` `agents_section` reads the agents section; `agent.yml` copies main's settings file.",
+   "794.6": "`agents_section` falls back to the old `agents.yml` beside the settings file; already green before.",
+   "794.7": "Each test workflow runs the install setting with eval after the test tools, before tests.",
+   "794.8": "Each test workflow installs the test_tools setting, read by `python3 -m dokima.settings setup`.",
+   "794.9": "Each test workflow sets up the python setting with a second setup-python step before tests.",
+   "794.10": "No order setting exists; `agents` in `dokima/defaults.yaml` only names agents and models."
+  },
+  "evidence": "pytest on every plan test, settings path unset: 25 passed",
+  "raises": [
+   {
+    "kind": "blocker",
+    "to": "planner",
+    "label": "Test cannot pass",
+    "text": "The 794.6 test fails on an agent run machine: its box keeps the job's settings path, so it reads main's file, not the box's.",
+    "evidence": "`tests/test_agents.py::test_each_role_has_its_own_subscription_and_model` fails with `DOKIMA_SETTINGS` set, passes unset; `Box.env` keeps it.",
+    "raised_by": "worker",
+    "id": "W1"
+   }
+  ]
+ },
+ "check": {
+  "passed": false,
+  "problems": [
+   "plan test fails: tests/test_agents.py::test_each_role_has_its_own_subscription_and_model"
+  ]
+ },
+ "dropped_by_fence": [],
+ "files_changed": [
+  ".github/workflows/acceptance-criteria.yml",
+  ".github/workflows/agent.yml",
+  ".github/workflows/assign.yml",
+  ".github/workflows/audit.yml",
+  ".github/workflows/autopilot.yml",
+  ".github/workflows/board.yml",
+  ".github/workflows/commands.yml",
+  ".github/workflows/full-suite.yml",
+  ".github/workflows/playthrough.yml",
+  ".github/workflows/testmon.yml",
+  ".github/workflows/uptodate.yml",
+  "dokima/agents.py",
+  "dokima/defaults.yaml",
+  "dokima/settings.py",
+  "dokima/setup.py"
+ ],
+ "branch": "try/issue-794",
+ "url": "https://github.com/dokima-dev/dokima/issues/794#issuecomment-6227549215"
+}
