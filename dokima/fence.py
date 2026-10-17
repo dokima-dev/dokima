@@ -39,7 +39,9 @@ def fence(base, scope, clashed=()):
     outside scope, since base holds it with conflict markers; main's own changes are part of base and never dropped."""
     changed = set(git("diff", "--name-only", base).split()) | set(git("ls-files", "--others", "--exclude-standard").split())
     allowed = set(scope) | set(clashed)
-    dropped = sorted(p for p in changed if (is_test(p) and p not in TEST_SETUP & set(scope)) or p not in allowed)
+    # A clashed file's resolution is kept even when it is a test file: base holds it with conflict markers (#812).
+    dropped = sorted(p for p in changed if p not in set(clashed)
+                     and ((is_test(p) and p not in TEST_SETUP & set(scope)) or p not in allowed))
     for p in dropped:
         if subprocess.run(["git", "cat-file", "-e", f"{base}:{p}"], capture_output=True).returncode == 0:
             git("checkout", base, "--", p)

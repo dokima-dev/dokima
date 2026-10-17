@@ -93,6 +93,15 @@ def clash_pending(recs):
     return at is not None and not any(r.get("role") == "worker" for r in recs[at + 1:])
 
 
+def replan_pending(recs):
+    """True when main clashed after the newest plan was written and nothing rebuilt since: that plan is out of date.
+
+    The clash re-plan must run before any worker; a plan approved after the clash is the old plan (#812)."""
+    at = max((i for i, r in enumerate(recs) if r.get("role") == "updater"), default=None)
+    plan = max((i for i, r in enumerate(recs) if r.get("role") == "planner"), default=-1)
+    return at is not None and at > plan and clash_pending(recs)
+
+
 # More questions for the owner than this and a plan is not ready: it stops for the owner, whatever else says go.
 MAX_QUESTIONS = 3
 
@@ -174,6 +183,9 @@ def next_step(items, rec, owners, rounds=3, autopilot=lambda: False, body="", nu
         return ("start", "worker", "")
     if verdict == "approve" and stage == "plan":
         on = autopilot()
+        if on and replan_pending(records(items)):
+            # Main moved while this plan was in review: re-plan against the new main before anything is built (#812).
+            return ("start", "planner", "")
         if on:
             return ("start", "split" if plan.get("kind") == "feature" else "worker", "", "autopilot")
         why = "The plan is approved. Say `/work` to build it, or `/plan` with changes."
