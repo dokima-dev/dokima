@@ -5,9 +5,9 @@ It plays a new issue to a merge.
     REPO=dokima-dev/card-gallery PLAYED=<folder> PLAYED_COMMIT=<sha> SANDBOX_TOKEN=... GH_TOKEN=... \
         python3 -m dokima.playthrough
 
-Before the first step it installs the played commit on the sandbox: the dokima/ and .github/workflows/ files of the
-PLAYED folder are pushed to the sandbox's default branch with SANDBOX_TOKEN, a key of the play-through's own that can
-write only there, so the cards it judges are drawn by that commit's card.yml and dokima/card.py. Then it plays one
+Before the first step it installs the played commit on the sandbox: the PLAYED folder's thin workflow, calling that
+commit, and its starting settings file are pushed to the sandbox's default branch with SANDBOX_TOKEN, a key of the
+play-through's own that can write only there, so the cards it judges are drawn by that commit. Then it plays one
 issue through STEPS. Stand-in agents call no model: each writes its role's hand-back and no model report, and the
 played commit's own `dokima.agent record` turns it into the record posted on the sandbox. After each step it waits up
 to PLAYTHROUGH_WAIT seconds for the sandbox's card runs, reads both cards and logs `PASS: <step>` or
@@ -159,20 +159,15 @@ def play(sandbox, wait, poll, log):
     return 1 if failed else 0
 
 
-def install_files(played):
-    """Every file of the played folder's dokima/ and .github/workflows/, with its content.
+def install_files(played, commit):
+    """The two files an install adds, by path, with content: thin workflow and settings (#813).
 
-    Keyed by path relative to the folder."""
-    files = {}
-    for top in ("dokima", os.path.join(".github", "workflows")):
-        for d, _, names in os.walk(os.path.join(played, top)):
-            for n in names:
-                if "__pycache__" in d or n.endswith(".pyc"):
-                    continue
-                path = os.path.join(d, n)
-                with open(path, "rb") as f:
-                    files[os.path.relpath(path, played).replace(os.sep, "/")] = f.read()
-    return files
+    The workflow calls Dokima's shared workflows at `commit` instead of a release tag."""
+    with open(os.path.join(played, "dokima", "install", "dokima.yml")) as f:
+        workflow = re.sub(r"(dokima-dev/dokima/\.github/workflows/[\w.-]+)@\S+", rf"\1@{commit}", f.read())
+    with open(os.path.join(played, "dokima", "install", "settings.yaml")) as f:
+        settings = f.read()
+    return {".github/workflows/dokima.yml": workflow, ".dokima/settings.yaml": settings}
 
 
 def run(*args, env=None, cwd=None):
@@ -209,13 +204,13 @@ class Sandbox:
         return run("gh", *args, env=self.env)
 
     def install(self):
-        """Push the played commit's dokima/ and .github/workflows/ to the sandbox's default branch."""
+        """Push the played commit's thin workflow and settings file to the sandbox's default branch."""
         try:
             run("git", *self.git_auth, "clone", "-q", self.url, self.clone, env=self.env)
-            for rel, data in install_files(self.played).items():
+            for rel, data in install_files(self.played, self.commit).items():
                 path = os.path.join(self.clone, rel)
                 os.makedirs(os.path.dirname(path), exist_ok=True)
-                with open(path, "wb") as f:
+                with open(path, "w") as f:
                     f.write(data)
             self.git("add", "-A")
             if subprocess.run(["git", "diff", "--cached", "--quiet"], cwd=self.clone).returncode:
