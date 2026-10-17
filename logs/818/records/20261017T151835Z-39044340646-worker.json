@@ -1,0 +1,43 @@
+{
+ "role": "worker",
+ "stage": null,
+ "run_id": "39044340646",
+ "commit_before": "21d5674ec81f17d9397152bf1b2dc1797b7b4d89",
+ "started_by": "dokima-runtime[bot]",
+ "models": [
+  "claude-opus-5-5"
+ ],
+ "report": {
+  "duration_ms": 63342,
+  "turns": 10,
+  "cost_usd": 0.369903,
+  "tokens_in": 332907,
+  "tokens_out": 3543
+ },
+ "log": "https://github.com/dokima-dev/dokima/blob/logs/logs/818/39044340646-worker.md",
+ "run": "https://github.com/dokima-dev/dokima/actions/runs/39044340646",
+ "handback": {
+  "summary": "The reviewer's prompt now names its four duties, the no-criterion rule and the six required boxes.",
+  "criteria": {
+   "818.1": "Duty 1 in the new duties section of `dokima/roles/reviewer.md`.",
+   "818.2": "Duty 2 in the new duties section of `dokima/roles/reviewer.md`.",
+   "818.3": "Duty 3 in the new duties section of `dokima/roles/reviewer.md`.",
+   "818.4": "Duty 4 in the new duties section of `dokima/roles/reviewer.md`.",
+   "818.5": "Closing line of the duties section in `dokima/roles/reviewer.md`.",
+   "818.6": "New required boxes section in `dokima/roles/reviewer.md`, the six box lines in a code block."
+  },
+  "evidence": "`pytest -q tests/test_reviewer_duties.py`: 6 passed in 0.50s",
+  "raises": [],
+  "answers": []
+ },
+ "check": {
+  "passed": true,
+  "problems": []
+ },
+ "dropped_by_fence": [],
+ "files_changed": [
+  "dokima/roles/reviewer.md"
+ ],
+ "branch": "try/issue-818",
+ "url": "https://github.com/dokima-dev/dokima/issues/818#issuecomment-6235597107"
+}
