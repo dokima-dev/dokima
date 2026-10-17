@@ -1,0 +1,56 @@
+{
+ "role": "worker",
+ "stage": null,
+ "run_id": "39031835006",
+ "commit_before": "e3d9c7472337cc8d92d7a5504ea01e62cc5e6f53",
+ "started_by": "dokima-runtime[bot]",
+ "models": [
+  "claude-opus-5-5"
+ ],
+ "report": {
+  "duration_ms": 80446,
+  "turns": 5,
+  "cost_usd": 0.862333,
+  "tokens_in": 330253,
+  "tokens_out": 2383
+ },
+ "log": "https://github.com/dokima-dev/dokima/blob/logs/logs/787/39031835006-worker.md",
+ "run": "https://github.com/dokima-dev/dokima/actions/runs/39031835006",
+ "handback": {
+  "summary": "Split filing, the pull request off switch and the up-to-date check now read the autopilot label from settings.",
+  "criteria": {
+   "787.1": "`default_branch()` in `dokima/agent_autopilot.py` takes `branch.default`; the gate and merge use it, naming it when GitHub lacks it.",
+   "787.2": "`default_branch()` asks GitHub's `repos/{repo}` for `default_branch` when empty; `dokima/manifest.py` ties that call to metadata.",
+   "787.3": "`merge_method()` gives `--squash`, `--merge` or `--rebase` from `merge.method`, kept on the `--admin` retry.",
+   "787.4": "`checks_wait()` turns `gate.checks_wait_min` into seconds; `merge_gate` passes it to `proof`.",
+   "787.5": "`autopilot_label()` names the label; the sweep, `on_autopilot`, `dokima/board.py`, split filing and `uptodate.autopilot_of` read by it.",
+   "787.6": "`switch_autopilot`, `Board.label` and the pull request off switch in `dokima/agent_roles.py` add and remove the named label.",
+   "787.7": "`dokima/defaults.yaml` ships `branch.default` empty, so a repo with no settings asks GitHub.",
+   "787.8": "`env_lines` in `dokima/settings.py` fills an empty branch from the event file or `gh`, else fails saying so.",
+   "787.9": "Already built by #784: `filed_label()` reads `labels.filed`; its test passed before any change."
+  },
+  "evidence": "`pytest -q tests/test_settings_autopilot.py tests/test_settings_audit.py tests/test_manifest.py tests/test_uptodate*.py`: 110 passed.",
+  "raises": [
+   {
+    "kind": "issue",
+    "label": "Workflow trigger fixed name",
+    "text": "The autopilot workflow still triggers on the fixed label name, so a renamed label never starts it.",
+    "evidence": "`.github/workflows/autopilot.yml:25` names `autopilot`.",
+    "raised_by": "worker",
+    "id": "W4"
+   }
+  ]
+ },
+ "check": {
+  "passed": true,
+  "problems": []
+ },
+ "dropped_by_fence": [],
+ "files_changed": [
+  "dokima/agent_roles.py",
+  "dokima/manifest.py",
+  "dokima/uptodate.py"
+ ],
+ "branch": "try/issue-787",
+ "url": "https://github.com/dokima-dev/dokima/pull/810#issuecomment-6233768514"
+}
