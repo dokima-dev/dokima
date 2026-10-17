@@ -1,0 +1,66 @@
+{
+ "role": "reviewer",
+ "stage": "pr",
+ "run_id": "39061368950",
+ "commit_before": "fd19bfaf04b92bcd7bee5eab53538d60b5fde58f",
+ "started_by": "dokima-runtime[bot]",
+ "models": [
+  "claude-opus-5-5"
+ ],
+ "report": {
+  "duration_ms": 99060,
+  "turns": 9,
+  "cost_usd": 0.38790120000000006,
+  "tokens_in": 328758,
+  "tokens_out": 2784
+ },
+ "log": "https://github.com/dokima-dev/dokima/blob/logs/logs/812/39061368950-reviewer-pr.md",
+ "run": "https://github.com/dokima-dev/dokima/actions/runs/39061368950",
+ "handback": {
+  "previous_step": {
+   "did": [
+    "The worker changed no code this round.",
+    "The worker reran the plan's tests and the queue tests; all pass."
+   ],
+   "decided": [
+    "The code built in earlier rounds stays as it is."
+   ],
+   "open": [
+    "GitHub reruns the checks when the merge gate readies the pull request."
+   ]
+  },
+  "verdict": "approve",
+  "summary": "The planner's queue test fix now passes against the built code, and every test is green here.",
+  "raises": [],
+  "answers": [],
+  "asks": [],
+  "behaviors": [],
+  "edge_cases": [],
+  "tests": [],
+  "size": "ok",
+  "boxes": {
+   "dropped": "none",
+   "added": "none",
+   "superseded": "none",
+   "conflicts": "none",
+   "edges": {
+    "812.1": "covered",
+    "812.2": "covered",
+    "812.3": "covered",
+    "812.4": "covered",
+    "812.5": "covered",
+    "812.6": "covered",
+    "812.7": "covered",
+    "812.8": "covered",
+    "812.9": "covered",
+    "812.10": "covered"
+   },
+   "poor_tests": "none"
+  }
+ },
+ "check": {
+  "passed": true,
+  "problems": []
+ },
+ "url": "https://github.com/dokima-dev/dokima/pull/824#issuecomment-6239286041"
+}
