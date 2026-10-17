@@ -12,7 +12,7 @@ import re
 import subprocess
 import sys
 
-from dokima import agent, plan
+from dokima import agent, agent_autopilot, plan
 from dokima.board import api
 
 PER_PAGE = 100
@@ -187,14 +187,15 @@ def dokima_issue(repo, pr):
 
 
 def autopilot_of(repo, issue, rest):
-    """True or False from the issue's own `autopilot` label; None when GitHub cannot say."""
+    """Whether the issue carries the autopilot label named in settings; None when GitHub cannot say."""
     try:
         labels = (rest("GET", f"repos/{repo}/issues/{issue}") or {}).get("labels")
     except (subprocess.CalledProcessError, AttributeError):
         return None
     if not isinstance(labels, list):
         return None
-    return any((l.get("name") if isinstance(l, dict) else l) == agent.AUTOPILOT for l in labels)
+    name = agent_autopilot.autopilot_label()
+    return any((l.get("name") if isinstance(l, dict) else l) == name for l in labels)
 
 
 def clash(repo, base, sha, pr, rest=api, files=None, owners=None):
