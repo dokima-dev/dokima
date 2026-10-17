@@ -1,0 +1,194 @@
+{
+ "role": "reviewer",
+ "stage": "plan",
+ "run_id": "39071646670",
+ "commit_before": "6fd26c1422a3e5f6255aff16109d307fbec623ea",
+ "started_by": "dokima-runtime[bot]",
+ "models": [
+  "claude-opus-5-5"
+ ],
+ "report": {
+  "duration_ms": 46223,
+  "turns": 7,
+  "cost_usd": 0.435403,
+  "tokens_in": 292479,
+  "tokens_out": 4830
+ },
+ "log": "https://github.com/dokima-dev/dokima/blob/logs/logs/815/39071646670-reviewer-plan.md",
+ "run": "https://github.com/dokima-dev/dokima/actions/runs/39071646670",
+ "handback": {
+  "previous_step": {
+   "did": [
+    "The planner added a sixth criterion: code owners is never a file to add.",
+    "The planner added a test that fails on the code owners step today."
+   ],
+   "decided": [
+    "The page may name the code owners file once, only as optional."
+   ],
+   "open": []
+  },
+  "verdict": "approve",
+  "summary": "All six tests fail today for the right reason and pass on a fixed page; nothing waits for the owner.",
+  "raises": [],
+  "answers": [],
+  "asks": [
+   {
+    "ask": "The wiki's install page no longer tells adopters to copy Dokima's workflows and code.",
+    "source": "https://github.com/dokima-dev/dokima/issues/815",
+    "criterion": "815.1"
+   },
+   {
+    "ask": "The 815.1 test must fail on any line telling adopters to put Dokima's `.github/workflows/` or `dokima/` folders in their repo, whatever the verb.",
+    "source": "https://github.com/dokima-dev/dokima/issues/815#issuecomment-6241293967",
+    "criterion": "815.1"
+   },
+   {
+    "ask": "the page tells adopters to add the one workflow",
+    "source": "https://github.com/dokima-dev/dokima/issues/815#issuecomment-6241293967",
+    "criterion": "815.2"
+   },
+   {
+    "ask": "and the settings file",
+    "source": "https://github.com/dokima-dev/dokima/issues/815#issuecomment-6241293967",
+    "criterion": "815.3"
+   },
+   {
+    "ask": "The page names those two files as the whole install.",
+    "source": "https://github.com/dokima-dev/dokima/issues/815#issuecomment-6241293967",
+    "criterion": "815.4"
+   },
+   {
+    "ask": "It stops listing Dokima's own workflows, including `playthrough.yml` and `wiki.yml`, as things to add.",
+    "source": "https://github.com/dokima-dev/dokima/issues/815#issuecomment-6241293967",
+    "criterion": "815.5"
+   },
+   {
+    "ask": "don't keep it as an install step.",
+    "source": "https://github.com/dokima-dev/dokima/issues/815#issuecomment-6241461863",
+    "criterion": "815.6"
+   },
+   {
+    "ask": "The page may mention it once as optional, for naming approvers other than the owner, but never among the files to add.",
+    "source": "https://github.com/dokima-dev/dokima/issues/815#issuecomment-6241461863",
+    "criterion": "815.6"
+   }
+  ],
+  "behaviors": [
+   {
+    "criterion": "815.1",
+    "one_behavior": true,
+    "why": "One thing the page must never say."
+   },
+   {
+    "criterion": "815.2",
+    "one_behavior": true,
+    "why": "One file the page tells adopters to add."
+   },
+   {
+    "criterion": "815.3",
+    "one_behavior": true,
+    "why": "One file the page tells adopters to add."
+   },
+   {
+    "criterion": "815.4",
+    "one_behavior": true,
+    "why": "One statement that the two files are the whole install."
+   },
+   {
+    "criterion": "815.5",
+    "one_behavior": true,
+    "why": "One kind of file the page must not list."
+   },
+   {
+    "criterion": "815.6",
+    "one_behavior": true,
+    "why": "One file the page must never list as a step."
+   }
+  ],
+  "edge_cases": [
+   {
+    "criterion": "815.1",
+    "cut": [],
+    "missing": []
+   },
+   {
+    "criterion": "815.2",
+    "cut": [],
+    "missing": []
+   },
+   {
+    "criterion": "815.3",
+    "cut": [],
+    "missing": []
+   },
+   {
+    "criterion": "815.4",
+    "cut": [],
+    "missing": []
+   },
+   {
+    "criterion": "815.5",
+    "cut": [],
+    "missing": []
+   },
+   {
+    "criterion": "815.6",
+    "cut": [],
+    "missing": []
+   }
+  ],
+  "tests": [
+   {
+    "test": "tests/test_wiki_install.py::test_the_install_page_never_tells_adopters_to_put_dokimas_folders_in_their_repo",
+    "only_its_behavior": true,
+    "why": "Fails on today's step 4 whatever the verb; passes once it is gone."
+   },
+   {
+    "test": "tests/test_wiki_install.py::test_the_install_page_tells_adopters_to_add_the_thin_workflow",
+    "only_its_behavior": true,
+    "why": "Needs a line adding the exact workflow path."
+   },
+   {
+    "test": "tests/test_wiki_install.py::test_the_install_page_tells_adopters_to_add_the_settings_file",
+    "only_its_behavior": true,
+    "why": "Needs a line adding the exact settings path."
+   },
+   {
+    "test": "tests/test_wiki_install.py::test_the_install_page_says_the_two_files_are_the_whole_install",
+    "only_its_behavior": true,
+    "why": "Needs one line naming both files as the only ones."
+   },
+   {
+    "test": "tests/test_wiki_install.py::test_the_install_page_lists_none_of_dokimas_own_workflows_to_add",
+    "only_its_behavior": true,
+    "why": "Fails on each of Dokima's own workflows listed today."
+   },
+   {
+    "test": "tests/test_wiki_install.py::test_the_install_page_never_lists_the_code_owners_file_to_add",
+    "only_its_behavior": true,
+    "why": "Fails on the step today; passes with one optional mention."
+   }
+  ],
+  "size": "ok",
+  "boxes": {
+   "dropped": "none",
+   "added": "none",
+   "superseded": "none",
+   "conflicts": "none",
+   "edges": {
+    "815.1": "covered",
+    "815.2": "covered",
+    "815.3": "covered",
+    "815.4": "covered",
+    "815.5": "covered",
+    "815.6": "covered"
+   },
+   "poor_tests": "none"
+  }
+ },
+ "check": {
+  "passed": true,
+  "problems": []
+ },
+ "url": "https://github.com/dokima-dev/dokima/issues/815#issuecomment-6241504361"
+}
