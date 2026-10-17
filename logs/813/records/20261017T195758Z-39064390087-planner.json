@@ -1,0 +1,106 @@
+{
+ "role": "planner",
+ "stage": null,
+ "run_id": "39064390087",
+ "commit_before": "2f7b9516800c9eff4d86ee89347bd4b82bbca67f",
+ "started_by": "dokima-runtime[bot]",
+ "models": [
+  "claude-opus-5-5"
+ ],
+ "report": {
+  "duration_ms": 225078,
+  "turns": 20,
+  "cost_usd": 1.1812585999999998,
+  "tokens_in": 1223892,
+  "tokens_out": 17504
+ },
+ "log": "https://github.com/dokima-dev/dokima/blob/logs/logs/813/39064390087-planner.md",
+ "run": "https://github.com/dokima-dev/dokima/actions/runs/39064390087",
+ "handback": {
+  "kind": "user_story",
+  "title": "Installing adds only the workflow and settings",
+  "summary": "Installing Dokima puts one short workflow and one settings file in a repo, and nothing else.",
+  "user_story": "Installing Dokima adds one short workflow and a settings file to a repo, and no Dokima code.",
+  "acceptance_criteria": [
+   {
+    "text": "When Dokima is installed, the repo gains exactly two files: its one workflow and its settings file.",
+    "words": "Nothing else. No Python.",
+    "source": "https://github.com/dokima-dev/dokima/issues/742",
+    "files": [
+     "dokima/playthrough.py",
+     "dokima/install/settings.yaml"
+    ],
+    "edge_cases": [
+     {
+      "case": "An empty repo with no commits yet gets the same two files.",
+      "test": "tests/test_install.py::test_installing_into_an_empty_repo_adds_exactly_the_two_files"
+     }
+    ]
+   },
+   {
+    "text": "When Dokima is installed, no file it adds holds any secret's value.",
+    "words": "Nothing secret is ever committed.",
+    "source": "https://github.com/dokima-dev/dokima/issues/742",
+    "files": [
+     "dokima/playthrough.py",
+     "dokima/install/settings.yaml"
+    ],
+    "no_edge_cases": "The install takes no input from the owner; the test sets every secret Dokima reads."
+   },
+   {
+    "text": "When Dokima is installed, its settings file carries no owner's co-author line from Dokima's own repo.",
+    "words": "Never ship my line as a default",
+    "source": "https://github.com/dokima-dev/dokima/issues/742#issuecomment-6234488528",
+    "files": [
+     "dokima/playthrough.py",
+     "dokima/install/settings.yaml"
+    ],
+    "no_edge_cases": "One fixed settings file is installed; there is no other case."
+   }
+  ],
+  "non_functional": [],
+  "tests": {
+   "813.1": [
+    "tests/test_install.py::test_installing_adds_exactly_the_one_workflow_and_the_settings_file",
+    "tests/test_install.py::test_installing_into_an_empty_repo_adds_exactly_the_two_files"
+   ],
+   "813.2": [
+    "tests/test_install.py::test_installing_writes_no_secrets_value_into_any_file_it_adds"
+   ],
+   "813.3": [
+    "tests/test_install.py::test_the_installed_settings_file_never_ships_the_owners_co_author_line"
+   ]
+  },
+  "test_changes": {
+   "tests/test_playthrough.py::test_the_play_through_installs_the_played_commit_on_the_sandbox_before_the_first_step": "Owner asked install add only workflow and settings; still installs the played commit."
+  },
+  "links": {
+   "blocked_by": [],
+   "blocks": [
+    814,
+    815,
+    816
+   ],
+   "relates_to": [
+    742,
+    755
+   ]
+  },
+  "raises": [
+   {
+    "kind": "issue",
+    "label": "Old copy stays",
+    "text": "The sandbox already holds the old copied Dokima code and workflows; a new install leaves them there, still running.",
+    "evidence": "`dokima/playthrough.py` `Sandbox.install` writes into a clone of the sandbox and never removes files.",
+    "raised_by": "planner",
+    "id": "P1"
+   }
+  ],
+  "answers": []
+ },
+ "check": {
+  "passed": true,
+  "problems": []
+ },
+ "url": "https://github.com/dokima-dev/dokima/issues/813#issuecomment-6239980694"
+}
