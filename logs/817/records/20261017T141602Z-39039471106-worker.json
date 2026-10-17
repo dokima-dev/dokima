@@ -1,0 +1,51 @@
+{
+ "role": "worker",
+ "stage": null,
+ "run_id": "39039471106",
+ "commit_before": "d35d133c7eb0787c14015aa2b537a0677b853e57",
+ "started_by": "dokima-runtime[bot]",
+ "models": [
+  "claude-opus-5-5"
+ ],
+ "report": {
+  "duration_ms": 404969,
+  "turns": 32,
+  "cost_usd": 1.5215763999999998,
+  "tokens_in": 2295497,
+  "tokens_out": 18826
+ },
+ "log": "https://github.com/dokima-dev/dokima/blob/logs/logs/817/39039471106-worker.md",
+ "run": "https://github.com/dokima-dev/dokima/actions/runs/39039471106",
+ "handback": {
+  "summary": "Raising rules moved to one shared file with neutral examples; limits come from settings; planner learns clarifying questions.",
+  "criteria": {
+   "817.1": "Examples in `dokima/roles/raising.md` and `planner.md` use made-up `app/` files; `dokima/roles/` moved to this repo's protected paths.",
+   "817.2": "`dokima/roles/raising.md` holds the rules; each role file keeps only a marker line.",
+   "817.3": "`build()` in `dokima/prompt.py` puts `raising.md` in place of each role's marker.",
+   "817.4": "`build()` draws `planner.max_questions` into every 'more than N questions'.",
+   "817.5": "`build()` draws `river.max_blocks` into the blocks-in-a-row bullet; the example says N builds in a row.",
+   "817.6": "The planner's criteria bullet names \"When X, Y\" as the default style; the never-a-formula rule is gone.",
+   "817.7": "New Clarifying questions part of `planner.md` says each criterion needs a source, an observable result and a test.",
+   "817.8": "The same part says each blank it cannot fill becomes one question to the owner.",
+   "817.9": "The same part lists the owner's seven examples word for word.",
+   "817.10": "Already on main; untouched, both 796 house rules tests pass."
+  },
+  "evidence": "`pytest` on the 35 prompt test files: 410 passed in 93.28s",
+  "raises": []
+ },
+ "check": {
+  "passed": true,
+  "problems": []
+ },
+ "dropped_by_fence": [],
+ "files_changed": [
+  ".dokima/settings.yaml",
+  "dokima/prompt.py",
+  "dokima/roles/planner.md",
+  "dokima/roles/raising.md",
+  "dokima/roles/reviewer.md",
+  "dokima/roles/worker.md"
+ ],
+ "branch": "try/issue-817",
+ "url": "https://github.com/dokima-dev/dokima/issues/817#issuecomment-6234878651"
+}
