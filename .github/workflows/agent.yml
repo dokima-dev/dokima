@@ -76,8 +76,11 @@ jobs:
       - uses: actions/setup-python@v6
         with:
           python-version: "3.12"
+      - run: python3 -m pip install -q pyyaml  # the settings reader (#794)
       - name: Copy the runtime from main before touching any branch
         # AGENTS.md and the topic files it links come too: the river checks the owner's words a plan reviewer quotes from them.
+        # Then main's test commands, test folder, branches and bot, over Dokima's defaults, for every later step (#795);
+        # a settings reader with no env mode (before #795) gives Dokima's own.
         run: |
           mkdir -p /tmp/runtime && cp -r dokima /tmp/runtime/dokima
           for f in settings.yaml agents.yml; do
@@ -90,14 +93,22 @@ jobs:
               if [ -f "$f" ]; then cp --parents "$f" /tmp/runtime/; fi
             done
           fi
-      - run: python3 -m pip install -q pyyaml  # the settings reader (#794)
+          (cd /tmp/runtime && python3 -m dokima.settings env) > /tmp/env.txt 2> /tmp/env-err.txt \
+            || { echo "The settings file stopped the run: $(paste -sd' ' /tmp/env-err.txt)" > /tmp/why.txt
+                 echo "::error title=Bad settings::$(cat /tmp/why.txt)"; exit 1; }
+          cat /tmp/env-err.txt >&2
+          if ! grep -q '^DEFAULT_BRANCH=' /tmp/env.txt; then
+            echo "::notice title=Old settings::No settings reader with an env mode here, so Dokima's own branches and bot are used."
+            printf 'TESTS_AFFECTED=testmon\nTESTS_DIR=tests\nDEFAULT_BRANCH=main\nRECORDS_BRANCH=logs\nBOT_SLUG=dokima-runtime\n' > /tmp/env.txt
+          fi
+          cat /tmp/env.txt >> "$GITHUB_ENV"
       - name: Only a code owner starts an agent
         env:
           SENDER: ${{ github.actor }}
           EVENT: ${{ github.event_name }}
         run: |
-          # The river's own signal comes from Dokima's bot; everything else needs a code owner.
-          [ "$EVENT" = repository_dispatch ] && [ "$SENDER" = "dokima-runtime[bot]" ] && exit 0
+          # The river's own signal comes from the bot the settings name; everything else needs a code owner.
+          [ "$EVENT" = repository_dispatch ] && [ "$SENDER" = "${BOT_SLUG}[bot]" ] && exit 0
           python3 -m dokima.plan approvers | tr ',' '\n' | grep -qx "$SENDER" \
             || { echo "$SENDER is not a code owner, so they cannot start an agent." > /tmp/why.txt
                  echo "::error title=Not started::$(cat /tmp/why.txt)"; exit 1; }
@@ -163,12 +174,17 @@ jobs:
         env:
           GH_TOKEN: ${{ github.token }}
         run: |
+          # Merges of the default branch commit as the bot the settings name.
+          SLUG="$BOT_SLUG"
+          BOT_ID=$(gh api "users/${SLUG}[bot]" --jq .id) \
+            || { echo "The bot ${SLUG}[bot] the settings name was not found on GitHub." > /tmp/why.txt
+                 echo "::error title=Bot not found::$(cat /tmp/why.txt)"; exit 1; }
           if git ls-remote --exit-code --heads origin "try/issue-$N" >/dev/null; then
             git fetch -q origin "try/issue-$N" && git checkout -q -B "try/issue-$N" FETCH_HEAD
             echo "BRANCH_TIP=$(git rev-parse HEAD)" >> "$GITHUB_ENV"
             # A worker's branch that clashes with main still starts: the merge is committed with its conflict markers,
             # the clashed files are listed for the fence, and the worker resolves them. Main's changes are in BASE.
-            if [ "$ROLE" = worker ] && ! git -c user.name="dokima-runtime[bot]" -c user.email="337511017+dokima-runtime[bot]@users.noreply.github.com" merge -q --no-edit origin/main; then
+            if [ "$ROLE" = worker ] && ! git -c user.name="${SLUG}[bot]" -c user.email="${BOT_ID}+${SLUG}[bot]@users.noreply.github.com" merge -q --no-edit "origin/$DEFAULT_BRANCH"; then
               git diff --name-only --diff-filter=U > /tmp/clashed.txt
               if [ ! -s /tmp/clashed.txt ]; then
                 echo "Merging main into try/issue-$N failed with no clashed file to resolve." > /tmp/why.txt
@@ -176,9 +192,10 @@ jobs:
               fi
               # A test the planner changed after taking main's version of it keeps the planner's change, and so does
               # a test whose clash with main's version the planner was handed and resolved, with no marker left (#662).
-              MB=$(git merge-base HEAD origin/main)
-              for f in $(grep '^tests/' /tmp/clashed.txt || true); do
-                MAINS=$(git rev-parse -q --verify "origin/main:$f" || true)
+              MB=$(git merge-base HEAD "origin/$DEFAULT_BRANCH")
+              for f in $(cat /tmp/clashed.txt); do
+                case "$f" in "${TESTS_DIR%/}"/*) ;; *) continue ;; esac
+                MAINS=$(git rev-parse -q --verify "origin/$DEFAULT_BRANCH:$f" || true)
                 if [ -n "$MAINS" ] && { git log --format="%H:$f" "$MB..HEAD" -- "$f" | git cat-file --batch-check='%(objectname)' | grep -qxF "$MAINS" \
                      || { git log --format=%B "$MB..HEAD" | grep -qxF "Clash-with-main: $f $MAINS" \
                           && ! git show "HEAD:$f" | grep -qE '^(<<<<<<<|=======|>>>>>>>)( |$)'; }; }; then
@@ -186,7 +203,7 @@ jobs:
                 fi
               done
               git diff --name-only --diff-filter=U > /tmp/clashed.txt
-              git add -A && git -c user.name="dokima-runtime[bot]" -c user.email="337511017+dokima-runtime[bot]@users.noreply.github.com" commit -q --no-edit
+              git add -A && git -c user.name="${SLUG}[bot]" -c user.email="${BOT_ID}+${SLUG}[bot]@users.noreply.github.com" commit -q --no-edit
               [ ! -s /tmp/clashed.txt ] || echo "::notice title=Clash with main::the worker resolves $(paste -sd, /tmp/clashed.txt)"
             fi
             # A planner starts with main merged in, so it sees and can change the tests main added (#475). A branch
@@ -195,15 +212,15 @@ jobs:
             # unless the branch's copy differs from main's, even after an earlier round took it. A test both sides
             # changed is handed to the planner with its clash marked, to resolve (#662); the commit names main's copy
             # it clashed with, so the worker's merge keeps the planner's resolution instead of handing it the clash.
-            if [ "$ROLE" = planner ] && ! git -c user.name="dokima-runtime[bot]" -c user.email="337511017+dokima-runtime[bot]@users.noreply.github.com" merge -q --no-edit origin/main; then
+            if [ "$ROLE" = planner ] && ! git -c user.name="${SLUG}[bot]" -c user.email="${BOT_ID}+${SLUG}[bot]@users.noreply.github.com" merge -q --no-edit "origin/$DEFAULT_BRANCH"; then
               git reset -q --merge
-              MB=$(git merge-base HEAD origin/main)
-              git diff --name-only "$MB" origin/main -- tests > /tmp/mains-tests.txt
+              MB=$(git merge-base HEAD "origin/$DEFAULT_BRANCH")
+              git diff --name-only "$MB" "origin/$DEFAULT_BRANCH" -- "$TESTS_DIR" > /tmp/mains-tests.txt
               : > /tmp/mains-index.txt
               while read -r f; do
-                if git cat-file -e "origin/main:$f" 2>/dev/null; then
-                  ! git diff --quiet "$MB" HEAD -- "$f" || git checkout -q origin/main -- "$f"
-                  git ls-tree origin/main -- "$f" >> /tmp/mains-index.txt
+                if git cat-file -e "origin/$DEFAULT_BRANCH:$f" 2>/dev/null; then
+                  ! git diff --quiet "$MB" HEAD -- "$f" || git checkout -q "origin/$DEFAULT_BRANCH" -- "$f"
+                  git ls-tree "origin/$DEFAULT_BRANCH" -- "$f" >> /tmp/mains-index.txt
                 else
                   ! git diff --quiet "$MB" HEAD -- "$f" || git rm -q -- "$f"
                   printf '0 0000000000000000000000000000000000000000\t%s\n' "$f" >> /tmp/mains-index.txt
@@ -211,12 +228,12 @@ jobs:
               done < /tmp/mains-tests.txt
               : > /tmp/clash-trailers.txt
               while read -r f; do
-                MAINS=$(git rev-parse -q --verify "origin/main:$f" || true)
+                MAINS=$(git rev-parse -q --verify "origin/$DEFAULT_BRANCH:$f" || true)
                 if [ -n "$MAINS" ] && git cat-file -e "HEAD:$f" 2>/dev/null && ! git diff --quiet "$MB" HEAD -- "$f" \
                    && ! git log --format=%B "$MB..HEAD" | grep -qxF "Clash-with-main: $f $MAINS"; then
                   git show "$MB:$f" > /tmp/base-side 2>/dev/null || : > /tmp/base-side
                   git show "$MAINS" > /tmp/mains-side
-                  rc=0; git merge-file -p -L "try/issue-$N" -L "where it split off" -L origin/main "$f" /tmp/base-side /tmp/mains-side > /tmp/merged-side || rc=$?
+                  rc=0; git merge-file -p -L "try/issue-$N" -L "where it split off" -L "origin/$DEFAULT_BRANCH" "$f" /tmp/base-side /tmp/mains-side > /tmp/merged-side || rc=$?
                   if [ "$rc" -gt 0 ] && [ "$rc" -lt 128 ]; then
                     cp /tmp/merged-side "$f"
                     echo "Clash-with-main: $f $MAINS" >> /tmp/clash-trailers.txt
@@ -225,29 +242,29 @@ jobs:
               done < /tmp/mains-tests.txt
               if ! git diff --cached --quiet || [ -s /tmp/clash-trailers.txt ]; then
                 { echo "Main's tests for the planner of #$N"; [ ! -s /tmp/clash-trailers.txt ] || { echo; cat /tmp/clash-trailers.txt; }; } > /tmp/mains-msg.txt
-                git -c user.name="dokima-runtime[bot]" -c user.email="337511017+dokima-runtime[bot]@users.noreply.github.com" commit -q --allow-empty -F /tmp/mains-msg.txt
+                git -c user.name="${SLUG}[bot]" -c user.email="${BOT_ID}+${SLUG}[bot]@users.noreply.github.com" commit -q --allow-empty -F /tmp/mains-msg.txt
               fi
               BASE_TREE=$(export GIT_INDEX_FILE=/tmp/base.index; git read-tree "$MB" && git update-index --index-info < /tmp/mains-index.txt && git write-tree)
-              MAINS_BASE=$(git -c user.name="dokima-runtime[bot]" -c user.email="337511017+dokima-runtime[bot]@users.noreply.github.com" commit-tree "$BASE_TREE" -p "$MB" -m "Where #$N split off main, with main's tests")
+              MAINS_BASE=$(git -c user.name="${SLUG}[bot]" -c user.email="${BOT_ID}+${SLUG}[bot]@users.noreply.github.com" commit-tree "$BASE_TREE" -p "$MB" -m "Where #$N split off main, with main's tests")
               echo "::notice title=Clash with main::the planner starts with main's tests; the worker merges main"
             fi
           elif [ "$ROLE" = planner ] || [ "$STAGE" = plan ]; then
             # A plan review needs no branch: a split never makes one, so it reviews from main.
-            git checkout -q -B "try/issue-$N" origin/main
+            git checkout -q -B "try/issue-$N" "origin/$DEFAULT_BRANCH"
           else
             echo "try/issue-$N does not exist; run the planner first." > /tmp/why.txt
             echo "::error title=Nothing to $ROLE::$(cat /tmp/why.txt)"; exit 1
           fi
           echo "BASE=$(git rev-parse HEAD)" >> "$GITHUB_ENV"
           # A plan's tests are everything the issue's branch added since it split off main, over every planning round.
-          echo "PLANNER_BASE=$(git merge-base HEAD origin/main)" >> "$GITHUB_ENV"
+          echo "PLANNER_BASE=$(git merge-base HEAD "origin/$DEFAULT_BRANCH")" >> "$GITHUB_ENV"
           # A planner on a branch that clashes with main counts main's tests it took as already there.
           [ -z "${MAINS_BASE:-}" ] || echo "PLANNER_BASE=$MAINS_BASE" >> "$GITHUB_ENV"
           # What this run starts from: the planner may change only tests from here on.
           echo "PLANNER_RUN_BASE=$(git rev-parse HEAD)" >> "$GITHUB_ENV"
           LOG="logs/$N/${{ github.run_id }}-$ROLE${STAGE:+-$STAGE}.md"
           echo "LOG=$LOG" >> "$GITHUB_ENV"
-          echo "LOG_URL=${{ github.server_url }}/${{ github.repository }}/blob/logs/$LOG" >> "$GITHUB_ENV"
+          echo "LOG_URL=${{ github.server_url }}/${{ github.repository }}/blob/$RECORDS_BRANCH/$LOG" >> "$GITHUB_ENV"
       - name: Build the starting pack
         env:
           GH_TOKEN: ${{ github.token }}
@@ -260,7 +277,7 @@ jobs:
               echo "Building the starting pack failed: $(tail -1 /tmp/pack-err.txt)" > /tmp/why.txt
             fi
             cat /tmp/pack-err.txt >&2; echo "::error title=No pack::$(cat /tmp/why.txt)"; exit 1; }
-          if [ "$STAGE" = pr ]; then git diff origin/main...HEAD > "$PACK/diff.patch"; fi
+          if [ "$STAGE" = pr ]; then git diff "origin/$DEFAULT_BRANCH...HEAD" > "$PACK/diff.patch"; fi
           ls -R "$PACK" | head -60
       # The repo's Python, test tools and install command, from main's settings file over Dokima's defaults (#794).
       # A runtime whose settings reader has no setup mode (main before #794) sets up as this workflow did before.
@@ -287,8 +304,9 @@ jobs:
           { pip install $TOOLS pyyaml && python3 -m dokima.agents install "$ROLE" && { [ -z "$INSTALL" ] || eval "$INSTALL"; }; } 2>&1 | tee /tmp/install.txt \
             || { echo "The step 'Install pytest and Claude Code' failed: $(tail -3 /tmp/install.txt | paste -sd' ')" > /tmp/why.txt; exit 1; }
       # The newest testmon baseline recorded on main (testmon.yml), so the review runs only the tests its change can affect.
+      # Affected tests set to all in the settings: no baseline is restored and every test runs (#795).
       - name: Restore main's testmon baseline
-        if: env.STAGE == 'pr'
+        if: env.STAGE == 'pr' && env.TESTS_AFFECTED != 'all'
         uses: actions/cache/restore@v4
         with:
           path: .testmondata
@@ -297,17 +315,22 @@ jobs:
       - name: Tests the change can affect, run by code before the reviewer reads the pull request
         if: env.STAGE == 'pr'
         run: |
-          # With a baseline testmon picks the affected tests; with none, or one it cannot read, every test runs.
-          code=0
-          if [ -f .testmondata ]; then
+          # With a baseline testmon picks the affected tests; with none, or one it cannot read, every test runs, and
+          # so with affected tests set to all in the settings (#795).
+          code=0; every=
+          if [ "$TESTS_AFFECTED" = all ]; then every="affected tests are set to all in the settings"
+          elif [ ! -f .testmondata ]; then every="no baseline from main was restored"
+          else
             PYTHONPATH= PYTHONSAFEPATH= python3 -m pytest -q -rA --testmon --junitxml="$PACK/tests.xml" > "$PACK/tests.txt" 2>&1 || code=$?
+            # Exit 0, 1 (a test failed) and 5 (no test affected) are testmon's real answers; anything else is a crash.
+            if [ "$code" -gt 1 ] && [ "$code" -ne 5 ]; then
+              echo "::warning title=No usable baseline::testmon stopped with exit $code; running every test"
+              every="testmon could not read main's baseline"
+            fi
           fi
-          # Exit 0, 1 (a test failed) and 5 (no test affected) are testmon's real answers; anything else is a crash.
-          if [ ! -f .testmondata ] || { [ "$code" -gt 1 ] && [ "$code" -ne 5 ]; }; then
-            [ ! -f .testmondata ] || echo "::warning title=No usable baseline::testmon stopped with exit $code; running every test"
+          if [ -n "$every" ]; then
             # The code review's record reads this note and says every test ran, and why.
-            if [ -f .testmondata ]; then echo "testmon could not read main's baseline" > "$PACK/no-baseline.txt"
-            else echo "no baseline from main was restored" > "$PACK/no-baseline.txt"; fi
+            echo "$every" > "$PACK/no-baseline.txt"
             rm -f "$PACK/tests.xml"
             PYTHONPATH= PYTHONSAFEPATH= python3 -m pytest -q -rA --junitxml="$PACK/tests.xml" > "$PACK/tests.txt" 2>&1 || true
           fi
@@ -424,7 +447,8 @@ jobs:
           BOT_ID=$(gh api "users/${SLUG}[bot]" --jq .id)
           git config user.name "${SLUG}[bot]"
           git config user.email "${BOT_ID}+${SLUG}[bot]@users.noreply.github.com"
-          if [ "$ROLE" = planner ]; then git add tests; else git add -A; fi
+          # The planner pushes only the test folder the settings name (Dokima's own, tests, when no settings were read).
+          if [ "$ROLE" = planner ]; then git add -- "${TESTS_DIR:-tests}"; else git add -A; fi
           # A planner that merged main in pushes the merge even with no test changed, so the branch holds main.
           if git diff --cached --quiet && { [ "$ROLE" != planner ] || [ "$(git rev-parse HEAD)" = "${BRANCH_TIP:-$(git rev-parse HEAD)}" ]; }; then echo "Nothing to push."
           else
@@ -447,7 +471,7 @@ jobs:
           # A finished worker opens its pull request whether or not it pushed anything (the planner may have pushed it all),
           # as a draft: no test runs on it until its code review approved and the merge gate readies it (#597).
           if [ "$ROLE" = worker ] && [ -z "$(gh pr list -R "$GITHUB_REPOSITORY" --head "try/issue-$N" --state open --json number -q '.[].number')" ]; then
-            gh pr create -R "$GITHUB_REPOSITORY" --draft --head "try/issue-$N" --base main --title "$(gh issue view "$N" -R "$GITHUB_REPOSITORY" --json title -q .title)" --body "Closes #$N"
+            gh pr create -R "$GITHUB_REPOSITORY" --draft --head "try/issue-$N" --base "$DEFAULT_BRANCH" --title "$(gh issue view "$N" -R "$GITHUB_REPOSITORY" --json title -q .title)" --body "Closes #$N"
           fi
       - name: Write this run's record
         if: always()
@@ -495,7 +519,7 @@ jobs:
             /home/runner/.claude/projects/
           if-no-files-found: warn
           retention-days: 90
-      - name: Save the conversation for good on the logs branch, secrets removed
+      - name: Save the conversation for good on the records branch, secrets removed
         if: always() && env.STARTED == 'true'
         env:
           GH_TOKEN: ${{ steps.app.outputs.token }}
@@ -506,15 +530,16 @@ jobs:
           SCRUB_AGENT: ${{ secrets[env.AGENT_KEY || 'CLAUDE_CODE_OAUTH_TOKEN'] }}
         run: |
           W=/tmp/logs-branch; R="https://x-access-token:${GH_TOKEN}@github.com/${GITHUB_REPOSITORY}.git"
-          if git ls-remote --exit-code --heads origin logs >/dev/null; then git clone -q --depth 1 -b logs "$R" "$W"
-          else git init -q "$W" && git -C "$W" checkout -q --orphan logs && git -C "$W" remote add origin "$R"; fi
+          B="$RECORDS_BRANCH"
+          if git ls-remote --exit-code --heads origin "$B" >/dev/null; then git clone -q --depth 1 -b "$B" "$R" "$W"
+          else git init -q "$W" && git -C "$W" checkout -q --orphan "$B" && git -C "$W" remote add origin "$R"; fi
           mkdir -p "$W/$(dirname "$LOG")"
           { echo "# ${ROLE}${STAGE:+ ($STAGE)} for #$N"; echo; echo "Run: ${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }}"; echo
             python3 -m dokima.agent transcript /home/runner/.claude/projects "$ROLE"; } > "$W/$LOG"
           BOT_ID=$(gh api "users/${SLUG}[bot]" --jq .id)
           git -C "$W" -c user.name="${SLUG}[bot]" -c user.email="${BOT_ID}+${SLUG}[bot]@users.noreply.github.com" add -A
           git -C "$W" -c user.name="${SLUG}[bot]" -c user.email="${BOT_ID}+${SLUG}[bot]@users.noreply.github.com" commit -qm "Conversation of run ${{ github.run_id }}"
-          for i in 1 2 3; do git -C "$W" push -q origin HEAD:logs && break; git -C "$W" pull -q --rebase origin logs || true; done
+          for i in 1 2 3; do git -C "$W" push -q origin "HEAD:$B" && break; git -C "$W" pull -q --rebase origin "$B" || true; done
       # On autopilot, a code review's approval with every check green merges the pull request here, so this step
       # holds the app's key (minted after the agent finished).
       - name: Decide what follows, merge on autopilot, and say it on the card

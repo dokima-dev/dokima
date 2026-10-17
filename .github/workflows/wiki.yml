@@ -11,15 +11,24 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
+      - uses: actions/setup-python@v6
+        with:
+          python-version: "3.12"
+      - run: python3 -m pip install -q pyyaml  # the settings reader
+      # The bot the settings name commits the sync (#795).
+      - name: The bot from the settings
+        run: python3 -m dokima.settings env >> "$GITHUB_ENV"
       - name: Copy docs/wiki to the GitHub wiki
         env:
           TOKEN: ${{ github.token }}
+          GH_TOKEN: ${{ github.token }}
         run: |
+          SLUG="$BOT_SLUG"; BOT_ID=$(gh api "users/${SLUG}[bot]" --jq .id)
           git clone "https://x-access-token:${TOKEN}@github.com/${GITHUB_REPOSITORY}.wiki.git" wiki
           rsync -a --delete --exclude .git docs/wiki/ wiki/
           cd wiki
-          git config user.name "dokima-runtime[bot]"
-          git config user.email "337511017+dokima-runtime[bot]@users.noreply.github.com"
+          git config user.name "${SLUG}[bot]"
+          git config user.email "${BOT_ID}+${SLUG}[bot]@users.noreply.github.com"
           git add -A
           if git diff --cached --quiet; then
             echo "Wiki already up to date"

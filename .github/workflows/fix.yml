@@ -1,7 +1,7 @@
 name: fix
 # Opens an agent's manual fix as a pull request authored by Dokima's app, so the owner can approve it (#589).
-# Started by hand on main with the name of the branch the agent pushed. The pull request goes into main, whose branch
-# rule holds it until all tests pass; this workflow never merges it.
+# Started by hand on main with the name of the branch the agent pushed. The pull request goes into the default branch
+# the settings name, whose branch rule holds it until all tests pass; this workflow never merges it.
 on:
   workflow_dispatch:
     inputs:
@@ -18,6 +18,16 @@ jobs:
     environment: keys
     runs-on: ubuntu-24.04
     steps:
+      # The default branch from the settings, the pull request's base (#795).
+      - uses: actions/checkout@v5
+        with:
+          persist-credentials: false
+      - uses: actions/setup-python@v6
+        with:
+          python-version: "3.12"
+      - run: python3 -m pip install -q pyyaml  # the settings reader
+      - name: The default branch from the settings
+        run: python3 -m dokima.settings env >> "$GITHUB_ENV"
       - id: app
         uses: actions/create-github-app-token@v2
         with:
@@ -31,8 +41,8 @@ jobs:
           BRANCH: ${{ inputs.branch }}
         run: |
           set -euo pipefail
-          if [ "$BRANCH" = "main" ]; then echo "::error::A fix comes from the branch the agent pushed, not main"; exit 1; fi
-          open=$(gh pr list --head "$BRANCH" --base main --state open --json number --jq '.[0].number // empty')
+          if [ "$BRANCH" = "$DEFAULT_BRANCH" ]; then echo "::error::A fix comes from the branch the agent pushed, not $DEFAULT_BRANCH"; exit 1; fi
+          open=$(gh pr list --head "$BRANCH" --base "$DEFAULT_BRANCH" --state open --json number --jq '.[0].number // empty')
           if [ -n "$open" ]; then echo "Pull request #$open is already open for $BRANCH"; exit 0; fi
-          gh pr create --base main --head "$BRANCH" --title "Manual fix: $BRANCH" \
+          gh pr create --base "$DEFAULT_BRANCH" --head "$BRANCH" --title "Manual fix: $BRANCH" \
             --body "A manual fix from the branch \`$BRANCH\`, opened by Dokima's app. It merges once all tests pass and the owner approves."

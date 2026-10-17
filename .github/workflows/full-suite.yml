@@ -43,5 +43,13 @@ jobs:
         run: |
           pip install -q $TOOLS pyyaml
           if [ -n "$INSTALL" ]; then eval "$INSTALL"; fi
-      # Every test, spread over all the runner's cores.
-      - run: pytest -q -p no:cacheprovider -n auto tests
+      # The all-tests command from the settings, leaving out the tests on their exclude list (#795); by default every
+      # test, spread over all the runner's cores. A checkout with no settings reader with an env mode (before #795)
+      # runs that default as before.
+      - name: Run every test, as the settings say
+        run: |
+          out=; if python3 -c 'from dokima.settings import env_lines' 2>/dev/null; then out=$(python3 -m dokima.settings env); fi
+          RUN_ALL=$(printf '%s\n' "$out" | sed -n 's/^TESTS_RUN_ALL=//p')
+          if [ -z "$RUN_ALL" ]; then RUN_ALL="pytest -q -p no:cacheprovider -n auto tests"
+            echo "::notice title=Old settings::No settings reader with an env mode here, so every test runs."; fi
+          eval "$RUN_ALL"

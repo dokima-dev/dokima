@@ -307,7 +307,8 @@ def test_the_merge_check_runs_mains_code_and_judges_the_pull_requests_code(recor
                 assert where in main_dirs, \
                     f"168.5: job '{name}' runs Dokima's code from the pull request's checkout, not main's: {run.strip()}"
                 assert "PYTHONPATH" not in step, f"168.5: job '{name}' points a Dokima step elsewhere with PYTHONPATH"
-            if re.search(r"(?m)^\s*(python3 -m )?pytest\s", run):
+            # Since #795 the command comes from the settings, so the step is also found by the tests it runs.
+            if re.search(r"(?m)^\s*(python3 -m )?pytest\s", run) or re.search(r"TESTS:\s*\$\{\{\s*matrix\.tests", step):
                 pytest_steps += 1
                 assert where in pr_dirs, \
                     f"168.5: job '{name}' runs the tests on main's code, not on the pull request's: {run.strip()}"

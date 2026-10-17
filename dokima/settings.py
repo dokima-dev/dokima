@@ -2,7 +2,9 @@
 
 `python3 -m dokima.settings`, run in a repo, prints the merged settings as JSON on standard output;
 `python3 -m dokima.settings setup` prints the setup group as `name=value` lines for a workflow's GITHUB_OUTPUT, so
-each test workflow sets up the repo's Python, test tools and install command as they say (#794). The defaults are
+each test workflow sets up the repo's Python, test tools and install command as they say (#794);
+`python3 -m dokima.settings env` prints the test commands, test folder, branches and bot as `NAME=value` lines for a
+workflow's GITHUB_ENV, so workflows run and push as the repo's settings say (#795). The defaults are
 `dokima/defaults.yaml`, beside this file; the repo's file is `.dokima/settings.yaml`, and names only what differs.
 Groups merge key by key, the repo winning; a list replaces the default list whole, except gates and prompt additions,
 which merge with the default ones by name. An unknown setting is left out with a warning suggesting the closest known
@@ -11,6 +13,7 @@ name. A locked setting fails the run, naming it.
 import difflib
 import json
 import os
+import shlex
 import sys
 
 import yaml
@@ -95,12 +98,35 @@ def setup_lines(got):
     return "\n".join(lines)
 
 
+def env_lines(got):
+    """The settings workflows run and push by, as `NAME=value` lines; multi-line values fail.
+
+    The all-tests command leaves out each test on the exclude list; the per-criterion command must name {test}."""
+    tests = got["tests"]
+    run_all = " ".join([str(tests["run_all"])] + [f"--deselect {shlex.quote(str(t))}" for t in tests.get("exclude") or []])
+    if "{test}" not in str(tests["run_one"]):
+        raise ValueError(f"tests.run_one in {REPO_FILE} must name {{test}}, where each criterion's tests go")
+    values = {"TESTS_RUN_ALL": run_all, "TESTS_RUN_ONE": tests["run_one"], "TESTS_AFFECTED": tests["affected"],
+              "TESTS_DIR": tests["dir"], "DEFAULT_BRANCH": got["branch"]["default"],
+              "RECORDS_BRANCH": got["records"]["branch"], "BOT_SLUG": got["bot"]["slug"]}
+    lines = []
+    for name, value in values.items():
+        value = "" if value is None else str(value)
+        if "\n" in value:
+            raise ValueError(f"{name.lower()} in {REPO_FILE} must be one line")
+        lines.append(f"{name}={value}")
+    return "\n".join(lines)
+
+
 def main(argv=()):
-    """Prints the merged settings as JSON, or the setup group; exits 1 saying why."""
+    """Prints the merged settings as JSON, or one mode's lines; exits 1 saying why."""
     try:
         got = read()
         if list(argv) == ["setup"]:
             print(setup_lines(got))
+            return 0
+        if list(argv) == ["env"]:
+            print(env_lines(got))
             return 0
     except Locked as e:
         print(f"::error title=Locked setting::{e}", file=sys.stderr)
