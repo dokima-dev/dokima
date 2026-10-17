@@ -21,6 +21,8 @@ OLD_FIELDS = ("questions", "concerns", "replies", "suspect_tests", "outside_scop
 PLAN_TEST_FAILS = "plan test fails: "
 # How a code review's Next line opens when its merge gate failed; such a review counts as a block (#601).
 GATE_FAILED = "The merge gate failed"
+# The mark on what code posts when the merge queue's checks fail (#830); on an issue it counts as a failed gate.
+QUEUE_FAILED = "<!-- dokima-queue-failed -->"
 
 
 MARK = "<!-- dokima-record -->"
@@ -185,7 +187,8 @@ def is_record(c, role=None, stage=None):
 
 def gate_failed(c):
     """True when a comment is a code review whose merge gate failed (#601)."""
-    return is_record(c, "reviewer", "pr") and f"**Next:** {GATE_FAILED}:" in (c.get("body") or "")
+    body = c.get("body") or ""
+    return (is_record(c, "reviewer", "pr") or QUEUE_FAILED in body) and f"**Next:** {GATE_FAILED}:" in body
 
 
 def open_blockers(recs, stage):

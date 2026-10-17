@@ -31,7 +31,7 @@ class Fix(ts.Machine):
 
     The branch is `fix/typo`, with one commit on it."""
 
-    def __init__(self, tmp, pr_open=False, gh_fail=""):
+    def __init__(self, tmp, pr_open=False, gh_fail="", issue="7"):
         super().__init__(tmp, [], gh_fail=gh_fail, options={"pr_open": pr_open})
         t = self.tmp
         src = f"{t}/src"
@@ -40,9 +40,9 @@ class Fix(ts.Machine):
         ts.sh(src, "git", "add", "-A")
         ts.sh(src, "git", "commit", "-qm", "Fix the typo")
         ts.sh(src, "git", "push", "-q", "origin", BRANCH)
-        open(f"{t}/event.json", "w").write(json.dumps({"inputs": {"branch": BRANCH}}))
-        ctx = {"inputs": Ctx(branch=BRANCH),
-               "github": Ctx(event_name="workflow_dispatch", actor=OWNER, event=Ctx(inputs=Ctx(branch=BRANCH)),
+        open(f"{t}/event.json", "w").write(json.dumps({"inputs": {"branch": BRANCH, "issue": issue}}))
+        ctx = {"inputs": Ctx(branch=BRANCH, issue=issue),
+               "github": Ctx(event_name="workflow_dispatch", actor=OWNER, event=Ctx(inputs=Ctx(branch=BRANCH, issue=issue)),
                              ref="refs/heads/main", ref_name="main", run_id="42", run_attempt="1",
                              server_url="https://github.com", repository="o/r", repository_owner="o",
                              token="fake-github-token"),
@@ -135,3 +135,20 @@ def test_a_manual_fix_cannot_merge_before_all_tests_pass(record_property, tmp_pa
     assert "pull_request_target" in on and (not types or {"opened", "synchronize", "reopened"} <= set(types)), \
         "589.2: the all tests check does not run when a pull request opens or gets a commit"
     assert any(j.get("name") == "all tests" for j in suite["jobs"].values()), "589.2: no job is named all tests"
+
+
+def test_every_manual_fix_names_the_issue_it_fixes(record_property, tmp_path):
+    """A manual fix's pull request says which issue it fixes; a run naming no issue opens nothing.
+
+    Proves 830.5. Runs fix.yml naming issue #7 and checks the pull request's body says `Fixes #7`, so the issue closes
+    when it merges and the fix is always traceable. Then runs it naming no issue, and naming one that is not a number,
+    and checks each fails and opens no pull request."""
+    record_property("proves", "830.5")
+    need_workflow("830.5")
+    run = Fix(tmp_path / "named")
+    opened = run.opened()
+    assert opened and "Fixes #7." in (flag(opened[0]["args"], "--body") or ""), \
+        f"830.5: the manual fix's pull request does not name the issue it fixes: {opened}\n{run.tail()}"
+    for bad in ("", "abc"):
+        run = Fix(tmp_path / f"bad{bad or 'none'}", issue=bad)
+        assert run.failed() and not run.opened(), f"830.5: a manual fix naming issue {bad!r} still opened: {run.opened()}"

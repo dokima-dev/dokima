@@ -70,6 +70,14 @@ jobs:
       (github.event_name == 'pull_request_target' &&
        contains(fromJSON('["opened", "synchronize", "reopened", "ready_for_review"]'), github.event.action))
     uses: ./.github/workflows/full-suite.yml
+  queue-failed:
+    # A failed merge queue run: put the pull request back once, then send it back to its worker (#830).
+    needs: [acceptance-criteria, full-suite]
+    if: >-
+      always() && github.event_name == 'merge_group' &&
+      (needs.full-suite.result == 'failure' || needs.acceptance-criteria.result == 'failure')
+    uses: ./.github/workflows/autopilot.yml
+    secrets: inherit
   testmon:
     if: github.event_name == 'push' && github.ref == format('refs/heads/{0}', github.event.repository.default_branch)
     uses: ./.github/workflows/testmon.yml
