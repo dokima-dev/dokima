@@ -6,8 +6,8 @@
 The plan is the newest one the planner handed back, once the reviewer approved it, read from the bot's own record
 comments; each criterion's check runs exactly the tests that plan lists for it. A pull request with no approved plan that
 changes only Markdown files outside the folders the text_only.not_text setting lists gets one passing "Text only" check
-instead. A manual fix Dokima's app opens with no linked issue gets one "Manual fix" check that runs the test folder
-setting.
+instead. A manual fix Dokima's app opens (any branch but try/issue-N) gets one "Manual fix" check that runs the test
+folder setting.
 
 A test proves a criterion by calling its tag, the tests.tag setting (record_property by default), as
 tag("proves", "<issue>.<n>"), where n counts the issue's criteria from 1, top to bottom.
@@ -52,12 +52,16 @@ def no_plan(name):
     return [{"id": "none", "name": name, "tests": ""}]
 
 
-def build_matrix(number, recs, author=None):
+def build_matrix(number, recs, author=None, head=None):
     """One check per criterion of the approved plan (acceptance criteria, then non-functional), each running exactly
     the plan's tests for it; one failing "No approved plan found" check when there is no issue or no approved plan.
-    A pull request Dokima's app opened with no linked issue is a manual fix: one check that runs all tests."""
+    A pull request Dokima's app opened from a branch other than try/issue-N is a manual fix: one check that runs all
+    tests, whether or not it names the issue it fixes (a manual fix always names one, #830)."""
+    app = author in (agent.BOT, f"{agent.BOT}[bot]")
+    if app and head is not None and not re.match(r"try/issue-\d+$", head):
+        return manual_fix()
     if not number:
-        if author in (agent.BOT, f"{agent.BOT}[bot]"):
+        if app:
             return manual_fix()
         return no_plan("No approved plan found: no issue linked")
     if not agent.approved(recs):
@@ -128,7 +132,7 @@ def main(argv):
         pr = event_pr(repo, json.load(open(os.environ["GITHUB_EVENT_PATH"])))
         number = agent.issue_of_pr(pr["head"]["ref"], pr.get("body")) or plan.pr_issue_number(repo, pr["number"])
         recs = agent.records(agent.conversation(repo, number)[1]) if number else []
-        rows = build_matrix(number, recs, (pr.get("user") or {}).get("login"))
+        rows = build_matrix(number, recs, (pr.get("user") or {}).get("login"), pr["head"]["ref"])
         if rows[0]["id"] == "none" and text_only(repo, pr["number"]):
             rows = TEXT_ONLY
         print("matrix=" + json.dumps(rows))

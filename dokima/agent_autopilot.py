@@ -6,6 +6,7 @@ Split out of dokima/agent.py (#636).
 """
 import json
 import os
+import re
 import subprocess
 import time
 import urllib.parse
@@ -896,6 +897,103 @@ def automerge(repo, number, tested=None):
     return pr, how, why
 
 
+QUEUE_REF = re.compile(r"^(?:refs/heads/)?gh-readonly-queue/.+/pr-(\d+)-[0-9a-f]+$")
+
+
+def failing_tests(repo, run_id):
+    """The tests a finished run names as failed or errored, from its log; [] when GitHub cannot give the log yet."""
+    try:
+        log = agent_github.gh("run", "view", str(run_id), "-R", repo, "--log-failed")
+    except subprocess.CalledProcessError:
+        return []
+    seen = []
+    for m in re.finditer(r"(?m)(?:FAILED|ERROR) (\S+::\S+)", log):
+        if m.group(1) not in seen:
+            seen.append(m.group(1))
+    return seen[:20]
+
+
+def queue_failed(repo, head_ref, run_id, run_url, owners):
+    """A merge queue run failed and GitHub took the pull request out of the queue (#830).
+
+    The first failure on a pull request's head puts it back in the queue once, since a flaky test is the common cause.
+    A second failure on the same head sends a Dokima pull request back to its worker with the failing tests named,
+    counted as a block like a failed merge gate (#601); at three blocks, or for a pull request with no issue, or one
+    that changes a workflow file (only the owner merges those), it stops and mentions the owner. Both required
+    checks may fail on one queue run: the first to report acts, the other finds its mark and does nothing.
+    Returns one line saying what it did."""
+    m = QUEUE_REF.match(head_ref or "")
+    if not m:
+        return f"{head_ref!r} is not a merge queue branch: nothing to do."
+    pr = m.group(1)
+    p = json.loads(agent_github.gh("api", f"repos/{repo}/pulls/{pr}"))
+    if p.get("state") != "open":
+        return f"PR #{pr} is {p.get('state')}: nothing to do."
+    head = (p.get("head") or {}).get("sha", "")
+    marks = [c.get("body") or "" for page in pages(agent_github.gh("api", f"repos/{repo}/issues/{pr}/comments?per_page=100", "--paginate"))
+             for c in page if QUEUE_FAILED in (c.get("body") or "")]
+    if any(f"run={run_id}" in b for b in marks):
+        return f"PR #{pr}: this queue run was handled already."
+    tests = failing_tests(repo, run_id)
+    named = ("Failing: " + ", ".join(f"`{t}`" for t in tests) + ".") if tests else "See the run for what failed."
+    tag = f"{QUEUE_FAILED}<!-- head={head} run={run_id} -->"
+    mention = " ".join(f"@{o}" for o in owners)
+    issue = issue_of_branch(repo, p)
+    if not any(f"head={head}" in b for b in marks):
+        asked, why = requeue(repo, pr, head)
+        said = (f"The merge queue's checks failed ([run]({run_url})), so GitHub took this pull request out of the queue. "
+                f"{named} " + ("Code put it back in the queue once, in case a test is flaky." if asked else
+                               f"Code could not put it back in the queue: {why}. {mention}"))
+        agent_github.gh("pr", "comment", pr, "-R", repo, "--body", f"{tag}\n{said}")
+        return f"PR #{pr}: " + ("re-queued once." if asked else f"not re-queued: {why}")
+    # The same head failed in the queue again: not a flake.
+    if issue is None:
+        # A manual fix names the issue it fixes ("Fixes #N", #830); the failure is said there too, so it is traceable.
+        fixes = issue_of_pr("", p.get("body"))
+        said = (f"{tag}\nThe merge queue's checks failed again on the same commit of PR #{pr} ([run]({run_url})). "
+                f"{named} {mention} Dokima didn't build this pull request from a plan, so it starts nothing: fix its branch.")
+        agent_github.gh("pr", "comment", pr, "-R", repo, "--body", said)
+        if fixes:
+            agent_github.gh("issue", "comment", str(fixes), "-R", repo, "--body", said)
+        return f"PR #{pr}: failed twice; no plan, owner mentioned" + (f" on #{fixes}." if fixes else ".")
+    on = on_autopilot(repo, issue, strict=True)
+    owners_set = set(owners)
+    d, items = conversation(repo, issue)
+    blocks = blocks_since_owner(items, owners_set, "pr") + 1
+    why = f"The merge queue's checks failed twice on PR #{pr}'s same commit ([run]({run_url})). {named}"
+    if on and blocks < 3:
+        agent_github.gh("issue", "comment", str(issue), "-R", repo, "--body",
+                        f"{tag}\n{why}\n\n**Next:** {GATE_FAILED}: the worker fixes the failing tests.")
+        agent_github.gh("api", "-X", "POST", f"repos/{repo}/dispatches", "-f", "event_type=dokima-next",
+                        "-f", "client_payload[role]=worker", "-f", "client_payload[stage]=", "-f", f"client_payload[issue]={issue}")
+        return f"PR #{pr}: failed twice; #{issue} back to the worker."
+    stop = (f"{blocks} blocks in a row without agreement. Your call: `/plan`, `/work` or `/review` with your words."
+            if on else "Say `/work` to send it back to the worker.")
+    agent_github.gh("issue", "comment", str(issue), "-R", repo, "--body",
+                    f"{tag}\n{why}\n\n**Next:** {GATE_FAILED}: {mention} {stop}")
+    return f"PR #{pr}: failed twice; #{issue} stopped for the owner."
+
+
+def issue_of_branch(repo, p):
+    """Issue N for a pull request from this repo's try/issue-N branch, else None."""
+    head = p.get("head") or {}
+    m = re.fullmatch(r"try/issue-(\d+)", head.get("ref") or "")
+    return int(m.group(1)) if m and ((head.get("repo") or {}).get("full_name") == repo) else None
+
+
+def requeue(repo, pr, head):
+    """Put the pull request back in the merge queue at the same head; (True, '') or (False, why)."""
+    files = [f["filename"] for p in pages(agent_github.gh("api", f"repos/{repo}/pulls/{pr}/files?per_page=100", "--paginate")) for f in p]
+    flows = [f for f in files if f.startswith(WORKFLOWS)]
+    if flows:
+        return False, f"it changes a workflow file ({', '.join(flows)}), and only the owner merges those"
+    try:
+        agent_github.gh("pr", "merge", str(pr), "-R", repo, f"--{merge_method()}", "--match-head-commit", head)
+    except subprocess.CalledProcessError as e:
+        return False, gh_reason(e)
+    return True, ""
+
+
 def unconfirmed_comment(repo, pr, why, mention):
     """Says on the pull request that autopilot cannot confirm its merge, mentioning the owner."""
     agent_github.gh("pr", "comment", str(pr), "-R", repo, "--body",
@@ -923,9 +1021,9 @@ def merge_tree(repo, number, owners):
 
 # The other agent job files, imported last so the job files can use each other (#636).
 from dokima import agent_github
-from dokima.agent_github import BOT, conversation, sub_issues, blocked_by, gh_reason, NO_PERMISSION, pages
+from dokima.agent_github import BOT, conversation, sub_issues, blocked_by, gh_reason, NO_PERMISSION, pages, issue_of_pr
 from dokima.agent_records import (
     MARK, LIVE, HANDBACK, records, latest, approved_plan, is_record, open_raises, settled, owner_raises, plan_links,
-    filled, first_sentence)
+    filled, first_sentence, GATE_FAILED, QUEUE_FAILED)
 from dokima.agent_roles import command_of
-from dokima.agent_next import next_step
+from dokima.agent_next import next_step, blocks_since_owner

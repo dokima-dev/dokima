@@ -14,16 +14,71 @@ run-name: "autopilot after #${{ github.event.issue.number }} ${{ github.event.ac
 on:
   issues:
     types: [closed, labeled]
+  # A merge queue run that fails takes its pull request out of the queue; code puts it back once, then sends it
+  # back to its worker (#830). An adopter's entry.yml calls this on the failed merge_group run itself.
+  workflow_run:
+    workflows: [full suite, Acceptance criteria]
+    types: [completed]
   # Called by the one workflow an adopter installs (dokima/install/dokima.yml), through entry.yml (#812).
   workflow_call:
-concurrency:
-  group: autopilot
-  cancel-in-progress: false
 permissions:
   contents: read
   issues: read
 jobs:
+  queue-failed:
+    # Its own group per queued pull request: never shares the closed job's queue, whose one waiting run a newer
+    # event would cancel (#812's lesson).
+    concurrency:
+      group: queue-failed-${{ github.event.workflow_run.head_branch || github.event.merge_group.head_ref }}
+      cancel-in-progress: false
+    if: >-
+      (github.event_name == 'workflow_run' && github.event.workflow_run.event == 'merge_group' &&
+       github.event.workflow_run.conclusion == 'failure') || github.event_name == 'merge_group'
+    environment: keys
+    runs-on: ubuntu-24.04
+    steps:
+      - name: Count this run's GitHub calls
+        continue-on-error: true
+        # Every gh call this job makes goes through a counter, so its cost in GitHub's hourly budget is known (#426).
+        run: |
+          d="$RUNNER_TEMP/ghcount" && mkdir -p "$d" && real=$(command -v gh)
+          printf '#!/bin/sh\necho "$*" | cut -c1-120 >> %s/calls\nexec %s "$@"\n' "$d" "$real" > "$d/gh"
+          chmod +x "$d/gh" && { [ -z "$GITHUB_PATH" ] || echo "$d" >> "$GITHUB_PATH"; } || true
+      - uses: actions/checkout@v5
+        with:
+          ref: ${{ github.event.repository.default_branch }}
+          persist-credentials: false
+      # Dokima's code from Dokima's own repo, at this shared workflow's commit (main when run directly), never the
+      # repo's own copy (#812).
+      - name: Dokima's code from Dokima's own repo
+        uses: actions/checkout@v5
+        with:
+          repository: dokima-dev/dokima
+          ref: ${{ job.workflow_sha }}
+          path: .dokima-code
+          sparse-checkout: dokima
+          persist-credentials: false
+      - name: Every Dokima step runs Dokima's code
+        run: |
+          rm -rf "$RUNNER_TEMP/dokima" && mv .dokima-code "$RUNNER_TEMP/dokima"
+          printf 'PYTHONPATH=%s\nPYTHONSAFEPATH=1\n' "$RUNNER_TEMP/dokima" >> "$GITHUB_ENV"
+      - id: app
+        uses: actions/create-github-app-token@v2
+        with:
+          app-id: ${{ vars.DOKIMA_APP_ID }}
+          private-key: ${{ secrets.DOKIMA_APP_KEY }}
+      - run: python3 -m pip install -q pyyaml  # the settings reader (#794)
+      - name: Put the pull request back in the queue once, then send it back to its worker
+        env:
+          GH_TOKEN: ${{ steps.app.outputs.token }}
+          HEAD_REF: ${{ github.event.workflow_run.head_branch || github.event.merge_group.head_ref }}
+          FAILED_RUN: ${{ github.event.workflow_run.id || github.run_id }}
+          FAILED_RUN_URL: ${{ github.event.workflow_run.html_url || format('{0}/{1}/actions/runs/{2}', github.server_url, github.repository, github.run_id) }}
+        run: python3 -m dokima.agent queue-failed
   closed:
+    concurrency:
+      group: autopilot
+      cancel-in-progress: false
     if: github.event.action == 'closed' || (github.event.label.name == 'autopilot' && github.event.sender.type != 'Bot')
     environment: keys
     runs-on: ubuntu-24.04
