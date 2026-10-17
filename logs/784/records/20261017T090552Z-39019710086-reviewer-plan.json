@@ -1,0 +1,201 @@
+{
+ "role": "reviewer",
+ "stage": "plan",
+ "run_id": "39019710086",
+ "commit_before": "960a2dadb5e8b3bbb930998bf3397190932dfd96",
+ "started_by": "dokima-runtime[bot]",
+ "models": [
+  "claude-opus-5-5"
+ ],
+ "report": {
+  "duration_ms": 76591,
+  "turns": 9,
+  "cost_usd": 0.4789548,
+  "tokens_in": 372901,
+  "tokens_out": 6086
+ },
+ "log": "https://github.com/dokima-dev/dokima/blob/logs/logs/784/39019710086-reviewer-plan.md",
+ "run": "https://github.com/dokima-dev/dokima/actions/runs/39019710086",
+ "handback": {
+  "previous_step": {
+   "did": [
+    "The planner wrote seven criteria and seven tests, each failing today for the right reason.",
+    "The planner dropped plan and work from the shipped defaults test."
+   ],
+   "decided": [
+    "The audit, not Dokima, asks for each label by its setting name."
+   ],
+   "open": [
+    "Three questions wait for the owner: merge queue, plan and work labels, label creation."
+   ]
+  },
+  "verdict": "block",
+  "summary": "Dokima does create labels, so the plan's label criterion covers only the audit and drops the owner's ask.",
+  "raises": [
+   {
+    "kind": "blocker",
+    "to": "planner",
+    "label": "784.3: labels Dokima creates",
+    "text": "Dokima itself adds autopilot and filed labels by fixed names, creating them. Add a criterion and test that it uses the setting names, or name the issue carrying it.",
+    "evidence": "`dokima/agent_autopilot.py:94` says adding a missing label creates it; `:71` and `:155` hard-code the names; `dokima/board.py:16`.",
+    "raised_by": "reviewer",
+    "id": "R1"
+   }
+  ],
+  "answers": [],
+  "asks": [
+   {
+    "ask": "The checks required on the default branch come from the required checks setting.",
+    "source": "https://github.com/dokima-dev/dokima/issues/740#issuecomment-6219928729",
+    "criterion": "784.1"
+   },
+   {
+    "ask": "Turning the merge queue off in a repo's settings stops the audit asking for one.",
+    "source": "https://github.com/dokima-dev/dokima/issues/740",
+    "criterion": "784.2"
+   },
+   {
+    "ask": "Dokima creates its labels under the names in the labels setting.",
+    "source": "https://github.com/dokima-dev/dokima/issues/740#issuecomment-6219928729",
+    "criterion": "784.3"
+   },
+   {
+    "ask": "The daily audit no longer flags label and pill colors that match the repo's settings.",
+    "source": "https://github.com/dokima-dev/dokima/issues/740",
+    "criterion": "784.4"
+   },
+   {
+    "ask": "The daily audit no longer flags label and pill colors that match the repo's settings.",
+    "source": "https://github.com/dokima-dev/dokima/issues/740",
+    "criterion": "784.5"
+   },
+   {
+    "ask": "The settings guard no longer flags a workflow's name, compared in code, as a missing check.",
+    "source": "https://github.com/dokima-dev/dokima/issues/740",
+    "criterion": "784.6"
+   },
+   {
+    "ask": "The settings declare no label as one that starts an agent.",
+    "source": "https://github.com/dokima-dev/dokima/issues/740",
+    "criterion": "784.7"
+   }
+  ],
+  "behaviors": [
+   {
+    "criterion": "784.1",
+    "one_behavior": true,
+    "why": "The audit compares the branch rule with the setting."
+   },
+   {
+    "criterion": "784.2",
+    "one_behavior": true,
+    "why": "With the queue off, no queue line appears."
+   },
+   {
+    "criterion": "784.3",
+    "one_behavior": true,
+    "why": "The audit looks up labels by setting name."
+   },
+   {
+    "criterion": "784.4",
+    "one_behavior": true,
+    "why": "Label colors come from settings."
+   },
+   {
+    "criterion": "784.5",
+    "one_behavior": true,
+    "why": "Pill colors come from settings."
+   },
+   {
+    "criterion": "784.6",
+    "one_behavior": true,
+    "why": "The guard accepts workflow names."
+   },
+   {
+    "criterion": "784.7",
+    "one_behavior": true,
+    "why": "The shipped labels hold no plan or work."
+   }
+  ],
+  "edge_cases": [
+   {
+    "criterion": "784.1",
+    "cut": [],
+    "missing": []
+   },
+   {
+    "criterion": "784.2",
+    "cut": [],
+    "missing": []
+   },
+   {
+    "criterion": "784.3",
+    "cut": [],
+    "missing": []
+   },
+   {
+    "criterion": "784.4",
+    "cut": [],
+    "missing": []
+   },
+   {
+    "criterion": "784.5",
+    "cut": [],
+    "missing": []
+   },
+   {
+    "criterion": "784.6",
+    "cut": [],
+    "missing": []
+   },
+   {
+    "criterion": "784.7",
+    "cut": [],
+    "missing": []
+   }
+  ],
+  "tests": [
+   {
+    "test": "tests/test_settings_audit.py::test_the_branch_rule_is_checked_against_the_required_checks_setting",
+    "only_its_behavior": true,
+    "why": "Runs the audit with Lint present, then missing."
+   },
+   {
+    "test": "tests/test_settings_audit.py::test_with_the_merge_queue_off_the_audit_never_asks_for_one",
+    "only_its_behavior": true,
+    "why": "Default asks, off and refused stay silent."
+   },
+   {
+    "test": "tests/test_settings_audit.py::test_the_audit_wants_each_label_under_its_name_in_settings",
+    "only_its_behavior": true,
+    "why": "Renamed label passes, old name is flagged."
+   },
+   {
+    "test": "tests/test_settings_audit.py::test_a_label_color_matching_settings_is_not_flagged",
+    "only_its_behavior": true,
+    "why": "Matching color passes, shipped color is flagged."
+   },
+   {
+    "test": "tests/test_settings_audit.py::test_a_pill_color_matching_settings_is_not_flagged",
+    "only_its_behavior": true,
+    "why": "Matching pill passes, shipped pill is flagged."
+   },
+   {
+    "test": "tests/test_settings_audit.py::test_the_guard_passes_a_workflow_name_compared_in_code",
+    "only_its_behavior": true,
+    "why": "Workflow name passes, unknown name is still named."
+   },
+   {
+    "test": "tests/test_settings_audit.py::test_the_shipped_settings_declare_no_plan_or_work_label",
+    "only_its_behavior": true,
+    "why": "Reads shipped settings for plan and work labels."
+   }
+  ],
+  "size": "ok"
+ },
+ "check": {
+  "passed": true,
+  "problems": []
+ },
+ "url": "https://github.com/dokima-dev/dokima/issues/784#issuecomment-6232075909"
+}
