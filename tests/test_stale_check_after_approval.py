@@ -124,6 +124,9 @@ class FakeGitHub:
                 return json.dumps(next(r for r in self.runs if r["id"] == int(m.group(1))))
             if bare == "users/o":
                 return "Organization\n" if query else json.dumps({"login": "o", "type": "Organization"})
+            if bare == "repos/o/r":
+                # The repo itself names its default branch, as GitHub does (#787).
+                return json.dumps({"full_name": "o/r", "default_branch": "main"})
             if bare == "repos/o/r/branches/main":
                 return json.dumps({"name": "main", "protection": {"required_status_checks": {
                     "contexts": REQUIRED, "checks": [{"context": c} for c in REQUIRED]}}})
