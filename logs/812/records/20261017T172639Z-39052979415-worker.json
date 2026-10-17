@@ -1,0 +1,54 @@
+{
+ "role": "worker",
+ "stage": null,
+ "run_id": "39052979415",
+ "commit_before": "325fe6375a5c146f78a01a95080e3697f13f671c",
+ "started_by": "RezaSoleymanifar",
+ "models": [
+  "claude-opus-5-5"
+ ],
+ "report": {
+  "duration_ms": 546423,
+  "turns": 25,
+  "cost_usd": 0.9061908000000001,
+  "tokens_in": 1241008,
+  "tokens_out": 10908
+ },
+ "log": "https://github.com/dokima-dev/dokima/blob/logs/logs/812/39052979415-worker.md",
+ "run": "https://github.com/dokima-dev/dokima/actions/runs/39052979415",
+ "handback": {
+  "summary": "Cleared the clash with main as the owner asked, and closed the last gaps in the queue and suite workflows.",
+  "criteria": {
+   "812.1": "Every shared job checks out Dokima's repo; run directly in the queue, the judge takes main; the suite reads settings from that checkout.",
+   "812.2": "Built in an earlier round: every job that reads a key uses the keys environment.",
+   "812.3": "Built in an earlier round: the agent run reads the key secret its settings name.",
+   "812.4": "Built in an earlier round: an early step fails a run with no bot, saying how to set it up.",
+   "812.5": "Built in an earlier round: a step fails a run with no model key, naming the secret and the fix.",
+   "812.6": "Built in an earlier round: the default co-author line names Dokima's bot on every commit and merge.",
+   "812.7": "Built in an earlier round: turning the co-author line off leaves commits and merges with none.",
+   "812.8": "Built in an earlier round: the adopter's file calls the entry workflow at a release tag.",
+   "812.9": "Built in an earlier round: the adopter's file is nineteen lines.",
+   "812.10": "The entry workflow sends each event on; it calls the full suite only on pull requests and the queue, as main does."
+  },
+  "evidence": "Plan-named test files and both merged files: `180 passed` with `pytest -q -n auto`.",
+  "raises": [],
+  "answers": []
+ },
+ "check": {
+  "passed": false,
+  "problems": [
+   "Conflict markers are still in tests/test_manual_fix_check.py, tests/test_merge_queue.py: the clash with main is not resolved."
+  ]
+ },
+ "dropped_by_fence": [
+  "tests/test_manual_fix_check.py",
+  "tests/test_merge_queue.py"
+ ],
+ "files_changed": [
+  ".github/workflows/acceptance-criteria.yml",
+  ".github/workflows/entry.yml",
+  ".github/workflows/full-suite.yml"
+ ],
+ "branch": "try/issue-812",
+ "url": "https://github.com/dokima-dev/dokima/pull/824#issuecomment-6237402443"
+}
