@@ -161,19 +161,6 @@ def test_no_shared_workflow_runs_the_adopters_dokima_folder(record_property, tmp
     assert not found, f"812.1: these jobs ran Dokima code from the adopter's repo, not Dokima's own: {found}"
 
 
-def test_every_event_dokima_acts_on_starts_the_adopters_workflow(record_property):
-    """The adopter's one workflow starts on every event Dokima acts on.
-
-    Proves 812.1. Reads the thin workflow and checks its triggers name every event Dokima's shared workflows start on
-    today: issues, comments, pull requests, reviews, line notes, the merge queue, pushes, the schedule, finished
-    runs and the river's own signal."""
-    record_property("proves", "812.1")
-    on = thin("812.1").get("on")
-    names = set(on) if isinstance(on, dict) else set(on or []) if isinstance(on, list) else {on}
-    missing = sorted(EVENTS - names)
-    assert not missing, f"812.1: the adopter's workflow never starts on {missing}, so Dokima never runs on them"
-
-
 # 812.2 ------------------------------------------------------------------------------------------------------------
 
 def reached():
@@ -389,3 +376,18 @@ def test_the_adopters_workflow_is_at_most_twenty_lines(record_property):
     assert os.path.isfile(THIN), "812.9: there is no thin workflow for adopters at dokima/install/dokima.yml"
     lines = open(THIN).read().splitlines()
     assert len(lines) <= 20, f"812.9: the adopter's workflow is {len(lines)} lines long, over 20"
+
+
+# 812.10 -----------------------------------------------------------------------------------------------------------
+
+def test_every_event_dokima_acts_on_starts_the_adopters_workflow(record_property):
+    """The adopter's one workflow starts on every event Dokima acts on.
+
+    Proves 812.10. An adopter installs one workflow and nothing else, so it alone must start Dokima. Reads the thin
+    workflow and checks its triggers name every event Dokima's shared workflows start on today: issues, comments, pull
+    requests, reviews, line notes, the merge queue, pushes, the schedule, finished runs and the river's own signal."""
+    record_property("proves", "812.10")
+    on = thin("812.10").get("on")
+    names = set(on) if isinstance(on, dict) else set(on or []) if isinstance(on, list) else {on}
+    missing = sorted(EVENTS - names)
+    assert not missing, f"812.10: the adopter's workflow never starts on {missing}, so Dokima never runs on them"
