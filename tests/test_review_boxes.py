@@ -54,18 +54,30 @@ def reasons(review, **kw):
     return code, [line for line in out.splitlines() if line.strip()]
 
 
+def assert_names_only(review, box, crit, why, tmp_path, stage):
+    """The review is rejected naming `box`, and no reason names any other, well formed box."""
+    code, out = reasons(review, tmp_path=tmp_path, stage=stage)
+    assert code == 1, f"{crit}: {why} was let through; it must be rejected"
+    assert any(re.search(rf"\b{box}\b", line) for line in out), \
+        f"{crit}: {why} was rejected, but no reason names {box}:\n" + "\n".join(out)
+    for other in NONE:
+        if other != box:
+            named = [line for line in out if re.search(rf"\b{other}\b", line)]
+            assert not named, f"{crit}: {why} was rejected, but a reason also names {other}, which is well formed:\n" + "\n".join(named)
+
+
 def test_a_review_missing_any_of_the_six_boxes_is_rejected_naming_the_box(record_property, tmp_path):
     """A review missing any of the six boxes is rejected, naming the box.
 
     Proves 819.1. At plan review and at code review, a review holding all six boxes passes. Taking out each box in turn (dropped,
-    added, superseded, conflicts, edges, poor_tests) is rejected with a reason naming that box; so is a review with
-    no boxes at all, its reason naming boxes."""
+    added, superseded, conflicts, edges, poor_tests) is rejected with a reason naming that box and no reason naming
+    the boxes still there; so is a review with no boxes at all, its reason naming boxes."""
     record_property("proves", "819.1")
     for stage in STAGES:
         ra.assert_passes(tmp_path, boxed(ra.APPROVE), "819.1", f"a review holding all six boxes ({stage})", stage=stage)
         for box in NONE:
-            ra.assert_rejected(tmp_path, without(boxed(ra.APPROVE), box), rf"\b{box}\b", "819.1",
-                               f"a review with no {box} box ({stage})", stage=stage)
+            assert_names_only(without(boxed(ra.APPROVE), box), box, "819.1", f"a review with no {box} box ({stage})",
+                              tmp_path, stage)
         bare = {k: v for k, v in ra.APPROVE.items() if k != "boxes"}
         ra.assert_rejected(tmp_path, bare, r"\bboxes\b", "819.1", f"a review with no boxes at all ({stage})",
                            stage=stage)
@@ -78,7 +90,9 @@ def test_a_box_entry_missing_a_field_its_shape_needs_is_rejected_naming_the_fiel
     at plan review and at code review. Then, for each box and each field of its shape, the same entry with that field
     left out, or blank, is rejected: one reason names the box and the field, and differs from the reason given when
     another field is left out, so the field named is the one missing. An added entry whose kind is neither creep nor
-    needed is rejected naming kind, and an entry that is a bare line instead of an object is rejected naming its box."""
+    needed is rejected naming kind, an entry that is a bare line instead of an object is rejected naming its box. An edges line reading missing with
+    its case named passes on a block; one that names no case, or reads neither covered nor missing, is rejected naming
+    edges and its criterion."""
     record_property("proves", "819.2")
     for stage in STAGES:
         whole = {box: [entry] for box, entry in ENTRIES.items()}
@@ -105,6 +119,14 @@ def test_a_box_entry_missing_a_field_its_shape_needs_is_rejected_naming_the_fiel
                            f"an added entry whose kind is extra, neither creep nor needed ({stage})", stage=stage)
         ra.assert_rejected(tmp_path, boxed(ra.BLOCK, dropped=["Oil the hinges"]), r"\bdropped\b", "819.2",
                            f"a dropped entry that is a bare line ({stage})", stage=stage)
+        named = {**NONE["edges"], "9.2": "missing: the issue has no comments"}
+        ra.assert_passes(tmp_path, boxed(ra.BLOCK, edges=named), "819.2",
+                         f"a block whose edges line reads missing and names its case ({stage})", stage=stage)
+        for line in ("missing", "missing:", "missing:   ", "maybe", ""):
+            ra.assert_rejected(tmp_path, boxed(ra.BLOCK, edges={**NONE["edges"], "9.2": line}),
+                               r"edges.*9\.2|9\.2.*edges", "819.2",
+                               f"a block whose edges line for 9.2 reads {line!r}, naming no case or neither covered nor "
+                               f"missing ({stage})", stage=stage)
 
 
 def test_a_weak_test_entry_naming_no_wrong_code_that_still_passes_is_rejected(record_property, tmp_path):
@@ -131,7 +153,8 @@ def test_a_review_that_approves_while_a_box_holds_a_blocking_entry_is_rejected(r
 
     Proves 819.4. At plan review and at code review, an approve with every box none and every criterion covered passes. For each
     box in turn (a dropped ask, an added creep, a superseded criterion, a conflict, an edges line reading missing, a
-    weak test), the same approve is rejected naming that box, while a block holding the same entry passes."""
+    weak test), the same approve is rejected naming that box and no reason naming the boxes left clear, while a block holding the
+    same entry passes."""
     record_property("proves", "819.4")
     blocking = {**{box: [entry] for box, entry in ENTRIES.items()},
                 "edges": {**NONE["edges"], "9.2": "missing: the issue has no comments"}}
@@ -140,8 +163,8 @@ def test_a_review_that_approves_while_a_box_holds_a_blocking_entry_is_rejected(r
         for box, value in blocking.items():
             ra.assert_passes(tmp_path, boxed(ra.BLOCK, **{box: value}), "819.4",
                              f"a block whose {box} box holds a blocking entry ({stage})", stage=stage)
-            ra.assert_rejected(tmp_path, boxed(ra.APPROVE, **{box: value}), rf"\b{box}\b", "819.4",
-                               f"an approve whose {box} box holds a blocking entry ({stage})", stage=stage)
+            assert_names_only(boxed(ra.APPROVE, **{box: value}), box, "819.4",
+                              f"an approve whose {box} box holds a blocking entry ({stage})", tmp_path, stage)
 
 
 def test_an_added_entry_of_kind_needed_does_not_stop_a_review_from_approving(record_property, tmp_path):
