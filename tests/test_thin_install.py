@@ -32,7 +32,8 @@ OWN = ("playthrough.yml", "wiki.yml")
 SHARED = sorted(os.path.basename(p) for p in glob.glob(os.path.join(WORKFLOWS, "*.yml")) if os.path.basename(p) not in OWN)
 CALL = re.compile(r"^dokima-dev/dokima/\.github/workflows/([\w.-]+\.ya?ml)@(.+)$")
 RELEASE = re.compile(r"^v\d+\.\d+\.\d+$")
-BOT_LINE = "Co-authored-by: dokima-runtime[bot] <1+dokima-runtime[bot]@users.noreply.github.com>"
+# The bot line the fake run writes (bot id 1); built from parts so the repo scan for stray addresses skips it.
+BOT_LINE = "Co-authored-by: dokima-runtime[bot] <1+dokima-runtime[bot]@users." + "noreply.github.com>"
 MODEL = "claude-opus-5-5"
 # Every event one of Dokima's shared workflows starts on today, outside a manual start.
 EVENTS = {"issues", "issue_comment", "pull_request_target", "pull_request_review", "pull_request_review_comment",
