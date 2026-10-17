@@ -489,6 +489,26 @@ def test_agents_base_their_branches_and_pull_requests_on_the_default_branch_sett
     assert base == "trunk", f"795.7: the worker's pull request goes to {base!r}, not trunk, the default branch setting"
 
 
+def test_a_planners_new_branch_starts_from_the_default_branch_setting(record_property, tmp_path):
+    """A planner's new branch starts from the default branch the settings name.
+
+    Proves 795.7. The settings name trunk as the default branch; trunk has a commit main lacks, and the issue has
+    no branch yet. Runs a planner's checkout of agent.yml and a stand-in planner that notes whether trunk's commit
+    is in what it starts from."""
+    record_property("proves", "795.7")
+    box = Box(tmp_path, TRUNK)
+    trunk = box.commit("trunk", {"trunk.txt": "only on trunk\n"}, "trunk moves on", start="main")
+    _, steps = steps_of("agent.yml", "run")
+    look = stand_in("The planner", f"git merge-base --is-ancestor {trunk} HEAD && echo yes > /tmp/from_trunk.txt "
+                                   "|| echo no > /tmp/from_trunk.txt\n")
+    result = box.run("agent.yml", "run", through(steps, "Starting branch") + [look], name="planner", role="planner")
+    seen = f"{box.tmp}/from_trunk.txt"
+    saw = open(seen).read().strip() if os.path.exists(seen) else None
+    assert saw is not None, f"795.7: the planner's run never reached the planner; job {result}\n{box.tail()}"
+    assert saw == "yes", ("795.7: a planner with no branch yet did not start from trunk, the default branch the "
+                          "settings name")
+
+
 def test_a_manual_fix_opens_against_the_default_branch_setting(record_property, tmp_path):
     """A manual fix's pull request goes to the default branch the settings name.
 
@@ -514,7 +534,7 @@ def test_each_runs_conversation_is_saved_on_the_records_branch_the_settings_name
 
     Proves 795.8. The settings name history as the records branch. Runs a planner's checkout, a stand-in agent that
     leaves a session log, and agent.yml's step that saves the conversation. Checks the origin's history branch holds
-    logs/57/42-planner.md and no logs branch gained it."""
+    logs/57/42-planner.md, no logs branch gained it, and the record's conversation link points to it on history."""
     record_property("proves", "795.8")
     box = Box(tmp_path, "records:\n  branch: history\n")
     _, steps = steps_of("agent.yml", "run")
@@ -522,7 +542,8 @@ def test_each_runs_conversation_is_saved_on_the_records_branch_the_settings_name
                                   'echo \'{"message": {"role": "assistant", "content": "Done."}}\' '
                                   '> /home/runner/.claude/projects/p/s.jsonl\n')
     save = step_named(steps, "Save the conversation")
-    result = box.run("agent.yml", "run", through(steps, "Starting branch") + [agent, app_step(steps), save],
+    link = stand_in("The record's link", 'echo "$LOG_URL" > /tmp/log_url.txt\n')
+    result = box.run("agent.yml", "run", through(steps, "Starting branch") + [link, agent, app_step(steps), save],
                      name="planner", role="planner", env={"STARTED": "true"})
     path = f"logs/{N}/42-planner.md"
     code, _ = box.origin("cat-file", "-e", f"history:{path}")
@@ -530,6 +551,9 @@ def test_each_runs_conversation_is_saved_on_the_records_branch_the_settings_name
                        f"job {result}\n{box.tail()}")
     code, _ = box.origin("cat-file", "-e", f"logs:{path}")
     assert code != 0, "795.8: the run's conversation was saved on logs, not only on the records branch the settings name"
+    url = open(f"{box.tmp}/log_url.txt").read().strip() if os.path.exists(f"{box.tmp}/log_url.txt") else ""
+    want = f"https://github.com/o/r/blob/history/{path}"
+    assert url == want, f"795.8: the record's conversation link is {url!r}, not {want!r} on the records branch history"
 
 
 # 795.9 ------------------------------------------------------------------------------------------------------------
@@ -560,25 +584,27 @@ def test_only_the_bot_named_in_settings_may_send_the_next_step_signal(record_pro
 
 # 795.10 -----------------------------------------------------------------------------------------------------------
 
-def test_a_workers_merge_of_main_carries_the_git_identity_of_the_bot_named_in_settings(record_property, tmp_path):
-    """Merging main into a worker's branch commits as the bot the settings name.
+def test_merging_main_into_a_branch_carries_the_git_identity_of_the_bot_named_in_settings(record_property, tmp_path):
+    """Merging main into a worker's or planner's branch commits as the named bot.
 
     Proves 795.10. The settings name other-bot as the bot. Main moved on since the branch split off. Runs the worker's
-    checkout of agent.yml and checks its merge commit's author is other-bot[bot], with that bot's noreply address."""
+    checkout of agent.yml, then the planner's, each on its own repo, and checks each merge commit's author is
+    other-bot[bot], with that bot's noreply address."""
     record_property("proves", "795.10")
-    box = Box(tmp_path, f"bot:\n  slug: {OTHER_BOT}\n", no_identity=True)
-    box.commit(f"try/issue-{N}", {"app.py": "a = 1\n"}, "the work", start="main")
-    box.commit("main", {"other.py": "o = 1\n"}, "main moves on")
-    _, steps = steps_of("agent.yml", "run")
-    result = box.run("agent.yml", "run", through(steps, "Starting branch"), name="worker", role="worker")
-    ws = f"{box.tmp}/jobs/worker/ws"
-    assert result == "success", f"795.10: the worker's checkout failed\n{box.tail()}"
-    parents = ts.sh(ws, "git", "log", "-1", "--format=%P").split()
-    assert len(parents) == 2, "795.10: the worker's checkout made no merge commit, so its identity cannot be checked"
-    name, email = author_of(ws)
-    assert name == f"{OTHER_BOT}[bot]", f"795.10: the worker's merge of main is authored by {name!r}, not {OTHER_BOT}[bot]"
-    assert email.endswith(f"+{OTHER_BOT}[bot]@users." + "noreply.github.com"), \
-        f"795.10: the worker's merge of main carries the address {email!r}, not {OTHER_BOT}[bot]'s"
+    for role in ("worker", "planner"):
+        box = Box(tmp_path / role, f"bot:\n  slug: {OTHER_BOT}\n", no_identity=True)
+        box.commit(f"try/issue-{N}", {"app.py": "a = 1\n"}, "the work", start="main")
+        box.commit("main", {"other.py": "o = 1\n"}, "main moves on")
+        _, steps = steps_of("agent.yml", "run")
+        result = box.run("agent.yml", "run", through(steps, "Starting branch"), name=role, role=role)
+        ws = f"{box.tmp}/jobs/{role}/ws"
+        assert result == "success", f"795.10: the {role}'s checkout failed\n{box.tail()}"
+        parents = ts.sh(ws, "git", "log", "-1", "--format=%P").split()
+        assert len(parents) == 2, f"795.10: the {role}'s checkout made no merge commit, so its identity cannot be checked"
+        name, email = author_of(ws)
+        assert name == f"{OTHER_BOT}[bot]", f"795.10: the {role}'s merge of main is authored by {name!r}, not {OTHER_BOT}[bot]"
+        assert email.endswith(f"+{OTHER_BOT}[bot]@users." + "noreply.github.com"), \
+            f"795.10: the {role}'s merge of main carries the address {email!r}, not {OTHER_BOT}[bot]'s"
 
 
 def test_the_wiki_sync_commits_as_the_bot_named_in_settings(record_property, tmp_path):
