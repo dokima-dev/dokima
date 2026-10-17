@@ -7,7 +7,8 @@ linked, or the description says "Closes #77" and issue #77 has no comments and n
 Others run the shell of the Acceptance criteria workflow's own steps, cut out of `.github/workflows/acceptance-criteria.yml`, with a fake
 `pytest` on PATH, so the workflow GitHub runs is the thing judged. Nothing here touches the network.
 
-Text files are `.md` files outside `dokima/roles/`, `tests/` and `.github/`: AGENTS.md, README.md, the wiki under
+Text files are `.md` files outside the folders the text_only.not_text setting names (`tests/` and `.github/` by
+default; Dokima's prompt folder no longer counts, #804): AGENTS.md, README.md, the wiki under
 docs/wiki/ and any other Markdown file. Anything else changed sends the pull request the full way.
 """
 import json
@@ -161,19 +162,18 @@ def test_the_text_only_check_passes_without_running_any_test(record_property, tm
 
 
 def test_a_pull_request_touching_anything_but_text_files_goes_the_full_way(record_property, tmp_path):
-    """Any code, test, workflow, role or non-Markdown file changed means no shortcut.
+    """Any code, test, workflow or non-Markdown file changed means no shortcut.
 
     Proves 358.3.
     Runs the real merge check for pull requests with no issue and no plan, each changing AGENTS.md plus one other
-    file: Python code, a test, a workflow, a role file under dokima/roles/ (Markdown, but it is the agents' prompt), a
-    JSON file, a file with no extension, a .md file under tests/ and one under .github/. Then a file renamed from code to
+    file: Python code, a test, a workflow, a JSON file, a file with no extension, a .md file under tests/ and one under .github/. Then a file renamed from code to
     a .md name, one deleted code file beside a text file, and a code change saying "Closes #77" for an issue with no
     plan. Each must get today's failing "No approved plan found"
     check, never the text-only one. A pull request changing only text files must still get the shortcut, so the check
     is not one that says no to everything."""
     record_property("proves", "358.3")
     others = ["dokima/checks.py", "tests/test_checks.py", ".github/workflows/full-suite.yml",
-              "dokima/roles/planner.md", "dokima/app.json", "LICENSE", "tests/samples/notes.md",
+              "dokima/app.json", "LICENSE", "tests/samples/notes.md",
               ".github/PULL_REQUEST_TEMPLATE.md"]
     for other in others:
         rows, out = run_matrix(tmp_path, changed("AGENTS.md", other))
