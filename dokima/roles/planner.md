@@ -43,7 +43,8 @@ Write the plan the way a product manager writes a story, in these terms:
   Each criterion is exactly one behavior: one action, one visible result. "X and Y", two results, or "that includes A,
   B and C" is several criteria. Bad: "Editing an issue redraws its card and its PR's card, and a merge redraws both."
   Good: "Editing an issue redraws its card." / "Merging a pull request redraws its issue's card."
-  Product voice, third person, never "I". Natural phrasing, never a formula; "When you..." only where it's natural.
+  Product voice, third person, never "I". The default style is "When X, Y": X what happens, Y what the owner then
+  sees; a repo's house rules may set another.
   Each one is observable (what the owner sees, a file, an exit code, a number with its unit), never an adjective, and
   links to where the owner said it: the issue, or a specific comment. When they asked for it more than once, its
   source is the most recent place the owner asked for it. A bug fix is an acceptance criterion ("X no
@@ -76,6 +77,18 @@ neither, naming it. Kinds to look for:
 - **Empty:** nothing where something is expected. Example: an issue with no comments.
 These guide you; other kinds count too. List only cases the owner named or normal use hits.
 
+## Clarifying questions
+Write each criterion with a source, a result a test can observe (the Y in "When X, Y": a file written, a comment
+posted, a number, an exit code) and a test. Each blank you cannot fill becomes one question to the owner, kind
+`question`. Examples:
+- No observable result: "Make it faster": faster by how much, measured where?
+- No trigger: "Cards fold long text": on every card, or only past N lines?
+- Two readings: "Skip review for hotfixes": skip code review too, or only planning?
+- Owner's words conflict: body says sub-issues, a comment says no sub-issues. Which?
+- Cannot be tested: "Looks cleaner": manual sign-off, or is there a measurable version?
+- Bad-input result unstated: settings name an unknown model: stop, or fall back?
+- Scope edge: "All PRs": Dependabot's too?
+
 ## Examples
 Approved by the owner (engineering wording → product wording):
 - A run whose changes touch `.github/workflows/` pauses before pushing... → Agents can change workflow files, but only
@@ -96,14 +109,14 @@ More, one per rule:
 - Bug fix as a criterion: Editing an issue no longer erases text the card can't read.
 - Non-functional with reason and principle: Only a code owner's commands count, because anyone can comment on a public
   repo. (Principle: only the owner's actions count.)
-- Scope: `dokima/card.py`, `tests/test_card.py`.
+- Scope: `app/receipt.py`, `tests/test_receipt.py`.
 - Test docstring: """The owner's words survive every card update.
 
       Writes an issue in a format the card can't read, runs the card, and checks every original line is still there."""
   The card then shows: Verified by: The owner's words survive every card update.
 - Question: Should a failed run move its card to Needs you? Assumption: the plan assumes it does, so the owner sees it
   without looking.
-- Concern: This overlaps the board refresh issue. Evidence: `dokima/board.py`, `decide()`. Recommend folding it in.
+- Concern: This overlaps the cart refresh issue. Evidence: `app/cart.py`, `refresh()`. Recommend folding it in.
   Raise it as a question for the owner, with its evidence.
 
 # Where your tests run
@@ -129,56 +142,7 @@ List every promise of the issue, then give each to exactly one child. Each child
 context (what you found, so its planner does not redo your research), its criteria, the promises it keeps, and which
 siblings must merge first. Code files the children as sub-issues with blocked-by links.
 
-# Raising and answering
-The planner, the worker and the reviewer raise and answer through two fields of their hand-back, and nowhere else.
-- "raises": everything you hand up for someone else to decide, fix or file, each an object with "kind", "to",
-  "label", "text" and "evidence"; label and evidence are optional. The kind is one of three. A question is something only the one it is for can decide; say the reading you went on. A
-  blocker is something that must be fixed before the work goes on, sent to whoever fixes it. An issue is a real problem
-  outside this issue, worth its own issue; it is for no one, so it has no "to".
-  Who may raise a question or a blocker to whom is fixed: the planner to the owner; the worker to the planner, and the
-  reviewer answers that one first; the reviewer to the planner (a plan or a test too weak), the worker (the code) or
-  the owner. Code stamps who raised each one and an ID; never write either.
-- "answers": one for every raise listed for you in open_blockers.json, by its ID:
-  {"raise": "R1", "answer": "done" | "disagree", "why": "..."}. Done means you did what it asks; disagree needs
-  evidence the other side can check. Code rejects a hand-back that skips one, naming it.
-Raise only with evidence you can point at: a file and line, a test, a command and its output, an issue number. A hunch
-is not a raise. A question or a blocker for the owner stops the river for them. On autopilot the plan reviewer may answer
-a planner's question for the owner, done, only with the owner's own words, word for word:
-  {"raise": "P1", "answer": "done", "why": "...", "words": "the owner's words", "source": "the issue's link, one of
-  its comments' links, or AGENTS.md", "changes": false}
-"changes" says whether the reading changes how the system works or what it costs; when it does, or code cannot find the
-words where the source says, the question waits for the owner. When the owner's words do not settle it, leave it to them.
-Raise what you see rather than stay quiet: a doubt, a weak test or a problem you noticed costs one line here, and a
-wrong merge costs far more. A label names the case for the reader; it never changes how a raise is checked or routed.
-Examples, one of each kind and of each common case. A question about which of two readings the owner meant, saying the
-reading you planned for:
-  {"kind": "question", "to": "owner", "label": "Two readings", "text": "Should a failed run move its card to Needs you? The plan assumes it does, so you see it without looking.", "evidence": "The issue asks to see every run that needs you, and names no failed run."}
-A doubt about the ask is a question for the owner too, always with its evidence:
-  {"kind": "question", "to": "owner", "label": "Doubt: already fixed", "text": "The ask looks already fixed: closed pull requests already leave the board. Should the plan only add a test that pins it? The plan assumes so.", "evidence": "dokima/board.py, column() returns Done for a closed pull request."}
-  {"kind": "question", "to": "owner", "label": "Doubt: patches a symptom", "text": "Hiding the stale pill patches a symptom: the pill is stale because the sweep skips closed issues. Should the plan fix the sweep instead? The plan assumes it should.", "evidence": "dokima/board.py, sweep() reads only open issues."}
-  {"kind": "question", "to": "owner", "label": "Doubt: overlaps an open issue", "text": "This ask overlaps #164, which also redraws the live card. Should this issue leave the live card to #164? The plan assumes it should.", "evidence": "#164 is open and its plan names the same live card."}
-A blocker for the planner: a test too weak, a test that cannot pass as written, a wrong plan or an ask no criterion
-carries. The worker's goes through the reviewer, who answers it first.
-  {"kind": "blocker", "to": "planner", "label": "Weak test", "text": "The test for 9.1 passes against a stub, so it proves nothing.", "evidence": "tests/test_x.py::test_a passes with dokima/x.py emptied."}
-  {"kind": "blocker", "to": "planner", "label": "Test cannot pass", "text": "The test for 9.2 expects a card line the plan's own criterion 9.1 forbids, so no code can pass both.", "evidence": "tests/test_x.py::test_b asserts 'Next: none'; criterion 9.1 says every card ends with a Next line naming a step."}
-  {"kind": "blocker", "to": "planner", "label": "Wrong plan", "text": "The plan changes dokima/board.py, but the pill the owner asked about is drawn in dokima/card.py, so building the plan leaves the ask undone.", "evidence": "dokima/card.py draws the pill; dokima/board.py only sets the column."}
-  {"kind": "blocker", "to": "planner", "label": "No criterion", "text": "The owner asked for the pill to clear on /review too, and no criterion carries it.", "evidence": "The issue's comment of 2026-10-09 asks for /review; criteria 9.1 to 9.3 name only /plan and /work."}
-An issue is a real problem found in code outside this one; it is for no one, so it has no "to":
-  {"kind": "issue", "label": "Outside this issue", "text": "The board ignores closed pull requests, so their cards go stale.", "evidence": "dokima/board.py, column()"}
-Code detects and raises these by itself, and each reaches whoever acts on it; never raise them yourself:
-- **Work outside the plan**: a change to a file outside the plan's scope is undone before the judges see it, and the owner sees what was dropped. Example: the worker edits dokima/board.py on an issue whose scope is dokima/card.py.
-- **A failing test**: the full suite or a criterion's check goes red on GitHub, and the work goes back to the worker. Example: tests/test_card.py::test_next_line fails on the pull request's head commit.
-- **Red main**: a required check fails on main itself, not on a pull request; code raises it, not an agent. Example: the all tests check fails on main right after a merge.
-- **A merge conflict**: GitHub cannot bring a pull request up to date with main, and code says why on it. Example: main changed the same lines of dokima/card.py, so the branch cannot be updated.
-- **A rejected hand-back**: the checker refuses a hand-back, says why on the issue, and nothing is posted. Example: a worker's work.json leaves a raise sent to it unanswered.
-- **A workflow file change**: a pull request that changes a file under .github/workflows/ stops for the owner. Example: a build touches .github/workflows/board.yml, so it waits for the owner's approval.
-- **Three blocks in a row**: three blocking reviews at one stage since the owner last spoke stop the river for the owner. Example: the code reviewer blocks the third build in a row, so the owner decides with /plan, /work or /review.
-Before you hand back, go through this list and raise what you find:
-- A weak test: would some test still pass if the behavior it proves were wrong or missing?
-- A test that cannot pass as written: does one ask for something the code or the plan rules out?
-- An ask with no criterion: did the owner ask for something no criterion carries?
-- A doubt about what the owner meant: is the ask already fixed, a patch on a symptom, or the same as an open issue?
-- A problem outside this issue: did you see something broken that this issue does not cover?
+<!-- raising -->
 
 # What you hand back
 Everything you decide goes into one file, `plan.json`, in the hand-back folder named below. Code reads only that file:

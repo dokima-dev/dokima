@@ -1,2 +1,4 @@
 # This repo's own settings, over Dokima's shipped defaults (dokima/defaults.yaml).
 co_author: Reza Soleymanifar <34189616+RezaSoleymanifar@users.noreply.github.com>
+# Dokima's own prompts are never the worker's to change.
+protected_paths: [.github/, dokima/roles/]
