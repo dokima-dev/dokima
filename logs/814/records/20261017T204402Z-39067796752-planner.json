@@ -1,0 +1,60 @@
+{
+ "role": "planner",
+ "stage": null,
+ "run_id": "39067796752",
+ "commit_before": "b7096b62f1f47d2ab3070403d35e7623e0673722",
+ "started_by": "dokima-runtime[bot]",
+ "models": [
+  "claude-opus-5-5"
+ ],
+ "report": {
+  "duration_ms": 90767,
+  "turns": 11,
+  "cost_usd": 0.5491402000000001,
+  "tokens_in": 386859,
+  "tokens_out": 9678
+ },
+ "log": "https://github.com/dokima-dev/dokima/blob/logs/logs/814/39067796752-planner.md",
+ "run": "https://github.com/dokima-dev/dokima/actions/runs/39067796752",
+ "handback": {
+  "kind": "user_story",
+  "title": "README install steps use the thin workflow",
+  "summary": "The README's install steps tell adopters to add one workflow and one settings file, not copy Dokima.",
+  "user_story": "Adopters following the README add only the thin workflow and settings file, never a copy of Dokima.",
+  "acceptance_criteria": [
+   {
+    "text": "When an adopter follows the README's install steps, they add the thin workflow and settings file, never copying Dokima's folders.",
+    "words": "The README install steps (README.md:120-125) and docs/wiki/Installing.md stop telling adopters to copy `.github/workflows/` and `dokima/`.",
+    "source": "https://github.com/dokima-dev/dokima/issues/742",
+    "files": [
+     "README.md"
+    ],
+    "no_edge_cases": "The README is one fixed file with no input; the test also checks the new steps exist."
+   }
+  ],
+  "non_functional": [],
+  "tests": {
+   "814.1": [
+    "tests/test_readme_install.py::test_install_steps_add_the_two_files_not_dokima"
+   ]
+  },
+  "test_changes": {},
+  "links": {
+   "blocked_by": [],
+   "blocks": [
+    816
+   ],
+   "relates_to": [
+    742,
+    815
+   ]
+  },
+  "raises": [],
+  "answers": []
+ },
+ "check": {
+  "passed": true,
+  "problems": []
+ },
+ "url": "https://github.com/dokima-dev/dokima/issues/814#issuecomment-6240688465"
+}
