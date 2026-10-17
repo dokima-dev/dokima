@@ -1,0 +1,62 @@
+{
+ "role": "worker",
+ "stage": null,
+ "run_id": "39005902685",
+ "commit_before": "fc3224bc177742fad2f86efc5639ffc0f54e667b",
+ "started_by": "RezaSoleymanifar",
+ "models": [
+  "claude-opus-5-5"
+ ],
+ "report": {
+  "duration_ms": 1294395,
+  "turns": 60,
+  "cost_usd": 3.8498398000000003,
+  "tokens_in": 7631078,
+  "tokens_out": 46130
+ },
+ "log": "https://github.com/dokima-dev/dokima/blob/logs/logs/795/39005902685-worker.md",
+ "run": "https://github.com/dokima-dev/dokima/actions/runs/39005902685",
+ "handback": {
+  "summary": "Workflows now read test commands, test folder, branches and bot from the settings, through a new settings mode.",
+  "criteria": {
+   "795.1": "`full-suite.yml` reads `TESTS_RUN_ALL` from `python3 -m dokima.settings env` and runs it; old readers keep the old command.",
+   "795.2": "`acceptance-criteria.yml` reads `TESTS_RUN_ONE` from main's reader and fills `{test}` with the report flags and tests.",
+   "795.3": "With `tests.affected: all`, `agent.yml` skips the baseline and runs every test; `testmon.yml` skips testmon and the cache save.",
+   "795.4": "`agent.yml` Starting branch uses `TESTS_DIR` for main's tests on a planner clash and for the worker's kept tests.",
+   "795.5": "The planner's push adds only `TESTS_DIR`.",
+   "795.6": "`env_lines` adds one `--deselect` per `tests.exclude` entry to the all-tests command; default list is empty.",
+   "795.7": "`agent.yml` merges, branches from and opens pull requests on `DEFAULT_BRANCH`; `fix.yml` lists and opens against it.",
+   "795.8": "`agent.yml` saves the conversation on `RECORDS_BRANCH` and builds `LOG_URL` on it.",
+   "795.9": "The code-owner gate lets only `${BOT_SLUG}[bot]` send the next-step signal.",
+   "795.10": "Starting branch merges and `wiki.yml` commit as the settings' bot, its id looked up on GitHub."
+  },
+  "evidence": "`pytest tests/test_settings_workflows.py` and neighbours: 37 passed",
+  "raises": [
+   {
+    "kind": "issue",
+    "label": "Record files stay",
+    "text": "Run records are still saved to and read from the logs branch, so a renamed records branch splits conversations from records.",
+    "evidence": "`dokima/agent_records.py:55` `LOGS_BRANCH = \"logs\"`",
+    "raised_by": "worker",
+    "id": "W1"
+   }
+  ]
+ },
+ "check": {
+  "passed": true,
+  "problems": []
+ },
+ "dropped_by_fence": [],
+ "files_changed": [
+  ".github/workflows/acceptance-criteria.yml",
+  ".github/workflows/agent.yml",
+  ".github/workflows/fix.yml",
+  ".github/workflows/full-suite.yml",
+  ".github/workflows/testmon.yml",
+  ".github/workflows/wiki.yml",
+  "dokima/defaults.yaml",
+  "dokima/settings.py"
+ ],
+ "branch": "try/issue-795",
+ "url": "https://github.com/dokima-dev/dokima/issues/795#issuecomment-6230109194"
+}
