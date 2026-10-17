@@ -366,6 +366,38 @@ def test_the_adopters_workflow_calls_dokimas_shared_workflows_at_a_release_tag(r
         assert "steps" not in (job or {}), f"812.8: job {name} of the adopter's workflow runs steps of its own"
 
 
+
+def test_every_shared_workflow_fetches_dokimas_code_at_the_called_commit(record_property):
+    """Each shared workflow fetches Dokima's code at the commit the adopter called, never main.
+
+    Proves 812.8. A tag pins nothing unless the shared workflow fetches Dokima's code at that tag's commit. Fills each
+    shared workflow's checkout of Dokima's repo with the values GitHub sets when an adopter's repo calls it: the
+    called workflow's own commit (`job.workflow_sha`) and repo (`job.workflow_repository`), while the run's own
+    commit (`github.workflow_sha`) is the adopter's. Every such checkout must name the called commit; an empty ref,
+    which falls back to main, fails."""
+    record_property("proves", "812.8")
+    called, adopters = "c" * 40, "a" * 40
+    ctx = {"github": Ctx(repository="adopter/repo", workflow_sha=adopters, sha=adopters, ref="refs/heads/main",
+                         event_name="issue_comment", event=Ctx()),
+           "job": Ctx(workflow_sha=called, workflow_repository=ts.DOKIMA_REPO,
+                      workflow_ref=f"{ts.DOKIMA_REPO}/.github/workflows/agent.yml@refs/tags/v1.2.3"),
+           "inputs": Ctx(), "vars": Ctx(), "secrets": Ctx(), "env": Ctx(), "steps": Ctx(), "needs": Ctx(),
+           "matrix": Ctx(), "runner": Ctx()}
+    status = {"failed": False}
+    found, wrong = [], []
+    for name in SHARED:
+        for job_name, job in (read_yaml(os.path.join(WORKFLOWS, name)).get("jobs") or {}).items():
+            for step in (job or {}).get("steps") or []:
+                if not ts.dokima_checkout(step, ctx, status):
+                    continue
+                ref = ts.fill((step.get("with") or {}).get("ref", ""), ctx, status)
+                found.append(f"{name} {job_name}")
+                if ref != called:
+                    wrong.append(f"{name} job {job_name}: {ref or 'empty, so main'}")
+    assert found, "812.8: no shared workflow checks out Dokima's own repo, so none fetches the called commit"
+    assert not wrong, ("812.8: these checkouts of Dokima's code do not fetch the commit the adopter called, so "
+                       "the tag pins nothing:\n" + "\n".join(wrong))
+
 # 812.9 ------------------------------------------------------------------------------------------------------------
 
 def test_the_adopters_workflow_is_at_most_twenty_lines(record_property):
