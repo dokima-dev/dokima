@@ -1,0 +1,260 @@
+{
+ "role": "reviewer",
+ "stage": "plan",
+ "run_id": "39041684061",
+ "commit_before": "904be47d4aac18f010364dfa0ea9f969431ac60c",
+ "started_by": "dokima-runtime[bot]",
+ "models": [
+  "claude-opus-5-5"
+ ],
+ "report": {
+  "duration_ms": 46822,
+  "turns": 5,
+  "cost_usd": 0.7291810000000001,
+  "tokens_in": 305184,
+  "tokens_out": 1438
+ },
+ "log": "https://github.com/dokima-dev/dokima/blob/logs/logs/812/39041684061-reviewer-plan.md",
+ "run": "https://github.com/dokima-dev/dokima/actions/runs/39041684061",
+ "handback": {
+  "previous_step": {
+   "did": [
+    "Rebuilt the new test's bot address so the older identity test passes again."
+   ],
+   "decided": [
+    "Kept the ten criteria and their tests as last round."
+   ],
+   "open": [
+    "Nothing new for the owner."
+   ]
+  },
+  "verdict": "approve",
+  "summary": "The plan covers every ask, and each new test fails today only because the work is missing.",
+  "raises": [],
+  "answers": [],
+  "asks": [
+   {
+    "ask": "All Dokima code runs from Dokima's own repo inside GitHub Actions.",
+    "source": "https://github.com/dokima-dev/dokima/issues/742",
+    "criterion": "812.1"
+   },
+   {
+    "ask": "live only in GitHub secrets on the repo (the `keys` environment)",
+    "source": "https://github.com/dokima-dev/dokima/issues/742",
+    "criterion": "812.2"
+   },
+   {
+    "ask": "`settings.yaml` only names which secret each role reads.",
+    "source": "https://github.com/dokima-dev/dokima/issues/742",
+    "criterion": "812.3"
+   },
+   {
+    "ask": "Missing bot or key fails loudly with the fix in the message",
+    "source": "https://github.com/dokima-dev/dokima/issues/742",
+    "criterion": "812.4"
+   },
+   {
+    "ask": "Missing bot or key fails loudly with the fix in the message",
+    "source": "https://github.com/dokima-dev/dokima/issues/742",
+    "criterion": "812.5"
+   },
+   {
+    "ask": "Until #747 lands, the co-author line names the repo's own bot.",
+    "source": "https://github.com/dokima-dev/dokima/issues/742#issuecomment-6234488528",
+    "criterion": "812.6"
+   },
+   {
+    "ask": "The shipped default is the `dokima[bot]` trailer, and an adopter can turn it off.",
+    "source": "https://github.com/dokima-dev/dokima/issues/742#issuecomment-6234488528",
+    "criterion": "812.7"
+   },
+   {
+    "ask": "calls Dokima's shared workflows by tag",
+    "source": "https://github.com/dokima-dev/dokima/issues/742",
+    "criterion": "812.8"
+   },
+   {
+    "ask": "a 20-line ceiling is fine",
+    "source": "https://github.com/dokima-dev/dokima/issues/742#issuecomment-6234488528",
+    "criterion": "812.9"
+   },
+   {
+    "ask": "One thin workflow, `.github/workflows/dokima.yml`",
+    "source": "https://github.com/dokima-dev/dokima/issues/742",
+    "criterion": "812.10"
+   }
+  ],
+  "behaviors": [
+   {
+    "criterion": "812.1",
+    "one_behavior": true,
+    "why": "Where a run takes Dokima's code from."
+   },
+   {
+    "criterion": "812.2",
+    "one_behavior": true,
+    "why": "Which environment key-reading jobs run in."
+   },
+   {
+    "criterion": "812.3",
+    "one_behavior": true,
+    "why": "Which secret a role's key comes from."
+   },
+   {
+    "criterion": "812.4",
+    "one_behavior": true,
+    "why": "The failure seen when the bot is missing."
+   },
+   {
+    "criterion": "812.5",
+    "one_behavior": true,
+    "why": "The failure seen when the model key is missing."
+   },
+   {
+    "criterion": "812.6",
+    "one_behavior": true,
+    "why": "The default co-author line on commits."
+   },
+   {
+    "criterion": "812.7",
+    "one_behavior": true,
+    "why": "No co-author line when turned off."
+   },
+   {
+    "criterion": "812.8",
+    "one_behavior": true,
+    "why": "The ref the adopter's workflow calls."
+   },
+   {
+    "criterion": "812.9",
+    "one_behavior": true,
+    "why": "The adopter's workflow line count."
+   },
+   {
+    "criterion": "812.10",
+    "one_behavior": true,
+    "why": "Which events start the adopter's one workflow."
+   }
+  ],
+  "edge_cases": [
+   {
+    "criterion": "812.1",
+    "cut": [],
+    "missing": []
+   },
+   {
+    "criterion": "812.2",
+    "cut": [],
+    "missing": []
+   },
+   {
+    "criterion": "812.3",
+    "cut": [],
+    "missing": []
+   },
+   {
+    "criterion": "812.4",
+    "cut": [],
+    "missing": []
+   },
+   {
+    "criterion": "812.5",
+    "cut": [],
+    "missing": []
+   },
+   {
+    "criterion": "812.6",
+    "cut": [],
+    "missing": []
+   },
+   {
+    "criterion": "812.7",
+    "cut": [],
+    "missing": []
+   },
+   {
+    "criterion": "812.8",
+    "cut": [],
+    "missing": []
+   },
+   {
+    "criterion": "812.9",
+    "cut": [],
+    "missing": []
+   },
+   {
+    "criterion": "812.10",
+    "cut": [],
+    "missing": []
+   }
+  ],
+  "tests": [
+   {
+    "test": "tests/test_thin_install.py::test_an_adopters_own_dokima_folder_never_runs",
+    "only_its_behavior": true,
+    "why": "A planted copy must never run; fails today on dokima.prompt."
+   },
+   {
+    "test": "tests/test_thin_install.py::test_a_run_starts_in_a_repo_holding_no_dokima_code",
+    "only_its_behavior": true,
+    "why": "A run must start with no Dokima code in the repo."
+   },
+   {
+    "test": "tests/test_thin_install.py::test_no_shared_workflow_runs_the_adopters_dokima_folder",
+    "only_its_behavior": true,
+    "why": "Every shared job runs against the planted copy."
+   },
+   {
+    "test": "tests/test_thin_install.py::test_every_event_dokima_acts_on_starts_the_adopters_workflow",
+    "only_its_behavior": true,
+    "why": "Checks only the thin workflow's events against today's shared events."
+   },
+   {
+    "test": "tests/test_thin_install.py::test_every_shared_job_that_reads_a_key_takes_it_from_the_keys_environment",
+    "only_its_behavior": true,
+    "why": "Every reached job naming a secret must be in keys; fails today on the missing workflow."
+   },
+   {
+    "test": "tests/test_thin_install.py::test_each_role_reads_its_model_key_from_the_secret_its_settings_name",
+    "only_its_behavior": true,
+    "why": "Named secret and default secret both checked in the agent's env."
+   },
+   {
+    "test": "tests/test_thin_install.py::test_a_run_with_no_bot_set_up_fails_saying_how_to_set_it_up",
+    "only_its_behavior": true,
+    "why": "Failure and fix message checked for both missing-bot cases."
+   },
+   {
+    "test": "tests/test_thin_install.py::test_a_run_with_no_model_key_fails_naming_the_secret_and_how_to_add_it",
+    "only_its_behavior": true,
+    "why": "Default and named secret both checked for the message."
+   },
+   {
+    "test": "tests/test_thin_install.py::test_every_commit_dokima_makes_credits_its_bot_by_default",
+    "only_its_behavior": true,
+    "why": "Planner and worker commits, merge included, need the bot line."
+   },
+   {
+    "test": "tests/test_thin_install.py::test_turning_the_co_author_line_off_leaves_commits_with_none",
+    "only_its_behavior": true,
+    "why": "Line on by default, gone when turned off."
+   },
+   {
+    "test": "tests/test_thin_install.py::test_the_adopters_workflow_calls_dokimas_shared_workflows_at_a_release_tag",
+    "only_its_behavior": true,
+    "why": "Every call must be at a release tag."
+   },
+   {
+    "test": "tests/test_thin_install.py::test_the_adopters_workflow_is_at_most_twenty_lines",
+    "only_its_behavior": true,
+    "why": "Counts every line against 20."
+   }
+  ],
+  "size": "ok"
+ },
+ "check": {
+  "passed": true,
+  "problems": []
+ },
+ "url": "https://github.com/dokima-dev/dokima/issues/812#issuecomment-6235198511"
+}
