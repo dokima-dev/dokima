@@ -131,10 +131,16 @@ jobs:
           GH_TOKEN: ${{ steps.app.outputs.token }}
           HEAD: ${{ github.event.pull_request.head.ref }}
           PR: ${{ github.event.pull_request.number }}
+          BODY: ${{ github.event.pull_request.body }}
+          AUTHOR: ${{ github.event.pull_request.user.login }}
         run: |
-          if [[ "$HEAD" =~ ^(try|work)/issue-([0-9]+)$ ]]; then
-            gh issue close "${BASH_REMATCH[2]}" -R "$GITHUB_REPOSITORY" --reason completed \
-              --comment "Closed: pull request #$PR merged." || echo "::warning title=Issue not closed::#${BASH_REMATCH[2]}"
+          # A planned build names its issue in its branch; a manual fix names it in the first words fix.yml wrote (#830).
+          n=
+          if [[ "$HEAD" =~ ^(try|work)/issue-([0-9]+)$ ]]; then n="${BASH_REMATCH[2]}"
+          else n=$(python3 -c 'import os; from dokima.agent_github import manual_fix_issue as f; print(f(os.environ.get("BODY"), os.environ.get("AUTHOR")) or "")' || true); fi
+          if [ -n "$n" ]; then
+            gh issue close "$n" -R "$GITHUB_REPOSITORY" --reason completed \
+              --comment "Closed: pull request #$PR merged." || echo "::warning title=Issue not closed::#$n"
           fi
       - name: Report this run's GitHub calls
         if: always()

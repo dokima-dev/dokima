@@ -74,6 +74,20 @@ def issue_of_pr(head, body):
     return m.group(1) if m else None
 
 
+# The first words fix.yml writes on a manual fix's pull request (#830); the card disarms the `#` as `&#35;` (#373).
+MANUAL_FIX = re.compile(r"\bFixes (?:#|&#35;)(\d+)\. A manual fix from the branch")
+
+
+def manual_fix_issue(body, author):
+    """The issue a manual fix names, for a pull request Dokima's app opened through fix.yml; else None.
+
+    Only the app's own manual fix counts: anyone's words in a pull request never close an issue (#373)."""
+    if author not in (BOT, f"{BOT}[bot]"):
+        return None
+    m = MANUAL_FIX.search(body or "")
+    return int(m.group(1)) if m else None
+
+
 def sub_issues(repo, number):
     """The issue's own sub-issues, one level down, each with its state."""
     # GitHub allows at most 100 sub-issues per parent, so one page holds them all.
