@@ -1,0 +1,182 @@
+{
+ "role": "planner",
+ "stage": null,
+ "run_id": "39046865155",
+ "commit_before": "6d9ec4f748da2976f31dd22be0f78ddd16ef9093",
+ "started_by": "dokima-runtime[bot]",
+ "models": [
+  "claude-opus-5-5"
+ ],
+ "report": {
+  "duration_ms": 1941672,
+  "turns": 36,
+  "cost_usd": 1.8725771999999998,
+  "tokens_in": 2719527,
+  "tokens_out": 26285
+ },
+ "log": "https://github.com/dokima-dev/dokima/blob/logs/logs/819/39046865155-planner.md",
+ "run": "https://github.com/dokima-dev/dokima/actions/runs/39046865155",
+ "handback": {
+  "kind": "user_story",
+  "title": "Code checks the reviewer's required boxes",
+  "summary": "A review that skips a box, leaves a field out or approves past a blocking entry is rejected.",
+  "user_story": "A review that skips a duty, or claims a weak test without proof, is rejected before it posts.",
+  "acceptance_criteria": [
+   {
+    "text": "When a plan review or code review leaves out one of the six boxes, it is rejected, naming that box.",
+    "words": "Every box must be present at both stages.",
+    "source": "https://github.com/dokima-dev/dokima/issues/741#issuecomment-6234488387",
+    "files": [
+     "dokima/agent_checks.py"
+    ],
+    "edge_cases": [
+     {
+      "case": "A review with no boxes at all is rejected, naming the boxes.",
+      "test": "tests/test_review_boxes.py::test_a_review_missing_any_of_the_six_boxes_is_rejected_naming_the_box"
+     },
+     {
+      "case": "A code review missing a box is rejected, as a plan review is.",
+      "test": "tests/test_review_boxes.py::test_a_review_missing_any_of_the_six_boxes_is_rejected_naming_the_box"
+     }
+    ]
+   },
+   {
+    "text": "When a box entry leaves out a field its shape needs, the review is rejected, naming that field.",
+    "words": "entries typed",
+    "source": "https://github.com/dokima-dev/dokima/issues/741#issuecomment-6205062350",
+    "files": [
+     "dokima/agent_checks.py"
+    ],
+    "edge_cases": [
+     {
+      "case": "An added entry whose kind is neither creep nor needed is rejected, naming the kind.",
+      "test": "tests/test_review_boxes.py::test_a_box_entry_missing_a_field_its_shape_needs_is_rejected_naming_the_field"
+     },
+     {
+      "case": "A field left blank counts as left out.",
+      "test": "tests/test_review_boxes.py::test_a_box_entry_missing_a_field_its_shape_needs_is_rejected_naming_the_field"
+     },
+     {
+      "case": "An entry written as a bare line is rejected, naming its box.",
+      "test": "tests/test_review_boxes.py::test_a_box_entry_missing_a_field_its_shape_needs_is_rejected_naming_the_field"
+     }
+    ]
+   },
+   {
+    "text": "When a weak test entry names no wrong code that still passes, the review is rejected.",
+    "words": "A weak-test claim without a named counterexample is rejected by code.",
+    "source": "https://github.com/dokima-dev/dokima/issues/741#issuecomment-6205062350",
+    "files": [
+     "dokima/agent_checks.py"
+    ],
+    "edge_cases": [
+     {
+      "case": "The wrong code is written as an empty or blank line.",
+      "test": "tests/test_review_boxes.py::test_a_weak_test_entry_naming_no_wrong_code_that_still_passes_is_rejected"
+     }
+    ]
+   },
+   {
+    "text": "When a review approves while any box holds a blocking entry, it is rejected, naming that box.",
+    "words": "each entry a blocker unless noted",
+    "source": "https://github.com/dokima-dev/dokima/issues/741#issuecomment-6205062350",
+    "files": [
+     "dokima/agent_checks.py"
+    ],
+    "edge_cases": [
+     {
+      "case": "An edges line reading missing blocks an approve, like an entry in any other box.",
+      "test": "tests/test_review_boxes.py::test_a_review_that_approves_while_a_box_holds_a_blocking_entry_is_rejected"
+     },
+     {
+      "case": "A block holding the same entry still passes.",
+      "test": "tests/test_review_boxes.py::test_a_review_that_approves_while_a_box_holds_a_blocking_entry_is_rejected"
+     }
+    ]
+   },
+   {
+    "text": "When the added box holds only entries of kind needed, the review can still approve.",
+    "words": "needed is not a blocker",
+    "source": "https://github.com/dokima-dev/dokima/issues/741#issuecomment-6205062350",
+    "files": [
+     "dokima/agent_checks.py"
+    ],
+    "edge_cases": [
+     {
+      "case": "The same entry of kind creep still stops an approve.",
+      "test": "tests/test_review_boxes.py::test_an_added_entry_of_kind_needed_does_not_stop_a_review_from_approving"
+     }
+    ]
+   },
+   {
+    "text": "When the edges box leaves out a criterion of the plan, the review is rejected, naming that criterion.",
+    "words": "per criterion: covered | missing: <named case>",
+    "source": "https://github.com/dokima-dev/dokima/issues/741#issuecomment-6205062350",
+    "files": [
+     "dokima/agent_checks.py"
+    ],
+    "edge_cases": [
+     {
+      "case": "An empty edges box is rejected, naming every criterion.",
+      "test": "tests/test_review_boxes.py::test_a_review_whose_edges_box_leaves_out_a_plan_criterion_is_rejected_naming_it"
+     },
+     {
+      "case": "An edges box written none, on a plan with criteria, is rejected.",
+      "test": "tests/test_review_boxes.py::test_a_review_whose_edges_box_leaves_out_a_plan_criterion_is_rejected_naming_it"
+     },
+     {
+      "case": "A split plan's story criterion left out is rejected, naming it.",
+      "test": "tests/test_review_boxes.py::test_a_review_whose_edges_box_leaves_out_a_plan_criterion_is_rejected_naming_it"
+     }
+    ]
+   }
+  ],
+  "non_functional": [],
+  "tests": {
+   "819.1": [
+    "tests/test_review_boxes.py::test_a_review_missing_any_of_the_six_boxes_is_rejected_naming_the_box"
+   ],
+   "819.2": [
+    "tests/test_review_boxes.py::test_a_box_entry_missing_a_field_its_shape_needs_is_rejected_naming_the_field"
+   ],
+   "819.3": [
+    "tests/test_review_boxes.py::test_a_weak_test_entry_naming_no_wrong_code_that_still_passes_is_rejected"
+   ],
+   "819.4": [
+    "tests/test_review_boxes.py::test_a_review_that_approves_while_a_box_holds_a_blocking_entry_is_rejected"
+   ],
+   "819.5": [
+    "tests/test_review_boxes.py::test_an_added_entry_of_kind_needed_does_not_stop_a_review_from_approving"
+   ],
+   "819.6": [
+    "tests/test_review_boxes.py::test_a_review_whose_edges_box_leaves_out_a_plan_criterion_is_rejected_naming_it"
+   ]
+  },
+  "test_changes": {
+   "tests/test_handback_check.py::test_well_formed_hand_backs_pass_and_every_malformed_field_is_named": "The bare review keeps the required boxes now; every other check is unchanged."
+  },
+  "links": {
+   "blocked_by": [],
+   "blocks": [],
+   "relates_to": [
+    741
+   ]
+  },
+  "raises": [
+   {
+    "kind": "issue",
+    "label": "Edges box shape",
+    "text": "The reviewer's prompt never says the edges box is an object keyed by criterion, so reviewers may guess wrong and be rejected.",
+    "evidence": "`dokima/roles/reviewer.md` line 54 shows only `edges: per criterion: covered | missing: <named case>`.",
+    "raised_by": "planner",
+    "id": "P1"
+   }
+  ],
+  "answers": []
+ },
+ "check": {
+  "passed": true,
+  "problems": []
+ },
+ "url": "https://github.com/dokima-dev/dokima/issues/819#issuecomment-6236099698"
+}
