@@ -1,0 +1,47 @@
+{
+ "role": "reviewer",
+ "stage": "pr",
+ "run_id": "39016027688",
+ "commit_before": "92f36a7ae774980a108010dd93cef53783671a6d",
+ "started_by": "dokima-runtime[bot]",
+ "models": [
+  "claude-opus-5-5"
+ ],
+ "report": {
+  "duration_ms": 1108644,
+  "turns": 19,
+  "cost_usd": 0.63393,
+  "tokens_in": 814994,
+  "tokens_out": 5737
+ },
+ "log": "https://github.com/dokima-dev/dokima/blob/logs/logs/796/39016027688-reviewer-pr.md",
+ "run": "https://github.com/dokima-dev/dokima/actions/runs/39016027688",
+ "handback": {
+  "previous_step": {
+   "did": [
+    "The worker changed no code this round; the earlier build stands.",
+    "The worker ran the planned tests and both updated older tests: all pass."
+   ],
+   "decided": [
+    "The worker kept the build as it was, since the updated tests pass on it."
+   ],
+   "open": [
+    "GitHub's checks on the newest commit wait until the merge gate readies the pull request."
+   ]
+  },
+  "verdict": "approve",
+  "summary": "Every planned test and both updated older tests pass on the branch; the code delivers each criterion.",
+  "raises": [],
+  "answers": [],
+  "asks": [],
+  "behaviors": [],
+  "edge_cases": [],
+  "tests": [],
+  "size": "ok"
+ },
+ "check": {
+  "passed": true,
+  "problems": []
+ },
+ "url": "https://github.com/dokima-dev/dokima/pull/803#issuecomment-6231529928"
+}
