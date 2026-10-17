@@ -1,0 +1,65 @@
+{
+ "role": "reviewer",
+ "stage": "pr",
+ "run_id": "39007324824",
+ "commit_before": "69f08396f5c6ef27b2c2d15dfac645c580ae4a0f",
+ "started_by": "dokima-runtime[bot]",
+ "models": [
+  "claude-opus-5-5"
+ ],
+ "report": {
+  "duration_ms": 422998,
+  "turns": 18,
+  "cost_usd": 0.7616419999999999,
+  "tokens_in": 929297,
+  "tokens_out": 6392
+ },
+ "log": "https://github.com/dokima-dev/dokima/blob/logs/logs/795/39007324824-reviewer-pr.md",
+ "run": "https://github.com/dokima-dev/dokima/actions/runs/39007324824",
+ "handback": {
+  "previous_step": {
+   "did": [
+    "Workflows now take test commands, test folder, branches and bot from the settings.",
+    "The all tests check leaves out tests on the new exclude list.",
+    "Affected tests set to all runs every test and saves no baseline."
+   ],
+   "decided": [
+    "Older settings readers keep the old commands, branches and bot."
+   ],
+   "open": [
+    "Run records still go to the logs branch, left to a later issue."
+   ]
+  },
+  "verdict": "approve",
+  "summary": "Every criterion is built in the code; all tests pass on the branch and the new ones fail on main.",
+  "raises": [],
+  "answers": [
+   {
+    "raise": "W1",
+    "answer": "disagree",
+    "why": "Already filed: open issue 783 moves run records onto the records branch setting."
+   }
+  ],
+  "asks": [],
+  "behaviors": [],
+  "edge_cases": [],
+  "tests": [
+   {
+    "test": "tests/test_settings_workflows.py::test_the_all_tests_check_runs_the_all_tests_command_from_settings",
+    "only_its_behavior": true,
+    "why": "Fails on main, passes on the branch."
+   },
+   {
+    "test": "tests/test_settings_workflows.py::test_tests_on_the_exclude_list_stay_out_of_the_all_tests_check",
+    "only_its_behavior": true,
+    "why": "Fails on main, passes on the branch."
+   }
+  ],
+  "size": "ok"
+ },
+ "check": {
+  "passed": true,
+  "problems": []
+ },
+ "url": "https://github.com/dokima-dev/dokima/pull/802#issuecomment-6230314321"
+}
