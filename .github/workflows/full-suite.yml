@@ -29,7 +29,7 @@ jobs:
         uses: actions/checkout@v5
         with:
           repository: dokima-dev/dokima
-          ref: ${{ github.job_workflow_sha }}
+          ref: ${{ job.workflow_sha }}
           path: .dokima-code
           sparse-checkout: dokima
           persist-credentials: false
@@ -90,16 +90,11 @@ jobs:
           if [ -z "$RUN_ALL" ]; then RUN_ALL="pytest -q -p no:cacheprovider -n auto tests"
             echo "::notice title=Old settings::No settings reader with an env mode here, so every test runs."; fi
           if [ "$MODE" = affected ] && [ -f .testmondata ]; then
-<<<<<<< HEAD
             skip=$(PYTHONPATH="$DOKIMA_CODE" PYTHONSAFEPATH=1 python3 -c 'import shlex; from dokima.settings import read; print(" ".join("--deselect " + shlex.quote(str(t)) for t in (read().get("tests") or {}).get("exclude") or []))')
-            code=0; eval "python3 -m pytest -q --testmon $skip" || code=$?
-=======
-            skip=$(python3 -c 'import shlex; from dokima.settings import read; print(" ".join("--deselect " + shlex.quote(str(t)) for t in (read().get("tests") or {}).get("exclude") or []))')
             # Pick only: main's baseline already maps tests to code, so nothing is recorded here (recording doubles
             # the run), and the picked tests spread over the runner's cores when the repo has pytest-xdist.
             par=; python3 -c 'import xdist' 2>/dev/null && par="-n auto"
             code=0; eval "python3 -m pytest -q --testmon-nocollect $par $skip" || code=$?
->>>>>>> origin/main
             # 0 passed, 1 a test failed, 5 no test affected: testmon's real answers. Anything else: run every test.
             if [ "$code" -eq 0 ] || [ "$code" -eq 5 ]; then exit 0; fi
             if [ "$code" -eq 1 ]; then exit 1; fi
