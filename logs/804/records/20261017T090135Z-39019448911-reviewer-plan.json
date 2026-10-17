@@ -1,0 +1,254 @@
+{
+ "role": "reviewer",
+ "stage": "plan",
+ "run_id": "39019448911",
+ "commit_before": "affa747a456355237569db6d617d2566657233fa",
+ "started_by": "dokima-runtime[bot]",
+ "models": [
+  "claude-opus-5-5"
+ ],
+ "report": {
+  "duration_ms": 48070,
+  "turns": 8,
+  "cost_usd": 0.45388239999999996,
+  "tokens_in": 348801,
+  "tokens_out": 3871
+ },
+ "log": "https://github.com/dokima-dev/dokima/blob/logs/logs/804/39019448911-reviewer-plan.md",
+ "run": "https://github.com/dokima-dev/dokima/actions/runs/39019448911",
+ "handback": {
+  "previous_step": {
+   "did": [
+    "Wrote ten criteria, one per ask, with eleven failing tests.",
+    "Dropped the prompt folder case from one older text-only test."
+   ],
+   "decided": [
+    "Each setting is proven from a small repo with its own settings file."
+   ],
+   "open": []
+  },
+  "verdict": "approve",
+  "summary": "The plan carries all ten asks, each with a test that fails today for the right reason.",
+  "raises": [],
+  "answers": [],
+  "asks": [
+   {
+    "ask": "Which call links a test to its criterion is read from the test tag setting.",
+    "source": "https://github.com/dokima-dev/dokima/issues/740#issuecomment-6219928729",
+    "criterion": "804.1"
+   },
+   {
+    "ask": "Dokima finds tests written as methods of a test class.",
+    "source": "https://github.com/dokima-dev/dokima/issues/740#issuecomment-6219928729",
+    "criterion": "804.2"
+   },
+   {
+    "ask": "Dokima finds tests written as async functions.",
+    "source": "https://github.com/dokima-dev/dokima/issues/740#issuecomment-6219928729",
+    "criterion": "804.3"
+   },
+   {
+    "ask": "Dokima finds tests indented under another block.",
+    "source": "https://github.com/dokima-dev/dokima/issues/740#issuecomment-6219928729",
+    "criterion": "804.4"
+   },
+   {
+    "ask": "Changes to Dokima's prompt folder no longer stop the text-only shortcut.",
+    "source": "https://github.com/dokima-dev/dokima/issues/740#issuecomment-6219928729",
+    "criterion": "804.5"
+   },
+   {
+    "ask": "The folders that stop the text-only shortcut come from settings.",
+    "source": "https://github.com/dokima-dev/dokima/issues/740#issuecomment-6219928729",
+    "criterion": "804.6"
+   },
+   {
+    "ask": "The manual-fix check runs the tests in the test folder setting.",
+    "source": "https://github.com/dokima-dev/dokima/issues/740#issuecomment-6219928729",
+    "criterion": "804.7"
+   },
+   {
+    "ask": "The planner's check refuses files outside the test folder setting.",
+    "source": "https://github.com/dokima-dev/dokima/issues/740#issuecomment-6219928729",
+    "criterion": "804.8"
+   },
+   {
+    "ask": "The planner's check lays the branch's test folder, from settings, over main.",
+    "source": "https://github.com/dokima-dev/dokima/issues/740#issuecomment-6219928729",
+    "criterion": "804.9"
+   },
+   {
+    "ask": "The check that new tests fail today runs each with the run-one command setting.",
+    "source": "https://github.com/dokima-dev/dokima/issues/740#issuecomment-6219928729",
+    "criterion": "804.10"
+   }
+  ],
+  "behaviors": [
+   {
+    "criterion": "804.1",
+    "one_behavior": true,
+    "why": "One setting or test shape, one observable result."
+   },
+   {
+    "criterion": "804.2",
+    "one_behavior": true,
+    "why": "One setting or test shape, one observable result."
+   },
+   {
+    "criterion": "804.3",
+    "one_behavior": true,
+    "why": "One setting or test shape, one observable result."
+   },
+   {
+    "criterion": "804.4",
+    "one_behavior": true,
+    "why": "One setting or test shape, one observable result."
+   },
+   {
+    "criterion": "804.5",
+    "one_behavior": true,
+    "why": "One setting or test shape, one observable result."
+   },
+   {
+    "criterion": "804.6",
+    "one_behavior": true,
+    "why": "One setting or test shape, one observable result."
+   },
+   {
+    "criterion": "804.7",
+    "one_behavior": true,
+    "why": "One setting or test shape, one observable result."
+   },
+   {
+    "criterion": "804.8",
+    "one_behavior": true,
+    "why": "One setting or test shape, one observable result."
+   },
+   {
+    "criterion": "804.9",
+    "one_behavior": true,
+    "why": "One setting or test shape, one observable result."
+   },
+   {
+    "criterion": "804.10",
+    "one_behavior": true,
+    "why": "One setting or test shape, one observable result."
+   }
+  ],
+  "edge_cases": [
+   {
+    "criterion": "804.1",
+    "cut": [],
+    "missing": []
+   },
+   {
+    "criterion": "804.2",
+    "cut": [],
+    "missing": []
+   },
+   {
+    "criterion": "804.3",
+    "cut": [],
+    "missing": []
+   },
+   {
+    "criterion": "804.4",
+    "cut": [],
+    "missing": []
+   },
+   {
+    "criterion": "804.5",
+    "cut": [],
+    "missing": []
+   },
+   {
+    "criterion": "804.6",
+    "cut": [],
+    "missing": []
+   },
+   {
+    "criterion": "804.7",
+    "cut": [],
+    "missing": []
+   },
+   {
+    "criterion": "804.8",
+    "cut": [],
+    "missing": []
+   },
+   {
+    "criterion": "804.9",
+    "cut": [],
+    "missing": []
+   },
+   {
+    "criterion": "804.10",
+    "cut": [],
+    "missing": []
+   }
+  ],
+  "tests": [
+   {
+    "test": "tests/test_test_settings.py::test_the_test_tag_setting_decides_which_call_links_a_test",
+    "only_its_behavior": true,
+    "why": "Runs the real check; has a passing case beside the failing one."
+   },
+   {
+    "test": "tests/test_test_settings.py::test_tests_written_as_methods_of_a_test_class_are_found",
+    "only_its_behavior": true,
+    "why": "Runs the real check; has a passing case beside the failing one."
+   },
+   {
+    "test": "tests/test_test_settings.py::test_a_class_method_test_still_needs_its_summary",
+    "only_its_behavior": true,
+    "why": "Found class tests still meet the summary rule."
+   },
+   {
+    "test": "tests/test_test_settings.py::test_tests_written_as_async_functions_are_found",
+    "only_its_behavior": true,
+    "why": "Runs the real check; has a passing case beside the failing one."
+   },
+   {
+    "test": "tests/test_test_settings.py::test_tests_indented_under_another_block_are_found",
+    "only_its_behavior": true,
+    "why": "Runs the real check; has a passing case beside the failing one."
+   },
+   {
+    "test": "tests/test_test_settings.py::test_prompt_folder_changes_take_the_text_only_shortcut",
+    "only_its_behavior": true,
+    "why": "Runs the real check; has a passing case beside the failing one."
+   },
+   {
+    "test": "tests/test_test_settings.py::test_the_folders_that_stop_the_text_only_shortcut_come_from_settings",
+    "only_its_behavior": true,
+    "why": "Runs the real check; has a passing case beside the failing one."
+   },
+   {
+    "test": "tests/test_test_settings.py::test_the_manual_fix_check_runs_the_test_folder_setting",
+    "only_its_behavior": true,
+    "why": "Runs the real check; has a passing case beside the failing one."
+   },
+   {
+    "test": "tests/test_test_settings.py::test_the_planners_check_refuses_files_outside_the_test_folder_setting",
+    "only_its_behavior": true,
+    "why": "Runs the real check; has a passing case beside the failing one."
+   },
+   {
+    "test": "tests/test_test_settings.py::test_the_new_test_check_lays_the_test_folder_setting_over_main",
+    "only_its_behavior": true,
+    "why": "Runs the real check; has a passing case beside the failing one."
+   },
+   {
+    "test": "tests/test_test_settings.py::test_the_new_test_check_runs_each_test_with_the_run_one_setting",
+    "only_its_behavior": true,
+    "why": "Runs the real check; has a passing case beside the failing one."
+   }
+  ],
+  "size": "ok"
+ },
+ "check": {
+  "passed": true,
+  "problems": []
+ },
+ "url": "https://github.com/dokima-dev/dokima/issues/804#issuecomment-6232035466"
+}
