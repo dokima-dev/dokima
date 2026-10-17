@@ -52,7 +52,8 @@ version of its body, oldest first, the way GitHub keeps a comment that is edited
 or by `gh api` on repos/o/r/issues/N/comments (creates) and repos/o/r/issues/comments/ID (reads, or edits with PATCH),
 the body given as -f/-F/--field/--raw-field body=..., body=@file, or --input with a JSON file. `-q`/`--jq` with a
 plain `.field` picks that field. The author is Dokima's bot for the app's token and github-actions for the workflow's
-own token. `gh issue view` and `gh pr view` show these comments as GitHub would.
+own token. `gh issue view` and `gh pr view` show these comments as GitHub would. `gh api repos/o/r` names main as
+the repo's default branch, as GitHub does, for settings that leave the default branch empty (#787).
 
 options.json, when present, can say: pr_open (the issue has open pull request #60), fail_edits (every edit fails
 the way GitHub fails it), fail_card (every new comment fails until the agent has started).
@@ -183,6 +184,8 @@ elif a[:1] == ["api"] and "--paginate" in a:
 elif a[:1] == ["api"] and len(a) == 2 and a[1].startswith("repos/o/r/issues/"):
     n = int(a[1].rsplit("/", 1)[1])
     print(json.dumps({"id": n * 10, "number": n}))
+elif a[:1] == ["api"] and "repos/o/r" in a:
+    out({"full_name": "o/r", "default_branch": "main"})
 elif a[:1] == ["api"]:
     print("{}")
 '''

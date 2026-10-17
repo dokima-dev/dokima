@@ -133,7 +133,7 @@ def test_the_shipped_defaults_hold_the_owners_list(tmp_path, record_property):
         "setup.python": "3.12",
         "fence.test_setup_files": ["conftest.py", "pytest.ini", "tox.ini", "setup.cfg", "pyproject.toml"],
         "protected_paths": [".github/"],
-        "branch.default": "main",
+        "branch.default": "",
         "records.branch": "logs",
         "owner_docs": "AGENTS.md",
         "style.docstrings": "required",

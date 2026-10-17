@@ -3,14 +3,15 @@
 The settings live in `.dokima/settings.yaml` in the repo the run works in, over Dokima's shipped defaults in
 `dokima/defaults.yaml`. This story reads these of them:
 
-    branch: {default: main}          # the branch autopilot merges into; empty or unset asks GitHub for the repo's own
+    branch: {default: main}          # the branch autopilot merges into; empty (as shipped) asks GitHub for the repo's own
     merge: {method: squash}          # how autopilot merges: squash, merge or rebase
     gate: {checks_wait_min: 45}      # how many minutes the merge gate waits for checks still running
     labels: {autopilot: autopilot, filed: filed-by-dokima}   # the autopilot label and the label on issues Dokima files
 
 Each test writes a settings file into a temp folder, runs there, and calls autopilot's or the board's own code
-against a fake GitHub in memory standing in for `gh`. Time is faked, so a 45-minute wait costs nothing. Nothing
-leaves the machine.
+against a fake GitHub in memory standing in for `gh`. Time is faked, so a 45-minute wait costs nothing. The tests
+of 787.8 and 787.9 run `python3 -m dokima.settings` itself, with a fake `gh` program first on the PATH and a fake
+GitHub event file. Nothing leaves the machine.
 """
 import json
 import os
@@ -24,6 +25,7 @@ from dokima import agent_autopilot as ap  # noqa: E402
 from dokima import agent_github  # noqa: E402
 from dokima import board as board_mod  # noqa: E402
 
+ROOT = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 REPO = "o/r"
 PR = 60
 HEAD = "a1" * 20
@@ -424,3 +426,105 @@ def test_issues_dokima_files_carry_the_filed_label_named_in_settings(record_prop
     assert gh.created, f"787.7: no issue was filed: {lines}"
     got = [args[args.index("--label") + 1] for args in gh.created]
     assert got == ["found-by-bot"], f"787.7: the filed issue carries {got}, not found-by-bot as the settings say"
+
+
+# 787.8 ---------------------------------------------------------------------------------------------------------
+
+
+def settings_run(where, *args, github="trunk"):
+    """Runs the settings reader in WHERE against a fake GitHub with default branch GITHUB.
+
+    A fake `gh` first on the PATH answers `gh api repos/o/r` with that branch (honouring `--jq .default_branch`), and
+    the event file names it as the repo's default branch, as GitHub's own event file does. GITHUB None makes GitHub
+    give nothing: `gh` fails and there is no event file."""
+    bin_dir = os.path.join(where, "fake-bin")
+    os.makedirs(bin_dir, exist_ok=True)
+    body = json.dumps({"full_name": REPO, "default_branch": github})
+    with open(os.path.join(bin_dir, "gh"), "w") as f:
+        f.write(f"""#!{sys.executable}
+import json, sys
+a = sys.argv[1:]
+if {github is None!r} or "repos/{REPO}" not in a:
+    sys.stderr.write("HTTP 404: Not Found\\n")
+    sys.exit(1)
+body = json.loads({body!r})
+q = a[a.index("--jq") + 1] if "--jq" in a else a[a.index("-q") + 1] if "-q" in a else None
+print(body["default_branch"] if q == ".default_branch" else json.dumps(body))
+""")
+    os.chmod(os.path.join(bin_dir, "gh"), 0o755)
+    env = {k: v for k, v in os.environ.items() if not k.startswith(("GITHUB_", "GH_", "DOKIMA_"))}
+    env.update(PATH=bin_dir + os.pathsep + os.environ.get("PATH", ""), PYTHONPATH=ROOT, GITHUB_REPOSITORY=REPO,
+               GH_TOKEN="fake-token")
+    if github is not None:
+        event = os.path.join(where, "event.json")
+        with open(event, "w") as f:
+            json.dump({"repository": {"full_name": REPO, "default_branch": github}}, f)
+        env["GITHUB_EVENT_PATH"] = event
+    return subprocess.run([sys.executable, "-m", "dokima.settings", *args], cwd=where, env=env,
+                          capture_output=True, text=True, timeout=60)
+
+
+def env_value(out, name):
+    """The value of NAME in `NAME=value` lines, or None when no line names it."""
+    return next((line.split("=", 1)[1] for line in out.splitlines() if line.startswith(name + "=")), None)
+
+
+def test_the_shipped_settings_leave_the_default_branch_empty(record_property, tmp_path):
+    """Dokima ships the default branch setting empty, not main.
+
+    Runs the settings reader in a repo with no settings file and checks the merged default branch is empty, so the
+    shipped defaults name no branch of their own. Proves 787.8."""
+    record_property("proves", "787.8")
+    done = settings_run(str(tmp_path))
+    assert done.returncode == 0, f"787.8: the settings reader failed in a repo with no settings file:\n{done.stderr[-800:]}"
+    got = json.loads(done.stdout)["branch"]["default"]
+    assert got in ("", None), f"787.8: the shipped default branch setting is {got!r}, not empty"
+
+
+def test_a_repo_with_no_settings_file_merges_into_githubs_default_branch(record_property, repo, monkeypatch):
+    """A repo with no settings file gets GitHub's default branch, not main.
+
+    The repo has no settings file; GitHub says its default branch is develop and has no main. Autopilot merges, and
+    every branch it read names develop. Proves 787.8."""
+    record_property("proves", "787.8")
+    repo(None)
+    gh = fake(monkeypatch, branches={"develop": ["all tests"]}, github_default="develop")
+    asked, why = ap.try_merge(REPO, PR)
+    assert asked, f"787.8: with no settings file, autopilot did not merge into GitHub's develop: {why}"
+    used = set(gh.branches_asked())
+    assert used == {"develop"}, f"787.8: with no settings file, autopilot read {sorted(used)}, not GitHub's develop"
+
+
+# 787.9 ---------------------------------------------------------------------------------------------------------
+
+
+def test_with_the_default_branch_empty_workflows_get_githubs_default_branch(record_property, tmp_path):
+    """With the default branch setting empty, workflows run on GitHub's default branch.
+
+    The repo's settings leave the default branch empty and GitHub says the repo's default branch is trunk. The lines
+    workflows run by must name trunk as the default branch, never an empty one. Then the settings name release, and
+    the lines must name release, not GitHub's trunk. Proves 787.9."""
+    record_property("proves", "787.9")
+    os.makedirs(tmp_path / ".dokima")
+    (tmp_path / ".dokima" / "settings.yaml").write_text('branch:\n  default: ""\n')
+    done = settings_run(str(tmp_path), "env")
+    assert done.returncode == 0, f"787.9: the settings lines for workflows failed:\n{done.stderr[-800:]}"
+    got = env_value(done.stdout, "DEFAULT_BRANCH")
+    assert got == "trunk", f"787.9: workflows were given default branch {got!r}, not GitHub's trunk"
+    (tmp_path / ".dokima" / "settings.yaml").write_text("branch:\n  default: release\n")
+    done = settings_run(str(tmp_path), "env")
+    got = env_value(done.stdout, "DEFAULT_BRANCH")
+    assert got == "release", f"787.9: a repo naming release gave workflows {got!r}, not release"
+
+
+def test_github_giving_no_default_branch_stops_the_run_saying_why(record_property, tmp_path):
+    """When GitHub gives no default branch, the run stops and says so.
+
+    The settings leave the default branch empty and GitHub answers nothing. The settings reader must fail, saying the
+    default branch is unknown, rather than hand workflows an empty branch. Proves 787.9."""
+    record_property("proves", "787.9")
+    os.makedirs(tmp_path / ".dokima")
+    (tmp_path / ".dokima" / "settings.yaml").write_text('branch:\n  default: ""\n')
+    done = settings_run(str(tmp_path), "env", github=None)
+    assert done.returncode != 0, f"787.9: with no default branch known, workflows were given:\n{done.stdout}"
+    assert "default branch" in done.stderr.lower(), f"787.9: the failure does not say the default branch is unknown:\n{done.stderr[-800:]}"
