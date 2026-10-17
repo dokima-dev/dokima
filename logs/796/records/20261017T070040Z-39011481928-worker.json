@@ -1,0 +1,60 @@
+{
+ "role": "worker",
+ "stage": null,
+ "run_id": "39011481928",
+ "commit_before": "3baa263c6dc15684d9dd6613f788940282df0443",
+ "started_by": "dokima-runtime[bot]",
+ "models": [
+  "claude-opus-5-5"
+ ],
+ "report": {
+  "duration_ms": 462511,
+  "turns": 26,
+  "cost_usd": 1.2328780000000001,
+  "tokens_in": 1669123,
+  "tokens_out": 16394
+ },
+ "log": "https://github.com/dokima-dev/dokima/blob/logs/logs/796/39011481928-worker.md",
+ "run": "https://github.com/dokima-dev/dokima/actions/runs/39011481928",
+ "handback": {
+  "summary": "Commits credit the co-author setting, and agent prompts follow the settings' owner docs, paths, test runner, caps and house rules.",
+  "criteria": {
+   "796.1": "`dokima/settings.py` env mode adds `CO_AUTHOR`; `agent.yml` push and `wiki.yml` sync add the trailer only when it is set.",
+   "796.2": "`agent.yml` runtime copy reads `OWNER_DOCS` from the settings and copies that file and its linked topic files; a missing one only warns.",
+   "796.3": "`dokima/prompt.py` `build()` puts the owner docs file in place of every AGENTS.md in the shipped prompt.",
+   "796.4": "`dokima/prompt.py` `build()` writes the protected paths into the worker's never-edit line.",
+   "796.5": "`dokima/prompt.py` `runner_line()` draws the planner's runner line from the test commands, folder and tag.",
+   "796.6": "`dokima/prompt.py` `caps_table()` writes each cap from the caps setting into its table row.",
+   "796.7": "`agent.yml` copies main's prompt addition files into the runtime and appends `dokima.prompt house` output after the whole prompt.",
+   "796.8": "`dokima/prompt.py` `for_role()` drops other roles' `## <role>` sections, keeping shared text and the role's own.",
+   "796.9": "`dokima/defaults.yaml` ships `co_author` empty, so no trailer is written without a setting.",
+   "796.10": "New `.dokima/settings.yaml` holds the owner's co-author line for this repo."
+  },
+  "evidence": "`pytest -q tests/test_settings_prompts.py`: 10 passed in 15.39s",
+  "raises": [
+   {
+    "kind": "issue",
+    "label": "Owner docs elsewhere",
+    "text": "Owner's words checks still read only AGENTS.md, so quotes from a renamed owner docs file are never found.",
+    "evidence": "`dokima/agent_next.py:13` reads `AGENTS.md`; `dokima/agent_checks.py:235` accepts only `AGENTS.md` as a source.",
+    "raised_by": "worker",
+    "id": "W1"
+   }
+  ]
+ },
+ "check": {
+  "passed": true,
+  "problems": []
+ },
+ "dropped_by_fence": [],
+ "files_changed": [
+  ".dokima/settings.yaml",
+  ".github/workflows/agent.yml",
+  ".github/workflows/wiki.yml",
+  "dokima/defaults.yaml",
+  "dokima/prompt.py",
+  "dokima/settings.py"
+ ],
+ "branch": "try/issue-796",
+ "url": "https://github.com/dokima-dev/dokima/issues/796#issuecomment-6230889839"
+}
