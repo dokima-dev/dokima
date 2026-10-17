@@ -63,9 +63,9 @@ jobs:
       - id: mode
         run: |
           queue=true; affected=testmon
-          if python3 -c 'from dokima.settings import read' 2>/dev/null; then
-            queue=$(python3 -c 'from dokima.settings import read; print("false" if (read().get("merge") or {}).get("queue", True) is False else "true")')
-            affected=$(python3 -c 'from dokima.settings import read; print((read().get("tests") or {}).get("affected") or "testmon")')
+          if PYTHONPATH="$DOKIMA_CODE" PYTHONSAFEPATH=1 python3 -c 'from dokima.settings import read' 2>/dev/null; then
+            queue=$(PYTHONPATH="$DOKIMA_CODE" PYTHONSAFEPATH=1 python3 -c 'from dokima.settings import read; print("false" if (read().get("merge") or {}).get("queue", True) is False else "true")')
+            affected=$(PYTHONPATH="$DOKIMA_CODE" PYTHONSAFEPATH=1 python3 -c 'from dokima.settings import read; print((read().get("tests") or {}).get("affected") or "testmon")')
           fi
           mode=all
           if [ "${{ github.event_name }}" = pull_request_target ] && [ "$queue" = true ] && [ "$affected" != all ]; then mode=affected; fi
@@ -90,7 +90,7 @@ jobs:
           if [ -z "$RUN_ALL" ]; then RUN_ALL="pytest -q -p no:cacheprovider -n auto tests"
             echo "::notice title=Old settings::No settings reader with an env mode here, so every test runs."; fi
           if [ "$MODE" = affected ] && [ -f .testmondata ]; then
-            skip=$(python3 -c 'import shlex; from dokima.settings import read; print(" ".join("--deselect " + shlex.quote(str(t)) for t in (read().get("tests") or {}).get("exclude") or []))')
+            skip=$(PYTHONPATH="$DOKIMA_CODE" PYTHONSAFEPATH=1 python3 -c 'import shlex; from dokima.settings import read; print(" ".join("--deselect " + shlex.quote(str(t)) for t in (read().get("tests") or {}).get("exclude") or []))')
             code=0; eval "python3 -m pytest -q --testmon $skip" || code=$?
             # 0 passed, 1 a test failed, 5 no test affected: testmon's real answers. Anything else: run every test.
             if [ "$code" -eq 0 ] || [ "$code" -eq 5 ]; then exit 0; fi

@@ -26,13 +26,13 @@ jobs:
       - uses: actions/checkout@v5
         with:
           ref: ${{ github.event.merge_group.base_ref }}
-      # Dokima's code from Dokima's own repo, at this shared workflow's commit (main when run directly), never the
-      # repo's own copy (#812).
+      # Dokima's code from Dokima's own repo, at this shared workflow's commit, never the repo's own copy (#812). Run
+      # directly, Dokima's own repo names main: in its merge queue that commit is the queued one (#388).
       - name: Dokima's code from Dokima's own repo
         uses: actions/checkout@v5
         with:
           repository: dokima-dev/dokima
-          ref: ${{ github.job_workflow_sha }}
+          ref: ${{ github.job_workflow_sha == github.workflow_sha && 'main' || github.job_workflow_sha }}
           path: .dokima-code
           sparse-checkout: dokima
           persist-credentials: false
@@ -65,13 +65,13 @@ jobs:
           ref: ${{ github.event.pull_request.head.sha || github.event.merge_group.head_sha }}
           path: pr
           persist-credentials: false
-      # Dokima's code from Dokima's own repo, at this shared workflow's commit (main when run directly), never the
-      # repo's own copy (#812).
+      # Dokima's code from Dokima's own repo, at this shared workflow's commit, never the repo's own copy (#812). Run
+      # directly, Dokima's own repo names main: in its merge queue that commit is the queued one (#388).
       - name: Dokima's code from Dokima's own repo
         uses: actions/checkout@v5
         with:
           repository: dokima-dev/dokima
-          ref: ${{ github.job_workflow_sha }}
+          ref: ${{ github.job_workflow_sha == github.workflow_sha && 'main' || github.job_workflow_sha }}
           path: .dokima-code
           sparse-checkout: dokima
           persist-credentials: false
