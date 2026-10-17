@@ -1,0 +1,43 @@
+{
+ "role": "worker",
+ "stage": null,
+ "run_id": "39061024197",
+ "commit_before": "fd19bfaf04b92bcd7bee5eab53538d60b5fde58f",
+ "started_by": "dokima-runtime[bot]",
+ "models": [
+  "claude-opus-5-5"
+ ],
+ "report": {
+  "duration_ms": 178402,
+  "turns": 7,
+  "cost_usd": 0.31575020000000004,
+  "tokens_in": 244295,
+  "tokens_out": 1872
+ },
+ "log": "https://github.com/dokima-dev/dokima/blob/logs/logs/812/39061024197-worker.md",
+ "run": "https://github.com/dokima-dev/dokima/actions/runs/39061024197",
+ "handback": {
+  "summary": "No code change this round; the planner's fixed queue tests now pass against the code already built.",
+  "criteria": {
+   "812.1": "Built earlier: every shared job checks out Dokima's own repo and runs code from there.",
+   "812.2": "Built earlier: every job that reads a key runs in the keys environment.",
+   "812.3": "Built earlier: the agent run reads the key secret its settings name.",
+   "812.4": "Built earlier: an early step fails a run with no bot, saying how to set it up.",
+   "812.5": "Built earlier: a step fails a run with no model key, naming the secret and the fix.",
+   "812.6": "Built earlier: the default co-author line names Dokima's bot on every commit and merge.",
+   "812.7": "Built earlier: turning the co-author line off leaves commits and merges with none.",
+   "812.8": "Built earlier: the adopter calls at a tag; shared workflows fetch Dokima's code at the called commit.",
+   "812.9": "Built earlier: the adopter's workflow is nineteen lines.",
+   "812.10": "Built earlier: the entry workflow starts Dokima on every event it acts on."
+  },
+  "evidence": "`pytest -q tests/test_thin_install.py tests/test_queue_judge.py`: `15 passed`."
+ },
+ "check": {
+  "passed": true,
+  "problems": []
+ },
+ "dropped_by_fence": [],
+ "files_changed": [],
+ "branch": "try/issue-812",
+ "url": "https://github.com/dokima-dev/dokima/pull/824#issuecomment-6239208380"
+}
