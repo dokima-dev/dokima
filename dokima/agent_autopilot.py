@@ -8,8 +8,9 @@ import json
 import os
 import subprocess
 import time
+import urllib.parse
 
-from dokima import body as issue_body, card, raises
+from dokima import body as issue_body, card, manifest, raises, settings
 from dokima.card import field_icon
 
 
@@ -152,7 +153,26 @@ def named(numbers):
     return ns[0] if len(ns) == 1 else ", ".join(ns[:-1]) + " and " + ns[-1]
 
 
-FILED_LABEL = "filed-by-dokima"  # every issue Dokima files itself carries it (#268)
+FILED_LABEL = "filed-by-dokima"  # every issue Dokima files itself carries it (#268), under its name in settings (#784)
+
+
+def filed_label(repo):
+    """The filed label's name in the labels setting, created in REPO when missing.
+
+    It gets its color from the settings and its description from the manifest. A refused creation is left to the
+    filing itself, which then says GitHub's reason."""
+    got = settings.read()
+    name = str((got.get("labels") or {}).get("filed") or FILED_LABEL)
+    want = manifest.labels(got)[name]
+    try:
+        agent_github.gh("api", f"repos/{repo}/labels/{urllib.parse.quote(name, safe='')}")
+    except subprocess.CalledProcessError:
+        try:
+            agent_github.gh("api", "-X", "POST", f"repos/{repo}/labels", "-f", f"name={name}",
+                            "-f", f"color={want['color']}", "-f", f"description={want['description']}")
+        except subprocess.CalledProcessError:
+            pass
+    return name
 
 
 def file_issues(repo, number, rec, recs):
@@ -168,7 +188,7 @@ def file_issues(repo, number, rec, recs):
     theirs = {x["id"]: x for x in open_raises(recs) if x.get("kind") == "issue" and raises.sent_to(x) == raises.CONFIRMS}
     found += [(theirs[a["raise"]], a) for a in card.answers_of(h)
               if a.get("answer") == "done" and isinstance(a["raise"], str) and a["raise"] in theirs]
-    lines = []
+    lines, label = [], None
     for x, decided in found:
         title = first_sentence(x.get("text") or x.get("label") or "An issue found")
         by = x.get("raised_by") or "reviewer"
@@ -197,9 +217,10 @@ def file_issues(repo, number, rec, recs):
         if raises.is_numbers(decided.get(raises.SEARCHED)) and decided[raises.SEARCHED]:
             body += ["", "**Open issues searched:** " + ", ".join(f"#{n}" for n in decided[raises.SEARCHED])]
         body += ["", f"{who} on #{number}{where}."]
+        label = label or filed_label(repo)
         try:
             url = agent_github.gh("issue", "create", "-R", repo, "--title", title, "--body", "\n".join(body),
-                     "--label", FILED_LABEL).strip()
+                     "--label", label).strip()
         except subprocess.CalledProcessError as e:
             lines.append(f"- Not filed: {card.escape(title)} GitHub refused it: {card.escape(gh_reason(e))}")
             continue
