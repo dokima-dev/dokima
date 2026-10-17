@@ -250,8 +250,24 @@ def commit_expressions():
 
 
 def suite_refs():
-    """The `ref:` of every checkout in full-suite.yml, the commit the all tests check runs."""
-    return [line.split(":", 1)[1].strip() for line in workflow("full-suite.yml") if re.match(r"^\s+ref:\s", line)]
+    """The `ref:` of every checkout in full-suite.yml, the commit the all tests check runs.
+
+    The checkout of Dokima's own repo (#812) brings Dokima's code, not the commit under test, so it is left out."""
+    lines = workflow("full-suite.yml")
+    return [line.split(":", 1)[1].strip() for i, line in enumerate(lines) if re.match(r"^\s+ref:\s", line)
+            and not any("repository: dokima-dev/dokima" in b for b in lines[max(0, i - 3):i + 4])]
+
+
+def called_on(job):
+    """The event names entry.yml calls one shared workflow on (#812), read from that job's `if:`."""
+    lines = workflow("entry.yml")
+    start = lines.index(f"  {job}:")
+    block = []
+    for line in lines[start + 1:]:
+        if line.startswith("  ") and not line.startswith("   "):
+            break
+        block.append(line)
+    return set(re.findall(r"github\.event_name == '(\w+)'", "\n".join(block)))
 
 
 def test_both_required_workflows_run_in_the_merge_queue_on_the_queued_commit(record_property):
@@ -260,7 +276,7 @@ def test_both_required_workflows_run_in_the_merge_queue_on_the_queued_commit(rec
     Proves 191.1. Reads the `on:` of full-suite.yml and acceptance-criteria.yml and checks each lists merge_group; then evaluates the commit
     the criteria check checks out and the commit its annotations link to for a merge_group event, and checks both are
     the queue's commit (the pull request on top of the latest main), not empty and not main's; and does the same for
-    the commit the all tests check checks out."""
+    the commit the all tests check checks out (all but its checkout of Dokima's own code, #812)."""
     record_property("proves", "191.1")
     for name in ("full-suite.yml", "acceptance-criteria.yml"):
         assert "merge_group" in triggers(workflow(name)), \
@@ -336,16 +352,21 @@ def test_pull_request_checks_behave_exactly_as_before(record_property, run_matri
 
     Proves 191.4. Checks the triggers are exactly main's plus merge_group (full-suite.yml: pull_request_target and
     merge_group; the owner dropped the push to main on 2026-10-17, since the queue already tests the exact merge; acceptance-criteria.yml: pull_request_target, merge_group), so nothing was dropped, swapped or
-    added beyond the queue; that the required check names 'all tests' and 'Acceptance criteria' are unchanged; that
+    added beyond the queue, besides the call from entry.yml (#812), which calls each only on those same events; that the required check names 'all tests' and 'Acceptance criteria' are unchanged; that
     `dokima.checks matrix` on a pull request lists its issue's plan exactly; that on a pull request the criteria
     check out and annotate the pull request's head commit, not main's; and that the all tests check still checks out
     the pull request's head on a pull request and main's commit on a push to main."""
     record_property("proves", "191.4")
     suite, dw = workflow("full-suite.yml"), workflow("acceptance-criteria.yml")
-    assert triggers(suite) == {"pull_request_target", "merge_group"}, \
+    # Since #812 an adopter's one workflow also calls both through entry.yml, only on these same events.
+    assert triggers(suite) - {"workflow_call"} == {"pull_request_target", "merge_group"}, \
         f"191.4: full-suite.yml should run on pull_request_target and merge_group only, but runs on {sorted(triggers(suite))}"
-    assert triggers(dw) == {"pull_request_target", "merge_group"}, \
+    assert called_on("full-suite") == {"pull_request_target", "merge_group"}, \
+        f"191.4: entry.yml should call full-suite.yml on pull_request_target and merge_group only, not {sorted(called_on('full-suite'))}"
+    assert triggers(dw) - {"workflow_call"} == {"pull_request_target", "merge_group"}, \
         f"191.4: acceptance-criteria.yml should run on pull_request_target and merge_group only, but runs on {sorted(triggers(dw))}"
+    assert called_on("acceptance-criteria") == {"pull_request_target", "merge_group"}, \
+        f"191.4: entry.yml should call acceptance-criteria.yml on pull_request_target and merge_group only, not {sorted(called_on('acceptance-criteria'))}"
     assert "name: all tests" in [x.strip() for x in suite], "191.4: the 'all tests' check was renamed"
     assert "name: Acceptance criteria" in [x.strip() for x in dw], "191.4: the 'Acceptance criteria' check was renamed"
     code, rows, err = run_matrix(pr_event(12))

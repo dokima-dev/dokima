@@ -20,6 +20,8 @@ on:
     types: [opened, edited, synchronize, reopened, closed, labeled, unlabeled, ready_for_review, converted_to_draft]
   schedule:
     - cron: '*/15 * * * *'
+  # Called by the one workflow an adopter installs (dokima/install/dokima.yml), through entry.yml (#812).
+  workflow_call:
 permissions:
   contents: read
   actions: read
@@ -90,6 +92,20 @@ jobs:
           printf '#!/bin/sh\necho "$*" | cut -c1-120 >> %s/calls\nexec %s "$@"\n' "$d" "$real" > "$d/gh"
           chmod +x "$d/gh" && { [ -z "$GITHUB_PATH" ] || echo "$d" >> "$GITHUB_PATH"; } || true
       - uses: actions/checkout@v5
+      # Dokima's code from Dokima's own repo, at this shared workflow's commit (main when run directly), never the
+      # repo's own copy (#812).
+      - name: Dokima's code from Dokima's own repo
+        uses: actions/checkout@v5
+        with:
+          repository: dokima-dev/dokima
+          ref: ${{ job.workflow_sha }}
+          path: .dokima-code
+          sparse-checkout: dokima
+          persist-credentials: false
+      - name: Every Dokima step runs Dokima's code
+        run: |
+          rm -rf "$RUNNER_TEMP/dokima" && mv .dokima-code "$RUNNER_TEMP/dokima"
+          printf 'PYTHONPATH=%s\nPYTHONSAFEPATH=1\n' "$RUNNER_TEMP/dokima" >> "$GITHUB_ENV"
       # The card is posted by the repo's Dokima app, so it shows as that app's bot.
       - id: app
         uses: actions/create-github-app-token@v2
@@ -107,7 +123,7 @@ jobs:
           RUN_TITLE: ${{ github.event.workflow_run.display_title }}
           BY_BOT: ${{ github.event.sender.type == 'Bot' }}
           DOKIMA_BOARD: ${{ vars.DOKIMA_BOARD }}
-        run: python3 dokima/card.py
+        run: python3 "$RUNNER_TEMP/dokima/dokima/card.py"
       # The PR's description carries no Closes line (#416), so a merge closes the issue it was built for here.
       - name: Close the issue a merged pull request was built for
         if: github.event_name == 'pull_request_target' && github.event.pull_request.merged

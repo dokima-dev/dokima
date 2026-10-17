@@ -155,14 +155,19 @@ def test_the_audit_runs_on_a_schedule_or_the_run_workflow_button_and_nothing_els
     """The audit starts on its schedule or the Run workflow button, and on nothing else.
 
     Proves 285.2. Reads audit.yml: its triggers are exactly `schedule` and `workflow_dispatch` (no settings-change events, no
-    comments), the button needs no input, and the audit job and step run for both a scheduled and a button run with
+    comments), besides the call from entry.yml (#812), which it makes on those two events alone; the button needs no input, and the audit job and step run for both a scheduled and a button run with
     the board set. It also checks that no comment, such as `/audit`, starts anything: the comment commands are still
     only /plan, /work and /review."""
     record_property("proves", "285.2")
     wf = workflow("285.2")
     on = triggers(wf)
-    assert set(on) == {"schedule", "workflow_dispatch"}, \
+    assert set(on) - {"workflow_call"} == {"schedule", "workflow_dispatch"}, \
         f"285.2: audit.yml should start only on schedule and workflow_dispatch, it starts on {sorted(on)}"
+    # Since #812 an adopter's one workflow calls audit.yml through entry.yml: on those same two events alone.
+    entry = ts.load_yaml(open(os.path.join(ROOT, ".github", "workflows", "entry.yml")).read())
+    called = set(re.findall(r"github\.event_name == '(\w+)'", str(entry["jobs"]["audit"].get("if"))))
+    assert called == {"schedule", "workflow_dispatch"}, \
+        f"285.2: entry.yml should call audit.yml only on schedule and workflow_dispatch, it calls it on {sorted(called)}"
     inputs = (on["workflow_dispatch"] or {}).get("inputs") if isinstance(on["workflow_dispatch"], dict) else None
     required = [k for k, v in (inputs or {}).items() if isinstance(v, dict) and str(v.get("required")) == "true"]
     assert not required, f"285.2: the Run workflow button should need no input, it requires {required}"

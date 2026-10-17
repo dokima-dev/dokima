@@ -1,12 +1,15 @@
 name: Acceptance criteria
 # One GitHub check per criterion of the PR's approved plan, plus one gate check.
-# Runs main's copy of this workflow and of Dokima's code; only the tests, and the code they judge, come from the PR.
+# Runs main's copy of this workflow, and Dokima's code from Dokima's own repo; only the tests, and the code they
+# judge, come from the PR.
 # In the merge queue they come from the queued commit: the PR on top of the latest main.
 # A draft pull request runs none: Dokima's are drafts until the merge gate readies them, after the code review (#597).
 on:
   pull_request_target:
     types: [opened, synchronize, reopened, ready_for_review]
   merge_group:
+  # Called by the one workflow an adopter installs (dokima/install/dokima.yml), through entry.yml (#812).
+  workflow_call:
 permissions:
   contents: read
   issues: read
@@ -19,10 +22,24 @@ jobs:
     outputs:
       matrix: ${{ steps.m.outputs.matrix }}
     steps:
-      # Main's copy of Dokima's code: in the merge queue the default is the queued commit, so name main's branch.
+      # Main's copy of the repo's settings: in the merge queue the default is the queued commit, so name main's branch.
       - uses: actions/checkout@v5
         with:
           ref: ${{ github.event.merge_group.base_ref }}
+      # Dokima's code from Dokima's own repo, at this shared workflow's commit, never the repo's own copy (#812). Run
+      # directly, Dokima's own repo names main: in its merge queue that commit is the queued one (#388).
+      - name: Dokima's code from Dokima's own repo
+        uses: actions/checkout@v5
+        with:
+          repository: dokima-dev/dokima
+          ref: ${{ job.workflow_sha == github.workflow_sha && 'main' || job.workflow_sha }}
+          path: .dokima-code
+          sparse-checkout: dokima
+          persist-credentials: false
+      - name: Every Dokima step runs Dokima's code
+        run: |
+          rm -rf "$RUNNER_TEMP/dokima" && mv .dokima-code "$RUNNER_TEMP/dokima"
+          printf 'PYTHONPATH=%s\nPYTHONSAFEPATH=1\n' "$RUNNER_TEMP/dokima" >> "$GITHUB_ENV"
       - run: python3 -m pip install -q pyyaml  # the settings reader (#794)
       - id: m
         env:
@@ -48,6 +65,19 @@ jobs:
           ref: ${{ github.event.pull_request.head.sha || github.event.merge_group.head_sha }}
           path: pr
           persist-credentials: false
+      # Dokima's code from Dokima's own repo, at this shared workflow's commit, never the repo's own copy (#812). Run
+      # directly, Dokima's own repo names main: in its merge queue that commit is the queued one (#388).
+      - name: Dokima's code from Dokima's own repo
+        uses: actions/checkout@v5
+        with:
+          repository: dokima-dev/dokima
+          ref: ${{ job.workflow_sha == github.workflow_sha && 'main' || job.workflow_sha }}
+          path: .dokima-code
+          sparse-checkout: dokima
+          persist-credentials: false
+      # Only Dokima's own steps run its code: the repo's tests import the repo's own.
+      - name: Where Dokima's code is
+        run: rm -rf "$RUNNER_TEMP/dokima" && mv .dokima-code "$RUNNER_TEMP/dokima" && echo "DOKIMA_CODE=$RUNNER_TEMP/dokima" >> "$GITHUB_ENV"
       - uses: actions/setup-python@v6
         with:
           python-version: "3.12"
@@ -56,7 +86,7 @@ jobs:
       # A checkout whose settings reader has no setup mode (main before #794) sets up as this workflow did before.
       - id: setup
         run: |
-          if python3 -c 'from dokima.settings import setup_lines' 2>/dev/null; then out=$(python3 -m dokima.settings setup)
+          if PYTHONPATH="$DOKIMA_CODE" PYTHONSAFEPATH=1 python3 -c 'from dokima.settings import setup_lines' 2>/dev/null; then out=$(PYTHONPATH="$DOKIMA_CODE" PYTHONSAFEPATH=1 python3 -m dokima.settings setup)
           else out=$(printf 'python=3.12\ntest_tools=pytest pytest-xdist\ninstall=\n')
             echo "::notice title=Old setup::No settings reader with a setup mode here, so the old install list is used."; fi
           echo "$out"; echo "$out" >> "${GITHUB_OUTPUT:-/dev/null}"
@@ -75,7 +105,7 @@ jobs:
       # #795, as the merge queue may run it), the criterion's tests run as before.
       - name: The per-criterion command from the settings
         run: |
-          out=; if python3 -c 'from dokima.settings import env_lines' 2>/dev/null; then out=$(python3 -m dokima.settings env); fi
+          out=; if PYTHONPATH="$DOKIMA_CODE" PYTHONSAFEPATH=1 python3 -c 'from dokima.settings import env_lines' 2>/dev/null; then out=$(PYTHONPATH="$DOKIMA_CODE" PYTHONSAFEPATH=1 python3 -m dokima.settings env); fi
           if printf '%s\n' "$out" | grep -q '^TESTS_RUN_ONE='; then printf '%s\n' "$out" >> "${GITHUB_ENV:-/dev/null}"
           else echo "::notice title=Old settings::No settings reader with an env mode here, so the old test command is used."; fi
       - name: Run this criterion's tests
@@ -95,7 +125,7 @@ jobs:
         env:
           ID: ${{ matrix.id }}
           HEAD_SHA: ${{ github.event.pull_request.head.sha || github.event.merge_group.head_sha }}
-        run: python3 -m dokima.checks annotate pr/r.xml
+        run: PYTHONPATH="$DOKIMA_CODE" PYTHONSAFEPATH=1 python3 -m dokima.checks annotate pr/r.xml
 
   gate:
     name: Acceptance criteria

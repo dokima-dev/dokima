@@ -1,0 +1,83 @@
+name: entry
+# The one shared workflow an adopter's thin workflow calls (dokima/install/dokima.yml), at a release tag. It hands each
+# event to the shared workflows that act on it, as their own triggers do in Dokima's own repo, so the adopter's file
+# stays short (#812). Each runs Dokima's code from Dokima's own repo at this tag, and the adopter's keys from its keys
+# environment. In an adopter's repo every shared workflow runs inside the one `dokima` run, so a finished run of it
+# stands in for the finished checks and reviews the board and the card wait for; only runs the checks or reviews
+# started count, so a redraw never starts another.
+on:
+  workflow_call:
+jobs:
+  agent:
+    if: github.event_name == 'repository_dispatch' && github.event.action == 'dokima-next'
+    uses: ./.github/workflows/agent.yml
+    secrets: inherit
+    with:
+      role: ${{ github.event.client_payload.role }}
+      stage: ${{ github.event.client_payload.stage || 'plan' }}
+      issue: ${{ github.event.client_payload.issue }}
+      card: ${{ github.event.client_payload.card }}
+  commands:
+    if: >-
+      (github.event_name == 'issue_comment' && github.event.action == 'created') ||
+      (github.event_name == 'pull_request_review' && github.event.action == 'submitted')
+    uses: ./.github/workflows/commands.yml
+    secrets: inherit
+  reviews:
+    if: github.event_name == 'pull_request_review' || github.event_name == 'pull_request_review_comment'
+    uses: ./.github/workflows/reviews.yml
+  assign:
+    if: github.event_name == 'issues' && github.event.action == 'opened'
+    uses: ./.github/workflows/assign.yml
+    secrets: inherit
+  autopilot:
+    if: github.event_name == 'issues' && contains(fromJSON('["closed", "labeled"]'), github.event.action)
+    uses: ./.github/workflows/autopilot.yml
+    secrets: inherit
+  board:
+    if: >-
+      (github.event_name == 'issues' &&
+       contains(fromJSON('["opened", "edited", "labeled", "unlabeled", "closed", "reopened"]'), github.event.action)) ||
+      (github.event_name == 'schedule' && github.event.schedule == '*/15 * * * *') ||
+      (github.event_name == 'issue_comment' && github.event.action == 'created') ||
+      (github.event_name == 'pull_request_target' &&
+       contains(fromJSON('["opened", "reopened", "synchronize", "closed"]'), github.event.action)) ||
+      (github.event_name == 'workflow_run' && github.event.action == 'completed' &&
+       contains(fromJSON('["pull_request_target", "merge_group", "pull_request_review", "pull_request_review_comment"]'), github.event.workflow_run.event))
+    uses: ./.github/workflows/board.yml
+    secrets: inherit
+  card:
+    if: >-
+      (github.event_name == 'issues' && github.event.action != 'deleted' && github.event.action != 'transferred') ||
+      github.event_name == 'issue_comment' ||
+      (github.event_name == 'schedule' && github.event.schedule == '*/15 * * * *') ||
+      (github.event_name == 'pull_request_target' &&
+       contains(fromJSON('["opened", "edited", "synchronize", "reopened", "closed", "labeled", "unlabeled", "ready_for_review", "converted_to_draft"]'), github.event.action)) ||
+      (github.event_name == 'workflow_run' &&
+       contains(fromJSON('["pull_request_target", "merge_group", "push", "pull_request_review", "pull_request_review_comment"]'), github.event.workflow_run.event))
+    uses: ./.github/workflows/card.yml
+    secrets: inherit
+  acceptance-criteria:
+    if: >-
+      github.event_name == 'merge_group' ||
+      (github.event_name == 'pull_request_target' &&
+       contains(fromJSON('["opened", "synchronize", "reopened", "ready_for_review"]'), github.event.action))
+    uses: ./.github/workflows/acceptance-criteria.yml
+  full-suite:
+    # Not on a push to main: the merge queue already ran every test on that exact merge (owner, 2026-10-17).
+    if: >-
+      github.event_name == 'merge_group' ||
+      (github.event_name == 'pull_request_target' &&
+       contains(fromJSON('["opened", "synchronize", "reopened", "ready_for_review"]'), github.event.action))
+    uses: ./.github/workflows/full-suite.yml
+  testmon:
+    if: github.event_name == 'push' && github.ref == format('refs/heads/{0}', github.event.repository.default_branch)
+    uses: ./.github/workflows/testmon.yml
+  uptodate:
+    if: github.event_name == 'push' && github.ref == format('refs/heads/{0}', github.event.repository.default_branch)
+    uses: ./.github/workflows/uptodate.yml
+    secrets: inherit
+  audit:
+    if: github.event_name == 'workflow_dispatch' || (github.event_name == 'schedule' && github.event.schedule == '17 6 * * *')
+    uses: ./.github/workflows/audit.yml
+    secrets: inherit

@@ -31,7 +31,8 @@ role when it has no model line, before any agent starts. In Python: `agents.run(
 The command-line tests run the real command from outside in a temp repo folder, with stub `claude`, `npm`, `kimi` and
 `codex` commands first on PATH that log every call. The workflow tests run `.github/workflows/agent.yml` the way GitHub
 does, through tests/test_start.py's machine, with its fake Claude Code; some put the reviewer on zeta, a stand-in agent
-whose adapter is committed on main beside the settings file and logs every call. Nothing leaves the machine.
+whose adapter is part of Dokima's own code (the checkout of Dokima's repo, since #812) and logs every call. Nothing
+leaves the machine.
 """
 import importlib
 import json
@@ -45,6 +46,7 @@ import pytest
 
 sys.path.insert(0, os.path.dirname(__file__))
 sys.path.insert(0, os.path.join(os.path.dirname(__file__), ".."))
+import test_start  # noqa: E402
 from test_start import Run, SPLIT_PROPOSED  # noqa: E402
 
 ROOT = os.path.abspath(os.path.join(os.path.dirname(__file__), ".."))
@@ -425,26 +427,47 @@ def test_the_issue_names_the_unknown_agent(record_property, tmp_path):
         f"698.11: nothing posted on the issue names the unknown agent no-such-agent:\n{bodies[-1500:]}\n{r.tail()}"
 
 
-def zeta_run(tmp_path, broken=None):
+def zeta_in_dokima(monkeypatch):
+    """Put zeta's adapter in the code each run checks out from Dokima's repo.
+
+    Since #812 a run takes Dokima's code only from Dokima's repo, never from the repo it works on, so an adapter
+    there is where the runtime finds it. Wraps the machine's stand-in for that checkout to add dokima/agent_zeta.py."""
+    real = test_start.dokima_checkout
+
+    def with_zeta(step, ctx, status, into=None):
+        """Check out Dokima's code as the machine does, then add zeta's adapter to it."""
+        if into is None:
+            return real(step, ctx, status)
+        dests = []
+        found = real(step, ctx, status, into=lambda p: dests.append(into(p)) or dests[-1])
+        for d in dests:
+            open(os.path.join(d, "dokima", "agent_zeta.py"), "w").write(ZETA)
+        return found
+
+    monkeypatch.setattr(test_start, "dokima_checkout", with_zeta)
+
+
+def zeta_run(tmp_path, monkeypatch, broken=None):
     """Run the plan review through the workflow with the reviewer on zeta, a stand-in.
 
-    zeta's adapter, dokima/agent_zeta.py, is committed on main next to the settings file, so the run's runtime holds
-    it. Returns the run and every call zeta's adapter got, as {call, model, prompt}."""
-    files = {".dokima/agents.yml": workflow_settings("z", "zeta", "ZETA_KEY", "zeta-1"), "dokima/agent_zeta.py": ZETA}
+    zeta's adapter, dokima/agent_zeta.py, is in Dokima's own code and the repo's settings file names zeta, so the
+    run's runtime holds it. Returns the run and every call zeta's adapter got, as {call, model, prompt}."""
+    zeta_in_dokima(monkeypatch)
+    files = {".dokima/agents.yml": workflow_settings("z", "zeta", "ZETA_KEY", "zeta-1")}
     r = Run(tmp_path / "run", "reviewer", "plan", SPLIT_PROPOSED, files=files, secrets={"ZETA_KEY": "zeta-key"},
             broken=broken)
     log = os.path.join(r.tmp, "gh", "zeta-calls.jsonl")
     return r, [json.loads(l) for l in open(log)] if os.path.exists(log) else []
 
 
-def test_a_run_starts_its_agent_through_its_own_adapter(record_property, tmp_path):
+def test_a_run_starts_its_agent_through_its_own_adapter(record_property, tmp_path, monkeypatch):
     """A real run starts the role's agent through its own adapter, on its model.
 
     Proves 698.12. Runs the agent workflow for a plan review with the reviewer on zeta, a stand-in agent whose adapter
     logs every call. zeta's adapter must be asked once to run the reviewer's prompt on zeta-1, and Claude Code must
     never start."""
     record_property("proves", "698.12")
-    r, calls = zeta_run(tmp_path)
+    r, calls = zeta_run(tmp_path, monkeypatch)
     runs = [c for c in calls if c["call"] == "run"]
     assert len(runs) == 1 and runs[0]["model"] == "zeta-1", \
         f"698.12: the run did not ask zeta's adapter once to run on zeta-1: {calls}\n{r.tail()}"
@@ -452,7 +475,7 @@ def test_a_run_starts_its_agent_through_its_own_adapter(record_property, tmp_pat
     assert not r.agent_started(), "698.12: the run started Claude Code though the reviewer is on zeta"
 
 
-def test_claude_code_is_installed_through_the_interface_as_today(record_property, tmp_path):
+def test_claude_code_is_installed_through_the_interface_as_today(record_property, tmp_path, monkeypatch):
     """The run installs its agent through the interface, which installs Claude Code as today.
 
     Proves 698.13. With no settings file, the interface's install for the planner must run
@@ -465,7 +488,7 @@ def test_claude_code_is_installed_through_the_interface_as_today(record_property
     npm = [c["argv"] for c in box.calls() if c["cmd"] == "npm"]
     assert p.returncode == 0 and npm == [["install", "-g", "@anthropic-ai/claude-code"]], \
         f"698.13: installing the planner's agent did not install Claude Code as today: {said(p)}; npm calls {npm}"
-    r, calls = zeta_run(tmp_path, broken={"npm": "npm should not run for zeta"})
+    r, calls = zeta_run(tmp_path, monkeypatch, broken={"npm": "npm should not run for zeta"})
     assert [c["call"] for c in calls if c["call"] == "install"] == ["install"], \
         f"698.13: the run did not install its agent through the interface (zeta's install calls: {calls}); it stopped " \
         f"at '{r.failed_step}':\n{r.tail()}"

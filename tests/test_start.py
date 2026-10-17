@@ -224,6 +224,10 @@ class Nil:
     def __getattr__(self, k):
         return NIL
 
+    def __getitem__(self, k):
+        """An index into a missing value (`pull_requests[0]`) is missing too, as GitHub reads it."""
+        return NIL
+
     def __bool__(self):
         return False
 
@@ -411,6 +415,27 @@ def git_env(base):
     return env
 
 
+DOKIMA_REPO = "dokima-dev/dokima"
+# What a checkout of Dokima's own repo holds that its runs read: its code and its own settings file.
+DOKIMA_PARTS = ("dokima", ".dokima")
+
+
+def dokima_checkout(step, ctx, status, into=None):
+    """Whether STEP checks out Dokima's own repo; with INTO, stands in for it.
+
+    GitHub's checkout action cannot run here. A step checking out dokima-dev/dokima gets this checkout's Dokima code
+    and settings file instead, copied to the step's path (INTO maps it to a folder), as the real checkout would."""
+    w = step.get("with") or {}
+    if "actions/checkout" not in str(step.get("uses") or "") or fill(w.get("repository", ""), ctx, status) != DOKIMA_REPO:
+        return False
+    if into is not None:
+        dest = into(fill(w.get("path", "") or ".", ctx, status))
+        for part in DOKIMA_PARTS:
+            shutil.copytree(os.path.join(ROOT, part), os.path.join(dest, part), dirs_exist_ok=True,
+                            ignore=shutil.ignore_patterns("__pycache__"))
+    return True
+
+
 def record_comment(rec, t):
     """A comment the bot posted carrying a record, as GitHub returns it."""
     return {"author": {"login": agent.BOT}, "body": agent.render(rec), "createdAt": t}
@@ -559,6 +584,8 @@ class Machine:
                     self.failed_step = self.failed_step or label
             elif "create-github-app-token" in str(step.get("uses")):
                 outputs = {"token": "fake-token", "app-slug": "dokima-runtime"}
+            elif dokima_checkout(step, sctx, status):
+                dokima_checkout(step, sctx, status, into=lambda p: moved(p) if os.path.isabs(p) else os.path.join(ws, p))
             if cancel:
                 status["cancelled"], self.cancelled_step = True, label
             if step.get("id"):

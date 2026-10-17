@@ -1,5 +1,8 @@
 import os
+import re
 import sys
+
+import yaml
 
 sys.path.insert(0, os.path.join(os.path.dirname(__file__), ".."))
 from dokima import plan  # noqa: E402
@@ -12,6 +15,10 @@ def read(path):
 
 
 def test_approve_only_means_merge(record_property):
+    """An Approve review never starts a build; it only means merge.
+
+    Reads every workflow: only the board, the review relays, commands.yml (which skips an Approve) and entry.yml (which
+    hands a review only to those, #812) may run on a review."""
     record_property("proves", "67.5")
     workflows = os.path.join(ROOT, ".github", "workflows")
     assert not os.path.exists(os.path.join(workflows, "build.yml"))
@@ -26,6 +33,13 @@ def test_approve_only_means_merge(record_property):
             continue
         if name == "commands.yml":  # a review's command starts a stage, but never an Approve
             assert "github.event.review.state != 'approved'" in read(f".github/workflows/{name}")
+            continue
+        if name == "entry.yml":  # an adopter's call (#812): a review reaches only commands.yml and the relays
+            jobs = yaml.safe_load(read(f".github/workflows/{name}"))["jobs"]
+            for job in jobs.values():
+                if re.search(r"github\.event_name == 'pull_request_review'", str(job.get("if"))):
+                    called = str(job.get("uses")).removeprefix("./.github/workflows/")
+                    assert called == "commands.yml" or called in relays, f"67.5: entry.yml hands a review to {called}"
             continue
         assert "pull_request_review" not in read(f".github/workflows/{name}")
     assert "Approve the plan" not in read("dokima/card.py")

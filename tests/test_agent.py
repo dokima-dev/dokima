@@ -260,11 +260,15 @@ def test_open_blockers_come_from_the_newest_review_at_that_stage(record_property
 def test_dokimas_own_code_always_runs_from_main(record_property):
     """The runtime is copied from main before any branch is checked out, every Dokima step runs from that copy, and only tests use the branch's code.
 
+    Since #812 that copy comes from a checkout of Dokima's own repo at this workflow's commit (main when run directly).
+
     Since #796 the prompt is built by `dokima.prompt` in the runtime copy, not glued from role files: the workflow must
     build it there, and the builder, run from a branch folder with its own role files, must still read main's."""
     record_property("proves", "agent.19")
     wf = open(os.path.join(os.path.dirname(__file__), "..", ".github", "workflows", "agent.yml")).read()
-    assert wf.index("cp -r dokima /tmp/runtime/dokima") < wf.index("name: Starting branch")
+    # Since #812 the runtime is Dokima's own repo, checked out at this workflow's commit, never the repo's own folder.
+    assert wf.index("repository: dokima-dev/dokima") < wf.index("mv .dokima-code/dokima /tmp/runtime/dokima") \
+        < wf.index("name: Starting branch"), "agent.19: the runtime is not Dokima's own code, copied before any branch"
     assert "PYTHONPATH: /tmp/runtime" in wf and 'PYTHONSAFEPATH: "1"' in wf
     assert '(cd /tmp/runtime && python3 -m dokima.prompt "$ROLE" "$GRADE")' in wf, "agent.19: the prompt is not built in main's runtime copy"
     assert "cat dokima/roles/" not in wf, "agent.19: the prompt reads the branch's role files"

@@ -14,6 +14,8 @@ run-name: "autopilot after #${{ github.event.issue.number }} ${{ github.event.ac
 on:
   issues:
     types: [closed, labeled]
+  # Called by the one workflow an adopter installs (dokima/install/dokima.yml), through entry.yml (#812).
+  workflow_call:
 concurrency:
   group: autopilot
   cancel-in-progress: false
@@ -37,6 +39,20 @@ jobs:
         with:
           ref: ${{ github.event.repository.default_branch }}
           persist-credentials: false
+      # Dokima's code from Dokima's own repo, at this shared workflow's commit (main when run directly), never the
+      # repo's own copy (#812).
+      - name: Dokima's code from Dokima's own repo
+        uses: actions/checkout@v5
+        with:
+          repository: dokima-dev/dokima
+          ref: ${{ job.workflow_sha }}
+          path: .dokima-code
+          sparse-checkout: dokima
+          persist-credentials: false
+      - name: Every Dokima step runs Dokima's code
+        run: |
+          rm -rf "$RUNNER_TEMP/dokima" && mv .dokima-code "$RUNNER_TEMP/dokima"
+          printf 'PYTHONPATH=%s\nPYTHONSAFEPATH=1\n' "$RUNNER_TEMP/dokima" >> "$GITHUB_ENV"
       - id: app
         uses: actions/create-github-app-token@v2
         with:

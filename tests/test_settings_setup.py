@@ -348,11 +348,14 @@ def test_a_run_on_github_starts_the_model_the_agents_section_names(record_proper
     """A workflow run starts the agent on the model main's agents section names.
 
     Proves 794.5. Runs the agent workflow for a plan review, the way GitHub runs it, with only .dokima/settings.yaml
-    on main putting the reviewer on claude-sonnet-5-5. The fake Claude Code must start with that model."""
+    on main putting the reviewer on claude-sonnet-5-5, and the key secret it names (TEAM_KEY) set on the repo, as a
+    run that starts needs since #812. The fake Claude Code must start with that model."""
     record_property("proves", "794.5")
     text = AGENTS_SECTION.replace("codex", "claude").replace("planner:", "reviewer:").replace("gpt-test-1",
                                                                                                "claude-sonnet-5-5")
-    r = Run(tmp_path / "run", "reviewer", "plan", SPLIT_PROPOSED, files={".dokima/settings.yaml": text})
+    assert "TEAM_KEY" in text, "test setup: the agents section no longer names the TEAM_KEY secret"
+    r = Run(tmp_path / "run", "reviewer", "plan", SPLIT_PROPOSED, files={".dokima/settings.yaml": text},
+            secrets={"TEAM_KEY": "team-key"})
     assert r.agent_started(), f"794.5: the agent never started; the run stopped at '{r.failed_step}':\n{r.tail()}"
     path = os.path.join(r.tmp, "gh", "agent-argv.json")
     argv = json.load(open(path)) if os.path.exists(path) else []

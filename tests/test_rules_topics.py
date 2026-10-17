@@ -6,7 +6,8 @@ markdown file it links. A run reads the rules from its runtime copy (`/tmp/runti
 runtime" step), so that step must bring the linked topic files too.
 
 Both tests run the real thing: the word check from a runtime copy of `dokima/` in a temp folder, and the workflow's
-own copy step cut out of `.github/workflows/agent.yml` and run by bash in a temp checkout.
+own copy step cut out of `.github/workflows/agent.yml` and run by bash in a temp checkout, holding Dokima's code where
+the checkout of Dokima's own repo puts it.
 """
 import os
 import shutil
@@ -101,12 +102,13 @@ def run_copy(checkout, runtime):
 def test_runtime_copy_holds_linked_topic_files(tmp_path, record_property):
     """A run's copy of the rules brings every topic file the rules file links.
 
-    Proves 637.2. Runs agent.yml's own "Copy the runtime" step in a temp checkout whose rules file links one topic file. The topic
-    file must land beside the copied rules file, at the place its link points, unchanged. Beside it, a checkout with no
+    Proves 637.2. Runs agent.yml's own "Copy the runtime" step in a temp checkout whose rules file links one topic file,
+    with Dokima's code where the step before it checks Dokima's own repo out (`.dokima-code`, #812). The topic file must
+    land beside the copied rules file, at the place its link points, unchanged. Beside it, a checkout with no
     rules file at all must still copy without failing, as repos without one do today."""
     record_property("proves", "637.2")
     checkout = tmp_path / "checkout"
-    shutil.copytree(os.path.join(ROOT, "dokima"), checkout / "dokima")
+    shutil.copytree(os.path.join(ROOT, "dokima"), checkout / ".dokima-code" / "dokima")
     write_rules(checkout)
     runtime = tmp_path / "runtime"
     r = run_copy(checkout, runtime)
@@ -116,6 +118,6 @@ def test_runtime_copy_holds_linked_topic_files(tmp_path, record_property):
     assert topic.exists() and TOPIC in topic.read_text(), \
         "637.2: the copy step leaves out the topic file the rules file links, so the word check cannot read it"
     bare = tmp_path / "bare"
-    shutil.copytree(os.path.join(ROOT, "dokima"), bare / "dokima")
+    shutil.copytree(os.path.join(ROOT, "dokima"), bare / ".dokima-code" / "dokima")
     r = run_copy(bare, tmp_path / "bare-runtime")
     assert r.returncode == 0, f"637.2: the copy step fails in a repo with no rules file:\n{r.stderr[-800:]}"

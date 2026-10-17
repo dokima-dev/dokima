@@ -12,7 +12,11 @@ checks it, its code working or broken.
 Every job of the real acceptance-criteria.yml (list, check once per row of the list's matrix, gate) then runs step by step:
 `actions/checkout` copies the tree its `ref` names on that event (the queued commit by default on merge_group, main
 by default on pull_request_target), other `uses:` steps are skipped, every `run:` script runs with bash, its `${{ }}`
-filled in, with a `pip` that does nothing and a `pytest` that runs this machine's pytest.
+filled in, with a `pip` that does nothing and a `pytest` that runs this machine's pytest. The repo is Dokima's own, so
+a checkout of dokima-dev/dokima (#812) copies these trees too, only the folders a sparse checkout names; the commit
+of the workflow file that runs (`github.workflow_sha`, and the called file's own `job.workflow_sha` as no other repo
+calls it) is the event's own commit, as GitHub gives it. Each step
+sees a runner temp folder and the values earlier steps of its job wrote to GITHUB_ENV.
 """
 import json
 import os
@@ -82,7 +86,8 @@ def context(event, needs=None, matrix=None):
         sha, ref, base_ref = MAIN_SHA, "refs/heads/main", "main"
     return ts.Ctx({k: ts.Ctx(v) for k, v in {
         "github": {"event_name": event, "repository": "o/r", "token": "ghs_x", "sha": sha, "ref": ref,
-                   "base_ref": base_ref, "event": ev},
+                   "base_ref": base_ref, "event": ev, "workflow_sha": sha, "job_workflow_sha": sha},
+        "job": {"workflow_sha": sha},
         "secrets": {}, "vars": {}, "env": {}, "steps": {}, "needs": needs or {}, "matrix": matrix or {},
         "inputs": {}}.items()})
 
@@ -107,7 +112,10 @@ def run_job(job, wf, ctx, event, trees, ws, bin_dir, out_file):
     status = {"failed": False}
     shutil.rmtree(ws, ignore_errors=True)
     os.makedirs(ws)
-    log = []
+    log, added = [], {}
+    # The runner's own temp folder, outside the workspace, where a step may move Dokima's checked-out code.
+    temp = os.path.join(ws, "..", "runner-temp")
+    os.makedirs(temp, exist_ok=True)
     for step in job.get("steps") or []:
         scond = str(step.get("if") or "").replace("${{", "").replace("}}", "").strip()
         if not ts.evaluate(ts.condition(scond), ctx, status):
@@ -115,10 +123,16 @@ def run_job(job, wf, ctx, event, trees, ws, bin_dir, out_file):
         uses = str(step.get("uses") or "")
         if uses.startswith("actions/checkout"):
             w = {k: ts.fill(v, ctx, status) for k, v in (step.get("with") or {}).items()}
+            assert w.get("repository", "") in ("", "o/r", ts.DOKIMA_REPO), \
+                f"the tests do not know the repo {w.get('repository')!r} a checkout names"
             dest = os.path.join(ws, w.get("path") or ".")
             src = tree_for(w.get("ref") or "", event, trees)
             log.append(f"checkout {w.get('ref') or '(no ref)'} -> {os.path.basename(src)} into {w.get('path') or '.'}")
-            shutil.copytree(src, dest, dirs_exist_ok=True)
+            if w.get("sparse-checkout"):
+                for part in str(w["sparse-checkout"]).split():
+                    shutil.copytree(os.path.join(src, part), os.path.join(dest, part), dirs_exist_ok=True)
+            else:
+                shutil.copytree(src, dest, dirs_exist_ok=True)
             continue
         if uses or "run" not in step:
             continue
@@ -127,11 +141,15 @@ def run_job(job, wf, ctx, event, trees, ws, bin_dir, out_file):
         cwd = os.path.join(ws, ts.fill(step.get("working-directory") or ".", ctx, status))
         path = os.path.join(ws, "..", f"step-{len(log)}.sh")
         open(path, "w").write(script)
+        env_file = os.path.join(ws, "..", "github-env")
+        open(env_file, "w").close()
         p = subprocess.run(ts.github_shell(step, job, wf.get("defaults")) + [path], cwd=cwd, capture_output=True,
                            text=True, timeout=120,
                            env={"PATH": bin_dir + os.pathsep + os.environ["PATH"], "HOME": os.path.join(ws, ".."),
                                 "PYTHONDONTWRITEBYTECODE": "1", "GITHUB_OUTPUT": out_file,
-                                "GITHUB_REPOSITORY": "o/r", **senv})
+                                "GITHUB_REPOSITORY": "o/r", "RUNNER_TEMP": temp, "GITHUB_ENV": env_file,
+                                **added, **senv})
+        added.update(line.split("=", 1) for line in open(env_file).read().splitlines() if "=" in line)
         log.append(f"$ {script.strip()}\n{p.stdout}{p.stderr}")
         if p.returncode != 0:
             status["failed"] = True
