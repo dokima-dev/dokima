@@ -15,9 +15,14 @@ The settings these tests write, beside the ones the shipped defaults already hol
 
 The settings guard (`dokima.manifest.undeclared(root)`) is run on a temp repo root holding one code file and one
 workflow file.
+
+Filing an issue a passed review found (`dokima.agent.file_issues`) runs in a temp repo folder whose settings rename
+the filed label, against a fake GitHub that, like the real one, refuses a label the repo does not have.
 """
+import json
 import os
 import re
+import subprocess
 import sys
 import textwrap
 
@@ -261,3 +266,128 @@ def test_the_shipped_settings_declare_no_plan_or_work_label(record_property, tmp
     labels = settings.read(str(tmp_path), warn=lambda message: None).get("labels") or {}
     starting = sorted(k for k in ("plan", "work") if k in labels or k in labels.values())
     assert not starting, f"784.7: the shipped settings still declare labels that started agents: {starting} in {labels}"
+
+
+# 784.8 and 784.9: Dokima adds and creates the filed label under its name in the labels setting
+
+FOUND = {"kind": "issue", "text": "The README still names the old command. It moved last week.", "evidence": "README.md"}
+
+
+class FakeRepo:
+    """A fake GitHub repo for agent.gh: its labels and the issues filed into it.
+
+    It behaves as GitHub and its command line do: `gh issue create --label X` and `gh issue edit --add-label X` fail
+    when the repo has no label X; `gh label create X`, a POST to the repo's labels, and a REST POST of an issue or of an
+    issue's labels naming X create the label; reading the repo's labels, or one by name, answers as GitHub does. Any other call fails the test, naming it."""
+
+    def __init__(self, labels):
+        self.labels, self.issues = set(labels), {}
+
+    def file(self, title, labels):
+        n = 100 + len(self.issues)
+        self.issues[n] = {"title": title, "labels": set(labels)}
+        return n
+
+    def gh(self, *args):
+        args = [str(a) for a in args]
+
+        def opt(flag):
+            return [args[i + 1] for i, a in enumerate(args[:-1]) if a == flag]
+
+        def fields(prefix):
+            return [v.split("=", 1)[1] for v in opt("-f") + opt("-F") + opt("--raw-field") + opt("--field")
+                    if v.startswith(prefix)]
+
+        if args[:2] == ["issue", "create"]:
+            missing = [l for l in opt("--label") if l not in self.labels]
+            if missing:
+                raise subprocess.CalledProcessError(1, ["gh", *args], "", f"could not add label: '{missing[0]}' not found")
+            n = self.file(opt("--title")[0], opt("--label"))
+            return f"https://github.com/o/r/issues/{n}\n"
+        if args[:2] == ["issue", "edit"]:
+            missing = [l for l in opt("--add-label") if l not in self.labels]
+            if missing:
+                raise subprocess.CalledProcessError(1, ["gh", *args], "", f"'{missing[0]}' not found")
+            self.issues[int(args[2])]["labels"] |= set(opt("--add-label"))
+            return ""
+        if args[:2] == ["label", "create"]:
+            self.labels.add(args[2])
+            return ""
+        if args and args[0] == "api":
+            path = next(a for a in args[1:] if not a.startswith("-") and a not in opt("-X") + opt("--method")
+                        and "=" not in a).lstrip("/")
+            method = (opt("-X") + opt("--method") + [""])[0].upper() or \
+                ("POST" if opt("-f") + opt("-F") + opt("--raw-field") + opt("--field") else "GET")
+            m = re.fullmatch(r"repos/o/r/labels/([^?]+)", path)
+            if m and method == "GET":
+                if m.group(1) not in self.labels:
+                    raise subprocess.CalledProcessError(1, ["gh", *args], "", "HTTP 404: Not Found")
+                return json.dumps({"name": m.group(1)})
+            if re.fullmatch(r"repos/o/r/labels(\?.*)?", path) and method == "GET":
+                return json.dumps([{"name": l} for l in sorted(self.labels)])
+            if re.fullmatch(r"repos/o/r/labels", path):
+                self.labels.add(fields("name=")[0])
+                return json.dumps({"name": fields("name=")[0]})
+            if re.fullmatch(r"repos/o/r/issues", path):
+                given = fields("labels[]=")
+                self.labels |= set(given)
+                n = self.file(fields("title=")[0], given)
+                return json.dumps({"number": n, "html_url": f"https://github.com/o/r/issues/{n}"})
+            m = re.fullmatch(r"repos/o/r/issues/(\d+)/labels", path)
+            if m:
+                given = fields("labels[]=")
+                self.labels |= set(given)
+                self.issues[int(m.group(1))]["labels"] |= set(given)
+                return json.dumps([{"name": l} for l in self.issues[int(m.group(1))]["labels"]])
+        raise AssertionError(f"unexpected GitHub call: gh {' '.join(args)}")
+
+
+def file_one(tmp_path, monkeypatch, labels):
+    """Files one found issue in a repo whose settings rename the filed label `dokima-found`.
+
+    The repo starts with LABELS. Returns the fake repo and the record lines Dokima wrote."""
+    from dokima import agent, agent_github
+    (tmp_path / ".dokima").mkdir()
+    (tmp_path / ".dokima" / "settings.yaml").write_text("labels:\n  filed: dokima-found\n")
+    monkeypatch.chdir(tmp_path)
+    for name in ("GITHUB_RUN_ID", "GITHUB_REPOSITORY"):
+        monkeypatch.delenv(name, raising=False)
+    repo = FakeRepo(labels)
+    monkeypatch.setattr(agent_github, "gh", repo.gh)
+    rec = {"role": "reviewer", "check": {"passed": True, "problems": []}, "handback": {"raises": [dict(FOUND)]}}
+    lines = agent.file_issues("o/r", 9, rec, [])
+    return repo, lines
+
+
+def test_a_filed_issue_carries_the_filed_label_named_in_settings(record_property, tmp_path, monkeypatch):
+    """Each issue Dokima files carries the filed label under its name in settings.
+
+    The repo's settings rename the filed label to dokima-found, and the repo holds both that label and the shipped
+    filed-by-dokima one. A passed review found one issue; Dokima files it, and the filed issue carries dokima-found and
+    not filed-by-dokima. Proves 784.8.
+    """
+    record_property("proves", "784.8")
+    repo, lines = file_one(tmp_path, monkeypatch, {"dokima-found", "filed-by-dokima"})
+    assert len(repo.issues) == 1, f"784.8: Dokima should file the one issue the review found; it wrote: {lines}"
+    got = next(iter(repo.issues.values()))["labels"]
+    assert "dokima-found" in got, \
+        f"784.8: the filed issue should carry the filed label named in settings, dokima-found; it carries {sorted(got)}"
+    assert "filed-by-dokima" not in got, \
+        f"784.8: the settings rename the filed label, yet the issue still carries filed-by-dokima: {sorted(got)}"
+
+
+def test_a_missing_filed_label_is_created_under_its_name_in_settings(record_property, tmp_path, monkeypatch):
+    """A missing filed label is created under its name in the labels setting.
+
+    The repo's settings rename the filed label to dokima-found; the repo still holds only the old filed-by-dokima
+    label. A passed review found one issue. After Dokima files it, the repo holds a dokima-found label and the filed
+    issue carries it. Proves 784.9.
+    """
+    record_property("proves", "784.9")
+    repo, lines = file_one(tmp_path, monkeypatch, {"filed-by-dokima"})
+    assert "dokima-found" in repo.labels, \
+        f"784.9: the repo lacked the filed label named in settings, and Dokima did not create dokima-found; " \
+        f"the repo holds {sorted(repo.labels)}; Dokima wrote: {lines}"
+    assert len(repo.issues) == 1, f"784.9: Dokima should file the one issue the review found; it wrote: {lines}"
+    got = next(iter(repo.issues.values()))["labels"]
+    assert "dokima-found" in got, f"784.9: the filed issue should carry the created dokima-found label; it carries {sorted(got)}"
