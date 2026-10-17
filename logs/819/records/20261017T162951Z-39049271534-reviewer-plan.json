@@ -1,0 +1,248 @@
+{
+ "role": "reviewer",
+ "stage": "plan",
+ "run_id": "39049271534",
+ "commit_before": "668a6da3520689cd662f8fae043952bc4b75812d",
+ "started_by": "dokima-runtime[bot]",
+ "models": [
+  "claude-opus-5-5"
+ ],
+ "report": {
+  "duration_ms": 275312,
+  "turns": 15,
+  "cost_usd": 0.7634316000000001,
+  "tokens_in": 823622,
+  "tokens_out": 8677
+ },
+ "log": "https://github.com/dokima-dev/dokima/blob/logs/logs/819/39049271534-reviewer-plan.md",
+ "run": "https://github.com/dokima-dev/dokima/actions/runs/39049271534",
+ "handback": {
+  "previous_step": {
+   "did": [
+    "The planner wrote six criteria, one test each, for the six review boxes.",
+    "The planner added the boxes to sample reviews in older tests."
+   ],
+   "decided": [
+    "Boxes are checked at plan review and at code review alike."
+   ],
+   "open": [
+    "The planner filed a proposal: the reviewer's prompt never shows the edges box shape."
+   ]
+  },
+  "verdict": "block",
+  "summary": "Two tests pass when the wrong box is named, and a blank edges case is never tested.",
+  "raises": [
+   {
+    "kind": "blocker",
+    "to": "planner",
+    "label": "819.1 names any box",
+    "text": "The test for 819.1 passes when every rejection lists all six boxes. Fix: also assert the reason names none of the boxes still present.",
+    "evidence": "`tests/test_review_boxes.py::test_a_review_missing_any_of_the_six_boxes_is_rejected_naming_the_box` only matches `\\b{box}\\b` in any line.",
+    "raised_by": "reviewer",
+    "id": "R1"
+   },
+   {
+    "kind": "blocker",
+    "to": "planner",
+    "label": "819.4 names any box",
+    "text": "The test for 819.4 passes when any approve with an entry prints one fixed reason listing all six boxes. Fix: assert the reason does not name the boxes left clear.",
+    "evidence": "`tests/test_review_boxes.py::test_a_review_that_approves_while_a_box_holds_a_blocking_entry_is_rejected` only matches `\\b{box}\\b`.",
+    "raised_by": "reviewer",
+    "id": "R2"
+   },
+   {
+    "kind": "blocker",
+    "to": "planner",
+    "label": "819.2 edges line shape",
+    "text": "No test checks an edges line that names no case, or reads neither covered nor missing. Fix: add both to the 819.2 test on a block.",
+    "evidence": "`ENTRIES` in `tests/test_review_boxes.py` has no edges shape; the owner's shape is `covered | missing: <named case>`.",
+    "raised_by": "reviewer",
+    "id": "R3"
+   }
+  ],
+  "answers": [
+   {
+    "raise": "P1",
+    "answer": "done",
+    "why": "Confirmed: the prompt shows the edges line but not its keyed shape. It stays a proposal for the owner.",
+    "searched": [
+     741,
+     632
+    ],
+    "verdict": "new"
+   }
+  ],
+  "asks": [
+   {
+    "ask": "One per duty, every box present",
+    "source": "https://github.com/dokima-dev/dokima/issues/741#issuecomment-6205062350",
+    "criterion": "819.1"
+   },
+   {
+    "ask": "Every box must be present at both stages.",
+    "source": "https://github.com/dokima-dev/dokima/issues/741#issuecomment-6234488387",
+    "criterion": "819.1"
+   },
+   {
+    "ask": "entries typed",
+    "source": "https://github.com/dokima-dev/dokima/issues/741#issuecomment-6205062350",
+    "criterion": "819.2"
+   },
+   {
+    "ask": "A weak-test claim without a named counterexample is rejected by code.",
+    "source": "https://github.com/dokima-dev/dokima/issues/741#issuecomment-6205062350",
+    "criterion": "819.3"
+   },
+   {
+    "ask": "each entry a blocker unless noted",
+    "source": "https://github.com/dokima-dev/dokima/issues/741#issuecomment-6205062350",
+    "criterion": "819.4"
+   },
+   {
+    "ask": "needed is not a blocker",
+    "source": "https://github.com/dokima-dev/dokima/issues/741#issuecomment-6205062350",
+    "criterion": "819.5"
+   },
+   {
+    "ask": "edges:       per criterion: covered | missing: <named case>",
+    "source": "https://github.com/dokima-dev/dokima/issues/741#issuecomment-6205062350",
+    "criterion": "819.6"
+   },
+   {
+    "ask": "A box with nothing to check at a stage (for example `added` at plan review, before any diff exists) says `none`.",
+    "source": "https://github.com/dokima-dev/dokima/issues/741#issuecomment-6234488387",
+    "criterion": "819.1"
+   }
+  ],
+  "behaviors": [
+   {
+    "criterion": "819.1",
+    "one_behavior": true,
+    "why": "A missing box is rejected, naming it."
+   },
+   {
+    "criterion": "819.2",
+    "one_behavior": true,
+    "why": "A missing field is rejected, naming it."
+   },
+   {
+    "criterion": "819.3",
+    "one_behavior": true,
+    "why": "A weak test entry with no wrong code is rejected."
+   },
+   {
+    "criterion": "819.4",
+    "one_behavior": true,
+    "why": "An approve past a blocking entry is rejected."
+   },
+   {
+    "criterion": "819.5",
+    "one_behavior": true,
+    "why": "A needed entry lets an approve pass."
+   },
+   {
+    "criterion": "819.6",
+    "one_behavior": true,
+    "why": "An edges box missing a criterion is rejected, naming it."
+   }
+  ],
+  "edge_cases": [
+   {
+    "criterion": "819.1",
+    "cut": [],
+    "missing": []
+   },
+   {
+    "criterion": "819.2",
+    "cut": [],
+    "missing": [
+     "An edges line naming no case, or reading neither covered nor missing."
+    ]
+   },
+   {
+    "criterion": "819.3",
+    "cut": [],
+    "missing": []
+   },
+   {
+    "criterion": "819.4",
+    "cut": [],
+    "missing": []
+   },
+   {
+    "criterion": "819.5",
+    "cut": [],
+    "missing": []
+   },
+   {
+    "criterion": "819.6",
+    "cut": [],
+    "missing": []
+   }
+  ],
+  "tests": [
+   {
+    "test": "tests/test_review_boxes.py::test_a_review_missing_any_of_the_six_boxes_is_rejected_naming_the_box",
+    "only_its_behavior": true,
+    "why": "Checks only missing boxes, but passes if every box is named."
+   },
+   {
+    "test": "tests/test_review_boxes.py::test_a_box_entry_missing_a_field_its_shape_needs_is_rejected_naming_the_field",
+    "only_its_behavior": true,
+    "why": "Checks each field is named, apart from other fields."
+   },
+   {
+    "test": "tests/test_review_boxes.py::test_a_weak_test_entry_naming_no_wrong_code_that_still_passes_is_rejected",
+    "only_its_behavior": true,
+    "why": "Good case beside missing and blank wrong code."
+   },
+   {
+    "test": "tests/test_review_boxes.py::test_a_review_that_approves_while_a_box_holds_a_blocking_entry_is_rejected",
+    "only_its_behavior": true,
+    "why": "Approve and block side by side, but any box name passes."
+   },
+   {
+    "test": "tests/test_review_boxes.py::test_an_added_entry_of_kind_needed_does_not_stop_a_review_from_approving",
+    "only_its_behavior": true,
+    "why": "Needed passes beside creep rejected."
+   },
+   {
+    "test": "tests/test_review_boxes.py::test_a_review_whose_edges_box_leaves_out_a_plan_criterion_is_rejected_naming_it",
+    "only_its_behavior": true,
+    "why": "Names the left out criterion, on one story and a split."
+   }
+  ],
+  "size": "ok",
+  "boxes": {
+   "dropped": "none",
+   "added": "none",
+   "superseded": "none",
+   "conflicts": "none",
+   "edges": {
+    "819.1": "covered",
+    "819.2": "missing: an edges line naming no case",
+    "819.3": "covered",
+    "819.4": "covered",
+    "819.5": "covered",
+    "819.6": "covered"
+   },
+   "poor_tests": [
+    {
+     "test": "tests/test_review_boxes.py::test_a_review_missing_any_of_the_six_boxes_is_rejected_naming_the_box",
+     "passes_with": "a check printing one reason listing all six boxes whenever any is missing",
+     "fix": "assert the reason names none of the boxes still present"
+    },
+    {
+     "test": "tests/test_review_boxes.py::test_a_review_that_approves_while_a_box_holds_a_blocking_entry_is_rejected",
+     "passes_with": "a check printing one reason listing all six boxes on any approve with an entry",
+     "fix": "assert the reason names none of the boxes left clear"
+    }
+   ]
+  }
+ },
+ "check": {
+  "passed": true,
+  "problems": []
+ },
+ "url": "https://github.com/dokima-dev/dokima/issues/819#issuecomment-6236578590"
+}
