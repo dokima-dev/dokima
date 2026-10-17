@@ -93,3 +93,21 @@ def test_the_install_page_lists_none_of_dokimas_own_workflows_to_add(record_prop
         and not re.search(r"\bnever\b", line, re.I)
     ]
     assert not bad, f"815.5: the install page still lists Dokima's own workflows to add: {bad}"
+
+
+def test_the_install_page_never_lists_the_code_owners_file_to_add(record_property):
+    """The install page never lists the code owners file among the files to add.
+
+    Fails when a heading makes code owners an install step, as step 3 does today, or when a line naming
+    `CODEOWNERS` does not call it optional. The owner allows one optional mention, so a page with none, or one line
+    saying it is optional, passes; a second mention fails.
+
+    Proves 815.6."""
+    record_property("proves", "815.6")
+    lines = page().splitlines()
+    steps = [line for line in lines if line.startswith("#") and re.search(r"code ?owners", line, re.I)]
+    assert not steps, f"815.6: the install page makes code owners an install step: {steps}"
+    named = [line for line in lines if "CODEOWNERS" in line]
+    required = [line for line in named if not re.search(r"\boptional\b", line, re.I)]
+    assert not required, f"815.6: the install page names `CODEOWNERS` without calling it optional: {required}"
+    assert len(named) <= 1, f"815.6: the install page mentions `CODEOWNERS` more than once: {named}"
