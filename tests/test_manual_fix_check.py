@@ -78,6 +78,8 @@ def run_check(tmp_path, row, tests_pass):
     fake.write_text(f"#!/bin/sh\necho \"$@\" > '{log}'\nexit {0 if tests_pass else 1}\n")
     fake.chmod(0o755)
     env = {**os.environ, "PATH": f"{bin_dir}{os.pathsep}{os.environ['PATH']}", "ID": row["id"], "TESTS": row["tests"]}
+    # The step's own default command, not the one the runner's settings set for the job around this test (#807).
+    env.pop("TESTS_RUN_ONE", None)
     p = subprocess.run(["bash", "-e", "-c", step_script("Run this criterion's tests")], cwd=tmp_path,
                        capture_output=True, text=True, timeout=30, env=env)
     args = log.read_text().split() if log.exists() else None
