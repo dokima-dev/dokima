@@ -1,0 +1,61 @@
+{
+ "role": "reviewer",
+ "stage": "pr",
+ "run_id": "39071922512",
+ "commit_before": "7621a082c60fd1fb967e36ab3a2b65872e35d414",
+ "started_by": "dokima-runtime[bot]",
+ "models": [
+  "claude-opus-5-5"
+ ],
+ "report": {
+  "duration_ms": 758023,
+  "turns": 18,
+  "cost_usd": 0.6303548000000001,
+  "tokens_in": 872795,
+  "tokens_out": 5699
+ },
+ "log": "https://github.com/dokima-dev/dokima/blob/logs/logs/815/39071922512-reviewer-pr.md",
+ "run": "https://github.com/dokima-dev/dokima/actions/runs/39071922512",
+ "handback": {
+  "previous_step": {
+   "did": [
+    "The worker rewrote the install page to ask for one workflow and one settings file.",
+    "The worker removed the step to copy Dokima and the table of its workflows.",
+    "The worker turned the code owners step into one optional line."
+   ],
+   "decided": [
+    "The repo's owner approves when no code owners file exists."
+   ],
+   "open": []
+  },
+  "verdict": "approve",
+  "summary": "The install page now asks for only the workflow and settings file, and its six tests pass.",
+  "raises": [],
+  "answers": [],
+  "asks": [],
+  "boxes": {
+   "dropped": "none",
+   "added": "none",
+   "superseded": "none",
+   "conflicts": "none",
+   "edges": {
+    "815.1": "covered",
+    "815.2": "covered",
+    "815.3": "covered",
+    "815.4": "covered",
+    "815.5": "covered",
+    "815.6": "covered"
+   },
+   "poor_tests": "none"
+  },
+  "behaviors": [],
+  "edge_cases": [],
+  "tests": [],
+  "size": "ok"
+ },
+ "check": {
+  "passed": true,
+  "problems": []
+ },
+ "url": "https://github.com/dokima-dev/dokima/pull/835#issuecomment-6241578024"
+}
