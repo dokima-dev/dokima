@@ -1,0 +1,71 @@
+{
+ "role": "planner",
+ "stage": null,
+ "run_id": "39067799441",
+ "commit_before": "b7096b62f1f47d2ab3070403d35e7623e0673722",
+ "started_by": "dokima-runtime[bot]",
+ "models": [
+  "claude-opus-5-5"
+ ],
+ "report": {
+  "duration_ms": 84909,
+  "turns": 14,
+  "cost_usd": 0.6071294,
+  "tokens_in": 602133,
+  "tokens_out": 8637
+ },
+ "log": "https://github.com/dokima-dev/dokima/blob/logs/logs/815/39067799441-planner.md",
+ "run": "https://github.com/dokima-dev/dokima/actions/runs/39067799441",
+ "handback": {
+  "kind": "user_story",
+  "title": "Wiki install page uses the thin workflow",
+  "summary": "The wiki's install page stops telling adopters to copy Dokima's workflows and code.",
+  "user_story": "Adopters following the wiki install page no longer copy Dokima's workflows and code into their repo.",
+  "acceptance_criteria": [
+   {
+    "text": "When an adopter reads the wiki install page, it never tells them to copy Dokima's workflows folder or code.",
+    "words": "docs/wiki/Installing.md stop telling adopters to copy `.github/workflows/` and `dokima/`",
+    "source": "https://github.com/dokima-dev/dokima/issues/742",
+    "files": [
+     "docs/wiki/Installing.md"
+    ],
+    "no_edge_cases": "A fixed page with no input; the test reads the whole page."
+   }
+  ],
+  "non_functional": [],
+  "tests": {
+   "815.1": [
+    "tests/test_wiki_install.py::test_the_install_page_never_tells_adopters_to_copy_dokimas_workflows_or_code"
+   ]
+  },
+  "test_changes": {},
+  "links": {
+   "blocked_by": [],
+   "blocks": [
+    816
+   ],
+   "relates_to": [
+    742,
+    814,
+    272
+   ]
+  },
+  "raises": [
+   {
+    "kind": "question",
+    "to": "owner",
+    "label": "Narrow story scope",
+    "text": "Should the page also drop Dokima's own two workflows and name the two files to add? The plan assumes no.",
+    "evidence": "The parent's approved story 4 has one criterion; its context names `playthrough.yml` and `wiki.yml`, which the page still lists.",
+    "raised_by": "planner",
+    "id": "P1"
+   }
+  ],
+  "answers": []
+ },
+ "check": {
+  "passed": true,
+  "problems": []
+ },
+ "url": "https://github.com/dokima-dev/dokima/issues/815#issuecomment-6240688293"
+}
