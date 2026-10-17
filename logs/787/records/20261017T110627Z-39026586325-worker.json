@@ -1,0 +1,76 @@
+{
+ "role": "worker",
+ "stage": null,
+ "run_id": "39026586325",
+ "commit_before": "ffbd8aea86145097b7c1436f5647cd209d2882bb",
+ "started_by": "dokima-runtime[bot]",
+ "models": [
+  "claude-opus-5-5"
+ ],
+ "report": {
+  "duration_ms": 737256,
+  "turns": 32,
+  "cost_usd": 1.4478756,
+  "tokens_in": 2211886,
+  "tokens_out": 17922
+ },
+ "log": "https://github.com/dokima-dev/dokima/blob/logs/logs/787/39026586325-worker.md",
+ "run": "https://github.com/dokima-dev/dokima/actions/runs/39026586325",
+ "handback": {
+  "summary": "Autopilot now reads its branch, merge method, checks wait and label names from settings; the branch ships empty.",
+  "criteria": {
+   "787.1": "`default_branch()` in `dokima/agent_autopilot.py` takes `branch.default`; the gate and merge use it, naming it when GitHub lacks it.",
+   "787.2": "`default_branch()` asks GitHub's `repos/{repo}` for `default_branch` when the setting is empty or missing.",
+   "787.3": "`merge_method()` gives `--squash`, `--merge` or `--rebase` from `merge.method`, kept on the `--admin` retry.",
+   "787.4": "`checks_wait()` turns `gate.checks_wait_min` into seconds; `merge_gate` passes it to `proof`.",
+   "787.5": "`autopilot_label()` names the label; `on_autopilot`, the sweep and `dokima/board.py` read by it.",
+   "787.6": "`switch_autopilot` and `Board.label` add and remove the label named in settings.",
+   "787.7": "Already built by #784: `filed_label()` reads `labels.filed`; its test passed before any change.",
+   "787.8": "`dokima/defaults.yaml` ships `branch.default` empty, so a repo with no settings asks GitHub.",
+   "787.9": "`env_lines` in `dokima/settings.py` fills an empty branch from the event file or `gh`, else fails saying so."
+  },
+  "evidence": "`pytest -q tests/test_settings_autopilot.py tests/test_settings_merge.py tests/test_start.py`: 41 passed.",
+  "raises": [
+   {
+    "kind": "blocker",
+    "to": "planner",
+    "label": "Old fakes break",
+    "text": "Shipping the branch empty makes merges ask GitHub for its default branch; twelve older tests' fake GitHubs do not answer that call, and they are outside scope.",
+    "evidence": "`tests/test_autopilot_checks.py`, `test_merge_gate.py`, `test_required_checks.py`: unknown call `gh api repos/o/r`; all pass with `main` shipped.",
+    "raised_by": "worker",
+    "id": "W1"
+   },
+   {
+    "kind": "blocker",
+    "to": "planner",
+    "label": "Manifest guard fails",
+    "text": "The merge must read `repos/{repo}` for GitHub's default branch, which the plan's tests require, but the manifest guard ties no permission to it, and the manifest is outside scope.",
+    "evidence": "`tests/test_manifest.py::test_the_guard_passes_settings_the_manifest_declares`: `GET repos/{}` cannot tie to an app permission.",
+    "raised_by": "worker",
+    "id": "W2"
+   },
+   {
+    "kind": "blocker",
+    "to": "planner",
+    "label": "Scope misses files",
+    "text": "Two more places still read the autopilot label as the fixed name, so a renamed label is missed there; neither file is in the plan's scope.",
+    "evidence": "`dokima/agent_roles.py` lines 419 and 639, `dokima/uptodate.py` line 197 use `AUTOPILOT`.",
+    "raised_by": "worker",
+    "id": "W3"
+   }
+  ]
+ },
+ "check": {
+  "passed": true,
+  "problems": []
+ },
+ "dropped_by_fence": [],
+ "files_changed": [
+  "dokima/agent_autopilot.py",
+  "dokima/board.py",
+  "dokima/defaults.yaml",
+  "dokima/settings.py"
+ ],
+ "branch": "try/issue-787",
+ "url": "https://github.com/dokima-dev/dokima/issues/787#issuecomment-6233043581"
+}
