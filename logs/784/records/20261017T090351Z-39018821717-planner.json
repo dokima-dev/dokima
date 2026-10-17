@@ -1,0 +1,206 @@
+{
+ "role": "planner",
+ "stage": null,
+ "run_id": "39018821717",
+ "commit_before": "826f2054bb114cbc1ad96e5b11080798cb967ec1",
+ "started_by": "dokima-runtime[bot]",
+ "models": [
+  "claude-opus-5-5"
+ ],
+ "report": {
+  "duration_ms": 803036,
+  "turns": 41,
+  "cost_usd": 2.5626650000000004,
+  "tokens_in": 4026590,
+  "tokens_out": 33008
+ },
+ "log": "https://github.com/dokima-dev/dokima/blob/logs/logs/784/39018821717-planner.md",
+ "run": "https://github.com/dokima-dev/dokima/actions/runs/39018821717",
+ "handback": {
+  "kind": "user_story",
+  "title": "Required checks, labels and the audit follow settings",
+  "summary": "The daily audit and its guard judge a repo by its own settings, not by Dokima's own values.",
+  "user_story": "The audit checks a repo's own required checks, label names, colors and merge queue choice, and stops false alarms.",
+  "acceptance_criteria": [
+   {
+    "text": "The audit wants the default branch to require exactly the checks named in the required checks setting.",
+    "words": "`gates.required: [\"all tests\", \"Acceptance criteria\"]`",
+    "source": "https://github.com/dokima-dev/dokima/issues/740#issuecomment-6219928729",
+    "files": [
+     "dokima/audit.py",
+     "dokima/manifest.py"
+    ],
+    "edge_cases": [
+     {
+      "case": "The branch rule lacks a check the settings add, so the audit names it.",
+      "test": "tests/test_settings_audit.py::test_the_branch_rule_is_checked_against_the_required_checks_setting"
+     }
+    ]
+   },
+   {
+    "text": "With the merge queue turned off in a repo's settings, the Setup issue never mentions a merge queue.",
+    "words": "merge queue (#375)",
+    "source": "https://github.com/dokima-dev/dokima/issues/740",
+    "files": [
+     "dokima/audit.py",
+     "dokima/defaults.yaml",
+     "dokima/manifest.py"
+    ],
+    "edge_cases": [
+     {
+      "case": "GitHub refuses to list the repo's rulesets while the queue is off.",
+      "test": "tests/test_settings_audit.py::test_with_the_merge_queue_off_the_audit_never_asks_for_one"
+     }
+    ]
+   },
+   {
+    "text": "The audit looks for each of Dokima's labels under its name in the labels setting.",
+    "words": "`labels: {plan: plan, work: work, autopilot: autopilot, filed: filed-by-dokima}`",
+    "source": "https://github.com/dokima-dev/dokima/issues/740#issuecomment-6219928729",
+    "files": [
+     "dokima/audit.py",
+     "dokima/manifest.py"
+    ],
+    "edge_cases": [
+     {
+      "case": "The repo still holds only the old label name, so the renamed one is missing.",
+      "test": "tests/test_settings_audit.py::test_the_audit_wants_each_label_under_its_name_in_settings"
+     }
+    ]
+   },
+   {
+    "text": "The daily audit no longer flags a label color that matches the repo's settings.",
+    "words": "#326 and #424 (audit false alarms)",
+    "source": "https://github.com/dokima-dev/dokima/issues/740",
+    "files": [
+     "dokima/audit.py",
+     "dokima/defaults.yaml",
+     "dokima/manifest.py"
+    ],
+    "edge_cases": [
+     {
+      "case": "The label keeps the shipped color while the settings name another.",
+      "test": "tests/test_settings_audit.py::test_a_label_color_matching_settings_is_not_flagged"
+     }
+    ]
+   },
+   {
+    "text": "The daily audit no longer flags a board pill color that matches the repo's settings.",
+    "words": "#326 and #424 (audit false alarms)",
+    "source": "https://github.com/dokima-dev/dokima/issues/740",
+    "files": [
+     "dokima/audit.py",
+     "dokima/defaults.yaml",
+     "dokima/manifest.py"
+    ],
+    "edge_cases": [
+     {
+      "case": "The pill keeps the shipped color while the settings name another.",
+      "test": "tests/test_settings_audit.py::test_a_pill_color_matching_settings_is_not_flagged"
+     }
+    ]
+   },
+   {
+    "text": "The settings guard no longer flags a workflow's name, compared in code, as a missing check.",
+    "words": "#326 and #424 (audit false alarms)",
+    "source": "https://github.com/dokima-dev/dokima/issues/740",
+    "files": [
+     "dokima/manifest.py"
+    ],
+    "edge_cases": [
+     {
+      "case": "A name that is neither a workflow nor a required check is still named.",
+      "test": "tests/test_settings_audit.py::test_the_guard_passes_a_workflow_name_compared_in_code"
+     }
+    ]
+   },
+   {
+    "text": "The shipped settings declare no plan or work label, the labels that once started agents.",
+    "words": "#515 (labels still declared as starting agents)",
+    "source": "https://github.com/dokima-dev/dokima/issues/740",
+    "files": [
+     "dokima/defaults.yaml"
+    ],
+    "no_edge_cases": "It reads one fixed file that Dokima ships."
+   }
+  ],
+  "non_functional": [],
+  "tests": {
+   "784.1": [
+    "tests/test_settings_audit.py::test_the_branch_rule_is_checked_against_the_required_checks_setting"
+   ],
+   "784.2": [
+    "tests/test_settings_audit.py::test_with_the_merge_queue_off_the_audit_never_asks_for_one"
+   ],
+   "784.3": [
+    "tests/test_settings_audit.py::test_the_audit_wants_each_label_under_its_name_in_settings"
+   ],
+   "784.4": [
+    "tests/test_settings_audit.py::test_a_label_color_matching_settings_is_not_flagged"
+   ],
+   "784.5": [
+    "tests/test_settings_audit.py::test_a_pill_color_matching_settings_is_not_flagged"
+   ],
+   "784.6": [
+    "tests/test_settings_audit.py::test_the_guard_passes_a_workflow_name_compared_in_code"
+   ],
+   "784.7": [
+    "tests/test_settings_audit.py::test_the_shipped_settings_declare_no_plan_or_work_label"
+   ]
+  },
+  "test_changes": {
+   "tests/test_settings_merge.py::test_the_shipped_defaults_hold_the_owners_list": "Owner's #515 drops plan and work labels; every other default still checked."
+  },
+  "links": {
+   "blocked_by": [],
+   "blocks": [
+    741,
+    742,
+    744,
+    791
+   ],
+   "relates_to": [
+    326,
+    424,
+    515,
+    375,
+    787,
+    785
+   ]
+  },
+  "raises": [
+   {
+    "kind": "question",
+    "to": "owner",
+    "label": "Reading: merge queue",
+    "text": "With the queue off, should auto-merge need only main's review exemption? The plan assumes so.",
+    "evidence": "`dokima/audit.py` `auto_merge()` names the queue's bypass list; #375, still open, adds the switch-on ask.",
+    "raised_by": "planner",
+    "id": "P1"
+   },
+   {
+    "kind": "question",
+    "to": "owner",
+    "label": "Conflict: plan, work labels",
+    "text": "Your settings list keeps plan and work labels; your #515 note drops them. The plan drops them. Right?",
+    "evidence": "`dokima/defaults.yaml` `labels` holds plan and work; nothing reads them; #740 row D1 lists them.",
+    "raised_by": "planner",
+    "id": "P2"
+   },
+   {
+    "kind": "question",
+    "to": "owner",
+    "label": "Reading: creates labels",
+    "text": "No Dokima code creates labels. The plan reads this as: the audit asks for each label by its setting name.",
+    "evidence": "`dokima/audit.py` `compare_labels()` says a label is missing; no code creates one.",
+    "raised_by": "planner",
+    "id": "P3"
+   }
+  ]
+ },
+ "check": {
+  "passed": true,
+  "problems": []
+ },
+ "url": "https://github.com/dokima-dev/dokima/issues/784#issuecomment-6231944437"
+}
