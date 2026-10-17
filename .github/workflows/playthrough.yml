@@ -44,6 +44,7 @@ jobs:
           private-key: ${{ secrets.DOKIMA_APP_KEY }}
           owner: dokima-dev
           repositories: card-gallery
+      - run: python3 -m pip install -q pyyaml  # the settings reader (#794)
       - name: Play one issue from opened to merged
         env:
           REPO: dokima-dev/card-gallery

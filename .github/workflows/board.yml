@@ -55,6 +55,7 @@ jobs:
       - uses: actions/setup-python@v6
         with:
           python-version: "3.12"
+      - run: python3 -m pip install -q pyyaml  # the settings reader (#794)
       - id: queue
         run: python3 -m dokima.board queue
       - name: Report this run's GitHub calls
@@ -107,6 +108,7 @@ jobs:
         with:
           app-id: ${{ vars.DOKIMA_APP_ID }}
           private-key: ${{ secrets.DOKIMA_APP_KEY }}
+      - run: python3 -m pip install -q pyyaml  # the settings reader (#794)
       - name: Sync the board
         env:
           GH_TOKEN: ${{ steps.app.outputs.token }}

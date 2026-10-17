@@ -24,7 +24,24 @@ jobs:
       - uses: actions/setup-python@v6
         with:
           python-version: "3.12"
-      - run: pip install -q pytest pytest-xdist
-      - run: pip install -q pyyaml  # the settings reader (#793)
+      - run: python3 -m pip install -q pyyaml  # the settings reader (#794)
+      # The repo's Python, test tools and install command, from its settings file over Dokima's defaults (#794).
+      # A checkout whose settings reader has no setup mode (main before #794) sets up as this workflow did before.
+      - id: setup
+        run: |
+          if python3 -c 'from dokima.settings import setup_lines' 2>/dev/null; then out=$(python3 -m dokima.settings setup)
+          else out=$(printf 'python=3.12\ntest_tools=pytest pytest-xdist\ninstall=\n')
+            echo "::notice title=Old setup::No settings reader with a setup mode here, so the old install list is used."; fi
+          echo "$out"; echo "$out" >> "${GITHUB_OUTPUT:-/dev/null}"
+      - uses: actions/setup-python@v6
+        with:
+          python-version: ${{ steps.setup.outputs.python }}
+      - name: Install the test tools and the repo itself
+        env:
+          TOOLS: ${{ steps.setup.outputs.test_tools }}
+          INSTALL: ${{ steps.setup.outputs.install }}
+        run: |
+          pip install -q $TOOLS pyyaml
+          if [ -n "$INSTALL" ]; then eval "$INSTALL"; fi
       # Every test, spread over all the runner's cores.
       - run: pytest -q -p no:cacheprovider -n auto tests
