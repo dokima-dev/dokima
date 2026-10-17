@@ -65,9 +65,15 @@ INSTANCES = [
 CHECKLIST = ("weak test", "cannot pass", "no criterion", "doubt", "outside this issue")
 
 
+GRADES = {"planner": "plan-grade", "worker": "result-grade", "reviewer": "plan-grade"}
+
+
 def prompt_section(role):
-    """The shared section of a role prompt, or None without one."""
-    lines = open(os.path.join(ROOT, "dokima", "roles", f"{role}.md")).read().splitlines()
+    """The shared section of a role's built prompt, or None without one.
+
+    The prompt is drawn by the prompt builder from the shipped files and settings, as the agent gets it."""
+    from dokima import prompt, settings
+    lines = prompt.build(role, GRADES[role], settings.read(ROOT)).splitlines()
     at = [i for i, l in enumerate(lines) if l.strip() == PROMPT_HEADING]
     if len(at) != 1:
         return None
@@ -148,7 +154,9 @@ def table_problems(section):
 def code_raise_bullets(section, crit):
     """Fails the test unless each thing code raises has one bullet with an example."""
     for name in CODE_RAISES:
-        hits = [l for l in section.splitlines() if l.strip().startswith(f"- **{name}")]
+        # The blocks-in-a-row limit comes from settings, so its bullet may give the number as a figure.
+        bold = re.escape(f"- **{name}").replace("Three", "(Three|\\d+)")
+        hits = [l for l in section.splitlines() if re.match(bold, l.strip())]
         assert len(hits) == 1, f"{crit}: there is not exactly one bullet '- **{name}**' (found {len(hits)})"
         after = hits[0].split("Example:", 1)
         assert len(after) == 2 and len(after[1].strip()) >= 20, \
@@ -234,7 +242,7 @@ def test_the_shared_prompt_section_has_an_example_of_every_kind_and_instance(rec
     record_property("proves", "302.3")
     found = {role: prompt_section(role) for role in ROLE_FILES}
     for role, text in found.items():
-        assert text, f"302.3: dokima/roles/{role}.md has no single '{PROMPT_HEADING}' section"
+        assert text, f"302.3: the {role}'s prompt has no single '{PROMPT_HEADING}' section"
     assert len(set(found.values())) == 1, "302.3: the shared section is not the same text in all three prompts"
     exs = [e for e, _ in examples(found["planner"])]
     for kind, to, label in INSTANCES:
@@ -257,7 +265,7 @@ def test_the_shared_prompt_section_asks_agents_to_speak_up_and_ends_with_the_che
     Proves 302.4."""
     record_property("proves", "302.4")
     text = prompt_section("planner")
-    assert text, f"302.4: dokima/roles/planner.md has no single '{PROMPT_HEADING}' section"
+    assert text, f"302.4: the planner's prompt has no single '{PROMPT_HEADING}' section"
     assert re.search(r"stay(ing)? quiet", text, re.I), "302.4: the shared section does not ask agents not to stay quiet"
     lines = text.splitlines()
     last = lines[-5:]
@@ -284,7 +292,7 @@ def test_agents_md_and_the_prompt_give_an_example_of_everything_code_raises(reco
     assert section, f"302.5: AGENTS.md does not have exactly one '{AGENTS_HEADING}' section"
     code_raise_bullets(section, "302.5 (AGENTS.md)")
     text = prompt_section("planner")
-    assert text, f"302.5: dokima/roles/planner.md has no single '{PROMPT_HEADING}' section"
+    assert text, f"302.5: the planner's prompt has no single '{PROMPT_HEADING}' section"
     code_raise_bullets(text, "302.5 (shared prompt section)")
     assert "never raise them yourself" in text.lower(), \
         "302.5: the shared prompt section does not tell agents never to raise these themselves"
@@ -300,7 +308,7 @@ def test_every_example_raise_in_agents_md_and_the_prompts_is_one_code_accepts(re
     Proves 302.6."""
     record_property("proves", "302.6")
     text = prompt_section("planner")
-    assert text, f"302.6: dokima/roles/planner.md has no single '{PROMPT_HEADING}' section"
+    assert text, f"302.6: the planner's prompt has no single '{PROMPT_HEADING}' section"
     exs = [e for e, _ in examples(text)]
     assert len(exs) >= len(INSTANCES), f"302.6: the shared section has {len(exs)} example raises, fewer than {len(INSTANCES)}"
     section = agents_section() or ""
