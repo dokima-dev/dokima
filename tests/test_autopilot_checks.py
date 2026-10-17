@@ -67,6 +67,9 @@ class FakeGitHub:
             return json.dumps([{"filename": "dokima/x.py"}])
         if "/protection" in joined:
             raise AssertionError("test setup: the protection endpoint is admin-only; the app reads the branch (#576)")
+        if a[-1:] == ["repos/o/r"]:
+            # The repo itself names its default branch, as GitHub does (#787).
+            return json.dumps({"full_name": "o/r", "default_branch": "main"})
         if joined.split("?")[0].endswith("/branches/main"):
             # Main's branch rule requires every check the test gives except the card runs, which judge nothing (#561).
             req = sorted({r["name"] for s in self.steps for r in s if r["name"] != "card"}

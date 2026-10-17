@@ -10,10 +10,11 @@ import json
 import os
 import subprocess
 import sys
+import urllib.parse
 
-from dokima import agent, body as issue_text, manifest, plan, retry
+from dokima import agent, agent_autopilot, body as issue_text, manifest, plan, retry
 
-AUTOPILOT = "autopilot"
+AUTOPILOT = "autopilot"  # the old Autopilot view's filter names it; the label itself is named in settings (#787)
 DONE = ("Done", None)
 QUIET = "no card can move"  # how reviews.yml names the run of a review or line note that cannot move a card
 
@@ -76,8 +77,8 @@ class Board:
         return {label["name"] for label in node["labels"]["nodes"]}
 
     def autopilot(self, kind, number):
-        """Whether the issue or PR carries the autopilot label."""
-        return AUTOPILOT in self.labels(kind, number)
+        """Whether the issue or PR carries the autopilot label, by its name in settings."""
+        return agent_autopilot.autopilot_label() in self.labels(kind, number)
 
     def dependencies(self, number, side):
         """[{number, state}] of the issues this one blocks ("blocking") or is blocked by ("blocked_by"); raises
@@ -117,12 +118,12 @@ class Board:
         return up["number"] if up else None
 
     def label(self, kind, number, on):
-        """Put the autopilot label on or off the issue or PR, leaving its other labels alone."""
-        path = f"repos/{self.repo_owner}/{self.repo_name}/issues/{number}/labels"
+        """Put the autopilot label, named in settings, on or off; other labels stay."""
+        path, name = f"repos/{self.repo_owner}/{self.repo_name}/issues/{number}/labels", agent_autopilot.autopilot_label()
         if on:
-            self.rest("POST", path, **{"labels[]": AUTOPILOT})
+            self.rest("POST", path, **{"labels[]": name})
         else:
-            self.rest("DELETE", f"{path}/{AUTOPILOT}")
+            self.rest("DELETE", f"{path}/{urllib.parse.quote(name, safe='')}")
 
     def state(self, kind, number):
         """"open" or "closed" (a merged pull request is closed); raises subprocess.CalledProcessError when GitHub cannot say."""
@@ -133,7 +134,7 @@ class Board:
         """Every issue and pull request card on the board; drafts are skipped.
 
         Each is {kind, number, status, action, closed, autopilot}; a merged pull request counts as closed."""
-        out, cursor = [], None
+        out, cursor, name = [], None, agent_autopilot.autopilot_label()
         while True:
             more = {"c": cursor} if cursor else {}
             items = self.q('query($o:String!,$n:Int!,$c:String){organization(login:$o){projectV2(number:$n){items(first:100,after:$c){pageInfo{hasNextPage endCursor} nodes{fieldValueByName(name:"Action"){... on ProjectV2ItemFieldSingleSelectValue{name}} status:fieldValueByName(name:"Status"){... on ProjectV2ItemFieldSingleSelectValue{name}} content{__typename ... on Issue{number state labels(first:100){nodes{name}}} ... on PullRequest{number state labels(first:100){nodes{name}}}}}}}}}', o=self.owner, n=self.number, **more)["organization"]["projectV2"]["items"]
@@ -144,7 +145,7 @@ class Board:
                 out.append({"kind": "issue" if c["__typename"] == "Issue" else "pr", "number": c["number"],
                             "status": (it.get("status") or {}).get("name"),
                             "action": (it.get("fieldValueByName") or {}).get("name"), "closed": c["state"] != "OPEN",
-                            "autopilot": AUTOPILOT in {label["name"] for label in c["labels"]["nodes"]}})
+                            "autopilot": name in {label["name"] for label in c["labels"]["nodes"]}})
             if not items["pageInfo"]["hasNextPage"]:
                 return out
             cursor = items["pageInfo"]["endCursor"]
@@ -200,7 +201,7 @@ def can_move(event, p):
             return bool(agent.command_of(words) or agent.autopilot_of(words) or agent.MARK in words or agent.LIVE in words
                         or words.strip().startswith("Autopilot"))
         if event == "issues" and action in ("labeled", "unlabeled"):
-            return p["label"]["name"] == AUTOPILOT
+            return p["label"]["name"] == agent_autopilot.autopilot_label()
         if event == "issues" and action == "edited":
             changes = p["changes"]
             if not changes:
@@ -404,7 +405,7 @@ def sync(event, payload, spec, repo, q=gql, rest=api):
     if not spec:
         return []
     touched = blockers(event, payload)
-    on_off = event == "issues" and payload["action"] in ("labeled", "unlabeled") and payload["label"]["name"] == AUTOPILOT \
+    on_off = event == "issues" and payload["action"] in ("labeled", "unlabeled") and payload["label"]["name"] == agent_autopilot.autopilot_label() \
         and payload["issue"]["number"]
     merged = event in ("pull_request", "pull_request_target") and payload["action"] == "closed" and payload["pull_request"].get("merged")
     board, owners = Board(spec, repo, q, rest), plan.repo_approvers(repo.split("/")[0])

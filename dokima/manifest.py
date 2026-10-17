@@ -122,6 +122,7 @@ REPO_PATHS = [
 # REST paths outside a repo: (pattern, permission)
 OTHER_PATHS = [
     (r"orgs/[^/]+/projectsV2(/|$)", "organization_projects"),
+    (r"repos/[^/]+$", "metadata"),  # the repo itself, a {} standing for owner/name: its default branch (#787)
     (r"users/|installation/token$|^rate_limit$", NONE),
 ]
 # What a GraphQL query or mutation touches: (pattern, permission)

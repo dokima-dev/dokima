@@ -71,6 +71,9 @@ class FakeGitHub:
         if path in (f"repos/{REPO}/branches/main/protection", f"repos/{REPO}/branches/main/protection/required_status_checks"):
             # Admin-only: GitHub refuses Dokima's app here (#576), so the rule is read from the branch instead.
             raise subprocess.CalledProcessError(1, ["gh", *a], output="", stderr="Resource not accessible by integration (HTTP 403)")
+        if path == f"repos/{REPO}":
+            # The repo itself names its default branch, as GitHub does (#787).
+            return json.dumps({"full_name": REPO, "default_branch": "main"})
         if path == f"repos/{REPO}/branches/main":
             if self.rule_fails:
                 raise subprocess.CalledProcessError(1, ["gh", *a], output="", stderr=BAD_GATEWAY)

@@ -399,12 +399,12 @@ def test_the_guard_passes_settings_the_manifest_declares(record_property, tmp_pa
     assert m.undeclared(ROOT) == [], f"282.3: code or workflows in this repo rely on settings the manifest leaves out: {m.undeclared(ROOT)}"
 
 
-@pytest.mark.parametrize("label,path", [("autopilot", "dokima/agent_autopilot.py")])
+@pytest.mark.parametrize("label,path", [("autopilot", ".github/workflows/autopilot.yml")])
 def test_the_guard_catches_a_label_taken_out_of_the_manifest(record_property, monkeypatch, label, path):
     """A label taken out of the manifest is named with the code that sets it.
 
     Proves 282.3. With autopilot left out of the manifest's labels, the guard run on this repo names that label and
-    dokima/agent_autopilot.py, which puts it on issues."""
+    .github/workflows/autopilot.yml, which reacts to it by that name; code reads the label's name from settings (#787)."""
     record_property("proves", "282.3")
     m = manifest("282.3")
     monkeypatch.delitem(m.LABELS, label)

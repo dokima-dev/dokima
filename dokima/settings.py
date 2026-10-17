@@ -14,6 +14,7 @@ import difflib
 import json
 import os
 import shlex
+import subprocess
 import sys
 
 import yaml
@@ -98,16 +99,40 @@ def setup_lines(got):
     return "\n".join(lines)
 
 
+def github_default_branch():
+    """The repo's default branch as GitHub names it, from the event file or `gh` (#787).
+
+    Raises ValueError when GitHub gives none."""
+    try:
+        with open(os.environ["GITHUB_EVENT_PATH"]) as f:
+            name = ((json.load(f) or {}).get("repository") or {}).get("default_branch")
+    except (KeyError, OSError, ValueError, AttributeError):
+        name = None
+    if not name:
+        repo = os.environ.get("GITHUB_REPOSITORY", "")
+        try:
+            name = subprocess.run(["gh", "api", f"repos/{repo}", "--jq", ".default_branch"], capture_output=True,
+                                  text=True, check=True).stdout.strip()
+        except (OSError, subprocess.CalledProcessError) as e:
+            why = " ".join((getattr(e, "stderr", None) or str(e)).split())
+            raise ValueError(f"the default branch is unknown: branch.default is empty and GitHub did not give "
+                             f"{repo or 'the repo'}'s default branch ({why})") from e
+    if not name:
+        raise ValueError("the default branch is unknown: branch.default is empty and GitHub gave no default branch")
+    return name
+
+
 def env_lines(got):
     """The settings workflows run and push by, as `NAME=value` lines; multi-line values fail.
 
-    The all-tests command leaves out each test on the exclude list; the per-criterion command must name {test}."""
+    The all-tests command leaves out each test on the exclude list; the per-criterion command must name {test}. An
+    empty default branch is GitHub's own default branch (#787)."""
     tests = got["tests"]
     run_all = " ".join([str(tests["run_all"])] + [f"--deselect {shlex.quote(str(t))}" for t in tests.get("exclude") or []])
     if "{test}" not in str(tests["run_one"]):
         raise ValueError(f"tests.run_one in {REPO_FILE} must name {{test}}, where each criterion's tests go")
     values = {"TESTS_RUN_ALL": run_all, "TESTS_RUN_ONE": tests["run_one"], "TESTS_AFFECTED": tests["affected"],
-              "TESTS_DIR": tests["dir"], "DEFAULT_BRANCH": got["branch"]["default"],
+              "TESTS_DIR": tests["dir"], "DEFAULT_BRANCH": got["branch"]["default"] or github_default_branch(),
               "RECORDS_BRANCH": got["records"]["branch"], "BOT_SLUG": got["bot"]["slug"],
               "CO_AUTHOR": got["co_author"], "OWNER_DOCS": got["owner_docs"]}
     lines = []

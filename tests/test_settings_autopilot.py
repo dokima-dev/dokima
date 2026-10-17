@@ -1,0 +1,567 @@
+"""Tests for #787: autopilot merges by the repo's branch, method, checks wait and labels.
+
+The settings live in `.dokima/settings.yaml` in the repo the run works in, over Dokima's shipped defaults in
+`dokima/defaults.yaml`. This story reads these of them:
+
+    branch: {default: main}          # the branch autopilot merges into; empty (as shipped) asks GitHub for the repo's own
+    merge: {method: squash}          # how autopilot merges: squash, merge or rebase
+    gate: {checks_wait_min: 45}      # how many minutes the merge gate waits for checks still running
+    labels: {autopilot: autopilot}   # the autopilot label
+
+Each test writes a settings file into a temp folder, runs there, and calls autopilot's or the board's own code
+against a fake GitHub in memory standing in for `gh`. Time is faked, so a 45-minute wait costs nothing. The tests
+of 787.7 and 787.8 run `python3 -m dokima.settings` itself, with a fake `gh` program first on the PATH and a fake
+GitHub event file. Nothing leaves the machine.
+"""
+import json
+import os
+import subprocess
+import sys
+
+import pytest
+
+sys.path.insert(0, os.path.join(os.path.dirname(os.path.abspath(__file__)), ".."))
+from dokima import agent_autopilot as ap  # noqa: E402
+from dokima import agent_github  # noqa: E402
+from dokima import agent_roles  # noqa: E402
+from dokima import board as board_mod  # noqa: E402
+from dokima import uptodate  # noqa: E402
+
+ROOT = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
+REPO = "o/r"
+PR = 60
+HEAD = "a1" * 20
+
+
+class FakeGitHub:
+    """A fake GitHub for one repo: branch rules, one pull request, checks, issues, labels.
+
+    BRANCHES names each branch GitHub has, with the checks its rule requires; any other branch answers 404. Every
+    call is kept in `calls`, so a test can say which branch, method or label autopilot used."""
+
+    def __init__(self, branches=None, github_default="main", running=(), labels=None):
+        """A repo with BRANCHES, GitHub's own default branch, checks still RUNNING and each issue's LABELS."""
+        self.branches = branches if branches is not None else {"main": ["all tests"]}
+        self.github_default = github_default
+        self.running = set(running)
+        self.labels = labels or {}
+        self.calls = []
+        self.created = []
+        self.merges = []
+
+    def refuse(self, args, why="HTTP 404: Not Found"):
+        """Raise the error `gh` raises when GitHub refuses a call."""
+        raise subprocess.CalledProcessError(1, ["gh", *args], output="", stderr=why)
+
+    def __call__(self, *args):
+        """Answer one `gh` call the way GitHub would."""
+        self.calls.append(args)
+        if args[:2] == ("pr", "view"):
+            field = args[args.index("--json") + 1]
+            return {"headRefOid": HEAD, "isDraft": "false"}[field]
+        if args[:2] == ("pr", "merge"):
+            self.merges.append(args)
+            return ""
+        if args[:2] == ("issue", "create"):
+            self.created.append(args)
+            return f"https://github.com/{REPO}/issues/900\n"
+        if args[:2] == ("api", "graphql"):
+            return json.dumps({"data": {"repository": {"pullRequest": {"state": "MERGED", "isInMergeQueue": False}}}})
+        rest = [a for a in args[1:] if not a.startswith("-")]
+        method = args[args.index("-X") + 1] if "-X" in args else "GET"
+        path = next(a for a in rest if a.startswith("repos/")) if any(a.startswith("repos/") for a in rest) else ""
+        if path == f"repos/{REPO}":
+            return json.dumps({"full_name": REPO, "default_branch": self.github_default})
+        if path.startswith(f"repos/{REPO}/branches/"):
+            name = path.split("/branches/", 1)[1].split("/protection")[0]
+            if name not in self.branches:
+                self.refuse(args, "HTTP 404: Branch not found")
+            rule = {"required_status_checks": {"contexts": self.branches[name]}}
+            return json.dumps({"name": name, "protection": rule})
+        if path.startswith(f"repos/{REPO}/compare/"):
+            base = path.split("/compare/", 1)[1].split("...")[0]
+            if base not in self.branches:
+                self.refuse(args)
+            return json.dumps({"status": "ahead", "behind_by": 0})
+        if path.startswith(f"repos/{REPO}/commits/") and "/check-runs" in path:
+            names = {c for cs in self.branches.values() for c in cs}
+            return json.dumps({"check_runs": [
+                {"name": c, "head_sha": HEAD, "status": "in_progress" if c in self.running else "completed",
+                 "conclusion": None if c in self.running else "success"} for c in sorted(names)]})
+        if path.startswith(f"repos/{REPO}/commits/") and "/status" in path:
+            return json.dumps({"statuses": []})
+        if path.startswith(f"repos/{REPO}/pulls/{PR}/files"):
+            return json.dumps([{"filename": "dokima/x.py"}])
+        if path.startswith(f"repos/{REPO}/issues/") and path.endswith("/sub_issues?per_page=100"):
+            return "[]"
+        if path.startswith(f"repos/{REPO}/issues?labels="):
+            name = path.split("labels=", 1)[1].split("&")[0]
+            return json.dumps([{"number": n, "state": "open", "labels": [{"name": x} for x in ls]}
+                               for n, ls in sorted(self.labels.items()) if name in ls])
+        if path.startswith(f"repos/{REPO}/issues/") and path.count("/") == 4 and method == "GET":
+            n = int(path.rsplit("/", 1)[1])
+            return json.dumps({"number": n, "state": "open", "labels": [{"name": x} for x in self.labels.get(n, [])]})
+        if path.startswith(f"repos/{REPO}/issues/") and "/labels" in path:
+            n = int(path.split("/issues/", 1)[1].split("/")[0])
+            if method == "POST":
+                field = next(a for a in args if a.startswith("labels[]="))
+                self.labels.setdefault(n, []).append(field.split("=", 1)[1])
+            elif method == "DELETE":
+                self.labels[n] = [x for x in self.labels.get(n, []) if x != path.rsplit("/", 1)[1]]
+            return "[]"
+        self.refuse(args, f"the fake GitHub has no answer for: gh {' '.join(args)}")
+
+    def branches_asked(self):
+        """Every branch name autopilot asked GitHub about: rules read and comparisons made."""
+        out = []
+        for args in self.calls:
+            for a in args:
+                if a.startswith(f"repos/{REPO}/branches/"):
+                    out.append(a.split("/branches/", 1)[1].split("/protection")[0])
+                elif a.startswith(f"repos/{REPO}/compare/"):
+                    out.append(a.split("/compare/", 1)[1].split("...")[0])
+        return out
+
+
+class Clock:
+    """A fake clock: sleeping only moves it forward."""
+
+    def __init__(self):
+        """Starts at zero seconds."""
+        self.now = 0.0
+
+    def sleep(self, s):
+        """Moves the clock S seconds on at once."""
+        self.now += s
+
+    def monotonic(self):
+        """The fake time in seconds."""
+        return self.now
+
+
+@pytest.fixture
+def repo(tmp_path, monkeypatch):
+    """Runs the test inside a temp repo folder; returns a function writing its `.dokima/settings.yaml`."""
+    monkeypatch.chdir(tmp_path)
+    clock = Clock()
+    monkeypatch.setattr(ap.time, "sleep", clock.sleep)
+    monkeypatch.setattr(ap.time, "monotonic", clock.monotonic)
+
+    def settings(text=None):
+        """Writes TEXT as the repo's settings file; None leaves the repo with no settings file."""
+        if text is not None:
+            os.makedirs(".dokima", exist_ok=True)
+            with open(os.path.join(".dokima", "settings.yaml"), "w") as f:
+                f.write(text)
+    settings.clock = clock
+    return settings
+
+
+def fake(monkeypatch, **kw):
+    """Puts a FakeGitHub with KW in place of `gh`, and returns it."""
+    gh = FakeGitHub(**kw)
+    monkeypatch.setattr(agent_github, "gh", gh)
+    return gh
+
+
+def merge_flag(args):
+    """The merge method flag a `gh pr merge` call passed: --squash, --merge or --rebase."""
+    flags = [a for a in args if a in ("--squash", "--merge", "--rebase")]
+    return flags[0] if len(flags) == 1 else flags
+
+
+# 787.1 ---------------------------------------------------------------------------------------------------------
+
+
+def test_autopilot_merges_into_the_default_branch_the_settings_name(record_property, repo, monkeypatch):
+    """Autopilot merges into the default branch the settings name.
+
+    With `branch.default: trunk`, a GitHub repo whose only branch is trunk, and a green pull request, autopilot
+    merges it, and every branch rule it read and every comparison it made names trunk, never main. Proves 787.1."""
+    record_property("proves", "787.1")
+    repo("branch:\n  default: trunk\n")
+    gh = fake(monkeypatch, branches={"trunk": ["all tests"]}, github_default="trunk")
+    asked, why = ap.try_merge(REPO, PR)
+    assert asked, f"787.1: autopilot did not merge into trunk, the settings' default branch: {why}"
+    assert gh.merges, "787.1: autopilot never asked GitHub to merge the pull request"
+    used = set(gh.branches_asked())
+    assert used == {"trunk"}, f"787.1: autopilot read branches {sorted(used)}, not only trunk as the settings name"
+
+
+def test_a_default_branch_github_lacks_stops_saying_which(record_property, repo, monkeypatch):
+    """A default branch setting GitHub does not have stops the merge, naming that branch.
+
+    With `branch.default: trunk` and a repo that only has main, nothing merges and the reason names trunk.
+    Proves 787.1."""
+    record_property("proves", "787.1")
+    repo("branch:\n  default: trunk\n")
+    gh = fake(monkeypatch, branches={"main": ["all tests"]})
+    asked, why = ap.try_merge(REPO, PR)
+    assert not asked and not gh.merges, "787.1: autopilot merged although GitHub has no trunk branch"
+    assert "trunk" in (why or ""), f"787.1: the reason does not name trunk, the branch the settings name: {why!r}"
+
+
+# 787.2 ---------------------------------------------------------------------------------------------------------
+
+
+def test_with_no_default_branch_setting_autopilot_uses_githubs_default_branch(record_property, repo, monkeypatch):
+    """With the default branch setting empty, autopilot merges into GitHub's default branch.
+
+    The settings file gives `branch.default` no value; GitHub says the repo's default branch is develop. Autopilot
+    merges, and every branch rule it read and every comparison it made names develop. Proves 787.2."""
+    record_property("proves", "787.2")
+    repo("branch:\n  default:\n")
+    gh = fake(monkeypatch, branches={"develop": ["all tests"]}, github_default="develop")
+    asked, why = ap.try_merge(REPO, PR)
+    assert asked, f"787.2: autopilot did not merge into develop, GitHub's default branch: {why}"
+    used = set(gh.branches_asked())
+    assert used == {"develop"}, f"787.2: autopilot read branches {sorted(used)}, not GitHub's default branch develop"
+
+
+def test_an_empty_text_default_branch_also_uses_githubs(record_property, repo, monkeypatch):
+    """A default branch setting of empty text also means GitHub's default branch.
+
+    With `branch.default: ""` and GitHub's default branch develop, autopilot merges into develop. Proves 787.2."""
+    record_property("proves", "787.2")
+    repo('branch:\n  default: ""\n')
+    gh = fake(monkeypatch, branches={"develop": ["all tests"]}, github_default="develop")
+    asked, why = ap.try_merge(REPO, PR)
+    assert asked, f"787.2: an empty default branch setting did not fall back to GitHub's develop: {why}"
+    assert set(gh.branches_asked()) == {"develop"}, f"787.2: autopilot read {sorted(set(gh.branches_asked()))}"
+
+
+# 787.3 ---------------------------------------------------------------------------------------------------------
+
+
+def test_autopilot_merges_with_the_merge_method_the_settings_name(record_property, repo, monkeypatch):
+    """Autopilot merges with the merge method the settings name.
+
+    With `merge.method: rebase`, the merge autopilot asks GitHub for passes --rebase, not --squash. Proves 787.3."""
+    record_property("proves", "787.3")
+    repo("merge:\n  method: rebase\n")
+    gh = fake(monkeypatch)
+    asked, why = ap.try_merge(REPO, PR)
+    assert asked and gh.merges, f"787.3: autopilot did not merge: {why}"
+    flags = [merge_flag(m) for m in gh.merges]
+    assert flags == ["--rebase"] * len(flags), f"787.3: autopilot merged with {flags}, not --rebase as the settings say"
+
+
+def test_a_direct_merge_after_a_held_one_keeps_the_settings_method(record_property, repo, monkeypatch):
+    """A direct merge after GitHub holds one keeps the settings' merge method.
+
+    GitHub refuses the first merge for a missing approving review; the retry with --admin still passes --merge.
+    Proves 787.3."""
+    record_property("proves", "787.3")
+    repo("merge:\n  method: merge\n")
+    gh = fake(monkeypatch)
+    plain = gh.__call__
+
+    def held(*args):
+        """Refuses the first plain merge, as GitHub does awaiting an approving review."""
+        if args[:2] == ("pr", "merge") and "--admin" not in args and not gh.merges:
+            gh.merges.append(args)
+            gh.refuse(args, "At least 1 approving review is required by reviewers with write access.")
+        return plain(*args)
+    monkeypatch.setattr(agent_github, "gh", held)
+    asked, why = ap.try_merge(REPO, PR)
+    assert asked, f"787.3: autopilot did not merge directly: {why}"
+    admin = [m for m in gh.merges if "--admin" in m]
+    assert admin, "787.3: autopilot never asked for a direct merge after GitHub held the first one"
+    assert [merge_flag(m) for m in gh.merges] == ["--merge"] * len(gh.merges), f"787.3: merges used {gh.merges}"
+
+
+# 787.4 ---------------------------------------------------------------------------------------------------------
+
+
+def test_the_merge_gate_waits_for_checks_as_many_minutes_as_the_settings_say(record_property, repo, monkeypatch):
+    """The merge gate waits for checks as many minutes as the settings say.
+
+    With `gate.checks_wait_min: 2` and a required check that never finishes, the gate stops after 2 minutes of
+    fake time, and says so, instead of waiting 45. Proves 787.4."""
+    record_property("proves", "787.4")
+    repo("gate:\n  checks_wait_min: 2\n")
+    fake(monkeypatch, running={"all tests"})
+    state, _, why = ap.merge_gate(REPO, PR)
+    assert state == "stopped", f"787.4: the gate did not stop on a check that never finished: {state} {why}"
+    waited = repo.clock.now
+    assert 120 <= waited < 180, f"787.4: the gate waited {waited:.0f} s, not the 2 minutes the settings say"
+    assert "after 2 minutes" in (why or ""), f"787.4: the reason does not say it waited 2 minutes: {why!r}"
+
+
+# 787.5 ---------------------------------------------------------------------------------------------------------
+
+
+def test_autopilot_reads_its_label_by_the_name_in_the_labels_setting(record_property, repo, monkeypatch):
+    """Autopilot treats an issue as on autopilot by the label name the settings give.
+
+    With `labels.autopilot: dokima-auto`, an issue carrying dokima-auto is on autopilot, and one carrying only the
+    old autopilot label is not. Proves 787.5."""
+    record_property("proves", "787.5")
+    repo("labels:\n  autopilot: dokima-auto\n")
+    fake(monkeypatch, labels={5: ["dokima-auto"], 6: ["autopilot"]})
+    assert ap.on_autopilot(REPO, 5) is True, "787.5: an issue carrying dokima-auto is not on autopilot"
+    assert ap.on_autopilot(REPO, 6) is False, "787.5: an issue carrying only the old autopilot label is on autopilot"
+
+
+def test_the_sweep_lists_issues_by_the_named_label(record_property, repo, monkeypatch):
+    """The autopilot sweep asks GitHub for issues by the label the settings name.
+
+    Proves 787.5."""
+    record_property("proves", "787.5")
+    repo("labels:\n  autopilot: dokima-auto\n")
+    gh = fake(monkeypatch, labels={5: ["dokima-auto"]})
+    monkeypatch.setenv("OWNERS", "owner-person")
+    monkeypatch.setattr(ap, "start_unblocked", lambda repo, waiting, owners: ([], []))
+    ap.autopilot_closed(REPO)
+    asked = [a for args in gh.calls for a in args if "issues?labels=" in a]
+    assert asked and all("labels=dokima-auto&" in a for a in asked), f"787.5: the sweep asked for {asked}"
+
+
+def test_the_board_reads_autopilot_by_the_named_label(record_property, repo):
+    """The board counts an issue as on autopilot by the label name the settings give.
+
+    With `labels.autopilot: dokima-auto`, the board says an issue carrying dokima-auto is on autopilot, and one
+    carrying only the old autopilot label is not. Proves 787.5."""
+    record_property("proves", "787.5")
+    repo("labels:\n  autopilot: dokima-auto\n")
+    labels = {5: ["dokima-auto"], 6: ["autopilot"]}
+
+    def q(query, **v):
+        """A fake GitHub GraphQL: an empty board, and each issue's labels."""
+        if "projectV2(number:$n){id fields" in query:
+            return {"organization": {"projectV2": {"id": "P", "fields": {"nodes": []}}}}
+        return {"repository": {"issue": {"labels": {"nodes": [{"name": x} for x in labels[v["n"]]]}}}}
+    b = board_mod.Board("o/1", REPO, q=q, rest=lambda *a, **k: {})
+    assert b.autopilot("issue", 5) is True, "787.5: the board does not count an issue carrying dokima-auto"
+    assert b.autopilot("issue", 6) is False, "787.5: the board counts the old autopilot label"
+
+
+def test_adding_the_named_label_on_github_moves_the_board_card(record_property, repo, monkeypatch):
+    """Adding the label the settings name on GitHub moves the board card.
+
+    With `labels.autopilot: dokima-auto`, adding dokima-auto to an issue is an event the board runs on, and the run
+    switches that issue's card on autopilot; adding the old autopilot label is skipped. Proves 787.5."""
+    record_property("proves", "787.5")
+    repo("labels:\n  autopilot: dokima-auto\n")
+    switched = []
+    monkeypatch.setattr(board_mod, "switch", lambda b, n: switched.append(n))
+    monkeypatch.setattr(board_mod, "rebuild", lambda *a, **k: [])
+    monkeypatch.setattr(board_mod.plan, "repo_approvers", lambda owner: [])
+
+    def event(name):
+        """The event GitHub sends when label NAME is added to issue #5."""
+        return {"action": "labeled", "label": {"name": name},
+                "issue": {"number": 5, "state": "open", "labels": [{"name": name}]}}
+
+    def q(query, **v):
+        """A fake GitHub GraphQL holding an empty board."""
+        return {"organization": {"projectV2": {"id": "P", "fields": {"nodes": []}}}}
+    assert board_mod.can_move("issues", event("dokima-auto")) is True, \
+        "787.5: the board skips adding dokima-auto, so the card never moves"
+    assert board_mod.can_move("issues", event("autopilot")) is False, \
+        "787.5: the board still runs on the old autopilot label"
+    board_mod.sync("issues", event("dokima-auto"), "o/1", REPO, q=q, rest=lambda *a, **k: {})
+    assert switched == [5], f"787.5: adding dokima-auto switched {switched}, not issue #5's card"
+
+
+def test_a_split_from_an_issue_on_autopilot_files_its_stories_with_the_named_label(record_property, repo, monkeypatch):
+    """A split filed from an issue on autopilot puts the named label on its stories.
+
+    With `labels.autopilot: dokima-auto`, the parent #5 carries dokima-auto. Filing its approved split must read
+    the parent as on autopilot and hand dokima-auto to the stories it files. Proves 787.5."""
+    record_property("proves", "787.5")
+    repo("labels:\n  autopilot: dokima-auto\n")
+    fake(monkeypatch, labels={5: ["dokima-auto"]})
+    monkeypatch.setenv("GITHUB_REPOSITORY", REPO)
+    monkeypatch.setattr(agent_roles, "conversation", lambda repo, n: ({}, []))
+    monkeypatch.setattr(agent_roles, "records", lambda items: [])
+    monkeypatch.setattr(agent_roles, "approved", lambda recs: True)
+    monkeypatch.setattr(agent_roles, "latest", lambda recs, role: {"handback": {"kind": "feature"}})
+    given = []
+
+    class Filed(Exception):
+        """Stops the run once the split is filed: the rest posts to GitHub."""
+
+    def file_split(repo, parent, recs, labels=()):
+        """Keeps the labels the stories would be filed with."""
+        given.append(list(labels))
+        raise Filed()
+    monkeypatch.setattr(agent_roles, "file_split", file_split)
+    with pytest.raises(Filed):
+        agent_roles.main(["agent", "split", "5"])
+    assert given == [["dokima-auto"]], f"787.5: the split's stories were filed with labels {given}, not dokima-auto"
+
+
+def test_the_up_to_date_check_reads_autopilot_by_the_named_label(record_property, repo):
+    """The up-to-date check counts an issue on autopilot by the named label.
+
+    With `labels.autopilot: dokima-auto`, an issue carrying dokima-auto is on autopilot, and one carrying only the
+    old autopilot label is not. Proves 787.5."""
+    record_property("proves", "787.5")
+    repo("labels:\n  autopilot: dokima-auto\n")
+    labels = {5: ["dokima-auto"], 6: ["autopilot"]}
+
+    def rest(method, path, **f):
+        """A fake GitHub REST answering each issue with its labels."""
+        return {"labels": [{"name": x} for x in labels[int(path.rsplit("/", 1)[1])]]}
+    assert uptodate.autopilot_of(REPO, 5, rest) is True, "787.5: the up-to-date check misses dokima-auto"
+    assert uptodate.autopilot_of(REPO, 6, rest) is False, "787.5: the up-to-date check counts the old autopilot label"
+
+
+# 787.6 ---------------------------------------------------------------------------------------------------------
+
+
+def test_turning_autopilot_on_puts_the_named_label_on(record_property, repo, monkeypatch):
+    """Turning autopilot on puts the label the settings name on the issue.
+
+    Proves 787.6."""
+    record_property("proves", "787.6")
+    repo("labels:\n  autopilot: dokima-auto\n")
+    gh = fake(monkeypatch, labels={5: []})
+    assert ap.switch_autopilot(REPO, 5, "start") == [5], "787.6: turning autopilot on switched nothing"
+    assert gh.labels[5] == ["dokima-auto"], f"787.6: the issue now carries {gh.labels[5]}, not dokima-auto"
+
+
+def test_the_board_puts_the_named_label_on_a_pull_request(record_property, repo):
+    """The board puts the label the settings name on a pull request.
+
+    Proves 787.6."""
+    record_property("proves", "787.6")
+    repo("labels:\n  autopilot: dokima-auto\n")
+    calls = []
+
+    def q(query, **v):
+        """A fake GitHub GraphQL holding an empty board."""
+        return {"organization": {"projectV2": {"id": "P", "fields": {"nodes": []}}}}
+    b = board_mod.Board("o/1", REPO, q=q, rest=lambda method, path, **f: calls.append((method, path, f)) or {})
+    b.label("pr", 60, True)
+    assert calls == [("POST", f"repos/{REPO}/issues/60/labels", {"labels[]": "dokima-auto"})], \
+        f"787.6: the board labelled the pull request with {calls}, not dokima-auto"
+
+
+def test_turning_autopilot_off_removes_the_named_label(record_property, repo, monkeypatch):
+    """Turning autopilot off takes the label the settings name off the issue.
+
+    With `labels.autopilot: dokima-auto`, an issue carrying dokima-auto and bug keeps only bug. Proves 787.6."""
+    record_property("proves", "787.6")
+    repo("labels:\n  autopilot: dokima-auto\n")
+    gh = fake(monkeypatch, labels={5: ["dokima-auto", "bug"]})
+    assert ap.switch_autopilot(REPO, 5, "stop") == [5], "787.6: turning autopilot off switched nothing"
+    assert gh.labels[5] == ["bug"], f"787.6: the issue still carries {gh.labels[5]} after autopilot was turned off"
+
+
+def test_turning_autopilot_off_on_a_pull_request_removes_the_named_label_from_it(record_property, repo, monkeypatch):
+    """Turning autopilot off on a pull request takes the named label off it.
+
+    With `labels.autopilot: dokima-auto`, `/autopilot stop` said on pull request #60 for issue #5 must take
+    dokima-auto off #60 and keep its other label. Proves 787.6."""
+    record_property("proves", "787.6")
+    repo("labels:\n  autopilot: dokima-auto\n")
+    gh = fake(monkeypatch, labels={5: [], PR: ["dokima-auto", "bug"]})
+    monkeypatch.setenv("GITHUB_REPOSITORY", REPO)
+    monkeypatch.setenv("ON_PR", "true")
+    monkeypatch.setenv("NUMBER", str(PR))
+    agent_roles.main(["agent", "autopilot", "stop", "5"])
+    assert gh.labels[PR] == ["bug"], f"787.6: the pull request still carries {gh.labels[PR]} after autopilot was turned off"
+
+
+# 787.7 ---------------------------------------------------------------------------------------------------------
+
+
+def settings_run(where, *args, github="trunk"):
+    """Runs the settings reader in WHERE against a fake GitHub with default branch GITHUB.
+
+    A fake `gh` first on the PATH answers `gh api repos/o/r` with that branch (honouring `--jq .default_branch`), and
+    the event file names it as the repo's default branch, as GitHub's own event file does. GITHUB None makes GitHub
+    give nothing: `gh` fails and there is no event file."""
+    bin_dir = os.path.join(where, "fake-bin")
+    os.makedirs(bin_dir, exist_ok=True)
+    body = json.dumps({"full_name": REPO, "default_branch": github})
+    with open(os.path.join(bin_dir, "gh"), "w") as f:
+        f.write(f"""#!{sys.executable}
+import json, sys
+a = sys.argv[1:]
+if {github is None!r} or "repos/{REPO}" not in a:
+    sys.stderr.write("HTTP 404: Not Found\\n")
+    sys.exit(1)
+body = json.loads({body!r})
+q = a[a.index("--jq") + 1] if "--jq" in a else a[a.index("-q") + 1] if "-q" in a else None
+print(body["default_branch"] if q == ".default_branch" else json.dumps(body))
+""")
+    os.chmod(os.path.join(bin_dir, "gh"), 0o755)
+    env = {k: v for k, v in os.environ.items() if not k.startswith(("GITHUB_", "GH_", "DOKIMA_"))}
+    env.update(PATH=bin_dir + os.pathsep + os.environ.get("PATH", ""), PYTHONPATH=ROOT, GITHUB_REPOSITORY=REPO,
+               GH_TOKEN="fake-token")
+    if github is not None:
+        event = os.path.join(where, "event.json")
+        with open(event, "w") as f:
+            json.dump({"repository": {"full_name": REPO, "default_branch": github}}, f)
+        env["GITHUB_EVENT_PATH"] = event
+    return subprocess.run([sys.executable, "-m", "dokima.settings", *args], cwd=where, env=env,
+                          capture_output=True, text=True, timeout=60)
+
+
+def env_value(out, name):
+    """The value of NAME in `NAME=value` lines, or None when no line names it."""
+    return next((line.split("=", 1)[1] for line in out.splitlines() if line.startswith(name + "=")), None)
+
+
+def test_the_shipped_settings_leave_the_default_branch_empty(record_property, tmp_path):
+    """Dokima ships the default branch setting empty, not main.
+
+    Runs the settings reader in a repo with no settings file and checks the merged default branch is empty, so the
+    shipped defaults name no branch of their own. Proves 787.7."""
+    record_property("proves", "787.7")
+    done = settings_run(str(tmp_path))
+    assert done.returncode == 0, f"787.7: the settings reader failed in a repo with no settings file:\n{done.stderr[-800:]}"
+    got = json.loads(done.stdout)["branch"]["default"]
+    assert got in ("", None), f"787.7: the shipped default branch setting is {got!r}, not empty"
+
+
+def test_a_repo_with_no_settings_file_merges_into_githubs_default_branch(record_property, repo, monkeypatch):
+    """A repo with no settings file gets GitHub's default branch, not main.
+
+    The repo has no settings file; GitHub says its default branch is develop and has no main. Autopilot merges, and
+    every branch it read names develop. Proves 787.7."""
+    record_property("proves", "787.7")
+    repo(None)
+    gh = fake(monkeypatch, branches={"develop": ["all tests"]}, github_default="develop")
+    asked, why = ap.try_merge(REPO, PR)
+    assert asked, f"787.7: with no settings file, autopilot did not merge into GitHub's develop: {why}"
+    used = set(gh.branches_asked())
+    assert used == {"develop"}, f"787.7: with no settings file, autopilot read {sorted(used)}, not GitHub's develop"
+
+
+# 787.8 ---------------------------------------------------------------------------------------------------------
+
+
+def test_with_the_default_branch_empty_workflows_get_githubs_default_branch(record_property, tmp_path):
+    """With the default branch setting empty, workflows run on GitHub's default branch.
+
+    The repo's settings leave the default branch empty and GitHub says the repo's default branch is trunk. The lines
+    workflows run by must name trunk as the default branch, never an empty one. Then the settings name release, and
+    the lines must name release, not GitHub's trunk. Proves 787.8."""
+    record_property("proves", "787.8")
+    os.makedirs(tmp_path / ".dokima")
+    (tmp_path / ".dokima" / "settings.yaml").write_text('branch:\n  default: ""\n')
+    done = settings_run(str(tmp_path), "env")
+    assert done.returncode == 0, f"787.8: the settings lines for workflows failed:\n{done.stderr[-800:]}"
+    got = env_value(done.stdout, "DEFAULT_BRANCH")
+    assert got == "trunk", f"787.8: workflows were given default branch {got!r}, not GitHub's trunk"
+    (tmp_path / ".dokima" / "settings.yaml").write_text("branch:\n  default: release\n")
+    done = settings_run(str(tmp_path), "env")
+    got = env_value(done.stdout, "DEFAULT_BRANCH")
+    assert got == "release", f"787.8: a repo naming release gave workflows {got!r}, not release"
+
+
+def test_github_giving_no_default_branch_stops_the_run_saying_why(record_property, tmp_path):
+    """When GitHub gives no default branch, the run stops and says so.
+
+    The settings leave the default branch empty and GitHub answers nothing. The settings reader must fail, saying the
+    default branch is unknown, rather than hand workflows an empty branch. Proves 787.8."""
+    record_property("proves", "787.8")
+    os.makedirs(tmp_path / ".dokima")
+    (tmp_path / ".dokima" / "settings.yaml").write_text('branch:\n  default: ""\n')
+    done = settings_run(str(tmp_path), "env", github=None)
+    assert done.returncode != 0, f"787.8: with no default branch known, workflows were given:\n{done.stdout}"
+    assert "default branch" in done.stderr.lower(), f"787.8: the failure does not say the default branch is unknown:\n{done.stderr[-800:]}"

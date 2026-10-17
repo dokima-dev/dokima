@@ -8,6 +8,7 @@ import os
 import re
 import subprocess
 import sys
+import urllib.parse
 
 from dokima import agents, body as issue_body
 
@@ -416,8 +417,9 @@ def main(argv):
         if not approved(recs) or latest(recs, "planner")["handback"].get("kind") != "feature":
             print("The newest plan is not an approved split.")
             return 1
-        on = AUTOPILOT in {l["name"] for l in json.loads(agent_github.gh("api", f"repos/{repo}/issues/{parent}")).get("labels", [])}
-        rec = file_split(repo, parent, recs, [AUTOPILOT] if on else [])
+        name = autopilot_label()
+        on = name in {l["name"] for l in json.loads(agent_github.gh("api", f"repos/{repo}/issues/{parent}")).get("labels", [])}
+        rec = file_split(repo, parent, recs, [name] if on else [])
         rec["run"] = f"{os.environ.get('GITHUB_SERVER_URL', 'https://github.com')}/{repo}/actions/runs/{os.environ.get('GITHUB_RUN_ID', '')}"
         card = os.environ.get("CARD_ID", "")
         if card:
@@ -636,8 +638,9 @@ def main(argv):
         if switch == "stop" and os.environ.get("ON_PR") == "true" and said_on.isdigit() and int(said_on) not in switched:
             # The pull request it was said on goes off autopilot too, even when its issue had no label.
             labels = {l["name"] for l in json.loads(agent_github.gh("api", f"repos/{repo}/issues/{said_on}")).get("labels", [])}
-            if AUTOPILOT in labels:
-                agent_github.gh("api", "-X", "DELETE", f"repos/{repo}/issues/{said_on}/labels/{AUTOPILOT}")
+            name = autopilot_label()
+            if name in labels:
+                agent_github.gh("api", "-X", "DELETE", f"repos/{repo}/issues/{said_on}/labels/{urllib.parse.quote(name, safe='')}")
                 switched.append(int(said_on))
         pick, dead = None, None
         if switch == "start":
@@ -708,7 +711,7 @@ from dokima.agent_records import (
     with_next, models_used, first_sentence, GATE_FAILED)
 from dokima.agent_checks import problems_round, issue_url, check
 from dokima.agent_autopilot import (
-    file_split, AUTOPILOT, issue_tree, switch_autopilot, autopilot_comment, AUTOPILOT_START_LINE, named,
+    file_split, AUTOPILOT, autopilot_label, issue_tree, switch_autopilot, autopilot_comment, AUTOPILOT_START_LINE, named,
     file_issues, record_links, set_title, rerun_checks, start_waiting, open_blockers_of, close_done_parents,
     autopilot_closed, AUTOPILOT_LINES, UNREAD, on_autopilot, approves_work, merge_gate, open_pr, automerge,
     unconfirmed_comment, merge_tree)

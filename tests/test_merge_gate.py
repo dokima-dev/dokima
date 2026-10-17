@@ -160,6 +160,9 @@ class FakeGitHub:
             return "[]"
         if path == f"repos/o/r/pulls/{PR}":
             return self.shaped(a, self.pr())
+        if path == "repos/o/r":
+            # The repo itself names its default branch, as GitHub does (#787).
+            return json.dumps({"full_name": "o/r", "default_branch": "main"})
         if path == "repos/o/r/branches/main":
             inner = {"strict": False, "contexts": REQUIRED, "checks": [{"context": c, "app_id": None} for c in REQUIRED]}
             return json.dumps({"name": "main", "protection": {"enabled": True, "required_status_checks": inner}})
