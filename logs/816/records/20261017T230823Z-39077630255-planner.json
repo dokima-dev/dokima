@@ -1,0 +1,82 @@
+{
+ "role": "planner",
+ "stage": null,
+ "run_id": "39077630255",
+ "commit_before": "9d6063b771a7d7bac5c365982b332871c4c523d5",
+ "started_by": "dokima-runtime[bot]",
+ "models": [
+  "claude-opus-5-5"
+ ],
+ "report": {
+  "duration_ms": 148808,
+  "turns": 23,
+  "cost_usd": 1.0195118,
+  "tokens_in": 1207913,
+  "tokens_out": 13893
+ },
+ "log": "https://github.com/dokima-dev/dokima/blob/logs/logs/816/39077630255-planner.md",
+ "run": "https://github.com/dokima-dev/dokima/actions/runs/39077630255",
+ "handback": {
+  "kind": "user_story",
+  "title": "An empty repo reaches its first merge from the docs",
+  "summary": "Following only the install docs, an empty repo gets its first pull request merged.",
+  "user_story": "An owner with an empty repo gets to a first merged pull request with only the docs.",
+  "acceptance_criteria": [
+   {
+    "text": "When an owner sets up main's rule as the docs say, the required checks match the names GitHub shows.",
+    "words": "an empty repo reaches its first merged PR using only the docs",
+    "source": "https://github.com/dokima-dev/dokima/issues/742",
+    "files": [
+     "README.md",
+     "docs/wiki/Installing.md"
+    ],
+    "no_edge_cases": "The docs are fixed text; no input varies, and the test checks both pages."
+   }
+  ],
+  "non_functional": [],
+  "tests": {
+   "816.1": [
+    "tests/test_first_merge_docs.py::test_the_docs_name_the_required_checks_as_an_adopters_repo_shows_them"
+   ]
+  },
+  "test_changes": {},
+  "links": {
+   "blocked_by": [
+    755,
+    820
+   ],
+   "blocks": [],
+   "relates_to": [
+    775,
+    746,
+    829
+   ]
+  },
+  "raises": [
+   {
+    "kind": "question",
+    "to": "owner",
+    "label": "How to prove it",
+    "text": "A real first merge needs GitHub, so you check it by hand. Is testing the blocking doc step enough?",
+    "evidence": "Your answer on #742 keeps the proof by hand; `dokima/planner.py` refuses a criterion without a test (#775).",
+    "raised_by": "planner",
+    "id": "P1"
+   },
+   {
+    "kind": "question",
+    "to": "owner",
+    "label": "Doubt: overlaps #820",
+    "text": "The merge gate also expects the short check names, which #820 fixes. Should #820 land first? The plan assumes so.",
+    "evidence": "`dokima/defaults.yaml` gates.required is `all tests`; under the thin install GitHub shows `dokima / full-suite / all tests`.",
+    "raised_by": "planner",
+    "id": "P2"
+   }
+  ],
+  "answers": []
+ },
+ "check": {
+  "passed": true,
+  "problems": []
+ },
+ "url": "https://github.com/dokima-dev/dokima/issues/816#issuecomment-6242821266"
+}
