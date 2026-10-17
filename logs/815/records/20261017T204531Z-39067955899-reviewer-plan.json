@@ -1,0 +1,118 @@
+{
+ "role": "reviewer",
+ "stage": "plan",
+ "run_id": "39067955899",
+ "commit_before": "4549e932321cd71721d67c82006492321a176bd4",
+ "started_by": "dokima-runtime[bot]",
+ "models": [
+  "claude-opus-5-5"
+ ],
+ "report": {
+  "duration_ms": 46399,
+  "turns": 6,
+  "cost_usd": 0.3201584,
+  "tokens_in": 196661,
+  "tokens_out": 4493
+ },
+ "log": "https://github.com/dokima-dev/dokima/blob/logs/logs/815/39067955899-reviewer-plan.md",
+ "run": "https://github.com/dokima-dev/dokima/actions/runs/39067955899",
+ "handback": {
+  "previous_step": {
+   "did": [
+    "The planner wrote one criterion: the page never says to copy Dokima's workflows or code.",
+    "The planner wrote one test that fails today on step 4."
+   ],
+   "decided": [
+    "The plan leaves the workflow table and the two files to add out of scope."
+   ],
+   "open": [
+    "The planner asks the owner whether the page should name the two files to add."
+   ]
+  },
+  "verdict": "block",
+  "summary": "The one test only looks for the word copy, so a reworded step 4 still passes.",
+  "raises": [
+   {
+    "kind": "blocker",
+    "to": "planner",
+    "label": "815.1 weak test",
+    "text": "The test for 815.1 only flags lines saying copy, so step 4 reworded to put or add still passes. Fix: drop the copy filter; fail on lines naming either folder.",
+    "evidence": "`tests/test_wiki_install.py:27` keeps only lines where `\"copy\" in line.lower()`.",
+    "raised_by": "reviewer",
+    "id": "R1"
+   },
+   {
+    "kind": "blocker",
+    "to": "planner",
+    "label": "Story ask not carried",
+    "text": "The approved story says the page tells adopters to add the one workflow and settings file; no criterion carries it. Add criteria, unless the owner's answer to P1 says no.",
+    "evidence": "Issue body, story 4 of #742: tells adopters to add the one workflow and settings file, not to copy Dokima.",
+    "raised_by": "reviewer",
+    "id": "R2"
+   }
+  ],
+  "answers": [],
+  "asks": [
+   {
+    "ask": "The wiki's install page no longer tells adopters to copy Dokima's workflows and code.",
+    "source": "https://github.com/dokima-dev/dokima/issues/815",
+    "criterion": "815.1"
+   },
+   {
+    "ask": "The wiki's install page tells adopters to add the one workflow and settings file, not to copy Dokima.",
+    "source": "https://github.com/dokima-dev/dokima/issues/815",
+    "criterion": "missing"
+   }
+  ],
+  "behaviors": [
+   {
+    "criterion": "815.1",
+    "one_behavior": true,
+    "why": "One page, one thing it must never say."
+   }
+  ],
+  "edge_cases": [
+   {
+    "criterion": "815.1",
+    "cut": [],
+    "missing": [
+     "The same instruction worded without the word copy, such as add or put."
+    ]
+   }
+  ],
+  "tests": [
+   {
+    "test": "tests/test_wiki_install.py::test_the_install_page_never_tells_adopters_to_copy_dokimas_workflows_or_code",
+    "only_its_behavior": true,
+    "why": "Checks only the copy instruction, but too narrowly."
+   }
+  ],
+  "size": "ok",
+  "boxes": {
+   "dropped": [
+    {
+     "words": "tells adopters to add the one workflow and settings file, not to copy Dokima",
+     "source": "issue body, story 4 of #742"
+    }
+   ],
+   "added": "none",
+   "superseded": "none",
+   "conflicts": "none",
+   "edges": {
+    "815.1": "missing: the same instruction without the word copy"
+   },
+   "poor_tests": [
+    {
+     "test": "tests/test_wiki_install.py::test_the_install_page_never_tells_adopters_to_copy_dokimas_workflows_or_code",
+     "passes_with": "Step 4 reworded to: Put `.github/workflows/` and the `dokima/` package in your repo.",
+     "fix": "Drop the copy filter; fail on any line naming the whole workflows folder or the dokima package."
+    }
+   ]
+  }
+ },
+ "check": {
+  "passed": true,
+  "problems": []
+ },
+ "url": "https://github.com/dokima-dev/dokima/issues/815#issuecomment-6240722437"
+}
