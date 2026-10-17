@@ -6,6 +6,8 @@ name: testmon baseline
 on:
   push:
     branches: [main]
+  # Called by the one workflow an adopter installs (dokima/install/dokima.yml), through entry.yml (#812).
+  workflow_call:
 permissions:
   contents: read
 jobs:
@@ -15,6 +17,19 @@ jobs:
       - uses: actions/checkout@v5
         with:
           persist-credentials: false
+      # Dokima's code from Dokima's own repo, at this shared workflow's commit (main when run directly), never the
+      # repo's own copy (#812).
+      - name: Dokima's code from Dokima's own repo
+        uses: actions/checkout@v5
+        with:
+          repository: dokima-dev/dokima
+          ref: ${{ github.job_workflow_sha }}
+          path: .dokima-code
+          sparse-checkout: dokima
+          persist-credentials: false
+      # Only Dokima's own steps run its code: the repo's tests import the repo's own.
+      - name: Where Dokima's code is
+        run: rm -rf "$RUNNER_TEMP/dokima" && mv .dokima-code "$RUNNER_TEMP/dokima" && echo "DOKIMA_CODE=$RUNNER_TEMP/dokima" >> "$GITHUB_ENV"
       - uses: actions/setup-python@v6
         with:
           python-version: "3.12"
@@ -23,7 +38,7 @@ jobs:
       # A checkout whose settings reader has no setup mode (main before #794) sets up as this workflow did before.
       - id: setup
         run: |
-          if python3 -c 'from dokima.settings import setup_lines' 2>/dev/null; then out=$(python3 -m dokima.settings setup)
+          if PYTHONPATH="$DOKIMA_CODE" PYTHONSAFEPATH=1 python3 -c 'from dokima.settings import setup_lines' 2>/dev/null; then out=$(PYTHONPATH="$DOKIMA_CODE" PYTHONSAFEPATH=1 python3 -m dokima.settings setup)
           else out=$(printf 'python=3.12\ntest_tools=pytest pytest-xdist pytest-testmon\ninstall=\n')
             echo "::notice title=Old setup::No settings reader with a setup mode here, so the old install list is used."; fi
           echo "$out"; echo "$out" >> "${GITHUB_OUTPUT:-/dev/null}"
@@ -41,7 +56,7 @@ jobs:
       # reader with no env mode (before #795) keeps the baseline, as before.
       - name: Affected tests from the settings
         run: |
-          out=; if python3 -c 'from dokima.settings import env_lines' 2>/dev/null; then out=$(python3 -m dokima.settings env); fi
+          out=; if PYTHONPATH="$DOKIMA_CODE" PYTHONSAFEPATH=1 python3 -c 'from dokima.settings import env_lines' 2>/dev/null; then out=$(PYTHONPATH="$DOKIMA_CODE" PYTHONSAFEPATH=1 python3 -m dokima.settings env); fi
           if printf '%s\n' "$out" | grep -q '^TESTS_AFFECTED='; then printf '%s\n' "$out" >> "$GITHUB_ENV"
           else echo "TESTS_AFFECTED=testmon" >> "$GITHUB_ENV"; fi
       - if: env.TESTS_AFFECTED == 'all'

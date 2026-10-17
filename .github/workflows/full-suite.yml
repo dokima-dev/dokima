@@ -9,6 +9,8 @@ on:
   push:
     branches: [main]
   merge_group:
+  # Called by the one workflow an adopter installs (dokima/install/dokima.yml), through entry.yml (#812).
+  workflow_call:
 permissions:
   contents: read
 jobs:
@@ -21,6 +23,19 @@ jobs:
         with:
           ref: ${{ github.event.pull_request.head.sha || github.sha }}
           persist-credentials: false
+      # Dokima's code from Dokima's own repo, at this shared workflow's commit (main when run directly), never the
+      # repo's own copy (#812).
+      - name: Dokima's code from Dokima's own repo
+        uses: actions/checkout@v5
+        with:
+          repository: dokima-dev/dokima
+          ref: ${{ github.job_workflow_sha }}
+          path: .dokima-code
+          sparse-checkout: dokima
+          persist-credentials: false
+      # Only Dokima's own steps run its code: the repo's tests import the repo's own.
+      - name: Where Dokima's code is
+        run: rm -rf "$RUNNER_TEMP/dokima" && mv .dokima-code "$RUNNER_TEMP/dokima" && echo "DOKIMA_CODE=$RUNNER_TEMP/dokima" >> "$GITHUB_ENV"
       - uses: actions/setup-python@v6
         with:
           python-version: "3.12"
@@ -29,7 +44,7 @@ jobs:
       # A checkout whose settings reader has no setup mode (main before #794) sets up as this workflow did before.
       - id: setup
         run: |
-          if python3 -c 'from dokima.settings import setup_lines' 2>/dev/null; then out=$(python3 -m dokima.settings setup)
+          if PYTHONPATH="$DOKIMA_CODE" PYTHONSAFEPATH=1 python3 -c 'from dokima.settings import setup_lines' 2>/dev/null; then out=$(PYTHONPATH="$DOKIMA_CODE" PYTHONSAFEPATH=1 python3 -m dokima.settings setup)
           else out=$(printf 'python=3.12\ntest_tools=pytest pytest-xdist\ninstall=\n')
             echo "::notice title=Old setup::No settings reader with a setup mode here, so the old install list is used."; fi
           echo "$out"; echo "$out" >> "${GITHUB_OUTPUT:-/dev/null}"
@@ -48,7 +63,7 @@ jobs:
       # runs that default as before.
       - name: Run every test, as the settings say
         run: |
-          out=; if python3 -c 'from dokima.settings import env_lines' 2>/dev/null; then out=$(python3 -m dokima.settings env); fi
+          out=; if PYTHONPATH="$DOKIMA_CODE" PYTHONSAFEPATH=1 python3 -c 'from dokima.settings import env_lines' 2>/dev/null; then out=$(PYTHONPATH="$DOKIMA_CODE" PYTHONSAFEPATH=1 python3 -m dokima.settings env); fi
           RUN_ALL=$(printf '%s\n' "$out" | sed -n 's/^TESTS_RUN_ALL=//p')
           if [ -z "$RUN_ALL" ]; then RUN_ALL="pytest -q -p no:cacheprovider -n auto tests"
             echo "::notice title=Old settings::No settings reader with an env mode here, so every test runs."; fi

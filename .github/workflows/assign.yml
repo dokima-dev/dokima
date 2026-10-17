@@ -4,6 +4,8 @@ name: assign
 on:
   issues:
     types: [opened]
+  # Called by the one workflow an adopter installs (dokima/install/dokima.yml), through entry.yml (#812).
+  workflow_call:
 permissions:
   contents: read
   issues: write
@@ -12,6 +14,20 @@ jobs:
     runs-on: ubuntu-24.04
     steps:
       - uses: actions/checkout@v5
+      # Dokima's code from Dokima's own repo, at this shared workflow's commit (main when run directly), never the
+      # repo's own copy (#812).
+      - name: Dokima's code from Dokima's own repo
+        uses: actions/checkout@v5
+        with:
+          repository: dokima-dev/dokima
+          ref: ${{ github.job_workflow_sha }}
+          path: .dokima-code
+          sparse-checkout: dokima
+          persist-credentials: false
+      - name: Every Dokima step runs Dokima's code
+        run: |
+          rm -rf "$RUNNER_TEMP/dokima" && mv .dokima-code "$RUNNER_TEMP/dokima"
+          printf 'PYTHONPATH=%s\nPYTHONSAFEPATH=1\n' "$RUNNER_TEMP/dokima" >> "$GITHUB_ENV"
       - run: python3 -m pip install -q pyyaml  # the settings reader (#794)
       - name: Assign the code owners
         env:
