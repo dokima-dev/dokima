@@ -50,3 +50,29 @@ def test_an_honest_build_is_untouched(record_property, tmp_path, monkeypatch):
     assert fence.fence(base, SCOPE) == [], "an honest build had changes dropped"
     assert (tmp_path / "app.py").read_text() == "x = 3\n"
 
+
+
+def test_a_resolved_clash_in_a_test_file_survives_the_fence(record_property, tmp_path, monkeypatch):
+    """A test file that clashed with main keeps the worker's resolution; other test edits are still undone.
+
+    Proves fence.812. Base holds tests/test_app.py with conflict markers, as when main was merged into the branch. The
+    worker resolves it and also edits another planner test. The fence must keep the resolution (no markers left, so
+    the clash check passes) and still put the other test back, naming only that one."""
+    record_property("proves", "fence.812")
+    base_marked = "<<<<<<< HEAD\ndef test_x():\n    assert 1\n=======\ndef test_x():\n    assert 2\n>>>>>>> origin/main\n"
+    monkeypatch.chdir(tmp_path)
+    (tmp_path / "tests").mkdir()
+    (tmp_path / "app.py").write_text("x = 1\n")
+    (tmp_path / "tests" / "test_app.py").write_text(base_marked)
+    (tmp_path / "tests" / "test_other.py").write_text("def test_y():\n    assert False\n")
+    for a in (["init", "-q"], ["config", "user.name", "t"], ["config", "user.email", "t@e.com"], ["add", "-A"], ["commit", "-qm", "base"]):
+        subprocess.run(["git", *a], check=True, capture_output=True)
+    base = subprocess.run(["git", "rev-parse", "HEAD"], check=True, capture_output=True, text=True).stdout.strip()
+    (tmp_path / "tests" / "test_app.py").write_text("def test_x():\n    assert 2\n")
+    (tmp_path / "tests" / "test_other.py").write_text("def test_y():\n    assert True\n")
+    dropped = fence.fence(base, ["app.py", "tests/test_app.py", "tests/test_other.py"], clashed=["tests/test_app.py"])
+    assert (tmp_path / "tests" / "test_app.py").read_text() == "def test_x():\n    assert 2\n", \
+        "812: the worker's resolution of a clashed test file was put back to the marked base"
+    assert fence.marked(["tests/test_app.py"]) == [], "812: conflict markers are back in the resolved test file"
+    assert "assert False" in (tmp_path / "tests" / "test_other.py").read_text(), "812: an edit to another planner test survived"
+    assert dropped == ["tests/test_other.py"], f"812: wrong dropped list: {dropped}"
