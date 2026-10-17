@@ -1,0 +1,54 @@
+{
+ "role": "reviewer",
+ "stage": "pr",
+ "run_id": "39020000235",
+ "commit_before": "d7bd6560bd1e153c499a949ba804d585c1bd452f",
+ "started_by": "dokima-runtime[bot]",
+ "models": [
+  "claude-opus-5-5"
+ ],
+ "report": {
+  "duration_ms": 114250,
+  "turns": 21,
+  "cost_usd": 0.8427134000000001,
+  "tokens_in": 1187057,
+  "tokens_out": 6854
+ },
+ "log": "https://github.com/dokima-dev/dokima/blob/logs/logs/804/39020000235-reviewer-pr.md",
+ "run": "https://github.com/dokima-dev/dokima/actions/runs/39020000235",
+ "handback": {
+  "previous_step": {
+   "did": [
+    "The worker made test finding, linking and folders follow the repo's test settings.",
+    "The worker made the new-test check run each test with the run-one command setting.",
+    "The worker reported two manual fix tests that already fail on main."
+   ],
+   "decided": [
+    "Test class methods are named with their class, as pytest names them."
+   ],
+   "open": []
+  },
+  "verdict": "approve",
+  "summary": "All ten criteria are built and their tests pass; the two red manual fix tests fail on main too.",
+  "raises": [],
+  "answers": [
+   {
+    "raise": "W1",
+    "answer": "done",
+    "why": "Confirmed: the same two manual fix tests fail on main, and this change does not touch them.",
+    "searched": [
+     799,
+     727,
+     703,
+     784
+    ],
+    "verdict": "new"
+   }
+  ]
+ },
+ "check": {
+  "passed": true,
+  "problems": []
+ },
+ "url": "https://github.com/dokima-dev/dokima/pull/806#issuecomment-6232114866"
+}
