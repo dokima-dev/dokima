@@ -1,0 +1,43 @@
+{
+ "role": "worker",
+ "stage": null,
+ "run_id": "39015860728",
+ "commit_before": "92f36a7ae774980a108010dd93cef53783671a6d",
+ "started_by": "dokima-runtime[bot]",
+ "models": [
+  "claude-opus-5-5"
+ ],
+ "report": {
+  "duration_ms": 77499,
+  "turns": 7,
+  "cost_usd": 0.3174754,
+  "tokens_in": 234813,
+  "tokens_out": 1908
+ },
+ "log": "https://github.com/dokima-dev/dokima/blob/logs/logs/796/39015860728-worker.md",
+ "run": "https://github.com/dokima-dev/dokima/actions/runs/39015860728",
+ "handback": {
+  "summary": "No code change this round: the earlier build passes every planned test and both updated older tests.",
+  "criteria": {
+   "796.1": "`dokima/settings.py` exports `CO_AUTHOR`; `agent.yml` and `wiki.yml` add the trailer only when it is set.",
+   "796.2": "`agent.yml` copies the owner docs file the settings name and its linked topic files; a missing one only warns.",
+   "796.3": "`dokima/prompt.py` `build()` puts the owner docs file in place of every AGENTS.md in the prompt.",
+   "796.4": "`dokima/prompt.py` `build()` writes the protected paths into the worker's never-edit line.",
+   "796.5": "`dokima/prompt.py` `runner_line()` draws the planner's runner line from the test settings.",
+   "796.6": "`dokima/prompt.py` `caps_table()` fills each cap row from the caps setting, defaults otherwise.",
+   "796.7": "`agent.yml` reads main's house rules file and appends it after the shipped prompt.",
+   "796.8": "`dokima/prompt.py` `for_role()` keeps shared rules and only the role's own section.",
+   "796.9": "`dokima/defaults.yaml` ships `co_author` empty, so no trailer without a setting.",
+   "796.10": "`.dokima/settings.yaml` holds the owner's co-author line for this repo."
+  },
+  "evidence": "`pytest -q tests/test_settings_prompts.py tests/test_agent.py tests/test_bot_identity.py`: 42 passed"
+ },
+ "check": {
+  "passed": true,
+  "problems": []
+ },
+ "dropped_by_fence": [],
+ "files_changed": [],
+ "branch": "try/issue-796",
+ "url": "https://github.com/dokima-dev/dokima/pull/803#issuecomment-6231503650"
+}
