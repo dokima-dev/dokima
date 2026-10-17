@@ -1,0 +1,355 @@
+{
+ "role": "planner",
+ "stage": null,
+ "run_id": "39037042766",
+ "commit_before": "edf1c0e0800fbd616670940fb81b53445a839682",
+ "started_by": "RezaSoleymanifar",
+ "models": [
+  "claude-opus-5-5"
+ ],
+ "report": {
+  "duration_ms": 46784,
+  "turns": 8,
+  "cost_usd": 0.38765920000000004,
+  "tokens_in": 367446,
+  "tokens_out": 4780
+ },
+ "log": "https://github.com/dokima-dev/dokima/blob/logs/logs/741/39037042766-planner.md",
+ "run": "https://github.com/dokima-dev/dokima/actions/runs/39037042766",
+ "handback": {
+  "kind": "feature",
+  "title": "Shipped prompts fit any repo, with clear reviewer duties",
+  "summary": "The shipped role prompts drop Dokima's own examples, share one raising text, and spell out planner questions and reviewer duties.",
+  "feature": "Prompts fit any repo. Stories: (1) generic prompts and planner questions. (2) reviewer duties and boxes, after 1. (3) code checks the boxes, after 2.",
+  "stories": [
+   {
+    "title": "Generic shipped prompts and the planner's questions",
+    "user_story": "Any repo's agents get prompts with neutral examples, its own numbers, and clear rules for asking the owner.",
+    "context": "Already on main (#796, #803): the caps table, runner line, owner docs name and protected paths are drawn from settings by the prompt builder, and house rules are added after each role's prompt. Still open: the role files name Dokima files in their examples (planner lines 99 to 170, the raising block in all three roles), the raising block is copied three times, and the planner's 'more than 3 questions' and the 'three blocks in a row' lines are written in, while settings hold planner.max_questions and river.max_blocks. Code's own limits move to settings in #783. The two grade prompts are left out of scope. The owner's answer of 2026-10-17: the rewrite sizes are an estimate, not a requirement, so no size check; the two grade prompts staying as they are is a scope note, not a requirement. House rules per role shipped in #796; their criterion is proved by the existing tests 796.7 and 796.8, and the prompts.append line maps to it.",
+    "acceptance_criteria": [
+     {
+      "text": "A scan of the shipped prompts finds no file name from Dokima's own code.",
+      "words": "a scan finds no Dokima file name in any shipped prompt",
+      "source": "https://github.com/dokima-dev/dokima/issues/741",
+      "files": [
+       "dokima/roles/planner.md",
+       "dokima/roles/worker.md",
+       "dokima/roles/reviewer.md",
+       "dokima/prompt.py"
+      ],
+      "no_edge_cases": "A fixed scan of shipped files; no input varies."
+     },
+     {
+      "text": "The raising rules are written once, in one shared raising prompt file.",
+      "words": "The 50-line \"raising\" block copied into planner, worker and reviewer moves to one shared `roles/raising.md` with neutral examples.",
+      "source": "https://github.com/dokima-dev/dokima/issues/741",
+      "files": [
+       "dokima/roles/raising.md",
+       "dokima/roles/planner.md",
+       "dokima/roles/worker.md",
+       "dokima/roles/reviewer.md",
+       "dokima/prompt.py"
+      ],
+      "no_edge_cases": "A fixed set of shipped files; no input varies."
+     },
+     {
+      "text": "The planner's, worker's and reviewer's prompts each carry the shared raising rules.",
+      "words": "moves to one shared `roles/raising.md`",
+      "source": "https://github.com/dokima-dev/dokima/issues/741",
+      "files": [
+       "dokima/prompt.py",
+       "dokima/roles/raising.md"
+      ],
+      "no_edge_cases": "Every role builds the same way; no input varies."
+     },
+     {
+      "text": "The planner's prompt states the question limit the questions setting names.",
+      "words": "Numbers written into prompts (\"more than 3 questions\", \"three blocks in a row\", word caps) are read from settings.",
+      "source": "https://github.com/dokima-dev/dokima/issues/741",
+      "files": [
+       "dokima/prompt.py",
+       "dokima/roles/planner.md"
+      ],
+      "edge_cases": [
+       {
+        "case": "No settings file: the prompt states the shipped limit of 3.",
+        "test": "tests/test_role_prompts.py::test_question_limit_default"
+       }
+      ]
+     },
+     {
+      "text": "Each prompt states the blocks-in-a-row limit the blocks setting names.",
+      "words": "Numbers written into prompts (\"more than 3 questions\", \"three blocks in a row\", word caps) are read from settings.",
+      "source": "https://github.com/dokima-dev/dokima/issues/741",
+      "files": [
+       "dokima/prompt.py",
+       "dokima/roles/raising.md"
+      ],
+      "edge_cases": [
+       {
+        "case": "No settings file: the prompt states the shipped limit of 3.",
+        "test": "tests/test_role_prompts.py::test_blocks_limit_default"
+       }
+      ]
+     },
+     {
+      "text": "The planner's prompt gives \"When X, Y\" as the default criterion style.",
+      "words": "Default criterion style in the planner prompt: \"When X, Y\".",
+      "source": "https://github.com/dokima-dev/dokima/issues/741",
+      "files": [
+       "dokima/roles/planner.md",
+       "dokima/prompt.py"
+      ],
+      "no_edge_cases": "Fixed prompt text; no input varies."
+     },
+     {
+      "text": "The planner's prompt says each criterion needs a source, an observable result and a test.",
+      "words": "The planner tries to write each criterion with a source, a result (the Y in \"When X, Y\": something a test can observe, such as a file written, a comment posted, a number, an exit code) and a test.",
+      "source": "https://github.com/dokima-dev/dokima/issues/741#issuecomment-6205062350",
+      "files": [
+       "dokima/roles/planner.md",
+       "dokima/prompt.py"
+      ],
+      "no_edge_cases": "Fixed prompt text; no input varies."
+     },
+     {
+      "text": "The planner's prompt says each blank it cannot fill becomes one question to the owner.",
+      "words": "Each blank it cannot fill becomes one question to the owner, kind `question`.",
+      "source": "https://github.com/dokima-dev/dokima/issues/741#issuecomment-6205062350",
+      "files": [
+       "dokima/roles/planner.md",
+       "dokima/prompt.py"
+      ],
+      "no_edge_cases": "Fixed prompt text; no input varies."
+     },
+     {
+      "text": "The planner's prompt shows the owner's seven clarifying question examples.",
+      "words": "Examples for the prompt:",
+      "source": "https://github.com/dokima-dev/dokima/issues/741#issuecomment-6205062350",
+      "files": [
+       "dokima/roles/planner.md",
+       "dokima/prompt.py"
+      ],
+      "no_edge_cases": "Fixed prompt text; no input varies."
+     },
+     {
+      "text": "A repo's house rules appear after the shipped prompt for each role.",
+      "words": "a repo's house rules appear after the shipped prompt for each role",
+      "source": "https://github.com/dokima-dev/dokima/issues/741",
+      "files": [
+       "dokima/prompt.py"
+      ],
+      "edge_cases": [
+       {
+        "case": "A repo with no house rules file: the agent still starts.",
+        "test": "tests/test_settings_prompts.py::test_a_repos_house_rules_file_is_added_after_the_shipped_prompt"
+       },
+       {
+        "case": "A section named for one role reaches only that role.",
+        "test": "tests/test_settings_prompts.py::test_a_house_rules_section_named_for_a_role_is_added_only_to_that_roles_prompt"
+       }
+      ]
+     }
+    ],
+    "non_functional": [],
+    "depends_on": []
+   },
+   {
+    "title": "The reviewer's prompt spells out its duties and boxes",
+    "user_story": "The reviewer's prompt names its four duties and the boxes it fills for each.",
+    "context": "The duties come from the owner's comment of 2026-10-15 on this issue; the boxes from the owner's next comment. Code flagging stale criteria is #743; this story only writes the duties into the prompt. Shares the prompt builder with story 1, so it takes its turn after it.",
+    "acceptance_criteria": [
+     {
+      "text": "The reviewer's prompt says every owner sentence maps to a criterion or is marked not a requirement, with a reason.",
+      "words": "Nothing dropped. Every sentence of the owner's maps to a criterion or is marked \"not a requirement\" with a reason.",
+      "source": "https://github.com/dokima-dev/dokima/issues/741#issuecomment-6204381975",
+      "files": [
+       "dokima/roles/reviewer.md",
+       "dokima/prompt.py"
+      ],
+      "no_edge_cases": "Fixed prompt text; no input varies."
+     },
+     {
+      "text": "The reviewer's prompt says later owner words win over older ones.",
+      "words": "No stale criteria. Sources are append-only and later words win.",
+      "source": "https://github.com/dokima-dev/dokima/issues/741#issuecomment-6204381975",
+      "files": [
+       "dokima/roles/reviewer.md",
+       "dokima/prompt.py"
+      ],
+      "no_edge_cases": "Fixed prompt text; no input varies."
+     },
+     {
+      "text": "The reviewer's prompt says it confirms or retires a criterion code flags as stale.",
+      "words": "A criterion whose source is older than a later owner comment on the same point is flagged by code (#743); the reviewer confirms or retires it.",
+      "source": "https://github.com/dokima-dev/dokima/issues/741#issuecomment-6204381975",
+      "files": [
+       "dokima/roles/reviewer.md",
+       "dokima/prompt.py"
+      ],
+      "no_edge_cases": "Fixed prompt text; no input varies."
+     },
+     {
+      "text": "The reviewer's prompt says when two owner sources disagree unsettled, it asks the owner and never picks.",
+      "words": "Conflicts handled. When two owner sources disagree and no later word settles it, the reviewer asks the owner. It never picks.",
+      "source": "https://github.com/dokima-dev/dokima/issues/741#issuecomment-6204381975",
+      "files": [
+       "dokima/roles/reviewer.md",
+       "dokima/prompt.py"
+      ],
+      "no_edge_cases": "Fixed prompt text; no input varies."
+     },
+     {
+      "text": "The reviewer's prompt says any change serving no criterion blocks.",
+      "words": "Nothing added. Every change in the diff serves a criterion. The fence handles file scope; behavior added inside allowed files is the reviewer's call, and anything that serves no criterion blocks.",
+      "source": "https://github.com/dokima-dev/dokima/issues/741#issuecomment-6204381975",
+      "files": [
+       "dokima/roles/reviewer.md",
+       "dokima/prompt.py"
+      ],
+      "no_edge_cases": "Fixed prompt text; no input varies."
+     },
+     {
+      "text": "The reviewer's prompt shows the six required boxes and their entry shapes.",
+      "words": "**Reviewer: required boxes.** One per duty, every box present, entries typed, each entry a blocker unless noted.",
+      "source": "https://github.com/dokima-dev/dokima/issues/741#issuecomment-6205062350",
+      "files": [
+       "dokima/roles/reviewer.md",
+       "dokima/prompt.py"
+      ],
+      "no_edge_cases": "Fixed prompt text; no input varies."
+     }
+    ],
+    "non_functional": [],
+    "depends_on": [
+     0
+    ]
+   },
+   {
+    "title": "Code checks the reviewer's required boxes",
+    "user_story": "A review that skips a duty, or claims a weak test without proof, is rejected before it posts.",
+    "context": "The review hand-back is checked in the agent checks module (verdict approve or block). Boxes: dropped, added, superseded, conflicts, edges, poor_tests, as the owner's comment shapes them. An added entry of kind needed is not a blocker. The owner's answer of 2026-10-17: boxes are required at plan review and at code review; a box with nothing to check at a stage says none; the boxes sit beside the existing asks, edge_cases and tests lists, which stay.",
+    "acceptance_criteria": [
+     {
+      "text": "A review missing any of the six boxes is rejected, naming the box.",
+      "words": "every box present",
+      "source": "https://github.com/dokima-dev/dokima/issues/741#issuecomment-6205062350",
+      "files": [
+       "dokima/agent_checks.py"
+      ],
+      "edge_cases": [
+       {
+        "case": "A box left empty instead of none is rejected.",
+        "test": "tests/test_review_boxes.py::test_empty_box_rejected"
+       },
+       {
+        "case": "At plan review, an added box saying none is accepted.",
+        "test": "tests/test_review_boxes.py::test_added_none_at_plan_review_accepted"
+       }
+      ]
+     },
+     {
+      "text": "A box entry missing a field its shape needs is rejected, naming the field.",
+      "words": "entries typed",
+      "source": "https://github.com/dokima-dev/dokima/issues/741#issuecomment-6205062350",
+      "files": [
+       "dokima/agent_checks.py"
+      ],
+      "edge_cases": [
+       {
+        "case": "An added entry whose kind is not creep or needed is rejected.",
+        "test": "tests/test_review_boxes.py::test_added_wrong_kind_rejected"
+       }
+      ]
+     },
+     {
+      "text": "A weak test entry with no wrong code that still passes is rejected.",
+      "words": "A weak-test claim without a named counterexample is rejected by code.",
+      "source": "https://github.com/dokima-dev/dokima/issues/741#issuecomment-6205062350",
+      "files": [
+       "dokima/agent_checks.py"
+      ],
+      "no_edge_cases": "The missing counterexample itself is the case tested."
+     },
+     {
+      "text": "A review that approves while any box holds a blocking entry is rejected.",
+      "words": "each entry a blocker unless noted",
+      "source": "https://github.com/dokima-dev/dokima/issues/741#issuecomment-6205062350",
+      "files": [
+       "dokima/agent_checks.py"
+      ],
+      "no_edge_cases": "Each box is tried in turn by the one test."
+     },
+     {
+      "text": "An added entry of kind needed does not stop a review from approving.",
+      "words": "# needed is not a blocker",
+      "source": "https://github.com/dokima-dev/dokima/issues/741#issuecomment-6205062350",
+      "files": [
+       "dokima/agent_checks.py"
+      ],
+      "no_edge_cases": "One kind, one outcome."
+     },
+     {
+      "text": "A review whose edges box leaves out a plan criterion is rejected, naming it.",
+      "words": "edges:       per criterion: covered | missing: <named case>",
+      "source": "https://github.com/dokima-dev/dokima/issues/741#issuecomment-6205062350",
+      "files": [
+       "dokima/agent_checks.py"
+      ],
+      "edge_cases": [
+       {
+        "case": "A missing entry with no named case is rejected.",
+        "test": "tests/test_review_boxes.py::test_missing_edge_needs_case"
+       }
+      ]
+     }
+    ],
+    "non_functional": [],
+    "depends_on": [
+     1
+    ]
+   }
+  ],
+  "links": {
+   "blocked_by": [],
+   "blocks": [
+    746
+   ],
+   "relates_to": [
+    272,
+    740,
+    743,
+    783,
+    790,
+    656,
+    713,
+    714,
+    632,
+    799,
+    800
+   ]
+  },
+  "answers": [
+   {
+    "raise": "R1",
+    "answer": "done",
+    "why": "Story 1 adds a criterion: house rules appear after the shipped prompt for each role, proved by 796.7 and 796.8."
+   },
+   {
+    "raise": "R2",
+    "answer": "done",
+    "why": "Story 1's criterion 7 and story 2's criterion 2 are each split in two, as the owner asked."
+   },
+   {
+    "raise": "R3",
+    "answer": "done",
+    "why": "Story 3's criterion 2 now lists an added entry with a wrong kind as its edge case."
+   }
+  ]
+ },
+ "check": {
+  "passed": true,
+  "problems": []
+ },
+ "url": "https://github.com/dokima-dev/dokima/issues/741#issuecomment-6234492240"
+}
