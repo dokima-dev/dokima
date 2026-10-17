@@ -1,0 +1,63 @@
+{
+ "role": "reviewer",
+ "stage": "pr",
+ "run_id": "38997755074",
+ "commit_before": "d53791310b9c727bca5c2a7440292f7b9a6f1011",
+ "started_by": "dokima-runtime[bot]",
+ "models": [
+  "claude-opus-5-5"
+ ],
+ "report": {
+  "duration_ms": 37760,
+  "turns": 11,
+  "cost_usd": 0.37054879999999996,
+  "tokens_in": 391530,
+  "tokens_out": 2844
+ },
+ "log": "https://github.com/dokima-dev/dokima/blob/logs/logs/794/38997755074-reviewer-pr.md",
+ "run": "https://github.com/dokima-dev/dokima/actions/runs/38997755074",
+ "handback": {
+  "previous_step": {
+   "did": [
+    "Test workflows now check that the settings reader has a setup mode before using it.",
+    "Without that mode, they install the old list and say so."
+   ],
+   "decided": [
+    "The worker left the owner's asked-for test to the planner."
+   ],
+   "open": [
+    "No test runs the setup step against a settings reader without the setup mode."
+   ]
+  },
+  "verdict": "block",
+  "summary": "The fallback is built, but the test the owner asked for is missing.",
+  "raises": [
+   {
+    "kind": "blocker",
+    "to": "planner",
+    "label": "No test: old reader",
+    "text": "The owner asked for a test running the setup step against an old settings reader without setup mode. Add one for 794.8: it must fall back to the old list.",
+    "evidence": "Owner's /work comment of 2026-10-17T03:06Z; `grep -rl setup_lines tests/` finds nothing.",
+    "raised_by": "reviewer",
+    "id": "R3"
+   }
+  ],
+  "answers": [
+   {
+    "raise": "W2",
+    "answer": "done",
+    "why": "Agreed and passed to the planner: the owner asked for this test and none exists."
+   }
+  ],
+  "asks": [],
+  "behaviors": [],
+  "edge_cases": [],
+  "tests": [],
+  "size": "ok"
+ },
+ "check": {
+  "passed": true,
+  "problems": []
+ },
+ "url": "https://github.com/dokima-dev/dokima/pull/801#issuecomment-6228883156"
+}
