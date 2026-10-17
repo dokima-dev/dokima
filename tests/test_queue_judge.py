@@ -14,8 +14,8 @@ Every job of the real acceptance-criteria.yml (list, check once per row of the l
 by default on pull_request_target), other `uses:` steps are skipped, every `run:` script runs with bash, its `${{ }}`
 filled in, with a `pip` that does nothing and a `pytest` that runs this machine's pytest. The repo is Dokima's own, so
 a checkout of dokima-dev/dokima (#812) copies these trees too, only the folders a sparse checkout names; the commit
-of the workflow file that runs (`github.workflow_sha`, and `github.job_workflow_sha` as no other repo calls it) is the
-event's own commit, as GitHub gives it. Each step
+of the workflow file that runs (`github.workflow_sha`, and the called file's own `job.workflow_sha` as no other repo
+calls it) is the event's own commit, as GitHub gives it. Each step
 sees a runner temp folder and the values earlier steps of its job wrote to GITHUB_ENV.
 """
 import json
@@ -87,6 +87,7 @@ def context(event, needs=None, matrix=None):
     return ts.Ctx({k: ts.Ctx(v) for k, v in {
         "github": {"event_name": event, "repository": "o/r", "token": "ghs_x", "sha": sha, "ref": ref,
                    "base_ref": base_ref, "event": ev, "workflow_sha": sha, "job_workflow_sha": sha},
+        "job": {"workflow_sha": sha},
         "secrets": {}, "vars": {}, "env": {}, "steps": {}, "needs": needs or {}, "matrix": matrix or {},
         "inputs": {}}.items()})
 
