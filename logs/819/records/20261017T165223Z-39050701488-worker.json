@@ -1,0 +1,41 @@
+{
+ "role": "worker",
+ "stage": null,
+ "run_id": "39050701488",
+ "commit_before": "c22dc6df1c751fbc4b4326f8f447bc61b312e4a6",
+ "started_by": "dokima-runtime[bot]",
+ "models": [
+  "claude-opus-5-5"
+ ],
+ "report": {
+  "duration_ms": 434086,
+  "turns": 16,
+  "cost_usd": 0.7061972,
+  "tokens_in": 855084,
+  "tokens_out": 7352
+ },
+ "log": "https://github.com/dokima-dev/dokima/blob/logs/logs/819/39050701488-worker.md",
+ "run": "https://github.com/dokima-dev/dokima/actions/runs/39050701488",
+ "handback": {
+  "summary": "Code now checks the reviewer's six boxes at both review stages, naming each fault.",
+  "criteria": {
+   "819.1": "`problems_boxes` in `dokima/agent_checks.py` names each box left out, or boxes when all are gone.",
+   "819.2": "`problems_boxes` names the box and field of a partial entry, a wrong added kind, a bare line.",
+   "819.3": "`poor_tests` entries need `passes_with` filled; blank or missing is rejected naming it.",
+   "819.4": "An approve with any blocking entry, or an edges line reading missing, is rejected naming that box.",
+   "819.5": "Added entries of kind needed are not counted as blocking, so an approve passes.",
+   "819.6": "`problems_edges` names each plan criterion with no edges line; none only passes with no criteria."
+  },
+  "evidence": "pytest -q tests/test_review_boxes.py tests/test_handback_check.py: 12 passed"
+ },
+ "check": {
+  "passed": true,
+  "problems": []
+ },
+ "dropped_by_fence": [],
+ "files_changed": [
+  "dokima/agent_checks.py"
+ ],
+ "branch": "try/issue-819",
+ "url": "https://github.com/dokima-dev/dokima/issues/819#issuecomment-6236907191"
+}
