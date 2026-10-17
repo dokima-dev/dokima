@@ -1,0 +1,72 @@
+{
+ "role": "reviewer",
+ "stage": "pr",
+ "run_id": "39022735451",
+ "commit_before": "c89b1f155bd4137311bec849ba792b25a085d491",
+ "started_by": "dokima-runtime[bot]",
+ "models": [
+  "claude-opus-5-5"
+ ],
+ "report": {
+  "duration_ms": 101677,
+  "turns": 15,
+  "cost_usd": 0.5911917999999999,
+  "tokens_in": 668846,
+  "tokens_out": 6198
+ },
+ "log": "https://github.com/dokima-dev/dokima/blob/logs/logs/805/39022735451-reviewer-pr.md",
+ "run": "https://github.com/dokima-dev/dokima/actions/runs/39022735451",
+ "handback": {
+  "previous_step": {
+   "did": [
+    "The planner's check now stops a new test after the repo's time limit.",
+    "It finds test files by the repo's test folder and file pattern.",
+    "It skips docstring rules when docstrings are off, and takes its cap from settings."
+   ],
+   "decided": [
+    "An empty docstring cap turns the cap off."
+   ],
+   "open": []
+  },
+  "verdict": "approve",
+  "summary": "The planner's check now follows the repo's time limit, test files and docstring settings; all five criteria are proven.",
+  "raises": [],
+  "answers": [],
+  "asks": [],
+  "behaviors": [],
+  "edge_cases": [],
+  "tests": [
+   {
+    "test": "tests/test_planner_settings.py::test_the_new_test_check_stops_a_test_after_the_time_limit_setting",
+    "only_its_behavior": true,
+    "why": "Fails on main, passes on the branch; checks stopped and not stopped."
+   },
+   {
+    "test": "tests/test_planner_settings.py::test_the_planners_test_files_follow_the_test_folder_and_file_pattern_settings",
+    "only_its_behavior": true,
+    "why": "Fails on main, passes on the branch; checks helper skipped and test found."
+   },
+   {
+    "test": "tests/test_planner_settings.py::test_turning_docstrings_off_stops_the_planners_check_requiring_them",
+    "only_its_behavior": true,
+    "why": "Fails on main, passes on the branch; checks off and default."
+   },
+   {
+    "test": "tests/test_planner_settings.py::test_the_planners_docstring_cap_comes_from_settings",
+    "only_its_behavior": true,
+    "why": "Fails on main, passes on the branch; checks over and under the cap."
+   },
+   {
+    "test": "tests/test_planner_settings.py::test_an_empty_docstring_cap_turns_the_cap_off",
+    "only_its_behavior": true,
+    "why": "Fails on main, passes on the branch; checks empty cap and shipped cap."
+   }
+  ],
+  "size": "ok"
+ },
+ "check": {
+  "passed": true,
+  "problems": []
+ },
+ "url": "https://github.com/dokima-dev/dokima/pull/808#issuecomment-6232493619"
+}
