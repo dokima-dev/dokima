@@ -172,11 +172,13 @@ def test_no_file_commits_as_anyone_but_the_bot_or_reza(record_property):
 
     Proves 567.3. Reads every tracked file and lists each `<name>@users.noreply.github.com` address that belongs to someone
     else, such as the stranger "dokima", the play-through's made-up name or GitHub Actions' own bot.
-    It also checks the scan finds the bot's and Reza's addresses in agent.yml, so it never passes blind."""
+    It also checks the scan finds the bot's address in agent.yml and Reza's in this repo's own settings file, where his
+    co-author line lives since #796, so it never passes blind."""
     record_property("proves", "567.3")
     found = noreply_addresses()
-    for mine in ("${BOT_ID}+${SLUG}[bot]@users.noreply.github.com", REZA_EMAIL):
-        assert ".github/workflows/agent.yml" in found.get(mine, []), f"567.3: the scan missed {mine} in agent.yml"
+    for mine, where in (("${BOT_ID}+${SLUG}[bot]@users.noreply.github.com", ".github/workflows/agent.yml"),
+                        (REZA_EMAIL, ".dokima/settings.yaml")):
+        assert where in found.get(mine, []), f"567.3: the scan missed {mine} in {where}"
     others = {a: files for a, files in found.items() if a not in BOT_EMAILS | {REZA_EMAIL}}
     assert not others, "567.3: files commit as someone other than the bot or Reza: " + "; ".join(
         f"{a} in {', '.join(sorted(set(f)))}" for a, f in sorted(others.items()))
