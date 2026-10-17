@@ -1,0 +1,89 @@
+{
+ "role": "reviewer",
+ "stage": "pr",
+ "run_id": "39054587009",
+ "commit_before": "db2d10ebf50a69373cfd81a717e4b781080d79ed",
+ "started_by": "dokima-runtime[bot]",
+ "models": [
+  "claude-opus-5-5"
+ ],
+ "report": {
+  "duration_ms": 12681,
+  "turns": 2,
+  "cost_usd": 1.2184819000000005,
+  "tokens_in": 155423,
+  "tokens_out": 899
+ },
+ "log": "https://github.com/dokima-dev/dokima/blob/logs/logs/812/39054587009-reviewer-pr.md",
+ "run": "https://github.com/dokima-dev/dokima/actions/runs/39054587009",
+ "handback": {
+  "previous_step": {
+   "did": [
+    "Made the merge queue's judge take main's code when run in Dokima's own repo.",
+    "Made the full suite read its settings with Dokima's own code."
+   ],
+   "decided": [
+    "Kept the owner's rule: the full suite never runs on a push to main."
+   ],
+   "open": []
+  },
+  "verdict": "block",
+  "summary": "Every shared workflow fetches Dokima's code from main, not the tag the adopter calls, so the tag pins nothing.",
+  "raises": [
+   {
+    "kind": "blocker",
+    "to": "worker",
+    "label": "812.8 code from main",
+    "text": "Shared workflows check out Dokima at `github.job_workflow_sha`, which GitHub never sets, so the ref is empty and main runs. Fix: use `job.workflow_sha`.",
+    "evidence": "`agent.yml:82` and 20 more; GitHub's contexts table lacks it; actions/runner#2417 reports it empty.",
+    "raised_by": "reviewer",
+    "id": "R4"
+   },
+   {
+    "kind": "blocker",
+    "to": "planner",
+    "label": "812.8 test too weak",
+    "text": "The 812.8 test checks only the adopter's call line. Add one proving each shared workflow fetches Dokima's code at the called commit, using a value GitHub sets.",
+    "evidence": "`tests/test_thin_install.py::test_the_adopters_workflow_calls_dokimas_shared_workflows_at_a_release_tag` passes while every checkout falls back to main.",
+    "raised_by": "reviewer",
+    "id": "R5"
+   }
+  ],
+  "answers": [],
+  "asks": [],
+  "behaviors": [],
+  "edge_cases": [],
+  "tests": [],
+  "size": "ok",
+  "boxes": {
+   "dropped": "none",
+   "added": "none",
+   "superseded": "none",
+   "conflicts": "none",
+   "edges": {
+    "812.1": "covered",
+    "812.2": "covered",
+    "812.3": "covered",
+    "812.4": "covered",
+    "812.5": "covered",
+    "812.6": "covered",
+    "812.7": "covered",
+    "812.8": "missing: the shared workflows' code is fetched at the called tag",
+    "812.9": "covered",
+    "812.10": "covered"
+   },
+   "poor_tests": [
+    {
+     "test": "tests/test_thin_install.py::test_the_adopters_workflow_calls_dokimas_shared_workflows_at_a_release_tag",
+     "passes_with": "Shared workflows that check out Dokima's main branch whatever tag was called.",
+     "fix": "Also check each shared workflow's checkout of Dokima uses the called commit, from a value GitHub sets."
+    }
+   ]
+  }
+ },
+ "check": {
+  "passed": true,
+  "problems": []
+ },
+ "url": "https://github.com/dokima-dev/dokima/pull/824#issuecomment-6237797512"
+}
