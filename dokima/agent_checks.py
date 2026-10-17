@@ -223,6 +223,67 @@ def problems_asks(r, ids):
     return bad
 
 
+BOXES = {"dropped": ("words", "source"), "added": ("what", "kind", "serves"), "superseded": ("old", "new", "retired"),
+         "conflicts": ("a", "b", "ask"), "edges": (), "poor_tests": ("test", "passes_with", "fix")}
+
+
+def problems_boxes(r, ids):
+    """Everything wrong with a review's six boxes (#819), each reason naming its box.
+
+    Every box is there, "none" or a list of whole entries (edges a line per criterion of the plan, covered or
+    missing: the case), and an approve holds no blocking entry. An added entry of kind needed is not a blocker."""
+    boxes = r.get("boxes")
+    if not isinstance(boxes, dict):
+        return ["boxes must be an object holding the six boxes: " + ", ".join(BOXES) + "; a box with nothing in it says none"]
+    bad = []
+    for box, keys in BOXES.items():
+        if box not in boxes:
+            bad.append(f"boxes has no {box} box: write none when there is nothing in it")
+            continue
+        v = boxes[box]
+        if box == "edges":
+            bad += problems_edges(r, v, ids)
+            continue
+        if v == "none":
+            continue
+        if not isinstance(v, list) or not v:
+            bad.append(f"the {box} box must be none or a list of entries, each with {', '.join(keys)}")
+            continue
+        bad += problems_items(boxes, box, keys)
+        whole = [x for x in v if isinstance(x, dict) and all(filled(x.get(k)) for k in keys)]
+        if box == "added":
+            for i, x in enumerate(v, 1):
+                if x in whole and x["kind"].strip() not in ("creep", "needed"):
+                    bad.append(f"added item {i} has kind {x['kind'].strip()}: kind must be creep or needed")
+            whole = [x for x in whole if x["kind"].strip() != "needed"]
+        if whole and r.get("verdict") == "approve":
+            bad.append(f"an approve holds no blocking entry, but the {box} box holds {len(whole)}")
+    return bad
+
+
+def problems_edges(r, v, ids):
+    """Everything wrong with the edges box, each reason naming its criterion.
+
+    A line for every criterion of the plan, covered or missing: the case; none only on a plan with no criteria; an approve has no line reading missing."""
+    if v == "none" and not ids:
+        return []
+    if not isinstance(v, dict):
+        return ["the edges box must give a line for every criterion of the plan (" + ", ".join(ids) +
+                "), each covered or missing: the case"]
+    bad, gaps = [], []
+    for k in ids:
+        line = v.get(k)
+        if line is None:
+            bad.append(f"the edges box has no line for criterion {k}: say covered or missing: the case")
+        elif not isinstance(line, str) or not (line.strip() == "covered" or re.fullmatch(r"missing:\s*\S.*", line.strip(), re.S)):
+            bad.append(f"the edges line for criterion {k} must read covered or missing: the case it lacks")
+        elif line.strip() != "covered":
+            gaps.append(k)
+    if gaps and r.get("verdict") == "approve":
+        bad.append("an approve holds no blocking entry, but the edges box marks criteria missing: " + ", ".join(gaps))
+    return bad
+
+
 def issue_url(number):
     """The link of the issue on GitHub."""
     return f"{os.environ.get('GITHUB_SERVER_URL', 'https://github.com')}/{os.environ.get('GITHUB_REPOSITORY', '')}/issues/{number}"
@@ -384,6 +445,8 @@ def check(kind, path, plan_path=None, number=None):
             bad.append(f"the issue number {number!r} is not a number: the hand-back can't be checked against the plan")
         else:
             bad += problems_plan(kind, data, plan, number)
+            if kind == "review":
+                bad += problems_boxes(data, plan_criteria(plan, number))
             if kind == "work" and os.environ.get("ROLE") == "worker":
                 bad += [PLAN_TEST_FAILS + t for t in failing_plan_tests(plan)]
             if kind == "review" and os.environ.get("STAGE") == "plan":

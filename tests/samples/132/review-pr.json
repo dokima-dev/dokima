@@ -10,5 +10,16 @@
   "open": []
  },
  "verdict": "approve",
- "summary": "A failed run now always leaves its card, and its open pull request's, in its stage's column with Needs you."
+ "summary": "A failed run now always leaves its card, and its open pull request's, in its stage's column with Needs you.",
+ "boxes": {
+  "dropped": "none",
+  "added": "none",
+  "superseded": "none",
+  "conflicts": "none",
+  "edges": {
+   "132.1": "covered",
+   "132.2": "covered"
+  },
+  "poor_tests": "none"
+ }
 }

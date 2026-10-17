@@ -66,7 +66,8 @@ WORK = {"summary": "Built the job id.", "criteria": {"9.1": "x.py, a()", "9.2": 
         "evidence": "pytest -q: 2 passed"}
 ASKS = [{"ask": "Paint the door blue", "source": ISSUE, "criterion": "9.1"}]
 APPROVE = {"previous_step": {"did": ["Planned one story."], "decided": [], "open": []}, "verdict": "approve",
-           "summary": "Every promise has a proof.", "asks": ASKS}
+           "summary": "Every promise has a proof.", "asks": ASKS,
+           "boxes": {"dropped": "none", "added": "none", "superseded": "none", "conflicts": "none", "edges": {c: "covered" for c in ("9.1", "9.2", "9.3")}, "poor_tests": "none"}}
 
 # Raises as an agent writes them, and as code stamps them on the issue.
 DOUBT = {"kind": "question", "to": "owner", "label": "Doubt about the ask",
