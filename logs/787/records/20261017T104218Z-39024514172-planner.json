@@ -1,0 +1,226 @@
+{
+ "role": "planner",
+ "stage": null,
+ "run_id": "39024514172",
+ "commit_before": "35c3af17ddb65ce25f7aa2a5e3fa0caeddc65a52",
+ "started_by": "dokima-runtime[bot]",
+ "models": [
+  "claude-opus-5-5"
+ ],
+ "report": {
+  "duration_ms": 5841,
+  "turns": 1,
+  "cost_usd": 0.49732279999999995,
+  "tokens_in": 54209,
+  "tokens_out": 169
+ },
+ "log": "https://github.com/dokima-dev/dokima/blob/logs/logs/787/39024514172-planner.md",
+ "run": "https://github.com/dokima-dev/dokima/actions/runs/39024514172",
+ "handback": {
+  "kind": "user_story",
+  "title": "Autopilot merges by the repo's branch, method and labels",
+  "summary": "Autopilot merges into the repo's own branch, its own way, and reads its own labels, all from settings.",
+  "user_story": "Autopilot merges into my repo's branch, my way, using my label names.",
+  "acceptance_criteria": [
+   {
+    "text": "Autopilot merges pull requests into the default branch the settings name.",
+    "words": "`branch.default: main`",
+    "source": "https://github.com/dokima-dev/dokima/issues/740#issuecomment-6219928729",
+    "files": [
+     "dokima/agent_autopilot.py"
+    ],
+    "edge_cases": [
+     {
+      "case": "The settings name a branch GitHub does not have: nothing merges, and the reason names it.",
+      "test": "tests/test_settings_autopilot.py::test_a_default_branch_github_lacks_stops_saying_which"
+     }
+    ]
+   },
+   {
+    "text": "With the default branch setting left empty, autopilot merges into the repo's default branch on GitHub.",
+    "words": "better: read repo default_branch",
+    "source": "https://github.com/dokima-dev/dokima/issues/740#issuecomment-6219928729",
+    "files": [
+     "dokima/agent_autopilot.py",
+     "dokima/settings.py"
+    ],
+    "edge_cases": [
+     {
+      "case": "The setting is empty text rather than no value.",
+      "test": "tests/test_settings_autopilot.py::test_an_empty_text_default_branch_also_uses_githubs"
+     }
+    ]
+   },
+   {
+    "text": "Autopilot merges with the merge method the settings name.",
+    "words": "`merge.method: squash`",
+    "source": "https://github.com/dokima-dev/dokima/issues/740#issuecomment-6219928729",
+    "files": [
+     "dokima/agent_autopilot.py"
+    ],
+    "edge_cases": [
+     {
+      "case": "GitHub holds the merge for approval: the direct merge keeps the same method.",
+      "test": "tests/test_settings_autopilot.py::test_a_direct_merge_after_a_held_one_keeps_the_settings_method"
+     }
+    ]
+   },
+   {
+    "text": "The merge gate waits for checks as many minutes as the settings say.",
+    "words": "`gate.checks_wait_min: 45`",
+    "source": "https://github.com/dokima-dev/dokima/issues/740#issuecomment-6219928729",
+    "files": [
+     "dokima/agent_autopilot.py"
+    ],
+    "no_edge_cases": "A check that never finishes is the case its own test runs."
+   },
+   {
+    "text": "Autopilot treats an issue as on autopilot by the label name in settings.",
+    "words": "autopilot: autopilot",
+    "source": "https://github.com/dokima-dev/dokima/issues/740#issuecomment-6219928729",
+    "files": [
+     "dokima/agent_autopilot.py",
+     "dokima/board.py"
+    ],
+    "edge_cases": [
+     {
+      "case": "The sweep of issues on autopilot asks GitHub by that label name.",
+      "test": "tests/test_settings_autopilot.py::test_the_sweep_lists_issues_by_the_named_label"
+     },
+     {
+      "case": "The board counts an issue on autopilot by that label name.",
+      "test": "tests/test_settings_autopilot.py::test_the_board_reads_autopilot_by_the_named_label"
+     },
+     {
+      "case": "The owner adds the label named in settings on GitHub: the board card moves.",
+      "test": "tests/test_settings_autopilot.py::test_adding_the_named_label_on_github_moves_the_board_card"
+     }
+    ]
+   },
+   {
+    "text": "Turning autopilot on puts the label named in settings on the issue.",
+    "words": "autopilot: autopilot",
+    "source": "https://github.com/dokima-dev/dokima/issues/740#issuecomment-6219928729",
+    "files": [
+     "dokima/agent_autopilot.py",
+     "dokima/board.py"
+    ],
+    "edge_cases": [
+     {
+      "case": "The board puts that label on a pull request built for an issue on autopilot.",
+      "test": "tests/test_settings_autopilot.py::test_the_board_puts_the_named_label_on_a_pull_request"
+     },
+     {
+      "case": "Turning autopilot off takes the label named in settings off the issue.",
+      "test": "tests/test_settings_autopilot.py::test_turning_autopilot_off_removes_the_named_label"
+     }
+    ]
+   },
+   {
+    "text": "Issues Dokima files carry the filed label named in settings.",
+    "words": "filed: filed-by-dokima",
+    "source": "https://github.com/dokima-dev/dokima/issues/740#issuecomment-6219928729",
+    "files": [
+     "dokima/agent_autopilot.py"
+    ],
+    "no_edge_cases": "Filing an issue has one path; its own test runs it."
+   },
+   {
+    "text": "Dokima ships the default branch setting empty, so a repo naming none gets GitHub's default branch.",
+    "words": "ship the default branch setting empty, not \"main\"",
+    "source": "https://github.com/dokima-dev/dokima/issues/787#issuecomment-6232347057",
+    "files": [
+     "dokima/defaults.yaml",
+     "dokima/agent_autopilot.py"
+    ],
+    "edge_cases": [
+     {
+      "case": "A repo with no settings file at all merges into GitHub's default branch.",
+      "test": "tests/test_settings_autopilot.py::test_a_repo_with_no_settings_file_merges_into_githubs_default_branch"
+     }
+    ]
+   },
+   {
+    "text": "With the default branch setting empty, workflows run on the repo's default branch on GitHub.",
+    "words": "Empty means ask GitHub for the repo's default branch",
+    "source": "https://github.com/dokima-dev/dokima/issues/787#issuecomment-6232347057",
+    "files": [
+     "dokima/settings.py"
+    ],
+    "edge_cases": [
+     {
+      "case": "A repo that names a branch gives workflows that branch.",
+      "test": "tests/test_settings_autopilot.py::test_with_the_default_branch_empty_workflows_get_githubs_default_branch"
+     },
+     {
+      "case": "GitHub gives no default branch: the run stops, saying so.",
+      "test": "tests/test_settings_autopilot.py::test_github_giving_no_default_branch_stops_the_run_saying_why"
+     }
+    ]
+   }
+  ],
+  "non_functional": [],
+  "tests": {
+   "787.1": [
+    "tests/test_settings_autopilot.py::test_autopilot_merges_into_the_default_branch_the_settings_name",
+    "tests/test_settings_autopilot.py::test_a_default_branch_github_lacks_stops_saying_which"
+   ],
+   "787.2": [
+    "tests/test_settings_autopilot.py::test_with_no_default_branch_setting_autopilot_uses_githubs_default_branch",
+    "tests/test_settings_autopilot.py::test_an_empty_text_default_branch_also_uses_githubs"
+   ],
+   "787.3": [
+    "tests/test_settings_autopilot.py::test_autopilot_merges_with_the_merge_method_the_settings_name",
+    "tests/test_settings_autopilot.py::test_a_direct_merge_after_a_held_one_keeps_the_settings_method"
+   ],
+   "787.4": [
+    "tests/test_settings_autopilot.py::test_the_merge_gate_waits_for_checks_as_many_minutes_as_the_settings_say"
+   ],
+   "787.5": [
+    "tests/test_settings_autopilot.py::test_autopilot_reads_its_label_by_the_name_in_the_labels_setting",
+    "tests/test_settings_autopilot.py::test_the_sweep_lists_issues_by_the_named_label",
+    "tests/test_settings_autopilot.py::test_the_board_reads_autopilot_by_the_named_label",
+    "tests/test_settings_autopilot.py::test_adding_the_named_label_on_github_moves_the_board_card"
+   ],
+   "787.6": [
+    "tests/test_settings_autopilot.py::test_turning_autopilot_on_puts_the_named_label_on",
+    "tests/test_settings_autopilot.py::test_the_board_puts_the_named_label_on_a_pull_request",
+    "tests/test_settings_autopilot.py::test_turning_autopilot_off_removes_the_named_label"
+   ],
+   "787.7": [
+    "tests/test_settings_autopilot.py::test_issues_dokima_files_carry_the_filed_label_named_in_settings"
+   ],
+   "787.8": [
+    "tests/test_settings_autopilot.py::test_the_shipped_settings_leave_the_default_branch_empty",
+    "tests/test_settings_autopilot.py::test_a_repo_with_no_settings_file_merges_into_githubs_default_branch"
+   ],
+   "787.9": [
+    "tests/test_settings_autopilot.py::test_with_the_default_branch_empty_workflows_get_githubs_default_branch",
+    "tests/test_settings_autopilot.py::test_github_giving_no_default_branch_stops_the_run_saying_why"
+   ]
+  },
+  "test_changes": {
+   "tests/test_settings_merge.py::test_the_shipped_defaults_hold_the_owners_list": "The owner asked to ship the default branch empty, not main, on #787.",
+   "tests/test_start.py::FAKE_GH": "The fake GitHub now names the repo's default branch, as real GitHub does."
+  },
+  "links": {
+   "blocked_by": [],
+   "blocks": [
+    741,
+    742,
+    744,
+    791
+   ],
+   "relates_to": [
+    783,
+    784
+   ]
+  },
+  "answers": []
+ },
+ "check": {
+  "passed": true,
+  "problems": []
+ },
+ "url": "https://github.com/dokima-dev/dokima/issues/787#issuecomment-6232748988"
+}
