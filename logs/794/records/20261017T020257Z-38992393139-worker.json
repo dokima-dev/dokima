@@ -1,0 +1,61 @@
+{
+ "role": "worker",
+ "stage": null,
+ "run_id": "38992393139",
+ "commit_before": "a598158769f4247aec934033d33f0f8be89db4ed",
+ "started_by": "dokima-runtime[bot]",
+ "models": [
+  "claude-opus-5-5"
+ ],
+ "report": {
+  "duration_ms": 778778,
+  "turns": 48,
+  "cost_usd": 2.727200999999999,
+  "tokens_in": 4859199,
+  "tokens_out": 29242
+ },
+ "log": "https://github.com/dokima-dev/dokima/blob/logs/logs/794/38992393139-worker.md",
+ "run": "https://github.com/dokima-dev/dokima/actions/runs/38992393139",
+ "handback": {
+  "summary": "Setup edits only the agents lines of the settings file; agents read it; test workflows follow its setup group.",
+  "criteria": {
+   "794.1": "`dokima/setup.py` `read_settings` reads YAML; every workflow job running Dokima installs PyYAML before its first Dokima step.",
+   "794.2": "`dokima/setup.py` `set_line` edits only the agents lines in place, so comment lines stay.",
+   "794.3": "`set_line` keeps a line's end comment when it changes or descends through that line.",
+   "794.4": "`saved_text` refuses to save if any other setting would change; a missing file or section is added.",
+   "794.5": "`dokima/agents.py` `agents_section` reads the agents section; `agent.yml` copies main's settings file.",
+   "794.6": "`agents_section` falls back to the old `agents.yml` beside the settings file when it has no agents section.",
+   "794.7": "Each test workflow runs the install setting after the test tools, before the tests.",
+   "794.8": "Each test workflow installs the test_tools setting, read by `python3 -m dokima.settings setup`.",
+   "794.9": "Each test workflow sets up the python setting with a second setup-python step before tests.",
+   "794.10": "No order setting exists; `agents` in `dokima/defaults.yaml` only names agents and models."
+  },
+  "evidence": "pytest on all 25 plan tests: 25 passed",
+  "raises": [],
+  "answers": []
+ },
+ "check": {
+  "passed": true,
+  "problems": []
+ },
+ "dropped_by_fence": [],
+ "files_changed": [
+  ".github/workflows/acceptance-criteria.yml",
+  ".github/workflows/agent.yml",
+  ".github/workflows/assign.yml",
+  ".github/workflows/audit.yml",
+  ".github/workflows/autopilot.yml",
+  ".github/workflows/board.yml",
+  ".github/workflows/commands.yml",
+  ".github/workflows/full-suite.yml",
+  ".github/workflows/playthrough.yml",
+  ".github/workflows/testmon.yml",
+  ".github/workflows/uptodate.yml",
+  "dokima/agents.py",
+  "dokima/defaults.yaml",
+  "dokima/settings.py",
+  "dokima/setup.py"
+ ],
+ "branch": "try/issue-794",
+ "url": "https://github.com/dokima-dev/dokima/issues/794#issuecomment-6228137567"
+}
