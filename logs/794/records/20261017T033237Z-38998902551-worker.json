@@ -1,0 +1,45 @@
+{
+ "role": "worker",
+ "stage": null,
+ "run_id": "38998902551",
+ "commit_before": "9fbc85f4eebf37d9879b383dd64490444b9bf8b9",
+ "started_by": "dokima-runtime[bot]",
+ "models": [
+  "claude-opus-5-5"
+ ],
+ "report": {
+  "duration_ms": 170358,
+  "turns": 7,
+  "cost_usd": 0.28169740000000004,
+  "tokens_in": 230531,
+  "tokens_out": 2023
+ },
+ "log": "https://github.com/dokima-dev/dokima/blob/logs/logs/794/38998902551-worker.md",
+ "run": "https://github.com/dokima-dev/dokima/actions/runs/38998902551",
+ "handback": {
+  "summary": "No code change this round: the fallback built last round already passes the planner's new old-reader test.",
+  "criteria": {
+   "794.1": "`dokima/setup.py` `read_settings` reads YAML; every workflow job running Dokima installs PyYAML before its first Dokima step.",
+   "794.2": "`dokima/setup.py` `set_line` edits only the agents lines in place, so comment lines stay.",
+   "794.3": "`set_line` keeps a line's end comment when it changes or descends through that line.",
+   "794.4": "`saved_text` refuses to save if any other setting would change; a missing file or section is added.",
+   "794.5": "`dokima/agents.py` `agents_section` reads the agents section; `agent.yml` copies main's settings file.",
+   "794.6": "`agents_section` falls back to the old `agents.yml` beside the settings file when it has no agents section.",
+   "794.7": "Each test workflow runs the install setting after the test tools, before the tests.",
+   "794.8": "Each test workflow installs the test_tools setting when the reader has `setup_lines`, else the old list.",
+   "794.9": "Each test workflow sets up the python setting with a second setup-python step before tests.",
+   "794.10": "No order setting exists; `agents` in `dokima/defaults.yaml` only names agents and models."
+  },
+  "evidence": "pytest on all 29 plan tests: 29 passed; new 794.8 test passed before any change.",
+  "raises": [],
+  "answers": []
+ },
+ "check": {
+  "passed": true,
+  "problems": []
+ },
+ "dropped_by_fence": [],
+ "files_changed": [],
+ "branch": "try/issue-794",
+ "url": "https://github.com/dokima-dev/dokima/pull/801#issuecomment-6229041395"
+}
