@@ -1,0 +1,43 @@
+{
+ "role": "reviewer",
+ "stage": "pr",
+ "run_id": "38993388770",
+ "commit_before": "a914b886b515fd00fee8253768030c711a0ff4d4",
+ "started_by": "dokima-runtime[bot]",
+ "models": [
+  "claude-opus-5-5"
+ ],
+ "report": {
+  "duration_ms": 1436047,
+  "turns": 24,
+  "cost_usd": 1.4274470000000001,
+  "tokens_in": 2149857,
+  "tokens_out": 10360
+ },
+ "log": "https://github.com/dokima-dev/dokima/blob/logs/logs/794/38993388770-reviewer-pr.md",
+ "run": "https://github.com/dokima-dev/dokima/actions/runs/38993388770",
+ "handback": {
+  "previous_step": {
+   "did": [
+    "Setup now changes only the agents lines of the settings file.",
+    "Agents now come from the settings file, or from the old agents file.",
+    "Each test workflow installs the Python, tools and install command the settings name.",
+    "Every workflow job that runs Dokima installs the settings reader first."
+   ],
+   "decided": [
+    "Setup refuses to save, storing nothing, if another setting would change."
+   ],
+   "open": []
+  },
+  "verdict": "approve",
+  "summary": "All 25 plan tests and the full suite pass; GitHub's red marks need checking, as checks skip draft pull requests.",
+  "raises": [],
+  "answers": [],
+  "asks": []
+ },
+ "check": {
+  "passed": true,
+  "problems": []
+ },
+ "url": "https://github.com/dokima-dev/dokima/pull/801#issuecomment-6228266396"
+}
