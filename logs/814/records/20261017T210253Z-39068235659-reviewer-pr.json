@@ -1,0 +1,73 @@
+{
+ "role": "reviewer",
+ "stage": "pr",
+ "run_id": "39068235659",
+ "commit_before": "a151fef916ec8c807f1e244a9f6495f66b36a208",
+ "started_by": "dokima-runtime[bot]",
+ "models": [
+  "claude-opus-5-5"
+ ],
+ "report": {
+  "duration_ms": 801730,
+  "turns": 15,
+  "cost_usd": 0.4088174,
+  "tokens_in": 536721,
+  "tokens_out": 4123
+ },
+ "log": "https://github.com/dokima-dev/dokima/blob/logs/logs/814/39068235659-reviewer-pr.md",
+ "run": "https://github.com/dokima-dev/dokima/actions/runs/39068235659",
+ "handback": {
+  "previous_step": {
+   "did": [
+    "The worker replaced the copy step with steps adding the workflow and settings file.",
+    "The worker renumbered the later setup steps."
+   ],
+   "decided": [
+    "The worker changed only the README."
+   ],
+   "open": []
+  },
+  "verdict": "approve",
+  "summary": "The README's setup steps now add only the thin workflow and settings file; the test proves it.",
+  "raises": [],
+  "answers": [],
+  "asks": [],
+  "behaviors": [
+   {
+    "criterion": "814.1",
+    "one_behavior": true,
+    "why": "One change: the install steps add two files instead of copying Dokima."
+   }
+  ],
+  "edge_cases": [
+   {
+    "criterion": "814.1",
+    "cut": [],
+    "missing": []
+   }
+  ],
+  "tests": [
+   {
+    "test": "tests/test_readme_install.py::test_install_steps_add_the_two_files_not_dokima",
+    "only_its_behavior": true,
+    "why": "Fails on main's copy step, passes on the branch; untouched since the planner."
+   }
+  ],
+  "size": "ok",
+  "boxes": {
+   "dropped": "none",
+   "added": "none",
+   "superseded": "none",
+   "conflicts": "none",
+   "edges": {
+    "814.1": "covered"
+   },
+   "poor_tests": "none"
+  }
+ },
+ "check": {
+  "passed": true,
+  "problems": []
+ },
+ "url": "https://github.com/dokima-dev/dokima/pull/831#issuecomment-6240791421"
+}
