@@ -1,0 +1,397 @@
+{
+ "role": "reviewer",
+ "stage": "plan",
+ "run_id": "39037417694",
+ "commit_before": "edf1c0e0800fbd616670940fb81b53445a839682",
+ "started_by": "dokima-runtime[bot]",
+ "models": [
+  "claude-opus-5-5"
+ ],
+ "report": {
+  "duration_ms": 32418,
+  "turns": 8,
+  "cost_usd": 0.3176964,
+  "tokens_in": 331088,
+  "tokens_out": 2388
+ },
+ "log": "https://github.com/dokima-dev/dokima/blob/logs/logs/741/39037417694-reviewer-plan.md",
+ "run": "https://github.com/dokima-dev/dokima/actions/runs/39037417694",
+ "handback": {
+  "previous_step": {
+   "did": [
+    "The planner adds a code review case: a review missing a box is rejected."
+   ],
+   "decided": [
+    "Boxes are checked at both plan review and code review, as the owner said."
+   ],
+   "open": []
+  },
+  "verdict": "approve",
+  "summary": "Approved: every ask has a criterion, and the code review case for missing boxes is now listed.",
+  "raises": [],
+  "answers": [],
+  "asks": [
+   {
+    "ask": "Role prompts ship with Dokima and contain no example from Dokima's own code.",
+    "source": "https://github.com/dokima-dev/dokima/issues/741",
+    "criterion": "S1.1"
+   },
+   {
+    "ask": "a scan finds no Dokima file name in any shipped prompt",
+    "source": "https://github.com/dokima-dev/dokima/issues/741",
+    "criterion": "S1.1"
+   },
+   {
+    "ask": "The 50-line \"raising\" block copied into planner, worker and reviewer moves to one shared `roles/raising.md` with neutral examples.",
+    "source": "https://github.com/dokima-dev/dokima/issues/741",
+    "criterion": "S1.2"
+   },
+   {
+    "ask": "moves to one shared `roles/raising.md`",
+    "source": "https://github.com/dokima-dev/dokima/issues/741",
+    "criterion": "S1.3"
+   },
+   {
+    "ask": "Numbers written into prompts (\"more than 3 questions\", ...) are read from settings.",
+    "source": "https://github.com/dokima-dev/dokima/issues/741",
+    "criterion": "S1.4"
+   },
+   {
+    "ask": "Numbers written into prompts (... \"three blocks in a row\", ...) are read from settings.",
+    "source": "https://github.com/dokima-dev/dokima/issues/741",
+    "criterion": "S1.5"
+   },
+   {
+    "ask": "Default criterion style in the planner prompt: \"When X, Y\".",
+    "source": "https://github.com/dokima-dev/dokima/issues/741",
+    "criterion": "S1.6"
+   },
+   {
+    "ask": "A repo appends house rules through `prompts.append` in `settings.yaml`, per role or for all.",
+    "source": "https://github.com/dokima-dev/dokima/issues/741",
+    "criterion": "S1.10"
+   },
+   {
+    "ask": "a repo's house rules appear after the shipped prompt for each role",
+    "source": "https://github.com/dokima-dev/dokima/issues/741",
+    "criterion": "S1.10"
+   },
+   {
+    "ask": "The planner tries to write each criterion with a source, a result ... and a test.",
+    "source": "https://github.com/dokima-dev/dokima/issues/741#issuecomment-6205062350",
+    "criterion": "S1.7"
+   },
+   {
+    "ask": "Each blank it cannot fill becomes one question to the owner, kind `question`.",
+    "source": "https://github.com/dokima-dev/dokima/issues/741#issuecomment-6205062350",
+    "criterion": "S1.8"
+   },
+   {
+    "ask": "Examples for the prompt:",
+    "source": "https://github.com/dokima-dev/dokima/issues/741#issuecomment-6205062350",
+    "criterion": "S1.9"
+   },
+   {
+    "ask": "Nothing dropped. Every sentence of the owner's maps to a criterion or is marked \"not a requirement\" with a reason.",
+    "source": "https://github.com/dokima-dev/dokima/issues/741#issuecomment-6204381975",
+    "criterion": "S2.1"
+   },
+   {
+    "ask": "No stale criteria. Sources are append-only and later words win.",
+    "source": "https://github.com/dokima-dev/dokima/issues/741#issuecomment-6204381975",
+    "criterion": "S2.2"
+   },
+   {
+    "ask": "the reviewer confirms or retires it.",
+    "source": "https://github.com/dokima-dev/dokima/issues/741#issuecomment-6204381975",
+    "criterion": "S2.3"
+   },
+   {
+    "ask": "Conflicts handled. When two owner sources disagree and no later word settles it, the reviewer asks the owner. It never picks.",
+    "source": "https://github.com/dokima-dev/dokima/issues/741#issuecomment-6204381975",
+    "criterion": "S2.4"
+   },
+   {
+    "ask": "Nothing added. Every change in the diff serves a criterion.",
+    "source": "https://github.com/dokima-dev/dokima/issues/741#issuecomment-6204381975",
+    "criterion": "S2.5"
+   },
+   {
+    "ask": "**Reviewer: required boxes.** One per duty",
+    "source": "https://github.com/dokima-dev/dokima/issues/741#issuecomment-6205062350",
+    "criterion": "S2.6"
+   },
+   {
+    "ask": "every box present",
+    "source": "https://github.com/dokima-dev/dokima/issues/741#issuecomment-6205062350",
+    "criterion": "S3.1"
+   },
+   {
+    "ask": "entries typed",
+    "source": "https://github.com/dokima-dev/dokima/issues/741#issuecomment-6205062350",
+    "criterion": "S3.2"
+   },
+   {
+    "ask": "A weak-test claim without a named counterexample is rejected by code.",
+    "source": "https://github.com/dokima-dev/dokima/issues/741#issuecomment-6205062350",
+    "criterion": "S3.3"
+   },
+   {
+    "ask": "each entry a blocker unless noted",
+    "source": "https://github.com/dokima-dev/dokima/issues/741#issuecomment-6205062350",
+    "criterion": "S3.4"
+   },
+   {
+    "ask": "# needed is not a blocker",
+    "source": "https://github.com/dokima-dev/dokima/issues/741#issuecomment-6205062350",
+    "criterion": "S3.5"
+   },
+   {
+    "ask": "edges:       per criterion: covered | missing: <named case>",
+    "source": "https://github.com/dokima-dev/dokima/issues/741#issuecomment-6205062350",
+    "criterion": "S3.6"
+   },
+   {
+    "ask": "Every box must be present at both stages.",
+    "source": "https://github.com/dokima-dev/dokima/issues/741#issuecomment-6234488387",
+    "criterion": "S3.1"
+   },
+   {
+    "ask": "A box with nothing to check at a stage (for example `added` at plan review, before any diff exists) says `none`.",
+    "source": "https://github.com/dokima-dev/dokima/issues/741#issuecomment-6234488387",
+    "criterion": "S3.1"
+   }
+  ],
+  "behaviors": [
+   {
+    "criterion": "S1.1",
+    "one_behavior": true,
+    "why": "One scan, one result."
+   },
+   {
+    "criterion": "S1.2",
+    "one_behavior": true,
+    "why": "The raising rules live in one file."
+   },
+   {
+    "criterion": "S1.3",
+    "one_behavior": true,
+    "why": "Each role's prompt holds the shared text."
+   },
+   {
+    "criterion": "S1.4",
+    "one_behavior": true,
+    "why": "One number from one setting."
+   },
+   {
+    "criterion": "S1.5",
+    "one_behavior": true,
+    "why": "One number from one setting."
+   },
+   {
+    "criterion": "S1.6",
+    "one_behavior": true,
+    "why": "One line of prompt text."
+   },
+   {
+    "criterion": "S1.7",
+    "one_behavior": true,
+    "why": "What a criterion needs, now alone."
+   },
+   {
+    "criterion": "S1.8",
+    "one_behavior": true,
+    "why": "Each gap becomes a question, now alone."
+   },
+   {
+    "criterion": "S1.9",
+    "one_behavior": true,
+    "why": "One list of examples."
+   },
+   {
+    "criterion": "S1.10",
+    "one_behavior": true,
+    "why": "House rules come after the shipped prompt."
+   },
+   {
+    "criterion": "S2.1",
+    "one_behavior": true,
+    "why": "One duty."
+   },
+   {
+    "criterion": "S2.2",
+    "one_behavior": true,
+    "why": "Later words win, now alone."
+   },
+   {
+    "criterion": "S2.3",
+    "one_behavior": true,
+    "why": "Confirm or retire a flagged criterion, now alone."
+   },
+   {
+    "criterion": "S2.4",
+    "one_behavior": true,
+    "why": "One duty."
+   },
+   {
+    "criterion": "S2.5",
+    "one_behavior": true,
+    "why": "One duty."
+   },
+   {
+    "criterion": "S2.6",
+    "one_behavior": true,
+    "why": "One section listing the boxes."
+   },
+   {
+    "criterion": "S3.1",
+    "one_behavior": true,
+    "why": "A missing box is rejected."
+   },
+   {
+    "criterion": "S3.2",
+    "one_behavior": true,
+    "why": "A badly shaped entry is rejected."
+   },
+   {
+    "criterion": "S3.3",
+    "one_behavior": true,
+    "why": "A weak test claim needs wrong code."
+   },
+   {
+    "criterion": "S3.4",
+    "one_behavior": true,
+    "why": "Approve with a blocking entry is rejected."
+   },
+   {
+    "criterion": "S3.5",
+    "one_behavior": true,
+    "why": "A needed entry does not block."
+   },
+   {
+    "criterion": "S3.6",
+    "one_behavior": true,
+    "why": "Edges must name every criterion."
+   }
+  ],
+  "edge_cases": [
+   {
+    "criterion": "S1.1",
+    "cut": [],
+    "missing": []
+   },
+   {
+    "criterion": "S1.2",
+    "cut": [],
+    "missing": []
+   },
+   {
+    "criterion": "S1.3",
+    "cut": [],
+    "missing": []
+   },
+   {
+    "criterion": "S1.4",
+    "cut": [],
+    "missing": []
+   },
+   {
+    "criterion": "S1.5",
+    "cut": [],
+    "missing": []
+   },
+   {
+    "criterion": "S1.6",
+    "cut": [],
+    "missing": []
+   },
+   {
+    "criterion": "S1.7",
+    "cut": [],
+    "missing": []
+   },
+   {
+    "criterion": "S1.8",
+    "cut": [],
+    "missing": []
+   },
+   {
+    "criterion": "S1.9",
+    "cut": [],
+    "missing": []
+   },
+   {
+    "criterion": "S1.10",
+    "cut": [],
+    "missing": []
+   },
+   {
+    "criterion": "S2.1",
+    "cut": [],
+    "missing": []
+   },
+   {
+    "criterion": "S2.2",
+    "cut": [],
+    "missing": []
+   },
+   {
+    "criterion": "S2.3",
+    "cut": [],
+    "missing": []
+   },
+   {
+    "criterion": "S2.4",
+    "cut": [],
+    "missing": []
+   },
+   {
+    "criterion": "S2.5",
+    "cut": [],
+    "missing": []
+   },
+   {
+    "criterion": "S2.6",
+    "cut": [],
+    "missing": []
+   },
+   {
+    "criterion": "S3.1",
+    "cut": [],
+    "missing": []
+   },
+   {
+    "criterion": "S3.2",
+    "cut": [],
+    "missing": []
+   },
+   {
+    "criterion": "S3.3",
+    "cut": [],
+    "missing": []
+   },
+   {
+    "criterion": "S3.4",
+    "cut": [],
+    "missing": []
+   },
+   {
+    "criterion": "S3.5",
+    "cut": [],
+    "missing": []
+   },
+   {
+    "criterion": "S3.6",
+    "cut": [],
+    "missing": []
+   }
+  ],
+  "tests": [],
+  "size": "ok"
+ },
+ "check": {
+  "passed": true,
+  "problems": []
+ },
+ "url": "https://github.com/dokima-dev/dokima/issues/741#issuecomment-6234548981"
+}
