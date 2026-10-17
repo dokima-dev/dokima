@@ -1,0 +1,191 @@
+{
+ "role": "planner",
+ "stage": null,
+ "run_id": "39018820027",
+ "commit_before": "826f2054bb114cbc1ad96e5b11080798cb967ec1",
+ "started_by": "dokima-runtime[bot]",
+ "models": [
+  "claude-opus-5-5"
+ ],
+ "report": {
+  "duration_ms": 104486,
+  "turns": 14,
+  "cost_usd": 0.7588086,
+  "tokens_in": 718505,
+  "tokens_out": 8031
+ },
+ "log": "https://github.com/dokima-dev/dokima/blob/logs/logs/781/39018820027-planner.md",
+ "run": "https://github.com/dokima-dev/dokima/actions/runs/39018820027",
+ "handback": {
+  "kind": "feature",
+  "title": "Finding and checking tests follows the test settings",
+  "summary": "Dokima finds, checks and times tests by the repo's test settings, not its own fixed values.",
+  "feature": "A repo's test folder, pattern, tag, commands and docstring rules decide how Dokima finds and checks tests. Two stories take turns on shared files.",
+  "stories": [
+   {
+    "title": "Tests are found and tagged by the test settings",
+    "user_story": "A repo's test tag, folder and run command decide which tests Dokima finds, links and runs.",
+    "context": "`dokima/checks.py` holds `PROVES`, `TEST_DEF` (top-level `def test_*` only), `NOT_TEXT` (still lists `dokima/roles/`) and `MANUAL_FIX` (folder `tests`). `dokima/planner.py` imports `PROVES` and `TEST_DEF` for `test_functions()`, whose block logic and `unsummarized()`/`unnumbered()` walk top-level nodes only, so class methods need them too. `problems()` hardcodes `tests/`; `main_with_tests()` lays `tests`; `passing_today()` runs `sys.executable -m pytest`. `dokima/defaults.yaml` already holds every setting (`tests.*`, `text_only.not_text` without `dokima/roles/`); read them with `dokima.settings.read()`.",
+    "acceptance_criteria": [
+     {
+      "text": "Which call links a test to its criterion is read from the test tag setting.",
+      "words": "`tests.tag: record_property`",
+      "source": "https://github.com/dokima-dev/dokima/issues/740#issuecomment-6219928729",
+      "files": [
+       "dokima/checks.py",
+       "dokima/planner.py"
+      ]
+     },
+     {
+      "text": "Dokima finds tests written as methods of a test class.",
+      "words": "misses class methods",
+      "source": "https://github.com/dokima-dev/dokima/issues/740#issuecomment-6219928729",
+      "files": [
+       "dokima/checks.py",
+       "dokima/planner.py"
+      ]
+     },
+     {
+      "text": "Dokima finds tests written as async functions.",
+      "words": "`async def`",
+      "source": "https://github.com/dokima-dev/dokima/issues/740#issuecomment-6219928729",
+      "files": [
+       "dokima/checks.py",
+       "dokima/planner.py"
+      ]
+     },
+     {
+      "text": "Dokima finds tests indented under another block.",
+      "words": "`async def`, indented",
+      "source": "https://github.com/dokima-dev/dokima/issues/740#issuecomment-6219928729",
+      "files": [
+       "dokima/checks.py",
+       "dokima/planner.py"
+      ]
+     },
+     {
+      "text": "Changes to Dokima's prompt folder no longer stop the text-only shortcut.",
+      "words": "drop `dokima/roles/` from default",
+      "source": "https://github.com/dokima-dev/dokima/issues/740#issuecomment-6219928729",
+      "files": [
+       "dokima/checks.py"
+      ]
+     },
+     {
+      "text": "The folders that stop the text-only shortcut come from settings.",
+      "words": "text_only.not_text",
+      "source": "https://github.com/dokima-dev/dokima/issues/740#issuecomment-6219928729",
+      "files": [
+       "dokima/checks.py"
+      ]
+     },
+     {
+      "text": "The manual-fix check runs the tests in the test folder setting.",
+      "words": "Manual-fix check runs folder `tests`",
+      "source": "https://github.com/dokima-dev/dokima/issues/740#issuecomment-6219928729",
+      "files": [
+       "dokima/checks.py"
+      ]
+     },
+     {
+      "text": "The planner's check refuses files outside the test folder setting.",
+      "words": "outside tests/; the planner may only write tests",
+      "source": "https://github.com/dokima-dev/dokima/issues/740#issuecomment-6219928729",
+      "files": [
+       "dokima/planner.py"
+      ]
+     },
+     {
+      "text": "The planner's check lays the branch's test folder, from settings, over main.",
+      "words": "Lays main + branch `tests/` into a temp dir",
+      "source": "https://github.com/dokima-dev/dokima/issues/740#issuecomment-6219928729",
+      "files": [
+       "dokima/planner.py"
+      ]
+     },
+     {
+      "text": "The check that new tests fail today runs each with the run-one command setting.",
+      "words": "New tests must fail today: pytest per test",
+      "source": "https://github.com/dokima-dev/dokima/issues/740#issuecomment-6219928729",
+      "files": [
+       "dokima/planner.py"
+      ]
+     }
+    ],
+    "non_functional": [],
+    "depends_on": []
+   },
+   {
+    "title": "Planner's test limits and docstrings follow settings",
+    "user_story": "A repo's time limit, test file pattern and docstring rules decide what the planner's check accepts.",
+    "context": "`dokima/planner.py`: `NEW_TEST_TIMEOUT` (60 s) in `passing_today()`; `main()` picks test files with `startswith(\"tests/\") and endswith(\".py\")`; `DOCSTRING_CAP` (15) in `docstring_caps()`; `unsummarized()` and `unnumbered()` require docstrings. Settings `tests.new_test_timeout_s`, `tests.dir`, `tests.file_pattern`, `style.docstrings`, `style.docstring_cap` are in `dokima/defaults.yaml`; null cap means off. Waits on story 1, which changes the same file.",
+    "acceptance_criteria": [
+     {
+      "text": "The check that new tests fail today stops a test after the time limit setting.",
+      "words": "`tests.new_test_timeout_s: 60`",
+      "source": "https://github.com/dokima-dev/dokima/issues/740#issuecomment-6219928729",
+      "files": [
+       "dokima/planner.py"
+      ]
+     },
+     {
+      "text": "The planner's test files are found by the test folder and file pattern settings.",
+      "words": "Planner's test files = `tests/` + `.py`",
+      "source": "https://github.com/dokima-dev/dokima/issues/740#issuecomment-6219928729",
+      "files": [
+       "dokima/planner.py"
+      ]
+     },
+     {
+      "text": "Turning docstrings off in settings stops the planner's check requiring them.",
+      "words": "`style.docstrings: required`",
+      "source": "https://github.com/dokima-dev/dokima/issues/740#issuecomment-6219928729",
+      "files": [
+       "dokima/planner.py"
+      ]
+     },
+     {
+      "text": "The planner's test docstring cap comes from settings.",
+      "words": "`style.docstring_cap: 15`",
+      "source": "https://github.com/dokima-dev/dokima/issues/740#issuecomment-6219928729",
+      "files": [
+       "dokima/planner.py"
+      ]
+     },
+     {
+      "text": "An empty planner test docstring cap turns that cap off.",
+      "words": "`style.docstring_cap: 15` (`null` = off)",
+      "source": "https://github.com/dokima-dev/dokima/issues/740#issuecomment-6219928729",
+      "files": [
+       "dokima/planner.py"
+      ]
+     }
+    ],
+    "non_functional": [],
+    "depends_on": [
+     0
+    ]
+   }
+  ],
+  "links": {
+   "blocked_by": [],
+   "blocks": [
+    741,
+    742,
+    744,
+    791
+   ],
+   "relates_to": [
+    707,
+    718
+   ]
+  },
+  "raises": [],
+  "answers": []
+ },
+ "check": {
+  "passed": true,
+  "problems": []
+ },
+ "url": "https://github.com/dokima-dev/dokima/issues/781#issuecomment-6231944045"
+}
