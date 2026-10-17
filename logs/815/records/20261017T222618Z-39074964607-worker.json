@@ -1,0 +1,41 @@
+{
+ "role": "worker",
+ "stage": null,
+ "run_id": "39074964607",
+ "commit_before": "dff4f7b36e1b294d33299617b48d1e49e2e9daa0",
+ "started_by": "dokima-runtime[bot]",
+ "models": [
+  "claude-opus-5-5"
+ ],
+ "report": {
+  "duration_ms": 35509,
+  "turns": 6,
+  "cost_usd": 0.2697102,
+  "tokens_in": 190837,
+  "tokens_out": 1757
+ },
+ "log": "https://github.com/dokima-dev/dokima/blob/logs/logs/815/39074964607-worker.md",
+ "run": "https://github.com/dokima-dev/dokima/actions/runs/39074964607",
+ "handback": {
+  "summary": "Cleared the leftover merge clash on the install page, keeping the two-file install and dropping the old workflow list.",
+  "criteria": {
+   "815.1": "`docs/wiki/Installing.md` no longer says to copy the workflows folder or the code folder.",
+   "815.2": "Step 3 of `docs/wiki/Installing.md` says to add `dokima.yml` as the one workflow.",
+   "815.3": "Step 3 of `docs/wiki/Installing.md` says to add `settings.yaml` as the settings file.",
+   "815.4": "Step 3 of `docs/wiki/Installing.md` says these two files are the only ones you add.",
+   "815.5": "The table of Dokima's own workflows is gone from `docs/wiki/Installing.md`.",
+   "815.6": "`docs/wiki/Installing.md` mentions code owners once, as optional, and never as a file to add."
+  },
+  "evidence": "`pytest -q tests/test_wiki_install.py`: 6 passed in 0.06s"
+ },
+ "check": {
+  "passed": true,
+  "problems": []
+ },
+ "dropped_by_fence": [],
+ "files_changed": [
+  "docs/wiki/Installing.md"
+ ],
+ "branch": "try/issue-815",
+ "url": "https://github.com/dokima-dev/dokima/pull/835#issuecomment-6242206431"
+}
