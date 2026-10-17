@@ -116,12 +116,15 @@ jobs:
         run: |
           if [ "$ID" = "text-only" ] && [ -z "$TESTS" ]; then echo "::notice title=Text only::Only text files changed: no plan or tests needed."; exit 0; fi
           if [ -z "$TESTS" ]; then echo "::error title=$ID has no test::No test verifies this criterion yet."; exit 1; fi
+          # A manual fix has no plan; every test it must pass runs once, in the all tests check main requires (#840).
+          if [ "$ID" = "manual-fix" ]; then
+            echo "::notice title=Manual fix::Every test runs in the all tests check, which main requires before a merge."; exit 0; fi
           # The criterion's tests go where the command names {test}, after the report the annotations read; with no
           # command read from the settings, the old one.
           RUN_ONE=${TESTS_RUN_ONE:-}; [ -n "$RUN_ONE" ] || RUN_ONE='pytest -p no:cacheprovider {test}'
           eval "${RUN_ONE//\{test\}/-rA -o junit_family=xunit1 --junitxml=r.xml $TESTS}"
       - name: Annotate the tests that ran
-        if: always() && matrix.tests != ''
+        if: always() && matrix.tests != '' && matrix.id != 'manual-fix'
         env:
           ID: ${{ matrix.id }}
           HEAD_SHA: ${{ github.event.pull_request.head.sha || github.event.merge_group.head_sha }}
