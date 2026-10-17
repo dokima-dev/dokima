@@ -332,6 +332,34 @@ def test_the_board_reads_autopilot_by_the_named_label(record_property, repo):
     assert b.autopilot("issue", 6) is False, "787.5: the board counts the old autopilot label"
 
 
+def test_adding_the_named_label_on_github_moves_the_board_card(record_property, repo, monkeypatch):
+    """Adding the label the settings name on GitHub moves the board card.
+
+    With `labels.autopilot: dokima-auto`, adding dokima-auto to an issue is an event the board runs on, and the run
+    switches that issue's card on autopilot; adding the old autopilot label is skipped. Proves 787.5."""
+    record_property("proves", "787.5")
+    repo("labels:\n  autopilot: dokima-auto\n")
+    switched = []
+    monkeypatch.setattr(board_mod, "switch", lambda b, n: switched.append(n))
+    monkeypatch.setattr(board_mod, "rebuild", lambda *a, **k: [])
+    monkeypatch.setattr(board_mod.plan, "repo_approvers", lambda owner: [])
+
+    def event(name):
+        """The event GitHub sends when label NAME is added to issue #5."""
+        return {"action": "labeled", "label": {"name": name},
+                "issue": {"number": 5, "state": "open", "labels": [{"name": name}]}}
+
+    def q(query, **v):
+        """A fake GitHub GraphQL holding an empty board."""
+        return {"organization": {"projectV2": {"id": "P", "fields": {"nodes": []}}}}
+    assert board_mod.can_move("issues", event("dokima-auto")) is True, \
+        "787.5: the board skips adding dokima-auto, so the card never moves"
+    assert board_mod.can_move("issues", event("autopilot")) is False, \
+        "787.5: the board still runs on the old autopilot label"
+    board_mod.sync("issues", event("dokima-auto"), "o/1", REPO, q=q, rest=lambda *a, **k: {})
+    assert switched == [5], f"787.5: adding dokima-auto switched {switched}, not issue #5's card"
+
+
 # 787.6 ---------------------------------------------------------------------------------------------------------
 
 
@@ -361,6 +389,17 @@ def test_the_board_puts_the_named_label_on_a_pull_request(record_property, repo)
     b.label("pr", 60, True)
     assert calls == [("POST", f"repos/{REPO}/issues/60/labels", {"labels[]": "dokima-auto"})], \
         f"787.6: the board labelled the pull request with {calls}, not dokima-auto"
+
+
+def test_turning_autopilot_off_removes_the_named_label(record_property, repo, monkeypatch):
+    """Turning autopilot off takes the label the settings name off the issue.
+
+    With `labels.autopilot: dokima-auto`, an issue carrying dokima-auto and bug keeps only bug. Proves 787.6."""
+    record_property("proves", "787.6")
+    repo("labels:\n  autopilot: dokima-auto\n")
+    gh = fake(monkeypatch, labels={5: ["dokima-auto", "bug"]})
+    assert ap.switch_autopilot(REPO, 5, "stop") == [5], "787.6: turning autopilot off switched nothing"
+    assert gh.labels[5] == ["bug"], f"787.6: the issue still carries {gh.labels[5]} after autopilot was turned off"
 
 
 # 787.7 ---------------------------------------------------------------------------------------------------------
