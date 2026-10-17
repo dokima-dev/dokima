@@ -81,7 +81,7 @@ def test_annotation_links_permanently_to_the_tests_first_line(record_property):
 def test_full_suite_runs_every_test_on_every_pull_request(record_property):
     """The merge gate still runs every test, in parallel, exactly as today.
 
-    Proves 29.4, 539.3 and 716.1. Checks the shipped all-tests command still runs every test spread over all cores with `-n auto`, and that full-suite.yml never uses testmon, which only code reviews use.
+    Proves 29.4, 539.3 and 716.1. Checks the shipped all-tests command still runs every test spread over all cores with `-n auto`, and that full-suite.yml uses testmon only on a pull request (owner 2026-10-17: the merge queue runs every test once), never in the merge queue.
     For 716.1 it plays GitHub's part on a new push to a ready Dokima pull request, once by Dokima's bot and once by
     the owner, and checks the all tests job runs for both: no trigger filter or condition on who pushed skips the
     owner. The owner is played by their real login from `.github/CODEOWNERS`, as the repository's owner, so a rule
@@ -106,4 +106,6 @@ def test_full_suite_runs_every_test_on_every_pull_request(record_property):
         f"29.4: the merge gate's default command no longer runs every test: {run_all!r}"
     assert "-n auto" in run_all, \
         "539.3: the merge gate no longer runs every test in parallel with -n auto"
-    assert not any("testmon" in line for line in lines), "539.3: the merge gate uses testmon, so it may skip tests"
+    picks = [line for line in lines if "mode=affected" in line]
+    assert picks and all("pull_request_target" in line for line in picks), \
+        "539.3: the all tests check may pick only affected tests outside a pull request, so the merge queue may skip tests"
