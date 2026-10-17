@@ -1,8 +1,10 @@
 """An agent's prompt, as the repo's settings say (#796).
 
 `python3 -m dokima.prompt ROLE GRADE`, run in the runtime folder, prints the shipped prompt (dokima/roles/style.md,
-GRADE.md, ROLE.md) with the settings drawn in: the owner docs file in place of AGENTS.md, the protected paths in the
-worker's never-edit line, the test settings in the planner's runner line and the caps setting in the caps table.
+GRADE.md, ROLE.md, with the shared raising rules of raising.md in place of each role's marker) with the settings drawn
+in: the owner docs file in place of AGENTS.md, the protected paths in the worker's never-edit line, the test settings
+in the planner's runner line, the caps setting in the caps table, the questions setting in the planner's question
+limit and the blocks setting in the blocks-in-a-row line (#817).
 `python3 -m dokima.prompt house ROLE` prints the house rules for ROLE: each prompt addition's file, less the
 `## <role>` sections of the other roles. `python3 -m dokima.prompt files` prints the addition files, one a line, so
 the workflow copies them from main.
@@ -26,6 +28,9 @@ LABELS = {"summary": "summary", "user_story": "user_story", "criterion": "criter
           "work_evidence": "the worker's own test run (evidence)", "test_change": "a test change reason"}
 RUNNER = re.compile(r"^Current runner .*\n.*\n", re.M)
 NEVER_EDIT = re.compile(r"^Never edit `\.github/`", re.M)
+RAISING = "<!-- raising -->"  # where a role file takes the shared raising rules
+QUESTIONS = re.compile(r"\b(more than)(\s+)\d+(\s+questions)\b", re.I)
+BLOCKS = re.compile(r"^- \*\*\d+ blocks in a row\*\*.*$", re.M)
 
 
 def shipped(name):
@@ -50,9 +55,11 @@ def runner_line(tests):
 
 def build(role, grade, got):
     """The shipped prompt for ROLE with grade GRADE, with the settings GOT drawn in."""
-    text = "".join(shipped(n) for n in ("style", grade, role))
+    text = "".join(shipped(n) for n in ("style", grade, role)).replace(RAISING, shipped("raising").rstrip("\n"))
     text = caps_table(text, got["style"]["caps"])
     text = RUNNER.sub(lambda m: runner_line(got["tests"]), text)
+    text = QUESTIONS.sub(lambda m: f"{m[1]}{m[2]}{got['planner']['max_questions']}{m[3]}", text)
+    text = BLOCKS.sub(lambda m: re.sub(r"\b\d+\b", str(got["river"]["max_blocks"]), m[0]), text)
     paths = ", ".join(f"`{p}`" for p in got["protected_paths"] or [])
     text = NEVER_EDIT.sub(lambda m: f"Never edit {paths}" if paths else "Never edit", text)
     return text.replace("AGENTS.md", str(got["owner_docs"]))
