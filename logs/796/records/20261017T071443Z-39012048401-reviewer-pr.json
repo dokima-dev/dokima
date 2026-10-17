@@ -1,0 +1,73 @@
+{
+ "role": "reviewer",
+ "stage": "pr",
+ "run_id": "39012048401",
+ "commit_before": "75ad6636ddabd2346e89f5092ac30784b337c69d",
+ "started_by": "dokima-runtime[bot]",
+ "models": [
+  "claude-opus-5-5"
+ ],
+ "report": {
+  "duration_ms": 771190,
+  "turns": 27,
+  "cost_usd": 1.0225572,
+  "tokens_in": 1611015,
+  "tokens_out": 8739
+ },
+ "log": "https://github.com/dokima-dev/dokima/blob/logs/logs/796/39012048401-reviewer-pr.md",
+ "run": "https://github.com/dokima-dev/dokima/actions/runs/39012048401",
+ "handback": {
+  "previous_step": {
+   "did": [
+    "The worker made commits credit only the co-author the settings name.",
+    "The worker built every agent's prompt from settings: owner docs, protected paths, runner line, caps.",
+    "The worker added main's house rules after the prompt, a role's section to that role."
+   ],
+   "decided": [
+    "This repo's own settings file now holds the owner's co-author line."
+   ],
+   "open": [
+    "The worker proposed an issue that open #783 already covers."
+   ]
+  },
+  "verdict": "block",
+  "summary": "All ten new tests pass, but two older tests that pass on main now fail; the planner must update them.",
+  "raises": [
+   {
+    "kind": "blocker",
+    "to": "planner",
+    "label": "Old test conflicts",
+    "text": "An older test expects the owner's co-author line in the agent workflow, which 796.1 and 796.9 remove. Update it to follow the settings.",
+    "evidence": "`tests/test_bot_identity.py::test_no_file_commits_as_anyone_but_the_bot_or_reza` passes on main, fails on branch at line 179.",
+    "raised_by": "reviewer",
+    "id": "R1"
+   },
+   {
+    "kind": "blocker",
+    "to": "planner",
+    "label": "Old test conflicts",
+    "text": "An older test expects the prompt glued from role files by the workflow; 796.3 to 796.6 build it from settings instead. Update it.",
+    "evidence": "`tests/test_agent.py::test_dokimas_own_code_always_runs_from_main` passes on main, fails on branch at line 263.",
+    "raised_by": "reviewer",
+    "id": "R2"
+   }
+  ],
+  "answers": [
+   {
+    "raise": "W1",
+    "answer": "disagree",
+    "why": "True, but open #783 already covers it: the repo's own rules file drives the agents' checks."
+   }
+  ],
+  "asks": [],
+  "behaviors": [],
+  "edge_cases": [],
+  "tests": [],
+  "size": "ok"
+ },
+ "check": {
+  "passed": true,
+  "problems": []
+ },
+ "url": "https://github.com/dokima-dev/dokima/pull/803#issuecomment-6230970125"
+}
