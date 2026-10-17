@@ -1,0 +1,48 @@
+{
+ "role": "worker",
+ "stage": null,
+ "run_id": "39054012036",
+ "commit_before": "3ece44a8c2872a8a49af5b0eb52b55f32b3328f5",
+ "started_by": "RezaSoleymanifar",
+ "models": [
+  "claude-opus-5-5"
+ ],
+ "report": {
+  "duration_ms": 363227,
+  "turns": 19,
+  "cost_usd": 0.6911702000000002,
+  "tokens_in": 853047,
+  "tokens_out": 8066
+ },
+ "log": "https://github.com/dokima-dev/dokima/blob/logs/logs/812/39054012036-worker.md",
+ "run": "https://github.com/dokima-dev/dokima/actions/runs/39054012036",
+ "handback": {
+  "summary": "After the owner's hand merge, the suite reads settings with Dokima's own code, and the queue judge uses main.",
+  "criteria": {
+   "812.1": "Every shared job checks out Dokima's repo; run directly, the judge takes main; every suite settings read uses that checkout.",
+   "812.2": "Built in an earlier round: every job that reads a key uses the keys environment.",
+   "812.3": "Built in an earlier round: the agent run reads the key secret its settings name.",
+   "812.4": "Built in an earlier round: an early step fails a run with no bot, saying how to set it up.",
+   "812.5": "Built in an earlier round: a step fails a run with no model key, naming the secret and the fix.",
+   "812.6": "Built in an earlier round: the default co-author line names Dokima's bot on every commit and merge.",
+   "812.7": "Built in an earlier round: turning the co-author line off leaves commits and merges with none.",
+   "812.8": "Built in an earlier round: the adopter's file calls the entry workflow at a release tag.",
+   "812.9": "Built in an earlier round: the adopter's file is nineteen lines.",
+   "812.10": "Built in an earlier round: the entry workflow sends on every event; owner's merge keeps the suite off main pushes."
+  },
+  "evidence": "Plan tests and every changed test file: `180 passed` with `pytest -q -n auto`.",
+  "raises": [],
+  "answers": []
+ },
+ "check": {
+  "passed": true,
+  "problems": []
+ },
+ "dropped_by_fence": [],
+ "files_changed": [
+  ".github/workflows/acceptance-criteria.yml",
+  ".github/workflows/full-suite.yml"
+ ],
+ "branch": "try/issue-812",
+ "url": "https://github.com/dokima-dev/dokima/pull/824#issuecomment-6237656320"
+}
