@@ -1,0 +1,82 @@
+{
+ "role": "reviewer",
+ "stage": "pr",
+ "run_id": "39058545296",
+ "commit_before": "a0fb4c6ad558cabffee11e9f4dd8583d5bae99e0",
+ "started_by": "dokima-runtime[bot]",
+ "models": [
+  "claude-opus-5-5"
+ ],
+ "report": {
+  "duration_ms": 123366,
+  "turns": 14,
+  "cost_usd": 0.49741359999999996,
+  "tokens_in": 553584,
+  "tokens_out": 4834
+ },
+ "log": "https://github.com/dokima-dev/dokima/blob/logs/logs/812/39058545296-reviewer-pr.md",
+ "run": "https://github.com/dokima-dev/dokima/actions/runs/39058545296",
+ "handback": {
+  "previous_step": {
+   "did": [
+    "Made every shared workflow fetch Dokima's code at the commit the adopter called.",
+    "Cleared a leftover merge clash in the full suite workflow, keeping both sides."
+   ],
+   "decided": [
+    "In Dokima's own repo, the queue's judge still takes main's code."
+   ],
+   "open": [
+    "Two queue judge tests fail because their fake run gives no called commit."
+   ]
+  },
+  "verdict": "block",
+  "summary": "The code is right, but two of the planner's queue tests cannot pass it; the planner must fix them.",
+  "raises": [
+   {
+    "kind": "blocker",
+    "to": "planner",
+    "label": "812.8 test cannot pass",
+    "text": "For 812.8, the queue judge's fake run sets no `job` values, so the called-commit fix fails it. Fix: add `job.workflow_sha` to `context` in `tests/test_queue_judge.py`.",
+    "evidence": "`tests/test_queue_judge.py:89` sets only `github.job_workflow_sha`; both its tests fail: `NameError: name 'job'`.",
+    "raised_by": "reviewer",
+    "id": "R6"
+   }
+  ],
+  "answers": [
+   {
+    "raise": "W9",
+    "answer": "done",
+    "why": "Confirmed: both queue judge tests fail only because their fake run lacks the called commit. Sent to the planner."
+   }
+  ],
+  "asks": [],
+  "behaviors": [],
+  "edge_cases": [],
+  "tests": [],
+  "size": "ok",
+  "boxes": {
+   "dropped": "none",
+   "added": "none",
+   "superseded": "none",
+   "conflicts": "none",
+   "edges": {
+    "812.1": "covered",
+    "812.2": "covered",
+    "812.3": "covered",
+    "812.4": "covered",
+    "812.5": "covered",
+    "812.6": "covered",
+    "812.7": "covered",
+    "812.8": "covered",
+    "812.9": "covered",
+    "812.10": "covered"
+   },
+   "poor_tests": "none"
+  }
+ },
+ "check": {
+  "passed": true,
+  "problems": []
+ },
+ "url": "https://github.com/dokima-dev/dokima/pull/824#issuecomment-6238629896"
+}
