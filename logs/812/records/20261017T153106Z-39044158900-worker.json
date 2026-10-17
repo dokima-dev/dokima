@@ -1,0 +1,123 @@
+{
+ "role": "worker",
+ "stage": null,
+ "run_id": "39044158900",
+ "commit_before": "b4b78ad85422034ef30ad5bf5615344d7e123f42",
+ "started_by": "dokima-runtime[bot]",
+ "models": [
+  "claude-opus-5-5"
+ ],
+ "report": {
+  "duration_ms": 139080,
+  "turns": 9,
+  "cost_usd": 4.1213812,
+  "tokens_in": 1832863,
+  "tokens_out": 6968
+ },
+ "log": "https://github.com/dokima-dev/dokima/blob/logs/logs/812/39044158900-worker.md",
+ "run": "https://github.com/dokima-dev/dokima/actions/runs/39044158900",
+ "handback": {
+  "summary": "Shared workflows now run Dokima's code from Dokima's repo, check the bot and key, and credit the bot by default.",
+  "criteria": {
+   "812.1": "Every job that runs Dokima checks out Dokima's own repo and runs only that code, never the repo's folder.",
+   "812.2": "Each shared workflow can be called, and every job reading a key keeps the keys environment.",
+   "812.3": "The agent run reads the key secret the settings name, from a runtime holding only the repo's settings.",
+   "812.4": "A new early step fails the run, naming the app id, the app key and the keys environment.",
+   "812.5": "A new step fails the run when the role's key secret is empty, naming it and the keys environment.",
+   "812.6": "The default co-author names the bot itself; the run's commits and merges carry that line.",
+   "812.7": "An empty co-author setting leaves the run's commits and merges with no line.",
+   "812.8": "The adopter's file calls Dokima's entry workflow at a release tag.",
+   "812.9": "The adopter's file is nineteen lines.",
+   "812.10": "The adopter's file starts on every event; the entry workflow routes each to the right shared workflow."
+  },
+  "evidence": "`pytest -q tests/test_thin_install.py`: 12 passed",
+  "raises": [
+   {
+    "kind": "blocker",
+    "to": "planner",
+    "label": "Old harnesses lack checkout",
+    "text": "These tests' runners never stand in for checking out Dokima's repo, so every job fails at that step. They need the stand-in the plan gave Machine.",
+    "evidence": "`tests/card_player.py`, `test_card_sweep.py`, `test_card_merge.py`, `test_card_every_change.py`, `test_all_tests_judge.py`, `test_manual_fix_check.py`, `test_queue_judge.py` fail.",
+    "raised_by": "worker",
+    "id": "W1"
+   },
+   {
+    "kind": "blocker",
+    "to": "planner",
+    "label": "Copy step run alone",
+    "text": "These tests run the runtime copy step without the Dokima checkout before it, so it fails. Passing them means running the repo's own code, which 812.1 forbids.",
+    "evidence": "`test_clash.py`, `test_worker_pr.py`, `test_planner_starts_with_main.py`, `test_test_clash_planner.py`, `test_rules_topics.py::test_runtime_copy_holds_linked_topic_files`",
+    "raised_by": "worker",
+    "id": "W2"
+   },
+   {
+    "kind": "blocker",
+    "to": "planner",
+    "label": "Repo code must run",
+    "text": "These tests put Dokima code in the repo's own folder and expect it to run, which 812.1 now forbids.",
+    "evidence": "`test_agents.py` 698.12 and 698.13 (a zeta adapter); `test_settings_test_setup.py` 794.8 (an old settings reader).",
+    "raised_by": "worker",
+    "id": "W3"
+   },
+   {
+    "kind": "blocker",
+    "to": "planner",
+    "label": "Tests pin old design",
+    "text": "These tests demand the old triggers, text or paths, which the plan's call trigger, entry workflow and Dokima checkout change.",
+    "evidence": "`test_audit_workflow` 285.2, `test_merge_queue` 191.1/191.4, `test_card_merge` 345.3, `test_review_relay` 396.1, `test_plan` approve, `test_merge_check` 168.5, `test_agent`, `test_hand_links` 254.4.",
+    "raised_by": "worker",
+    "id": "W4"
+   },
+   {
+    "kind": "blocker",
+    "to": "planner",
+    "label": "Missing key now stops",
+    "text": "This test runs with a key secret the repo lacks and expects the agent to start; 812.5 now stops that run.",
+    "evidence": "`test_settings_setup.py::test_a_run_on_github_starts_the_model_the_agents_section_names` stops at the new key check, naming TEAM_KEY.",
+    "raised_by": "worker",
+    "id": "W5"
+   },
+   {
+    "kind": "issue",
+    "label": "No release tag yet",
+    "text": "Dokima has no release tag yet, so the tag the adopter's file names must be made before anyone installs it.",
+    "evidence": "`git ls-remote --tags origin` lists none; `dokima/install/dokima.yml` names v0.1.0.",
+    "raised_by": "worker",
+    "id": "W6"
+   },
+   {
+    "kind": "issue",
+    "label": "Wiki and logs credit",
+    "text": "The wiki sync writes the bot placeholder as it is, and commits on the logs branch credit no co-author.",
+    "evidence": "`.github/workflows/wiki.yml` uses CO_AUTHOR raw; `dokima/agent.py` save-record adds no trailer.",
+    "raised_by": "worker",
+    "id": "W7"
+   }
+  ]
+ },
+ "check": {
+  "passed": true,
+  "problems": []
+ },
+ "dropped_by_fence": [],
+ "files_changed": [
+  ".github/workflows/acceptance-criteria.yml",
+  ".github/workflows/agent.yml",
+  ".github/workflows/assign.yml",
+  ".github/workflows/audit.yml",
+  ".github/workflows/autopilot.yml",
+  ".github/workflows/board.yml",
+  ".github/workflows/card.yml",
+  ".github/workflows/commands.yml",
+  ".github/workflows/entry.yml",
+  ".github/workflows/fix.yml",
+  ".github/workflows/full-suite.yml",
+  ".github/workflows/reviews.yml",
+  ".github/workflows/testmon.yml",
+  ".github/workflows/uptodate.yml",
+  "dokima/defaults.yaml",
+  "dokima/install/dokima.yml"
+ ],
+ "branch": "try/issue-812",
+ "url": "https://github.com/dokima-dev/dokima/issues/812#issuecomment-6235568920"
+}
