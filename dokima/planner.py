@@ -12,9 +12,11 @@ is listed, far over is rejected.
 """
 
 import ast
+import fnmatch
 import json
 import os
 import re
+import shlex
 import shutil
 import subprocess
 import sys
@@ -22,8 +24,9 @@ import tarfile
 import tempfile
 
 from dokima import fence
+from dokima import settings
 from dokima import words
-from dokima.checks import PROVES, TEST_DEF
+from dokima.checks import PROVES, TEST_DEF, proves  # noqa: F401
 from dokima.agent import pack_parent, problems_old, problems_raised  # noqa: E402
 
 NEW_TEST_TIMEOUT = 60  # seconds one new test may run on today's code before it is stopped and rejected
@@ -397,20 +400,55 @@ def declared_labels(tc, declared):
     return dict(tc, added=added, changed=changed)
 
 
+def tests_dir():
+    """The test folder setting, as a path prefix ending in '/'."""
+    return settings.read()["tests"]["dir"].rstrip("/") + "/"
+
+
+def is_test_file(path):
+    """True when PATH is in the test folder and matches the file pattern setting."""
+    return path.startswith(tests_dir()) and fnmatch.fnmatch(os.path.basename(path), settings.read()["tests"]["file_pattern"])
+
+
+def docstrings_required():
+    """True unless the style.docstrings setting turns docstrings off."""
+    return settings.read()["style"]["docstrings"] not in (False, "off")
+
+
+def test_nodes(tree):
+    """Each test in a parsed file, as (its name, its node).
+
+    Tests are `test_*` functions, async or not, at any depth outside a function, and methods of `Test*` classes,
+    named Class::test_x."""
+    out = []
+
+    def visit(node, prefix):
+        for child in ast.iter_child_nodes(node):
+            if isinstance(child, (ast.FunctionDef, ast.AsyncFunctionDef)):
+                if child.name.startswith("test_"):
+                    out.append((prefix + child.name, child))
+            elif isinstance(child, ast.ClassDef):
+                if child.name.startswith("Test"):
+                    visit(child, f"{prefix}{child.name}::")
+            elif isinstance(child, ast.stmt):
+                visit(child, prefix)
+    visit(tree, "")
+    return out
+
+
 def test_functions(text):
-    """Each test function in a file: name -> (its source, the criterion keys it proves)."""
-    out, name, block = {}, None, []
-    for line in (text or "").splitlines() + ["\x00end"]:
-        top = line[:1] not in ("", " ", "\t")
-        if top and name:
-            src = "\n".join(block).rstrip()
-            out[name] = (src, PROVES.findall(src))
-            name, block = None, []
-        found = TEST_DEF.match(line)
-        if found:
-            name = found.group(1)
-        if name:
-            block.append(line)
+    """Each test in a file: name -> (its source, the criterion keys it proves).
+
+    Keys are read from the test tag setting's call. A file that cannot be read as Python has none."""
+    try:
+        tree = ast.parse(text or "")
+    except (SyntaxError, ValueError):
+        return {}
+    lines, tag = (text or "").splitlines(), proves(settings.read()["tests"]["tag"])
+    out = {}
+    for name, node in test_nodes(tree):
+        src = "\n".join(lines[node.lineno - 1:node.end_lineno]).rstrip()
+        out[name] = (src, tag.findall(src))
     return out
 
 
@@ -421,12 +459,14 @@ def test_changes(paths, before, after):
     new name under renamed (old -> new), a key that is there only when something was renamed.
     """
     added, changed, deleted, renamed = {}, {}, {}, {}
+    short = lambda name: name.rpartition("::")[2]  # a class method's own name, without its class
     for path in paths:
         old, new = test_functions(before(path)), test_functions(after(path))
         gone = [name for name in old if name not in new]
         for name, (src, keys) in new.items():
             if name not in old:
-                was = next((o for o in gone if old[o][0].replace(f"def {o}(", f"def {name}(", 1) == src), None)
+                was = next((o for o in gone if old[o][0].replace(f"def {short(o)}(", f"def {short(name)}(", 1) == src),
+                           None)
                 if was:
                     gone.remove(was)
                     changed[f"{path}::{was}"] = (old[was][1], keys)
@@ -456,7 +496,8 @@ def problems(number, plan, files, tc, declared=None):
     Given the tests the plan declares, each must be in the repo and filed under one of the plan's criteria, and an
     older test already in the repo counts as proof of the criteria it is filed under.
     """
-    out = [f"{p} is outside tests/; the planner may only write tests" for p in files if not p.startswith("tests/")]
+    folder = tests_dir()
+    out = [f"{p} is outside {folder}; the planner may only write tests" for p in files if not p.startswith(folder)]
     if not tc["added"] and not tc["changed"]:
         out.append("the plan came with no tests")
     keys = {f"{number}.{k}" for k in range(1, len(plan["criteria"]) + 1)}
@@ -502,9 +543,9 @@ def unsummarized(added):
     for path in sorted({t.partition("::")[0] for t in added}):
         with open(path, encoding="utf-8") as f:
             tree = ast.parse(f.read(), path)
-        for node in tree.body:
-            t = f"{path}::{getattr(node, 'name', '')}"
-            if isinstance(node, (ast.FunctionDef, ast.AsyncFunctionDef)) and t in added:
+        for name, node in test_nodes(tree):
+            t = f"{path}::{name}"
+            if t in added:
                 doc = ast.get_docstring(node, clean=False) or ""
                 if not one_sentence(doc.split("\n")[0].strip()):
                     out.append(f"{t} is a new test with no one-sentence summary: the first line of its docstring must "
@@ -548,16 +589,19 @@ def docstrings(path, text):
     return out
 
 
-def docstring_caps(paths, before, after):
+def docstring_caps(paths, before, after, cap=DOCSTRING_CAP):
     """(listed, rejected) for each docstring the planner added or rewrote whose first line runs over its cap.
 
-    A docstring whose first line is the same as before is an older one left alone, and is not held to the cap.
+    A docstring whose first line is the same as before is an older one left alone, and is not held to the cap. An
+    empty cap (None) turns the cap off.
     """
+    if cap is None:
+        return [], []
     texts = []
     for path in paths:
         old = docstrings(path, before(path))
         texts += [(where, line) for where, line in docstrings(path, after(path)).items() if old.get(where) != line]
-    return words.check(texts, DOCSTRING_CAP, "has a docstring whose first line holds")
+    return words.check(texts, cap, "has a docstring whose first line holds")
 
 
 def unnumbered(added):
@@ -566,9 +610,9 @@ def unnumbered(added):
     for path in sorted({t.partition("::")[0] for t in added}):
         with open(path, encoding="utf-8") as f:
             tree = ast.parse(f.read(), path)
-        for node in tree.body:
-            t = f"{path}::{getattr(node, 'name', '')}"
-            if isinstance(node, (ast.FunctionDef, ast.AsyncFunctionDef)) and t in added:
+        for name, node in test_nodes(tree):
+            t = f"{path}::{name}"
+            if t in added:
                 below = (ast.get_docstring(node, clean=False) or "").partition("\n")[2]
                 for k in sorted(set(added[t])):
                     if not re.search(r"(?<![\d.])" + re.escape(k) + r"(?!\d|\.\d)", below):
@@ -578,7 +622,9 @@ def unnumbered(added):
 
 
 def main_with_tests(base, into):
-    """Lay main's code (`base`) into the folder `into`, with the branch's tests/ as they stand now on top.
+    """Lay main's code (`base`) into `into`, with the branch's test folder on top.
+
+    The test folder is the tests.dir setting, as it stands now on the branch.
 
     On a re-plan the branch may already hold the worker's code, so new tests are judged on main's code instead. The
     copy lives outside the repo, so the branch, its worktrees and its files stay exactly as they were.
@@ -589,8 +635,9 @@ def main_with_tests(base, into):
         f.seek(0)
         with tarfile.open(fileobj=f) as t:
             t.extractall(into, filter="data")
-    shutil.rmtree(os.path.join(into, "tests"), ignore_errors=True)
-    listed = subprocess.run(["git", "ls-files", "--cached", "--others", "--exclude-standard", "--", "tests"],
+    folder = settings.read()["tests"]["dir"]
+    shutil.rmtree(os.path.join(into, folder), ignore_errors=True)
+    listed = subprocess.run(["git", "ls-files", "--cached", "--others", "--exclude-standard", "--", folder],
                             check=True, capture_output=True, text=True).stdout.split("\n")
     for p in listed:
         if p and os.path.isfile(p):
@@ -598,20 +645,32 @@ def main_with_tests(base, into):
             shutil.copyfile(p, os.path.join(into, p))
 
 
+def new_test_timeout():
+    """The repo's tests.new_test_timeout_s setting, or NEW_TEST_TIMEOUT when its settings file sets none."""
+    mine = settings.load(settings.REPO_FILE).get("tests")
+    return mine.get("new_test_timeout_s", NEW_TEST_TIMEOUT) if isinstance(mine, dict) else NEW_TEST_TIMEOUT
+
+
 def passing_today(added, base="HEAD"):
-    """Run each new test (path::name) on main's code (`base`) with the planner's tests on top; the ones that pass or
-    are skipped, or run past the limit."""
+    """Run each new test (path::name) on main's code (`base`) with the planner's tests on top.
+
+    Each runs by the tests.run_one setting; a command starting `python` runs this Python, and is stopped after the
+    tests.new_test_timeout_s setting. Returns the ones that pass or are skipped, or run past the limit."""
     out = []
     if not added:
         return out
+    one = shlex.split(str(settings.read()["tests"]["run_one"]))
+    limit = new_test_timeout()
+    if one[:1] == ["python"]:
+        one[0] = sys.executable
     with tempfile.TemporaryDirectory() as into:
         main_with_tests(base, into)
         for t in sorted(added):
             try:
-                r = subprocess.run([sys.executable, "-m", "pytest", "-q", "-p", "no:cacheprovider", t], cwd=into,
-                                   capture_output=True, text=True, timeout=NEW_TEST_TIMEOUT)
+                r = subprocess.run([t if w == "{test}" else w.replace("{test}", t) for w in one], cwd=into,
+                                   capture_output=True, text=True, timeout=limit)
             except subprocess.TimeoutExpired:
-                out.append(f"{t} is a new test still running after {NEW_TEST_TIMEOUT} s on today's code; it was stopped")
+                out.append(f"{t} is a new test still running after {limit} s on today's code; it was stopped")
                 continue
             if r.returncode in (0, 5):  # 0: passed or skipped, 5: nothing ran
                 out.append(f"{t} is a new test that passes today (or is skipped); every new test must fail on today's code")
@@ -652,7 +711,7 @@ def main(argv):
         if kind == "plan":
             base = os.environ.get("PLANNER_BASE", "HEAD")
             files = changed_files(base)
-            paths = [p for p in files if p.startswith("tests/") and p.endswith(".py")]
+            paths = [p for p in files if is_test_file(p)]
             broken = unreadable(paths)
             if broken:
                 raise Garbled("; ".join(broken))
@@ -664,9 +723,11 @@ def main(argv):
             run_base = os.environ.get("PLANNER_RUN_BASE")
             own = changed_files(run_base) if run_base else files
             bad = problems(number, result, own, tc, result.get("declared")) + bad
-            more, too_long = docstring_caps(paths, read_at(base), read_now)
+            more, too_long = docstring_caps(paths, read_at(base), read_now, settings.read()["style"]["docstring_cap"])
             listed, bad = listed + more, bad + too_long
-            bad += unsummarized(tc["added"]) + unnumbered(tc["added"]) + passing_today(tc["added"], base)
+            if docstrings_required():
+                bad += unsummarized(tc["added"]) + unnumbered(tc["added"])
+            bad += passing_today(tc["added"], base)
         for line in listed:
             print(f"::warning title=Over the word cap::{line}")
         if bad:

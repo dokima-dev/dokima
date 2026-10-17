@@ -5,11 +5,12 @@
 
 The plan is the newest one the planner handed back, once the reviewer approved it, read from the bot's own record
 comments; each criterion's check runs exactly the tests that plan lists for it. A pull request with no approved plan that
-changes only Markdown files outside dokima/roles/, tests/ and .github/ gets one passing "Text only" check instead.
-A manual fix Dokima's app opens with no linked issue gets one "Manual fix" check that runs all tests.
+changes only Markdown files outside the folders the text_only.not_text setting lists gets one passing "Text only" check
+instead. A manual fix Dokima's app opens with no linked issue gets one "Manual fix" check that runs the test folder
+setting.
 
-A test proves a criterion by calling record_property("proves", "<issue>.<n>"),
-where n counts the issue's criteria from 1, top to bottom.
+A test proves a criterion by calling its tag, the tests.tag setting (record_property by default), as
+tag("proves", "<issue>.<n>"), where n counts the issue's criteria from 1, top to bottom.
 """
 import json
 import os
@@ -18,14 +19,25 @@ import subprocess
 import sys
 import xml.etree.ElementTree as ET
 
-from dokima import agent, plan
+from dokima import agent, plan, settings
 
-PROVES = re.compile(r"""record_property\(\s*["']proves["']\s*,\s*["']([\d.]+)["']\s*\)""")
+
+def proves(tag="record_property"):
+    """The call TAG("proves", "<key>") linking a test to its criterion.
+
+    Its one group is the key."""
+    return re.compile(re.escape(tag) + r"""\(\s*["']proves["']\s*,\s*["']([\d.]+)["']\s*\)""")
+
+
+PROVES = proves()
 TEST_DEF = re.compile(r"^def (test_\w+)\(")
 QUEUE_REF = re.compile(r"^(?:refs/heads/)?gh-readonly-queue/.+/pr-(\d+)-[0-9a-f]+$")
 TEXT_ONLY = [{"id": "text-only", "name": "Text only: no plan needed", "tests": ""}]
-NOT_TEXT = ("dokima/roles/", "tests/", ".github/")
-MANUAL_FIX = [{"id": "manual-fix", "name": "Manual fix: all tests pass", "tests": "tests"}]
+
+
+def manual_fix():
+    """The one check of a manual fix: it runs the test folder setting."""
+    return [{"id": "manual-fix", "name": "Manual fix: all tests pass", "tests": settings.read()["tests"]["dir"]}]
 
 
 def check_name(key, text, limit=60):
@@ -46,7 +58,7 @@ def build_matrix(number, recs, author=None):
     A pull request Dokima's app opened with no linked issue is a manual fix: one check that runs all tests."""
     if not number:
         if author in (agent.BOT, f"{agent.BOT}[bot]"):
-            return MANUAL_FIX
+            return manual_fix()
         return no_plan("No approved plan found: no issue linked")
     if not agent.approved(recs):
         return no_plan(f"No approved plan found for issue #{number}")
@@ -60,9 +72,11 @@ def build_matrix(number, recs, author=None):
     return rows or no_plan(f"No approved plan found for issue #{number}")
 
 
-def is_text(path):
-    """True for a Markdown file outside dokima/roles/, tests/ and .github/."""
-    return bool(path) and path.lower().endswith(".md") and not path.startswith(NOT_TEXT)
+def is_text(path, not_text=None):
+    """True for a Markdown file outside the folders NOT_TEXT lists, by default the text_only.not_text setting."""
+    if not_text is None:
+        not_text = settings.read()["text_only"]["not_text"]
+    return bool(path) and path.lower().endswith(".md") and not path.startswith(tuple(not_text))
 
 
 def text_only(repo, number):
@@ -78,8 +92,9 @@ def text_only(repo, number):
         return False
     if not files:
         return False
-    return all(isinstance(f, dict) and is_text(f.get("filename")) and
-               ("previous_filename" not in f or is_text(f["previous_filename"])) for f in files)
+    not_text = settings.read()["text_only"]["not_text"]
+    return all(isinstance(f, dict) and is_text(f.get("filename"), not_text) and
+               ("previous_filename" not in f or is_text(f["previous_filename"], not_text)) for f in files)
 
 
 def annotations(junit_xml, repo, sha, criterion):
