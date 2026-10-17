@@ -123,21 +123,22 @@ def test_the_co_author_line_on_dokimas_commits_comes_from_the_co_author_setting(
 # 796.9 ------------------------------------------------------------------------------------------------------------
 
 def test_with_no_co_author_setting_commits_carry_no_co_author_line(record_property, tmp_path):
-    """A repo that names no co-author gets commits that credit no one.
+    """A repo that names no co-author never gets commits crediting Dokima's owner.
 
-    Proves 796.9. Dokima's shipped defaults reach every repo, so they credit no one. Runs agent.yml's planner push
-    and wiki.yml's sync in a repo with no settings file, and checks neither pushed commit has a co-author line. Then
-    a settings file that names other settings but no co-author: the planner's commit still has none."""
+    Proves 796.9. Dokima's shipped defaults reach every repo, so they never carry the owner's own line (#812 makes
+    Dokima's bot the shipped default instead). Runs agent.yml's planner push and wiki.yml's sync in a repo with no
+    settings file, and checks neither pushed commit credits the owner. Then a settings file that names other settings
+    but no co-author: the planner's commit still does not credit the owner."""
     record_property("proves", "796.9")
     default, _ = planner_push(tmp_path / "default", None)
-    assert "Co-authored-by" not in default, \
-        f"796.9: with no settings file, the planner's commit still has a co-author line:\n{default}"
+    assert TODAY not in default, \
+        f"796.9: with no settings file, the planner's commit credits Dokima's owner:\n{default}"
     wiki = wiki_sync(tmp_path / "wiki", None)
-    assert "Co-authored-by" not in wiki, \
-        f"796.9: with no settings file, the wiki sync's commit still has a co-author line:\n{wiki}"
+    assert TODAY not in wiki, \
+        f"796.9: with no settings file, the wiki sync's commit credits Dokima's owner:\n{wiki}"
     other, _ = planner_push(tmp_path / "other", "owner_docs: AGENTS.md\n")
-    assert "Co-authored-by" not in other, \
-        f"796.9: with settings that name no co-author, the planner's commit has a co-author line:\n{other}"
+    assert TODAY not in other, \
+        f"796.9: with settings that name no co-author, the planner's commit credits Dokima's owner:\n{other}"
 
 
 # 796.10 -----------------------------------------------------------------------------------------------------------
