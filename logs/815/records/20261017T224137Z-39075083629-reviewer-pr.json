@@ -1,0 +1,58 @@
+{
+ "role": "reviewer",
+ "stage": "pr",
+ "run_id": "39075083629",
+ "commit_before": "ba44dbde251b4305a512e82b0dc5864b9ed85f8d",
+ "started_by": "dokima-runtime[bot]",
+ "models": [
+  "claude-opus-5-5"
+ ],
+ "report": {
+  "duration_ms": 82183,
+  "turns": 10,
+  "cost_usd": 0.4579252,
+  "tokens_in": 409394,
+  "tokens_out": 3117
+ },
+ "log": "https://github.com/dokima-dev/dokima/blob/logs/logs/815/39075083629-reviewer-pr.md",
+ "run": "https://github.com/dokima-dev/dokima/actions/runs/39075083629",
+ "handback": {
+  "previous_step": {
+   "did": [
+    "The worker cleared a merge clash on the install page after main changed it.",
+    "The worker kept the two-file install and dropped the old workflow list again."
+   ],
+   "decided": [],
+   "open": []
+  },
+  "verdict": "approve",
+  "summary": "The install page asks for only the workflow and settings file; all six tests pass here and fail on main.",
+  "raises": [],
+  "answers": [],
+  "asks": [],
+  "boxes": {
+   "dropped": "none",
+   "added": "none",
+   "superseded": "none",
+   "conflicts": "none",
+   "edges": {
+    "815.1": "covered",
+    "815.2": "covered",
+    "815.3": "covered",
+    "815.4": "covered",
+    "815.5": "covered",
+    "815.6": "covered"
+   },
+   "poor_tests": "none"
+  },
+  "behaviors": [],
+  "edge_cases": [],
+  "tests": [],
+  "size": "ok"
+ },
+ "check": {
+  "passed": true,
+  "problems": []
+ },
+ "url": "https://github.com/dokima-dev/dokima/pull/835#issuecomment-6242238307"
+}
