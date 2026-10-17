@@ -32,8 +32,9 @@ What the code these tests run must do, as the plan pins it:
   stops, and its question stops off autopilot and goes to the plan reviewer on autopilot. On autopilot, a plan review
   lets the plan go on only when it answered each of the plan's questions done, with changes false and with words
   the owner really said where the source says; otherwise it stops and names the question left.
-- dokima/roles/planner.md, worker.md and reviewer.md each hold one section headed exactly "# Raising and answering",
-  running to the next line that starts with "# " or the end of the file, word for word the same in all three.
+- The planner's, worker's and reviewer's prompts, as the prompt builder draws them, each hold one section headed
+  exactly "# Raising and answering", running to the next line that starts with "# " or the end of the prompt, word
+  for word the same in all three.
 """
 import copy
 import json
@@ -598,11 +599,20 @@ ROLE_FILES = ("planner", "worker", "reviewer")
 HEADING = "# Raising and answering"
 
 
+GRADES = {"planner": "plan-grade", "worker": "result-grade", "reviewer": "plan-grade"}
+
+
+def built(role):
+    """The prompt the role's agent gets, drawn by the prompt builder."""
+    from dokima import prompt, settings
+    return prompt.build(role, GRADES[role], settings.read(ROOT))
+
+
 def section(role):
-    """The shared section of a role prompt, or None without one.
+    """The shared section of a role's built prompt, or None without one.
 
     It runs from its heading to the next top-level heading."""
-    lines = open(os.path.join(ROOT, "dokima", "roles", f"{role}.md")).read().splitlines()
+    lines = built(role).splitlines()
     at = [i for i, l in enumerate(lines) if l.strip() == HEADING]
     if len(at) != 1:
         return None
@@ -626,14 +636,14 @@ def examples(text):
 def test_the_three_prompts_share_one_section_on_raising_and_answering(record_property):
     """The three role prompts share one section on raising and answering, word for word.
 
-    Reads dokima/roles/planner.md, worker.md and reviewer.md: each has exactly one "# Raising and answering" section,
+    Builds the planner's, worker's and reviewer's prompts: each has exactly one "# Raising and answering" section,
     the three are the same text, and it names both fields, raises and answers.
 
     Proves 300.5."""
     record_property("proves", "300.5")
     found = {role: section(role) for role in ROLE_FILES}
     for role, text in found.items():
-        assert text, f"300.5: dokima/roles/{role}.md has no single '{HEADING}' section"
+        assert text, f"300.5: the {role}'s prompt has no single '{HEADING}' section"
     assert len(set(found.values())) == 1, "300.5: the shared section is not the same text in the planner, worker and reviewer prompts"
     text = found["planner"]
     for field in ('"raises"', '"answers"'):
@@ -650,7 +660,7 @@ def test_the_shared_section_shows_a_real_example_of_each_kind(record_property):
     Proves 300.5."""
     record_property("proves", "300.5")
     text = section("planner")
-    assert text, f"300.5: dokima/roles/planner.md has no '{HEADING}' section"
+    assert text, f"300.5: the planner's prompt has no '{HEADING}' section"
     found = examples(text)
     kinds = {e.get("kind") for e in found}
     for kind in ("question", "blocker", "issue"):
@@ -659,6 +669,6 @@ def test_the_shared_section_shows_a_real_example_of_each_kind(record_property):
         ok = [role for role in ROLE_FILES if not raises.check_raises(role, [e])]
         assert ok, f"300.5: the example {e} is rejected by code for every agent: {raises.check_raises('reviewer', [e])}"
     for role in ROLE_FILES:
-        prompt = open(os.path.join(ROOT, "dokima", "roles", f"{role}.md")).read()
+        prompt = built(role)
         for field in OLD:
-            assert f'"{field}"' not in prompt, f"300.5: dokima/roles/{role}.md still asks for the old field \"{field}\""
+            assert f'"{field}"' not in prompt, f"300.5: the {role}'s prompt still asks for the old field \"{field}\""
