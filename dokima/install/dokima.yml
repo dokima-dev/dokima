@@ -1,0 +1,19 @@
+# Dokima, run from Dokima's own repo at a release tag (#812). Copy this file to .github/workflows/dokima.yml.
+name: dokima
+on:
+  issues:
+  issue_comment:
+  pull_request_target:
+  pull_request_review:
+  pull_request_review_comment:
+  merge_group:
+  push: {branches: [main]}
+  schedule: [{cron: "*/15 * * * *"}, {cron: "17 6 * * *"}]
+  workflow_run: {workflows: [dokima], types: [in_progress, completed]}
+  repository_dispatch: {types: [dokima-next]}
+  workflow_dispatch:
+permissions: {contents: read, issues: write, pull-requests: read, actions: read, checks: read}
+jobs:
+  dokima:
+    uses: dokima-dev/dokima/.github/workflows/entry.yml@v0.1.0
+    secrets: inherit

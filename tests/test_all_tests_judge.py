@@ -7,8 +7,10 @@ temp "main" tree, next to a tiny project (app.py and its test). The pull request
 code fixed or broken, and its own copy of those workflows, kept, edited or deleted. Each "all tests" job GitHub would
 start is then run step by step: `actions/checkout` copies the tree its `ref` names (main's by default on
 pull_request_target, the pull request's on pull_request) and, unless told `persist-credentials: false`, leaves the token
-in the checkout's .git/config the way the real action does; other `uses:` steps are skipped; every `run:` script runs
-with bash, its `${{ }}` filled in, with a `pip` that does nothing. The check counts as passed only when every
+in the checkout's .git/config the way the real action does; a checkout of Dokima's own repo copies this repo's Dokima
+code to its path (#812); other `uses:` steps are skipped; every `run:` script runs with bash, its `${{ }}` filled in,
+with a `pip` that does nothing, a runner temp folder outside the workspace, the event file, and the values earlier
+steps wrote to GITHUB_ENV. The check counts as passed only when every
 "all tests" run on the pull request passed or was skipped, the same rule autopilot reads before it merges
 (dokima/agent.py, unproven()).
 """
@@ -135,12 +137,22 @@ def run_job(job, wf, event, base, head, ws, bin_dir):
     env = {**(wf.get("env") or {}), **(job.get("env") or {})}
     workdir = ((job.get("defaults") or {}).get("run") or {}).get("working-directory") or \
         ((wf.get("defaults") or {}).get("run") or {}).get("working-directory") or "."
-    log = []
+    log, added = [], {}
+    # The runner's own temp folder, outside the workspace, where a step may move Dokima's checked-out code.
+    temp = os.path.join(ws, "..", "runner-temp")
+    shutil.rmtree(temp, ignore_errors=True)
+    os.makedirs(temp)
+    # The event file GitHub gives every run, naming the repo's default branch as the real payload does.
+    event_file = os.path.join(temp, "event.json")
+    json.dump({"number": 7, "repository": {"default_branch": "main"}}, open(event_file, "w"))
     for step in job.get("steps") or []:
         scond = str(step.get("if") or "").replace("${{", "").replace("}}", "").strip()
         if not ts.evaluate(ts.condition(scond), ctx, status):
             continue
         uses = str(step.get("uses") or "")
+        if ts.dokima_checkout(step, ctx, status):
+            ts.dokima_checkout(step, ctx, status, into=lambda d: os.path.join(ws, d))
+            continue
         if uses.startswith("actions/checkout"):
             w = {k: ts.fill(v, ctx, status) for k, v in (step.get("with") or {}).items()}
             dest = os.path.join(ws, w.get("path") or ".")
@@ -166,10 +178,14 @@ def run_job(job, wf, event, base, head, ws, bin_dir):
         cwd = os.path.join(ws, ts.fill(step.get("working-directory") or workdir, ctx, status))
         path = os.path.join(ws, "..", f"step-{len(log)}.sh")
         open(path, "w").write(script)
+        env_file = os.path.join(ws, "..", "github-env")
+        open(env_file, "w").close()
         p = subprocess.run(ts.github_shell(step, job, wf.get("defaults")) + [path], cwd=cwd, capture_output=True,
                            text=True, timeout=120,
                            env={"PATH": bin_dir + os.pathsep + os.environ["PATH"], "HOME": os.path.join(ws, ".."),
-                                "DOKIMA_TEST_WORKSPACE": ws, "PYTHONDONTWRITEBYTECODE": "1", **senv})
+                                "DOKIMA_TEST_WORKSPACE": ws, "PYTHONDONTWRITEBYTECODE": "1", "RUNNER_TEMP": temp,
+                                "GITHUB_ENV": env_file, "GITHUB_EVENT_PATH": event_file, "GITHUB_REPOSITORY": "o/r", **added, **senv})
+        added.update(line.split("=", 1) for line in open(env_file).read().splitlines() if "=" in line)
         log.append(f"$ {script.strip()}\n{p.stdout}{p.stderr}")
         if p.returncode != 0:
             status["failed"] = True

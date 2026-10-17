@@ -25,8 +25,9 @@ branch:
 records:
   branch: logs
 owner_docs: AGENTS.md
-# The Co-authored-by line on Dokima's commits, e.g. Ann Example <ann@example.com>; empty for none.
-co_author: ""
+# The Co-authored-by line on Dokima's commits, e.g. Ann Example <ann@example.com>; empty for none. {bot} names the
+# repo's own bot with its address, so by default Dokima shows among the repo's contributors (#812).
+co_author: "{bot}"
 style:
   docstrings: required
   docstring_cap: 15

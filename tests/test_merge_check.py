@@ -264,8 +264,9 @@ def test_the_merge_check_runs_mains_code_and_judges_the_pull_requests_code(recor
 
     Walks the Acceptance criteria workflow step by step. GitHub runs main's copy of a workflow only on `pull_request_target`, so
     that must be its trigger, and never `pull_request`. Every checkout that names the pull request's head marks its
-    folder as the pull request's; every other checkout is main's. Every `python3 -m dokima` step must run in one of
-    main's folders, with no PYTHONPATH of its own, and the step that runs pytest must run in the pull request's folder,
+    folder as the pull request's; a checkout of Dokima's own repo (#812) must never name the pull request's commit;
+    every other checkout is main's. Every `python3 -m dokima` step must run in one of main's folders, with no
+    PYTHONPATH of its own but one pointing at the job's checkout of Dokima's own repo, and the step that runs pytest must run in the pull request's folder,
     so the tests still judge the pull request's code and not main's. Since the workflow now runs main's copy while it
     runs the pull request's code, it must name no key and ask for no write permission: it needs a top-level
     `permissions:` list of only read or none (without one, pull_request_target hands out the repo's default token, which
@@ -289,8 +290,15 @@ def test_the_merge_check_runs_mains_code_and_judges_the_pull_requests_code(recor
     dokima_steps = pytest_steps = 0
     for name, head, steps in workflow_jobs(text):
         default = folder(setting(head, "working-directory"))
-        main_dirs, pr_dirs = set(), set()
+        main_dirs, pr_dirs, dokima_code = set(), set(), False
         for step in steps:
+            if "actions/checkout" in step and setting(step, "repository") == "dokima-dev/dokima":
+                # Dokima's own repo, at this shared workflow's commit, never the pull request's head (#812).
+                ref = setting(step, "ref") or ""
+                assert "pull_request.head" not in ref and "github.head_ref" not in ref and "merge_group" not in ref, \
+                    f"168.5: job '{name}' checks out Dokima's own repo at the pull request's commit: {ref}"
+                dokima_code = True
+                continue
             if "actions/checkout" in step:
                 where, ref = folder(setting(step, "path")), setting(step, "ref") or ""
                 if "pull_request.head" in ref or "github.head_ref" in ref:
@@ -306,7 +314,10 @@ def test_the_merge_check_runs_mains_code_and_judges_the_pull_requests_code(recor
                 dokima_steps += 1
                 assert where in main_dirs, \
                     f"168.5: job '{name}' runs Dokima's code from the pull request's checkout, not main's: {run.strip()}"
-                assert "PYTHONPATH" not in step, f"168.5: job '{name}' points a Dokima step elsewhere with PYTHONPATH"
+                # Since #812 a Dokima step may point PYTHONPATH only at the job's checkout of Dokima's own repo.
+                paths = set(re.findall(r'PYTHONPATH="?([^"\s]*)', step))
+                assert not paths or (dokima_code and paths <= {"$DOKIMA_CODE", "$RUNNER_TEMP/dokima"}), \
+                    f"168.5: job '{name}' points a Dokima step elsewhere with PYTHONPATH: {sorted(paths)}"
             # Since #795 the command comes from the settings, so the step is also found by the tests it runs.
             if re.search(r"(?m)^\s*(python3 -m )?pytest\s", run) or re.search(r"TESTS:\s*\$\{\{\s*matrix\.tests", step):
                 pytest_steps += 1

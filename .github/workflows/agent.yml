@@ -52,7 +52,7 @@ jobs:
       ROLE: ${{ (inputs.role || github.event.client_payload.role) }}
       STAGE: ${{ (inputs.role || github.event.client_payload.role) == 'reviewer' && (inputs.stage || github.event.client_payload.stage) || '' }}
       PACK: /tmp/pack
-      # Dokima's own code and prompts always come from main, never from the branch being judged.
+      # Dokima's own code and prompts come from Dokima's own repo, never from the repo or the branch being judged.
       PYTHONPATH: /tmp/runtime
       PYTHONSAFEPATH: "1"
       OUT: /tmp/dokima-out
@@ -73,6 +73,16 @@ jobs:
         with:
           fetch-depth: 0
           persist-credentials: false
+      # Dokima's code comes from Dokima's own repo, at the commit of this shared workflow (main when run directly),
+      # never from the repo it works on (#812).
+      - name: Dokima's code from Dokima's own repo
+        uses: actions/checkout@v5
+        with:
+          repository: dokima-dev/dokima
+          ref: ${{ job.workflow_sha }}
+          path: .dokima-code
+          sparse-checkout: dokima
+          persist-credentials: false
       - uses: actions/setup-python@v6
         with:
           python-version: "3.12"
@@ -83,7 +93,10 @@ jobs:
         # The owner docs file the settings name (AGENTS.md by default) and the topic files it links come too: the river
         # checks the owner's words a plan reviewer quotes from them. So do main's house rules files (#796).
         run: |
-          mkdir -p /tmp/runtime && cp -r dokima /tmp/runtime/dokima
+          # Dokima's code from its checkout, moved out of the repo so no commit picks it up; the repo's own copy never runs.
+          [ -d .dokima-code/dokima ] || { echo "Dokima's code was not checked out from dokima-dev/dokima." > /tmp/why.txt
+                                          echo "::error title=No Dokima code::$(cat /tmp/why.txt)"; exit 1; }
+          mkdir -p /tmp/runtime && mv .dokima-code/dokima /tmp/runtime/dokima && rm -rf .dokima-code
           for f in settings.yaml agents.yml; do
             if [ -f ".dokima/$f" ]; then mkdir -p /tmp/runtime/.dokima && cp ".dokima/$f" /tmp/runtime/.dokima/; fi
           done
@@ -115,6 +128,15 @@ jobs:
               if [ -f "$f" ]; then cp --parents "$f" /tmp/runtime/; fi
             done
           fi
+      # The bot is the repo's Dokima app: its id a variable and its key a secret, both in the keys environment.
+      - name: The bot is set up
+        env:
+          APP_ID: ${{ vars.DOKIMA_APP_ID }}
+          HAS_APP_KEY: ${{ secrets.DOKIMA_APP_KEY != '' }}
+        run: |
+          [ -n "$APP_ID" ] && [ "$HAS_APP_KEY" = true ] && exit 0
+          echo "No bot is set up: add the app's id as the variable DOKIMA_APP_ID and its private key as the secret DOKIMA_APP_KEY, both in the repo's keys environment (Settings, Environments, keys)." > /tmp/why.txt
+          echo "::error title=No bot::$(cat /tmp/why.txt)"; exit 1
       - name: Only a code owner starts an agent
         env:
           SENDER: ${{ github.actor }}
@@ -132,6 +154,13 @@ jobs:
             || { echo "The settings file stopped the run: $(paste -sd' ' /tmp/agents-err.txt)" > /tmp/why.txt
                  echo "::error title=Bad settings::$(cat /tmp/why.txt)"; exit 1; }
           echo "MODEL=$M" >> "$GITHUB_ENV"; echo "AGENT_KEY=$K" >> "$GITHUB_ENV"
+      - name: The role's key secret is set
+        env:
+          HAS_KEY: ${{ secrets[env.AGENT_KEY || 'CLAUDE_CODE_OAUTH_TOKEN'] != '' }}
+        run: |
+          [ "$HAS_KEY" = true ] && exit 0
+          echo "The secret ${AGENT_KEY:-CLAUDE_CODE_OAUTH_TOKEN}, which holds the $ROLE's model key, is missing: add it to the repo's keys environment (Settings, Environments, keys)." > /tmp/why.txt
+          echo "::error title=No model key::$(cat /tmp/why.txt)"; exit 1
       # The run's card moves through its stages (queued, setting up, agent working, checking, then its record), each
       # written by this job's own steps, each with a key made for that one call and revoked at once: no bot key stays
       # live on this machine while the branch's code, its tests, the agent or the hand-back check run. Every stage
@@ -192,9 +221,16 @@ jobs:
           BOT_ID=$(gh api "users/${SLUG}[bot]" --jq .id) \
             || { echo "The bot ${SLUG}[bot] the settings name was not found on GitHub." > /tmp/why.txt
                  echo "::error title=Bot not found::$(cat /tmp/why.txt)"; exit 1; }
+          # Each merge commit credits the co-author the settings name; {bot}, the default, is the bot itself (#812).
+          CO="${CO_AUTHOR//"{bot}"/${SLUG}[bot] <${BOT_ID}+${SLUG}[bot]@users.noreply.github.com>}"
+          CREDIT=(); [ -z "$CO" ] || CREDIT=(--trailer "Co-authored-by: $CO")
+          credit_merge() {
+            [ -n "$CO" ] && [ "$(git rev-parse HEAD)" != "$BRANCH_TIP" ] && git rev-parse -q --verify HEAD^2 >/dev/null || return 0
+            git -c user.name="${SLUG}[bot]" -c user.email="${BOT_ID}+${SLUG}[bot]@users.noreply.github.com" commit -q --amend --no-edit "${CREDIT[@]}"
+          }
           if git ls-remote --exit-code --heads origin "try/issue-$N" >/dev/null; then
             git fetch -q origin "try/issue-$N" && git checkout -q -B "try/issue-$N" FETCH_HEAD
-            echo "BRANCH_TIP=$(git rev-parse HEAD)" >> "$GITHUB_ENV"
+            BRANCH_TIP=$(git rev-parse HEAD); echo "BRANCH_TIP=$BRANCH_TIP" >> "$GITHUB_ENV"
             # A worker's branch that clashes with main still starts: the merge is committed with its conflict markers,
             # the clashed files are listed for the fence, and the worker resolves them. Main's changes are in BASE.
             if [ "$ROLE" = worker ] && ! git -c user.name="${SLUG}[bot]" -c user.email="${BOT_ID}+${SLUG}[bot]@users.noreply.github.com" merge -q --no-edit "origin/$DEFAULT_BRANCH"; then
@@ -216,9 +252,10 @@ jobs:
                 fi
               done
               git diff --name-only --diff-filter=U > /tmp/clashed.txt
-              git add -A && git -c user.name="${SLUG}[bot]" -c user.email="${BOT_ID}+${SLUG}[bot]@users.noreply.github.com" commit -q --no-edit
+              git add -A && git -c user.name="${SLUG}[bot]" -c user.email="${BOT_ID}+${SLUG}[bot]@users.noreply.github.com" commit -q --no-edit "${CREDIT[@]}"
               [ ! -s /tmp/clashed.txt ] || echo "::notice title=Clash with main::the worker resolves $(paste -sd, /tmp/clashed.txt)"
             fi
+            [ "$ROLE" != worker ] || credit_merge
             # A planner starts with main merged in, so it sees and can change the tests main added (#475). A branch
             # that clashes with main stays unmerged for the worker; it takes only main's tests the branch never
             # touched, and its plan check's base holds every test main changed, so none counts as the plan's own
@@ -255,12 +292,13 @@ jobs:
               done < /tmp/mains-tests.txt
               if ! git diff --cached --quiet || [ -s /tmp/clash-trailers.txt ]; then
                 { echo "Main's tests for the planner of #$N"; [ ! -s /tmp/clash-trailers.txt ] || { echo; cat /tmp/clash-trailers.txt; }; } > /tmp/mains-msg.txt
-                git -c user.name="${SLUG}[bot]" -c user.email="${BOT_ID}+${SLUG}[bot]@users.noreply.github.com" commit -q --allow-empty -F /tmp/mains-msg.txt
+                git -c user.name="${SLUG}[bot]" -c user.email="${BOT_ID}+${SLUG}[bot]@users.noreply.github.com" commit -q --allow-empty -F /tmp/mains-msg.txt "${CREDIT[@]}"
               fi
               BASE_TREE=$(export GIT_INDEX_FILE=/tmp/base.index; git read-tree "$MB" && git update-index --index-info < /tmp/mains-index.txt && git write-tree)
               MAINS_BASE=$(git -c user.name="${SLUG}[bot]" -c user.email="${BOT_ID}+${SLUG}[bot]@users.noreply.github.com" commit-tree "$BASE_TREE" -p "$MB" -m "Where #$N split off main, with main's tests")
               echo "::notice title=Clash with main::the planner starts with main's tests; the worker merges main"
             fi
+            [ "$ROLE" != planner ] || credit_merge
           elif [ "$ROLE" = planner ] || [ "$STAGE" = plan ]; then
             # A plan review needs no branch: a split never makes one, so it reviews from main.
             git checkout -q -B "try/issue-$N" "origin/$DEFAULT_BRANCH"
@@ -470,8 +508,9 @@ jobs:
           # A planner that merged main in pushes the merge even with no test changed, so the branch holds main.
           if git diff --cached --quiet && { [ "$ROLE" != planner ] || [ "$(git rev-parse HEAD)" = "${BRANCH_TIP:-$(git rev-parse HEAD)}" ]; }; then echo "Nothing to push."
           else
-            # The co-author the settings name, if any, is credited on the commit (#796).
-            CREDIT=(); [ -z "$CO_AUTHOR" ] || CREDIT=(--trailer "Co-authored-by: $CO_AUTHOR")
+            # The co-author the settings name, if any, is credited on the commit (#796); {bot} is the bot itself (#812).
+            CO="${CO_AUTHOR//"{bot}"/${SLUG}[bot] <${BOT_ID}+${SLUG}[bot]@users.noreply.github.com>}"
+            CREDIT=(); [ -z "$CO" ] || CREDIT=(--trailer "Co-authored-by: $CO")
             git diff --cached --quiet || git commit -qm "$ROLE for #$N (run ${{ github.run_id }})" "${CREDIT[@]}"
             # The branch may have moved during the run (main merged in): catch up once and push again. Changes that
             # still can't be saved fail the run here, before its record is written, so nothing reports them as done.
@@ -678,6 +717,18 @@ jobs:
       - uses: actions/checkout@v5
         with:
           persist-credentials: false
+      - name: Dokima's code from Dokima's own repo
+        uses: actions/checkout@v5
+        with:
+          repository: dokima-dev/dokima
+          ref: ${{ job.workflow_sha }}
+          path: .dokima-code
+          sparse-checkout: dokima
+          persist-credentials: false
+      - name: Every Dokima step runs Dokima's code
+        run: |
+          rm -rf "$RUNNER_TEMP/dokima" && mv .dokima-code "$RUNNER_TEMP/dokima"
+          printf 'PYTHONPATH=%s\nPYTHONSAFEPATH=1\n' "$RUNNER_TEMP/dokima" >> "$GITHUB_ENV"
       - uses: actions/setup-python@v6
         with:
           python-version: "3.12"
