@@ -1,0 +1,180 @@
+{
+ "role": "planner",
+ "stage": null,
+ "run_id": "39019073768",
+ "commit_before": "826f2054bb114cbc1ad96e5b11080798cb967ec1",
+ "started_by": "dokima-runtime[bot]",
+ "models": [
+  "claude-opus-5-5"
+ ],
+ "report": {
+  "duration_ms": 327532,
+  "turns": 32,
+  "cost_usd": 1.6759304,
+  "tokens_in": 2139853,
+  "tokens_out": 28168
+ },
+ "log": "https://github.com/dokima-dev/dokima/blob/logs/logs/804/39019073768-planner.md",
+ "run": "https://github.com/dokima-dev/dokima/actions/runs/39019073768",
+ "handback": {
+  "kind": "user_story",
+  "title": "Tests are found and tagged by the test settings",
+  "summary": "Dokima finds, links and runs tests by the repo's test settings instead of fixed values.",
+  "user_story": "A repo's test tag, folder and run command decide which tests Dokima finds, links and runs.",
+  "acceptance_criteria": [
+   {
+    "text": "The repo's test tag setting decides which call links a test to its criterion.",
+    "words": "Which call links a test to its criterion is read from the test tag setting.",
+    "source": "https://github.com/dokima-dev/dokima/issues/781",
+    "files": [
+     "dokima/checks.py",
+     "dokima/planner.py"
+    ],
+    "no_edge_cases": "A missing tag falls back to the shipped default, already tested."
+   },
+   {
+    "text": "The planner's check finds tests written as methods of a test class.",
+    "words": "Dokima finds tests written as methods of a test class.",
+    "source": "https://github.com/dokima-dev/dokima/issues/781",
+    "files": [
+     "dokima/checks.py",
+     "dokima/planner.py"
+    ],
+    "edge_cases": [
+     {
+      "case": "A class method test with no summary is still rejected for it.",
+      "test": "tests/test_test_settings.py::test_a_class_method_test_still_needs_its_summary"
+     }
+    ]
+   },
+   {
+    "text": "The planner's check finds tests written as async functions.",
+    "words": "Dokima finds tests written as async functions.",
+    "source": "https://github.com/dokima-dev/dokima/issues/781",
+    "files": [
+     "dokima/checks.py",
+     "dokima/planner.py"
+    ],
+    "no_edge_cases": "One shape of test; a missing name is covered in its test."
+   },
+   {
+    "text": "The planner's check finds tests indented under another block.",
+    "words": "Dokima finds tests indented under another block.",
+    "source": "https://github.com/dokima-dev/dokima/issues/781",
+    "files": [
+     "dokima/checks.py",
+     "dokima/planner.py"
+    ],
+    "no_edge_cases": "One shape of test; a missing name is covered in its test."
+   },
+   {
+    "text": "A pull request changing only prompt files gets the text-only check.",
+    "words": "Changes to Dokima's prompt folder no longer stop the text-only shortcut.",
+    "source": "https://github.com/dokima-dev/dokima/issues/781",
+    "files": [
+     "dokima/checks.py"
+    ],
+    "no_edge_cases": "Other folders are covered by the next criterion."
+   },
+   {
+    "text": "The repo's settings list the folders whose Markdown changes skip the text-only check.",
+    "words": "The folders that stop the text-only shortcut come from settings.",
+    "source": "https://github.com/dokima-dev/dokima/issues/781",
+    "files": [
+     "dokima/checks.py"
+    ],
+    "no_edge_cases": "A repo with no settings file keeps the shipped list."
+   },
+   {
+    "text": "A manual fix's check runs the tests in the repo's test folder setting.",
+    "words": "The manual-fix check runs the tests in the test folder setting.",
+    "source": "https://github.com/dokima-dev/dokima/issues/781",
+    "files": [
+     "dokima/checks.py"
+    ],
+    "no_edge_cases": "No settings file still runs the default folder, in its test."
+   },
+   {
+    "text": "The planner's check rejects any file outside the repo's test folder setting.",
+    "words": "The planner's check refuses files outside the test folder setting.",
+    "source": "https://github.com/dokima-dev/dokima/issues/781",
+    "files": [
+     "dokima/planner.py"
+    ],
+    "no_edge_cases": "A file inside the folder is shown as accepted in its test."
+   },
+   {
+    "text": "The check that new tests fail today runs them from the repo's test folder setting.",
+    "words": "The planner's check lays the branch's test folder, from settings, over main.",
+    "source": "https://github.com/dokima-dev/dokima/issues/781",
+    "files": [
+     "dokima/planner.py"
+    ],
+    "no_edge_cases": "A failing test is shown as not reported in its test."
+   },
+   {
+    "text": "The check that new tests fail today runs each one with the repo's run-one command.",
+    "words": "The check that new tests fail today runs each with the run-one command setting.",
+    "source": "https://github.com/dokima-dev/dokima/issues/781",
+    "files": [
+     "dokima/planner.py"
+    ],
+    "no_edge_cases": "A runner that fails is shown as accepted in its test."
+   }
+  ],
+  "non_functional": [],
+  "tests": {
+   "804.1": [
+    "tests/test_test_settings.py::test_the_test_tag_setting_decides_which_call_links_a_test"
+   ],
+   "804.2": [
+    "tests/test_test_settings.py::test_tests_written_as_methods_of_a_test_class_are_found",
+    "tests/test_test_settings.py::test_a_class_method_test_still_needs_its_summary"
+   ],
+   "804.3": [
+    "tests/test_test_settings.py::test_tests_written_as_async_functions_are_found"
+   ],
+   "804.4": [
+    "tests/test_test_settings.py::test_tests_indented_under_another_block_are_found"
+   ],
+   "804.5": [
+    "tests/test_test_settings.py::test_prompt_folder_changes_take_the_text_only_shortcut"
+   ],
+   "804.6": [
+    "tests/test_test_settings.py::test_the_folders_that_stop_the_text_only_shortcut_come_from_settings"
+   ],
+   "804.7": [
+    "tests/test_test_settings.py::test_the_manual_fix_check_runs_the_test_folder_setting"
+   ],
+   "804.8": [
+    "tests/test_test_settings.py::test_the_planners_check_refuses_files_outside_the_test_folder_setting"
+   ],
+   "804.9": [
+    "tests/test_test_settings.py::test_the_new_test_check_lays_the_test_folder_setting_over_main"
+   ],
+   "804.10": [
+    "tests/test_test_settings.py::test_the_new_test_check_runs_each_test_with_the_run_one_setting"
+   ]
+  },
+  "test_changes": {
+   "tests/test_text_only.py::test_a_pull_request_touching_anything_but_text_files_goes_the_full_way": "Owner asked that prompt folder changes no longer stop the text-only shortcut."
+  },
+  "links": {
+   "blocked_by": [],
+   "blocks": [
+    805
+   ],
+   "relates_to": [
+    781,
+    718
+   ]
+  },
+  "raises": [],
+  "answers": []
+ },
+ "check": {
+  "passed": true,
+  "problems": []
+ },
+ "url": "https://github.com/dokima-dev/dokima/issues/804#issuecomment-6231982856"
+}
