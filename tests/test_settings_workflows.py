@@ -230,19 +230,20 @@ def author_of(ws, ref="HEAD"):
 def test_the_all_tests_check_runs_the_all_tests_command_from_settings(record_property, tmp_path):
     """The all tests check runs the all-tests command the settings name.
 
-    Proves 795.1. Runs the all tests job of full-suite.yml with a settings file whose all-tests command writes
+    Proves 795.1. Runs the all tests job of full-suite.yml in the merge queue, where every test runs (on a pull
+    request only the affected tests run, owner 2026-10-17), with a settings file whose all-tests command writes
     'all-ran' to the log, and checks it ran and pytest's default command did not. Then runs it with no settings file
     and checks the default command, pytest over the tests folder, still runs."""
     record_property("proves", "795.1")
     box = Box(tmp_path / "set", 'tests:\n  run_all: echo all-ran >> "$SETUP_LOG"\n')
-    result = box.run("full-suite.yml", "all-tests", event="pull_request_target")
+    result = box.run("full-suite.yml", "all-tests", event="merge_group")
     lines = box.lines()
     assert "all-ran" in lines, (f"795.1: the all tests check did not run the all-tests command from settings; "
                                 f"job {result}, log {lines}\n{box.tail()}")
     ran = [l for l in lines if l.startswith("pytest")]
     assert not ran, f"795.1: the all tests check still ran its own pytest command beside the setting's: {ran}"
     box = Box(tmp_path / "default", None)
-    box.run("full-suite.yml", "all-tests", event="pull_request_target")
+    box.run("full-suite.yml", "all-tests", event="merge_group")
     ran = [l for l in box.lines() if l.startswith("pytest")]
     assert ran and ran[-1].split()[-1] == "tests", \
         f"795.1: with no settings file the all tests check no longer runs pytest over tests; log {box.lines()}"

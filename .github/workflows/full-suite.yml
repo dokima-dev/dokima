@@ -1,13 +1,13 @@
 name: full suite
-# Every test in the repo, on every pull request, in the merge queue and on main.
+# The tests a pull request can affect (testmon, from main's baseline) on the pull request, and every test, spread
+# over the runner's cores, once in the merge queue. Main is not run again: the queue already tested that exact merge.
+# A repo with no merge queue (merge.queue false) runs every test on the pull request instead, its only run.
 # A draft pull request runs none: Dokima's are drafts until the merge gate readies them, after the code review (#597).
 # Runs main's copy of this workflow, so a pull request can't rewrite its own judge; only the code it tests comes from
 # the pull request, checked out with no token left behind, and the run holds no secret and only read access.
 on:
   pull_request_target:
     types: [opened, synchronize, reopened, ready_for_review]
-  push:
-    branches: [main]
   merge_group:
   # Called by the one workflow an adopter installs (dokima/install/dokima.yml), through entry.yml (#812).
   workflow_call:
@@ -58,13 +58,45 @@ jobs:
         run: |
           pip install -q $TOOLS pyyaml
           if [ -n "$INSTALL" ]; then eval "$INSTALL"; fi
+      # Pull request on a repo with a merge queue: only the tests the change can affect, against main's newest testmon
+      # baseline (testmon.yml), as the code review runs them. Everything else runs the all-tests command below.
+      - id: mode
+        run: |
+          queue=true; affected=testmon
+          if python3 -c 'from dokima.settings import read' 2>/dev/null; then
+            queue=$(python3 -c 'from dokima.settings import read; print("false" if (read().get("merge") or {}).get("queue", True) is False else "true")')
+            affected=$(python3 -c 'from dokima.settings import read; print((read().get("tests") or {}).get("affected") or "testmon")')
+          fi
+          mode=all
+          if [ "${{ github.event_name }}" = pull_request_target ] && [ "$queue" = true ] && [ "$affected" != all ]; then mode=affected; fi
+          echo "mode=$mode" >> "${GITHUB_OUTPUT:-/dev/null}"; echo "Tests to run: $mode (merge queue: $queue, affected tests: $affected)"
+      - name: Restore main's testmon baseline
+        if: steps.mode.outputs.mode == 'affected'
+        uses: actions/cache/restore@v4
+        with:
+          path: .testmondata
+          key: testmon-${{ github.sha }}
+          restore-keys: testmon-
       # The all-tests command from the settings, leaving out the tests on their exclude list (#795); by default every
       # test, spread over all the runner's cores. A checkout with no settings reader with an env mode (before #795)
-      # runs that default as before.
-      - name: Run every test, as the settings say
+      # runs that default as before. In affected mode testmon picks the tests; with no baseline, or one it cannot
+      # read, every test runs.
+      - name: Run the tests, as the settings say
+        env:
+          MODE: ${{ steps.mode.outputs.mode }}
         run: |
           out=; if PYTHONPATH="$DOKIMA_CODE" PYTHONSAFEPATH=1 python3 -c 'from dokima.settings import env_lines' 2>/dev/null; then out=$(PYTHONPATH="$DOKIMA_CODE" PYTHONSAFEPATH=1 python3 -m dokima.settings env); fi
           RUN_ALL=$(printf '%s\n' "$out" | sed -n 's/^TESTS_RUN_ALL=//p')
           if [ -z "$RUN_ALL" ]; then RUN_ALL="pytest -q -p no:cacheprovider -n auto tests"
             echo "::notice title=Old settings::No settings reader with an env mode here, so every test runs."; fi
+          if [ "$MODE" = affected ] && [ -f .testmondata ]; then
+            skip=$(python3 -c 'import shlex; from dokima.settings import read; print(" ".join("--deselect " + shlex.quote(str(t)) for t in (read().get("tests") or {}).get("exclude") or []))')
+            code=0; eval "python3 -m pytest -q --testmon $skip" || code=$?
+            # 0 passed, 1 a test failed, 5 no test affected: testmon's real answers. Anything else: run every test.
+            if [ "$code" -eq 0 ] || [ "$code" -eq 5 ]; then exit 0; fi
+            if [ "$code" -eq 1 ]; then exit 1; fi
+            echo "::warning title=No usable baseline::testmon stopped with exit $code; running every test"
+          elif [ "$MODE" = affected ]; then
+            echo "::notice title=No baseline::No testmon baseline from main was restored, so every test runs."
+          fi
           eval "$RUN_ALL"

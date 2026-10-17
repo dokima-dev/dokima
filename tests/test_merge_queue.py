@@ -350,8 +350,8 @@ def test_queued_pr_with_no_linked_issue_fails_the_gate_with_the_same_reason(reco
 def test_pull_request_checks_behave_exactly_as_before(record_property, run_matrix):
     """Pull request checks are unchanged: same triggers, names, list and commit.
 
-    Proves 191.4. Checks the triggers are exactly main's plus merge_group (full-suite.yml: pull_request_target, push to main,
-    merge_group, as #263 left it; acceptance-criteria.yml: pull_request_target, merge_group), so nothing was dropped, swapped or
+    Proves 191.4. Checks the triggers are exactly main's plus merge_group (full-suite.yml: pull_request_target and
+    merge_group; the owner dropped the push to main on 2026-10-17, since the queue already tests the exact merge; acceptance-criteria.yml: pull_request_target, merge_group), so nothing was dropped, swapped or
     added beyond the queue, besides the call from entry.yml (#812), which calls each only on those same events; that the required check names 'all tests' and 'Acceptance criteria' are unchanged; that
     `dokima.checks matrix` on a pull request lists its issue's plan exactly; that on a pull request the criteria
     check out and annotate the pull request's head commit, not main's; and that the all tests check still checks out
@@ -359,11 +359,10 @@ def test_pull_request_checks_behave_exactly_as_before(record_property, run_matri
     record_property("proves", "191.4")
     suite, dw = workflow("full-suite.yml"), workflow("acceptance-criteria.yml")
     # Since #812 an adopter's one workflow also calls both through entry.yml, only on these same events.
-    assert triggers(suite) - {"workflow_call"} == {"pull_request_target", "push", "merge_group"}, \
-        f"191.4: full-suite.yml should run on pull_request_target, push and merge_group only, but runs on {sorted(triggers(suite))}"
-    assert called_on("full-suite") == {"pull_request_target", "push", "merge_group"}, \
-        f"191.4: entry.yml should call full-suite.yml on pull_request_target, push and merge_group only, not {sorted(called_on('full-suite'))}"
-    assert "branches: [main]" in [x.strip() for x in suite], "191.4: full-suite.yml no longer runs on pushes to main"
+    assert triggers(suite) - {"workflow_call"} == {"pull_request_target", "merge_group"}, \
+        f"191.4: full-suite.yml should run on pull_request_target and merge_group only, but runs on {sorted(triggers(suite))}"
+    assert called_on("full-suite") == {"pull_request_target", "merge_group"}, \
+        f"191.4: entry.yml should call full-suite.yml on pull_request_target and merge_group only, not {sorted(called_on('full-suite'))}"
     assert triggers(dw) - {"workflow_call"} == {"pull_request_target", "merge_group"}, \
         f"191.4: acceptance-criteria.yml should run on pull_request_target and merge_group only, but runs on {sorted(triggers(dw))}"
     assert called_on("acceptance-criteria") == {"pull_request_target", "merge_group"}, \
