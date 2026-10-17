@@ -1,0 +1,47 @@
+{
+ "role": "worker",
+ "stage": null,
+ "run_id": "39022732330",
+ "commit_before": "1843d9e84f2696358cfa04c36ae39050439845fc",
+ "started_by": "RezaSoleymanifar",
+ "models": [
+  "claude-opus-5-5"
+ ],
+ "report": {
+  "duration_ms": 243920,
+  "turns": 28,
+  "cost_usd": 1.4027960000000002,
+  "tokens_in": 1914179,
+  "tokens_out": 16564
+ },
+ "log": "https://github.com/dokima-dev/dokima/blob/logs/logs/784/39022732330-worker.md",
+ "run": "https://github.com/dokima-dev/dokima/actions/runs/39022732330",
+ "handback": {
+  "summary": "The audit, the settings guard and issue filing now follow a repo's settings for checks, labels, colors and queue.",
+  "criteria": {
+   "784.1": "`manifest.branch_rules()` makes main require the `gates.required` names; `audit.check()` compares the live rule with it.",
+   "784.2": "New `merge.queue` setting (default true); when false `audit.auto_merge()` reads only main's review exemption, never rulesets.",
+   "784.3": "`manifest.labels()` keys each label by its name in the `labels` setting; `compare_labels()` checks those names.",
+   "784.4": "New `colors.labels` defaults; `manifest.labels()` takes each label's color from them for the audit.",
+   "784.5": "New `colors.pills` defaults; `manifest.fields()` takes each option's color from them for the audit.",
+   "784.6": "`manifest.undeclared()` reads each workflow's `name:` and `check_python()` passes a compared name that is one.",
+   "784.7": "`dokima/defaults.yaml` drops the plan and work labels.",
+   "784.8": "`file_issues()` files with the label `filed_label()` returns: the `labels.filed` setting's name.",
+   "784.9": "`filed_label()` looks the label up and, when missing, creates it with its settings color and manifest description."
+  },
+  "evidence": "`pytest tests/test_settings_audit.py tests/test_manifest.py`: 71 passed in 6.51s"
+ },
+ "check": {
+  "passed": true,
+  "problems": []
+ },
+ "dropped_by_fence": [],
+ "files_changed": [
+  "dokima/agent_autopilot.py",
+  "dokima/audit.py",
+  "dokima/defaults.yaml",
+  "dokima/manifest.py"
+ ],
+ "branch": "try/issue-784",
+ "url": "https://github.com/dokima-dev/dokima/issues/784#issuecomment-6232496311"
+}
