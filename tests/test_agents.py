@@ -142,8 +142,11 @@ class Box:
         f.write_text(text)
 
     def env(self, **extra):
-        """The command's environment: the stubs first on PATH, this checkout's dokima importable, no real keys."""
-        env = {k: v for k, v in os.environ.items() if k not in (TODAY_KEY, "DOKIMA_AGENT_KEY", "FAKE_EXIT")}
+        """The command's environment: the stubs first on PATH, this checkout's dokima importable, no real keys.
+
+        Drops DOKIMA_SETTINGS, which an agent run's machine sets to main's settings file, so the box reads its own."""
+        env = {k: v for k, v in os.environ.items()
+               if k not in (TODAY_KEY, "DOKIMA_AGENT_KEY", "FAKE_EXIT", "DOKIMA_SETTINGS")}
         env.update({"PATH": f"{self.bin}:{os.environ['PATH']}", "PYTHONPATH": ROOT, "FAKE_LOG": str(self.log)})
         env.update(extra)
         return env
@@ -513,7 +516,7 @@ def test_a_runs_record_reads_its_agent_through_the_interface(record_property, tm
     record_property("proves", "698.15")
     box = Box(tmp_path)
     box.write_settings(settings({"z": ("zeta", "ZETA_KEY")}, {"planner": ("z", "zeta-1")}))
-    for k in ("PACK", "BASE", "LOG_URL"):
+    for k in ("PACK", "BASE", "LOG_URL", "DOKIMA_SETTINGS"):
         monkeypatch.delenv(k, raising=False)
     monkeypatch.chdir(box.repo)
     calls = []
