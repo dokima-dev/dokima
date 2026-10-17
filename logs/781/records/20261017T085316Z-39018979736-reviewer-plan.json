@@ -1,0 +1,275 @@
+{
+ "role": "reviewer",
+ "stage": "plan",
+ "run_id": "39018979736",
+ "commit_before": "826f2054bb114cbc1ad96e5b11080798cb967ec1",
+ "started_by": "dokima-runtime[bot]",
+ "models": [
+  "claude-opus-5-5"
+ ],
+ "report": {
+  "duration_ms": 27295,
+  "turns": 6,
+  "cost_usd": 0.3128624,
+  "tokens_in": 213411,
+  "tokens_out": 2272
+ },
+ "log": "https://github.com/dokima-dev/dokima/blob/logs/logs/781/39018979736-reviewer-plan.md",
+ "run": "https://github.com/dokima-dev/dokima/actions/runs/39018979736",
+ "handback": {
+  "previous_step": {
+   "did": [
+    "The planner split the 15 criteria into two stories of 10 and 5.",
+    "It copied each criterion word for word from the issue."
+   ],
+   "decided": [
+    "The second story waits on the first, since both change the same planner file."
+   ],
+   "open": [
+    "Each story's tests come when its own plan is written."
+   ]
+  },
+  "verdict": "approve",
+  "summary": "The split keeps all 15 asks, each once, in two stories that take turns.",
+  "raises": [],
+  "answers": [],
+  "asks": [
+   {
+    "ask": "Which call links a test to its criterion is read from the test tag setting.",
+    "source": "https://github.com/dokima-dev/dokima/issues/781",
+    "criterion": "S1.1"
+   },
+   {
+    "ask": "Dokima finds tests written as methods of a test class.",
+    "source": "https://github.com/dokima-dev/dokima/issues/781",
+    "criterion": "S1.2"
+   },
+   {
+    "ask": "Dokima finds tests written as async functions.",
+    "source": "https://github.com/dokima-dev/dokima/issues/781",
+    "criterion": "S1.3"
+   },
+   {
+    "ask": "Dokima finds tests indented under another block.",
+    "source": "https://github.com/dokima-dev/dokima/issues/781",
+    "criterion": "S1.4"
+   },
+   {
+    "ask": "Changes to Dokima's prompt folder no longer stop the text-only shortcut.",
+    "source": "https://github.com/dokima-dev/dokima/issues/781",
+    "criterion": "S1.5"
+   },
+   {
+    "ask": "The folders that stop the text-only shortcut come from settings.",
+    "source": "https://github.com/dokima-dev/dokima/issues/781",
+    "criterion": "S1.6"
+   },
+   {
+    "ask": "The manual-fix check runs the tests in the test folder setting.",
+    "source": "https://github.com/dokima-dev/dokima/issues/781",
+    "criterion": "S1.7"
+   },
+   {
+    "ask": "The planner's check refuses files outside the test folder setting.",
+    "source": "https://github.com/dokima-dev/dokima/issues/781",
+    "criterion": "S1.8"
+   },
+   {
+    "ask": "The planner's check lays the branch's test folder, from settings, over main.",
+    "source": "https://github.com/dokima-dev/dokima/issues/781",
+    "criterion": "S1.9"
+   },
+   {
+    "ask": "The check that new tests fail today runs each with the run-one command setting.",
+    "source": "https://github.com/dokima-dev/dokima/issues/781",
+    "criterion": "S1.10"
+   },
+   {
+    "ask": "The check that new tests fail today stops a test after the time limit setting.",
+    "source": "https://github.com/dokima-dev/dokima/issues/781",
+    "criterion": "S2.1"
+   },
+   {
+    "ask": "The planner's test files are found by the test folder and file pattern settings.",
+    "source": "https://github.com/dokima-dev/dokima/issues/781",
+    "criterion": "S2.2"
+   },
+   {
+    "ask": "Turning docstrings off in settings stops the planner's check requiring them.",
+    "source": "https://github.com/dokima-dev/dokima/issues/781",
+    "criterion": "S2.3"
+   },
+   {
+    "ask": "The planner's test docstring cap comes from settings.",
+    "source": "https://github.com/dokima-dev/dokima/issues/781",
+    "criterion": "S2.4"
+   },
+   {
+    "ask": "An empty planner test docstring cap turns that cap off.",
+    "source": "https://github.com/dokima-dev/dokima/issues/781",
+    "criterion": "S2.5"
+   }
+  ],
+  "behaviors": [
+   {
+    "criterion": "S1.1",
+    "one_behavior": true,
+    "why": "One setting decides one result."
+   },
+   {
+    "criterion": "S1.2",
+    "one_behavior": true,
+    "why": "One setting decides one result."
+   },
+   {
+    "criterion": "S1.3",
+    "one_behavior": true,
+    "why": "One setting decides one result."
+   },
+   {
+    "criterion": "S1.4",
+    "one_behavior": true,
+    "why": "One setting decides one result."
+   },
+   {
+    "criterion": "S1.5",
+    "one_behavior": true,
+    "why": "One setting decides one result."
+   },
+   {
+    "criterion": "S1.6",
+    "one_behavior": true,
+    "why": "One setting decides one result."
+   },
+   {
+    "criterion": "S1.7",
+    "one_behavior": true,
+    "why": "One setting decides one result."
+   },
+   {
+    "criterion": "S1.8",
+    "one_behavior": true,
+    "why": "One setting decides one result."
+   },
+   {
+    "criterion": "S1.9",
+    "one_behavior": true,
+    "why": "One setting decides one result."
+   },
+   {
+    "criterion": "S1.10",
+    "one_behavior": true,
+    "why": "One setting decides one result."
+   },
+   {
+    "criterion": "S2.1",
+    "one_behavior": true,
+    "why": "One setting decides one result."
+   },
+   {
+    "criterion": "S2.2",
+    "one_behavior": true,
+    "why": "One setting decides one result."
+   },
+   {
+    "criterion": "S2.3",
+    "one_behavior": true,
+    "why": "One setting decides one result."
+   },
+   {
+    "criterion": "S2.4",
+    "one_behavior": true,
+    "why": "One setting decides one result."
+   },
+   {
+    "criterion": "S2.5",
+    "one_behavior": true,
+    "why": "One setting decides one result."
+   }
+  ],
+  "edge_cases": [
+   {
+    "criterion": "S1.1",
+    "cut": [],
+    "missing": []
+   },
+   {
+    "criterion": "S1.2",
+    "cut": [],
+    "missing": []
+   },
+   {
+    "criterion": "S1.3",
+    "cut": [],
+    "missing": []
+   },
+   {
+    "criterion": "S1.4",
+    "cut": [],
+    "missing": []
+   },
+   {
+    "criterion": "S1.5",
+    "cut": [],
+    "missing": []
+   },
+   {
+    "criterion": "S1.6",
+    "cut": [],
+    "missing": []
+   },
+   {
+    "criterion": "S1.7",
+    "cut": [],
+    "missing": []
+   },
+   {
+    "criterion": "S1.8",
+    "cut": [],
+    "missing": []
+   },
+   {
+    "criterion": "S1.9",
+    "cut": [],
+    "missing": []
+   },
+   {
+    "criterion": "S1.10",
+    "cut": [],
+    "missing": []
+   },
+   {
+    "criterion": "S2.1",
+    "cut": [],
+    "missing": []
+   },
+   {
+    "criterion": "S2.2",
+    "cut": [],
+    "missing": []
+   },
+   {
+    "criterion": "S2.3",
+    "cut": [],
+    "missing": []
+   },
+   {
+    "criterion": "S2.4",
+    "cut": [],
+    "missing": []
+   },
+   {
+    "criterion": "S2.5",
+    "cut": [],
+    "missing": []
+   }
+  ],
+  "tests": [],
+  "size": "ok"
+ },
+ "check": {
+  "passed": true,
+  "problems": []
+ },
+ "url": "https://github.com/dokima-dev/dokima/issues/781#issuecomment-6231965506"
+}
