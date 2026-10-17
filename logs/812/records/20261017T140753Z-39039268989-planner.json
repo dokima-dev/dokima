@@ -1,0 +1,265 @@
+{
+ "role": "planner",
+ "stage": null,
+ "run_id": "39039268989",
+ "commit_before": "bc679b7bd8af6fb06851c290c39f65cbbf6e8254",
+ "started_by": "dokima-runtime[bot]",
+ "models": [
+  "claude-opus-5-5"
+ ],
+ "report": {
+  "duration_ms": 85276,
+  "turns": 8,
+  "cost_usd": 0.4182808,
+  "tokens_in": 340700,
+  "tokens_out": 3425
+ },
+ "log": "https://github.com/dokima-dev/dokima/blob/logs/logs/812/39039268989-planner.md",
+ "run": "https://github.com/dokima-dev/dokima/actions/runs/39039268989",
+ "handback": {
+  "kind": "user_story",
+  "title": "Dokima's workflows run from Dokima's own repo",
+  "summary": "Adopters call Dokima's shared workflows by tag, so Dokima's code, keys and errors all come from Dokima's side.",
+  "user_story": "An adopter's runs use Dokima's tagged code and the adopter's own secrets, failing clearly when one is missing.",
+  "acceptance_criteria": [
+   {
+    "text": "A run on an adopter's repo takes all Dokima code from Dokima's own repo, never the adopter's.",
+    "words": "All Dokima code runs from Dokima's own repo inside GitHub Actions.",
+    "source": "https://github.com/dokima-dev/dokima/issues/742",
+    "files": [
+     "dokima/install/dokima.yml",
+     ".github/workflows/entry.yml",
+     ".github/workflows/acceptance-criteria.yml",
+     ".github/workflows/agent.yml",
+     ".github/workflows/assign.yml",
+     ".github/workflows/audit.yml",
+     ".github/workflows/autopilot.yml",
+     ".github/workflows/board.yml",
+     ".github/workflows/card.yml",
+     ".github/workflows/commands.yml",
+     ".github/workflows/fix.yml",
+     ".github/workflows/full-suite.yml",
+     ".github/workflows/reviews.yml",
+     ".github/workflows/testmon.yml",
+     ".github/workflows/uptodate.yml"
+    ],
+    "edge_cases": [
+     {
+      "case": "An adopter's repo holding no Dokima code at all",
+      "test": "tests/test_thin_install.py::test_a_run_starts_in_a_repo_holding_no_dokima_code"
+     },
+     {
+      "case": "An adopter's repo holding its own copy of Dokima's code",
+      "test": "tests/test_thin_install.py::test_an_adopters_own_dokima_folder_never_runs"
+     }
+    ]
+   },
+   {
+    "text": "Every job that reads a key takes it from the repo's keys environment, in the shared workflows too.",
+    "words": "live only in GitHub secrets on the repo (the `keys` environment)",
+    "source": "https://github.com/dokima-dev/dokima/issues/742",
+    "files": [
+     "dokima/install/dokima.yml",
+     ".github/workflows/entry.yml",
+     ".github/workflows/agent.yml",
+     ".github/workflows/audit.yml",
+     ".github/workflows/autopilot.yml",
+     ".github/workflows/board.yml",
+     ".github/workflows/card.yml",
+     ".github/workflows/commands.yml",
+     ".github/workflows/fix.yml",
+     ".github/workflows/uptodate.yml"
+    ],
+    "edge_cases": [
+     {
+      "case": "A job reading a key whose name comes from the settings",
+      "test": "tests/test_thin_install.py::test_every_shared_job_that_reads_a_key_takes_it_from_the_keys_environment"
+     }
+    ]
+   },
+   {
+    "text": "Each role reads its model key from the secret its settings name.",
+    "words": "`settings.yaml` only names which secret each role reads.",
+    "source": "https://github.com/dokima-dev/dokima/issues/742",
+    "files": [
+     ".github/workflows/agent.yml",
+     "dokima/agents.py"
+    ],
+    "edge_cases": [
+     {
+      "case": "Settings that name no agents use the default secret",
+      "test": "tests/test_thin_install.py::test_each_role_reads_its_model_key_from_the_secret_its_settings_name"
+     }
+    ]
+   },
+   {
+    "text": "A run with no bot set up fails, and its message says how to set the bot up.",
+    "words": "Missing bot or key fails loudly with the fix in the message",
+    "source": "https://github.com/dokima-dev/dokima/issues/742",
+    "files": [
+     ".github/workflows/agent.yml"
+    ],
+    "edge_cases": [
+     {
+      "case": "The app id is set but its key is missing",
+      "test": "tests/test_thin_install.py::test_a_run_with_no_bot_set_up_fails_saying_how_to_set_it_up"
+     }
+    ]
+   },
+   {
+    "text": "A run with no model key secret fails, and its message names the secret and how to add it.",
+    "words": "Missing bot or key fails loudly with the fix in the message",
+    "source": "https://github.com/dokima-dev/dokima/issues/742",
+    "files": [
+     ".github/workflows/agent.yml",
+     "dokima/agents.py"
+    ],
+    "edge_cases": [
+     {
+      "case": "The settings name a secret the repo lacks",
+      "test": "tests/test_thin_install.py::test_a_run_with_no_model_key_fails_naming_the_secret_and_how_to_add_it"
+     }
+    ]
+   },
+   {
+    "text": "Every commit Dokima makes carries a co-author line naming Dokima's bot by default.",
+    "words": "Until #747 lands, the co-author line names the repo's own bot.",
+    "source": "https://github.com/dokima-dev/dokima/issues/742#issuecomment-6234488528",
+    "files": [
+     ".github/workflows/agent.yml",
+     "dokima/defaults.yaml",
+     "dokima/settings.py"
+    ],
+    "edge_cases": [
+     {
+      "case": "A worker's run that merges main in before pushing",
+      "test": "tests/test_thin_install.py::test_every_commit_dokima_makes_credits_its_bot_by_default"
+     }
+    ]
+   },
+   {
+    "text": "When a repo's settings turn the co-author line off, its commits carry none.",
+    "words": "The shipped default is the `dokima[bot]` trailer, and an adopter can turn it off.",
+    "source": "https://github.com/dokima-dev/dokima/issues/742#issuecomment-6234488528",
+    "files": [
+     ".github/workflows/agent.yml",
+     "dokima/defaults.yaml",
+     "dokima/settings.py"
+    ],
+    "edge_cases": [
+     {
+      "case": "A worker's run that merges main in with the line off",
+      "test": "tests/test_thin_install.py::test_turning_the_co_author_line_off_leaves_commits_with_none"
+     }
+    ]
+   },
+   {
+    "text": "The adopter's workflow calls Dokima's shared workflows at a release tag, never a branch.",
+    "words": "One thin workflow, `.github/workflows/dokima.yml`, about 15 lines, that calls Dokima's shared workflows by tag.",
+    "source": "https://github.com/dokima-dev/dokima/issues/742",
+    "files": [
+     "dokima/install/dokima.yml",
+     ".github/workflows/entry.yml"
+    ],
+    "edge_cases": [
+     {
+      "case": "A call at main or another branch",
+      "test": "tests/test_thin_install.py::test_the_adopters_workflow_calls_dokimas_shared_workflows_at_a_release_tag"
+     }
+    ]
+   },
+   {
+    "text": "The adopter's workflow is at most 20 lines long.",
+    "words": "a 20-line ceiling is fine",
+    "source": "https://github.com/dokima-dev/dokima/issues/742#issuecomment-6234488528",
+    "files": [
+     "dokima/install/dokima.yml"
+    ],
+    "no_edge_cases": "A line count has no failure a user meets beyond the limit itself."
+   },
+   {
+    "text": "The adopter's one workflow starts Dokima on every event Dokima acts on.",
+    "words": "One thin workflow, `.github/workflows/dokima.yml`, about 15 lines, that calls Dokima's shared workflows by tag.",
+    "source": "https://github.com/dokima-dev/dokima/issues/742",
+    "files": [
+     "dokima/install/dokima.yml",
+     ".github/workflows/entry.yml"
+    ],
+    "edge_cases": [
+     {
+      "case": "An event only one shared workflow acts on, such as a finished run",
+      "test": "tests/test_thin_install.py::test_every_event_dokima_acts_on_starts_the_adopters_workflow"
+     }
+    ]
+   }
+  ],
+  "non_functional": [],
+  "tests": {
+   "812.1": [
+    "tests/test_thin_install.py::test_an_adopters_own_dokima_folder_never_runs",
+    "tests/test_thin_install.py::test_a_run_starts_in_a_repo_holding_no_dokima_code",
+    "tests/test_thin_install.py::test_no_shared_workflow_runs_the_adopters_dokima_folder"
+   ],
+   "812.2": [
+    "tests/test_thin_install.py::test_every_shared_job_that_reads_a_key_takes_it_from_the_keys_environment"
+   ],
+   "812.3": [
+    "tests/test_thin_install.py::test_each_role_reads_its_model_key_from_the_secret_its_settings_name"
+   ],
+   "812.4": [
+    "tests/test_thin_install.py::test_a_run_with_no_bot_set_up_fails_saying_how_to_set_it_up"
+   ],
+   "812.5": [
+    "tests/test_thin_install.py::test_a_run_with_no_model_key_fails_naming_the_secret_and_how_to_add_it"
+   ],
+   "812.6": [
+    "tests/test_thin_install.py::test_every_commit_dokima_makes_credits_its_bot_by_default"
+   ],
+   "812.7": [
+    "tests/test_thin_install.py::test_turning_the_co_author_line_off_leaves_commits_with_none"
+   ],
+   "812.8": [
+    "tests/test_thin_install.py::test_the_adopters_workflow_calls_dokimas_shared_workflows_at_a_release_tag"
+   ],
+   "812.9": [
+    "tests/test_thin_install.py::test_the_adopters_workflow_is_at_most_twenty_lines"
+   ],
+   "812.10": [
+    "tests/test_thin_install.py::test_every_event_dokima_acts_on_starts_the_adopters_workflow"
+   ]
+  },
+  "test_changes": {
+   "tests/test_settings_prompts.py::test_with_no_co_author_setting_commits_carry_no_co_author_line": "Owner made the bot line the default; still proves never the owner's line.",
+   "tests/test_start.py::Machine": "Stands in for checking out Dokima's repo, and reads indexes into missing values."
+  },
+  "links": {
+   "blocked_by": [],
+   "blocks": [
+    813,
+    816
+   ],
+   "relates_to": [
+    742,
+    747,
+    755,
+    41,
+    110,
+    272,
+    820
+   ]
+  },
+  "raises": [],
+  "answers": [
+   {
+    "raise": "R1",
+    "answer": "done",
+    "why": "The event test now proves its own criterion 812.10, from the owner's words on one thin workflow."
+   }
+  ]
+ },
+ "check": {
+  "passed": true,
+  "problems": []
+ },
+ "url": "https://github.com/dokima-dev/dokima/issues/812#issuecomment-6234849441"
+}
