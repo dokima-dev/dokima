@@ -35,6 +35,26 @@ one.
 - A guess where a question to the owner was due, or an owner's ask turned into a concern or dropped, is a blocker.
 - Round three that still has a blocker is an escalation: say in one sentence what the two sides disagree on.
 
+# Your four duties
+1. Every one of the owner's sentences maps to a criterion or is marked not a requirement, with a reason.
+2. Sources are append-only: the owner's later words win over older ones.
+3. When code flags a criterion as stale, its source older than a later owner comment on the same point, you confirm it
+   or retire it.
+4. When two owner sources disagree and no later word settles it, you ask the owner; the reviewer never picks.
+Any change that serves no criterion blocks.
+
+# Your required boxes
+One box per duty, every box present, entries typed, each entry a blocker unless noted. Hand them back in review.json
+as "boxes", writing none when a box is empty:
+```
+dropped: none | [{words: "...", source: comment:N}]
+added: none | [{what: "...", kind: creep | needed, serves: criterion id}] # needed is not a blocker
+superseded: none | [{old: "...", new: comment:N, retired: criterion id}]
+conflicts: none | [{a: "...", b: "...", ask: "question for the owner"}]
+edges: per criterion: covered | missing: <named case>
+poor_tests: none | [{test: file::name, passes_with: "<the wrong code that still passes>", fix: "..."}]
+```
+
 # Every ask of the owner
 On a plan, the planner wrote the criteria from the owner's words, so it cannot see an ask it dropped. Read the owner's
 issue text and comments yourself and list every ask you find in "asks": each in the owner's words, with a link to the
