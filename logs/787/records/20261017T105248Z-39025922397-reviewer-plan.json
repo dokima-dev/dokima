@@ -1,0 +1,290 @@
+{
+ "role": "reviewer",
+ "stage": "plan",
+ "run_id": "39025922397",
+ "commit_before": "35c3af17ddb65ce25f7aa2a5e3fa0caeddc65a52",
+ "started_by": "dokima-runtime[bot]",
+ "models": [
+  "claude-opus-5-5"
+ ],
+ "report": {
+  "duration_ms": 563315,
+  "turns": 15,
+  "cost_usd": 0.6398142000000001,
+  "tokens_in": 702565,
+  "tokens_out": 6019
+ },
+ "log": "https://github.com/dokima-dev/dokima/blob/logs/logs/787/39025922397-reviewer-plan.md",
+ "run": "https://github.com/dokima-dev/dokima/actions/runs/39025922397",
+ "handback": {
+  "previous_step": {
+   "did": [
+    "The planner planned again after the overlapping issue merged, with the same plan and tests."
+   ],
+   "decided": [
+    "The plan keeps all nine criteria and their tests unchanged."
+   ],
+   "open": [
+    "Filed issues already carry the settings' filed label on main, from the overlapping issue."
+   ]
+  },
+  "verdict": "approve",
+  "summary": "The plan is unchanged and holds against today's main; one criterion is already met there and its test pins it.",
+  "raises": [],
+  "answers": [],
+  "asks": [
+   {
+    "ask": "`branch.default: main`",
+    "source": "https://github.com/dokima-dev/dokima/issues/740#issuecomment-6219928729",
+    "criterion": "787.1"
+   },
+   {
+    "ask": "better: read repo default_branch",
+    "source": "https://github.com/dokima-dev/dokima/issues/740#issuecomment-6219928729",
+    "criterion": "787.2"
+   },
+   {
+    "ask": "`merge.method: squash`",
+    "source": "https://github.com/dokima-dev/dokima/issues/740#issuecomment-6219928729",
+    "criterion": "787.3"
+   },
+   {
+    "ask": "`gate.checks_wait_min: 45`",
+    "source": "https://github.com/dokima-dev/dokima/issues/740#issuecomment-6219928729",
+    "criterion": "787.4"
+   },
+   {
+    "ask": "autopilot: autopilot",
+    "source": "https://github.com/dokima-dev/dokima/issues/740#issuecomment-6219928729",
+    "criterion": "787.5"
+   },
+   {
+    "ask": "filed: filed-by-dokima",
+    "source": "https://github.com/dokima-dev/dokima/issues/740#issuecomment-6219928729",
+    "criterion": "787.7"
+   },
+   {
+    "ask": "a test where adding the label named in settings moves the board card",
+    "source": "https://github.com/dokima-dev/dokima/issues/787#issuecomment-6232040687",
+    "criterion": "787.5"
+   },
+   {
+    "ask": "a test that turning autopilot off removes the settings' label",
+    "source": "https://github.com/dokima-dev/dokima/issues/787#issuecomment-6232040687",
+    "criterion": "787.6"
+   },
+   {
+    "ask": "ship the default branch setting empty, not \"main\"",
+    "source": "https://github.com/dokima-dev/dokima/issues/787#issuecomment-6232347057",
+    "criterion": "787.8"
+   },
+   {
+    "ask": "Empty means ask GitHub for the repo's default branch",
+    "source": "https://github.com/dokima-dev/dokima/issues/787#issuecomment-6232347057",
+    "criterion": "787.9"
+   },
+   {
+    "ask": "a repo that names a branch in its settings gets that one",
+    "source": "https://github.com/dokima-dev/dokima/issues/787#issuecomment-6232347057",
+    "criterion": "787.1"
+   }
+  ],
+  "behaviors": [
+   {
+    "criterion": "787.1",
+    "one_behavior": true,
+    "why": "One branch used for the merge."
+   },
+   {
+    "criterion": "787.2",
+    "one_behavior": true,
+    "why": "One fallback when the setting is empty."
+   },
+   {
+    "criterion": "787.3",
+    "one_behavior": true,
+    "why": "One merge method."
+   },
+   {
+    "criterion": "787.4",
+    "one_behavior": true,
+    "why": "One wait length."
+   },
+   {
+    "criterion": "787.5",
+    "one_behavior": true,
+    "why": "Reading the label by its set name."
+   },
+   {
+    "criterion": "787.6",
+    "one_behavior": true,
+    "why": "Switching by the set label name."
+   },
+   {
+    "criterion": "787.7",
+    "one_behavior": true,
+    "why": "One label on filed issues."
+   },
+   {
+    "criterion": "787.8",
+    "one_behavior": true,
+    "why": "One shipped value: an empty default branch."
+   },
+   {
+    "criterion": "787.9",
+    "one_behavior": true,
+    "why": "One branch value handed to workflows."
+   }
+  ],
+  "edge_cases": [
+   {
+    "criterion": "787.1",
+    "cut": [],
+    "missing": []
+   },
+   {
+    "criterion": "787.2",
+    "cut": [],
+    "missing": []
+   },
+   {
+    "criterion": "787.3",
+    "cut": [],
+    "missing": []
+   },
+   {
+    "criterion": "787.4",
+    "cut": [],
+    "missing": []
+   },
+   {
+    "criterion": "787.5",
+    "cut": [],
+    "missing": []
+   },
+   {
+    "criterion": "787.6",
+    "cut": [],
+    "missing": []
+   },
+   {
+    "criterion": "787.7",
+    "cut": [],
+    "missing": []
+   },
+   {
+    "criterion": "787.8",
+    "cut": [],
+    "missing": []
+   },
+   {
+    "criterion": "787.9",
+    "cut": [],
+    "missing": []
+   }
+  ],
+  "tests": [
+   {
+    "test": "tests/test_settings_autopilot.py::test_autopilot_merges_into_the_default_branch_the_settings_name",
+    "only_its_behavior": true,
+    "why": "Merges and reads only the named branch."
+   },
+   {
+    "test": "tests/test_settings_autopilot.py::test_a_default_branch_github_lacks_stops_saying_which",
+    "only_its_behavior": true,
+    "why": "Catches code that ignores the setting."
+   },
+   {
+    "test": "tests/test_settings_autopilot.py::test_with_no_default_branch_setting_autopilot_uses_githubs_default_branch",
+    "only_its_behavior": true,
+    "why": "No value falls back to GitHub's branch."
+   },
+   {
+    "test": "tests/test_settings_autopilot.py::test_an_empty_text_default_branch_also_uses_githubs",
+    "only_its_behavior": true,
+    "why": "Empty text falls back too."
+   },
+   {
+    "test": "tests/test_settings_autopilot.py::test_autopilot_merges_with_the_merge_method_the_settings_name",
+    "only_its_behavior": true,
+    "why": "Checks only the merge method used."
+   },
+   {
+    "test": "tests/test_settings_autopilot.py::test_a_direct_merge_after_a_held_one_keeps_the_settings_method",
+    "only_its_behavior": true,
+    "why": "The second merge keeps the method."
+   },
+   {
+    "test": "tests/test_settings_autopilot.py::test_the_merge_gate_waits_for_checks_as_many_minutes_as_the_settings_say",
+    "only_its_behavior": true,
+    "why": "Checks only the wait length."
+   },
+   {
+    "test": "tests/test_settings_autopilot.py::test_autopilot_reads_its_label_by_the_name_in_the_labels_setting",
+    "only_its_behavior": true,
+    "why": "Reads autopilot by the set name."
+   },
+   {
+    "test": "tests/test_settings_autopilot.py::test_the_sweep_lists_issues_by_the_named_label",
+    "only_its_behavior": true,
+    "why": "Sweep asks by the set name."
+   },
+   {
+    "test": "tests/test_settings_autopilot.py::test_the_board_reads_autopilot_by_the_named_label",
+    "only_its_behavior": true,
+    "why": "Board counts by the set name."
+   },
+   {
+    "test": "tests/test_settings_autopilot.py::test_adding_the_named_label_on_github_moves_the_board_card",
+    "only_its_behavior": true,
+    "why": "Adding the set label moves the card."
+   },
+   {
+    "test": "tests/test_settings_autopilot.py::test_turning_autopilot_on_puts_the_named_label_on",
+    "only_its_behavior": true,
+    "why": "Turning on adds the set label."
+   },
+   {
+    "test": "tests/test_settings_autopilot.py::test_the_board_puts_the_named_label_on_a_pull_request",
+    "only_its_behavior": true,
+    "why": "Pull request gets the set label."
+   },
+   {
+    "test": "tests/test_settings_autopilot.py::test_turning_autopilot_off_removes_the_named_label",
+    "only_its_behavior": true,
+    "why": "Turning off removes the set label."
+   },
+   {
+    "test": "tests/test_settings_autopilot.py::test_issues_dokima_files_carry_the_filed_label_named_in_settings",
+    "only_its_behavior": true,
+    "why": "Filed issue carries the set label."
+   },
+   {
+    "test": "tests/test_settings_autopilot.py::test_the_shipped_settings_leave_the_default_branch_empty",
+    "only_its_behavior": true,
+    "why": "Checks only the shipped branch value."
+   },
+   {
+    "test": "tests/test_settings_autopilot.py::test_a_repo_with_no_settings_file_merges_into_githubs_default_branch",
+    "only_its_behavior": true,
+    "why": "No settings file merges into GitHub's branch."
+   },
+   {
+    "test": "tests/test_settings_autopilot.py::test_with_the_default_branch_empty_workflows_get_githubs_default_branch",
+    "only_its_behavior": true,
+    "why": "Runs the real reader; checks only the branch line."
+   },
+   {
+    "test": "tests/test_settings_autopilot.py::test_github_giving_no_default_branch_stops_the_run_saying_why",
+    "only_its_behavior": true,
+    "why": "No branch known stops the reader, saying so."
+   }
+  ],
+  "size": "ok"
+ },
+ "check": {
+  "passed": true,
+  "problems": []
+ },
+ "url": "https://github.com/dokima-dev/dokima/issues/787#issuecomment-6232947794"
+}
