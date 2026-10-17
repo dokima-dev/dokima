@@ -1,0 +1,82 @@
+{
+ "role": "reviewer",
+ "stage": "pr",
+ "run_id": "39027446112",
+ "commit_before": "0a8615ae58aef7b5fb083569eee68bc527f19a5a",
+ "started_by": "dokima-runtime[bot]",
+ "models": [
+  "claude-opus-5-5"
+ ],
+ "report": {
+  "duration_ms": 212309,
+  "turns": 17,
+  "cost_usd": 0.6333077999999999,
+  "tokens_in": 719833,
+  "tokens_out": 7246
+ },
+ "log": "https://github.com/dokima-dev/dokima/blob/logs/logs/787/39027446112-reviewer-pr.md",
+ "run": "https://github.com/dokima-dev/dokima/actions/runs/39027446112",
+ "handback": {
+  "previous_step": {
+   "did": [
+    "Autopilot reads its branch, merge method, checks wait and label names from settings.",
+    "The default branch now ships empty; empty asks GitHub for the repo's default."
+   ],
+   "decided": [
+    "The filed label was already read from settings, so nothing changed there."
+   ],
+   "open": [
+    "Older tests, the permission list and two files need changes outside the plan."
+   ]
+  },
+  "verdict": "block",
+  "summary": "The new tests pass, but fifteen older tests now fail, and the fixes lie outside the plan.",
+  "raises": [
+   {
+    "kind": "blocker",
+    "to": "planner",
+    "label": "Older tests now fail",
+    "text": "Fifteen tests green on main fail here: older fake GitHubs don't answer the default branch call, and the permission guard can't place it. Add them to scope.",
+    "evidence": "`pytest tests/test_merge_gate.py tests/test_manifest.py` and five more: 16 failed here, 2 on main.",
+    "raised_by": "reviewer",
+    "id": "R4"
+   },
+   {
+    "kind": "blocker",
+    "to": "planner",
+    "label": "Renamed label missed",
+    "text": "A renamed autopilot label is still missed by split filing, the off switch on a pull request, the up-to-date check, and the autopilot workflow's trigger.",
+    "evidence": "`dokima/agent_roles.py:419,639`, `dokima/uptodate.py:197`, `.github/workflows/autopilot.yml:25` name `autopilot` outright.",
+    "raised_by": "reviewer",
+    "id": "R5"
+   }
+  ],
+  "answers": [
+   {
+    "raise": "W1",
+    "answer": "done",
+    "why": "Confirmed: those tests pass on main and fail here only on the default branch call."
+   },
+   {
+    "raise": "W2",
+    "answer": "done",
+    "why": "Confirmed: the guard test fails here, and the permission list lives outside the plan's files."
+   },
+   {
+    "raise": "W3",
+    "answer": "done",
+    "why": "Confirmed: both files still read the fixed name; the autopilot workflow does too."
+   }
+  ],
+  "asks": [],
+  "behaviors": [],
+  "edge_cases": [],
+  "tests": [],
+  "size": "ok"
+ },
+ "check": {
+  "passed": true,
+  "problems": []
+ },
+ "url": "https://github.com/dokima-dev/dokima/pull/810#issuecomment-6233165965"
+}
