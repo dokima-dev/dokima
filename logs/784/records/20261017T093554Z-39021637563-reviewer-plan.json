@@ -1,0 +1,231 @@
+{
+ "role": "reviewer",
+ "stage": "plan",
+ "run_id": "39021637563",
+ "commit_before": "2fb54ffda7a5db8a2f206c95d2f4a52f1d0d7bb6",
+ "started_by": "dokima-runtime[bot]",
+ "models": [
+  "claude-opus-5-5"
+ ],
+ "report": {
+  "duration_ms": 58330,
+  "turns": 10,
+  "cost_usd": 0.5891000000000001,
+  "tokens_in": 429866,
+  "tokens_out": 5408
+ },
+ "log": "https://github.com/dokima-dev/dokima/blob/logs/logs/784/39021637563-reviewer-plan.md",
+ "run": "https://github.com/dokima-dev/dokima/actions/runs/39021637563",
+ "handback": {
+  "previous_step": {
+   "did": [
+    "The planner added criteria: filed issues carry, and create, the filed label by setting name.",
+    "The planner named the autopilot label as carried by issue 787, as the owner said."
+   ],
+   "decided": [
+    "The plan drops the plan and work labels from the shipped settings."
+   ],
+   "open": [
+    "Two questions wait for the owner: the merge queue, and the plan and work labels."
+   ]
+  },
+  "verdict": "approve",
+  "summary": "Every ask has a criterion and a test failing today for the right reason; two questions wait for the owner.",
+  "raises": [],
+  "answers": [],
+  "asks": [
+   {
+    "ask": "The checks required on the default branch come from the required checks setting.",
+    "source": "https://github.com/dokima-dev/dokima/issues/740#issuecomment-6219928729",
+    "criterion": "784.1"
+   },
+   {
+    "ask": "Turning the merge queue off in a repo's settings stops the audit asking for one.",
+    "source": "https://github.com/dokima-dev/dokima/issues/740",
+    "criterion": "784.2"
+   },
+   {
+    "ask": "Dokima creates its labels under the names in the labels setting.",
+    "source": "https://github.com/dokima-dev/dokima/issues/740#issuecomment-6219928729",
+    "criterion": "784.3"
+   },
+   {
+    "ask": "The daily audit no longer flags label and pill colors that match the repo's settings.",
+    "source": "https://github.com/dokima-dev/dokima/issues/740",
+    "criterion": "784.4"
+   },
+   {
+    "ask": "The daily audit no longer flags label and pill colors that match the repo's settings.",
+    "source": "https://github.com/dokima-dev/dokima/issues/740",
+    "criterion": "784.5"
+   },
+   {
+    "ask": "The settings guard no longer flags a workflow's name, compared in code, as a missing check.",
+    "source": "https://github.com/dokima-dev/dokima/issues/740",
+    "criterion": "784.6"
+   },
+   {
+    "ask": "The settings declare no label as one that starts an agent.",
+    "source": "https://github.com/dokima-dev/dokima/issues/740",
+    "criterion": "784.7"
+   },
+   {
+    "ask": "Dokima adds and creates the filed label under its name in the labels setting",
+    "source": "https://github.com/dokima-dev/dokima/issues/784#issuecomment-6232188413",
+    "criterion": "784.8"
+   },
+   {
+    "ask": "Dokima adds and creates the filed label under its name in the labels setting",
+    "source": "https://github.com/dokima-dev/dokima/issues/784#issuecomment-6232188413",
+    "criterion": "784.9"
+   }
+  ],
+  "behaviors": [
+   {
+    "criterion": "784.1",
+    "one_behavior": true,
+    "why": "The audit compares the branch rule with the setting."
+   },
+   {
+    "criterion": "784.2",
+    "one_behavior": true,
+    "why": "With the queue off, no queue line appears."
+   },
+   {
+    "criterion": "784.3",
+    "one_behavior": true,
+    "why": "The audit looks up labels by setting name."
+   },
+   {
+    "criterion": "784.4",
+    "one_behavior": true,
+    "why": "Label colors come from settings."
+   },
+   {
+    "criterion": "784.5",
+    "one_behavior": true,
+    "why": "Pill colors come from settings."
+   },
+   {
+    "criterion": "784.6",
+    "one_behavior": true,
+    "why": "The guard accepts workflow names."
+   },
+   {
+    "criterion": "784.7",
+    "one_behavior": true,
+    "why": "The shipped labels hold no plan or work."
+   },
+   {
+    "criterion": "784.8",
+    "one_behavior": true,
+    "why": "A filed issue carries the renamed filed label."
+   },
+   {
+    "criterion": "784.9",
+    "one_behavior": true,
+    "why": "A missing renamed filed label gets created."
+   }
+  ],
+  "edge_cases": [
+   {
+    "criterion": "784.1",
+    "cut": [],
+    "missing": []
+   },
+   {
+    "criterion": "784.2",
+    "cut": [],
+    "missing": []
+   },
+   {
+    "criterion": "784.3",
+    "cut": [],
+    "missing": []
+   },
+   {
+    "criterion": "784.4",
+    "cut": [],
+    "missing": []
+   },
+   {
+    "criterion": "784.5",
+    "cut": [],
+    "missing": []
+   },
+   {
+    "criterion": "784.6",
+    "cut": [],
+    "missing": []
+   },
+   {
+    "criterion": "784.7",
+    "cut": [],
+    "missing": []
+   },
+   {
+    "criterion": "784.8",
+    "cut": [],
+    "missing": []
+   },
+   {
+    "criterion": "784.9",
+    "cut": [],
+    "missing": []
+   }
+  ],
+  "tests": [
+   {
+    "test": "tests/test_settings_audit.py::test_the_branch_rule_is_checked_against_the_required_checks_setting",
+    "only_its_behavior": true,
+    "why": "Runs the audit with Lint present, then missing."
+   },
+   {
+    "test": "tests/test_settings_audit.py::test_with_the_merge_queue_off_the_audit_never_asks_for_one",
+    "only_its_behavior": true,
+    "why": "Default asks; off and refused stay silent."
+   },
+   {
+    "test": "tests/test_settings_audit.py::test_the_audit_wants_each_label_under_its_name_in_settings",
+    "only_its_behavior": true,
+    "why": "Renamed label passes, old name is flagged."
+   },
+   {
+    "test": "tests/test_settings_audit.py::test_a_label_color_matching_settings_is_not_flagged",
+    "only_its_behavior": true,
+    "why": "Matching color passes, shipped color is flagged."
+   },
+   {
+    "test": "tests/test_settings_audit.py::test_a_pill_color_matching_settings_is_not_flagged",
+    "only_its_behavior": true,
+    "why": "Matching pill passes, shipped pill is flagged."
+   },
+   {
+    "test": "tests/test_settings_audit.py::test_the_guard_passes_a_workflow_name_compared_in_code",
+    "only_its_behavior": true,
+    "why": "Workflow name passes, unknown name is still named."
+   },
+   {
+    "test": "tests/test_settings_audit.py::test_the_shipped_settings_declare_no_plan_or_work_label",
+    "only_its_behavior": true,
+    "why": "Reads shipped settings for plan and work labels."
+   },
+   {
+    "test": "tests/test_settings_audit.py::test_a_filed_issue_carries_the_filed_label_named_in_settings",
+    "only_its_behavior": true,
+    "why": "Files one issue; checks it carries only the renamed label."
+   },
+   {
+    "test": "tests/test_settings_audit.py::test_a_missing_filed_label_is_created_under_its_name_in_settings",
+    "only_its_behavior": true,
+    "why": "Repo lacks the renamed label; checks it is created and used."
+   }
+  ],
+  "size": "ok"
+ },
+ "check": {
+  "passed": true,
+  "problems": []
+ },
+ "url": "https://github.com/dokima-dev/dokima/issues/784#issuecomment-6232344987"
+}
