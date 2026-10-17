@@ -361,8 +361,8 @@ def test_a_run_on_github_starts_the_model_the_agents_section_names(record_proper
         f"794.5: the reviewer started on {got!r}, not claude-sonnet-5-5 from the agents section of main's settings file"
 
 
-# A settings file that tries to change the order of steps, the ways a repo might guess at, and puts the reviewer on
-# claude-sonnet-5-5, so a run shows it read the file.
+# A settings file that tries to change the order of steps, the ways a repo might guess at, and puts each role on its
+# own model, so each run shows it read the file.
 REORDER = textwrap.dedent('''\
     river:
       order: [plan, build, merge]  # skip the reviews
@@ -373,29 +373,97 @@ REORDER = textwrap.dedent('''\
           agent: claude
           key: CLAUDE_CODE_OAUTH_TOKEN
       roles:
+        planner:
+          subscription: main
+          model: claude-haiku-5-5
+        worker:
+          subscription: main
+          model: claude-fable-5-1
         reviewer:
           subscription: main
           model: claude-sonnet-5-5
     ''')
 
+# The test the stand-in planner writes: it needs x.py, which only the stand-in worker builds.
+PLANNER_TEST = ('def test_a(record_property):\n    """x.value() is 1.\n\n    Proves 57.1."""\n'
+                '    record_property("proves", "57.1")\n    import x\n    assert x.value() == 1\n')
+
+# The plan the stand-in planner hands back: one criterion on issue #57 ("Fix it."), proved by PLANNER_TEST.
+ORDER_PLAN = {"kind": "user_story", "title": "Fix it", "summary": "Fixes the stuck issue.",
+              "user_story": "The stuck issue is fixed.",
+              "acceptance_criteria": [{"text": "The stuck issue is fixed.", "words": "Fix it.",
+                                       "source": "https://github.com/o/r/issues/57", "files": ["x.py"],
+                                       "no_edge_cases": "One fix."}],
+              "non_functional": [], "tests": {"57.1": ["tests/test_x.py::test_a"]}, "test_changes": {},
+              "links": {"blocked_by": [], "blocks": [], "relates_to": []}}
+
+# A stand-in for Claude Code that plays whichever role the run gives it: the planner hands back ORDER_PLAN with its
+# test, the worker builds x.py and hands back its work, the reviewer hands back the review the test chose. Each keeps
+# its arguments (agent-argv.json), so the test sees the model it was started on.
+STAND_IN = r'''#!/usr/bin/env python3
+"""A stand-in planner, worker or reviewer."""
+import json, os, shutil, sys
+d, out, role = os.environ["FAKE_GH_DIR"], os.environ["OUT"], os.environ["ROLE"]
+json.dump(sys.argv[1:], open(os.path.join(d, "agent-argv.json"), "w"))
+if role == "planner":
+    open("tests/test_x.py", "w").write(__TEST__)
+    json.dump(__PLAN__, open(os.path.join(out, "plan.json"), "w"))
+elif role == "worker":
+    open("x.py", "w").write("def value():\n    return 1\n")
+    json.dump({"summary": "Built it.", "criteria": {"57.1": "x.py, value()"}, "evidence": "pytest -q: 1 passed",
+               "raises": [], "answers": []}, open(os.path.join(out, "work.json"), "w"))
+else:
+    shutil.copy(os.environ["FAKE_REVIEW"], os.path.join(out, "review.json"))
+model = sys.argv[sys.argv.index("--model") + 1] if "--model" in sys.argv[:-1] else os.environ.get("MODEL", "")
+logs = os.path.join(os.environ["HOME"], ".claude", "projects", "p")
+os.makedirs(logs, exist_ok=True)
+open(os.path.join(logs, "s.jsonl"), "w").write(json.dumps({"message": {"model": model, "role": "assistant", "content": "Done."}}) + "\n")
+open(os.environ["FAKE_CLAUDE_MARK"], "w").write("started")
+print(json.dumps({"num_turns": 1, "duration_ms": 1000, "usage": {}}))
+'''.replace("__TEST__", repr(PLANNER_TEST)).replace("__PLAN__", repr(ORDER_PLAN))
+
+
+def next_steps(r):
+    """Every next step the run started, as (role, stage).
+
+    Only a reviewer's stage tells two steps apart (plan or pr), so other roles show an empty stage."""
+    out = []
+    for c in r.dispatches():
+        f = dict(x.split("=", 1) for i, x in enumerate(c) if i and c[i - 1] in ("-f", "-F") and "=" in x)
+        if f.get("event_type") == "dokima-next":
+            role = f.get("client_payload[role]", "")
+            out.append((role, f.get("client_payload[stage]", "") if role == "reviewer" else ""))
+    return out
+
 
 def test_no_setting_changes_the_order_of_steps(record_property, tmp_path, monkeypatch):
     """Settings that try to skip the reviews leave the order plan, review, build, review, merge.
 
-    Proves 794.10. Runs the plan review of an issue on autopilot, the way GitHub runs it, with main's settings file
-    asking to skip the reviews and go straight to build and merge. First checks the reviewer started on the model the
-    file names, so the file was really read in this run; without that the order check would prove nothing. Then the
-    approved plan must start exactly one worker, the build, and nothing else: no merge, no second planner."""
+    Proves 794.10. Runs the planner, the plan review and the worker of an issue on autopilot, one after the other, the
+    way GitHub runs them, with main's settings file asking to skip the reviews and go straight to build and merge.
+    In each run it first checks the agent started on the model the file names for its role, so the file was really
+    read in that run; without that the order check would prove nothing. Then each run must start exactly the next
+    step of the order: the planner starts the plan review, the approved plan starts the build, and the build starts
+    the code review. Nothing is skipped and no merge is started."""
     record_property("proves", "794.10")
     import test_autopilot_river as river
-    r = river.run(monkeypatch, tmp_path / "river", "reviewer", "plan", river.ts.STORY_PLANNED, river.ON,
-                  try_branch=True, review=river.APPROVE, files={".dokima/settings.yaml": REORDER})
-    assert r.agent_started(), f"794.10: the plan review never started; the run stopped at '{r.failed_step}':\n{r.tail()}"
-    path = os.path.join(r.tmp, "gh", "agent-argv.json")
-    argv = json.load(open(path)) if os.path.exists(path) else []
-    got = argv[argv.index("--model") + 1] if "--model" in argv[:-1] else None
-    assert got == "claude-sonnet-5-5", \
-        (f"794.10: the run did not read main's settings file (the reviewer started on {got!r}, not claude-sonnet-5-5), "
-         "so it cannot show the file leaves the order alone")
-    assert river.starts(r) == [("worker", river.N)], \
-        f"794.10: after an approved plan the next step must be the build, one worker; the run started {river.starts(r)}"
+    import test_start as ts
+    monkeypatch.setattr(ts, "FAKE_CLAUDE", STAND_IN)
+    files = {".dokima/settings.yaml": REORDER}
+    runs = (("planner", "", [ts.owner_comment("/plan", "2026-10-07T10:00:00Z")], "claude-haiku-5-5",
+             [("reviewer", "plan")], "the plan review"),
+            ("reviewer", "plan", ts.STORY_PLANNED, "claude-sonnet-5-5", [("worker", "")], "the build, one worker"),
+            ("worker", "", ts.STORY_APPROVED, "claude-fable-5-1", [("reviewer", "pr")], "the code review"))
+    for role, stage, comments, model, want, name in runs:
+        step = f"{role} {stage}".strip()
+        r = river.run(monkeypatch, tmp_path / step.replace(" ", "-"), role, stage, comments, river.ON,
+                      try_branch=True, review=river.APPROVE, files=files)
+        assert r.agent_started(), f"794.10: the {step} run never started its agent; it stopped at '{r.failed_step}':\n{r.tail()}"
+        path = os.path.join(r.tmp, "gh", "agent-argv.json")
+        argv = json.load(open(path)) if os.path.exists(path) else []
+        got = argv[argv.index("--model") + 1] if "--model" in argv[:-1] else None
+        assert got == model, \
+            (f"794.10: the {step} run did not read main's settings file (its agent started on {got!r}, not {model}), "
+             "so it cannot show the file leaves the order alone")
+        assert next_steps(r) == want, \
+            f"794.10: after the {step} run the next step must be {name}, {want}; the run started {next_steps(r)}\n{r.tail()}"
