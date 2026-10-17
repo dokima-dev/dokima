@@ -74,6 +74,15 @@ def issue_of_pr(head, body):
     return m.group(1) if m else None
 
 
+def manual_fix_issue(head):
+    """The issue a manual fix fixes, from its branch fix/issue-N or fix/issue-N-<what>; else None.
+
+    fix.yml makes every manual fix name its issue in its branch, as a planned build's try/issue-N does (#837), so the
+    card, the close on merge and a failed queue run all find it without reading any text (a PR's text is rewritten)."""
+    m = re.fullmatch(r"fix/issue-(\d+)(?:-[\w.-]+)?", head or "")
+    return int(m.group(1)) if m else None
+
+
 def sub_issues(repo, number):
     """The issue's own sub-issues, one level down, each with its state."""
     # GitHub allows at most 100 sub-issues per parent, so one page holds them all.

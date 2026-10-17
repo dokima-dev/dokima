@@ -15,7 +15,7 @@ import os
 import test_start as ts
 from test_start import OWNER, Ctx
 
-BRANCH = "fix/typo"
+BRANCH = "fix/issue-7-typo"
 APP_TOKEN = "fake-token"
 WORKFLOW = os.path.join(ts.ROOT, ".github", "workflows", "fix.yml")
 
@@ -29,7 +29,7 @@ def need_workflow(criterion):
 class Fix(ts.Machine):
     """A run of fix.yml on main for the branch an agent pushed.
 
-    The branch is `fix/typo`, with one commit on it."""
+    The branch is `fix/issue-7-typo`, with one commit on it."""
 
     def __init__(self, tmp, pr_open=False, gh_fail="", issue="7"):
         super().__init__(tmp, [], gh_fail=gh_fail, options={"pr_open": pr_open})
@@ -152,3 +152,14 @@ def test_every_manual_fix_names_the_issue_it_fixes(record_property, tmp_path):
     for bad in ("", "abc"):
         run = Fix(tmp_path / f"bad{bad or 'none'}", issue=bad)
         assert run.failed() and not run.opened(), f"830.5: a manual fix naming issue {bad!r} still opened: {run.opened()}"
+
+
+def test_a_manual_fix_s_branch_names_its_issue(record_property, tmp_path):
+    """A manual fix whose branch does not name the issue it fixes opens nothing.
+
+    Proves 837.3. Runs fix.yml for the branch fix/issue-7-typo naming issue #8, and checks it fails and opens no pull
+    request, so the card, the close on merge and a failed queue run can always read the issue from the branch."""
+    record_property("proves", "837.3")
+    need_workflow("837.3")
+    run = Fix(tmp_path, issue="8")
+    assert run.failed() and not run.opened(), f"837.3: a fix whose branch names another issue still opened: {run.opened()}"

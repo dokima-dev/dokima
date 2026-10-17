@@ -20,6 +20,7 @@ import sys
 
 sys.path.insert(0, os.path.join(os.path.dirname(os.path.abspath(__file__)), ".."))
 from dokima import body, plan, retry  # noqa: E402
+from dokima.agent_github import manual_fix_issue  # noqa: E402
 
 ALL_TESTS = "all tests"
 ACCEPTANCE = "Acceptance criteria"
@@ -660,7 +661,7 @@ def find_work(repo):
     if os.environ.get("ON_PR"):
         # A comment on a pull request carries the pull request's number as the issue's.
         pr = int(os.environ["ON_PR"])
-        return plan.pr_issue_number(repo, pr), pr
+        return pr_issue(repo, pr), pr
     if os.environ.get("ISSUE_NUMBER"):
         n = int(os.environ["ISSUE_NUMBER"])
         return n, issue_pr(repo, n)
@@ -670,7 +671,13 @@ def find_work(repo):
         pr = prs[0]["number"] if prs else None
     if not pr:
         return None, None
-    return plan.pr_issue_number(repo, pr), int(pr)
+    return pr_issue(repo, pr), int(pr)
+
+
+def pr_issue(repo, pr):
+    """The issue PR pr is for: a manual fix's from its fix/issue-N branch (#837), else the one it closes."""
+    head = json.loads(gh("api", f"repos/{repo}/pulls/{pr}")).get("head", {}).get("ref")
+    return manual_fix_issue(head) or plan.pr_issue_number(repo, pr)
 
 
 def test_entry(repo, ref, path, source, name):

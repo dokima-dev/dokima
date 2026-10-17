@@ -113,7 +113,7 @@ class Box(ts.Machine):
         github = Ctx(event_name=event, actor=actor, event=Ctx(pull_request=pr), run_id="42", run_attempt="1", sha="",
                      server_url="https://github.com", repository="o/r", repository_owner="o", token="fake-github-token",
                      ref="refs/heads/main", ref_name="main")
-        return {"inputs": Ctx(role=role, stage=stage, issue=N, branch="fix/typo"), "github": github,
+        return {"inputs": Ctx(role=role, stage=stage, issue=N, branch=f"fix/issue-{N}-typo"), "github": github,
                 "client_payload": Ctx(), "matrix": Ctx(tests=tests, id="9.1", name="9.1"),
                 "secrets": Ctx(CLAUDE_CODE_OAUTH_TOKEN="fake-claude-token", DOKIMA_APP_KEY="k"),
                 "vars": Ctx(DOKIMA_APP_ID="1"), "needs": Ctx()}
@@ -513,11 +513,11 @@ def test_a_planners_new_branch_starts_from_the_default_branch_setting(record_pro
 def test_a_manual_fix_opens_against_the_default_branch_setting(record_property, tmp_path):
     """A manual fix's pull request goes to the default branch the settings name.
 
-    Proves 795.7. The settings name trunk as the default branch. Runs fix.yml for the pushed branch fix/typo and
+    Proves 795.7. The settings name trunk as the default branch. Runs fix.yml for the pushed branch fix/issue-N-typo and
     checks it looked for an open pull request into trunk and opened one into trunk."""
     record_property("proves", "795.7")
     box = Box(tmp_path, TRUNK)
-    box.commit("fix/typo", {"fixed.txt": "fixed\n"}, "Fix the typo", start="main")
+    box.commit(f"fix/issue-{N}-typo", {"fixed.txt": "fixed\n"}, "Fix the typo", start="main")
     results = box.run_workflow("fix.yml")
     made = box.gh_calls("pr", "create")
     assert made, f"795.7: the manual fix opened no pull request: {results}\n{box.tail()}"

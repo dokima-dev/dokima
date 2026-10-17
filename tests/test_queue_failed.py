@@ -103,16 +103,8 @@ def test_a_manual_fix_that_fails_twice_tells_the_owner_on_its_issue(record_prope
     """A manual fix has no plan, so no worker starts; the second failure is said on the PR and on the issue it fixes."""
     record_property("proves", "830.6")
     mark = f"{agent_records.QUEUE_FAILED}<!-- head={HEAD} run=111 -->"
-    gh = Gh(comments=[mark], ref="fix/queue-failed")
-    real = gh.__call__
-
-    def with_body(*a):
-        if a[:2] == ("api", f"repos/{REPO}/pulls/{PR}"):
-            return json.dumps({"state": "open", "body": "Fixes #807. A manual fix.",
-                               "head": {"sha": HEAD, "ref": "fix/queue-failed", "repo": {"full_name": REPO}}})
-        return real(*a)
-    gh.__call__ = with_body
-    monkeypatch.setattr(ap.agent_github, "gh", lambda *a: (gh.calls.append(a), with_body(*a))[1] if a[:2] == ("api", f"repos/{REPO}/pulls/{PR}") else gh(*a))
+    gh = Gh(comments=[mark], ref="fix/issue-807-queue-failed")
+    monkeypatch.setattr(ap.agent_github, "gh", gh)
     monkeypatch.setattr(ap, "merge_method", lambda: "squash")
     out = ap.queue_failed(REPO, QREF, "222", "https://x/runs/222", ["owner"])
     assert not [c for c in gh.calls if "client_payload[role]=worker" in c], "830.6: a manual fix started a worker"
