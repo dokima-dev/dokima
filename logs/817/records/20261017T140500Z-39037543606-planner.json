@@ -1,0 +1,263 @@
+{
+ "role": "planner",
+ "stage": null,
+ "run_id": "39037543606",
+ "commit_before": "edf1c0e0800fbd616670940fb81b53445a839682",
+ "started_by": "dokima-runtime[bot]",
+ "models": [
+  "claude-opus-5-5"
+ ],
+ "report": {
+  "duration_ms": 1419268,
+  "turns": 43,
+  "cost_usd": 2.7901540000000002,
+  "tokens_in": 4270933,
+  "tokens_out": 43072
+ },
+ "log": "https://github.com/dokima-dev/dokima/blob/logs/logs/817/39037543606-planner.md",
+ "run": "https://github.com/dokima-dev/dokima/actions/runs/39037543606",
+ "handback": {
+  "kind": "user_story",
+  "title": "Generic shipped prompts and the planner's questions",
+  "summary": "Shipped prompts drop Dokima's file names, share one raising text, draw limits from settings, and teach planner questions.",
+  "user_story": "Any repo's agents get prompts with neutral examples, its own limits, and clear rules for asking the owner.",
+  "acceptance_criteria": [
+   {
+    "text": "A scan of the shipped prompts finds no file name from Dokima's own code.",
+    "words": "a scan finds no Dokima file name in any shipped prompt",
+    "source": "https://github.com/dokima-dev/dokima/issues/741",
+    "files": [
+     "dokima/roles/planner.md",
+     "dokima/roles/worker.md",
+     "dokima/roles/reviewer.md",
+     "dokima/roles/raising.md",
+     "dokima/prompt.py",
+     ".dokima/settings.yaml"
+    ],
+    "edge_cases": [
+     {
+      "case": "The new shared raising file is scanned too.",
+      "test": "tests/test_shipped_prompts.py::test_no_shipped_prompt_names_a_file_of_dokimas_own_code"
+     },
+     {
+      "case": "Prompts as built for a repo with no settings file.",
+      "test": "tests/test_shipped_prompts.py::test_no_shipped_prompt_names_a_file_of_dokimas_own_code"
+     }
+    ]
+   },
+   {
+    "text": "The raising rules are written once, in one shared raising prompt file.",
+    "words": "moves to one shared `roles/raising.md` with neutral examples",
+    "source": "https://github.com/dokima-dev/dokima/issues/741",
+    "files": [
+     "dokima/roles/planner.md",
+     "dokima/roles/worker.md",
+     "dokima/roles/reviewer.md",
+     "dokima/roles/raising.md",
+     "dokima/prompt.py"
+    ],
+    "edge_cases": [
+     {
+      "case": "A role prompt that keeps its own copy of the rules.",
+      "test": "tests/test_shipped_prompts.py::test_the_raising_rules_are_written_once_in_one_shared_file"
+     }
+    ]
+   },
+   {
+    "text": "The planner's, worker's and reviewer's prompts each carry the shared raising rules.",
+    "words": "The 50-line \"raising\" block copied into planner, worker and reviewer",
+    "source": "https://github.com/dokima-dev/dokima/issues/741",
+    "files": [
+     "dokima/roles/planner.md",
+     "dokima/roles/worker.md",
+     "dokima/roles/reviewer.md",
+     "dokima/roles/raising.md",
+     "dokima/prompt.py"
+    ],
+    "edge_cases": [
+     {
+      "case": "The reviewer's prompt at both plan review and code review.",
+      "test": "tests/test_shipped_prompts.py::test_every_role_prompt_carries_the_shared_raising_rules"
+     },
+     {
+      "case": "A prompt that holds the rules twice.",
+      "test": "tests/test_shipped_prompts.py::test_every_role_prompt_carries_the_shared_raising_rules"
+     }
+    ]
+   },
+   {
+    "text": "The planner's prompt states the question limit the questions setting names.",
+    "words": "Numbers written into prompts (\"more than 3 questions\", \"three blocks in a row\", word caps) are read from settings.",
+    "source": "https://github.com/dokima-dev/dokima/issues/741",
+    "files": [
+     "dokima/roles/planner.md",
+     "dokima/prompt.py"
+    ],
+    "edge_cases": [
+     {
+      "case": "No settings file: the prompt says more than 3 questions.",
+      "test": "tests/test_shipped_prompts.py::test_the_planners_prompt_states_the_question_limit_the_settings_name"
+     }
+    ]
+   },
+   {
+    "text": "Each prompt states the blocks-in-a-row limit the blocks setting names.",
+    "words": "Numbers written into prompts (\"more than 3 questions\", \"three blocks in a row\", word caps) are read from settings.",
+    "source": "https://github.com/dokima-dev/dokima/issues/741",
+    "files": [
+     "dokima/roles/planner.md",
+     "dokima/roles/worker.md",
+     "dokima/roles/reviewer.md",
+     "dokima/roles/raising.md",
+     "dokima/prompt.py"
+    ],
+    "edge_cases": [
+     {
+      "case": "No settings file: each prompt names 3 blocks in a row.",
+      "test": "tests/test_shipped_prompts.py::test_every_prompt_states_the_blocks_in_a_row_limit_the_settings_name"
+     },
+     {
+      "case": "The example no longer says the third build.",
+      "test": "tests/test_shipped_prompts.py::test_every_prompt_states_the_blocks_in_a_row_limit_the_settings_name"
+     }
+    ]
+   },
+   {
+    "text": "The planner's prompt gives \"When X, Y\" as the default criterion style.",
+    "words": "Default criterion style in the planner prompt: \"When X, Y\".",
+    "source": "https://github.com/dokima-dev/dokima/issues/741",
+    "files": [
+     "dokima/roles/planner.md",
+     "dokima/prompt.py"
+    ],
+    "edge_cases": [
+     {
+      "case": "The old rule against a formula no longer contradicts it.",
+      "test": "tests/test_shipped_prompts.py::test_the_planners_prompt_gives_when_x_y_as_the_default_criterion_style"
+     }
+    ]
+   },
+   {
+    "text": "The planner's prompt says each criterion needs a source, an observable result and a test.",
+    "words": "The planner tries to write each criterion with a source, a result",
+    "source": "https://github.com/dokima-dev/dokima/issues/741#issuecomment-6205062350",
+    "files": [
+     "dokima/roles/planner.md",
+     "dokima/prompt.py"
+    ],
+    "no_edge_cases": "Fixed prompt text; no input changes it."
+   },
+   {
+    "text": "The planner's prompt says each blank it cannot fill becomes one question to the owner.",
+    "words": "Each blank it cannot fill becomes one question to the owner",
+    "source": "https://github.com/dokima-dev/dokima/issues/741#issuecomment-6205062350",
+    "files": [
+     "dokima/roles/planner.md",
+     "dokima/prompt.py"
+    ],
+    "no_edge_cases": "Fixed prompt text; no input changes it."
+   },
+   {
+    "text": "The planner's prompt shows the owner's seven clarifying question examples.",
+    "words": "Examples for the prompt:",
+    "source": "https://github.com/dokima-dev/dokima/issues/741#issuecomment-6205062350",
+    "files": [
+     "dokima/roles/planner.md",
+     "dokima/prompt.py"
+    ],
+    "no_edge_cases": "The owner's fixed examples; no input changes them."
+   },
+   {
+    "text": "A repo's house rules appear after the shipped prompt for each role.",
+    "words": "proved by the existing 796.7 and 796.8 tests",
+    "source": "https://github.com/dokima-dev/dokima/issues/741#issuecomment-6234488387",
+    "files": [
+     "dokima/prompt.py"
+    ],
+    "edge_cases": [
+     {
+      "case": "A house rules section named for one role reaches only that role.",
+      "test": "tests/test_settings_prompts.py::test_a_house_rules_section_named_for_a_role_is_added_only_to_that_roles_prompt"
+     },
+     {
+      "case": "A repo with no house rules file still gets its prompt.",
+      "test": "tests/test_settings_prompts.py::test_a_repos_house_rules_file_is_added_after_the_shipped_prompt"
+     }
+    ]
+   }
+  ],
+  "non_functional": [],
+  "tests": {
+   "817.1": [
+    "tests/test_shipped_prompts.py::test_no_shipped_prompt_names_a_file_of_dokimas_own_code"
+   ],
+   "817.2": [
+    "tests/test_shipped_prompts.py::test_the_raising_rules_are_written_once_in_one_shared_file"
+   ],
+   "817.3": [
+    "tests/test_shipped_prompts.py::test_every_role_prompt_carries_the_shared_raising_rules"
+   ],
+   "817.4": [
+    "tests/test_shipped_prompts.py::test_the_planners_prompt_states_the_question_limit_the_settings_name"
+   ],
+   "817.5": [
+    "tests/test_shipped_prompts.py::test_every_prompt_states_the_blocks_in_a_row_limit_the_settings_name"
+   ],
+   "817.6": [
+    "tests/test_shipped_prompts.py::test_the_planners_prompt_gives_when_x_y_as_the_default_criterion_style"
+   ],
+   "817.7": [
+    "tests/test_shipped_prompts.py::test_the_planners_prompt_says_each_criterion_needs_a_source_a_result_and_a_test"
+   ],
+   "817.8": [
+    "tests/test_shipped_prompts.py::test_the_planners_prompt_turns_each_unfilled_blank_into_one_question"
+   ],
+   "817.9": [
+    "tests/test_shipped_prompts.py::test_the_planners_prompt_shows_the_owners_seven_question_examples"
+   ],
+   "817.10": [
+    "tests/test_settings_prompts.py::test_a_repos_house_rules_file_is_added_after_the_shipped_prompt",
+    "tests/test_settings_prompts.py::test_a_house_rules_section_named_for_a_role_is_added_only_to_that_roles_prompt"
+   ]
+  },
+  "test_changes": {
+   "tests/test_raise_design.py::test_the_shared_prompt_section_has_an_example_of_every_kind_and_instance": "Reads the built prompts, since raising rules move to one shared file; same checks.",
+   "tests/test_raise_design.py::test_the_shared_prompt_section_asks_agents_to_speak_up_and_ends_with_the_checklist": "Reads the built prompts, since raising rules move to one shared file; same checks.",
+   "tests/test_raise_design.py::test_agents_md_and_the_prompt_give_an_example_of_everything_code_raises": "Reads the built prompts; the blocks bullet may give its settings number as a figure.",
+   "tests/test_raise_design.py::test_every_example_raise_in_agents_md_and_the_prompts_is_one_code_accepts": "Reads the built prompts, since raising rules move to one shared file; same checks.",
+   "tests/test_raise_handbacks.py::test_the_three_prompts_share_one_section_on_raising_and_answering": "Reads the built prompts, since raising rules move to one shared file; same checks.",
+   "tests/test_raise_handbacks.py::test_the_shared_section_shows_a_real_example_of_each_kind": "Reads the built prompts, since raising rules move to one shared file; same checks."
+  },
+  "links": {
+   "blocked_by": [],
+   "blocks": [
+    818
+   ],
+   "relates_to": [
+    741,
+    783,
+    713,
+    714,
+    632,
+    656
+   ]
+  },
+  "raises": [
+   {
+    "kind": "question",
+    "to": "owner",
+    "label": "Prompts folder rule",
+    "text": "Should the worker's rule against editing Dokima's prompts folder move into Dokima's own settings? The plan assumes it should.",
+    "evidence": "The worker's prompt names `dokima/roles/`, a Dokima path the scan must not find; protected paths come from settings.",
+    "raised_by": "planner",
+    "id": "P1"
+   }
+  ],
+  "answers": []
+ },
+ "check": {
+  "passed": true,
+  "problems": []
+ },
+ "url": "https://github.com/dokima-dev/dokima/issues/817#issuecomment-6234569411"
+}
