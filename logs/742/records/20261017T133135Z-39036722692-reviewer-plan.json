@@ -1,0 +1,297 @@
+{
+ "role": "reviewer",
+ "stage": "plan",
+ "run_id": "39036722692",
+ "commit_before": "edf1c0e0800fbd616670940fb81b53445a839682",
+ "started_by": "dokima-runtime[bot]",
+ "models": [
+  "claude-opus-5-5"
+ ],
+ "report": {
+  "duration_ms": 130679,
+  "turns": 12,
+  "cost_usd": 0.6623705999999999,
+  "tokens_in": 511204,
+  "tokens_out": 10496
+ },
+ "log": "https://github.com/dokima-dev/dokima/blob/logs/logs/742/39036722692-reviewer-plan.md",
+ "run": "https://github.com/dokima-dev/dokima/actions/runs/39036722692",
+ "handback": {
+  "previous_step": {
+   "did": [
+    "The planner split the issue into five stories: shared workflows, installer, README, wiki, first merge."
+   ],
+   "decided": [
+    "The adopter's workflow may be at most 20 lines.",
+    "The owner's own co-author credit stays in Dokima's repo.",
+    "The first merge from the docs is checked by hand."
+   ],
+   "open": [
+    "Three questions for the owner: bot name, the owner's credit, where the first-merge proof lives."
+   ]
+  },
+  "verdict": "approve",
+  "summary": "The split keeps every ask; four questions wait for you, including the line limit.",
+  "raises": [
+   {
+    "kind": "question",
+    "to": "owner",
+    "label": "Line limit",
+    "text": "You asked for about 15 lines. Is 20 the right ceiling for the adopter's workflow? The plan assumes it is.",
+    "evidence": "Criterion S1.9 says at most 20 lines; the issue says `about 15 lines`.",
+    "raised_by": "reviewer",
+    "id": "R1"
+   }
+  ],
+  "answers": [
+   {
+    "raise": "P2",
+    "answer": "disagree",
+    "why": "The issue says the bot line replaces your own trailer, which the plan's reading keeps; only you can decide."
+   }
+  ],
+  "asks": [
+   {
+    "ask": "One thin workflow, `.github/workflows/dokima.yml`, about 15 lines",
+    "source": "https://github.com/dokima-dev/dokima/issues/742",
+    "criterion": "S1.9"
+   },
+   {
+    "ask": "that calls Dokima's shared workflows by tag",
+    "source": "https://github.com/dokima-dev/dokima/issues/742",
+    "criterion": "S1.8"
+   },
+   {
+    "ask": "`.dokima/settings.yaml`. Nothing else. No Python.",
+    "source": "https://github.com/dokima-dev/dokima/issues/742",
+    "criterion": "S2.1"
+   },
+   {
+    "ask": "All Dokima code runs from Dokima's own repo inside GitHub Actions.",
+    "source": "https://github.com/dokima-dev/dokima/issues/742",
+    "criterion": "S1.1"
+   },
+   {
+    "ask": "Credentials live only in GitHub secrets on the repo (the `keys` environment): the App key, `CLAUDE_TOKEN`, `KIMI_API_KEY` when used.",
+    "source": "https://github.com/dokima-dev/dokima/issues/742",
+    "criterion": "S1.2"
+   },
+   {
+    "ask": "`settings.yaml` only names which secret each role reads.",
+    "source": "https://github.com/dokima-dev/dokima/issues/742",
+    "criterion": "S1.3"
+   },
+   {
+    "ask": "Nothing secret is ever committed.",
+    "source": "https://github.com/dokima-dev/dokima/issues/742",
+    "criterion": "S2.2"
+   },
+   {
+    "ask": "Identity on every commit: the trailer `Co-authored-by: dokima[bot]`",
+    "source": "https://github.com/dokima-dev/dokima/issues/742",
+    "criterion": "S1.6"
+   },
+   {
+    "ask": "Replaces the owner's hardcoded trailer (#110)",
+    "source": "https://github.com/dokima-dev/dokima/issues/742",
+    "criterion": "S1.6"
+   },
+   {
+    "ask": "the adopter can turn it off in settings.",
+    "source": "https://github.com/dokima-dev/dokima/issues/742",
+    "criterion": "S1.7"
+   },
+   {
+    "ask": "The README install steps (README.md:120-125) ... stop telling adopters to copy `.github/workflows/` and `dokima/`.",
+    "source": "https://github.com/dokima-dev/dokima/issues/742",
+    "criterion": "S3.1"
+   },
+   {
+    "ask": "docs/wiki/Installing.md stop telling adopters to copy `.github/workflows/` and `dokima/`.",
+    "source": "https://github.com/dokima-dev/dokima/issues/742",
+    "criterion": "S4.1"
+   },
+   {
+    "ask": "`playthrough.yml` and `wiki.yml` are Dokima-project files, never installed.",
+    "source": "https://github.com/dokima-dev/dokima/issues/742",
+    "criterion": "S2.1"
+   },
+   {
+    "ask": "The existing copy installer in `playthrough.py:161-223` is the starting point.",
+    "source": "https://github.com/dokima-dev/dokima/issues/742",
+    "criterion": "S2.1"
+   },
+   {
+    "ask": "Missing bot ... fails loudly with the fix in the message",
+    "source": "https://github.com/dokima-dev/dokima/issues/742",
+    "criterion": "S1.4"
+   },
+   {
+    "ask": "Missing ... key fails loudly with the fix in the message; a run without the secret fails with a clear message",
+    "source": "https://github.com/dokima-dev/dokima/issues/742",
+    "criterion": "S1.5"
+   },
+   {
+    "ask": "install adds only the workflow and settings",
+    "source": "https://github.com/dokima-dev/dokima/issues/742",
+    "criterion": "S2.1"
+   },
+   {
+    "ask": "an empty repo reaches its first merged PR using only the docs.",
+    "source": "https://github.com/dokima-dev/dokima/issues/742",
+    "criterion": "S5.1"
+   }
+  ],
+  "behaviors": [
+   {
+    "criterion": "S1.1",
+    "one_behavior": true,
+    "why": "One result: all code comes from Dokima's repo."
+   },
+   {
+    "criterion": "S1.2",
+    "one_behavior": true,
+    "why": "One result: keys come from the keys environment."
+   },
+   {
+    "criterion": "S1.3",
+    "one_behavior": true,
+    "why": "One result: each role reads the secret its settings name."
+   },
+   {
+    "criterion": "S1.4",
+    "one_behavior": true,
+    "why": "One case, no bot, failing with its fix."
+   },
+   {
+    "criterion": "S1.5",
+    "one_behavior": true,
+    "why": "One case, no key, failing with its name and fix."
+   },
+   {
+    "criterion": "S1.6",
+    "one_behavior": true,
+    "why": "One result: the default trailer names Dokima's bot."
+   },
+   {
+    "criterion": "S1.7",
+    "one_behavior": true,
+    "why": "One case: trailer off leaves none."
+   },
+   {
+    "criterion": "S1.8",
+    "one_behavior": true,
+    "why": "One result: the call names a release tag."
+   },
+   {
+    "criterion": "S1.9",
+    "one_behavior": true,
+    "why": "One value: a line count ceiling."
+   },
+   {
+    "criterion": "S2.1",
+    "one_behavior": true,
+    "why": "One result: exactly two files added."
+   },
+   {
+    "criterion": "S2.2",
+    "one_behavior": true,
+    "why": "One result: no secret value written."
+   },
+   {
+    "criterion": "S3.1",
+    "one_behavior": true,
+    "why": "One result: README drops the copy step."
+   },
+   {
+    "criterion": "S4.1",
+    "one_behavior": true,
+    "why": "One result: wiki page drops the copy step."
+   },
+   {
+    "criterion": "S5.1",
+    "one_behavior": true,
+    "why": "One result: a first merged pull request from the docs."
+   }
+  ],
+  "edge_cases": [
+   {
+    "criterion": "S1.1",
+    "cut": [],
+    "missing": []
+   },
+   {
+    "criterion": "S1.2",
+    "cut": [],
+    "missing": []
+   },
+   {
+    "criterion": "S1.3",
+    "cut": [],
+    "missing": []
+   },
+   {
+    "criterion": "S1.4",
+    "cut": [],
+    "missing": []
+   },
+   {
+    "criterion": "S1.5",
+    "cut": [],
+    "missing": []
+   },
+   {
+    "criterion": "S1.6",
+    "cut": [],
+    "missing": []
+   },
+   {
+    "criterion": "S1.7",
+    "cut": [],
+    "missing": []
+   },
+   {
+    "criterion": "S1.8",
+    "cut": [],
+    "missing": []
+   },
+   {
+    "criterion": "S1.9",
+    "cut": [],
+    "missing": []
+   },
+   {
+    "criterion": "S2.1",
+    "cut": [],
+    "missing": []
+   },
+   {
+    "criterion": "S2.2",
+    "cut": [],
+    "missing": []
+   },
+   {
+    "criterion": "S3.1",
+    "cut": [],
+    "missing": []
+   },
+   {
+    "criterion": "S4.1",
+    "cut": [],
+    "missing": []
+   },
+   {
+    "criterion": "S5.1",
+    "cut": [],
+    "missing": []
+   }
+  ],
+  "tests": [],
+  "size": "ok"
+ },
+ "check": {
+  "passed": true,
+  "problems": []
+ },
+ "url": "https://github.com/dokima-dev/dokima/issues/742#issuecomment-6234446943"
+}
