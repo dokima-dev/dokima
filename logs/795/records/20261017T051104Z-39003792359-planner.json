@@ -1,0 +1,321 @@
+{
+ "role": "planner",
+ "stage": null,
+ "run_id": "39003792359",
+ "commit_before": "5997fbdc6c6aee308f4dad8b253522890231764b",
+ "started_by": "RezaSoleymanifar",
+ "models": [
+  "claude-opus-5-5"
+ ],
+ "report": {
+  "duration_ms": 3917,
+  "turns": 1,
+  "cost_usd": 0.8738761999999999,
+  "tokens_in": 74806,
+  "tokens_out": 200
+ },
+ "log": "https://github.com/dokima-dev/dokima/blob/logs/logs/795/39003792359-planner.md",
+ "run": "https://github.com/dokima-dev/dokima/actions/runs/39003792359",
+ "handback": {
+  "kind": "user_story",
+  "title": "Test commands, branches and the bot follow settings",
+  "summary": "Workflows take their test commands, test folder, branches and bot from the repo's settings, not Dokima's own.",
+  "user_story": "Workflows run the repo's test commands and use its branches and bot, as its settings name.",
+  "acceptance_criteria": [
+   {
+    "text": "The all tests check runs the all-tests command from settings.",
+    "words": "The all tests check runs the all-tests command from settings.",
+    "source": "https://github.com/dokima-dev/dokima/issues/779",
+    "files": [
+     "dokima/settings.py",
+     "dokima/defaults.yaml",
+     ".github/workflows/full-suite.yml"
+    ],
+    "edge_cases": [
+     {
+      "case": "No settings file: the default command still runs every test",
+      "test": "tests/test_settings_workflows.py::test_the_all_tests_check_runs_the_all_tests_command_from_settings"
+     }
+    ]
+   },
+   {
+    "text": "Each criterion's check runs the per-criterion command from settings.",
+    "words": "Each criterion's check runs the per-criterion command from settings.",
+    "source": "https://github.com/dokima-dev/dokima/issues/779",
+    "files": [
+     "dokima/settings.py",
+     "dokima/defaults.yaml",
+     ".github/workflows/acceptance-criteria.yml"
+    ],
+    "edge_cases": [
+     {
+      "case": "No settings file: the default command runs the test and writes its report",
+      "test": "tests/test_settings_workflows.py::test_each_criterions_check_runs_the_per_criterion_command_from_settings"
+     },
+     {
+      "case": "The merge queue runs main's older settings reader",
+      "test": "tests/test_settings_workflows.py::test_each_criterions_check_runs_the_per_criterion_command_from_settings"
+     }
+    ]
+   },
+   {
+    "text": "Setting affected tests to all runs every test before review, with no saved baseline.",
+    "words": "Setting affected tests to all runs every test before review, with no saved baseline.",
+    "source": "https://github.com/dokima-dev/dokima/issues/779",
+    "files": [
+     "dokima/settings.py",
+     "dokima/defaults.yaml",
+     ".github/workflows/agent.yml",
+     ".github/workflows/testmon.yml"
+    ],
+    "edge_cases": [
+     {
+      "case": "Main holds a saved baseline when the review starts",
+      "test": "tests/test_settings_workflows.py::test_setting_affected_tests_to_all_runs_every_test_before_review"
+     },
+     {
+      "case": "A push to main with affected tests set to all",
+      "test": "tests/test_settings_workflows.py::test_setting_affected_tests_to_all_saves_no_baseline_on_main"
+     }
+    ]
+   },
+   {
+    "text": "Handling a clash with main keeps the test folder named in settings.",
+    "words": "Handling a clash with main keeps the test folder named in settings.",
+    "source": "https://github.com/dokima-dev/dokima/issues/779",
+    "files": [
+     "dokima/settings.py",
+     "dokima/defaults.yaml",
+     ".github/workflows/agent.yml"
+    ],
+    "edge_cases": [
+     {
+      "case": "A worker's clash where the planner changed main's test",
+      "test": "tests/test_settings_workflows.py::test_a_workers_clash_with_main_keeps_the_planners_test_in_the_settings_test_folder"
+     }
+    ]
+   },
+   {
+    "text": "The planner's push holds only files in the test folder named in settings.",
+    "words": "The planner's push holds only files in the test folder named in settings.",
+    "source": "https://github.com/dokima-dev/dokima/issues/779",
+    "files": [
+     "dokima/settings.py",
+     "dokima/defaults.yaml",
+     ".github/workflows/agent.yml"
+    ],
+    "edge_cases": [
+     {
+      "case": "The planner also wrote files outside that folder",
+      "test": "tests/test_settings_workflows.py::test_the_planners_push_holds_only_files_in_the_settings_test_folder"
+     }
+    ]
+   },
+   {
+    "text": "Tests on the merge gate exclude list stay out of the all tests check.",
+    "words": "Tests on the merge gate exclude list stay out of the all tests check.",
+    "source": "https://github.com/dokima-dev/dokima/issues/779",
+    "files": [
+     "dokima/settings.py",
+     "dokima/defaults.yaml",
+     ".github/workflows/full-suite.yml"
+    ],
+    "edge_cases": [
+     {
+      "case": "The default empty list: every test runs",
+      "test": "tests/test_settings_workflows.py::test_tests_on_the_exclude_list_stay_out_of_the_all_tests_check"
+     }
+    ]
+   },
+   {
+    "text": "Agents base their branches and pull requests on the default branch setting.",
+    "words": "Agents base their branches and pull requests on the default branch setting.",
+    "source": "https://github.com/dokima-dev/dokima/issues/779",
+    "files": [
+     "dokima/settings.py",
+     "dokima/defaults.yaml",
+     ".github/workflows/agent.yml",
+     ".github/workflows/fix.yml"
+    ],
+    "edge_cases": [
+     {
+      "case": "A manual fix's pull request",
+      "test": "tests/test_settings_workflows.py::test_a_manual_fix_opens_against_the_default_branch_setting"
+     },
+     {
+      "case": "A planner's issue with no branch yet",
+      "test": "tests/test_settings_workflows.py::test_a_planners_new_branch_starts_from_the_default_branch_setting"
+     }
+    ]
+   },
+   {
+    "text": "Each run's conversation is saved on the records branch the settings name.",
+    "words": "Each run's conversation is saved on the records branch the settings name.",
+    "source": "https://github.com/dokima-dev/dokima/issues/779",
+    "files": [
+     "dokima/settings.py",
+     "dokima/defaults.yaml",
+     ".github/workflows/agent.yml"
+    ],
+    "edge_cases": [
+     {
+      "case": "The records branch does not exist yet",
+      "test": "tests/test_settings_workflows.py::test_each_runs_conversation_is_saved_on_the_records_branch_the_settings_name"
+     },
+     {
+      "case": "The record's link to the conversation",
+      "test": "tests/test_settings_workflows.py::test_each_runs_conversation_is_saved_on_the_records_branch_the_settings_name"
+     }
+    ]
+   },
+   {
+    "text": "Only the bot named in settings may send the next-step signal.",
+    "words": "Only the bot named in settings may send the next-step signal.",
+    "source": "https://github.com/dokima-dev/dokima/issues/779",
+    "files": [
+     "dokima/settings.py",
+     "dokima/defaults.yaml",
+     ".github/workflows/agent.yml"
+    ],
+    "edge_cases": [
+     {
+      "case": "A signal from Dokima's usual bot when settings name another",
+      "test": "tests/test_settings_workflows.py::test_only_the_bot_named_in_settings_may_send_the_next_step_signal"
+     },
+     {
+      "case": "No settings file: Dokima's usual bot still signals",
+      "test": "tests/test_settings_workflows.py::test_only_the_bot_named_in_settings_may_send_the_next_step_signal"
+     }
+    ]
+   },
+   {
+    "text": "Commits Dokima makes carry the git identity of the bot named in settings.",
+    "words": "Commits Dokima makes carry the git identity of the bot named in settings.",
+    "source": "https://github.com/dokima-dev/dokima/issues/779",
+    "files": [
+     "dokima/settings.py",
+     "dokima/defaults.yaml",
+     ".github/workflows/agent.yml",
+     ".github/workflows/wiki.yml"
+    ],
+    "edge_cases": [
+     {
+      "case": "The wiki sync's commit",
+      "test": "tests/test_settings_workflows.py::test_the_wiki_sync_commits_as_the_bot_named_in_settings"
+     },
+     {
+      "case": "The planner's merge of main",
+      "test": "tests/test_settings_workflows.py::test_merging_main_into_a_branch_carries_the_git_identity_of_the_bot_named_in_settings"
+     }
+    ]
+   }
+  ],
+  "non_functional": [],
+  "tests": {
+   "795.1": [
+    "tests/test_settings_workflows.py::test_the_all_tests_check_runs_the_all_tests_command_from_settings"
+   ],
+   "795.2": [
+    "tests/test_settings_workflows.py::test_each_criterions_check_runs_the_per_criterion_command_from_settings"
+   ],
+   "795.3": [
+    "tests/test_settings_workflows.py::test_setting_affected_tests_to_all_runs_every_test_before_review",
+    "tests/test_settings_workflows.py::test_setting_affected_tests_to_all_saves_no_baseline_on_main"
+   ],
+   "795.4": [
+    "tests/test_settings_workflows.py::test_a_planners_clash_with_main_takes_mains_tests_from_the_settings_test_folder",
+    "tests/test_settings_workflows.py::test_a_workers_clash_with_main_keeps_the_planners_test_in_the_settings_test_folder"
+   ],
+   "795.5": [
+    "tests/test_settings_workflows.py::test_the_planners_push_holds_only_files_in_the_settings_test_folder"
+   ],
+   "795.6": [
+    "tests/test_settings_workflows.py::test_tests_on_the_exclude_list_stay_out_of_the_all_tests_check"
+   ],
+   "795.7": [
+    "tests/test_settings_workflows.py::test_agents_base_their_branches_and_pull_requests_on_the_default_branch_setting",
+    "tests/test_settings_workflows.py::test_a_planners_new_branch_starts_from_the_default_branch_setting",
+    "tests/test_settings_workflows.py::test_a_manual_fix_opens_against_the_default_branch_setting"
+   ],
+   "795.8": [
+    "tests/test_settings_workflows.py::test_each_runs_conversation_is_saved_on_the_records_branch_the_settings_name"
+   ],
+   "795.9": [
+    "tests/test_settings_workflows.py::test_only_the_bot_named_in_settings_may_send_the_next_step_signal"
+   ],
+   "795.10": [
+    "tests/test_settings_workflows.py::test_merging_main_into_a_branch_carries_the_git_identity_of_the_bot_named_in_settings",
+    "tests/test_settings_workflows.py::test_the_wiki_sync_commits_as_the_bot_named_in_settings"
+   ]
+  },
+  "test_changes": {
+   "tests/test_keys.py::test_a_build_starts_from_todays_main": "The default branch now comes from settings; still checks the worker merges it first.",
+   "tests/test_checks.py::test_full_suite_runs_every_test_on_every_pull_request": "The command moved to the shipped settings; checks it there: every test, `-n auto`.",
+   "tests/test_agent.py::test_a_replan_checks_tests_against_where_the_branch_left_main": "The default branch now comes from settings; still checks against its split, not the head.",
+   "tests/test_agent.py::test_the_rivers_signal_comes_only_from_dokimas_bot": "The bot's name now comes from settings; still only a bot skips the gate.",
+   "tests/test_merge_check.py::test_the_merge_check_runs_mains_code_and_judges_the_pull_requests_code": "The test command now comes from settings; the step is also found by its tests."
+  },
+  "links": {
+   "blocked_by": [],
+   "blocks": [
+    796
+   ],
+   "relates_to": [
+    779,
+    744,
+    789
+   ]
+  },
+  "raises": [
+   {
+    "kind": "question",
+    "to": "owner",
+    "label": "Doubt: overlaps #744",
+    "text": "#744 also asks for the test exclude list. Build it here and leave #744 the rest? The plan assumes so.",
+    "evidence": "#744's body: `tests.exclude` keeps tests the repo marks off the merge gate, default empty.",
+    "raised_by": "planner",
+    "id": "P4"
+   },
+   {
+    "kind": "question",
+    "to": "owner",
+    "label": "Two exclude lists",
+    "text": "The plan adds a new list of tests, by path, apart from the gate's list of checks. Is that right?",
+    "evidence": "`dokima/defaults.yaml` `gate.exclude: [card, board wait]` names checks, not tests.",
+    "raised_by": "planner",
+    "id": "P5"
+   },
+   {
+    "kind": "question",
+    "to": "owner",
+    "label": "Pushed commits' name",
+    "text": "Pushed commits already use the app's own name. Keep that, and move only the fixed names? The plan assumes so.",
+    "evidence": "`agent.yml` push step sets `user.name` from the app token's `app-slug`; merges hardcode `dokima-runtime[bot]`.",
+    "raised_by": "planner",
+    "id": "P6"
+   }
+  ],
+  "answers": [
+   {
+    "raise": "R1",
+    "answer": "done",
+    "why": "A new test runs a planner with no branch and checks it starts from trunk."
+   },
+   {
+    "raise": "R2",
+    "answer": "done",
+    "why": "The 795.10 test now runs the planner's merge of main too, checking its author."
+   },
+   {
+    "raise": "R3",
+    "answer": "done",
+    "why": "The 795.8 test now checks the record's conversation link names the history branch."
+   }
+  ]
+ },
+ "check": {
+  "passed": true,
+  "problems": []
+ },
+ "url": "https://github.com/dokima-dev/dokima/issues/795#issuecomment-6229794051"
+}
