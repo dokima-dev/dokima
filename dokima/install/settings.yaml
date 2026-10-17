@@ -1,0 +1,2 @@
+# This repo's settings, over Dokima's shipped defaults. Name only what differs, and never a secret's value.
+co_author: "{bot}"
