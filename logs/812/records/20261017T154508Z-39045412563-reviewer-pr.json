@@ -1,0 +1,101 @@
+{
+ "role": "reviewer",
+ "stage": "pr",
+ "run_id": "39045412563",
+ "commit_before": "afde8888a871dbb3c7646f907889d9a786a0dadb",
+ "started_by": "dokima-runtime[bot]",
+ "models": [
+  "claude-opus-5-5"
+ ],
+ "report": {
+  "duration_ms": 229953,
+  "turns": 25,
+  "cost_usd": 1.0248443999999999,
+  "tokens_in": 1401359,
+  "tokens_out": 11999
+ },
+ "log": "https://github.com/dokima-dev/dokima/blob/logs/logs/812/39045412563-reviewer-pr.md",
+ "run": "https://github.com/dokima-dev/dokima/actions/runs/39045412563",
+ "handback": {
+  "previous_step": {
+   "did": [
+    "Built the shared workflows so each run takes Dokima's code from Dokima's own repo.",
+    "Added an adopter's workflow of nineteen lines, calling Dokima at a release tag.",
+    "Added checks that stop a run with no bot or model key, saying the fix."
+   ],
+   "decided": [
+    "The co-author line names the repo's own bot unless the settings turn it off."
+   ],
+   "open": [
+    "Many older tests now fail; the worker sent them to the planner to update."
+   ]
+  },
+  "verdict": "block",
+  "summary": "The new criteria pass, but 57 older tests now fail; the planner must update them before this can merge.",
+  "raises": [
+   {
+    "kind": "blocker",
+    "to": "planner",
+    "label": "Old tests now fail",
+    "text": "For 812.1, 57 tests green on main now fail: their fake runners and triggers predate Dokima's checkout. The plan lists two test changes. Fix: update each, like `Machine`.",
+    "evidence": "`tests.txt`: 49 failed; plus 8 more in `test_merge_queue`, `test_review_relay`, `test_plan`, `test_merge_check`, `test_agent`, `test_hand_links`, `test_rules_topics`.",
+    "raised_by": "reviewer",
+    "id": "R3"
+   }
+  ],
+  "answers": [
+   {
+    "raise": "W1",
+    "answer": "done",
+    "why": "Confirmed: the card, queue and all-tests stand-ins never fake Dokima's checkout, so those jobs stop. The planner's to fix."
+   },
+   {
+    "raise": "W2",
+    "answer": "done",
+    "why": "Confirmed: these tests run the copy step alone, and only the repo's own code could pass them, which 812.1 forbids."
+   },
+   {
+    "raise": "W3",
+    "answer": "done",
+    "why": "Confirmed: these tests expect code in the repo's own folder to run, which 812.1 rules out. The planner's to change."
+   },
+   {
+    "raise": "W4",
+    "answer": "done",
+    "why": "Confirmed: each named test pins the old triggers or paths the shared design replaces; rerun, they fail."
+   },
+   {
+    "raise": "W5",
+    "answer": "done",
+    "why": "Confirmed: that test runs without the key secret it names, so 812.5 now rightly stops it."
+   },
+   {
+    "raise": "W6",
+    "answer": "disagree",
+    "why": "Already open as [#755](https://github.com/dokima-dev/dokima/issues/755) (first release tag); no new issue needed."
+   },
+   {
+    "raise": "W7",
+    "answer": "done",
+    "why": "Confirmed: the wiki sync writes the bot placeholder as is in a repo with no setting. Worth its own issue.",
+    "searched": [
+     110,
+     747,
+     755,
+     306
+    ],
+    "verdict": "new"
+   }
+  ],
+  "asks": [],
+  "behaviors": [],
+  "edge_cases": [],
+  "tests": [],
+  "size": "ok"
+ },
+ "check": {
+  "passed": true,
+  "problems": []
+ },
+ "url": "https://github.com/dokima-dev/dokima/pull/824#issuecomment-6235806450"
+}
