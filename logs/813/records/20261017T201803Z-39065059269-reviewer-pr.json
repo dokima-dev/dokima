@@ -1,0 +1,118 @@
+{
+ "role": "reviewer",
+ "stage": "pr",
+ "run_id": "39065059269",
+ "commit_before": "6026846c16624047dac92b4d35e807a6074d51fd",
+ "started_by": "dokima-runtime[bot]",
+ "models": [
+  "claude-opus-5-5"
+ ],
+ "report": {
+  "duration_ms": 160774,
+  "turns": 18,
+  "cost_usd": 0.6504760000000002,
+  "tokens_in": 803622,
+  "tokens_out": 6928
+ },
+ "log": "https://github.com/dokima-dev/dokima/blob/logs/logs/813/39065059269-reviewer-pr.md",
+ "run": "https://github.com/dokima-dev/dokima/actions/runs/39065059269",
+ "handback": {
+  "previous_step": {
+   "did": [
+    "The worker made installing add only the short workflow and a new starting settings file.",
+    "The worker made the play-through's install call the played commit instead of the release tag."
+   ],
+   "decided": [
+    "The starting settings file names Dokima's bot as co-author, the shipped default."
+   ],
+   "open": [
+    "GitHub shows the acceptance tests and full suite red here; they pass locally."
+   ]
+  },
+  "verdict": "approve",
+  "summary": "The code delivers all three criteria and every test passes here; it still needs GitHub's checks green before merging.",
+  "raises": [],
+  "answers": [],
+  "asks": [],
+  "behaviors": [
+   {
+    "criterion": "813.1",
+    "one_behavior": true,
+    "why": "One result: the repo gains exactly the two files."
+   },
+   {
+    "criterion": "813.2",
+    "one_behavior": true,
+    "why": "One result: no added file holds a secret value."
+   },
+   {
+    "criterion": "813.3",
+    "one_behavior": true,
+    "why": "One result: the installed settings lack the owner's line."
+   }
+  ],
+  "edge_cases": [
+   {
+    "criterion": "813.1",
+    "cut": [],
+    "missing": []
+   },
+   {
+    "criterion": "813.2",
+    "cut": [],
+    "missing": []
+   },
+   {
+    "criterion": "813.3",
+    "cut": [],
+    "missing": []
+   }
+  ],
+  "tests": [
+   {
+    "test": "tests/test_install.py::test_installing_adds_exactly_the_one_workflow_and_the_settings_file",
+    "only_its_behavior": true,
+    "why": "Runs the real install and compares the added files to the two expected."
+   },
+   {
+    "test": "tests/test_install.py::test_installing_into_an_empty_repo_adds_exactly_the_two_files",
+    "only_its_behavior": true,
+    "why": "Same check on a repo with no commits."
+   },
+   {
+    "test": "tests/test_install.py::test_installing_writes_no_secrets_value_into_any_file_it_adds",
+    "only_its_behavior": true,
+    "why": "Sets every secret, then searches the added files for their values."
+   },
+   {
+    "test": "tests/test_install.py::test_the_installed_settings_file_never_ships_the_owners_co_author_line",
+    "only_its_behavior": true,
+    "why": "Looks for the owner's own line in the installed settings."
+   }
+  ],
+  "size": "ok",
+  "boxes": {
+   "dropped": "none",
+   "added": [
+    {
+     "what": "The play-through's install points the short workflow at the played commit, not the release tag.",
+     "kind": "needed",
+     "serves": "813.1"
+    }
+   ],
+   "superseded": "none",
+   "conflicts": "none",
+   "edges": {
+    "813.1": "covered",
+    "813.2": "covered",
+    "813.3": "covered"
+   },
+   "poor_tests": "none"
+  }
+ },
+ "check": {
+  "passed": true,
+  "problems": []
+ },
+ "url": "https://github.com/dokima-dev/dokima/pull/830#issuecomment-6240091334"
+}
