@@ -1,0 +1,53 @@
+{
+ "role": "reviewer",
+ "stage": "pr",
+ "run_id": "38999197850",
+ "commit_before": "9fbc85f4eebf37d9879b383dd64490444b9bf8b9",
+ "started_by": "dokima-runtime[bot]",
+ "models": [
+  "claude-opus-5-5"
+ ],
+ "report": {
+  "duration_ms": 530154,
+  "turns": 17,
+  "cost_usd": 0.6590952,
+  "tokens_in": 820575,
+  "tokens_out": 4991
+ },
+ "log": "https://github.com/dokima-dev/dokima/blob/logs/logs/794/38999197850-reviewer-pr.md",
+ "run": "https://github.com/dokima-dev/dokima/actions/runs/38999197850",
+ "handback": {
+  "previous_step": {
+   "did": [
+    "The worker changed no code this round.",
+    "The planner's new old-reader test passes on the fallback built last round."
+   ],
+   "decided": [
+    "Test workflows use the old install list when the settings reader lacks a setup mode."
+   ],
+   "open": [
+    "GitHub must run the criteria checks again on the final commit."
+   ]
+  },
+  "verdict": "approve",
+  "summary": "The fallback the owner asked for is built and proven; all tests pass on the branch.",
+  "raises": [],
+  "answers": [],
+  "asks": [],
+  "behaviors": [],
+  "edge_cases": [],
+  "tests": [
+   {
+    "test": "tests/test_settings_test_setup.py::test_a_reader_without_the_setup_mode_falls_back_to_the_old_install_list",
+    "only_its_behavior": true,
+    "why": "Fails when a workflow checks for the file instead of the mode."
+   }
+  ],
+  "size": "ok"
+ },
+ "check": {
+  "passed": true,
+  "problems": []
+ },
+ "url": "https://github.com/dokima-dev/dokima/pull/801#issuecomment-6229085046"
+}
