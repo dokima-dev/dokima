@@ -1,0 +1,95 @@
+{
+ "role": "reviewer",
+ "stage": "plan",
+ "run_id": "39067976051",
+ "commit_before": "a089b0f26f307ada4e8951f16eb4213660fe7fcf",
+ "started_by": "dokima-runtime[bot]",
+ "models": [
+  "claude-opus-5-5"
+ ],
+ "report": {
+  "duration_ms": 42211,
+  "turns": 6,
+  "cost_usd": 0.2807616,
+  "tokens_in": 189702,
+  "tokens_out": 3129
+ },
+ "log": "https://github.com/dokima-dev/dokima/blob/logs/logs/814/39067976051-reviewer-plan.md",
+ "run": "https://github.com/dokima-dev/dokima/actions/runs/39067976051",
+ "handback": {
+  "previous_step": {
+   "did": [
+    "One criterion: the README's install steps add the two files, never copy Dokima.",
+    "The planner wrote one test that reads the README's Install section."
+   ],
+   "decided": [
+    "The wiki install page is left to its own issue."
+   ],
+   "open": []
+  },
+  "verdict": "approve",
+  "summary": "The plan carries the README part of the owner's ask, and its test fails today for the right reason.",
+  "raises": [],
+  "answers": [],
+  "asks": [
+   {
+    "ask": "The README install steps (README.md:120-125) and docs/wiki/Installing.md stop telling adopters to copy `.github/workflows/` and `dokima/`.",
+    "source": "https://github.com/dokima-dev/dokima/issues/742",
+    "criterion": "814.1"
+   },
+   {
+    "ask": "One thin workflow, `.github/workflows/dokima.yml`, about 15 lines, that calls Dokima's shared workflows by tag.",
+    "source": "https://github.com/dokima-dev/dokima/issues/742",
+    "criterion": "814.1"
+   },
+   {
+    "ask": "`.dokima/settings.yaml`.",
+    "source": "https://github.com/dokima-dev/dokima/issues/742",
+    "criterion": "814.1"
+   }
+  ],
+  "behaviors": [
+   {
+    "criterion": "814.1",
+    "one_behavior": true,
+    "why": "One setup step changes from copying Dokima to adding two files."
+   }
+  ],
+  "edge_cases": [
+   {
+    "criterion": "814.1",
+    "cut": [],
+    "missing": []
+   }
+  ],
+  "tests": [
+   {
+    "test": "tests/test_readme_install.py::test_install_steps_add_the_two_files_not_dokima",
+    "only_its_behavior": true,
+    "why": "Checks only the Install section's steps; fails today on the old copy step."
+   }
+  ],
+  "size": "ok",
+  "boxes": {
+   "dropped": "none",
+   "added": [
+    {
+     "what": "Steps naming the two files to add",
+     "kind": "needed",
+     "serves": "814.1"
+    }
+   ],
+   "superseded": "none",
+   "conflicts": "none",
+   "edges": {
+    "814.1": "covered"
+   },
+   "poor_tests": "none"
+  }
+ },
+ "check": {
+  "passed": true,
+  "problems": []
+ },
+ "url": "https://github.com/dokima-dev/dokima/issues/814#issuecomment-6240727286"
+}
