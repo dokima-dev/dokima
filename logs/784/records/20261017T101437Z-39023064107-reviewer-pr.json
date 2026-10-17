@@ -1,0 +1,46 @@
+{
+ "role": "reviewer",
+ "stage": "pr",
+ "run_id": "39023064107",
+ "commit_before": "a143eceb7fbf0832ac3a7560177868d2abfc4e01",
+ "started_by": "dokima-runtime[bot]",
+ "models": [
+  "claude-opus-5-5"
+ ],
+ "report": {
+  "duration_ms": 372976,
+  "turns": 23,
+  "cost_usd": 0.9276327999999999,
+  "tokens_in": 1390172,
+  "tokens_out": 7604
+ },
+ "log": "https://github.com/dokima-dev/dokima/blob/logs/logs/784/39023064107-reviewer-pr.md",
+ "run": "https://github.com/dokima-dev/dokima/actions/runs/39023064107",
+ "handback": {
+  "previous_step": {
+   "did": [
+    "The audit judges required checks, label names and colors, and pill colors by settings.",
+    "With the merge queue off, the audit checks only main's review exemption for auto-merge.",
+    "The settings guard no longer names a workflow's own name as a missing check.",
+    "Filed issues carry the filed label named in settings, created when the repo lacks it.",
+    "The shipped settings drop the plan and work labels."
+   ],
+   "decided": [],
+   "open": []
+  },
+  "verdict": "approve",
+  "summary": "The build delivers all nine criteria; every new test passes on the branch and fails on main.",
+  "raises": [],
+  "answers": [],
+  "asks": [],
+  "behaviors": [],
+  "edge_cases": [],
+  "tests": [],
+  "size": "ok"
+ },
+ "check": {
+  "passed": true,
+  "problems": []
+ },
+ "url": "https://github.com/dokima-dev/dokima/pull/809#issuecomment-6232543639"
+}
