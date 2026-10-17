@@ -78,21 +78,15 @@ jobs:
           python-version: "3.12"
       - run: python3 -m pip install -q pyyaml  # the settings reader (#794)
       - name: Copy the runtime from main before touching any branch
-        # AGENTS.md and the topic files it links come too: the river checks the owner's words a plan reviewer quotes from them.
-        # Then main's test commands, test folder, branches and bot, over Dokima's defaults, for every later step (#795);
-        # a settings reader with no env mode (before #795) gives Dokima's own.
+        # Main's test commands, test folder, branches, bot, co-author and owner docs file, over Dokima's defaults, for
+        # every later step (#795, #796); a settings reader with no env mode (before #795) gives Dokima's own.
+        # The owner docs file the settings name (AGENTS.md by default) and the topic files it links come too: the river
+        # checks the owner's words a plan reviewer quotes from them. So do main's house rules files (#796).
         run: |
           mkdir -p /tmp/runtime && cp -r dokima /tmp/runtime/dokima
           for f in settings.yaml agents.yml; do
             if [ -f ".dokima/$f" ]; then mkdir -p /tmp/runtime/.dokima && cp ".dokima/$f" /tmp/runtime/.dokima/; fi
           done
-          if [ -f AGENTS.md ]; then
-            cp AGENTS.md /tmp/runtime/
-            grep -oE '\]\([^)#: ]+\.md' AGENTS.md | cut -c3- | sort -u | while read -r f; do
-              case "$f" in /*|*..*) continue ;; esac
-              if [ -f "$f" ]; then cp --parents "$f" /tmp/runtime/; fi
-            done
-          fi
           (cd /tmp/runtime && python3 -m dokima.settings env) > /tmp/env.txt 2> /tmp/env-err.txt \
             || { echo "The settings file stopped the run: $(paste -sd' ' /tmp/env-err.txt)" > /tmp/why.txt
                  echo "::error title=Bad settings::$(cat /tmp/why.txt)"; exit 1; }
@@ -102,6 +96,25 @@ jobs:
             printf 'TESTS_AFFECTED=testmon\nTESTS_DIR=tests\nDEFAULT_BRANCH=main\nRECORDS_BRANCH=logs\nBOT_SLUG=dokima-runtime\n' > /tmp/env.txt
           fi
           cat /tmp/env.txt >> "$GITHUB_ENV"
+          DOCS=$(sed -n 's/^OWNER_DOCS=//p' /tmp/env.txt); DOCS=${DOCS:-AGENTS.md}
+          case "$DOCS" in /*|*..*) echo "::warning title=Owner docs not copied::$DOCS is outside the repo"; DOCS= ;; esac
+          if [ -n "$DOCS" ] && [ -f "$DOCS" ]; then
+            cp --parents "$DOCS" /tmp/runtime/
+            DIR=$(dirname "$DOCS")
+            grep -oE '\]\([^)#: ]+\.md' "$DOCS" | cut -c3- | sort -u | while read -r f; do
+              case "$f" in /*|*..*) continue ;; esac
+              [ "$DIR" = . ] || f="$DIR/$f"
+              if [ -f "$f" ]; then cp --parents "$f" /tmp/runtime/; fi
+            done
+          elif [ -n "$DOCS" ]; then
+            echo "::warning title=Owner docs not found::$DOCS, the owner docs file the settings name, is not on main"
+          fi
+          if (cd /tmp/runtime && python3 -c 'import dokima.prompt') 2>/dev/null; then
+            (cd /tmp/runtime && python3 -m dokima.prompt files) | while read -r f; do
+              case "$f" in ""|/*|*..*) continue ;; esac
+              if [ -f "$f" ]; then cp --parents "$f" /tmp/runtime/; fi
+            done
+          fi
       - name: Only a code owner starts an agent
         env:
           SENDER: ${{ github.actor }}
@@ -377,7 +390,12 @@ jobs:
           esac
           CHECK="$CHECK && python3 -m dokima.agent check-round $ROLE $OUT/$FILE $PACK"
           echo "CHECK=$CHECK" >> "$GITHUB_ENV"
-          printf '%s' "$(cat /tmp/runtime/dokima/roles/style.md /tmp/runtime/dokima/roles/$GRADE.md /tmp/runtime/dokima/roles/$ROLE.md)
+          # The shipped prompt with main's settings drawn in, then main's house rules for this role (#796).
+          (cd /tmp/runtime && python3 -m dokima.prompt "$ROLE" "$GRADE") > /tmp/shipped.md 2> /tmp/prompt-err.txt \
+            && (cd /tmp/runtime && python3 -m dokima.prompt house "$ROLE") > /tmp/house.md 2>> /tmp/prompt-err.txt \
+            || { echo "The prompt could not be built: $(paste -sd' ' /tmp/prompt-err.txt)" > /tmp/why.txt
+                 echo "::error title=Prompt not built::$(cat /tmp/why.txt)"; exit 1; }
+          printf '%s' "$(cat /tmp/shipped.md)
 
           # Your pack
           - $PACK/issue.md: issue #$N as it stands, with every comment (the owner's words and answers are here).
@@ -389,7 +407,7 @@ jobs:
           - $PACK/worker-run/: the worker's session log." )
           You are on branch try/issue-$N. Your stage is: ${STAGE:-$ROLE}.
           Hand back into $OUT. Before you finish, run this check on your hand-back and fix everything it reports:
-            $CHECK" > /tmp/prompt.md
+            $CHECK$( [ -s /tmp/house.md ] && printf '\n\n# House rules\n%s' "$(cat /tmp/house.md)" )" > /tmp/prompt.md
           python3 -m dokima.agents run "$ROLE" /tmp/prompt.md "$OUT"
       # The card says checking, with a key made for this one edit and revoked before code checks the hand-back.
       - id: checking-key
@@ -452,7 +470,9 @@ jobs:
           # A planner that merged main in pushes the merge even with no test changed, so the branch holds main.
           if git diff --cached --quiet && { [ "$ROLE" != planner ] || [ "$(git rev-parse HEAD)" = "${BRANCH_TIP:-$(git rev-parse HEAD)}" ]; }; then echo "Nothing to push."
           else
-            git diff --cached --quiet || git commit -qm "$ROLE for #$N (run ${{ github.run_id }})" --trailer "Co-authored-by: Reza Soleymanifar <34189616+RezaSoleymanifar@users.noreply.github.com>"
+            # The co-author the settings name, if any, is credited on the commit (#796).
+            CREDIT=(); [ -z "$CO_AUTHOR" ] || CREDIT=(--trailer "Co-authored-by: $CO_AUTHOR")
+            git diff --cached --quiet || git commit -qm "$ROLE for #$N (run ${{ github.run_id }})" "${CREDIT[@]}"
             # The branch may have moved during the run (main merged in): catch up once and push again. Changes that
             # still can't be saved fail the run here, before its record is written, so nothing reports them as done.
             R="https://x-access-token:${GH_TOKEN}@github.com/${GITHUB_REPOSITORY}.git"
