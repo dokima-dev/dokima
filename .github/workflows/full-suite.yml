@@ -54,7 +54,7 @@ jobs:
           fi
           mode=all
           if [ "${{ github.event_name }}" = pull_request_target ] && [ "$queue" = true ] && [ "$affected" != all ]; then mode=affected; fi
-          echo "mode=$mode" >> "$GITHUB_OUTPUT"; echo "Tests to run: $mode (merge queue: $queue, affected tests: $affected)"
+          echo "mode=$mode" >> "${GITHUB_OUTPUT:-/dev/null}"; echo "Tests to run: $mode (merge queue: $queue, affected tests: $affected)"
       - name: Restore main's testmon baseline
         if: steps.mode.outputs.mode == 'affected'
         uses: actions/cache/restore@v4
