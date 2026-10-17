@@ -1,0 +1,275 @@
+{
+ "role": "reviewer",
+ "stage": "plan",
+ "run_id": "39005331595",
+ "commit_before": "fc3224bc177742fad2f86efc5639ffc0f54e667b",
+ "started_by": "dokima-runtime[bot]",
+ "models": [
+  "claude-opus-5-5"
+ ],
+ "report": {
+  "duration_ms": 53769,
+  "turns": 9,
+  "cost_usd": 0.4979628,
+  "tokens_in": 377934,
+  "tokens_out": 3900
+ },
+ "log": "https://github.com/dokima-dev/dokima/blob/logs/logs/795/39005331595-reviewer-plan.md",
+ "run": "https://github.com/dokima-dev/dokima/actions/runs/39005331595",
+ "handback": {
+  "previous_step": {
+   "did": [
+    "Added a test that a planner with no branch starts from the default branch.",
+    "Made the records test check the conversation link names the records branch.",
+    "Made the identity test check the planner's merge of main too."
+   ],
+   "decided": [],
+   "open": [
+    "Still asks the owner about the overlap, two exclude lists and pushed commits' name."
+   ]
+  },
+  "verdict": "approve",
+  "summary": "All three earlier gaps are now tested; all fifteen new tests fail today for the right reason.",
+  "raises": [],
+  "answers": [],
+  "asks": [
+   {
+    "ask": "The all tests check runs the all-tests command from settings.",
+    "source": "https://github.com/dokima-dev/dokima/issues/740#issuecomment-6219928729",
+    "criterion": "795.1"
+   },
+   {
+    "ask": "Each criterion's check runs the per-criterion command from settings.",
+    "source": "https://github.com/dokima-dev/dokima/issues/740#issuecomment-6219928729",
+    "criterion": "795.2"
+   },
+   {
+    "ask": "Setting affected tests to all runs every test before review, with no saved baseline.",
+    "source": "https://github.com/dokima-dev/dokima/issues/740#issuecomment-6219928729",
+    "criterion": "795.3"
+   },
+   {
+    "ask": "Handling a clash with main keeps the test folder named in settings.",
+    "source": "https://github.com/dokima-dev/dokima/issues/740#issuecomment-6219928729",
+    "criterion": "795.4"
+   },
+   {
+    "ask": "The planner's push holds only files in the test folder named in settings.",
+    "source": "https://github.com/dokima-dev/dokima/issues/740#issuecomment-6219928729",
+    "criterion": "795.5"
+   },
+   {
+    "ask": "Tests on the merge gate exclude list stay out of the all tests check.",
+    "source": "https://github.com/dokima-dev/dokima/issues/740",
+    "criterion": "795.6"
+   },
+   {
+    "ask": "Agents base their branches and pull requests on the default branch setting.",
+    "source": "https://github.com/dokima-dev/dokima/issues/740#issuecomment-6219928729",
+    "criterion": "795.7"
+   },
+   {
+    "ask": "Each run's conversation is saved on the records branch the settings name.",
+    "source": "https://github.com/dokima-dev/dokima/issues/740#issuecomment-6219928729",
+    "criterion": "795.8"
+   },
+   {
+    "ask": "Only the bot named in settings may send the next-step signal.",
+    "source": "https://github.com/dokima-dev/dokima/issues/740#issuecomment-6219928729",
+    "criterion": "795.9"
+   },
+   {
+    "ask": "Commits Dokima makes carry the git identity of the bot named in settings.",
+    "source": "https://github.com/dokima-dev/dokima/issues/740#issuecomment-6219928729",
+    "criterion": "795.10"
+   }
+  ],
+  "behaviors": [
+   {
+    "criterion": "795.1",
+    "one_behavior": true,
+    "why": "One command run by one check."
+   },
+   {
+    "criterion": "795.2",
+    "one_behavior": true,
+    "why": "One command run by each criterion's check."
+   },
+   {
+    "criterion": "795.3",
+    "one_behavior": true,
+    "why": "One setting value turning the baseline off; the owner's words."
+   },
+   {
+    "criterion": "795.4",
+    "one_behavior": true,
+    "why": "Clash handling follows one folder setting."
+   },
+   {
+    "criterion": "795.5",
+    "one_behavior": true,
+    "why": "The push is limited to one folder."
+   },
+   {
+    "criterion": "795.6",
+    "one_behavior": true,
+    "why": "Listed tests are left out of one check."
+   },
+   {
+    "criterion": "795.7",
+    "one_behavior": true,
+    "why": "Everything uses one default branch setting; the owner's words."
+   },
+   {
+    "criterion": "795.8",
+    "one_behavior": true,
+    "why": "Conversations saved on one branch."
+   },
+   {
+    "criterion": "795.9",
+    "one_behavior": true,
+    "why": "One sender allowed to send one signal."
+   },
+   {
+    "criterion": "795.10",
+    "one_behavior": true,
+    "why": "Commits carry one identity."
+   }
+  ],
+  "edge_cases": [
+   {
+    "criterion": "795.1",
+    "cut": [],
+    "missing": []
+   },
+   {
+    "criterion": "795.2",
+    "cut": [],
+    "missing": []
+   },
+   {
+    "criterion": "795.3",
+    "cut": [],
+    "missing": []
+   },
+   {
+    "criterion": "795.4",
+    "cut": [],
+    "missing": []
+   },
+   {
+    "criterion": "795.5",
+    "cut": [],
+    "missing": []
+   },
+   {
+    "criterion": "795.6",
+    "cut": [],
+    "missing": []
+   },
+   {
+    "criterion": "795.7",
+    "cut": [],
+    "missing": []
+   },
+   {
+    "criterion": "795.8",
+    "cut": [],
+    "missing": []
+   },
+   {
+    "criterion": "795.9",
+    "cut": [],
+    "missing": []
+   },
+   {
+    "criterion": "795.10",
+    "cut": [],
+    "missing": []
+   }
+  ],
+  "tests": [
+   {
+    "test": "tests/test_settings_workflows.py::test_the_all_tests_check_runs_the_all_tests_command_from_settings",
+    "only_its_behavior": true,
+    "why": "Runs the job with a setting and without; fails today, right reason."
+   },
+   {
+    "test": "tests/test_settings_workflows.py::test_each_criterions_check_runs_the_per_criterion_command_from_settings",
+    "only_its_behavior": true,
+    "why": "Runs the check job with the setting, default and main's older reader."
+   },
+   {
+    "test": "tests/test_settings_workflows.py::test_setting_affected_tests_to_all_runs_every_test_before_review",
+    "only_its_behavior": true,
+    "why": "Runs the review steps; the baseline must not be used with all."
+   },
+   {
+    "test": "tests/test_settings_workflows.py::test_setting_affected_tests_to_all_saves_no_baseline_on_main",
+    "only_its_behavior": true,
+    "why": "Runs every baseline job on a push; none saved with all."
+   },
+   {
+    "test": "tests/test_settings_workflows.py::test_a_planners_clash_with_main_takes_mains_tests_from_the_settings_test_folder",
+    "only_its_behavior": true,
+    "why": "Runs the planner's clash path with spec as the folder."
+   },
+   {
+    "test": "tests/test_settings_workflows.py::test_a_workers_clash_with_main_keeps_the_planners_test_in_the_settings_test_folder",
+    "only_its_behavior": true,
+    "why": "Runs the worker's clash path with spec as the folder."
+   },
+   {
+    "test": "tests/test_settings_workflows.py::test_the_planners_push_holds_only_files_in_the_settings_test_folder",
+    "only_its_behavior": true,
+    "why": "Runs the real push and reads the pushed branch."
+   },
+   {
+    "test": "tests/test_settings_workflows.py::test_tests_on_the_exclude_list_stay_out_of_the_all_tests_check",
+    "only_its_behavior": true,
+    "why": "Runs real tests; listed one skipped, default list runs it."
+   },
+   {
+    "test": "tests/test_settings_workflows.py::test_agents_base_their_branches_and_pull_requests_on_the_default_branch_setting",
+    "only_its_behavior": true,
+    "why": "Checks the worker's merge and pull request base use trunk."
+   },
+   {
+    "test": "tests/test_settings_workflows.py::test_a_planners_new_branch_starts_from_the_default_branch_setting",
+    "only_its_behavior": true,
+    "why": "Runs a planner with no branch; checks it starts from trunk."
+   },
+   {
+    "test": "tests/test_settings_workflows.py::test_a_manual_fix_opens_against_the_default_branch_setting",
+    "only_its_behavior": true,
+    "why": "Runs the manual fix workflow; checks list and create bases."
+   },
+   {
+    "test": "tests/test_settings_workflows.py::test_each_runs_conversation_is_saved_on_the_records_branch_the_settings_name",
+    "only_its_behavior": true,
+    "why": "Runs the real save step; checks the branch and the record's link."
+   },
+   {
+    "test": "tests/test_settings_workflows.py::test_only_the_bot_named_in_settings_may_send_the_next_step_signal",
+    "only_its_behavior": true,
+    "why": "Runs the gate with named bot, usual bot and no settings."
+   },
+   {
+    "test": "tests/test_settings_workflows.py::test_merging_main_into_a_branch_carries_the_git_identity_of_the_bot_named_in_settings",
+    "only_its_behavior": true,
+    "why": "Runs the worker's and planner's merges; checks each author."
+   },
+   {
+    "test": "tests/test_settings_workflows.py::test_the_wiki_sync_commits_as_the_bot_named_in_settings",
+    "only_its_behavior": true,
+    "why": "Runs the wiki sync step and checks its commit author."
+   }
+  ],
+  "size": "ok"
+ },
+ "check": {
+  "passed": true,
+  "problems": []
+ },
+ "url": "https://github.com/dokima-dev/dokima/issues/795#issuecomment-6230007090"
+}
