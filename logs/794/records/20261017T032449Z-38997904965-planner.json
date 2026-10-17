@@ -1,0 +1,276 @@
+{
+ "role": "planner",
+ "stage": null,
+ "run_id": "38997904965",
+ "commit_before": "d53791310b9c727bca5c2a7440292f7b9a6f1011",
+ "started_by": "dokima-runtime[bot]",
+ "models": [
+  "claude-opus-5-5"
+ ],
+ "report": {
+  "duration_ms": 664821,
+  "turns": 23,
+  "cost_usd": 1.0708414000000002,
+  "tokens_in": 1397134,
+  "tokens_out": 12620
+ },
+ "log": "https://github.com/dokima-dev/dokima/blob/logs/logs/794/38997904965-planner.md",
+ "run": "https://github.com/dokima-dev/dokima/actions/runs/38997904965",
+ "handback": {
+  "kind": "user_story",
+  "title": "Setup saves safely; agents and test setup follow settings",
+  "summary": "Setup saves settings without losing anything, agents come from the settings file, and test workflows set up as it says.",
+  "user_story": "Setup keeps a settings file intact, agents come from it, and test workflows install what it names.",
+  "acceptance_criteria": [
+   {
+    "text": "A settings file holding lists is read in full, on every machine that runs Dokima.",
+    "words": "A settings file holding lists is read in full, on every machine that runs Dokima.",
+    "source": "https://github.com/dokima-dev/dokima/issues/779",
+    "files": [
+     "dokima/setup.py",
+     ".github/workflows/acceptance-criteria.yml",
+     ".github/workflows/agent.yml",
+     ".github/workflows/assign.yml",
+     ".github/workflows/audit.yml",
+     ".github/workflows/autopilot.yml",
+     ".github/workflows/board.yml",
+     ".github/workflows/commands.yml",
+     ".github/workflows/playthrough.yml",
+     ".github/workflows/uptodate.yml"
+    ],
+    "edge_cases": [
+     {
+      "case": "Lists written one item per line",
+      "test": "tests/test_settings_setup.py::test_a_list_written_one_item_per_line_is_read_in_full"
+     },
+     {
+      "case": "A workflow job that runs Dokima before installing the reader",
+      "test": "tests/test_settings_setup.py::test_every_machine_that_runs_dokima_can_read_the_settings_file"
+     }
+    ]
+   },
+   {
+    "text": "Saving a setting through setup keeps the file's comments.",
+    "words": "Saving a setting through setup keeps the file's comments.",
+    "source": "https://github.com/dokima-dev/dokima/issues/779",
+    "files": [
+     "dokima/setup.py"
+    ],
+    "edge_cases": [
+     {
+      "case": "Comment lines inside the agents section, where setup writes",
+      "test": "tests/test_settings_setup.py::test_saving_a_setting_keeps_the_files_comments"
+     }
+    ]
+   },
+   {
+    "text": "Saving a setting through setup keeps comments written at the end of a line.",
+    "words": "Saving a setting through setup keeps comments written at the end of a line.",
+    "source": "https://github.com/dokima-dev/dokima/issues/779",
+    "files": [
+     "dokima/setup.py"
+    ],
+    "edge_cases": [
+     {
+      "case": "A comment at the end of the agents section's own line",
+      "test": "tests/test_settings_setup.py::test_saving_a_setting_keeps_comments_at_the_end_of_lines"
+     }
+    ]
+   },
+   {
+    "text": "Saving one setting through setup leaves every other setting as it was.",
+    "words": "Saving one setting through setup leaves every other setting as it was.",
+    "source": "https://github.com/dokima-dev/dokima/issues/779",
+    "files": [
+     "dokima/setup.py"
+    ],
+    "edge_cases": [
+     {
+      "case": "A settings file with no agents section yet",
+      "test": "tests/test_settings_setup.py::test_saving_into_a_file_with_no_agents_section_leaves_the_rest"
+     },
+     {
+      "case": "A repo with no settings file yet",
+      "test": "tests/test_settings_setup.py::test_saving_with_no_settings_file_yet_creates_it"
+     }
+    ]
+   },
+   {
+    "text": "The agents section of the settings file picks each role's agent and model.",
+    "words": "The agents section of the settings file picks each role's agent and model.",
+    "source": "https://github.com/dokima-dev/dokima/issues/779",
+    "files": [
+     "dokima/agents.py",
+     "dokima/setup.py",
+     "dokima/defaults.yaml",
+     ".github/workflows/agent.yml"
+    ],
+    "edge_cases": [
+     {
+      "case": "A role the section leaves out stays on today's agent",
+      "test": "tests/test_settings_setup.py::test_the_agents_section_picks_each_roles_agent_and_model"
+     },
+     {
+      "case": "A run on GitHub reads main's settings file",
+      "test": "tests/test_settings_setup.py::test_a_run_on_github_starts_the_model_the_agents_section_names"
+     }
+    ]
+   },
+   {
+    "text": "A repo with only the old agents file still runs each role's agent as named there.",
+    "words": "A repo with only the old agents file still runs each role's agent as named there.",
+    "source": "https://github.com/dokima-dev/dokima/issues/779",
+    "files": [
+     "dokima/agents.py",
+     ".github/workflows/agent.yml"
+    ],
+    "edge_cases": [
+     {
+      "case": "A run on GitHub with only the old agents file on main",
+      "test": "tests/test_agents.py::test_a_run_starts_with_the_model_the_file_names"
+     }
+    ]
+   },
+   {
+    "text": "The repo's own install command runs before its tests in every test workflow.",
+    "words": "The repo's own install command runs before its tests in every test workflow.",
+    "source": "https://github.com/dokima-dev/dokima/issues/779",
+    "files": [
+     "dokima/settings.py",
+     ".github/workflows/agent.yml",
+     ".github/workflows/acceptance-criteria.yml",
+     ".github/workflows/full-suite.yml",
+     ".github/workflows/testmon.yml"
+    ],
+    "edge_cases": [
+     {
+      "case": "No install command set, the default",
+      "test": "tests/test_settings_test_setup.py::test_the_repos_install_command_runs_before_its_tests"
+     }
+    ]
+   },
+   {
+    "text": "The test tools each test workflow installs come from the test tools setting.",
+    "words": "The test tools each test workflow installs come from the test tools setting.",
+    "source": "https://github.com/dokima-dev/dokima/issues/779",
+    "files": [
+     "dokima/settings.py",
+     ".github/workflows/agent.yml",
+     ".github/workflows/acceptance-criteria.yml",
+     ".github/workflows/full-suite.yml",
+     ".github/workflows/testmon.yml"
+    ],
+    "edge_cases": [
+     {
+      "case": "A repo whose settings reader has no setup mode yet falls back to the old tool list",
+      "test": "tests/test_settings_test_setup.py::test_a_reader_without_the_setup_mode_falls_back_to_the_old_install_list"
+     }
+    ]
+   },
+   {
+    "text": "The repo's tests run on the Python version the settings name.",
+    "words": "The repo's tests run on the Python version the settings name.",
+    "source": "https://github.com/dokima-dev/dokima/issues/779",
+    "files": [
+     "dokima/settings.py",
+     ".github/workflows/agent.yml",
+     ".github/workflows/acceptance-criteria.yml",
+     ".github/workflows/full-suite.yml",
+     ".github/workflows/testmon.yml"
+    ],
+    "no_edge_cases": "One version is named; the default needs no new proof, it is today's."
+   },
+   {
+    "text": "No setting in a repo's file changes the order: plan, review, build, review, merge.",
+    "words": "No setting in a repo's file changes the order: plan, review, build, review, merge.",
+    "source": "https://github.com/dokima-dev/dokima/issues/779",
+    "files": [
+     "dokima/agents.py",
+     "dokima/agent_next.py",
+     ".github/workflows/agent.yml"
+    ],
+    "no_edge_cases": "No order setting exists; the test tries the names a repo would guess."
+   }
+  ],
+  "non_functional": [],
+  "tests": {
+   "794.1": [
+    "tests/test_settings_setup.py::test_a_settings_file_holding_lists_is_read_in_full",
+    "tests/test_settings_setup.py::test_a_list_written_one_item_per_line_is_read_in_full",
+    "tests/test_settings_setup.py::test_every_machine_that_runs_dokima_can_read_the_settings_file"
+   ],
+   "794.2": [
+    "tests/test_settings_setup.py::test_saving_a_setting_keeps_the_files_comments"
+   ],
+   "794.3": [
+    "tests/test_settings_setup.py::test_saving_a_setting_keeps_comments_at_the_end_of_lines"
+   ],
+   "794.4": [
+    "tests/test_settings_setup.py::test_saving_one_setting_leaves_every_other_setting_as_it_was",
+    "tests/test_settings_setup.py::test_saving_into_a_file_with_no_agents_section_leaves_the_rest",
+    "tests/test_settings_setup.py::test_saving_with_no_settings_file_yet_creates_it"
+   ],
+   "794.5": [
+    "tests/test_settings_setup.py::test_the_agents_section_picks_each_roles_agent_and_model",
+    "tests/test_settings_setup.py::test_a_run_on_github_starts_the_model_the_agents_section_names"
+   ],
+   "794.6": [
+    "tests/test_agents.py::test_each_role_has_its_own_subscription_and_model",
+    "tests/test_agents.py::test_a_run_starts_with_the_model_the_file_names"
+   ],
+   "794.7": [
+    "tests/test_settings_test_setup.py::test_the_repos_install_command_runs_before_its_tests"
+   ],
+   "794.8": [
+    "tests/test_settings_test_setup.py::test_the_test_tools_installed_come_from_the_test_tools_setting",
+    "tests/test_settings_test_setup.py::test_a_reader_without_the_setup_mode_falls_back_to_the_old_install_list"
+   ],
+   "794.9": [
+    "tests/test_settings_test_setup.py::test_the_repos_tests_run_on_the_python_the_settings_name"
+   ],
+   "794.10": [
+    "tests/test_settings_setup.py::test_no_setting_changes_the_order_of_steps"
+   ]
+  },
+  "test_changes": {
+   "tests/test_setup.py::test_settings_name_key_secret": "Setup now saves into the settings file's agents section, as the owner asked.",
+   "tests/test_setup.py::test_settings_give_roles": "Setup now saves into the settings file's agents section, as the owner asked.",
+   "tests/test_testmon.py::test_code_review_runs_only_affected_tests": "Tools now come from settings; runs both jobs to see testmon still installed.",
+   "tests/test_checks.py::test_full_suite_runs_every_test_on_every_pull_request": "Owner asked tools come from the test tools setting; 794.8 proves that now.",
+   "tests/test_manual_fix_installs.py::test_the_manual_fix_check_installs_what_all_tests_installs": "Installs now come from settings; runs both jobs instead of reading install lines.",
+   "tests/test_setup.py::test_settings_keep_other_subscription": "Same promise, now read from the settings file's agents section, as the owner asked.",
+   "tests/test_setup.py::test_settings_keep_other_roles": "Same promise, now read from the settings file's agents section, as the owner asked.",
+   "tests/test_agents.py::test_a_runs_record_reads_its_agent_through_the_interface": "Same checks; it now ignores the run machine's settings path and reads its own file.",
+   "tests/test_agents.py::test_each_role_has_its_own_subscription_and_model": "Same checks; its box now drops the run machine's settings path, as the owner asked."
+  },
+  "links": {
+   "blocked_by": [],
+   "blocks": [
+    795
+   ],
+   "relates_to": [
+    779,
+    740,
+    780,
+    727
+   ]
+  },
+  "answers": [
+   {
+    "raise": "R3",
+    "answer": "done",
+    "why": "Added a test under 794.8: each test workflow with an old settings reader installs the old list."
+   },
+   {
+    "raise": "RW2",
+    "answer": "done",
+    "why": "Same test: it runs every test workflow's setup against a reader without the setup mode."
+   }
+  ]
+ },
+ "check": {
+  "passed": true,
+  "problems": []
+ },
+ "url": "https://github.com/dokima-dev/dokima/issues/794#issuecomment-6228903331"
+}
