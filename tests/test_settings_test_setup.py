@@ -38,6 +38,32 @@ echo "agent-start" >> "$SETUP_LOG"
 exec "$(dirname "$0")/claude-fake" "$@"
 '''
 DEFAULT_TOOLS = {"pytest", "pytest-xdist", "pytest-testmon"}
+# What each job installed for the tests before #794, on Python 3.12: the list it falls back to.
+OLD_TOOLS = {"full-suite.yml": {"pytest", "pytest-xdist"}, "acceptance-criteria.yml": {"pytest", "pytest-xdist"},
+             "testmon.yml": {"pytest", "pytest-xdist", "pytest-testmon"},
+             "agent.yml": {"pytest", "pytest-xdist", "pytest-testmon"}}
+MAIN_BLOCK = '\nif __name__ == "__main__":'
+OLD_MAIN = '''
+
+del setup_lines
+
+
+def main(argv=()):
+    """The reader as #793 shipped it: prints every setting as JSON, whatever it is asked."""
+    print(json.dumps(read(), indent=1))
+    return 0
+'''
+
+
+def old_reader():
+    """This checkout's settings reader without its setup mode, as #793 left it.
+
+    It still reads the settings and prints them all as JSON, even when asked for `setup`, so a step that trusts it
+    gets JSON where it expects `name=value` lines."""
+    text = open(os.path.join(os.path.dirname(__file__), "..", "dokima", "settings.py")).read()
+    assert MAIN_BLOCK in text, "794.8: dokima/settings.py has no main block to stand in for the old reader"
+    head, tail = text.split(MAIN_BLOCK, 1)
+    return head.rstrip() + "\n" + OLD_MAIN + MAIN_BLOCK + tail
 JOBS = [("full-suite.yml", "all-tests"), ("acceptance-criteria.yml", "check"), ("testmon.yml", "baseline"),
         ("agent.yml", "run")]
 
@@ -45,9 +71,13 @@ JOBS = [("full-suite.yml", "all-tests"), ("acceptance-criteria.yml", "check"), (
 class SetupRun(Machine):
     """One workflow job run on the machine, logging installs, Python versions and test runs."""
 
-    def __init__(self, tmp, file, job, settings):
-        """Run JOB of workflow FILE with SETTINGS as main's settings file (None for none)."""
+    def __init__(self, tmp, file, job, settings, reader=None):
+        """Run JOB of workflow FILE with SETTINGS as main's settings file (None for none).
+
+        READER, when given, is the text of `dokima/settings.py` on main in place of this checkout's."""
         files = {".dokima/settings.yaml": settings} if settings is not None else {}
+        if reader is not None:
+            files["dokima/settings.py"] = reader
         super().__init__(tmp, SPLIT_PROPOSED if file == "agent.yml" else [], files=files)
         t = self.tmp
         self.setup_log = f"{t}/setup.log"
@@ -167,3 +197,32 @@ def test_the_repos_tests_run_on_the_python_the_settings_name(record_property, tm
     versions = [l.split(None, 1)[1] if " " in l else "" for l in r.before_tests("794.9") if l.split()[0] == "python"]
     assert versions and versions[-1] == "3.11", \
         f"794.9: in {where(file, job)} the tests ran on Python {versions[-1] if versions else 'never set up'!r}, not 3.11"
+
+
+@pytest.mark.parametrize("file,job", JOBS)
+def test_a_reader_without_the_setup_mode_falls_back_to_the_old_install_list(record_property, tmp_path, file, job):
+    """Test workflows follow settings only if the reader has a setup mode, else old tools.
+
+    Proves 794.8, as the owner asked after the merge queue broke: check for the mode, not the file. Runs each test
+    workflow's job twice with a settings file naming other tools and Python 3.11. With this checkout's reader the job
+    must install the named tools. With the same reader stripped of its setup mode, as #793 left main, the job must
+    still reach the repo's tests, having installed exactly the old list on Python 3.12 and none of the named tools."""
+    record_property("proves", "794.8")
+    settings = 'setup:\n  python: "3.11"\n  test_tools: odd-runner odd-plugin\n'
+    r = SetupRun(tmp_path / "new", file, job, settings)
+    got = set(r.installed("794.8"))
+    assert {"odd-runner", "odd-plugin"} <= got, (f"794.8: with a settings reader that has a setup mode, "
+                                                 f"{where(file, job)} did not install the tools the settings name; "
+                                                 f"got {sorted(got)}")
+    r = SetupRun(tmp_path / "old", file, job, settings, reader=old_reader())
+    got = set(r.installed("794.8"))
+    missing = sorted(OLD_TOOLS[file] - got)
+    assert not missing, (f"794.8: with a settings reader that has no setup mode, {where(file, job)} did not install "
+                         f"the old test tools {missing}; got {sorted(got)}")
+    named = sorted({"odd-runner", "odd-plugin"} & got)
+    assert not named, (f"794.8: with a settings reader that has no setup mode, {where(file, job)} installed {named}; "
+                       f"it should fall back to the old list")
+    versions = [l.split(None, 1)[1] if " " in l else "" for l in r.before_tests("794.8") if l.split()[0] == "python"]
+    assert versions and versions[-1] == "3.12", (f"794.8: with a settings reader that has no setup mode, "
+                                                 f"{where(file, job)} set up Python "
+                                                 f"{versions[-1] if versions else 'never'!r}, not the old 3.12")
