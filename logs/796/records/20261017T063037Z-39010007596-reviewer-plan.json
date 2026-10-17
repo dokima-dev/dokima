@@ -1,0 +1,212 @@
+{
+ "role": "reviewer",
+ "stage": "plan",
+ "run_id": "39010007596",
+ "commit_before": "af1cac8812dd0b7a6541718d5c49ca07c3dfa5bf",
+ "started_by": "dokima-runtime[bot]",
+ "models": [
+  "claude-opus-5-5"
+ ],
+ "report": {
+  "duration_ms": 90412,
+  "turns": 13,
+  "cost_usd": 0.6579342,
+  "tokens_in": 653505,
+  "tokens_out": 6916
+ },
+ "log": "https://github.com/dokima-dev/dokima/blob/logs/logs/796/39010007596-reviewer-plan.md",
+ "run": "https://github.com/dokima-dev/dokima/actions/runs/39010007596",
+ "handback": {
+  "previous_step": {
+   "did": [
+    "The planner wrote eight criteria, one per ask of story 4 of the parent plan.",
+    "The planner wrote one test per criterion; each fails today because the feature is missing."
+   ],
+   "decided": [
+    "A role's house rules section is a heading naming that role.",
+    "With no settings file, commits keep today's co-author line."
+   ],
+   "open": [
+    "The owner has two questions to answer: role sections and the default co-author."
+   ]
+  },
+  "verdict": "approve",
+  "summary": "The plan carries all eight asks, each with a test that fails today because the feature is missing.",
+  "raises": [],
+  "answers": [],
+  "asks": [
+   {
+    "ask": "The co-author line on Dokima's commits comes from the co-author setting.",
+    "source": "https://github.com/dokima-dev/dokima/issues/779",
+    "criterion": "796.1"
+   },
+   {
+    "ask": "Agents copy the owner docs file the settings name, in place of the rules file.",
+    "source": "https://github.com/dokima-dev/dokima/issues/779",
+    "criterion": "796.2"
+   },
+   {
+    "ask": "The planner and worker prompts name the owner docs file the settings name.",
+    "source": "https://github.com/dokima-dev/dokima/issues/779",
+    "criterion": "796.3"
+   },
+   {
+    "ask": "The worker's prompt lists the protected paths the settings name.",
+    "source": "https://github.com/dokima-dev/dokima/issues/779",
+    "criterion": "796.4"
+   },
+   {
+    "ask": "The planner prompt's runner line is drawn from the test settings.",
+    "source": "https://github.com/dokima-dev/dokima/issues/779",
+    "criterion": "796.5"
+   },
+   {
+    "ask": "The style prompt's caps table is drawn from the caps setting.",
+    "source": "https://github.com/dokima-dev/dokima/issues/779",
+    "criterion": "796.6"
+   },
+   {
+    "ask": "A repo's house rules file is added after the shipped prompt.",
+    "source": "https://github.com/dokima-dev/dokima/issues/779",
+    "criterion": "796.7"
+   },
+   {
+    "ask": "A house rules section named for a role is added only to that role's prompt.",
+    "source": "https://github.com/dokima-dev/dokima/issues/779",
+    "criterion": "796.8"
+   }
+  ],
+  "behaviors": [
+   {
+    "criterion": "796.1",
+    "one_behavior": true,
+    "why": "One result: the co-author line follows the setting."
+   },
+   {
+    "criterion": "796.2",
+    "one_behavior": true,
+    "why": "One result: the named owner docs file is copied."
+   },
+   {
+    "criterion": "796.3",
+    "one_behavior": true,
+    "why": "One result: prompts name the owner docs file the settings name."
+   },
+   {
+    "criterion": "796.4",
+    "one_behavior": true,
+    "why": "One result: the worker's prompt lists the named protected paths."
+   },
+   {
+    "criterion": "796.5",
+    "one_behavior": true,
+    "why": "One result: the runner line follows the test settings."
+   },
+   {
+    "criterion": "796.6",
+    "one_behavior": true,
+    "why": "One result: the caps table follows the caps setting."
+   },
+   {
+    "criterion": "796.7",
+    "one_behavior": true,
+    "why": "One result: house rules come after the shipped prompt."
+   },
+   {
+    "criterion": "796.8",
+    "one_behavior": true,
+    "why": "One result: a role's section reaches only that role."
+   }
+  ],
+  "edge_cases": [
+   {
+    "criterion": "796.1",
+    "cut": [],
+    "missing": []
+   },
+   {
+    "criterion": "796.2",
+    "cut": [],
+    "missing": []
+   },
+   {
+    "criterion": "796.3",
+    "cut": [],
+    "missing": []
+   },
+   {
+    "criterion": "796.4",
+    "cut": [],
+    "missing": []
+   },
+   {
+    "criterion": "796.5",
+    "cut": [],
+    "missing": []
+   },
+   {
+    "criterion": "796.6",
+    "cut": [],
+    "missing": []
+   },
+   {
+    "criterion": "796.7",
+    "cut": [],
+    "missing": []
+   },
+   {
+    "criterion": "796.8",
+    "cut": [],
+    "missing": []
+   }
+  ],
+  "tests": [
+   {
+    "test": "tests/test_settings_prompts.py::test_the_co_author_line_on_dokimas_commits_comes_from_the_co_author_setting",
+    "only_its_behavior": true,
+    "why": "Runs both commit steps that credit a co-author; fails today on the fixed line."
+   },
+   {
+    "test": "tests/test_settings_prompts.py::test_agents_copy_the_owner_docs_file_the_settings_name_in_place_of_the_rules_file",
+    "only_its_behavior": true,
+    "why": "Runs the real runtime copy; fails today because only the rules file is copied."
+   },
+   {
+    "test": "tests/test_settings_prompts.py::test_the_planner_and_worker_prompts_name_the_owner_docs_file_the_settings_name",
+    "only_its_behavior": true,
+    "why": "Builds both prompts through the agent step; fails today because they name the rules file."
+   },
+   {
+    "test": "tests/test_settings_prompts.py::test_the_workers_prompt_lists_the_protected_paths_the_settings_name",
+    "only_its_behavior": true,
+    "why": "Builds the worker's prompt; fails today because the named paths are absent."
+   },
+   {
+    "test": "tests/test_settings_prompts.py::test_the_planner_prompts_runner_line_is_drawn_from_the_test_settings",
+    "only_its_behavior": true,
+    "why": "Checks the runner section names command, folder and tag; fails today on the fixed line."
+   },
+   {
+    "test": "tests/test_settings_prompts.py::test_the_style_prompts_caps_table_is_drawn_from_the_caps_setting",
+    "only_its_behavior": true,
+    "why": "Checks changed and unchanged caps rows; fails today with summary 20, blocker 30."
+   },
+   {
+    "test": "tests/test_settings_prompts.py::test_a_repos_house_rules_file_is_added_after_the_shipped_prompt",
+    "only_its_behavior": true,
+    "why": "Checks placement, main over branch, and a missing file; fails today because no house rules are added."
+   },
+   {
+    "test": "tests/test_settings_prompts.py::test_a_house_rules_section_named_for_a_role_is_added_only_to_that_roles_prompt",
+    "only_its_behavior": true,
+    "why": "Three roles each get shared rules and only their own section; fails today."
+   }
+  ],
+  "size": "ok"
+ },
+ "check": {
+  "passed": true,
+  "problems": []
+ },
+ "url": "https://github.com/dokima-dev/dokima/issues/796#issuecomment-6230682127"
+}
