@@ -1,0 +1,41 @@
+{
+ "role": "worker",
+ "stage": null,
+ "run_id": "39064849549",
+ "commit_before": "2259e6d7d890a496002dbca24e9caa3ee43136f4",
+ "started_by": "dokima-runtime[bot]",
+ "models": [
+  "claude-opus-5-5"
+ ],
+ "report": {
+  "duration_ms": 112157,
+  "turns": 11,
+  "cost_usd": 0.46026900000000004,
+  "tokens_in": 448175,
+  "tokens_out": 4344
+ },
+ "log": "https://github.com/dokima-dev/dokima/blob/logs/logs/813/39064849549-worker.md",
+ "run": "https://github.com/dokima-dev/dokima/actions/runs/39064849549",
+ "handback": {
+  "summary": "Installing now adds only the thin workflow, calling the played commit, and a new starting settings file.",
+  "criteria": {
+   "813.1": "`install_files` in `dokima/playthrough.py` returns only `.github/workflows/dokima.yml` and `.dokima/settings.yaml`, from `dokima/install/`.",
+   "813.2": "The installed files are the fixed `dokima/install/` texts; no environment value is read or written.",
+   "813.3": "New `dokima/install/settings.yaml` sets `co_author` to the shipped `{bot}`, not the owner's line."
+  },
+  "evidence": "`pytest -q tests/test_install.py tests/test_playthrough.py`: 16 passed in 3.15s",
+  "raises": [],
+  "answers": []
+ },
+ "check": {
+  "passed": true,
+  "problems": []
+ },
+ "dropped_by_fence": [],
+ "files_changed": [
+  "dokima/install/settings.yaml",
+  "dokima/playthrough.py"
+ ],
+ "branch": "try/issue-813",
+ "url": "https://github.com/dokima-dev/dokima/issues/813#issuecomment-6240058125"
+}
