@@ -334,17 +334,16 @@ def test_queued_pr_with_no_linked_issue_fails_the_gate_with_the_same_reason(reco
 def test_pull_request_checks_behave_exactly_as_before(record_property, run_matrix):
     """Pull request checks are unchanged: same triggers, names, list and commit.
 
-    Proves 191.4. Checks the triggers are exactly main's plus merge_group (full-suite.yml: pull_request_target, push to main,
-    merge_group, as #263 left it; acceptance-criteria.yml: pull_request_target, merge_group), so nothing was dropped, swapped or
+    Proves 191.4. Checks the triggers are exactly main's plus merge_group (full-suite.yml: pull_request_target and
+    merge_group; the owner dropped the push to main on 2026-10-17, since the queue already tests the exact merge; acceptance-criteria.yml: pull_request_target, merge_group), so nothing was dropped, swapped or
     added beyond the queue; that the required check names 'all tests' and 'Acceptance criteria' are unchanged; that
     `dokima.checks matrix` on a pull request lists its issue's plan exactly; that on a pull request the criteria
     check out and annotate the pull request's head commit, not main's; and that the all tests check still checks out
     the pull request's head on a pull request and main's commit on a push to main."""
     record_property("proves", "191.4")
     suite, dw = workflow("full-suite.yml"), workflow("acceptance-criteria.yml")
-    assert triggers(suite) == {"pull_request_target", "push", "merge_group"}, \
-        f"191.4: full-suite.yml should run on pull_request_target, push and merge_group only, but runs on {sorted(triggers(suite))}"
-    assert "branches: [main]" in [x.strip() for x in suite], "191.4: full-suite.yml no longer runs on pushes to main"
+    assert triggers(suite) == {"pull_request_target", "merge_group"}, \
+        f"191.4: full-suite.yml should run on pull_request_target and merge_group only, but runs on {sorted(triggers(suite))}"
     assert triggers(dw) == {"pull_request_target", "merge_group"}, \
         f"191.4: acceptance-criteria.yml should run on pull_request_target and merge_group only, but runs on {sorted(triggers(dw))}"
     assert "name: all tests" in [x.strip() for x in suite], "191.4: the 'all tests' check was renamed"
