@@ -60,7 +60,7 @@ Copy `.github/workflows/` and the `dokima/` package.
 | `assign.yml` | Assigns new issues to the code owners |
 | `testmon.yml` | Baseline so code review runs only affected tests |
 | `audit.yml` | Daily check of settings against `dokima/manifest.py` |
-| `fix.yml` | Opens a manual fix as the app's PR |
+| `fix.yml` | Opens a manual fix as the app's PR; it names the issue it fixes (`-f issue=N`), so every fix is traceable |
 | `playthrough.yml`, `wiki.yml` | δokima's own maintenance |
 
 ## 5. Branch rule on main

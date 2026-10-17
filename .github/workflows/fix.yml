@@ -8,6 +8,9 @@ on:
       branch:
         description: The branch the agent pushed
         required: true
+      issue:
+        description: The issue this fix fixes; every fix names one, so it is always traceable (file it first if none exists)
+        required: true
 permissions:
   contents: read
 concurrency:
@@ -53,10 +56,13 @@ jobs:
           GH_TOKEN: ${{ steps.app.outputs.token }}
           GH_REPO: ${{ github.repository }}
           BRANCH: ${{ inputs.branch }}
+          ISSUE: ${{ inputs.issue }}
         run: |
           set -euo pipefail
           if [ "$BRANCH" = "$DEFAULT_BRANCH" ]; then echo "::error::A fix comes from the branch the agent pushed, not $DEFAULT_BRANCH"; exit 1; fi
+          case "$ISSUE" in ''|*[!0-9]*) echo "::error::A fix names the issue it fixes by number; got '$ISSUE'. File the issue first."; exit 1;; esac
+          gh issue view "$ISSUE" --json number >/dev/null || { echo "::error::Issue #$ISSUE does not exist here. File the issue first."; exit 1; }
           open=$(gh pr list --head "$BRANCH" --base "$DEFAULT_BRANCH" --state open --json number --jq '.[0].number // empty')
           if [ -n "$open" ]; then echo "Pull request #$open is already open for $BRANCH"; exit 0; fi
           gh pr create --base "$DEFAULT_BRANCH" --head "$BRANCH" --title "Manual fix: $BRANCH" \
-            --body "A manual fix from the branch \`$BRANCH\`, opened by Dokima's app. It merges once all tests pass and the owner approves."
+            --body "Fixes #$ISSUE. A manual fix from the branch \`$BRANCH\`, opened by Dokima's app. It merges once all tests pass and the owner approves."

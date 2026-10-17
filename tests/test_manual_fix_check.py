@@ -130,14 +130,29 @@ def test_only_dokimas_app_gets_the_manual_fix_check(record_property, tmp_path):
     """A pull request with no issue, opened by anyone else, still fails.
 
     Proves 643.3. Runs the matrix command for the same code change twice: opened by a person, it must get only the failing
-    no-plan check; opened by Dokima's app, it must get the manual fix check instead. A pull request by Dokima's app
-    that names an issue with no approved plan must still fail for that issue."""
+    no-plan check; opened by Dokima's app, it must get the manual fix check instead. Since 2026-10-17 every manual fix
+    names the issue it fixes (owner, #830), so one by Dokima's app from its fix branch naming an issue still gets the
+    manual fix check; a planned build from try/issue-N with no approved plan still fails (830.7)."""
     record_property("proves", "643.3")
     rows, output = run_matrix(tmp_path, OWNER)
     assert rows == [{"id": "none", "name": NO_ISSUE, "tests": ""}], \
         f"643.3: a pull request a person opened with no linked issue no longer fails '{NO_ISSUE}': {rows}\n{output}"
-    rows, output = run_matrix(tmp_path, APP, body="Closes #77")
-    assert rows == [{"id": "none", "name": "No approved plan found for issue #77", "tests": ""}], \
-        f"643.3: a pull request by Dokima's app for an issue with no approved plan no longer fails: {rows}\n{output}"
+    rows, output = run_matrix(tmp_path, APP, body="Fixes #77")
+    assert [r["id"] for r in rows or []] == ["manual-fix"], \
+        f"643.3: a manual fix by Dokima's app naming the issue it fixes lost its manual fix check: {rows}\n{output}"
     rows, output = run_matrix(tmp_path, APP)
     manual_fix_row(rows, output, "643.3")
+
+
+def test_a_manual_fix_naming_its_issue_still_gets_the_manual_fix_check(record_property):
+    """Naming the issue it fixes ("Fixes #N") does not turn a manual fix into a planned build.
+
+    Proves 830.7. Dokima's app opened it from a branch that is not try/issue-N, so it gets the one check that runs all
+    tests, never "No approved plan found for issue #N". A pull request from try/issue-N with no approved plan still
+    gets the failing no-plan check."""
+    record_property("proves", "830.7")
+    from dokima import checks
+    rows = checks.build_matrix("807", [], APP, "fix/queue-failed")
+    assert [r["id"] for r in rows] == ["manual-fix"], f"830.7: a manual fix naming its issue got {rows}"
+    rows = checks.build_matrix("807", [], APP, "try/issue-807")
+    assert rows[0]["id"] == "none", f"830.7: a planned build with no approved plan did not fail: {rows}"

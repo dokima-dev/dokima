@@ -687,6 +687,13 @@ def main(argv):
         started = start_waiting(repo, [int(argv[2])], line=AUTOPILOT_START_LINE)
         print(f"started the planner for #{argv[2]}" if started else f"#{argv[2]} on autopilot: nothing to start yet.")
         return 0
+    if argv[1] == "queue-failed":
+        # A merge queue run failed (#830): put the pull request back once, then send it back to its worker.
+        repo = os.environ["GITHUB_REPOSITORY"]
+        owners = [o for o in os.environ.get("OWNERS", "").split(",") if o] or sorted(repo_approvers(repo.split("/")[0]))
+        print(queue_failed(repo, os.environ.get("HEAD_REF", ""), os.environ.get("FAILED_RUN", ""),
+                           os.environ.get("FAILED_RUN_URL", ""), owners))
+        return 0
     if argv[1] == "route":
         on_pr = os.environ.get("ON_PR") == "true"
         head, pr_body = os.environ.get("HEAD", ""), ""
@@ -714,5 +721,6 @@ from dokima.agent_autopilot import (
     file_split, AUTOPILOT, autopilot_label, issue_tree, switch_autopilot, autopilot_comment, AUTOPILOT_START_LINE, named,
     file_issues, record_links, set_title, rerun_checks, start_waiting, open_blockers_of, close_done_parents,
     autopilot_closed, AUTOPILOT_LINES, UNREAD, on_autopilot, approves_work, merge_gate, open_pr, automerge,
-    unconfirmed_comment, merge_tree)
+    unconfirmed_comment, merge_tree, queue_failed)
+from dokima.plan import repo_approvers
 from dokima.agent_next import next_step, waiting, board_place, next_line, blocks_since_owner
