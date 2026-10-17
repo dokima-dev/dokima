@@ -58,11 +58,30 @@ gate:
   exclude: [card, board wait]
 merge:
   method: squash
+  # false for a repo with no merge queue, such as a personal one: auto-merge then needs only main's review exemption.
+  queue: true
+# Each of Dokima's labels by its key; the name is what the repo calls it.
 labels:
-  plan: plan
-  work: work
   autopilot: autopilot
   filed: filed-by-dokima
+# The colors the audit wants: labels by the keys above, as GitHub writes them (rrggbb), and board pills by field and
+# option, as GitHub names them.
+colors:
+  labels:
+    autopilot: "8250df"
+    filed: "bfd4f2"
+  pills:
+    Status:
+      Backlog: GRAY
+      Plan: BLUE
+      Work: YELLOW
+      Review: ORANGE
+      Done: GREEN
+    Action:
+      Needs you: RED
+      Autopilot: PURPLE
+    Priority:
+      Blocker: RED
 roles:
   planner:
     max_turns: 100

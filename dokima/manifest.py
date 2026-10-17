@@ -19,6 +19,8 @@ LABELS = {
     "autopilot": {"color": "8250df", "description": "Running on its own"},
     "filed-by-dokima": {"color": "bfd4f2", "description": "Created automatically, not by a person"},
 }
+# Each label's key in the settings' labels and colors.labels groups, by its shipped name.
+LABEL_KEYS = {"autopilot": "autopilot", "filed-by-dokima": "filed"}
 
 FIELDS = {
     "Status": {
@@ -60,6 +62,32 @@ PERMISSIONS = {
     "administration": "read",
     "organization_projects": "write",
 }
+
+
+def labels(got):
+    """LABELS under the names and colors the merged settings GOT give them."""
+    colors = (got.get("colors") or {}).get("labels") or {}
+    out = {}
+    for name, want in LABELS.items():
+        key = LABEL_KEYS[name]
+        out[str((got.get("labels") or {}).get(key) or name)] = {**want, "color": str(colors.get(key) or want["color"])}
+    return out
+
+
+def fields(got):
+    """FIELDS with each option's color as the merged settings GOT give it."""
+    pills = (got.get("colors") or {}).get("pills") or {}
+    return {field: {option: {**want, "color": str((pills.get(field) or {}).get(option) or want["color"])}
+                    for option, want in options.items()}
+            for field, options in FIELDS.items()}
+
+
+def branch_rules(got):
+    """BRANCH_RULES with main requiring exactly the checks the merged settings GOT name."""
+    required = [e.get("name") if isinstance(e, dict) else e for e in (got.get("gates") or {}).get("required") or []]
+    return {branch: {**rule, "required_checks": required} if branch == "main" else rule
+            for branch, rule in BRANCH_RULES.items()}
+
 
 LEVEL = {"read": 1, "write": 2}
 NONE = ""  # a call that needs no app permission
@@ -267,7 +295,10 @@ def called(node):
     return f.id if isinstance(f, ast.Name) else f.attr if isinstance(f, ast.Attribute) else None
 
 
-def check_python(report, path, source):
+def check_python(report, path, source, workflows=()):
+    """Names what Python SOURCE relies on that the manifest leaves out.
+
+    A name compared in code that is one of WORKFLOWS, the repo's workflow names, is no check."""
     tree = ast.parse(source)
     module = Scope(tree.body)
     scopes = {}
@@ -300,8 +331,8 @@ def check_python(report, path, source):
                     and isinstance(left.slice, ast.Constant) and left.slice.value == "name"
                     and len(node.ops) == 1 and isinstance(node.ops[0], (ast.Eq, ast.NotEq))):
                 name = text(node.comparators[0], scope)
-                # A name compared with a declared view's is the view being looked up, not a check.
-                if name is not None and name not in CHECKS and name not in VIEWS:
+                # A name compared with a declared view's or a workflow's is that being looked up, not a check.
+                if name is not None and name not in CHECKS and name not in VIEWS and name not in workflows:
                     report.add(path, f"check {name!r} is not in the manifest's required checks")
         elif isinstance(node, ast.Call):
             python_call(report, path, node, scope)
@@ -388,17 +419,29 @@ def check_workflow(report, path, source):
                     report.gh_api(path, args)
 
 
+def workflow_names(flows):
+    """The name each workflow file in the folder FLOWS gives itself."""
+    names = set()
+    for f in sorted(os.listdir(flows)) if os.path.isdir(flows) else []:
+        if f.endswith((".yml", ".yaml")):
+            m = re.search(r"^name:\s*['\"]?(.*?)['\"]?\s*$", open(os.path.join(flows, f)).read(), re.M)
+            names |= {m.group(1)} if m else set()
+    return names
+
+
 def undeclared(root):
     """One line, naming the file, per setting under root the manifest leaves out."""
     report = Report()
+    flows = os.path.join(root, ".github", "workflows")
+    workflows = workflow_names(flows)
     code = os.path.join(root, "dokima")
     for folder, dirs, files in sorted(os.walk(code)):
         dirs.sort()
         for f in sorted(files):
             if f.endswith(".py"):
                 full = os.path.join(folder, f)
-                check_python(report, os.path.relpath(full, root).replace(os.sep, "/"), open(full).read())
-    flows = os.path.join(root, ".github", "workflows")
+                check_python(report, os.path.relpath(full, root).replace(os.sep, "/"), open(full).read(),
+                             workflows)
     if os.path.isdir(flows):
         for f in sorted(os.listdir(flows)):
             if f.endswith((".yml", ".yaml")):
