@@ -1,0 +1,262 @@
+{
+ "role": "planner",
+ "stage": null,
+ "run_id": "39011089190",
+ "commit_before": "af1cac8812dd0b7a6541718d5c49ca07c3dfa5bf",
+ "started_by": "RezaSoleymanifar",
+ "models": [
+  "claude-opus-5-5"
+ ],
+ "report": {
+  "duration_ms": 133722,
+  "turns": 10,
+  "cost_usd": 0.7026787999999999,
+  "tokens_in": 552006,
+  "tokens_out": 7352
+ },
+ "log": "https://github.com/dokima-dev/dokima/blob/logs/logs/796/39011089190-planner.md",
+ "run": "https://github.com/dokima-dev/dokima/actions/runs/39011089190",
+ "handback": {
+  "kind": "user_story",
+  "title": "Co-author, owner docs and prompts follow settings",
+  "summary": "Commits credit the co-author the settings name, and agent prompts follow the repo's docs, paths, caps and house rules.",
+  "user_story": "A repo's settings decide who commits credit and what every agent's prompt says, house rules included.",
+  "acceptance_criteria": [
+   {
+    "text": "The co-author line on Dokima's commits comes from the co-author setting.",
+    "words": "The co-author line on Dokima's commits comes from the co-author setting.",
+    "source": "https://github.com/dokima-dev/dokima/issues/779",
+    "files": [
+     ".github/workflows/agent.yml",
+     ".github/workflows/wiki.yml",
+     "dokima/settings.py",
+     "dokima/defaults.yaml"
+    ],
+    "edge_cases": [
+     {
+      "case": "An empty co-author setting leaves no co-author line.",
+      "test": "tests/test_settings_prompts.py::test_the_co_author_line_on_dokimas_commits_comes_from_the_co_author_setting"
+     }
+    ]
+   },
+   {
+    "text": "Agents copy the owner docs file the settings name, in place of the rules file.",
+    "words": "Agents copy the owner docs file the settings name, in place of the rules file.",
+    "source": "https://github.com/dokima-dev/dokima/issues/779",
+    "files": [
+     ".github/workflows/agent.yml",
+     "dokima/settings.py"
+    ],
+    "edge_cases": [
+     {
+      "case": "The topic files the owner docs file links are copied too.",
+      "test": "tests/test_settings_prompts.py::test_agents_copy_the_owner_docs_file_the_settings_name_in_place_of_the_rules_file"
+     },
+     {
+      "case": "Settings naming a missing file still let the run go on.",
+      "test": "tests/test_settings_prompts.py::test_agents_copy_the_owner_docs_file_the_settings_name_in_place_of_the_rules_file"
+     },
+     {
+      "case": "With no settings file, the rules file is copied as today.",
+      "test": "tests/test_settings_prompts.py::test_agents_copy_the_owner_docs_file_the_settings_name_in_place_of_the_rules_file"
+     }
+    ]
+   },
+   {
+    "text": "The planner and worker prompts name the owner docs file the settings name.",
+    "words": "The planner and worker prompts name the owner docs file the settings name.",
+    "source": "https://github.com/dokima-dev/dokima/issues/779",
+    "files": [
+     ".github/workflows/agent.yml",
+     "dokima/prompt.py",
+     "dokima/settings.py"
+    ],
+    "edge_cases": [
+     {
+      "case": "With no settings file, the prompts name the rules file as today.",
+      "test": "tests/test_settings_prompts.py::test_the_planner_and_worker_prompts_name_the_owner_docs_file_the_settings_name"
+     }
+    ]
+   },
+   {
+    "text": "The worker's prompt lists the protected paths the settings name.",
+    "words": "The worker's prompt lists the protected paths the settings name.",
+    "source": "https://github.com/dokima-dev/dokima/issues/779",
+    "files": [
+     ".github/workflows/agent.yml",
+     "dokima/prompt.py",
+     "dokima/settings.py"
+    ],
+    "edge_cases": [
+     {
+      "case": "With no settings file, the prompt lists the default protected path.",
+      "test": "tests/test_settings_prompts.py::test_the_workers_prompt_lists_the_protected_paths_the_settings_name"
+     }
+    ]
+   },
+   {
+    "text": "The planner prompt's runner line is drawn from the test settings.",
+    "words": "The planner prompt's runner line is drawn from the test settings.",
+    "source": "https://github.com/dokima-dev/dokima/issues/779",
+    "files": [
+     ".github/workflows/agent.yml",
+     "dokima/prompt.py",
+     "dokima/settings.py"
+    ],
+    "edge_cases": [
+     {
+      "case": "With no settings file, the line names the default tag.",
+      "test": "tests/test_settings_prompts.py::test_the_planner_prompts_runner_line_is_drawn_from_the_test_settings"
+     }
+    ]
+   },
+   {
+    "text": "The style prompt's caps table is drawn from the caps setting.",
+    "words": "The style prompt's caps table is drawn from the caps setting.",
+    "source": "https://github.com/dokima-dev/dokima/issues/779",
+    "files": [
+     ".github/workflows/agent.yml",
+     "dokima/prompt.py",
+     "dokima/settings.py"
+    ],
+    "edge_cases": [
+     {
+      "case": "A cap the settings leave out keeps its default.",
+      "test": "tests/test_settings_prompts.py::test_the_style_prompts_caps_table_is_drawn_from_the_caps_setting"
+     },
+     {
+      "case": "With no settings file, the table shows today's caps.",
+      "test": "tests/test_settings_prompts.py::test_the_style_prompts_caps_table_is_drawn_from_the_caps_setting"
+     }
+    ]
+   },
+   {
+    "text": "A repo's house rules file is added after the shipped prompt.",
+    "words": "A repo's house rules file is added after the shipped prompt.",
+    "source": "https://github.com/dokima-dev/dokima/issues/779",
+    "files": [
+     ".github/workflows/agent.yml",
+     "dokima/prompt.py",
+     "dokima/settings.py"
+    ],
+    "edge_cases": [
+     {
+      "case": "House rules changed only on the agent's branch are never used.",
+      "test": "tests/test_settings_prompts.py::test_a_repos_house_rules_file_is_added_after_the_shipped_prompt"
+     },
+     {
+      "case": "A repo with no house rules file still starts its agent.",
+      "test": "tests/test_settings_prompts.py::test_a_repos_house_rules_file_is_added_after_the_shipped_prompt"
+     }
+    ]
+   },
+   {
+    "text": "A house rules section named for a role is added only to that role's prompt.",
+    "words": "A house rules section named for a role is added only to that role's prompt.",
+    "source": "https://github.com/dokima-dev/dokima/issues/779",
+    "files": [
+     ".github/workflows/agent.yml",
+     "dokima/prompt.py",
+     "dokima/settings.py"
+    ],
+    "edge_cases": [
+     {
+      "case": "A role with no section of its own gets only the shared rules.",
+      "test": "tests/test_settings_prompts.py::test_a_house_rules_section_named_for_a_role_is_added_only_to_that_roles_prompt"
+     }
+    ]
+   },
+   {
+    "text": "With no co-author setting, Dokima's commits carry no co-author line.",
+    "words": "Ship the co-author default empty (no co-author line)",
+    "source": "https://github.com/dokima-dev/dokima/issues/796#issuecomment-6230833365",
+    "files": [
+     ".github/workflows/agent.yml",
+     ".github/workflows/wiki.yml",
+     "dokima/settings.py",
+     "dokima/defaults.yaml"
+    ],
+    "edge_cases": [
+     {
+      "case": "Settings that name other things but no co-author still give no co-author line.",
+      "test": "tests/test_settings_prompts.py::test_with_no_co_author_setting_commits_carry_no_co_author_line"
+     }
+    ]
+   },
+   {
+    "text": "Dokima's own repo settings file keeps the owner's co-author line on its commits.",
+    "words": "put my current line in this repo's own .dokima/settings.yaml so this repo keeps it",
+    "source": "https://github.com/dokima-dev/dokima/issues/796#issuecomment-6230833365",
+    "files": [
+     ".dokima/settings.yaml",
+     ".github/workflows/agent.yml",
+     "dokima/settings.py"
+    ],
+    "no_edge_cases": "One fixed file in this repo; its one line is checked exactly."
+   }
+  ],
+  "non_functional": [],
+  "tests": {
+   "796.1": [
+    "tests/test_settings_prompts.py::test_the_co_author_line_on_dokimas_commits_comes_from_the_co_author_setting"
+   ],
+   "796.2": [
+    "tests/test_settings_prompts.py::test_agents_copy_the_owner_docs_file_the_settings_name_in_place_of_the_rules_file"
+   ],
+   "796.3": [
+    "tests/test_settings_prompts.py::test_the_planner_and_worker_prompts_name_the_owner_docs_file_the_settings_name"
+   ],
+   "796.4": [
+    "tests/test_settings_prompts.py::test_the_workers_prompt_lists_the_protected_paths_the_settings_name"
+   ],
+   "796.5": [
+    "tests/test_settings_prompts.py::test_the_planner_prompts_runner_line_is_drawn_from_the_test_settings"
+   ],
+   "796.6": [
+    "tests/test_settings_prompts.py::test_the_style_prompts_caps_table_is_drawn_from_the_caps_setting"
+   ],
+   "796.7": [
+    "tests/test_settings_prompts.py::test_a_repos_house_rules_file_is_added_after_the_shipped_prompt"
+   ],
+   "796.8": [
+    "tests/test_settings_prompts.py::test_a_house_rules_section_named_for_a_role_is_added_only_to_that_roles_prompt"
+   ],
+   "796.9": [
+    "tests/test_settings_prompts.py::test_with_no_co_author_setting_commits_carry_no_co_author_line"
+   ],
+   "796.10": [
+    "tests/test_settings_prompts.py::test_dokimas_own_settings_file_keeps_the_owners_co_author_line"
+   ]
+  },
+  "test_changes": {},
+  "links": {
+   "blocked_by": [],
+   "blocks": [],
+   "relates_to": [
+    110,
+    741,
+    779,
+    780,
+    783,
+    789,
+    790,
+    791
+   ]
+  },
+  "raises": [
+   {
+    "kind": "issue",
+    "label": "Bot default is Dokima's",
+    "text": "The shipped bot default names Dokima's own app, against the owner's rule that shipped defaults fit any repo.",
+    "evidence": "`dokima/defaults.yaml` sets `bot: slug: dokima-runtime`; see #789 and the owner's comment on #796.",
+    "raised_by": "planner",
+    "id": "P3"
+   }
+  ]
+ },
+ "check": {
+  "passed": true,
+  "problems": []
+ },
+ "url": "https://github.com/dokima-dev/dokima/issues/796#issuecomment-6230837649"
+}
