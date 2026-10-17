@@ -1,0 +1,337 @@
+{
+ "role": "planner",
+ "stage": null,
+ "run_id": "39036404562",
+ "commit_before": "edf1c0e0800fbd616670940fb81b53445a839682",
+ "started_by": "dokima-runtime[bot]",
+ "models": [
+  "claude-opus-5-5"
+ ],
+ "report": {
+  "duration_ms": 228340,
+  "turns": 17,
+  "cost_usd": 1.2222194000000002,
+  "tokens_in": 1076098,
+  "tokens_out": 20576
+ },
+ "log": "https://github.com/dokima-dev/dokima/blob/logs/logs/742/39036404562-planner.md",
+ "run": "https://github.com/dokima-dev/dokima/actions/runs/39036404562",
+ "handback": {
+  "kind": "feature",
+  "title": "Thin install: no Dokima code in the adopter's repo",
+  "summary": "Adopters install one short workflow and a settings file; all Dokima code runs from Dokima's repo.",
+  "feature": "Dokima installs as one short workflow and a settings file. Stories: shared workflows, installer, README, wiki, first merge.",
+  "stories": [
+   {
+    "title": "Dokima's workflows run from Dokima's own repo",
+    "user_story": "An adopter's runs use Dokima's tagged code and the adopter's own secrets, failing clearly when one is missing.",
+    "task": "Make Dokima's workflows callable from another repo at a tag, take all code from Dokima's repo, and fail clearly on a missing bot or key.",
+    "context": "Today every workflow checks out the running repo and runs `python -m dokima` from it (`actions/checkout@v5` with no `repository:`), so an adopter must hold `dokima/`. Reusable workflows need `on: workflow_call`; `agent.yml` already has one. Environment secrets work in a called workflow when its job names `environment: keys`. Events such as `workflow_run` name workflows by their name in the adopter's repo, so one shared entry that routes by event keeps the adopter's file short. Role key secrets are already named in settings (`dokima/agents.py`, #794): prove it still holds when called from outside. The app id is `vars.DOKIMA_APP_ID` and its key `secrets.DOKIMA_APP_KEY` in every app-token step. Commits are authored as `${SLUG}[bot]` (`agent.yml:219`) and credit `co_author` (`agent.yml:474`). `playthrough.yml` and `wiki.yml` stay Dokima-only and are never shared. Default secret names stay today's (`CLAUDE_CODE_OAUTH_TOKEN`); the owner's `CLAUDE_TOKEN` is any name a repo sets. The owner wrote about 15 lines; 20 is the ceiling set here.",
+    "promises": [
+     "Code runs from Dokima's repo",
+     "Keys only in the keys environment",
+     "Settings name each role's secret",
+     "Missing bot or key fails with the fix",
+     "Co-author trailer on by default, can be turned off",
+     "Thin workflow calls shared workflows by tag",
+     "About 15 lines"
+    ],
+    "acceptance_criteria": [
+     {
+      "text": "A run on an adopter's repo takes all Dokima code from Dokima's own repo, never the adopter's.",
+      "words": "All Dokima code runs from Dokima's own repo inside GitHub Actions.",
+      "source": "https://github.com/dokima-dev/dokima/issues/742",
+      "files": [
+       ".github/workflows/acceptance-criteria.yml",
+       ".github/workflows/agent.yml",
+       ".github/workflows/assign.yml",
+       ".github/workflows/audit.yml",
+       ".github/workflows/autopilot.yml",
+       ".github/workflows/board.yml",
+       ".github/workflows/card.yml",
+       ".github/workflows/commands.yml",
+       ".github/workflows/fix.yml",
+       ".github/workflows/full-suite.yml",
+       ".github/workflows/reviews.yml",
+       ".github/workflows/testmon.yml",
+       ".github/workflows/uptodate.yml"
+      ]
+     },
+     {
+      "text": "Every job that reads a key takes it from the repo's keys environment, in the shared workflows too.",
+      "words": "Credentials** live only in GitHub secrets on the repo (the `keys` environment)",
+      "source": "https://github.com/dokima-dev/dokima/issues/742",
+      "files": [
+       ".github/workflows/acceptance-criteria.yml",
+       ".github/workflows/agent.yml",
+       ".github/workflows/assign.yml",
+       ".github/workflows/audit.yml",
+       ".github/workflows/autopilot.yml",
+       ".github/workflows/board.yml",
+       ".github/workflows/card.yml",
+       ".github/workflows/commands.yml",
+       ".github/workflows/fix.yml",
+       ".github/workflows/full-suite.yml",
+       ".github/workflows/reviews.yml",
+       ".github/workflows/testmon.yml",
+       ".github/workflows/uptodate.yml"
+      ]
+     },
+     {
+      "text": "Each role reads its model key from the secret its settings name.",
+      "words": "`settings.yaml` only names which secret each role reads.",
+      "source": "https://github.com/dokima-dev/dokima/issues/742",
+      "files": [
+       ".github/workflows/agent.yml",
+       "dokima/agents.py"
+      ]
+     },
+     {
+      "text": "A run with no bot set up fails, and its message says how to set the bot up.",
+      "words": "Missing bot or key fails loudly with the fix in the message",
+      "source": "https://github.com/dokima-dev/dokima/issues/742",
+      "files": [
+       ".github/workflows/acceptance-criteria.yml",
+       ".github/workflows/agent.yml",
+       ".github/workflows/assign.yml",
+       ".github/workflows/audit.yml",
+       ".github/workflows/autopilot.yml",
+       ".github/workflows/board.yml",
+       ".github/workflows/card.yml",
+       ".github/workflows/commands.yml",
+       ".github/workflows/fix.yml",
+       ".github/workflows/full-suite.yml",
+       ".github/workflows/reviews.yml",
+       ".github/workflows/testmon.yml",
+       ".github/workflows/uptodate.yml",
+       "dokima/keys.py"
+      ]
+     },
+     {
+      "text": "A run with no model key secret fails, and its message names the secret and how to add it.",
+      "words": "a run without the secret fails with a clear message",
+      "source": "https://github.com/dokima-dev/dokima/issues/742",
+      "files": [
+       ".github/workflows/agent.yml",
+       "dokima/agents.py",
+       "dokima/keys.py"
+      ]
+     },
+     {
+      "text": "Every commit Dokima makes carries a co-author line naming Dokima's bot by default.",
+      "words": "the trailer `Co-authored-by: dokima[bot]`, so Dokima appears in the contributor list of every repo it touches.",
+      "source": "https://github.com/dokima-dev/dokima/issues/742",
+      "files": [
+       ".github/workflows/agent.yml",
+       "dokima/defaults.yaml",
+       "dokima/settings.py"
+      ]
+     },
+     {
+      "text": "When a repo's settings turn the co-author line off, its commits carry none.",
+      "words": "the adopter can turn it off in settings.",
+      "source": "https://github.com/dokima-dev/dokima/issues/742",
+      "files": [
+       ".github/workflows/agent.yml",
+       "dokima/defaults.yaml",
+       "dokima/settings.py"
+      ]
+     },
+     {
+      "text": "The adopter's workflow calls Dokima's shared workflows at a release tag, never a branch.",
+      "words": "calls Dokima's shared workflows by tag.",
+      "source": "https://github.com/dokima-dev/dokima/issues/742",
+      "files": [
+       "dokima/adopter/dokima.yml",
+       ".github/workflows/acceptance-criteria.yml",
+       ".github/workflows/agent.yml",
+       ".github/workflows/assign.yml",
+       ".github/workflows/audit.yml",
+       ".github/workflows/autopilot.yml",
+       ".github/workflows/board.yml",
+       ".github/workflows/card.yml",
+       ".github/workflows/commands.yml",
+       ".github/workflows/fix.yml",
+       ".github/workflows/full-suite.yml",
+       ".github/workflows/reviews.yml",
+       ".github/workflows/testmon.yml",
+       ".github/workflows/uptodate.yml"
+      ]
+     },
+     {
+      "text": "The adopter's workflow is at most 20 lines long.",
+      "words": "about 15 lines",
+      "source": "https://github.com/dokima-dev/dokima/issues/742",
+      "files": [
+       "dokima/adopter/dokima.yml"
+      ]
+     }
+    ],
+    "non_functional": [],
+    "depends_on": []
+   },
+   {
+    "title": "Installing adds only the workflow and settings",
+    "user_story": "Installing Dokima adds one short workflow and a settings file to a repo, and nothing else.",
+    "task": "Build the installer from the play-through's copy installer, writing only the thin workflow and settings file.",
+    "context": "`dokima/playthrough.py:161-223` (`install_files`, `Sandbox.install`) copies `dokima/` and every workflow; it is the starting point. The installed files are exactly `.github/workflows/dokima.yml` and `.dokima/settings.yaml`: no Python, no `playthrough.yml` or `wiki.yml`. The settings file names secrets only, never their values.",
+    "promises": [
+     "Install adds only the workflow and settings",
+     "No Python",
+     "Play-through and wiki never installed",
+     "Nothing secret committed"
+    ],
+    "acceptance_criteria": [
+     {
+      "text": "Installing Dokima adds exactly two files to a repo: its one workflow and its settings file.",
+      "words": "install adds only the workflow and settings",
+      "source": "https://github.com/dokima-dev/dokima/issues/742",
+      "files": [
+       "dokima/install.py",
+       "dokima/adopter/dokima.yml",
+       "dokima/adopter/settings.yaml"
+      ]
+     },
+     {
+      "text": "Installing writes no secret's value into any file it adds.",
+      "words": "Nothing secret is ever committed.",
+      "source": "https://github.com/dokima-dev/dokima/issues/742",
+      "files": [
+       "dokima/install.py",
+       "dokima/adopter/settings.yaml"
+      ]
+     }
+    ],
+    "non_functional": [],
+    "depends_on": [
+     0
+    ]
+   },
+   {
+    "title": "README install steps use the thin workflow",
+    "user_story": "The README tells adopters to add the one workflow and settings file, not to copy Dokima.",
+    "task": "Rewrite the README install steps for the thin install.",
+    "context": "`README.md:107-128` today says to copy `.github/workflows/` and `dokima/` (step 1).",
+    "promises": [
+     "README stops telling adopters to copy"
+    ],
+    "acceptance_criteria": [
+     {
+      "text": "The README's install steps no longer tell adopters to copy Dokima's workflows and code.",
+      "words": "The README install steps (README.md:120-125) and docs/wiki/Installing.md stop telling adopters to copy",
+      "source": "https://github.com/dokima-dev/dokima/issues/742",
+      "files": [
+       "README.md"
+      ]
+     }
+    ],
+    "non_functional": [],
+    "depends_on": [
+     1
+    ]
+   },
+   {
+    "title": "Wiki install page uses the thin workflow",
+    "user_story": "The wiki's install page tells adopters to add the one workflow and settings file, not to copy Dokima.",
+    "task": "Rewrite the wiki install page for the thin install.",
+    "context": "`docs/wiki/Installing.md` section 4 says to copy `.github/workflows/` and `dokima/`, and its table lists `playthrough.yml` and `wiki.yml`, which are never installed.",
+    "promises": [
+     "Wiki stops telling adopters to copy",
+     "Play-through and wiki are Dokima-only"
+    ],
+    "acceptance_criteria": [
+     {
+      "text": "The wiki's install page no longer tells adopters to copy Dokima's workflows and code.",
+      "words": "docs/wiki/Installing.md stop telling adopters to copy `.github/workflows/` and `dokima/`.",
+      "source": "https://github.com/dokima-dev/dokima/issues/742",
+      "files": [
+       "docs/wiki/Installing.md"
+      ]
+     }
+    ],
+    "non_functional": [],
+    "depends_on": [
+     1
+    ]
+   },
+   {
+    "title": "An empty repo reaches its first merge from the docs",
+    "user_story": "An owner with an empty repo gets to a first merged pull request with only the docs.",
+    "task": "Follow only the docs on a fresh empty repo until its first Dokima pull request merges.",
+    "context": "Needs real GitHub, so CI cannot prove it; see the question on the trial issue #746. A release tag must exist for the thin workflow to call (#755).",
+    "promises": [
+     "An empty repo reaches its first merged PR using only the docs"
+    ],
+    "acceptance_criteria": [
+     {
+      "text": "An empty repo reaches its first merged pull request following only the docs.",
+      "words": "an empty repo reaches its first merged PR using only the docs.",
+      "source": "https://github.com/dokima-dev/dokima/issues/742",
+      "files": [
+       "docs/wiki/Installing.md",
+       "README.md"
+      ]
+     }
+    ],
+    "non_functional": [],
+    "depends_on": [
+     0,
+     1,
+     2,
+     3
+    ]
+   }
+  ],
+  "links": {
+   "blocked_by": [],
+   "blocks": [
+    744,
+    745,
+    746
+   ],
+   "relates_to": [
+    272,
+    41,
+    110,
+    747,
+    755,
+    789
+   ]
+  },
+  "raises": [
+   {
+    "kind": "question",
+    "to": "owner",
+    "label": "Bot before shared app",
+    "text": "Until the shared app exists, should the co-author line name the repo's own bot? The plan assumes it does.",
+    "evidence": "`agent.yml:219` authors commits as the repo's own bot; the shared app is still open in #747.",
+    "raised_by": "planner",
+    "id": "P1"
+   },
+   {
+    "kind": "question",
+    "to": "owner",
+    "label": "Your own credit",
+    "text": "Here, should Dokima's bot line replace your co-author credit? The plan assumes your line stays, since a repo's setting wins.",
+    "evidence": "`.dokima/settings.yaml` sets `co_author` to you, from #110; this issue says the trailer replaces it.",
+    "raised_by": "planner",
+    "id": "P2"
+   },
+   {
+    "kind": "question",
+    "to": "owner",
+    "label": "First merge proof",
+    "text": "Should the trial issue prove the first merge from the docs? The plan keeps it here, checked by hand.",
+    "evidence": "It needs real GitHub; #775 says the plan check refuses a criterion with no test; #746 runs the trial.",
+    "raised_by": "planner",
+    "id": "P3"
+   }
+  ],
+  "answers": []
+ },
+ "check": {
+  "passed": true,
+  "problems": []
+ },
+ "url": "https://github.com/dokima-dev/dokima/issues/742#issuecomment-6234407522"
+}
