@@ -1,0 +1,293 @@
+{
+ "role": "reviewer",
+ "stage": "plan",
+ "run_id": "38986276868",
+ "commit_before": "c1421a26fa4b937d751028fe891aab2c955c4860",
+ "started_by": "dokima-runtime[bot]",
+ "models": [
+  "claude-opus-5-5"
+ ],
+ "report": {
+  "duration_ms": 81001,
+  "turns": 11,
+  "cost_usd": 0.5931118000000001,
+  "tokens_in": 507977,
+  "tokens_out": 5861
+ },
+ "log": "https://github.com/dokima-dev/dokima/blob/logs/logs/794/38986276868-reviewer-plan.md",
+ "run": "https://github.com/dokima-dev/dokima/actions/runs/38986276868",
+ "handback": {
+  "previous_step": {
+   "did": [
+    "The planner added a criterion that no setting changes the order of steps.",
+    "Its test runs a plan review with a settings file asking to skip the reviews."
+   ],
+   "decided": [
+    "The test checks only that an approved plan goes to the build next."
+   ],
+   "open": [
+    "Nothing checks that the code review still comes before merge."
+   ]
+  },
+  "verdict": "block",
+  "summary": "The order rule now has a criterion, but its test checks only one of the steps the owner named.",
+  "raises": [
+   {
+    "kind": "blocker",
+    "to": "planner",
+    "label": "794.10: one step only",
+    "text": "The test for 794.10 checks only the step after the plan review. Fix: also run the planner and worker with that file; the reviewer must start next.",
+    "evidence": "`tests/test_settings_setup.py::test_no_setting_changes_the_order_of_steps` asserts only `starts(r) == [(\"worker\", N)]` after a plan review.",
+    "raised_by": "reviewer",
+    "id": "R2"
+   }
+  ],
+  "answers": [],
+  "asks": [
+   {
+    "ask": "A settings file holding lists is read in full, on every machine that runs Dokima.",
+    "source": "https://github.com/dokima-dev/dokima/issues/740",
+    "criterion": "794.1"
+   },
+   {
+    "ask": "Saving a setting through setup keeps the file's comments.",
+    "source": "https://github.com/dokima-dev/dokima/issues/740",
+    "criterion": "794.2"
+   },
+   {
+    "ask": "Saving a setting through setup keeps comments written at the end of a line.",
+    "source": "https://github.com/dokima-dev/dokima/issues/740",
+    "criterion": "794.3"
+   },
+   {
+    "ask": "Saving one setting through setup leaves every other setting as it was.",
+    "source": "https://github.com/dokima-dev/dokima/issues/740",
+    "criterion": "794.4"
+   },
+   {
+    "ask": "The agents section of the settings file picks each role's agent and model.",
+    "source": "https://github.com/dokima-dev/dokima/issues/740",
+    "criterion": "794.5"
+   },
+   {
+    "ask": "A repo with only the old agents file still runs each role's agent as named there.",
+    "source": "https://github.com/dokima-dev/dokima/issues/740",
+    "criterion": "794.6"
+   },
+   {
+    "ask": "No setting in a repo's file changes the order: plan, review, build, review, merge.",
+    "source": "https://github.com/dokima-dev/dokima/issues/740",
+    "criterion": "794.10"
+   },
+   {
+    "ask": "The repo's own install command runs before its tests in every test workflow.",
+    "source": "https://github.com/dokima-dev/dokima/issues/740#issuecomment-6219928729",
+    "criterion": "794.7"
+   },
+   {
+    "ask": "The test tools each test workflow installs come from the test tools setting.",
+    "source": "https://github.com/dokima-dev/dokima/issues/740#issuecomment-6219928729",
+    "criterion": "794.8"
+   },
+   {
+    "ask": "The repo's tests run on the Python version the settings name.",
+    "source": "https://github.com/dokima-dev/dokima/issues/740#issuecomment-6219928729",
+    "criterion": "794.9"
+   }
+  ],
+  "behaviors": [
+   {
+    "criterion": "794.1",
+    "one_behavior": true,
+    "why": "One result: lists are read whole wherever Dokima runs."
+   },
+   {
+    "criterion": "794.2",
+    "one_behavior": true,
+    "why": "One result: comment lines survive a save."
+   },
+   {
+    "criterion": "794.3",
+    "one_behavior": true,
+    "why": "One result: end-of-line comments survive a save."
+   },
+   {
+    "criterion": "794.4",
+    "one_behavior": true,
+    "why": "One result: only the saved setting changes."
+   },
+   {
+    "criterion": "794.5",
+    "one_behavior": true,
+    "why": "One result: the agents section picks each role."
+   },
+   {
+    "criterion": "794.6",
+    "one_behavior": true,
+    "why": "One result: the old file still works."
+   },
+   {
+    "criterion": "794.7",
+    "one_behavior": true,
+    "why": "One result: the install command runs before tests."
+   },
+   {
+    "criterion": "794.8",
+    "one_behavior": true,
+    "why": "One result: installed tools come from the setting."
+   },
+   {
+    "criterion": "794.9",
+    "one_behavior": true,
+    "why": "One result: tests run on the named Python."
+   },
+   {
+    "criterion": "794.10",
+    "one_behavior": true,
+    "why": "One result: the order of steps stays fixed."
+   }
+  ],
+  "edge_cases": [
+   {
+    "criterion": "794.1",
+    "cut": [],
+    "missing": []
+   },
+   {
+    "criterion": "794.2",
+    "cut": [],
+    "missing": []
+   },
+   {
+    "criterion": "794.3",
+    "cut": [],
+    "missing": []
+   },
+   {
+    "criterion": "794.4",
+    "cut": [],
+    "missing": []
+   },
+   {
+    "criterion": "794.5",
+    "cut": [],
+    "missing": []
+   },
+   {
+    "criterion": "794.6",
+    "cut": [],
+    "missing": []
+   },
+   {
+    "criterion": "794.7",
+    "cut": [],
+    "missing": []
+   },
+   {
+    "criterion": "794.8",
+    "cut": [],
+    "missing": []
+   },
+   {
+    "criterion": "794.9",
+    "cut": [],
+    "missing": []
+   },
+   {
+    "criterion": "794.10",
+    "cut": [],
+    "missing": [
+     "A setting asking to skip the code review before merge"
+    ]
+   }
+  ],
+  "tests": [
+   {
+    "test": "tests/test_settings_setup.py::test_a_settings_file_holding_lists_is_read_in_full",
+    "only_its_behavior": true,
+    "why": "Checks only 794.1; fails today for the missing feature."
+   },
+   {
+    "test": "tests/test_settings_setup.py::test_a_list_written_one_item_per_line_is_read_in_full",
+    "only_its_behavior": true,
+    "why": "Checks only 794.1; fails today for the missing feature."
+   },
+   {
+    "test": "tests/test_settings_setup.py::test_every_machine_that_runs_dokima_can_read_the_settings_file",
+    "only_its_behavior": true,
+    "why": "Checks only 794.1; fails today for the missing feature."
+   },
+   {
+    "test": "tests/test_settings_setup.py::test_saving_a_setting_keeps_the_files_comments",
+    "only_its_behavior": true,
+    "why": "Checks only 794.2; fails today for the missing feature."
+   },
+   {
+    "test": "tests/test_settings_setup.py::test_saving_a_setting_keeps_comments_at_the_end_of_lines",
+    "only_its_behavior": true,
+    "why": "Checks only 794.3; fails today for the missing feature."
+   },
+   {
+    "test": "tests/test_settings_setup.py::test_saving_one_setting_leaves_every_other_setting_as_it_was",
+    "only_its_behavior": true,
+    "why": "Checks only 794.4; fails today for the missing feature."
+   },
+   {
+    "test": "tests/test_settings_setup.py::test_saving_into_a_file_with_no_agents_section_leaves_the_rest",
+    "only_its_behavior": true,
+    "why": "Checks only 794.4; fails today for the missing feature."
+   },
+   {
+    "test": "tests/test_settings_setup.py::test_saving_with_no_settings_file_yet_creates_it",
+    "only_its_behavior": true,
+    "why": "Checks only 794.4; fails today for the missing feature."
+   },
+   {
+    "test": "tests/test_settings_setup.py::test_the_agents_section_picks_each_roles_agent_and_model",
+    "only_its_behavior": true,
+    "why": "Checks only 794.5; fails today for the missing feature."
+   },
+   {
+    "test": "tests/test_settings_setup.py::test_a_run_on_github_starts_the_model_the_agents_section_names",
+    "only_its_behavior": true,
+    "why": "Checks only 794.5; fails today for the missing feature."
+   },
+   {
+    "test": "tests/test_agents.py::test_each_role_has_its_own_subscription_and_model",
+    "only_its_behavior": true,
+    "why": "Checks only 794.6; fails today for the missing feature."
+   },
+   {
+    "test": "tests/test_agents.py::test_a_run_starts_with_the_model_the_file_names",
+    "only_its_behavior": true,
+    "why": "Checks only 794.6; fails today for the missing feature."
+   },
+   {
+    "test": "tests/test_settings_test_setup.py::test_the_repos_install_command_runs_before_its_tests",
+    "only_its_behavior": true,
+    "why": "Checks only 794.7; fails today for the missing feature."
+   },
+   {
+    "test": "tests/test_settings_test_setup.py::test_the_test_tools_installed_come_from_the_test_tools_setting",
+    "only_its_behavior": true,
+    "why": "Checks only 794.8; fails today for the missing feature."
+   },
+   {
+    "test": "tests/test_settings_test_setup.py::test_the_repos_tests_run_on_the_python_the_settings_name",
+    "only_its_behavior": true,
+    "why": "Checks only 794.9; fails today for the missing feature."
+   },
+   {
+    "test": "tests/test_settings_setup.py::test_no_setting_changes_the_order_of_steps",
+    "only_its_behavior": true,
+    "why": "Checks only the order, but only the step after the plan review."
+   }
+  ],
+  "size": "ok"
+ },
+ "check": {
+  "passed": true,
+  "problems": []
+ },
+ "url": "https://github.com/dokima-dev/dokima/issues/794#issuecomment-6227301779"
+}
