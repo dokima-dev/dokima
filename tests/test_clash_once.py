@@ -180,3 +180,21 @@ def test_when_autopilot_cannot_be_read_a_clash_starts_nothing_and_says_why(recor
     assert re.search(r"autopilot could not be read", shown, re.I), f"369.5: the record does not say autopilot could not be read:\n{shown}"
     for o in tc.OWNERS:
         assert f"@{o}" in shown, f"369.5: the record does not mention the code owner @{o}:\n{shown}"
+
+
+def test_main_moving_during_plan_review_re_plans_before_building(record_property):
+    """When main clashes while a plan is in review, the approval re-plans instead of building the old plan.
+
+    Proves 812.river. The history: the plan, then a clash record (main moved after the plan was written), then the
+    plan review approves that old plan. On autopilot the next step must start the planner, never the worker or a split.
+    Once the re-plan exists (planner record after the clash), its approval goes to the worker as before (369.3)."""
+    record_property("proves", "812.river")
+    approve = {**ts.APPROVE, "summary": "The plan keeps every promise.", "asks": []}
+    body, _ = clash_record(labels=("autopilot",))
+    items = [comment(agent.BOT, agent.render(ts.planner_record(ts.STORY)), "2026-10-08T09:00:00Z"),
+             comment(agent.BOT, body, "2026-10-08T09:05:00Z")]
+    step = agent.next_step(items, ts.review_record(approve), set(tc.OWNERS), autopilot=lambda: True, body="", number=str(ISSUE))
+    assert step[:2] == ("start", "planner"), f"812: an approval of a plan older than the clash should re-plan, got {step}"
+    items.append(comment(agent.BOT, agent.render(ts.planner_record(ts.STORY)), "2026-10-08T09:30:00Z"))
+    step = agent.next_step(items, ts.review_record(approve), set(tc.OWNERS), autopilot=lambda: True, body="", number=str(ISSUE))
+    assert step[:2] == ("start", "worker"), f"812: the approved re-plan should go to the worker, got {step}"
