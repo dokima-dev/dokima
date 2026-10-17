@@ -1,0 +1,149 @@
+{
+ "role": "reviewer",
+ "stage": "plan",
+ "run_id": "39022285628",
+ "commit_before": "b990fc30a8c5508348d86169cddc084c537eadf6",
+ "started_by": "dokima-runtime[bot]",
+ "models": [
+  "claude-opus-5-5"
+ ],
+ "report": {
+  "duration_ms": 69460,
+  "turns": 9,
+  "cost_usd": 0.4277753999999999,
+  "tokens_in": 361301,
+  "tokens_out": 4237
+ },
+ "log": "https://github.com/dokima-dev/dokima/blob/logs/logs/805/39022285628-reviewer-plan.md",
+ "run": "https://github.com/dokima-dev/dokima/actions/runs/39022285628",
+ "handback": {
+  "previous_step": {
+   "did": [
+    "The planner wrote five criteria, one per ask from the parent plan.",
+    "The planner wrote one test per criterion, each running the real check."
+   ],
+   "decided": [
+    "Each test checks the setting's good case beside its bad case."
+   ],
+   "open": []
+  },
+  "verdict": "approve",
+  "summary": "The plan carries all five asks, each with one test that fails today because the setting is not read yet.",
+  "raises": [],
+  "answers": [],
+  "asks": [
+   {
+    "ask": "The check that new tests fail today stops a test after the time limit setting.",
+    "source": "https://github.com/dokima-dev/dokima/issues/781",
+    "criterion": "805.1"
+   },
+   {
+    "ask": "The planner's test files are found by the test folder and file pattern settings.",
+    "source": "https://github.com/dokima-dev/dokima/issues/781",
+    "criterion": "805.2"
+   },
+   {
+    "ask": "Turning docstrings off in settings stops the planner's check requiring them.",
+    "source": "https://github.com/dokima-dev/dokima/issues/781",
+    "criterion": "805.3"
+   },
+   {
+    "ask": "The planner's test docstring cap comes from settings.",
+    "source": "https://github.com/dokima-dev/dokima/issues/781",
+    "criterion": "805.4"
+   },
+   {
+    "ask": "An empty planner test docstring cap turns that cap off.",
+    "source": "https://github.com/dokima-dev/dokima/issues/781",
+    "criterion": "805.5"
+   }
+  ],
+  "behaviors": [
+   {
+    "criterion": "805.1",
+    "one_behavior": true,
+    "why": "One limit, one result: the slow test is stopped."
+   },
+   {
+    "criterion": "805.2",
+    "one_behavior": true,
+    "why": "One result: which files count as test files."
+   },
+   {
+    "criterion": "805.3",
+    "one_behavior": true,
+    "why": "One switch, one result: docstrings no longer required."
+   },
+   {
+    "criterion": "805.4",
+    "one_behavior": true,
+    "why": "One value read: the cap."
+   },
+   {
+    "criterion": "805.5",
+    "one_behavior": true,
+    "why": "One case: an empty cap means no cap."
+   }
+  ],
+  "edge_cases": [
+   {
+    "criterion": "805.1",
+    "cut": [],
+    "missing": []
+   },
+   {
+    "criterion": "805.2",
+    "cut": [],
+    "missing": []
+   },
+   {
+    "criterion": "805.3",
+    "cut": [],
+    "missing": []
+   },
+   {
+    "criterion": "805.4",
+    "cut": [],
+    "missing": []
+   },
+   {
+    "criterion": "805.5",
+    "cut": [],
+    "missing": []
+   }
+  ],
+  "tests": [
+   {
+    "test": "tests/test_planner_settings.py::test_the_new_test_check_stops_a_test_after_the_time_limit_setting",
+    "only_its_behavior": true,
+    "why": "Fails today: a 3 s test passes a 1 s limit; also checks a fast test passes."
+   },
+   {
+    "test": "tests/test_planner_settings.py::test_the_planners_test_files_follow_the_test_folder_and_file_pattern_settings",
+    "only_its_behavior": true,
+    "why": "Fails today: a helper outside the pattern is read as a test."
+   },
+   {
+    "test": "tests/test_planner_settings.py::test_turning_docstrings_off_stops_the_planners_check_requiring_them",
+    "only_its_behavior": true,
+    "why": "Fails today: bare tests rejected despite docstrings off; default still required."
+   },
+   {
+    "test": "tests/test_planner_settings.py::test_the_planners_docstring_cap_comes_from_settings",
+    "only_its_behavior": true,
+    "why": "Fails today: a 7-word line passes a cap of 5; cap 10 passes."
+   },
+   {
+    "test": "tests/test_planner_settings.py::test_an_empty_docstring_cap_turns_the_cap_off",
+    "only_its_behavior": true,
+    "why": "Fails today: a 29-word line rejected under an empty cap; shipped cap still rejects."
+   }
+  ],
+  "size": "ok"
+ },
+ "check": {
+  "passed": true,
+  "problems": []
+ },
+ "url": "https://github.com/dokima-dev/dokima/issues/805#issuecomment-6232433865"
+}
