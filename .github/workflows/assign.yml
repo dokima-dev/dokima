@@ -12,6 +12,7 @@ jobs:
     runs-on: ubuntu-24.04
     steps:
       - uses: actions/checkout@v5
+      - run: python3 -m pip install -q pyyaml  # the settings reader (#794)
       - name: Assign the code owners
         env:
           GH_TOKEN: ${{ github.token }}

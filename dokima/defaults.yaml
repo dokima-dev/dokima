@@ -74,6 +74,9 @@ bot:
   slug: dokima-runtime
 card:
   icon_base: https://raw.githubusercontent.com/{repo}/main/dokima/icons/
+# Each role's agent and model, as `python3 -m dokima.setup add` saves them: subscriptions and roles (#794). None here,
+# so every role runs on Claude Code as today.
+agents:
 # Locked: a repo's settings file may not set any of these; the run fails, naming it.
 integrity:
   app_only_identity: true

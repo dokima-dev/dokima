@@ -56,8 +56,9 @@ jobs:
       PYTHONPATH: /tmp/runtime
       PYTHONSAFEPATH: "1"
       OUT: /tmp/dokima-out
-      # Main's settings file, copied with the runtime: it names each role's agent, model and key secret (#698).
-      DOKIMA_SETTINGS: /tmp/runtime/.dokima/agents.yml
+      # Main's settings file, copied with the runtime: its agents section names each role's agent, model and key
+      # secret (#698, #794); a repo with only the old agents file beside it still runs as that file says.
+      DOKIMA_SETTINGS: /tmp/runtime/.dokima/settings.yaml
       # A card already up for this run: queued by the listener, or by the hand-off that started it.
       CARD_ID: ${{ (inputs.card || github.event.client_payload.card) }}
     steps:
@@ -79,7 +80,9 @@ jobs:
         # AGENTS.md and the topic files it links come too: the river checks the owner's words a plan reviewer quotes from them.
         run: |
           mkdir -p /tmp/runtime && cp -r dokima /tmp/runtime/dokima
-          if [ -f .dokima/agents.yml ]; then mkdir -p /tmp/runtime/.dokima && cp .dokima/agents.yml /tmp/runtime/.dokima/; fi
+          for f in settings.yaml agents.yml; do
+            if [ -f ".dokima/$f" ]; then mkdir -p /tmp/runtime/.dokima && cp ".dokima/$f" /tmp/runtime/.dokima/; fi
+          done
           if [ -f AGENTS.md ]; then
             cp AGENTS.md /tmp/runtime/
             grep -oE '\]\([^)#: ]+\.md' AGENTS.md | cut -c3- | sort -u | while read -r f; do
@@ -87,6 +90,7 @@ jobs:
               if [ -f "$f" ]; then cp --parents "$f" /tmp/runtime/; fi
             done
           fi
+      - run: python3 -m pip install -q pyyaml  # the settings reader (#794)
       - name: Only a code owner starts an agent
         env:
           SENDER: ${{ github.actor }}
@@ -258,10 +262,24 @@ jobs:
             cat /tmp/pack-err.txt >&2; echo "::error title=No pack::$(cat /tmp/why.txt)"; exit 1; }
           if [ "$STAGE" = pr ]; then git diff origin/main...HEAD > "$PACK/diff.patch"; fi
           ls -R "$PACK" | head -60
+      # The repo's Python, test tools and install command, from main's settings file over Dokima's defaults (#794).
+      - id: setup
+        name: The repo's test setup from the settings file
+        run: |
+          (cd /tmp/runtime && python3 -m dokima.settings setup) > /tmp/setup.txt 2> /tmp/setup-err.txt \
+            || { echo "The settings file stopped the run: $(paste -sd' ' /tmp/setup-err.txt)" > /tmp/why.txt
+                 echo "::error title=Bad settings::$(cat /tmp/why.txt)"; exit 1; }
+          cat /tmp/setup-err.txt >&2; cat /tmp/setup.txt >> "$GITHUB_OUTPUT"
+      - uses: actions/setup-python@v6
+        with:
+          python-version: ${{ steps.setup.outputs.python }}
       - name: Install pytest and Claude Code
+        env:
+          TOOLS: ${{ steps.setup.outputs.test_tools }}
+          INSTALL: ${{ steps.setup.outputs.install }}
         run: |
           set -o pipefail
-          { pip install pytest pytest-xdist pytest-testmon pyyaml && python3 -m dokima.agents install "$ROLE"; } 2>&1 | tee /tmp/install.txt \
+          { pip install $TOOLS pyyaml && python3 -m dokima.agents install "$ROLE" && { [ -z "$INSTALL" ] || eval "$INSTALL"; }; } 2>&1 | tee /tmp/install.txt \
             || { echo "The step 'Install pytest and Claude Code' failed: $(tail -3 /tmp/install.txt | paste -sd' ')" > /tmp/why.txt; exit 1; }
       # The newest testmon baseline recorded on main (testmon.yml), so the review runs only the tests its change can affect.
       - name: Restore main's testmon baseline
@@ -618,6 +636,7 @@ jobs:
         with:
           app-id: ${{ vars.DOKIMA_APP_ID }}
           private-key: ${{ secrets.DOKIMA_APP_KEY }}
+      - run: python3 -m pip install -q pyyaml  # the settings reader (#794)
       - name: A failed record for a run that ended before posting its own
         env:
           GH_TOKEN: ${{ steps.app.outputs.token }}

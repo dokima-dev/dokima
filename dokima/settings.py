@@ -1,6 +1,8 @@
 """Dokima's settings: the shipped defaults with a repo's own settings file merged over them (#779).
 
-`python3 -m dokima.settings`, run in a repo, prints the merged settings as JSON on standard output. The defaults are
+`python3 -m dokima.settings`, run in a repo, prints the merged settings as JSON on standard output;
+`python3 -m dokima.settings setup` prints the setup group as `name=value` lines for a workflow's GITHUB_OUTPUT, so
+each test workflow sets up the repo's Python, test tools and install command as they say (#794). The defaults are
 `dokima/defaults.yaml`, beside this file; the repo's file is `.dokima/settings.yaml`, and names only what differs.
 Groups merge key by key, the repo winning; a list replaces the default list whole, except gates and prompt additions,
 which merge with the default ones by name. An unknown setting is left out with a warning suggesting the closest known
@@ -82,10 +84,24 @@ def read(repo=".", warn=None):
     return merge(load(DEFAULTS), mine, warn)
 
 
-def main():
-    """Prints the merged settings as JSON; exits 1, saying why, when they cannot be used."""
+def setup_lines(got):
+    """The setup group as `name=value` lines; a value on several lines fails."""
+    lines = []
+    for name, value in got["setup"].items():
+        value = "" if value is None else str(value)
+        if "\n" in value:
+            raise ValueError(f"setup.{name} in {REPO_FILE} must be one line")
+        lines.append(f"{name}={value}")
+    return "\n".join(lines)
+
+
+def main(argv=()):
+    """Prints the merged settings as JSON, or the setup group; exits 1 saying why."""
     try:
         got = read()
+        if list(argv) == ["setup"]:
+            print(setup_lines(got))
+            return 0
     except Locked as e:
         print(f"::error title=Locked setting::{e}", file=sys.stderr)
         return 1
@@ -97,4 +113,4 @@ def main():
 
 
 if __name__ == "__main__":
-    sys.exit(main())
+    sys.exit(main(sys.argv[1:]))

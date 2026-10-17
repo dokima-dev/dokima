@@ -1,20 +1,22 @@
 """The one agent interface: each role runs the agent and model the settings name (#698).
 
-The settings file is `.dokima/agents.yml` under the current folder (or the path in DOKIMA_SETTINGS, where the
-workflow keeps main's copy, so a branch never picks its own agent or secret):
+The settings are the agents section of `.dokima/settings.yaml` under the current folder (or of the file at the path
+in DOKIMA_SETTINGS, where the workflow keeps main's copy, so a branch never picks its own agent or secret) (#794):
 
-    subscriptions:
-      SUB:
-        agent: AGENT      # the adapter dokima/agent_AGENT.py runs it
-        key: SECRET       # the repo secret holding the subscription's key or sign-in
-    roles:
-      ROLE:               # planner, worker or reviewer
-        subscription: SUB
-        model: MODEL
+    agents:
+      subscriptions:
+        SUB:
+          agent: AGENT      # the adapter dokima/agent_AGENT.py runs it
+          key: SECRET       # the repo secret holding the subscription's key or sign-in
+      roles:
+        ROLE:               # planner, worker or reviewer
+          subscription: SUB
+          model: MODEL
 
-With no file, or for a role the file leaves out, the role runs on Claude Code with today's model and secret. There is
-no fallback: a bad name stops the run before any agent starts, and a failed agent fails it. Any model name passes;
-the agent itself refuses one it lacks.
+When that file has no agents section, the old `agents.yml` beside it is read instead, holding the same two groups at
+its top. With neither, or for a role they leave out, the role runs on Claude Code with today's model and secret.
+There is no fallback: a bad name stops the run before any agent starts, and a failed agent fails it. Any model name
+passes; the agent itself refuses one it lacks.
 
     python3 -m dokima.agents model ROLE
     python3 -m dokima.agents key ROLE
@@ -28,6 +30,8 @@ import importlib
 import os
 import re
 import sys
+
+import yaml
 
 from dokima.setup import SETTINGS, read_settings
 
@@ -44,12 +48,31 @@ def settings_path():
     return os.environ.get("DOKIMA_SETTINGS") or SETTINGS
 
 
-def role_settings(role):
-    """The role's agent, model and key secret; today's when the file leaves the role out."""
-    path = settings_path()
+def read_file(path):
+    """The settings in the file at PATH, empty when missing; Stop when unreadable."""
     if not os.path.exists(path):
-        return dict(TODAY)
-    settings = read_settings(open(path).read())
+        return {}
+    try:
+        return read_settings(open(path).read())
+    except (ValueError, yaml.YAMLError) as e:
+        raise Stop(f"{path} cannot be read: {e}")
+
+
+def agents_section():
+    """The agents section and its file; else the old agents file beside it."""
+    path = settings_path()
+    section = read_file(path).get("agents")
+    if section is None:
+        old = os.path.join(os.path.dirname(path), "agents.yml")
+        return read_file(old), old
+    if not isinstance(section, dict):
+        raise Stop(f"The agents section of {path} must hold subscriptions and roles.")
+    return section, path
+
+
+def role_settings(role):
+    """The role's agent, model and key secret; today's when the settings leave the role out."""
+    settings, path = agents_section()
     roles = settings.get("roles")
     given = roles.get(role) if isinstance(roles, dict) else None
     if given is None:
@@ -64,7 +87,7 @@ def role_settings(role):
         raise Stop(f"The {role} names the subscription '{sub}', which {path} does not list.")
     if not found.get("agent") or not found.get("key"):
         raise Stop(f"The subscription '{sub}' in {path} needs both an agent and a key line.")
-    return {"agent": found["agent"], "model": given["model"], "key": found["key"]}
+    return {"agent": str(found["agent"]), "model": str(given["model"]), "key": str(found["key"])}
 
 
 def adapter(role):

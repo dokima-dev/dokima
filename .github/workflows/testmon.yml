@@ -18,7 +18,24 @@ jobs:
       - uses: actions/setup-python@v6
         with:
           python-version: "3.12"
-      - run: pip install -q pytest pytest-xdist pytest-testmon pyyaml
+      - run: python3 -m pip install -q pyyaml  # the settings reader (#794)
+      # The repo's Python, test tools and install command, from its settings file over Dokima's defaults (#794).
+      # A checkout without Dokima's settings reader sets up as this workflow did before #794.
+      - id: setup
+        run: |
+          if [ -f dokima/settings.py ]; then out=$(python3 -m dokima.settings setup)
+          else out=$(printf 'python=3.12\ntest_tools=pytest pytest-xdist pytest-testmon\ninstall=\n'); fi
+          echo "$out"; echo "$out" >> "${GITHUB_OUTPUT:-/dev/null}"
+      - uses: actions/setup-python@v6
+        with:
+          python-version: ${{ steps.setup.outputs.python }}
+      - name: Install the test tools and the repo itself
+        env:
+          TOOLS: ${{ steps.setup.outputs.test_tools }}
+          INSTALL: ${{ steps.setup.outputs.install }}
+        run: |
+          pip install -q $TOOLS pyyaml
+          if [ -n "$INSTALL" ]; then eval "$INSTALL"; fi
       # A failing test still records its baseline (exit 1): testmon runs it again on the next review. Any other
       # non-zero exit is a crash and fails this job, so a missing baseline is never silent. testmon needs pytest's
       # cache plugin, so it is not turned off here.

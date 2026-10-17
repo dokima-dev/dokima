@@ -26,6 +26,7 @@ jobs:
         with:
           app-id: ${{ vars.DOKIMA_APP_ID }}
           private-key: ${{ secrets.DOKIMA_APP_KEY }}
+      - run: python3 -m pip install -q pyyaml  # the settings reader (#794)
       - name: Compare the repo's settings with the manifest and report what is off
         env:
           GH_TOKEN: ${{ steps.app.outputs.token }}
