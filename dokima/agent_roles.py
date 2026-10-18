@@ -695,6 +695,9 @@ def main(argv):
         others = start_waiting(repo, [n for n in open_on_autopilot(repo) if n != int(argv[2])], line=AUTOPILOT_START_LINE)
         for n in others:
             print(f"started the planner for #{n}, whose own label run GitHub dropped")
+        # A close waiting in the same queue was dropped too, so this run also does what autopilot does on a close (#853).
+        for line in autopilot_closed(repo):
+            print(line)
         return 0
     if argv[1] == "queue-failed":
         # A merge queue run failed (#830): put the pull request back once, then send it back to its worker.
