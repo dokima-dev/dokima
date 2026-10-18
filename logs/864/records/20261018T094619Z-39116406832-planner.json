@@ -1,0 +1,239 @@
+{
+ "role": "planner",
+ "stage": null,
+ "run_id": "39116406832",
+ "commit_before": "30bb52b54a4360049561545bdc97d2a3e3eec483",
+ "started_by": "RezaSoleymanifar",
+ "models": [
+  "claude-opus-5-5"
+ ],
+ "report": {
+  "duration_ms": 125530,
+  "turns": 13,
+  "cost_usd": 0.5781912,
+  "tokens_in": 621453,
+  "tokens_out": 4738
+ },
+ "log": "https://github.com/dokima-dev/dokima/blob/logs/logs/864/39116406832-planner.md",
+ "run": "https://github.com/dokima-dev/dokima/actions/runs/39116406832",
+ "handback": {
+  "kind": "user_story",
+  "title": "Hotfix PRs labeled, design asks replanned, cards one line",
+  "summary": "A hotfix's pull request carries its label, a design choice returns it to planning, and its card is one line.",
+  "user_story": "Owners spot hotfixes by label and link, see design asks go back to planning, and read one-line cards.",
+  "acceptance_criteria": [
+   {
+    "text": "When a hotfix worker opens its pull request, the pull request carries the hotfix label.",
+    "words": "Every hotfix PR carries the `hotfix` label",
+    "source": "https://github.com/dokima-dev/dokima/issues/750",
+    "files": [
+     ".github/workflows/agent.yml",
+     "dokima/hotfix.py"
+    ],
+    "edge_cases": [
+     {
+      "case": "An issue without the hotfix label opens its pull request with no hotfix label.",
+      "test": "tests/test_hotfix_pr.py::test_a_hotfix_pull_request_carries_the_hotfix_label"
+     }
+    ]
+   },
+   {
+    "text": "When a hotfix worker raises that the ask needs a design choice, the planner starts on the issue.",
+    "words": "or the worker finds the ask needs a design choice, it goes back to normal planning",
+    "source": "https://github.com/dokima-dev/dokima/issues/750",
+    "files": [
+     "dokima/agent_roles.py",
+     "dokima/agent_next.py",
+     "dokima/hotfix.py",
+     "dokima/roles/worker.md"
+    ],
+    "edge_cases": [
+     {
+      "case": "A hotfix worker that raises nothing still goes to code review.",
+      "test": "tests/test_hotfix_pr.py::test_a_hotfix_worker_finding_a_design_choice_starts_the_planner"
+     }
+    ]
+   },
+   {
+    "text": "When a hotfix worker sends the issue back to planning, the issue gets a comment saying why.",
+    "words": "it goes back to normal planning, saying why",
+    "source": "https://github.com/dokima-dev/dokima/issues/750",
+    "files": [
+     "dokima/agent_roles.py",
+     "dokima/hotfix.py"
+    ],
+    "edge_cases": [
+     {
+      "case": "A hotfix worker that raises nothing posts no such comment.",
+      "test": "tests/test_hotfix_pr.py::test_a_hotfix_worker_sending_it_back_says_why_on_the_issue"
+     }
+    ]
+   },
+   {
+    "text": "When an issue labeled hotfix is drawn, its card is one line showing its state.",
+    "words": "The card shows one line",
+    "source": "https://github.com/dokima-dev/dokima/issues/750",
+    "files": [
+     "dokima/card.py",
+     "dokima/hotfix.py"
+    ],
+    "edge_cases": [
+     {
+      "case": "A hotfix that blocks another issue still has a one line card.",
+      "test": "tests/test_hotfix_card.py::test_a_hotfix_card_shows_its_state_in_one_line"
+     },
+     {
+      "case": "The card on the pull request is one line too.",
+      "test": "tests/test_hotfix_card.py::test_a_hotfix_card_shows_its_state_in_one_line"
+     }
+    ]
+   },
+   {
+    "text": "When an issue labeled hotfix is drawn, its card line shows the ask word for word.",
+    "words": "The card shows one line: the ask, the PR, the review verdict, the gate.",
+    "source": "https://github.com/dokima-dev/dokima/issues/750",
+    "files": [
+     "dokima/card.py",
+     "dokima/hotfix.py"
+    ],
+    "edge_cases": [
+     {
+      "case": "Redrawn after the ask was folded below the card, the line still shows it.",
+      "test": "tests/test_hotfix_card.py::test_a_hotfix_card_line_shows_the_ask"
+     },
+     {
+      "case": "An ask written on two lines shows whole in the one line.",
+      "test": "tests/test_hotfix_card.py::test_a_hotfix_card_line_shows_the_ask"
+     }
+    ]
+   },
+   {
+    "text": "When a hotfix has a pull request, its card line links that pull request.",
+    "words": "The card shows one line: the ask, the PR, the review verdict, the gate.",
+    "source": "https://github.com/dokima-dev/dokima/issues/750",
+    "files": [
+     "dokima/card.py",
+     "dokima/hotfix.py"
+    ],
+    "edge_cases": [
+     {
+      "case": "With no pull request yet, the line links none.",
+      "test": "tests/test_hotfix_card.py::test_a_hotfix_card_line_links_its_pull_request"
+     }
+    ]
+   },
+   {
+    "text": "When a hotfix code review ends, its card line says code review approved or blocked.",
+    "words": "The card shows one line: the ask, the PR, the review verdict, the gate.",
+    "source": "https://github.com/dokima-dev/dokima/issues/750",
+    "files": [
+     "dokima/card.py",
+     "dokima/hotfix.py"
+    ],
+    "edge_cases": [
+     {
+      "case": "A blocking review shows code review blocked.",
+      "test": "tests/test_hotfix_card.py::test_a_hotfix_card_line_shows_the_review_verdict"
+     },
+     {
+      "case": "Before any review, the line names no verdict.",
+      "test": "tests/test_hotfix_card.py::test_a_hotfix_card_line_shows_the_review_verdict"
+     }
+    ]
+   },
+   {
+    "text": "When a hotfix merge gate runs, its card line says merge gate passed or failed.",
+    "words": "The card shows one line: the ask, the PR, the review verdict, the gate.",
+    "source": "https://github.com/dokima-dev/dokima/issues/750",
+    "files": [
+     "dokima/card.py",
+     "dokima/hotfix.py"
+    ],
+    "edge_cases": [
+     {
+      "case": "A failed gate shows merge gate failed.",
+      "test": "tests/test_hotfix_card.py::test_a_hotfix_card_line_shows_the_gate_result"
+     },
+     {
+      "case": "Before the gate runs, the line names no result.",
+      "test": "tests/test_hotfix_card.py::test_a_hotfix_card_line_shows_the_gate_result"
+     }
+    ]
+   },
+   {
+    "text": "When a hotfix worker opens its pull request, the pull request links the issue it answers.",
+    "words": "Every hotfix PR carries the `hotfix` label and links the issue it answers.",
+    "source": "https://github.com/dokima-dev/dokima/issues/750",
+    "files": [
+     ".github/workflows/agent.yml"
+    ],
+    "no_edge_cases": "The link is one fixed line written when the pull request opens; normal use has no other case."
+   }
+  ],
+  "non_functional": [
+   {
+    "text": "The hotfix parts of the worker and reviewer prompts name nothing about this project's own repo.",
+    "why": "Prompts must fit any repo Dokima runs on.",
+    "words": "keep the prompts free of anything about Dokima's own repo, so they fit any repo.",
+    "source": "https://github.com/dokima-dev/dokima/issues/750#issuecomment-6246479912",
+    "files": [
+     "dokima/roles/worker.md",
+     "dokima/roles/reviewer.md",
+     "dokima/hotfix.py"
+    ],
+    "no_edge_cases": "It is one rule on fixed prompt text, checked whole on each run."
+   }
+  ],
+  "tests": {
+   "864.1": [
+    "tests/test_hotfix_pr.py::test_a_hotfix_pull_request_carries_the_hotfix_label"
+   ],
+   "864.2": [
+    "tests/test_hotfix_pr.py::test_a_hotfix_worker_finding_a_design_choice_starts_the_planner"
+   ],
+   "864.3": [
+    "tests/test_hotfix_pr.py::test_a_hotfix_worker_sending_it_back_says_why_on_the_issue"
+   ],
+   "864.4": [
+    "tests/test_hotfix_card.py::test_a_hotfix_card_shows_its_state_in_one_line"
+   ],
+   "864.5": [
+    "tests/test_hotfix_card.py::test_a_hotfix_card_line_shows_the_ask"
+   ],
+   "864.6": [
+    "tests/test_hotfix_card.py::test_a_hotfix_card_line_links_its_pull_request"
+   ],
+   "864.7": [
+    "tests/test_hotfix_card.py::test_a_hotfix_card_line_shows_the_review_verdict"
+   ],
+   "864.8": [
+    "tests/test_hotfix_card.py::test_a_hotfix_card_line_shows_the_gate_result"
+   ],
+   "864.9": [
+    "tests/test_hotfix.py::test_a_finished_hotfix_worker_starts_code_review_on_its_pull_request"
+   ],
+   "864.10": [
+    "tests/test_hotfix.py::test_hotfix_prompts_name_nothing_from_dokimas_own_repo"
+   ]
+  },
+  "test_changes": {
+   "tests/test_hotfix.py::test_hotfix_prompts_name_nothing_from_dokimas_own_repo": "Also proves 864.10; its checks are unchanged, so 863.10 keeps its proof.",
+   "tests/test_hotfix.py::test_a_finished_hotfix_worker_starts_code_review_on_its_pull_request": "Also proves 864.9: adds a check that the body links #57; older checks unchanged."
+  },
+  "links": {
+   "blocked_by": [],
+   "blocks": [],
+   "relates_to": [
+    750,
+    718,
+    869,
+    870
+   ]
+  }
+ },
+ "check": {
+  "passed": true,
+  "problems": []
+ },
+ "url": "https://github.com/dokima-dev/dokima/issues/864#issuecomment-6248370120"
+}
