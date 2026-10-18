@@ -27,7 +27,8 @@ from test_start import NIL, Ctx, condition  # noqa: E402
 ROOT = cp.ROOT
 THIN = os.path.join(ROOT, "dokima", "install", "dokima.yml")
 ENTRY = os.path.join(cp.WORKFLOWS, "entry.yml")
-CI = "ci"  # the repo's own CI workflow, a name Dokima cannot know beforehand
+CI = "ci"  # the repo's own CI workflow, a common name
+ODD_CI = "Quality gate 7f3a9 (nightly)"  # a CI name no one could guess, so no name can be hard-coded
 REQUIRED = ["all tests", "Acceptance criteria", "lint", "build"]
 
 
@@ -109,27 +110,27 @@ def wrap(v):
     return v
 
 
-def ci_finished(n, p, conclusion="success"):
-    """The event GitHub sends when the repo's own CI finishes on PR p."""
-    run = {"name": CI, "head_sha": f"sha{p}", "head_branch": f"try/issue-{n}", "display_title": f"Issue {n}",
+def ci_finished(n, p, conclusion="success", name=CI):
+    """The event GitHub sends when the repo's own CI, named `name`, finishes on PR p."""
+    run = {"name": name, "head_sha": f"sha{p}", "head_branch": f"try/issue-{n}", "display_title": f"Issue {n}",
            "event": "pull_request", "status": "completed", "conclusion": conclusion,
            "pull_requests": [{"number": p, "head": {"ref": f"try/issue-{n}", "sha": f"sha{p}"}, "base": {"ref": "main"}}]}
-    return "workflow_run", {"action": "completed", "workflow": {"name": CI}, "workflow_run": run,
+    return "workflow_run", {"action": "completed", "workflow": {"name": name}, "workflow_run": run,
                             "sender": cp.sender(cp.OWNER), "repository": cp.REPOSITORY}
 
 
-def assert_ci_redraws(tmp_path, conclusion, k):
-    """Play the repo's CI finishing on PR #260; fail naming k unless the card redraws."""
-    event_name, event = ci_finished(246, 260, conclusion)
+def assert_ci_redraws(tmp_path, conclusion, k, name=CI):
+    """Play the repo's CI `name` finishing on PR #260; fail unless the card redraws."""
+    event_name, event = ci_finished(246, 260, conclusion, name)
     assert thin_starts(event), \
-        (f"{k}: the adopter's workflow does not start when the repo's own CI ({CI!r}) finishes, so its card is "
+        (f"{k}: the adopter's workflow does not start when the repo's own CI ({name!r}) finishes, so its card is "
          f"never redrawn")
     assert entry_calls_card(event_name, event), \
         (f"{k}: the repo's own CI finishing on a pull request starts Dokima, but entry.yml's card job skips it, so "
          f"the card is not redrawn")
     hub = cp.Hub(tmp_path)
     # Called from entry.yml, the card workflow runs for the caller's event, whatever its own `on:` lists.
-    card = dict(cp.workflow(), on={"workflow_run": {"workflows": [CI], "types": ["completed"]}})
+    card = dict(cp.workflow(), on={"workflow_run": {"workflows": [name], "types": ["completed"]}})
     r = cp.Run(hub, event_name, event, card)
     assert r.card_ran(), f"{k}: the card workflow ran for the repo's CI but its card job was skipped"
     assert not r.failed(), f"{k}: the card workflow failed on the repo's CI finishing:\n{r.log[-3000:]}"
@@ -142,18 +143,20 @@ def test_the_repos_own_ci_finishing_redraws_the_card(tmp_path, record_property):
 
     Plays a workflow of the repo's own, named `ci` and started by the pull request, finishing on PR #260: the
     adopter's workflow must start on it, entry.yml must call the card on it, and issue #246's stale card must be
-    replaced. Proves 859.1."""
+    replaced. Then plays the same with a CI whose name no one could guess, so listening for known names fails.
+    Proves 859.1."""
     record_property("proves", "859.1")
-    assert_ci_redraws(tmp_path, "success", "859.1")
+    assert_ci_redraws(tmp_path / "common", "success", "859.1")
+    assert_ci_redraws(tmp_path / "odd", "success", "859.1", ODD_CI)
 
 
 def test_the_repos_own_ci_failing_redraws_the_card(tmp_path, record_property):
     """A failed run of the repo's own CI redraws the card too.
 
     The same play as the passing run, with the CI run ending in failure: the card must still be redrawn, so the
-    owner sees the red check. Proves 859.1."""
+    owner sees the red check. The CI has a name no one could guess. Proves 859.1."""
     record_property("proves", "859.1")
-    assert_ci_redraws(tmp_path, "failure", "859.1")
+    assert_ci_redraws(tmp_path, "failure", "859.1", ODD_CI)
 
 
 # --- 859.2: the card shows every check the branch rule requires --------------------------------------------------
