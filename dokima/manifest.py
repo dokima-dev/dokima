@@ -107,6 +107,8 @@ GH_COMMANDS = {
     ("pr", "merge"): ("contents", "write"),
     **{("run", s): ("actions", "read") for s in ("view", "list", "download", "watch")},
     **{("run", s): ("actions", "write") for s in ("rerun", "cancel", "delete")},
+    ("release", "view"): ("contents", "read"),
+    ("release", "create"): ("contents", "write"),
 }
 
 # REST paths inside a repo (after repos/<owner>/<name>/), first match wins: (pattern, permission)
