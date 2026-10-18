@@ -1,0 +1,49 @@
+{
+ "role": "worker",
+ "stage": null,
+ "run_id": "39091603383",
+ "commit_before": "5212e7d699c3c3c454904d16ec22ba3b9258b808",
+ "started_by": "dokima-runtime[bot]",
+ "models": [
+  "claude-opus-5-5"
+ ],
+ "report": {
+  "duration_ms": 66435,
+  "turns": 11,
+  "cost_usd": 0.3634926,
+  "tokens_in": 296360,
+  "tokens_out": 3976
+ },
+ "log": "https://github.com/dokima-dev/dokima/blob/logs/logs/755/39091603383-worker.md",
+ "run": "https://github.com/dokima-dev/dokima/actions/runs/39091603383",
+ "handback": {
+  "summary": "Added a release command and a workflow that tag and release v0.1.0 from the changelog on main.",
+  "criteria": {
+   "755.1": "`dokima/release.py` `run()` makes the v0.1.0 tag at the pushed commit; skips with no changelog, no section, or an existing release.",
+   "755.2": "`run()` calls `gh release create v0.1.0`; a refusal exits 1 with GitHub's reason. `.github/workflows/release.yml` runs it on push to main.",
+   "755.3": "`section()` takes only the lines under the v0.1.0 heading as the notes, up to the next heading."
+  },
+  "evidence": "`pytest -q tests/test_release.py`: 7 passed in 0.53s",
+  "raises": [
+   {
+    "kind": "issue",
+    "label": "Changelog not yet written",
+    "text": "No changelog exists on main yet, so this workflow makes no release until one lands.",
+    "evidence": "No `CHANGELOG.md` at the repo root; #849 holds it.",
+    "raised_by": "worker",
+    "id": "W1"
+   }
+  ]
+ },
+ "check": {
+  "passed": true,
+  "problems": []
+ },
+ "dropped_by_fence": [],
+ "files_changed": [
+  ".github/workflows/release.yml",
+  "dokima/release.py"
+ ],
+ "branch": "try/issue-755",
+ "url": "https://github.com/dokima-dev/dokima/issues/755#issuecomment-6244910659"
+}
