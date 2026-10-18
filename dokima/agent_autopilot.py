@@ -437,6 +437,14 @@ def start_waiting(repo, numbers, line=AUTOPILOT_LINE):
     return started
 
 
+def open_on_autopilot(repo):
+    """The numbers of every open issue on autopilot, oldest first."""
+    found = json.loads(agent_github.gh(
+        "api", f"repos/{repo}/issues?labels={urllib.parse.quote(autopilot_label(), safe='')}&state=open&per_page=100",
+        "--paginate") or "[]")
+    return sorted(i["number"] for i in found if "pull_request" not in i)
+
+
 def open_blockers_of(repo, number):
     """The numbers of the open issues blocking this one on GitHub, oldest first."""
     return sorted(b["number"] for b in blocked_by(repo, number) if b.get("state") != "closed")
