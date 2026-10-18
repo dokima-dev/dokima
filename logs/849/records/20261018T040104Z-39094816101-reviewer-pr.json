@@ -1,0 +1,72 @@
+{
+ "role": "reviewer",
+ "stage": "pr",
+ "run_id": "39094816101",
+ "commit_before": "ce2cbc6ab232ffce3b42a364fbdf76da7be1bcc8",
+ "started_by": "dokima-runtime[bot]",
+ "models": [
+  "claude-opus-5-5"
+ ],
+ "report": {
+  "duration_ms": 6459,
+  "turns": 2,
+  "cost_usd": 0.39078419999999997,
+  "tokens_in": 82884,
+  "tokens_out": 297
+ },
+ "log": "https://github.com/dokima-dev/dokima/blob/logs/logs/849/39094816101-reviewer-pr.md",
+ "run": "https://github.com/dokima-dev/dokima/actions/runs/39094816101",
+ "handback": {
+  "previous_step": {
+   "did": [
+    "The worker added the owner's two lines to the changelog's v0.1.0 section."
+   ],
+   "decided": [
+    "The worker put the two lines first, as adopters need them most."
+   ],
+   "open": []
+  },
+  "verdict": "approve",
+  "summary": "The changelog now carries the owner's two lines; GitHub's checks on the final commit still gate the merge.",
+  "raises": [],
+  "answers": [],
+  "asks": [],
+  "behaviors": [
+   {
+    "criterion": "849.1",
+    "one_behavior": true,
+    "why": "One changelog section listing what v0.1.0 does."
+   }
+  ],
+  "edge_cases": [
+   {
+    "criterion": "849.1",
+    "cut": [],
+    "missing": []
+   }
+  ],
+  "tests": [
+   {
+    "test": "tests/test_changelog.py::test_changelog_lists_v010",
+    "only_its_behavior": true,
+    "why": "Passes on the branch; fails on main, where no changelog exists."
+   }
+  ],
+  "size": "ok",
+  "boxes": {
+   "dropped": "none",
+   "added": "none",
+   "superseded": "none",
+   "conflicts": "none",
+   "edges": {
+    "849.1": "covered"
+   },
+   "poor_tests": "none"
+  }
+ },
+ "check": {
+  "passed": true,
+  "problems": []
+ },
+ "url": "https://github.com/dokima-dev/dokima/pull/851#issuecomment-6245331283"
+}
