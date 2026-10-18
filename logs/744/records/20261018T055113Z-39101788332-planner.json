@@ -1,0 +1,162 @@
+{
+ "role": "planner",
+ "stage": null,
+ "run_id": "39101788332",
+ "commit_before": "ccbebe20951336dbdfb7da7800bf77e892c34308",
+ "started_by": "dokima-runtime[bot]",
+ "models": [
+  "claude-opus-5-5"
+ ],
+ "report": {
+  "duration_ms": 149978,
+  "turns": 19,
+  "cost_usd": 0.9816543999999999,
+  "tokens_in": 1050978,
+  "tokens_out": 10763
+ },
+ "log": "https://github.com/dokima-dev/dokima/blob/logs/logs/744/39101788332-planner.md",
+ "run": "https://github.com/dokima-dev/dokima/actions/runs/39101788332",
+ "handback": {
+  "kind": "feature",
+  "title": "Adopter safety: human pull requests pass, audit spares repo checks",
+  "summary": "An adopter's own pull requests, CI and missing board stop tripping Dokima's checks, audit and card.",
+  "feature": "Adopters are not tripped on day one. Stories: (1) unplanned pull requests pass; (2) the audit spares repo checks and boards; (3) cards follow CI.",
+  "stories": [
+   {
+    "title": "Pull requests with no plan pass unless Dokima opened them",
+    "user_story": "People and Dependabot merge pull requests without a Dokima plan, while Dokima's own stay held to theirs.",
+    "context": "dokima/checks.py build_matrix returns one failing 'No approved plan found' row for any pull request without an approved plan unless Dokima's app opened it off a try/issue-N branch (manual fix). The Acceptance criteria workflow fails any row with no tests except ids text-only and manual-fix, so a new passing row needs a matching exit there. Add merge.unplanned_prs to dokima/defaults.yaml with allow as the default; any other value (for example block) keeps today's failing check. Dokima's app is agent.BOT.",
+    "acceptance_criteria": [
+     {
+      "text": "When a person opens a pull request with no approved plan, the Acceptance criteria check passes.",
+      "words": "Setting `merge.unplanned_prs: allow` (default) lets them through",
+      "source": "https://github.com/dokima-dev/dokima/issues/744",
+      "files": [
+       "dokima/checks.py",
+       "dokima/defaults.yaml",
+       ".github/workflows/acceptance-criteria.yml"
+      ]
+     },
+     {
+      "text": "When Dependabot opens a pull request with no approved plan, the Acceptance criteria check passes.",
+      "words": "including human and Dependabot PRs",
+      "source": "https://github.com/dokima-dev/dokima/issues/744",
+      "files": [
+       "dokima/checks.py",
+       "dokima/defaults.yaml",
+       ".github/workflows/acceptance-criteria.yml"
+      ]
+     },
+     {
+      "text": "When Dokima opens an issue's pull request with no approved plan, the Acceptance criteria check still fails.",
+      "words": "only Dokima's own PRs are held to the plan",
+      "source": "https://github.com/dokima-dev/dokima/issues/744",
+      "files": [
+       "dokima/checks.py",
+       ".github/workflows/acceptance-criteria.yml"
+      ]
+     },
+     {
+      "text": "When the unplanned pull requests setting is not allow, a person's unplanned pull request fails the check.",
+      "words": "Setting `merge.unplanned_prs: allow` (default)",
+      "source": "https://github.com/dokima-dev/dokima/issues/744",
+      "files": [
+       "dokima/checks.py",
+       "dokima/defaults.yaml"
+      ]
+     }
+    ],
+    "non_functional": [],
+    "depends_on": []
+   },
+   {
+    "title": "The audit spares the repo's checks and a missing board",
+    "user_story": "The Setup issue no longer flags the repo's own required checks or a missing board.",
+    "context": "dokima/audit.py compare_rule adds a line for every required check Dokima does not declare (the 'a check Dokima does not declare' list); that list should go. main() exits 1 with an error when DOKIMA_BOARD is empty, check() always reads board fields and views, and run() calls needs_you, which writes to the board. With no board, skip the board reads and the Needs you mark, and still report the other drift.",
+    "acceptance_criteria": [
+     {
+      "text": "When the branch rule requires a check the repo added, the Setup issue lists no line about it.",
+      "words": "Checks the repo added are not drift.",
+      "source": "https://github.com/dokima-dev/dokima/issues/744",
+      "files": [
+       "dokima/audit.py"
+      ]
+     },
+     {
+      "text": "When no board is set, the audit finishes with exit code 0.",
+      "words": "The audit fails when no board is set; boards are optional and only exist for organizations.",
+      "source": "https://github.com/dokima-dev/dokima/issues/744",
+      "files": [
+       "dokima/audit.py"
+      ]
+     },
+     {
+      "text": "When no board is set, the Setup issue lists no line about board fields or views.",
+      "words": "No board means nothing to report.",
+      "source": "https://github.com/dokima-dev/dokima/issues/744",
+      "files": [
+       "dokima/audit.py"
+      ]
+     }
+    ],
+    "non_functional": [],
+    "depends_on": []
+   },
+   {
+    "title": "The card follows the repo's own CI",
+    "user_story": "The card redraws when the repo's own CI finishes, and shows every check the merge needs.",
+    "context": "The adopter's thin workflow dokima/install/dokima.yml listens to workflow_run only for its own dokima workflow, and entry.yml's card job only for runs started by pull_request_target, merge_group, push and review events, so the repo's own CI finishing never redraws the card. dokima/card.py done_row draws only Dokima's checks (all tests, Acceptance criteria) from the PR head's check runs. The issue explicitly asks for the card change, so dokima/card.py and the workflow files are in scope here.",
+    "acceptance_criteria": [
+     {
+      "text": "When the repo's own CI finishes on a pull request, its issue's card redraws.",
+      "words": "The card redraws only when Dokima's own workflows finish, not when the adopter's CI does.",
+      "source": "https://github.com/dokima-dev/dokima/issues/744",
+      "files": [
+       "dokima/install/dokima.yml",
+       ".github/workflows/entry.yml",
+       ".github/workflows/card.yml",
+       "dokima/card.py"
+      ]
+     },
+     {
+      "text": "The card shows each check the branch rule requires, the repo's own included, with its state.",
+      "words": "The merge gate already waits on every required check; the card must show them.",
+      "source": "https://github.com/dokima-dev/dokima/issues/744",
+      "files": [
+       "dokima/card.py"
+      ]
+     }
+    ],
+    "non_functional": [],
+    "depends_on": []
+   }
+  ],
+  "links": {
+   "blocked_by": [],
+   "blocks": [
+    746
+   ],
+   "relates_to": [
+    272,
+    326,
+    284
+   ]
+  },
+  "raises": [
+   {
+    "kind": "question",
+    "to": "owner",
+    "label": "Doubt: already done",
+    "text": "Installing the repo's own needs and leaving out marked tests already work. Leave both out? The plan does.",
+    "evidence": "`setup.install` in `dokima/defaults.yaml` runs in `full-suite.yml`; `tests.exclude` in `dokima/settings.py:150` (#795).",
+    "raised_by": "planner",
+    "id": "P1"
+   }
+  ]
+ },
+ "check": {
+  "passed": true,
+  "problems": []
+ },
+ "url": "https://github.com/dokima-dev/dokima/issues/744#issuecomment-6246247936"
+}
