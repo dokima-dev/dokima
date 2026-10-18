@@ -1,0 +1,98 @@
+{
+ "role": "planner",
+ "stage": null,
+ "run_id": "39094720553",
+ "commit_before": "c68db07f49b74f1109fbcbd2fa85633369cf5092",
+ "started_by": "dokima-runtime[bot]",
+ "models": [
+  "claude-opus-5-5"
+ ],
+ "report": {
+  "duration_ms": 135473,
+  "turns": 19,
+  "cost_usd": 0.9134158,
+  "tokens_in": 1020725,
+  "tokens_out": 10368
+ },
+ "log": "https://github.com/dokima-dev/dokima/blob/logs/logs/853/39094720553-planner.md",
+ "run": "https://github.com/dokima-dev/dokima/actions/runs/39094720553",
+ "handback": {
+  "kind": "user_story",
+  "title": "A label run also does a dropped close's work",
+  "summary": "Adding the autopilot label by hand no longer loses the work of a close it pushed out of the queue.",
+  "user_story": "When a label replaces a waiting close run, the close's autopilot work still happens.",
+  "acceptance_criteria": [
+   {
+    "text": "When a label run follows a dropped close, a parent whose last sub-issue closed closes, saying its tree is done.",
+    "words": "a waiting close run it replaces loses its close work",
+    "source": "https://github.com/dokima-dev/dokima/issues/853",
+    "files": [
+     "dokima/agent_roles.py",
+     "rules/flow.md"
+    ],
+    "edge_cases": [
+     {
+      "case": "The parent still has an open sub-issue, so it stays open with no comment.",
+      "test": "tests/test_autopilot_label_close.py::test_a_label_run_closes_the_done_parent_of_a_dropped_close"
+     }
+    ]
+   },
+   {
+    "text": "When a label run follows a dropped close, every issue of a done tree goes off autopilot.",
+    "words": "a waiting close run it replaces loses its close work",
+    "source": "https://github.com/dokima-dev/dokima/issues/853",
+    "files": [
+     "dokima/agent_roles.py"
+    ],
+    "edge_cases": [
+     {
+      "case": "Trees still open, and the issue just labeled, stay on autopilot.",
+      "test": "tests/test_autopilot_label_close.py::test_a_label_run_switches_a_dropped_closes_done_tree_off_autopilot"
+     }
+    ]
+   },
+   {
+    "text": "When a label run follows a dropped close that unblocks an issue planned while blocked, its planner starts once.",
+    "words": "a waiting close run it replaces loses its close work",
+    "source": "https://github.com/dokima-dev/dokima/issues/853",
+    "files": [
+     "dokima/agent_roles.py"
+    ],
+    "edge_cases": [
+     {
+      "case": "Another blocker is still open, so nothing starts.",
+      "test": "tests/test_autopilot_label_close.py::test_a_label_run_plans_again_an_issue_a_dropped_close_unblocked"
+     }
+    ]
+   }
+  ],
+  "non_functional": [],
+  "tests": {
+   "853.1": [
+    "tests/test_autopilot_label_close.py::test_a_label_run_closes_the_done_parent_of_a_dropped_close"
+   ],
+   "853.2": [
+    "tests/test_autopilot_label_close.py::test_a_label_run_switches_a_dropped_closes_done_tree_off_autopilot"
+   ],
+   "853.3": [
+    "tests/test_autopilot_label_close.py::test_a_label_run_plans_again_an_issue_a_dropped_close_unblocked"
+   ]
+  },
+  "test_changes": {},
+  "links": {
+   "blocked_by": [],
+   "blocks": [],
+   "relates_to": [
+    811,
+    386
+   ]
+  },
+  "raises": [],
+  "answers": []
+ },
+ "check": {
+  "passed": true,
+  "problems": []
+ },
+ "url": "https://github.com/dokima-dev/dokima/issues/853#issuecomment-6245321309"
+}
