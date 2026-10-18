@@ -1,0 +1,152 @@
+{
+ "role": "reviewer",
+ "stage": "plan",
+ "run_id": "39105179783",
+ "commit_before": "9833b6454271a4f0f3e3190bdb99c03e6e83d69d",
+ "started_by": "dokima-runtime[bot]",
+ "models": [
+  "claude-opus-5-5"
+ ],
+ "report": {
+  "duration_ms": 819918,
+  "turns": 13,
+  "cost_usd": 0.5587586000000001,
+  "tokens_in": 597672,
+  "tokens_out": 5345
+ },
+ "log": "https://github.com/dokima-dev/dokima/blob/logs/logs/857/39105179783-reviewer-plan.md",
+ "run": "https://github.com/dokima-dev/dokima/actions/runs/39105179783",
+ "handback": {
+  "previous_step": {
+   "did": [
+    "The planner answered the worker's question about pull requests with no named author."
+   ],
+   "decided": [
+    "A pull request with no named author still fails with no plan.",
+    "The criteria, tests and older test changes stay as before."
+   ],
+   "open": []
+  },
+  "verdict": "approve",
+  "summary": "The plan is unchanged and still proven; all four new tests fail today for the right reason.",
+  "raises": [],
+  "answers": [],
+  "asks": [
+   {
+    "ask": "When a person opens a pull request with no approved plan, the Acceptance criteria check passes.",
+    "source": "https://github.com/dokima-dev/dokima/issues/857",
+    "criterion": "857.1"
+   },
+   {
+    "ask": "When Dependabot opens a pull request with no approved plan, the Acceptance criteria check passes.",
+    "source": "https://github.com/dokima-dev/dokima/issues/857",
+    "criterion": "857.2"
+   },
+   {
+    "ask": "When Dokima opens an issue's pull request with no approved plan, the Acceptance criteria check still fails.",
+    "source": "https://github.com/dokima-dev/dokima/issues/857",
+    "criterion": "857.3"
+   },
+   {
+    "ask": "When the unplanned pull requests setting is not allow, a person's unplanned pull request fails the check.",
+    "source": "https://github.com/dokima-dev/dokima/issues/857",
+    "criterion": "857.4"
+   },
+   {
+    "ask": "Add merge.unplanned_prs to dokima/defaults.yaml with allow as the default",
+    "source": "https://github.com/dokima-dev/dokima/issues/857",
+    "criterion": "857.1"
+   },
+   {
+    "ask": "any other value (for example block) keeps today's failing check",
+    "source": "https://github.com/dokima-dev/dokima/issues/857",
+    "criterion": "857.4"
+   }
+  ],
+  "behaviors": [
+   {
+    "criterion": "857.1",
+    "one_behavior": true,
+    "why": "One author, one result: the check passes."
+   },
+   {
+    "criterion": "857.2",
+    "one_behavior": true,
+    "why": "One author, one result: the check passes."
+   },
+   {
+    "criterion": "857.3",
+    "one_behavior": true,
+    "why": "Dokima's unplanned pull request fails; one result."
+   },
+   {
+    "criterion": "857.4",
+    "one_behavior": true,
+    "why": "A non-allow setting makes a person's pull request fail."
+   }
+  ],
+  "edge_cases": [
+   {
+    "criterion": "857.1",
+    "cut": [],
+    "missing": []
+   },
+   {
+    "criterion": "857.2",
+    "cut": [],
+    "missing": []
+   },
+   {
+    "criterion": "857.3",
+    "cut": [],
+    "missing": []
+   },
+   {
+    "criterion": "857.4",
+    "cut": [],
+    "missing": []
+   }
+  ],
+  "tests": [
+   {
+    "test": "tests/test_unplanned_prs.py::test_a_persons_pull_request_with_no_plan_passes",
+    "only_its_behavior": true,
+    "why": "Runs the real check steps; fails on main on the no-plan row."
+   },
+   {
+    "test": "tests/test_unplanned_prs.py::test_dependabots_pull_request_with_no_plan_passes",
+    "only_its_behavior": true,
+    "why": "Runs the real check for Dependabot; fails on main on the no-plan row."
+   },
+   {
+    "test": "tests/test_unplanned_prs.py::test_dokimas_pull_request_with_no_plan_still_fails",
+    "only_its_behavior": true,
+    "why": "Pairs Dokima's failure with a person's pass; fails on main on the person."
+   },
+   {
+    "test": "tests/test_unplanned_prs.py::test_a_setting_other_than_allow_fails_a_persons_unplanned_pull_request",
+    "only_its_behavior": true,
+    "why": "Block fails, allow passes; fails on main on the allow case."
+   }
+  ],
+  "size": "ok",
+  "boxes": {
+   "dropped": "none",
+   "added": "none",
+   "superseded": "none",
+   "conflicts": "none",
+   "edges": {
+    "857.1": "covered",
+    "857.2": "covered",
+    "857.3": "covered",
+    "857.4": "covered"
+   },
+   "poor_tests": "none"
+  }
+ },
+ "check": {
+  "passed": true,
+  "problems": []
+ },
+ "url": "https://github.com/dokima-dev/dokima/issues/857#issuecomment-6246708705"
+}
