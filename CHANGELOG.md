@@ -6,6 +6,8 @@ What each version of Dokima does.
 
 Dokima's first version.
 
+- Installing adds only one small workflow and a settings file; Dokima's code stays in Dokima's repo.
+- One settings file per repo, merged over the shipped defaults.
 - Plan, plan review, work and code review, each a separate agent on its own machine, routed by code.
 - Commands from code owners only: `/plan`, `/work`, `/review`, `/autopilot start` and `/autopilot stop`.
 - The planner writes a test for every acceptance criterion; each criterion gets its own check on GitHub.
