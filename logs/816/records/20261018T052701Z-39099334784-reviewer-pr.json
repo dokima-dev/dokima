@@ -1,0 +1,74 @@
+{
+ "role": "reviewer",
+ "stage": "pr",
+ "run_id": "39099334784",
+ "commit_before": "43f21f28bbb3205680cee9f9ff1b98ac08c2398c",
+ "started_by": "dokima-runtime[bot]",
+ "models": [
+  "claude-opus-5-5"
+ ],
+ "report": {
+  "duration_ms": 635721,
+  "turns": 13,
+  "cost_usd": 0.4881987999999999,
+  "tokens_in": 509237,
+  "tokens_out": 6085
+ },
+ "log": "https://github.com/dokima-dev/dokima/blob/logs/logs/816/39099334784-reviewer-pr.md",
+ "run": "https://github.com/dokima-dev/dokima/actions/runs/39099334784",
+ "handback": {
+  "previous_step": {
+   "did": [
+    "The worker made the readme and wiki name both required checks by full name."
+   ],
+   "decided": [
+    "The docs say why the names are long: the checks run inside the one workflow."
+   ],
+   "open": [
+    "The card shows both GitHub checks failed; the whole suite passes here."
+   ]
+  },
+  "verdict": "approve",
+  "summary": "The docs now name the required checks as GitHub shows them; the code matches the plan.",
+  "raises": [],
+  "answers": [],
+  "asks": [],
+  "behaviors": [
+   {
+    "criterion": "816.1",
+    "one_behavior": true,
+    "why": "One result: the docs name each required check as GitHub shows it."
+   }
+  ],
+  "edge_cases": [
+   {
+    "criterion": "816.1",
+    "cut": [],
+    "missing": []
+   }
+  ],
+  "tests": [
+   {
+    "test": "tests/test_first_merge_docs.py::test_the_docs_name_the_required_checks_as_an_adopters_repo_shows_them",
+    "only_its_behavior": true,
+    "why": "Fails on main's short names, passes on the branch; checks both pages."
+   }
+  ],
+  "size": "ok",
+  "boxes": {
+   "dropped": "none",
+   "added": "none",
+   "superseded": "none",
+   "conflicts": "none",
+   "edges": {
+    "816.1": "covered"
+   },
+   "poor_tests": "none"
+  }
+ },
+ "check": {
+  "passed": true,
+  "problems": []
+ },
+ "url": "https://github.com/dokima-dev/dokima/pull/856#issuecomment-6245927415"
+}
