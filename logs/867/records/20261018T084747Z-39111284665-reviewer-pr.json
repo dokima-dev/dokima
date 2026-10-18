@@ -1,0 +1,159 @@
+{
+ "role": "reviewer",
+ "stage": "pr",
+ "run_id": "39111284665",
+ "commit_before": "9abaf48daf45f87a27330e72220c0557a4713282",
+ "started_by": "dokima-runtime[bot]",
+ "models": [
+  "claude-opus-5-5"
+ ],
+ "report": {
+  "duration_ms": 1314739,
+  "turns": 17,
+  "cost_usd": 0.6548684,
+  "tokens_in": 860461,
+  "tokens_out": 5777
+ },
+ "log": "https://github.com/dokima-dev/dokima/blob/logs/logs/867/39111284665-reviewer-pr.md",
+ "run": "https://github.com/dokima-dev/dokima/actions/runs/39111284665",
+ "handback": {
+  "previous_step": {
+   "did": [
+    "The worker made no new changes; the earlier build stands, rechecked against current main."
+   ],
+   "decided": [
+    "The v0.1.1 section keeps the lines for 866 and 867, as agreed last round."
+   ],
+   "open": [
+    "GitHub shows the acceptance tests and test suite as failed; their re-run was refused."
+   ]
+  },
+  "verdict": "approve",
+  "summary": "Each criterion is built and proven; the full suite passes here, but GitHub's red checks must turn green.",
+  "raises": [],
+  "answers": [],
+  "asks": [],
+  "behaviors": [
+   {
+    "criterion": "867.1",
+    "one_behavior": true,
+    "why": "A push makes the release the newest heading names."
+   },
+   {
+    "criterion": "867.2",
+    "one_behavior": true,
+    "why": "One changelog section naming three fixes."
+   },
+   {
+    "criterion": "867.3",
+    "one_behavior": true,
+    "why": "One tag in the install file."
+   },
+   {
+    "criterion": "867.4",
+    "one_behavior": true,
+    "why": "One version in the README install steps."
+   },
+   {
+    "criterion": "867.5",
+    "one_behavior": true,
+    "why": "One version on the wiki install page."
+   }
+  ],
+  "edge_cases": [
+   {
+    "criterion": "867.1",
+    "cut": [],
+    "missing": []
+   },
+   {
+    "criterion": "867.2",
+    "cut": [],
+    "missing": []
+   },
+   {
+    "criterion": "867.3",
+    "cut": [],
+    "missing": []
+   },
+   {
+    "criterion": "867.4",
+    "cut": [],
+    "missing": []
+   },
+   {
+    "criterion": "867.5",
+    "cut": [],
+    "missing": []
+   }
+  ],
+  "tests": [
+   {
+    "test": "tests/test_newest_release.py::test_release_names_newest_version",
+    "only_its_behavior": true,
+    "why": "A hardcoded version fails it."
+   },
+   {
+    "test": "tests/test_newest_release.py::test_release_v011_newest",
+    "only_its_behavior": true,
+    "why": "The owner's own example."
+   },
+   {
+    "test": "tests/test_newest_release.py::test_release_newest_below_unreleased",
+    "only_its_behavior": true,
+    "why": "A draft section on top is normal use."
+   },
+   {
+    "test": "tests/test_newest_release.py::test_release_newest_already_released",
+    "only_its_behavior": true,
+    "why": "Every later push hits this."
+   },
+   {
+    "test": "tests/test_newest_release.py::test_changelog_has_v011_on_top",
+    "only_its_behavior": true,
+    "why": "Checks the three named fixes in the top section."
+   },
+   {
+    "test": "tests/test_newest_release.py::test_install_file_calls_newest_version",
+    "only_its_behavior": true,
+    "why": "Ties the install tag to the changelog."
+   },
+   {
+    "test": "tests/test_newest_release.py::test_readme_names_newest_release",
+    "only_its_behavior": true,
+    "why": "Ties the README to the changelog."
+   },
+   {
+    "test": "tests/test_newest_release.py::test_wiki_names_newest_release",
+    "only_its_behavior": true,
+    "why": "Ties the wiki page to the changelog."
+   }
+  ],
+  "size": "ok",
+  "boxes": {
+   "dropped": "none",
+   "added": [
+    {
+     "what": "Changelog lines for 866 and 867",
+     "kind": "needed",
+     "serves": "867.2"
+    }
+   ],
+   "superseded": "none",
+   "conflicts": "none",
+   "edges": {
+    "867.1": "covered",
+    "867.2": "covered",
+    "867.3": "covered",
+    "867.4": "covered",
+    "867.5": "covered"
+   },
+   "poor_tests": "none"
+  }
+ },
+ "check": {
+  "passed": true,
+  "problems": []
+ },
+ "url": "https://github.com/dokima-dev/dokima/pull/871#issuecomment-6247599623"
+}
