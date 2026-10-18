@@ -1,0 +1,140 @@
+{
+ "role": "reviewer",
+ "stage": "pr",
+ "run_id": "39107138438",
+ "commit_before": "f1da15e8131f2b9fc0e539802cf25bd808d7fe2c",
+ "started_by": "dokima-runtime[bot]",
+ "models": [
+  "claude-opus-5-5"
+ ],
+ "report": {
+  "duration_ms": 519565,
+  "turns": 24,
+  "cost_usd": 1.1099256,
+  "tokens_in": 1477365,
+  "tokens_out": 10781
+ },
+ "log": "https://github.com/dokima-dev/dokima/blob/logs/logs/863/39107138438-reviewer-pr.md",
+ "run": "https://github.com/dokima-dev/dokima/actions/runs/39107138438",
+ "handback": {
+  "previous_step": {
+   "did": [
+    "The worker built the hotfix lane: labeled issues start their worker from the issue's text.",
+    "The worker made code review judge a hotfix against the issue's text, with no plan.",
+    "The worker made a hotfix sent back to planning comment why on the issue."
+   ],
+   "decided": [
+    "A hotfix stays in its lane only until a planner runs on it."
+   ],
+   "open": [
+    "The worker proposed two issues: a wrong autopilot line and rules silent on hotfixes."
+   ]
+  },
+  "verdict": "approve",
+  "summary": "The code delivers all ten criteria, the planner's tests are untouched, and every test passes merged with main.",
+  "raises": [],
+  "answers": [
+   {
+    "raise": "W1",
+    "answer": "done",
+    "why": "Confirmed: the autopilot switch line always says planning started, even when a hotfix's worker started.",
+    "searched": [
+     544,
+     594,
+     842
+    ],
+    "verdict": "new"
+   },
+   {
+    "raise": "W2",
+    "answer": "done",
+    "why": "Confirmed: no rules file mentions the hotfix lane, so owners cannot read how it works.",
+    "searched": [
+     750,
+     864
+    ],
+    "verdict": "new"
+   }
+  ],
+  "asks": [],
+  "behaviors": [],
+  "edge_cases": [],
+  "tests": [
+   {
+    "test": "tests/test_hotfix.py::test_work_on_a_hotfix_starts_its_worker_with_no_plan",
+    "only_its_behavior": true,
+    "why": "Passes on the branch; unchanged since the planner's commit."
+   },
+   {
+    "test": "tests/test_hotfix.py::test_autopilot_starts_a_hotfix_worker_instead_of_its_planner",
+    "only_its_behavior": true,
+    "why": "Passes on the branch; unchanged since the planner's commit."
+   },
+   {
+    "test": "tests/test_hotfix.py::test_a_hotfix_worker_pack_gives_the_issue_text_as_the_ask",
+    "only_its_behavior": true,
+    "why": "Passes on the branch; unchanged since the planner's commit."
+   },
+   {
+    "test": "tests/test_hotfix.py::test_a_hotfix_worker_change_stays_on_the_pull_request",
+    "only_its_behavior": true,
+    "why": "Passes on the branch; unchanged since the planner's commit."
+   },
+   {
+    "test": "tests/test_hotfix.py::test_a_finished_hotfix_worker_starts_code_review_on_its_pull_request",
+    "only_its_behavior": true,
+    "why": "Passes on the branch; unchanged since the planner's commit."
+   },
+   {
+    "test": "tests/test_hotfix.py::test_code_review_of_a_hotfix_gets_the_issue_text_as_the_ask",
+    "only_its_behavior": true,
+    "why": "Passes on the branch; unchanged since the planner's commit."
+   },
+   {
+    "test": "tests/test_hotfix.py::test_an_approved_hotfix_passes_the_merge_gate_like_any_pull_request",
+    "only_its_behavior": true,
+    "why": "Passes on the branch; unchanged since the planner's commit."
+   },
+   {
+    "test": "tests/test_hotfix.py::test_code_review_sends_a_too_big_hotfix_to_the_planner",
+    "only_its_behavior": true,
+    "why": "Passes on the branch; unchanged since the planner's commit."
+   },
+   {
+    "test": "tests/test_hotfix.py::test_a_hotfix_sent_back_to_planning_says_why_on_the_issue",
+    "only_its_behavior": true,
+    "why": "Passes on the branch; unchanged since the planner's commit."
+   },
+   {
+    "test": "tests/test_hotfix.py::test_hotfix_prompts_name_nothing_from_dokimas_own_repo",
+    "only_its_behavior": true,
+    "why": "Passes on the branch; unchanged since the planner's commit."
+   }
+  ],
+  "size": "ok",
+  "boxes": {
+   "dropped": "none",
+   "added": "none",
+   "superseded": "none",
+   "conflicts": "none",
+   "edges": {
+    "863.1": "covered",
+    "863.2": "covered",
+    "863.3": "covered",
+    "863.4": "covered",
+    "863.5": "covered",
+    "863.6": "covered",
+    "863.7": "covered",
+    "863.8": "covered",
+    "863.9": "covered",
+    "863.10": "covered"
+   },
+   "poor_tests": "none"
+  }
+ },
+ "check": {
+  "passed": true,
+  "problems": []
+ },
+ "url": "https://github.com/dokima-dev/dokima/pull/868#issuecomment-6247054788"
+}
