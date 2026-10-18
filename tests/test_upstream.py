@@ -5,11 +5,14 @@ A repo's `.dokima/settings.yaml` may name the upstream repo where Dokima's own p
     upstream:
       repo: dokima-dev/dokima     # empty (the default): nothing leaves the repo
 
-An agent tags a problem as Dokima's fault, not the repo's, by giving its issue raise `"fault": "dokima"`. Once a
-review confirms it, code files a tagged problem in the upstream repo, linking back to the issue where it was seen, and
-any other problem in the repo itself, as before. A failed run of a shared workflow runs
+An agent first judges each problem it raises as an issue: Dokima's fault (its workflows, code, prompts, settings or
+install), tagged `"fault": "dokima"`; the repo's own (its code or its tests), left untagged; or unclear, tagged
+`"fault": "unsure"`. Once a review confirms it, code files a problem that is Dokima's fault in the upstream repo, linking
+back to the issue where it was seen and carrying nothing else from the private repo; any other problem is filed in the
+repo itself, as before, and an unclear one says there that Dokima cannot tell whose fault it is. A failed run of a
+shared workflow, other than the two test checks (full-suite.yml and acceptance-criteria.yml), runs
 `python3 -m dokima.upstream failed WORKFLOW JOB` as its last step, which files the failure upstream with the run's
-link. A repeat, the same tagged problem or the same workflow's job failing again, is a comment on the open upstream
+link; a failed test check files nothing upstream by itself. A repeat, the same tagged problem or the same workflow's job failing again, is a comment on the open upstream
 issue, never a second issue. Calls on the upstream repo run with the key in DOKIMA_UPSTREAM_TOKEN, which the workflow
 mints from the App's own key.
 
@@ -33,10 +36,15 @@ TRIAL, UPSTREAM = "o/r", "dokima-dev/dokima"
 LOCAL_KEY, UPSTREAM_KEY = "trial-key", "upstream-key"
 WORKFLOWS = os.path.join(ROOT, ".github", "workflows")
 # The secrets the workflows name before #745; no new credential may join them.
+# The test checks: their failures are usually the repo's own code or tests, so they file nothing upstream by themselves.
+TEST_CHECKS = {"full-suite.yml": "all-tests", "acceptance-criteria.yml": "check"}
 SECRETS_BEFORE = {"CLAUDE_CODE_OAUTH_TOKEN", "DOKIMA_APP_KEY", "SANDBOX_TOKEN", "GITHUB_TOKEN"}
 
 TAGGED = {"kind": "issue", "label": "Card drops a line", "fault": "dokima",
           "text": "The card drops the last line of a long plan.", "evidence": "`dokima/card.py` cuts the plan fold.",
+          "verdict": "new", "searched": [3]}
+UNSURE = {"kind": "issue", "label": "Install step fails", "fault": "unsure",
+          "text": "The install step fails before any test runs.", "evidence": "The run's install step exits 1.",
           "verdict": "new", "searched": [3]}
 UNTAGGED = {"kind": "issue", "label": "Search ignores archive",
             "text": "The search page ignores archived jobs, so their links go stale.", "evidence": "`app/search.py`",
@@ -99,7 +107,7 @@ def checked_and_filed(where, number, raise_list):
 
     The tag must pass the check first, as on a real run, or nothing is filed."""
     problems = raises.check_raises("reviewer", [dict(r) for r in raise_list])
-    assert problems == [], f"{where}: the hand-back check rejects a raise tagged as Dokima's fault: {problems}"
+    assert problems == [], f"{where}: the hand-back check rejects a raise tagged with its fault: {problems}"
     return agent.file_issues(TRIAL, number, review(raise_list), [])
 
 
@@ -136,83 +144,88 @@ def test_with_an_upstream_repo_a_tagged_problem_is_filed_there(record_property, 
     """With an upstream repo set, a problem that is Dokima's fault is filed there.
 
     The trial repo's settings name dokima-dev/dokima. A passed review raises one problem tagged as Dokima's fault;
-    code files it in Dokima's repo, with the key minted for it, and the trial repo gets nothing. Proves 745.2."""
-    record_property("proves", "745.2")
+    code files it in Dokima's repo, with the key minted for it, and the trial repo gets nothing. Proves 745.1."""
+    record_property("proves", "745.1")
     name_upstream()
-    lines = checked_and_filed("745.2", 9, [TAGGED])
+    lines = checked_and_filed("745.1", 9, [TAGGED])
     state = github()
     up = issues(state, UPSTREAM)
     assert len(up) == 1 and "drops the last line" in next(iter(up.values()))["body"], \
-        f"745.2: the tagged problem should be filed once in {UPSTREAM}; it holds {up}; the record says {lines}"
+        f"745.1: the tagged problem should be filed once in {UPSTREAM}; it holds {up}; the record says {lines}"
     assert issues(state, TRIAL) == {}, \
-        f"745.2: the tagged problem should leave the trial repo alone, yet it holds {issues(state, TRIAL)}"
+        f"745.1: the tagged problem should leave the trial repo alone, yet it holds {issues(state, TRIAL)}"
     keys = {c["token"] for c in state["calls"] if c["repo"] == UPSTREAM}
     assert keys == {UPSTREAM_KEY}, \
-        f"745.2: every call on {UPSTREAM} should use the upstream key {UPSTREAM_KEY!r}; they used {sorted(map(str, keys))}"
+        f"745.1: every call on {UPSTREAM} should use the upstream key {UPSTREAM_KEY!r}; they used {sorted(map(str, keys))}"
 
 
 def test_with_an_upstream_repo_an_untagged_problem_stays_in_the_repo_itself(record_property, github):
     """An untagged problem still files in the repo, while the tagged one goes upstream.
 
     The trial repo's settings name dokima-dev/dokima. A passed review raises two problems, one tagged as Dokima's
-    fault and one not; the untagged one is filed in the trial repo only. Proves 745.2."""
-    record_property("proves", "745.2")
+    fault and one not; the untagged one is filed in the trial repo only. Proves 745.1."""
+    record_property("proves", "745.1")
     name_upstream()
-    checked_and_filed("745.2", 9, [TAGGED, UNTAGGED])
+    checked_and_filed("745.1", 9, [TAGGED, UNTAGGED])
     state = github()
     mine, up = issues(state, TRIAL), issues(state, UPSTREAM)
     assert len(mine) == 1 and "archived jobs" in next(iter(mine.values()))["body"], \
-        f"745.2: the untagged problem should be filed once in the trial repo; it holds {mine}"
+        f"745.1: the untagged problem should be filed once in the trial repo; it holds {mine}"
     assert all("archived jobs" not in everything(i) for i in up.values()), \
-        f"745.2: the untagged problem is the repo's own, yet it reached {UPSTREAM}: {up}"
-    assert len(up) == 1, f"745.2: the tagged problem beside it should still go upstream once; {UPSTREAM} holds {up}"
+        f"745.1: the untagged problem is the repo's own, yet it reached {UPSTREAM}: {up}"
+    assert len(up) == 1, f"745.1: the tagged problem beside it should still go upstream once; {UPSTREAM} holds {up}"
 
 
 def test_a_problem_filed_upstream_links_back_to_the_issue_where_it_was_seen(record_property, github):
     """A problem filed upstream links back to the issue where it was seen.
 
     The trial repo's settings name dokima-dev/dokima. A passed review on the trial repo's issue 9 raises a problem
-    tagged as Dokima's fault; the upstream issue, its body or a comment on it, links to o/r's issue 9. Proves 745.3."""
-    record_property("proves", "745.3")
+    tagged as Dokima's fault; the upstream issue, its body or a comment on it, links to o/r's issue 9. Proves 745.2."""
+    record_property("proves", "745.2")
     name_upstream()
-    checked_and_filed("745.3", 9, [TAGGED])
+    checked_and_filed("745.2", 9, [TAGGED])
     up = issues(github(), UPSTREAM)
     back = f"https://github.com/{TRIAL}/issues/9"
-    assert len(up) == 1, f"745.3: the tagged problem should be filed once in {UPSTREAM}; it holds {up}"
+    assert len(up) == 1, f"745.2: the tagged problem should be filed once in {UPSTREAM}; it holds {up}"
     assert back in everything(next(iter(up.values()))), \
-        f"745.3: the upstream issue should link back to {back}; it says: {everything(next(iter(up.values())))!r}"
+        f"745.2: the upstream issue should link back to {back}; it says: {everything(next(iter(up.values())))!r}"
 
 
 @pytest.mark.parametrize("role,grade", [("planner", "plan-grade"), ("worker", "result-grade"),
                                         ("reviewer", "plan-grade"), ("reviewer", "result-grade")])
-def test_every_agent_is_told_how_to_tag_a_problem_as_dokimas_fault(record_property, role, grade):
-    """Every agent's instructions show the tag for a problem that is Dokima's fault.
+def test_every_agent_is_told_how_to_judge_whose_fault_a_problem_is(record_property, role, grade):
+    """Every agent's instructions say how to judge and tag whose fault a problem is.
 
-    Builds each agent's prompt as a run does, and checks it shows the tag `"fault": "dokima"` on an issue raise, the
-    same tag the hand-back check lets through. Proves 745.4."""
-    record_property("proves", "745.4")
+    Builds each agent's prompt as a run does. It must name, in the owner's words, what is Dokima's fault ("workflows,
+    code, prompts, settings or install") and what is the repo's own ("its code or its tests"), and show the tags
+    `"fault": "dokima"` and `"fault": "unsure"`, both of which the hand-back check lets through. Proves 745.3."""
+    record_property("proves", "745.3")
     text = prompt.build(role, grade, settings.read(ROOT))
-    assert '"fault": "dokima"' in text, \
-        f"745.4: the {role}'s prompt ({grade}) never shows the tag \"fault\": \"dokima\" for a problem that is Dokima's fault"
-    assert raises.check_raises(role, [dict(TAGGED)]) == [], \
-        f"745.4: the {role}'s instructions name a tag the hand-back check rejects: {raises.check_raises(role, [dict(TAGGED)])}"
+    for words, what in (("workflows, code, prompts, settings or install", "what counts as Dokima's fault"),
+                        ("its code or its tests", "what counts as the repo's own"),
+                        ('"fault": "dokima"', "the tag for a problem that is Dokima's fault"),
+                        ('"fault": "unsure"', "the tag for a problem whose fault it cannot tell")):
+        assert words in text, f"745.3: the {role}'s prompt ({grade}) never says {what}: no {words!r} in it"
+    for r in (TAGGED, UNSURE):
+        assert raises.check_raises(role, [dict(r)]) == [], \
+            f"745.3: the {role}'s instructions name a tag the hand-back check rejects: {raises.check_raises(role, [dict(r)])}"
 
 
 def test_a_tagged_problem_raised_again_is_a_comment_on_the_upstream_issue(record_property, github):
     """The same problem raised again is a comment on its upstream issue.
 
     The trial repo's settings name dokima-dev/dokima. The same problem, tagged as Dokima's fault, is confirmed on the
-    trial repo's issue 9 and then on its issue 10; Dokima's repo holds one issue, and a comment on it links to issue 10. Proves 745.5."""
-    record_property("proves", "745.5")
+    trial repo's issue 9 and then on its issue 10; Dokima's repo holds one issue, and a comment on it links to issue 10. Proves 745.4."""
+    record_property("proves", "745.4")
     name_upstream()
-    checked_and_filed("745.5", 9, [TAGGED])
-    checked_and_filed("745.5", 10, [TAGGED])
+    checked_and_filed("745.4", 9, [TAGGED])
+    checked_and_filed("745.4", 10, [TAGGED])
     up = issues(github(), UPSTREAM)
-    assert len(up) == 1, f"745.5: a repeat should never open a second issue; {UPSTREAM} holds {len(up)}: {up}"
+    assert len(up) == 1, f"745.4: a repeat should never open a second issue; {UPSTREAM} holds {len(up)}: {up}"
     again = f"https://github.com/{TRIAL}/issues/10"
     got = next(iter(up.values()))["comments"]
     assert any(again in c for c in got), \
-        f"745.5: the repeat should be a comment linking {again}; the comments are {got}"
+        f"745.4: the repeat should be a comment linking {again}; the comments are {got}"
 
 
 def test_a_failed_run_files_the_failure_upstream_with_the_run_link(record_property, github):
@@ -220,34 +233,34 @@ def test_a_failed_run_files_the_failure_upstream_with_the_run_link(record_proper
 
     The trial repo's settings name dokima-dev/dokima. The agent workflow's run job fails on run 101; its last step
     runs `python3 -m dokima.upstream failed agent run`, and Dokima's repo then holds one issue whose text links run 101.
-    Proves 745.6.
+    Proves 745.5.
     """
-    record_property("proves", "745.6")
+    record_property("proves", "745.5")
     name_upstream()
     got = failed()
-    assert got.returncode == 0, f"745.6: filing the failed run upstream failed: {got.stdout}{got.stderr}"
+    assert got.returncode == 0, f"745.5: filing the failed run upstream failed: {got.stdout}{got.stderr}"
     state = github()
     up = issues(state, UPSTREAM)
-    assert len(up) == 1, f"745.6: the failed run should open one issue in {UPSTREAM}; it holds {up}"
+    assert len(up) == 1, f"745.5: the failed run should open one issue in {UPSTREAM}; it holds {up}"
     assert run_link(101) in everything(next(iter(up.values()))), \
-        f"745.6: the upstream issue should link the failed run {run_link(101)}; it says {everything(next(iter(up.values())))!r}"
-    assert issues(state, TRIAL) == {}, f"745.6: the failure belongs upstream, yet the trial repo got {issues(state, TRIAL)}"
+        f"745.5: the upstream issue should link the failed run {run_link(101)}; it says {everything(next(iter(up.values())))!r}"
+    assert issues(state, TRIAL) == {}, f"745.5: the failure belongs upstream, yet the trial repo got {issues(state, TRIAL)}"
     keys = {c["token"] for c in state["calls"] if c["repo"] == UPSTREAM}
     assert keys == {UPSTREAM_KEY}, \
-        f"745.6: every call on {UPSTREAM} should use the upstream key {UPSTREAM_KEY!r}; they used {sorted(map(str, keys))}"
+        f"745.5: every call on {UPSTREAM} should use the upstream key {UPSTREAM_KEY!r}; they used {sorted(map(str, keys))}"
 
 
 def test_with_no_upstream_repo_a_failed_run_files_nothing(record_property, github):
     """With no upstream repo set, a failed run files nothing and the step passes.
 
-    The trial repo has no settings file. The failure step runs and exits 0, and neither repo gets an issue or a call. Proves 745.6."""
-    record_property("proves", "745.6")
+    The trial repo has no settings file. The failure step runs and exits 0, and neither repo gets an issue or a call. Proves 745.5."""
+    record_property("proves", "745.5")
     got = failed()
-    assert got.returncode == 0, f"745.6: with no upstream repo the failure step should pass quietly: {got.stdout}{got.stderr}"
+    assert got.returncode == 0, f"745.5: with no upstream repo the failure step should pass quietly: {got.stdout}{got.stderr}"
     state = github()
     assert issues(state, UPSTREAM) == {} and issues(state, TRIAL) == {}, \
-        f"745.6: with no upstream repo nothing should be filed; got {issues(state, UPSTREAM)} and {issues(state, TRIAL)}"
-    assert state["calls"] == [], f"745.6: with no upstream repo the step should call GitHub not at all: {state['calls']}"
+        f"745.5: with no upstream repo nothing should be filed; got {issues(state, UPSTREAM)} and {issues(state, TRIAL)}"
+    assert state["calls"] == [], f"745.5: with no upstream repo the step should call GitHub not at all: {state['calls']}"
 
 
 def shared_workflows():
@@ -255,8 +268,8 @@ def shared_workflows():
     with open(os.path.join(WORKFLOWS, "entry.yml")) as f:
         jobs = yaml.safe_load(f)["jobs"]
     found = {os.path.basename(j["uses"]) for j in jobs.values() if str(j.get("uses", "")).startswith("./.github/workflows/")}
-    assert found, "745.7: entry.yml hands events to no shared workflow"
-    return sorted(found)
+    assert found, "745.6: entry.yml hands events to no shared workflow"
+    return sorted(found - set(TEST_CHECKS))
 
 
 def workflow(name):
@@ -272,11 +285,11 @@ def files_failure(step):
 
 @pytest.mark.parametrize("name", shared_workflows())
 def test_every_job_of_each_shared_workflow_ends_by_filing_its_failure_upstream(record_property, name):
-    """Every job of each shared workflow ends with a step filing its failure upstream.
+    """Every shared workflow job, but the test checks, ends by filing its failure upstream.
 
-    Reads each workflow entry.yml calls. A job is covered when its own last step runs on failure and runs
-    `python3 -m dokima.upstream failed`, or when a later job that needs it does so on failure. Proves 745.7."""
-    record_property("proves", "745.7")
+    Reads each workflow entry.yml calls, leaving out the two test checks. A job is covered when its own last step runs on failure and runs
+    `python3 -m dokima.upstream failed`, or when a later job that needs it does so on failure. Proves 745.6."""
+    record_property("proves", "745.6")
     jobs = workflow(name)["jobs"]
     final = {k for k, j in jobs.items() if "failure()" in str(j.get("if", ""))
              and any(files_failure(s) for s in j.get("steps") or [])}
@@ -287,44 +300,110 @@ def test_every_job_of_each_shared_workflow_ends_by_filing_its_failure_upstream(r
         needs = lambda f: k in ([jobs[f]["needs"]] if isinstance(jobs[f].get("needs"), str) else jobs[f].get("needs") or [])
         if not files_failure(j["steps"][-1]) and not any(needs(f) for f in final):
             missing.append(k)
-    assert not missing, (f"745.7: in {name}, a failure of these jobs files nothing upstream, as no final step runs "
+    assert not missing, (f"745.6: in {name}, a failure of these jobs files nothing upstream, as no final step runs "
                          f"`python3 -m dokima.upstream failed` on failure: {', '.join(missing)}")
+
+
+@pytest.mark.parametrize("name", sorted(TEST_CHECKS))
+def test_a_failed_test_check_files_nothing_upstream(record_property, github, name):
+    """A failed test check files nothing upstream by itself.
+
+    The trial repo's settings name dokima-dev/dokima. The failure step runs for a test check's job, as it would if a
+    workflow ran it there; it exits 0 and Dokima's repo gets no issue, as a failed test is usually the repo's own.
+    Proves 745.6."""
+    record_property("proves", "745.6")
+    name_upstream()
+    got = failed(name[:-len(".yml")], TEST_CHECKS[name])
+    assert got.returncode == 0, f"745.6: the failure step for the test check {name} should pass quietly: {got.stdout}{got.stderr}"
+    state = github()
+    assert issues(state, UPSTREAM) == {}, \
+        f"745.6: a failed test check ({name}) should file nothing upstream, yet {UPSTREAM} holds {issues(state, UPSTREAM)}"
+    assert issues(state, TRIAL) == {}, f"745.6: the failure step should file nothing, yet the trial repo got {issues(state, TRIAL)}"
 
 
 def test_the_same_failure_twice_gives_one_upstream_issue_with_two_linked_comments(record_property, github):
     """The same failure twice leaves one upstream issue with two comments, each linking its run.
 
     The trial repo's settings name dokima-dev/dokima. The agent workflow's run job fails on run 101, then again on
-    run 102; Dokima's repo holds one issue, with exactly two comments, one linking each run. Proves 745.8."""
-    record_property("proves", "745.8")
+    run 102; Dokima's repo holds one issue, with exactly two comments, one linking each run. Proves 745.7."""
+    record_property("proves", "745.7")
     name_upstream()
     for run in ("101", "102"):
         got = failed(run=run)
-        assert got.returncode == 0, f"745.8: filing failed run {run} upstream failed: {got.stdout}{got.stderr}"
+        assert got.returncode == 0, f"745.7: filing failed run {run} upstream failed: {got.stdout}{got.stderr}"
     up = issues(github(), UPSTREAM)
-    assert len(up) == 1, f"745.8: the same failure twice should leave one upstream issue; {UPSTREAM} holds {len(up)}: {up}"
+    assert len(up) == 1, f"745.7: the same failure twice should leave one upstream issue; {UPSTREAM} holds {len(up)}: {up}"
     comments = next(iter(up.values()))["comments"]
-    assert len(comments) == 2, f"745.8: the upstream issue should hold two comments, one a run; it holds {comments}"
+    assert len(comments) == 2, f"745.7: the upstream issue should hold two comments, one a run; it holds {comments}"
     for run, c in zip((101, 102), comments):
-        assert run_link(run) in c, f"745.8: the comment for run {run} should link {run_link(run)}; it says {c!r}"
+        assert run_link(run) in c, f"745.7: the comment for run {run} should link {run_link(run)}; it says {c!r}"
 
 
 def test_a_different_failure_opens_its_own_upstream_issue(record_property, github):
     """A different job's failure is not a repeat: it opens its own upstream issue.
 
     The trial repo's settings name dokima-dev/dokima. The agent workflow's run job fails, then the card workflow's
-    draw job; Dokima's repo holds two issues, each linking its own run. Proves 745.8."""
-    record_property("proves", "745.8")
+    draw job; Dokima's repo holds two issues, each linking its own run. Proves 745.7."""
+    record_property("proves", "745.7")
     name_upstream()
     for workflow_, job, run in (("agent", "run", "101"), ("card", "draw", "102")):
         got = failed(workflow_, job, run)
-        assert got.returncode == 0, f"745.8: filing failed run {run} upstream failed: {got.stdout}{got.stderr}"
+        assert got.returncode == 0, f"745.7: filing failed run {run} upstream failed: {got.stdout}{got.stderr}"
     up = issues(github(), UPSTREAM)
-    assert len(up) == 2, f"745.8: two different failures should be two upstream issues; {UPSTREAM} holds {len(up)}: {up}"
+    assert len(up) == 2, f"745.7: two different failures should be two upstream issues; {UPSTREAM} holds {len(up)}: {up}"
     texts = [everything(i) for i in up.values()]
     for run in (101, 102):
         assert sum(run_link(run) in t for t in texts) == 1, \
-            f"745.8: run {run} should be linked from exactly one upstream issue; the issues say {texts}"
+            f"745.7: run {run} should be linked from exactly one upstream issue; the issues say {texts}"
+
+
+def test_a_problem_whose_fault_is_unclear_stays_in_the_repo_saying_so(record_property, github):
+    """A problem of unclear fault stays in the repo, its issue saying so.
+
+    The trial repo's settings name dokima-dev/dokima. A passed review raises one problem tagged `"fault": "unsure"`;
+    code files it in the trial repo, its issue saying Dokima "cannot tell" whose fault it is, and Dokima's repo gets
+    nothing. Proves 745.8."""
+    record_property("proves", "745.8")
+    name_upstream()
+    lines = checked_and_filed("745.8", 9, [UNSURE])
+    state = github()
+    assert issues(state, UPSTREAM) == {}, \
+        f"745.8: a problem of unclear fault should file nothing upstream, yet {UPSTREAM} holds {issues(state, UPSTREAM)}"
+    mine = [i for i in issues(state, TRIAL).values() if "install step fails" in everything(i)]
+    assert len(mine) == 1, f"745.8: the problem should be filed once in the trial repo; it holds {issues(state, TRIAL)}; the record says {lines}"
+    assert "cannot tell" in everything(mine[0]).lower(), \
+        f"745.8: the repo's issue should say Dokima cannot tell whose fault it is; it says {everything(mine[0])!r}"
+
+
+def test_a_problem_filed_upstream_carries_nothing_from_the_private_repo(record_property, github):
+    """A problem filed upstream carries nothing from the private repo but its links back.
+
+    The trial repo's settings name dokima-dev/dokima, and its issue 9 has a private title and body. A passed review on
+    issue 9 raises a problem tagged as Dokima's fault, having searched the trial repo's issue 3. The upstream issue
+    holds the problem's own text; once the links to the trial repo are taken out, it names no trial repo issue by
+    number (such as #3 or #9, which upstream would point at Dokima's own issues), not the trial repo's name, and none
+    of issue 9's words. Proves 745.9."""
+    record_property("proves", "745.9")
+    name_upstream()
+    path = os.environ["UPSTREAM_GH_STATE"]
+    with open(path) as f:
+        state = json.load(f)
+    state["repos"][TRIAL]["issues"]["9"] = {"title": "Offer from Acme Hiring", "body": "Salary talks with Acme Hiring.",
+                                            "state": "open", "labels": [], "comments": []}
+    state["next"][TRIAL] = 9
+    with open(path, "w") as f:
+        json.dump(state, f)
+    checked_and_filed("745.9", 9, [TAGGED])
+    up = issues(github(), UPSTREAM)
+    assert len(up) == 1, f"745.9: the tagged problem should be filed once in {UPSTREAM}; it holds {up}"
+    text = everything(next(iter(up.values()))) + "\n" + next(iter(up.values()))["title"]
+    assert "drops the last line" in text, f"745.9: the upstream issue should hold the problem's own text; it says {text!r}"
+    rest = re.sub(rf"https://github\.com/{re.escape(TRIAL)}/\S*", "", text)
+    assert not re.search(r"(?<![\w/&])#\d+", rest), \
+        f"745.9: the upstream issue names a trial repo issue by number, which points at Dokima's own issues: {rest!r}"
+    assert not re.search(rf"(?<![\w/.-]){re.escape(TRIAL)}(?![\w/.-])", rest), \
+        f"745.9: the upstream issue names the private repo outside its links: {rest!r}"
+    assert "Acme" not in text, f"745.9: the upstream issue copies the private issue's words: {text!r}"
 
 
 def test_filing_upstream_mints_its_key_from_the_apps_own_key(record_property):
@@ -333,8 +412,8 @@ def test_filing_upstream_mints_its_key_from_the_apps_own_key(record_property):
     Reads every workflow file. Each step that files a failure upstream, and the agent workflow's step that files the
     review's problems, takes DOKIMA_UPSTREAM_TOKEN from an earlier step of its job that mints it with
     actions/create-github-app-token from the App's id and key, for the upstream repo's owner. The workflows name no
-    secret beyond those named before. Proves 745.9."""
-    record_property("proves", "745.9")
+    secret beyond those named before. Proves 745.10."""
+    record_property("proves", "745.10")
     seen, wrong, secrets = 0, [], set()
     for name in sorted(os.listdir(WORKFLOWS)):
         if not name.endswith(".yml"):
@@ -357,8 +436,8 @@ def test_filing_upstream_mints_its_key_from_the_apps_own_key(record_property):
                         and "vars.DOKIMA_APP_ID" in str(w.get("app-id")) and "secrets.DOKIMA_APP_KEY" in str(w.get("private-key"))
                         and w.get("owner")):
                     wrong.append(f"{name} job {k} step {step.get('name') or at + 1}")
-    assert seen, "745.9: no workflow step files anything upstream yet"
-    assert not wrong, ("745.9: these steps file upstream without DOKIMA_UPSTREAM_TOKEN minted from the App's own key "
+    assert seen, "745.10: no workflow step files anything upstream yet"
+    assert not wrong, ("745.10: these steps file upstream without DOKIMA_UPSTREAM_TOKEN minted from the App's own key "
                        f"for the upstream repo's owner: {'; '.join(wrong)}")
     new = sorted(secrets - SECRETS_BEFORE)
-    assert not new, f"745.9: filing upstream should need no new credential, yet the workflows name new secrets: {new}"
+    assert not new, f"745.10: filing upstream should need no new credential, yet the workflows name new secrets: {new}"
