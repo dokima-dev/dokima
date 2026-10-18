@@ -184,13 +184,14 @@ def release_command(crit):
 
 
 def run_release(tmp_path, crit, releases=(), refuse=False, changelog=SAMPLE):
-    """Run release.yml's command against the fake gh, in a temp folder holding CHANGELOG.
+    """Run release.yml's command against the fake gh, in a temp folder with an optional changelog.
 
     Returns the finished process and the fake GitHub's state afterwards."""
     cmd = release_command(crit)
     work = tmp_path / "repo"
     work.mkdir()
-    (work / "CHANGELOG.md").write_text(changelog)
+    if changelog is not None:
+        (work / "CHANGELOG.md").write_text(changelog)
     bin_dir = tmp_path / "bin"
     bin_dir.mkdir()
     gh = bin_dir / "gh"
@@ -277,3 +278,27 @@ def test_release_refused_fails_the_run(tmp_path, record_property):
              or (c[:1] == ["api"] and any(a.startswith("tag_name=") for a in c))]
     assert asked, "755.2: the command never asked GitHub for the release"
     assert done.returncode != 0, "755.2: GitHub refused the release, yet the command exited 0"
+
+
+def test_release_waits_for_changelog(tmp_path, record_property):
+    """A push to main before the changelog arrives makes no tag and no release.
+
+    755.1, edge case: main has no CHANGELOG.md yet, so the command run on every push to main must make nothing and
+    still succeed. Code that tags v0.1.0 on any push fails here."""
+    record_property("proves", "755.1")
+    done, state = run_release(tmp_path, "755.1", changelog=None)
+    assert not state["unsupported"], f"755.1: the release command made calls the fake gh does not know: {state['unsupported']}"
+    assert done.returncode == 0, f"755.1: the release command failed when main has no changelog: {done.stderr[-800:]}"
+    assert state["created"] == [], f"755.1: main has no changelog, yet the command made {state['created']}"
+
+
+def test_release_waits_for_version_section(tmp_path, record_property):
+    """A changelog with no v0.1.0 section yet makes no tag and no release.
+
+    755.1, edge case: the changelog holds only an Unreleased section, so v0.1.0 has not reached main; the command must
+    make nothing and still succeed."""
+    record_property("proves", "755.1")
+    done, state = run_release(tmp_path, "755.1", changelog="# Changelog\n\n## Unreleased\n\n- A draft line.\n")
+    assert not state["unsupported"], f"755.1: the release command made calls the fake gh does not know: {state['unsupported']}"
+    assert done.returncode == 0, f"755.1: the release command failed on a changelog with no v0.1.0: {done.stderr[-800:]}"
+    assert state["created"] == [], f"755.1: the changelog has no v0.1.0 section, yet the command made {state['created']}"
