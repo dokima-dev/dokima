@@ -1,0 +1,112 @@
+{
+ "role": "reviewer",
+ "stage": "pr",
+ "run_id": "39104952502",
+ "commit_before": "1ae8887c19d71cec8104edb4c7c69b4d192f604b",
+ "started_by": "dokima-runtime[bot]",
+ "models": [
+  "claude-opus-5-5"
+ ],
+ "report": {
+  "duration_ms": 64196,
+  "turns": 8,
+  "cost_usd": 0.5017416,
+  "tokens_in": 360312,
+  "tokens_out": 4700
+ },
+ "log": "https://github.com/dokima-dev/dokima/blob/logs/logs/859/39104952502-reviewer-pr.md",
+ "run": "https://github.com/dokima-dev/dokima/actions/runs/39104952502",
+ "handback": {
+  "previous_step": {
+   "did": [
+    "The worker made Dokima start when any of the repo's workflows finishes.",
+    "The worker let the card redraw when a pull request's own CI finishes.",
+    "The worker added each required check, with its state, to the card's done line."
+   ],
+   "decided": [
+    "Commit statuses count like check runs when a required check has no run."
+   ],
+   "open": [
+    "The change touches a workflow file, so it waits for the owner."
+   ]
+  },
+  "verdict": "approve",
+  "summary": "The card now redraws when the repo's CI finishes and lists every required check with its state.",
+  "raises": [],
+  "answers": [],
+  "asks": [],
+  "behaviors": [
+   {
+    "criterion": "859.1",
+    "one_behavior": true,
+    "why": "One event, one result: the card redraws."
+   },
+   {
+    "criterion": "859.2",
+    "one_behavior": true,
+    "why": "Each required check shows with its state."
+   }
+  ],
+  "edge_cases": [
+   {
+    "criterion": "859.1",
+    "cut": [],
+    "missing": []
+   },
+   {
+    "criterion": "859.2",
+    "cut": [],
+    "missing": []
+   }
+  ],
+  "tests": [
+   {
+    "test": "tests/test_card_repo_ci.py::test_the_repos_own_ci_finishing_redraws_the_card",
+    "only_its_behavior": true,
+    "why": "Fails on main, passes on the branch."
+   },
+   {
+    "test": "tests/test_card_repo_ci.py::test_the_repos_own_ci_failing_redraws_the_card",
+    "only_its_behavior": true,
+    "why": "Fails on main, passes on the branch."
+   },
+   {
+    "test": "tests/test_card_repo_ci.py::test_a_required_repo_check_that_failed_shows_failed",
+    "only_its_behavior": true,
+    "why": "Fails on main, passes on the branch."
+   },
+   {
+    "test": "tests/test_card_repo_ci.py::test_a_required_repo_check_that_passed_shows_passed",
+    "only_its_behavior": true,
+    "why": "Fails on main, passes on the branch."
+   },
+   {
+    "test": "tests/test_card_repo_ci.py::test_a_required_check_not_yet_run_shows_not_started",
+    "only_its_behavior": true,
+    "why": "Fails on main, passes on the branch."
+   },
+   {
+    "test": "tests/test_card_repo_ci.py::test_a_required_check_reported_as_a_commit_status_shows_its_state",
+    "only_its_behavior": true,
+    "why": "Fails on main, passes on the branch."
+   }
+  ],
+  "size": "ok",
+  "boxes": {
+   "dropped": "none",
+   "added": "none",
+   "superseded": "none",
+   "conflicts": "none",
+   "edges": {
+    "859.1": "covered",
+    "859.2": "covered"
+   },
+   "poor_tests": "none"
+  }
+ },
+ "check": {
+  "passed": true,
+  "problems": []
+ },
+ "url": "https://github.com/dokima-dev/dokima/pull/866#issuecomment-6246670297"
+}
