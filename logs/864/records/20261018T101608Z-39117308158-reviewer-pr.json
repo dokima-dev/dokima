@@ -1,0 +1,65 @@
+{
+ "role": "reviewer",
+ "stage": "pr",
+ "run_id": "39117308158",
+ "commit_before": "a58e6c1acc1073bec98d890f293cfa8aaddd9bae",
+ "started_by": "dokima-runtime[bot]",
+ "models": [
+  "claude-opus-5-5"
+ ],
+ "report": {
+  "duration_ms": 182459,
+  "turns": 24,
+  "cost_usd": 0.9769092000000003,
+  "tokens_in": 1398242,
+  "tokens_out": 7862
+ },
+ "log": "https://github.com/dokima-dev/dokima/blob/logs/logs/864/39117308158-reviewer-pr.md",
+ "run": "https://github.com/dokima-dev/dokima/actions/runs/39117308158",
+ "handback": {
+  "previous_step": {
+   "did": [
+    "A hotfix pull request now opens with the hotfix label.",
+    "A hotfix worker needing a design choice sends the issue to the planner, saying why.",
+    "A hotfix card is now one line: state, ask, pull request, review verdict, gate."
+   ],
+   "decided": [
+    "The issue link was already there; nothing changed for it."
+   ],
+   "open": []
+  },
+  "verdict": "approve",
+  "summary": "The code does each of the ten criteria itself, the planner's tests are untouched, and all pass.",
+  "raises": [],
+  "answers": [],
+  "asks": [],
+  "boxes": {
+   "dropped": "none",
+   "added": "none",
+   "superseded": "none",
+   "conflicts": "none",
+   "edges": {
+    "864.1": "covered",
+    "864.2": "covered",
+    "864.3": "covered",
+    "864.4": "covered",
+    "864.5": "covered",
+    "864.6": "covered",
+    "864.7": "covered",
+    "864.8": "covered",
+    "864.9": "covered",
+    "864.10": "covered"
+   },
+   "poor_tests": "none"
+  },
+  "behaviors": [],
+  "edge_cases": [],
+  "tests": [],
+  "size": "ok"
+ },
+ "check": {
+  "passed": true,
+  "problems": []
+ },
+ "url": "https://github.com/dokima-dev/dokima/pull/873#issuecomment-6248485795"
+}
