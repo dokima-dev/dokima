@@ -1,0 +1,40 @@
+{
+ "role": "worker",
+ "stage": null,
+ "run_id": "39111123495",
+ "commit_before": "9abaf48daf45f87a27330e72220c0557a4713282",
+ "started_by": "dokima-runtime[bot]",
+ "models": [
+  "claude-opus-5-5"
+ ],
+ "report": {
+  "duration_ms": 101820,
+  "turns": 11,
+  "cost_usd": 0.3900476000000001,
+  "tokens_in": 426084,
+  "tokens_out": 2709
+ },
+ "log": "https://github.com/dokima-dev/dokima/blob/logs/logs/867/39111123495-worker.md",
+ "run": "https://github.com/dokima-dev/dokima/actions/runs/39111123495",
+ "handback": {
+  "summary": "No new changes: the earlier round's build stands, rechecked against current main; every plan test passes.",
+  "criteria": {
+   "867.1": "`dokima/release.py`: `newest()` reads the top-most version heading; `run()` releases it unless already released.",
+   "867.2": "`CHANGELOG.md`: a `## v0.1.1` section on top names #852, #856 and #861, plus #866 and #867.",
+   "867.3": "`dokima/install/dokima.yml` calls `entry.yml@v0.1.1`.",
+   "867.4": "`README.md` setup step 1 names the newest release, `v0.1.1`.",
+   "867.5": "`docs/wiki/Installing.md` step 1 names the newest release, `v0.1.1`."
+  },
+  "evidence": "`pytest -q tests/test_newest_release.py tests/test_release.py`: 15 passed",
+  "raises": [],
+  "answers": []
+ },
+ "check": {
+  "passed": true,
+  "problems": []
+ },
+ "dropped_by_fence": [],
+ "files_changed": [],
+ "branch": "try/issue-867",
+ "url": "https://github.com/dokima-dev/dokima/pull/871#issuecomment-6247577346"
+}
