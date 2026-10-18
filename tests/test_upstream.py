@@ -9,7 +9,7 @@ An agent first judges each problem it raises as an issue: Dokima's fault (its wo
 install), tagged `"fault": "dokima"`; the repo's own (its code or its tests), left untagged; or unclear, tagged
 `"fault": "unsure"`. Once a review confirms it, code files a problem that is Dokima's fault in the upstream repo; any
 other problem is filed in the repo itself, as before, and an unclear one says there that Dokima cannot tell whose fault
-it is. A failed run of a shared workflow, other than the two test checks (full-suite.yml and acceptance-criteria.yml),
+it is. A failed run of a shared workflow, other than the two test checks (full-suite.yml and acceptance-criteria.yml) and the review relay (reviews.yml),
 runs `python3 -m dokima.upstream failed WORKFLOW JOB` as its last step, which files the failure upstream naming the
 workflow file and the job; a failed test check files nothing upstream by itself. A repeat, the same tagged problem or
 the same workflow's job failing again, is a comment on the open upstream issue, never a second issue.
@@ -40,6 +40,8 @@ WORKFLOWS = os.path.join(ROOT, ".github", "workflows")
 # The secrets the workflows name before #745; no new credential may join them.
 # The test checks: their failures are usually the repo's own code or tests, so they file nothing upstream by themselves.
 TEST_CHECKS = {"full-suite.yml": "all-tests", "acceptance-criteria.yml": "check"}
+# The review relay runs the pull request's own copy, so it holds no key (#396.3) and files nothing upstream.
+RELAY = "reviews.yml"
 SECRETS_BEFORE = {"CLAUDE_CODE_OAUTH_TOKEN", "DOKIMA_APP_KEY", "SANDBOX_TOKEN", "GITHUB_TOKEN"}
 
 TAGGED = {"kind": "issue", "label": "Card drops a line", "fault": "dokima",
@@ -262,12 +264,12 @@ def test_with_no_upstream_repo_a_failed_run_files_nothing(record_property, githu
 
 
 def shared_workflows():
-    """The shared workflows entry.yml hands events to, by file name."""
+    """The shared workflows entry.yml calls, but the test checks and the review relay."""
     with open(os.path.join(WORKFLOWS, "entry.yml")) as f:
         jobs = yaml.safe_load(f)["jobs"]
     found = {os.path.basename(j["uses"]) for j in jobs.values() if str(j.get("uses", "")).startswith("./.github/workflows/")}
     assert found, "745.6: entry.yml hands events to no shared workflow"
-    return sorted(found - set(TEST_CHECKS))
+    return sorted(found - set(TEST_CHECKS) - {RELAY})
 
 
 def workflow(name):
@@ -283,9 +285,9 @@ def files_failure(step):
 
 @pytest.mark.parametrize("name", shared_workflows())
 def test_every_job_of_each_shared_workflow_ends_by_filing_its_failure_upstream(record_property, name):
-    """Every shared workflow job, but the test checks, ends by filing its failure upstream.
+    """Every shared workflow job but the test checks and relay files its failure upstream.
 
-    Reads each workflow entry.yml calls, leaving out the two test checks. A job is covered when its own last step runs on failure and runs
+    Reads each workflow entry.yml calls, leaving out the two test checks and the review relay, which holds no key. A job is covered when its own last step runs on failure and runs
     `python3 -m dokima.upstream failed`, or when a later job that needs it does so on failure. Proves 745.6."""
     record_property("proves", "745.6")
     jobs = workflow(name)["jobs"]
