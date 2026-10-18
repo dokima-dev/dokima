@@ -1,0 +1,369 @@
+{
+ "role": "reviewer",
+ "stage": "plan",
+ "run_id": "39103168285",
+ "commit_before": "ccbebe20951336dbdfb7da7800bf77e892c34308",
+ "started_by": "dokima-runtime[bot]",
+ "models": [
+  "claude-opus-5-5"
+ ],
+ "report": {
+  "duration_ms": 89577,
+  "turns": 8,
+  "cost_usd": 0.5092614,
+  "tokens_in": 311382,
+  "tokens_out": 9110
+ },
+ "log": "https://github.com/dokima-dev/dokima/blob/logs/logs/750/39103168285-reviewer-plan.md",
+ "run": "https://github.com/dokima-dev/dokima/actions/runs/39103168285",
+ "handback": {
+  "previous_step": {
+   "did": [
+    "The planner split the hotfix lane into two stories of 10 and 7 criteria."
+   ],
+   "decided": [
+    "The owner's work command starts a hotfix worker by hand.",
+    "The lane may change the guarded workflow and prompt files."
+   ],
+   "open": [
+    "Two questions wait for the owner: the work command, and the guarded files."
+   ]
+  },
+  "verdict": "block",
+  "summary": "No criterion keeps the hotfix's own fix on the pull request, and one criterion holds two behaviors.",
+  "raises": [
+   {
+    "kind": "blocker",
+    "to": "planner",
+    "label": "No criterion: fix lands",
+    "text": "No criterion keeps the worker's fix on the pull request; with no plan the fence drops it. Fix: add a criterion that the fix survives the fence.",
+    "evidence": "`dokima/fence.py` `scope_from` builds scope from the plan; empty scope drops every change. S1.6 covers only tests.",
+    "raised_by": "reviewer",
+    "id": "R1"
+   },
+   {
+    "kind": "blocker",
+    "to": "planner",
+    "label": "S1.4 is two behaviors",
+    "text": "S1.4 bundles two results: code review starts, and it judges the diff against the issue's text. Fix: split it into two criteria.",
+    "evidence": "S1.4 reads: code review starts and judges the diff against the issue's text.",
+    "raised_by": "reviewer",
+    "id": "R2"
+   },
+   {
+    "kind": "question",
+    "to": "owner",
+    "label": "Doubt: work command",
+    "text": "Your issue keeps hotfixes apart from the work command. Should that command still start one by hand, as P1 assumes?",
+    "evidence": "The issue says: Why separate from /work, keeping them apart keeps the contract path clean.",
+    "raised_by": "reviewer",
+    "id": "R3"
+   }
+  ],
+  "answers": [],
+  "asks": [
+   {
+    "ask": "An issue labeled `hotfix` skips planning and plan review.",
+    "source": "https://github.com/dokima-dev/dokima/issues/750",
+    "criterion": "S1.1"
+   },
+   {
+    "ask": "When its turn comes (by hand, or on autopilot once nothing open blocks it)",
+    "source": "https://github.com/dokima-dev/dokima/issues/750",
+    "criterion": "S1.2"
+   },
+   {
+    "ask": "the worker builds straight from the issue's text: the text is the whole ask.",
+    "source": "https://github.com/dokima-dev/dokima/issues/750",
+    "criterion": "S1.3"
+   },
+   {
+    "ask": "Code review still runs and judges the diff against the issue's text; it is the judgment gate.",
+    "source": "https://github.com/dokima-dev/dokima/issues/750",
+    "criterion": "S1.4"
+   },
+   {
+    "ask": "All tests and the merge gate still run, as for any pull request.",
+    "source": "https://github.com/dokima-dev/dokima/issues/750",
+    "criterion": "S1.5"
+   },
+   {
+    "ask": "The worker may add or change a small test that pins the fix",
+    "source": "https://github.com/dokima-dev/dokima/issues/750",
+    "criterion": "S1.6"
+   },
+   {
+    "ask": "When code review finds the change bigger than the ask",
+    "source": "https://github.com/dokima-dev/dokima/issues/750",
+    "criterion": "S1.7"
+   },
+   {
+    "ask": "it goes back to normal planning, saying why.",
+    "source": "https://github.com/dokima-dev/dokima/issues/750",
+    "criterion": "S1.8"
+   },
+   {
+    "ask": "Every hotfix PR carries the `hotfix` label",
+    "source": "https://github.com/dokima-dev/dokima/issues/750",
+    "criterion": "S1.9"
+   },
+   {
+    "ask": "links the issue it answers.",
+    "source": "https://github.com/dokima-dev/dokima/issues/750",
+    "criterion": "S1.10"
+   },
+   {
+    "ask": "or the worker finds the ask needs a design choice",
+    "source": "https://github.com/dokima-dev/dokima/issues/750",
+    "criterion": "S2.1"
+   },
+   {
+    "ask": "it goes back to normal planning, saying why.",
+    "source": "https://github.com/dokima-dev/dokima/issues/750",
+    "criterion": "S2.2"
+   },
+   {
+    "ask": "The card shows one line",
+    "source": "https://github.com/dokima-dev/dokima/issues/750",
+    "criterion": "S2.3"
+   },
+   {
+    "ask": "the ask",
+    "source": "https://github.com/dokima-dev/dokima/issues/750",
+    "criterion": "S2.4"
+   },
+   {
+    "ask": "the PR",
+    "source": "https://github.com/dokima-dev/dokima/issues/750",
+    "criterion": "S2.5"
+   },
+   {
+    "ask": "the review verdict",
+    "source": "https://github.com/dokima-dev/dokima/issues/750",
+    "criterion": "S2.6"
+   },
+   {
+    "ask": "the gate.",
+    "source": "https://github.com/dokima-dev/dokima/issues/750",
+    "criterion": "S2.7"
+   },
+   {
+    "ask": "the worker builds straight from the issue's text (the fix itself lands on the pull request)",
+    "source": "https://github.com/dokima-dev/dokima/issues/750",
+    "criterion": "missing"
+   }
+  ],
+  "behaviors": [
+   {
+    "criterion": "S1.1",
+    "one_behavior": true,
+    "why": "One trigger, one result: the worker starts with no plan."
+   },
+   {
+    "criterion": "S1.2",
+    "one_behavior": true,
+    "why": "One autopilot result: worker starts instead of planner."
+   },
+   {
+    "criterion": "S1.3",
+    "one_behavior": true,
+    "why": "One result: the pack holds the issue text as the ask."
+   },
+   {
+    "criterion": "S1.4",
+    "one_behavior": false,
+    "why": "Two results: review starts, and review judges against the issue text."
+   },
+   {
+    "criterion": "S1.5",
+    "one_behavior": true,
+    "why": "The merge gate is the run of all tests on the pull request."
+   },
+   {
+    "criterion": "S1.6",
+    "one_behavior": true,
+    "why": "One result: the worker's test change stays."
+   },
+   {
+    "criterion": "S1.7",
+    "one_behavior": true,
+    "why": "One result: the planner starts."
+   },
+   {
+    "criterion": "S1.8",
+    "one_behavior": true,
+    "why": "One result: a comment saying why."
+   },
+   {
+    "criterion": "S1.9",
+    "one_behavior": true,
+    "why": "One result: the label on the pull request."
+   },
+   {
+    "criterion": "S1.10",
+    "one_behavior": true,
+    "why": "One result: the pull request links its issue."
+   },
+   {
+    "criterion": "S2.1",
+    "one_behavior": true,
+    "why": "One result: the planner starts."
+   },
+   {
+    "criterion": "S2.2",
+    "one_behavior": true,
+    "why": "One result: a comment saying why."
+   },
+   {
+    "criterion": "S2.3",
+    "one_behavior": true,
+    "why": "One result: the card's state fits one line."
+   },
+   {
+    "criterion": "S2.4",
+    "one_behavior": true,
+    "why": "One result: the line shows the ask."
+   },
+   {
+    "criterion": "S2.5",
+    "one_behavior": true,
+    "why": "One result: the line links the pull request."
+   },
+   {
+    "criterion": "S2.6",
+    "one_behavior": true,
+    "why": "One result: the line shows the verdict."
+   },
+   {
+    "criterion": "S2.7",
+    "one_behavior": true,
+    "why": "One result: the line shows the gate."
+   }
+  ],
+  "edge_cases": [
+   {
+    "criterion": "S1.1",
+    "cut": [],
+    "missing": []
+   },
+   {
+    "criterion": "S1.2",
+    "cut": [],
+    "missing": []
+   },
+   {
+    "criterion": "S1.3",
+    "cut": [],
+    "missing": []
+   },
+   {
+    "criterion": "S1.4",
+    "cut": [],
+    "missing": []
+   },
+   {
+    "criterion": "S1.5",
+    "cut": [],
+    "missing": []
+   },
+   {
+    "criterion": "S1.6",
+    "cut": [],
+    "missing": []
+   },
+   {
+    "criterion": "S1.7",
+    "cut": [],
+    "missing": []
+   },
+   {
+    "criterion": "S1.8",
+    "cut": [],
+    "missing": []
+   },
+   {
+    "criterion": "S1.9",
+    "cut": [],
+    "missing": []
+   },
+   {
+    "criterion": "S1.10",
+    "cut": [],
+    "missing": []
+   },
+   {
+    "criterion": "S2.1",
+    "cut": [],
+    "missing": []
+   },
+   {
+    "criterion": "S2.2",
+    "cut": [],
+    "missing": []
+   },
+   {
+    "criterion": "S2.3",
+    "cut": [],
+    "missing": []
+   },
+   {
+    "criterion": "S2.4",
+    "cut": [],
+    "missing": []
+   },
+   {
+    "criterion": "S2.5",
+    "cut": [],
+    "missing": []
+   },
+   {
+    "criterion": "S2.6",
+    "cut": [],
+    "missing": []
+   },
+   {
+    "criterion": "S2.7",
+    "cut": [],
+    "missing": []
+   }
+  ],
+  "tests": [],
+  "size": "S1.4 bundles two behaviors.",
+  "boxes": {
+   "dropped": [
+    {
+     "words": "the worker builds straight from the issue's text",
+     "source": "https://github.com/dokima-dev/dokima/issues/750"
+    }
+   ],
+   "added": "none",
+   "superseded": "none",
+   "conflicts": "none",
+   "edges": {
+    "S1.1": "covered",
+    "S1.2": "covered",
+    "S1.3": "covered",
+    "S1.4": "covered",
+    "S1.5": "covered",
+    "S1.6": "covered",
+    "S1.7": "covered",
+    "S1.8": "covered",
+    "S1.9": "covered",
+    "S1.10": "covered",
+    "S2.1": "covered",
+    "S2.2": "covered",
+    "S2.3": "covered",
+    "S2.4": "covered",
+    "S2.5": "covered",
+    "S2.6": "covered",
+    "S2.7": "covered"
+   },
+   "poor_tests": "none"
+  }
+ },
+ "check": {
+  "passed": true,
+  "problems": []
+ },
+ "url": "https://github.com/dokima-dev/dokima/issues/750#issuecomment-6246429616"
+}
