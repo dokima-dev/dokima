@@ -1,0 +1,81 @@
+{
+ "role": "reviewer",
+ "stage": "plan",
+ "run_id": "39092025066",
+ "commit_before": "c7b582f35a8ecddf9a7aa8bcaf1d1db05e8d9b2b",
+ "started_by": "dokima-runtime[bot]",
+ "models": [
+  "claude-opus-5-5"
+ ],
+ "report": {
+  "duration_ms": 19825,
+  "turns": 4,
+  "cost_usd": 0.2097116,
+  "tokens_in": 116853,
+  "tokens_out": 1739
+ },
+ "log": "https://github.com/dokima-dev/dokima/blob/logs/logs/849/39092025066-reviewer-plan.md",
+ "run": "https://github.com/dokima-dev/dokima/actions/runs/39092025066",
+ "handback": {
+  "previous_step": {
+   "did": [
+    "The planner planned one criterion: the changelog has a v0.1.0 section listing what it does.",
+    "The planner wrote one test that reads the changelog's v0.1.0 section."
+   ],
+   "decided": [
+    "The test checks the section lists at least one thing, not what it says."
+   ],
+   "open": [
+    "The owner decides if reading the list at approval is enough to judge it true."
+   ]
+  },
+  "verdict": "approve",
+  "summary": "The plan carries the one ask; the owner still decides if reading the list at approval is enough.",
+  "raises": [],
+  "answers": [],
+  "asks": [
+   {
+    "ask": "the changelog listing what v0.1.0 does",
+    "source": "https://github.com/dokima-dev/dokima/issues/849",
+    "criterion": "849.1"
+   }
+  ],
+  "behaviors": [
+   {
+    "criterion": "849.1",
+    "one_behavior": true,
+    "why": "One file with one section that lists what v0.1.0 does."
+   }
+  ],
+  "edge_cases": [
+   {
+    "criterion": "849.1",
+    "cut": [],
+    "missing": []
+   }
+  ],
+  "tests": [
+   {
+    "test": "tests/test_changelog.py::test_changelog_lists_v010",
+    "only_its_behavior": true,
+    "why": "Fails today because the changelog is missing; checks only the v0.1.0 section's list."
+   }
+  ],
+  "size": "ok",
+  "boxes": {
+   "dropped": "none",
+   "added": "none",
+   "superseded": "none",
+   "conflicts": "none",
+   "edges": {
+    "849.1": "covered"
+   },
+   "poor_tests": "none"
+  }
+ },
+ "check": {
+  "passed": true,
+  "problems": []
+ },
+ "url": "https://github.com/dokima-dev/dokima/issues/849#issuecomment-6244966091"
+}
