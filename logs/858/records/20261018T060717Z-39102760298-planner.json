@@ -1,0 +1,118 @@
+{
+ "role": "planner",
+ "stage": null,
+ "run_id": "39102760298",
+ "commit_before": "ccbebe20951336dbdfb7da7800bf77e892c34308",
+ "started_by": "dokima-runtime[bot]",
+ "models": [
+  "claude-opus-5-5"
+ ],
+ "report": {
+  "duration_ms": 116795,
+  "turns": 15,
+  "cost_usd": 0.8205104000000001,
+  "tokens_in": 777984,
+  "tokens_out": 10182
+ },
+ "log": "https://github.com/dokima-dev/dokima/blob/logs/logs/858/39102760298-planner.md",
+ "run": "https://github.com/dokima-dev/dokima/actions/runs/39102760298",
+ "handback": {
+  "kind": "user_story",
+  "title": "The audit spares the repo's checks and a missing board",
+  "summary": "The daily audit stops flagging the repo's own required checks and works when no board is set.",
+  "user_story": "The Setup issue no longer flags the repo's own required checks or a missing board.",
+  "acceptance_criteria": [
+   {
+    "text": "When the branch rule requires a check the repo added, the Setup issue lists no line about it.",
+    "words": "Checks the repo added are not drift.",
+    "source": "https://github.com/dokima-dev/dokima/issues/744",
+    "files": [
+     "dokima/audit.py"
+    ],
+    "edge_cases": [
+     {
+      "case": "The rule also lacks a check Dokima needs: that one is still listed.",
+      "test": "tests/test_audit_no_board.py::test_a_check_the_repo_added_gets_no_line"
+     }
+    ]
+   },
+   {
+    "text": "When no board is set, the audit finishes with exit code 0.",
+    "words": "The audit fails when no board is set; boards are optional and only exist for organizations.",
+    "source": "https://github.com/dokima-dev/dokima/issues/744",
+    "files": [
+     "dokima/audit.py"
+    ],
+    "edge_cases": [
+     {
+      "case": "The board setting is empty, as the workflow passes an unset variable.",
+      "test": "tests/test_audit_no_board.py::test_the_audit_with_no_board_exits_0"
+     },
+     {
+      "case": "The board setting is not set at all.",
+      "test": "tests/test_audit_no_board.py::test_the_audit_with_no_board_exits_0"
+     }
+    ]
+   },
+   {
+    "text": "When no board is set, the Setup issue lists no line about board fields or views.",
+    "words": "No board means nothing to report.",
+    "source": "https://github.com/dokima-dev/dokima/issues/744",
+    "files": [
+     "dokima/audit.py"
+    ],
+    "no_edge_cases": "Its one case is the empty board setting, which the test runs."
+   },
+   {
+    "text": "When no board is set and the branch rule lacks a check Dokima needs, the Setup issue lists that check.",
+    "words": "Fix the review's two blockers.",
+    "source": "https://github.com/dokima-dev/dokima/issues/744#issuecomment-6246343182",
+    "files": [
+     "dokima/audit.py"
+    ],
+    "no_edge_cases": "Its one case is a rule missing one needed check, which the test runs."
+   }
+  ],
+  "non_functional": [],
+  "tests": {
+   "858.1": [
+    "tests/test_audit_no_board.py::test_a_check_the_repo_added_gets_no_line"
+   ],
+   "858.2": [
+    "tests/test_audit_no_board.py::test_the_audit_with_no_board_exits_0"
+   ],
+   "858.3": [
+    "tests/test_audit_no_board.py::test_the_audit_with_no_board_lists_no_board_lines"
+   ],
+   "858.4": [
+    "tests/test_audit_no_board.py::test_the_audit_with_no_board_lists_a_missing_needed_check"
+   ]
+  },
+  "test_changes": {
+   "tests/test_audit.py::test_too_much_is_a_difference_too": "The owner asked that checks the repo added are not drift; permission lines still proven."
+  },
+  "links": {
+   "blocked_by": [],
+   "blocks": [],
+   "relates_to": [
+    744,
+    326
+   ]
+  },
+  "raises": [
+   {
+    "kind": "issue",
+    "label": "Stale workflow comment",
+    "text": "The audit workflow's comment still says the audit fails without a board, which stops being true here.",
+    "evidence": "`.github/workflows/audit.yml` line 6",
+    "raised_by": "planner",
+    "id": "P1"
+   }
+  ]
+ },
+ "check": {
+  "passed": true,
+  "problems": []
+ },
+ "url": "https://github.com/dokima-dev/dokima/issues/858#issuecomment-6246377184"
+}
