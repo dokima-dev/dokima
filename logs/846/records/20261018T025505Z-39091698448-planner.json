@@ -1,0 +1,137 @@
+{
+ "role": "planner",
+ "stage": null,
+ "run_id": "39091698448",
+ "commit_before": "5220a2d260f57b1e9b85278cd8ad7de97e9eafe6",
+ "started_by": "dokima-runtime[bot]",
+ "models": [
+  "claude-opus-5-5"
+ ],
+ "report": {
+  "duration_ms": 36301,
+  "turns": 8,
+  "cost_usd": 0.430853,
+  "tokens_in": 354909,
+  "tokens_out": 2091
+ },
+ "log": "https://github.com/dokima-dev/dokima/blob/logs/logs/846/39091698448-planner.md",
+ "run": "https://github.com/dokima-dev/dokima/actions/runs/39091698448",
+ "handback": {
+  "kind": "user_story",
+  "title": "Card and branch updates find checks by shown names",
+  "summary": "In an adopter's repo, the card and branch updates must find Dokima's checks by the names GitHub shows there.",
+  "user_story": "In an adopter's repo, the card shows Dokima's checks passing, and failing pull requests are not updated.",
+  "acceptance_criteria": [
+   {
+    "text": "When all tests passes in an adopter's repo, the card's Definition of Done shows Test suite passed.",
+    "words": "the card, which reads the check runs by plain name (e.g. `all tests`), so its Definition of Done never shows them passing",
+    "source": "https://github.com/dokima-dev/dokima/issues/846",
+    "files": [
+     "dokima/card.py",
+     "dokima/settings.py"
+    ],
+    "edge_cases": [
+     {
+      "case": "The check failed: the card shows Test suite failed.",
+      "test": "tests/test_shown_check_names.py::test_adopter_card_shows_test_suite_passed_by_its_shown_name"
+     }
+    ]
+   },
+   {
+    "text": "When Acceptance criteria passes in an adopter's repo, the card's Definition of Done shows Acceptance tests passed.",
+    "words": "the card, which reads the check runs by plain name (e.g. `all tests`), so its Definition of Done never shows them passing",
+    "source": "https://github.com/dokima-dev/dokima/issues/846",
+    "files": [
+     "dokima/card.py",
+     "dokima/settings.py"
+    ],
+    "edge_cases": [
+     {
+      "case": "The check failed: the card shows Acceptance tests failed.",
+      "test": "tests/test_shown_check_names.py::test_adopter_card_shows_acceptance_tests_passed_by_its_shown_name"
+     }
+    ]
+   },
+   {
+    "text": "When a criterion's own check passes in an adopter's repo, the card shows that criterion passed.",
+    "words": "Fix: both find a check by the name GitHub shows, plain in Dokima's own repo and prefixed in an adopter's",
+    "source": "https://github.com/dokima-dev/dokima/issues/846",
+    "files": [
+     "dokima/card.py",
+     "dokima/settings.py"
+    ],
+    "edge_cases": [
+     {
+      "case": "The criterion's check failed: the card shows it failed.",
+      "test": "tests/test_shown_check_names.py::test_adopter_card_shows_a_criterion_passed_by_its_shown_name"
+     }
+    ]
+   },
+   {
+    "text": "When all tests failed on a pull request's head in an adopter's repo, branch updates leave it behind main.",
+    "words": "the branch updates (uptodate), which look for the same plain names before bringing a pull request up to date",
+    "source": "https://github.com/dokima-dev/dokima/issues/846",
+    "files": [
+     "dokima/uptodate.py",
+     "dokima/settings.py"
+    ],
+    "edge_cases": [
+     {
+      "case": "All tests passed: the pull request is still brought up to date.",
+      "test": "tests/test_shown_check_names.py::test_adopter_pr_whose_all_tests_failed_is_not_brought_up_to_date"
+     }
+    ]
+   },
+   {
+    "text": "When code review approved and every check passed in an adopter's repo, the card says Ready for approval.",
+    "words": "in an adopter repo, all green and code review approved, the card says Ready for approval",
+    "source": "https://github.com/dokima-dev/dokima/issues/846#issuecomment-6244658830",
+    "files": [
+     "dokima/card.py",
+     "dokima/settings.py"
+    ],
+    "edge_cases": [
+     {
+      "case": "All tests failed: the card says See why not every check passed.",
+      "test": "tests/test_shown_check_names.py::test_adopter_card_says_ready_for_approval_by_shown_names"
+     }
+    ]
+   }
+  ],
+  "non_functional": [],
+  "tests": {
+   "846.1": [
+    "tests/test_shown_check_names.py::test_adopter_card_shows_test_suite_passed_by_its_shown_name"
+   ],
+   "846.2": [
+    "tests/test_shown_check_names.py::test_adopter_card_shows_acceptance_tests_passed_by_its_shown_name"
+   ],
+   "846.3": [
+    "tests/test_shown_check_names.py::test_adopter_card_shows_a_criterion_passed_by_its_shown_name"
+   ],
+   "846.4": [
+    "tests/test_shown_check_names.py::test_adopter_pr_whose_all_tests_failed_is_not_brought_up_to_date"
+   ],
+   "846.5": [
+    "tests/test_shown_check_names.py::test_adopter_card_says_ready_for_approval_by_shown_names"
+   ]
+  },
+  "test_changes": {},
+  "links": {
+   "blocked_by": [],
+   "blocks": [
+    816
+   ],
+   "relates_to": [
+    785,
+    786
+   ]
+  },
+  "answers": []
+ },
+ "check": {
+  "passed": true,
+  "problems": []
+ },
+ "url": "https://github.com/dokima-dev/dokima/issues/846#issuecomment-6244925263"
+}
