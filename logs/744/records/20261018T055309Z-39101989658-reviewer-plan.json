@@ -1,0 +1,253 @@
+{
+ "role": "reviewer",
+ "stage": "plan",
+ "run_id": "39101989658",
+ "commit_before": "ccbebe20951336dbdfb7da7800bf77e892c34308",
+ "started_by": "dokima-runtime[bot]",
+ "models": [
+  "claude-opus-5-5"
+ ],
+ "report": {
+  "duration_ms": 63676,
+  "turns": 8,
+  "cost_usd": 0.4355568,
+  "tokens_in": 283837,
+  "tokens_out": 6676
+ },
+ "log": "https://github.com/dokima-dev/dokima/blob/logs/logs/744/39101989658-reviewer-plan.md",
+ "run": "https://github.com/dokima-dev/dokima/actions/runs/39101989658",
+ "handback": {
+  "previous_step": {
+   "did": [
+    "The planner split the issue into three stories: pull requests, the audit, the card."
+   ],
+   "decided": [
+    "Dokima's own pull requests stay held to their plan; other setting values keep today's check.",
+    "Installing the repo's needs and leaving out marked tests are left out as already done."
+   ],
+   "open": [
+    "The owner decides whether those two asks can be left out."
+   ]
+  },
+  "verdict": "block",
+  "summary": "Two owner asks have no criterion, and a missing board could skip the whole audit unnoticed.",
+  "raises": [
+   {
+    "kind": "blocker",
+    "to": "planner",
+    "label": "No criterion",
+    "text": "The asks to install the repo's needs and to leave out marked tests carry no criterion. Keep each as a criterion with a test pinning today's behavior.",
+    "evidence": "Issue lines on `tests.install` and `tests.exclude`; `full-suite.yml:57` and `:93` already do both.",
+    "raised_by": "reviewer",
+    "id": "R1"
+   },
+   {
+    "kind": "blocker",
+    "to": "planner",
+    "label": "2.2 missing case",
+    "text": "With no board, an audit that checks nothing still exits 0. Add: with no board, other drift is still listed.",
+    "evidence": "Story 2 context says to still report other drift; no criterion of 2.1 to 2.3 carries it.",
+    "raised_by": "reviewer",
+    "id": "R2"
+   }
+  ],
+  "answers": [],
+  "asks": [
+   {
+    "ask": "Setting `merge.unplanned_prs: allow` (default) lets them through",
+    "source": "https://github.com/dokima-dev/dokima/issues/744",
+    "criterion": "S1.1"
+   },
+   {
+    "ask": "including human and Dependabot PRs",
+    "source": "https://github.com/dokima-dev/dokima/issues/744",
+    "criterion": "S1.2"
+   },
+   {
+    "ask": "only Dokima's own PRs are held to the plan",
+    "source": "https://github.com/dokima-dev/dokima/issues/744",
+    "criterion": "S1.3"
+   },
+   {
+    "ask": "Setting `merge.unplanned_prs: allow` (default)",
+    "source": "https://github.com/dokima-dev/dokima/issues/744",
+    "criterion": "S1.4"
+   },
+   {
+    "ask": "Checks the repo added are not drift.",
+    "source": "https://github.com/dokima-dev/dokima/issues/744",
+    "criterion": "S2.1"
+   },
+   {
+    "ask": "The audit fails when no board is set; boards are optional and only exist for organizations.",
+    "source": "https://github.com/dokima-dev/dokima/issues/744",
+    "criterion": "S2.2"
+   },
+   {
+    "ask": "No board means nothing to report.",
+    "source": "https://github.com/dokima-dev/dokima/issues/744",
+    "criterion": "S2.3"
+   },
+   {
+    "ask": "The card redraws only when Dokima's own workflows finish, not when the adopter's CI does.",
+    "source": "https://github.com/dokima-dev/dokima/issues/744",
+    "criterion": "S3.1"
+   },
+   {
+    "ask": "The merge gate already waits on every required check; the card must show them.",
+    "source": "https://github.com/dokima-dev/dokima/issues/744",
+    "criterion": "S3.2"
+   },
+   {
+    "ask": "The `tests.install` setting runs first.",
+    "source": "https://github.com/dokima-dev/dokima/issues/744",
+    "criterion": "missing"
+   },
+   {
+    "ask": "`tests.exclude` keeps tests the repo marks (for example live network tests) off the merge gate.",
+    "source": "https://github.com/dokima-dev/dokima/issues/744",
+    "criterion": "missing"
+   },
+   {
+    "ask": "a human PR merges on a trial repo",
+    "source": "https://github.com/dokima-dev/dokima/issues/744",
+    "criterion": "S1.1"
+   },
+   {
+    "ask": "the repo's own CI is neither flagged nor broken",
+    "source": "https://github.com/dokima-dev/dokima/issues/744",
+    "criterion": "S2.1"
+   }
+  ],
+  "behaviors": [
+   {
+    "criterion": "S1.1",
+    "one_behavior": true,
+    "why": "One case, one check result."
+   },
+   {
+    "criterion": "S1.2",
+    "one_behavior": true,
+    "why": "One case, one check result."
+   },
+   {
+    "criterion": "S1.3",
+    "one_behavior": true,
+    "why": "One case, one check result."
+   },
+   {
+    "criterion": "S1.4",
+    "one_behavior": true,
+    "why": "One setting value, one check result."
+   },
+   {
+    "criterion": "S2.1",
+    "one_behavior": true,
+    "why": "One rule state, no line."
+   },
+   {
+    "criterion": "S2.2",
+    "one_behavior": true,
+    "why": "One state, one exit code."
+   },
+   {
+    "criterion": "S2.3",
+    "one_behavior": true,
+    "why": "One state, no board lines."
+   },
+   {
+    "criterion": "S3.1",
+    "one_behavior": true,
+    "why": "One event, one redraw."
+   },
+   {
+    "criterion": "S3.2",
+    "one_behavior": true,
+    "why": "One card row per required check."
+   }
+  ],
+  "edge_cases": [
+   {
+    "criterion": "S1.1",
+    "cut": [],
+    "missing": []
+   },
+   {
+    "criterion": "S1.2",
+    "cut": [],
+    "missing": []
+   },
+   {
+    "criterion": "S1.3",
+    "cut": [],
+    "missing": []
+   },
+   {
+    "criterion": "S1.4",
+    "cut": [],
+    "missing": []
+   },
+   {
+    "criterion": "S2.1",
+    "cut": [],
+    "missing": []
+   },
+   {
+    "criterion": "S2.2",
+    "cut": [],
+    "missing": [
+     "With no board, other drift such as a missing Dokima check is still listed."
+    ]
+   },
+   {
+    "criterion": "S2.3",
+    "cut": [],
+    "missing": []
+   },
+   {
+    "criterion": "S3.1",
+    "cut": [],
+    "missing": []
+   },
+   {
+    "criterion": "S3.2",
+    "cut": [],
+    "missing": []
+   }
+  ],
+  "tests": [],
+  "size": "ok",
+  "boxes": {
+   "dropped": [
+    {
+     "words": "The `tests.install` setting runs first.",
+     "source": "issue"
+    },
+    {
+     "words": "`tests.exclude` keeps tests the repo marks (for example live network tests) off the merge gate.",
+     "source": "issue"
+    }
+   ],
+   "added": "none",
+   "superseded": "none",
+   "conflicts": "none",
+   "edges": {
+    "S1.1": "covered",
+    "S1.2": "covered",
+    "S1.3": "covered",
+    "S1.4": "covered",
+    "S2.1": "covered",
+    "S2.2": "missing: with no board, other drift still listed",
+    "S2.3": "covered",
+    "S3.1": "covered",
+    "S3.2": "covered"
+   },
+   "poor_tests": "none"
+  }
+ },
+ "check": {
+  "passed": true,
+  "problems": []
+ },
+ "url": "https://github.com/dokima-dev/dokima/issues/744#issuecomment-6246272169"
+}
