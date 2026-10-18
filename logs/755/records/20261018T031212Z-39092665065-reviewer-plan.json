@@ -1,0 +1,161 @@
+{
+ "role": "reviewer",
+ "stage": "plan",
+ "run_id": "39092665065",
+ "commit_before": "2c3594d1f3bc23aea786f6d8ed41a33de0574cc1",
+ "started_by": "dokima-runtime[bot]",
+ "models": [
+  "claude-opus-5-5"
+ ],
+ "report": {
+  "duration_ms": 68296,
+  "turns": 9,
+  "cost_usd": 0.4720994,
+  "tokens_in": 380868,
+  "tokens_out": 3595
+ },
+ "log": "https://github.com/dokima-dev/dokima/blob/logs/logs/755/39092665065-reviewer-plan.md",
+ "run": "https://github.com/dokima-dev/dokima/actions/runs/39092665065",
+ "handback": {
+  "previous_step": {
+   "did": [
+    "The planner let the tag and release criteria change the permission list."
+   ],
+   "decided": [
+    "Release calls get a permission so the safety check accepts them."
+   ],
+   "open": []
+  },
+  "verdict": "approve",
+  "summary": "The plan now lets release calls get a permission; every check still fails on main for the right reason.",
+  "raises": [],
+  "answers": [],
+  "asks": [
+   {
+    "ask": "A v0.1.0 tag",
+    "source": "https://github.com/dokima-dev/dokima/issues/755",
+    "criterion": "755.1"
+   },
+   {
+    "ask": "GitHub release",
+    "source": "https://github.com/dokima-dev/dokima/issues/755",
+    "criterion": "755.2"
+   },
+   {
+    "ask": "A workflow makes the tag ... when the changelog merges, not by hand",
+    "source": "https://github.com/dokima-dev/dokima/issues/755#issuecomment-6244761525",
+    "criterion": "755.1"
+   },
+   {
+    "ask": "A workflow makes ... the release when the changelog merges, not by hand",
+    "source": "https://github.com/dokima-dev/dokima/issues/755#issuecomment-6244761525",
+    "criterion": "755.2"
+   },
+   {
+    "ask": "the release notes are the changelog's v0.1.0 section",
+    "source": "https://github.com/dokima-dev/dokima/issues/755#issuecomment-6244761525",
+    "criterion": "755.3"
+   },
+   {
+    "ask": "this story keeps the workflow that tags and releases",
+    "source": "https://github.com/dokima-dev/dokima/issues/755#issuecomment-6244851037",
+    "criterion": "755.1"
+   }
+  ],
+  "behaviors": [
+   {
+    "criterion": "755.1",
+    "one_behavior": true,
+    "why": "One result: the v0.1.0 tag at the pushed commit."
+   },
+   {
+    "criterion": "755.2",
+    "one_behavior": true,
+    "why": "One result: a GitHub release named v0.1.0."
+   },
+   {
+    "criterion": "755.3",
+    "one_behavior": true,
+    "why": "One result: the notes equal the v0.1.0 section."
+   }
+  ],
+  "edge_cases": [
+   {
+    "criterion": "755.1",
+    "cut": [],
+    "missing": []
+   },
+   {
+    "criterion": "755.2",
+    "cut": [],
+    "missing": []
+   },
+   {
+    "criterion": "755.3",
+    "cut": [],
+    "missing": []
+   }
+  ],
+  "tests": [
+   {
+    "test": "tests/test_release.py::test_release_makes_tag",
+    "only_its_behavior": true,
+    "why": "Checks one v0.1.0 tag at the pushed commit."
+   },
+   {
+    "test": "tests/test_release.py::test_release_skips_when_tagged",
+    "only_its_behavior": true,
+    "why": "Checks nothing new is made once v0.1.0 exists."
+   },
+   {
+    "test": "tests/test_release.py::test_release_waits_for_changelog",
+    "only_its_behavior": true,
+    "why": "Checks nothing is made with no changelog."
+   },
+   {
+    "test": "tests/test_release.py::test_release_waits_for_version_section",
+    "only_its_behavior": true,
+    "why": "Checks nothing is made without a v0.1.0 section."
+   },
+   {
+    "test": "tests/test_release.py::test_release_makes_github_release",
+    "only_its_behavior": true,
+    "why": "Checks GitHub then holds the v0.1.0 release."
+   },
+   {
+    "test": "tests/test_release.py::test_release_refused_fails_the_run",
+    "only_its_behavior": true,
+    "why": "Checks a refused release fails the run."
+   },
+   {
+    "test": "tests/test_release.py::test_release_notes_are_changelog_section",
+    "only_its_behavior": true,
+    "why": "Checks the notes hold the v0.1.0 lines and no Unreleased line."
+   }
+  ],
+  "size": "ok",
+  "boxes": {
+   "dropped": "none",
+   "added": [
+    {
+     "what": "Permission list entry for release calls",
+     "kind": "needed",
+     "serves": "755.2"
+    }
+   ],
+   "superseded": "none",
+   "conflicts": "none",
+   "edges": {
+    "755.1": "covered",
+    "755.2": "covered",
+    "755.3": "covered"
+   },
+   "poor_tests": "none"
+  }
+ },
+ "check": {
+  "passed": true,
+  "problems": []
+ },
+ "url": "https://github.com/dokima-dev/dokima/issues/755#issuecomment-6245049985"
+}
