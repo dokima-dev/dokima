@@ -1,0 +1,83 @@
+{
+ "role": "planner",
+ "stage": null,
+ "run_id": "39087756963",
+ "commit_before": "5583bcce6d4c233e8cae8ac7c14faa9fedbd0454",
+ "started_by": "dokima-runtime[bot]",
+ "models": [
+  "claude-opus-5-5"
+ ],
+ "report": {
+  "duration_ms": 80124,
+  "turns": 14,
+  "cost_usd": 0.6606953999999999,
+  "tokens_in": 669885,
+  "tokens_out": 7556
+ },
+ "log": "https://github.com/dokima-dev/dokima/blob/logs/logs/829/39087756963-planner.md",
+ "run": "https://github.com/dokima-dev/dokima/actions/runs/39087756963",
+ "handback": {
+  "kind": "user_story",
+  "title": "A new install clears the old Dokima copies",
+  "summary": "Installing Dokima removes the old copied Dokima code and workflows, so they stop running.",
+  "user_story": "After a new install, the sandbox holds no old Dokima code or workflows, so only the new install runs.",
+  "acceptance_criteria": [
+   {
+    "text": "When Dokima is installed over an old install, the old copy of Dokima's code is gone from the repo.",
+    "words": "The sandbox already holds the old copied Dokima code and workflows; a new install leaves them there, still running.",
+    "source": "https://github.com/dokima-dev/dokima/issues/829",
+    "files": [
+     "dokima/playthrough.py"
+    ],
+    "edge_cases": [
+     {
+      "case": "The repo's own files beside the old copy, like its README, are kept unchanged.",
+      "test": "tests/test_install.py::test_installing_over_an_old_install_keeps_the_repos_own_files"
+     }
+    ]
+   },
+   {
+    "text": "When Dokima is installed over an old install, the new workflow is the only Dokima workflow left.",
+    "words": "The sandbox already holds the old copied Dokima code and workflows; a new install leaves them there, still running.",
+    "source": "https://github.com/dokima-dev/dokima/issues/829",
+    "files": [
+     "dokima/playthrough.py"
+    ],
+    "edge_cases": [
+     {
+      "case": "The repo's own workflow, not one of Dokima's, is kept unchanged.",
+      "test": "tests/test_install.py::test_installing_over_an_old_install_keeps_the_repos_own_workflow"
+     }
+    ]
+   }
+  ],
+  "non_functional": [],
+  "tests": {
+   "829.1": [
+    "tests/test_install.py::test_installing_over_an_old_install_removes_the_old_copy_of_dokimas_code",
+    "tests/test_install.py::test_installing_over_an_old_install_keeps_the_repos_own_files"
+   ],
+   "829.2": [
+    "tests/test_install.py::test_installing_over_an_old_install_removes_the_old_copies_of_dokimas_workflows",
+    "tests/test_install.py::test_installing_over_an_old_install_keeps_the_repos_own_workflow"
+   ]
+  },
+  "test_changes": {},
+  "links": {
+   "blocked_by": [],
+   "blocks": [],
+   "relates_to": [
+    742,
+    816,
+    258
+   ]
+  },
+  "raises": [],
+  "answers": []
+ },
+ "check": {
+  "passed": true,
+  "problems": []
+ },
+ "url": "https://github.com/dokima-dev/dokima/issues/829#issuecomment-6244404931"
+}
