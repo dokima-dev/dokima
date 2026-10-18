@@ -1,0 +1,96 @@
+{
+ "role": "reviewer",
+ "stage": "pr",
+ "run_id": "39090397355",
+ "commit_before": "cf8d9c07199d5c0e01fe96f3d26f197833946946",
+ "started_by": "dokima-runtime[bot]",
+ "models": [
+  "claude-opus-5-5"
+ ],
+ "report": {
+  "duration_ms": 70268,
+  "turns": 9,
+  "cost_usd": 0.390151,
+  "tokens_in": 330342,
+  "tokens_out": 4115
+ },
+ "log": "https://github.com/dokima-dev/dokima/blob/logs/logs/811/39090397355-reviewer-pr.md",
+ "run": "https://github.com/dokima-dev/dokima/actions/runs/39090397355",
+ "handback": {
+  "previous_step": {
+   "did": [
+    "The worker made autopilot wake on any label a person adds.",
+    "The worker made only the repo's own autopilot label name start the issue's planner."
+   ],
+   "decided": [
+    "Any other label a person adds starts nothing on that issue."
+   ],
+   "open": [
+    "An older test needs the workflow to name the old label, so it now fails."
+   ]
+  },
+  "verdict": "block",
+  "summary": "The code does the ask, but an older test now fails and only the planner may change it.",
+  "raises": [
+   {
+    "kind": "blocker",
+    "to": "planner",
+    "label": "Older test conflicts",
+    "text": "For 811.1, `tests/test_manifest.py::test_the_guard_catches_a_label_taken_out_of_the_manifest` expects `autopilot.yml` to name `autopilot`; 811.1 removes that name. Smallest fix: a test change dropping that case, since no file names the label any more.",
+    "evidence": "`pytest -q tests/test_manifest.py` on `try/issue-811`: 1 failed, guard reported `[]`; passes on main.",
+    "raised_by": "reviewer",
+    "id": "R1"
+   }
+  ],
+  "answers": [
+   {
+    "raise": "W1",
+    "answer": "done",
+    "why": "Confirmed: the older test fails on the branch, passes on main; no code keeps both. Sent to the planner."
+   }
+  ],
+  "asks": [],
+  "behaviors": [
+   {
+    "criterion": "811.1",
+    "one_behavior": true,
+    "why": "One action, adding the renamed label, and one result, the planner starts."
+   }
+  ],
+  "edge_cases": [
+   {
+    "criterion": "811.1",
+    "cut": [],
+    "missing": []
+   }
+  ],
+  "tests": [
+   {
+    "test": "tests/test_autopilot_label.py::test_a_renamed_label_added_by_hand_starts_the_issue",
+    "only_its_behavior": true,
+    "why": "Passes on the branch, fails on main; checks only that the renamed label starts the planner."
+   },
+   {
+    "test": "tests/test_autopilot_label.py::test_the_old_label_name_starts_nothing_once_the_label_is_renamed",
+    "only_its_behavior": true,
+    "why": "Checks the old name starts nothing after a rename, so a code that starts on every label fails."
+   }
+  ],
+  "size": "ok",
+  "boxes": {
+   "dropped": "none",
+   "added": "none",
+   "superseded": "none",
+   "conflicts": "none",
+   "edges": {
+    "811.1": "covered"
+   },
+   "poor_tests": "none"
+  }
+ },
+ "check": {
+  "passed": true,
+  "problems": []
+ },
+ "url": "https://github.com/dokima-dev/dokima/pull/848#issuecomment-6244750919"
+}
