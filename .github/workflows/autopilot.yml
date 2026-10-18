@@ -8,7 +8,7 @@ run-name: "autopilot after #${{ github.event.issue.number }} ${{ github.event.ac
 # Every close waits in one queue for the whole repo, which a newer run never cancels, so two merges that close
 # together never read the tree at the same moment; and since each run works from the state of every tree, the run
 # that goes also does the work of any close whose run GitHub dropped from the queue. A failure says why on the issue.
-# A person adding the autopilot label by hand switches that one issue on the way `/autopilot start` does: its planner
+# A person adding the autopilot label (its name from the repo's settings) by hand switches that one issue on the way `/autopilot start` does: its planner
 # starts when nothing open blocks it and nothing started on it yet. A label Dokima's app adds (as `/autopilot start`
 # does) starts nothing here, since that command already started what it should.
 on:
@@ -79,7 +79,8 @@ jobs:
     concurrency:
       group: autopilot
       cancel-in-progress: false
-    if: github.event.action == 'closed' || (github.event.label.name == 'autopilot' && github.event.sender.type != 'Bot')
+    # Any label a person adds wakes it: the autopilot label's name lives in the repo's settings, which code reads (#811).
+    if: github.event.action == 'closed' || (github.event.action == 'labeled' && github.event.sender.type != 'Bot')
     environment: keys
     runs-on: ubuntu-24.04
     steps:
@@ -119,6 +120,7 @@ jobs:
           GH_TOKEN: ${{ steps.app.outputs.token }}
           N: ${{ github.event.issue.number }}
           ACTION: ${{ github.event.action }}
+          LABEL: ${{ github.event.label.name }}
         run: python3 -m dokima.agent "$ACTION" "$N" 2> /tmp/why.txt || { cat /tmp/why.txt >&2; exit 1; }
       - name: Say why autopilot stopped, on the issue that closed
         if: failure()

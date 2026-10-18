@@ -65,3 +65,39 @@ def test_a_label_run_also_starts_issues_whose_own_label_run_github_dropped(recor
     assert m.planners_started("843.1") == {101: 1, 103: 1}, \
         f"843.1: a label run did not pick up the issue whose own run was dropped: {m.planners_started('843.1')}\n{m.tail()}"
     assert start_lines(m, 101) == 1 and start_lines(m, 103) == 1
+
+
+# The repo calls its autopilot label something else in its settings file (#811).
+RENAMED = "on-autopilot"
+RENAMED_SETTINGS = {".dokima/settings.yaml": f"labels:\n  autopilot: {RENAMED}\n"}
+
+
+def test_a_renamed_label_added_by_hand_starts_the_issue(record_property, tmp_path):
+    """Adding the repo's renamed autopilot label by hand starts the issue's planner.
+
+    Proves 811.1. The repo's settings file names the autopilot label `on-autopilot`. A person adds `on-autopilot` to #101, which
+    waits on nothing, the way GitHub tells of it, and every workflow GitHub starts on that event runs. Checks #101's
+    planner started once, with one switched-on Autopilot line. Today autopilot.yml only wakes for a label named
+    `autopilot`, so nothing starts."""
+    record_property("proves", "811.1")
+    m = Repo(tmp_path / "renamed", {57: [101]}, {}, files=RENAMED_SETTINGS)
+    m.add_label(101, name=RENAMED)
+    assert not m.failed, f"811.1: a workflow failed when the renamed label was added: {m.failures}\n{m.tail()}"
+    assert m.planners_started("811.1") == {101: 1}, \
+        (f"811.1: adding the renamed label {RENAMED!r} by hand did not start #101's planner once: "
+         f"{m.planners_started('811.1')}\n{m.tail()}")
+    assert start_lines(m, 101) == 1, f"811.1: #101 did not get one switched-on Autopilot line: {m.new_comments(101)}"
+
+
+def test_the_old_label_name_starts_nothing_once_the_label_is_renamed(record_property, tmp_path):
+    """When the repo renames its autopilot label, adding a label still called `autopilot` starts nothing.
+
+    Proves 811.1. The settings file names the label `on-autopilot`; a person adds a label named `autopilot` to #101. Checks no
+    planner starts and no Autopilot line is written, so only the repo's own label name switches an issue on."""
+    record_property("proves", "811.1")
+    m = Repo(tmp_path / "old-name", {57: [101]}, {}, files=RENAMED_SETTINGS)
+    m.add_label(101, name=LABEL)
+    assert not m.failed, f"811.1: a workflow failed when the old label name was added: {m.failures}\n{m.tail()}"
+    assert m.planners_started("811.1") == {}, \
+        f"811.1: the old name 'autopilot' started a planner though the repo renamed its label: {m.planners_started('811.1')}"
+    assert start_lines(m, 101) == 0, f"811.1: #101 got an Autopilot line from the old label name: {m.new_comments(101)}"
