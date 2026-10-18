@@ -1,0 +1,89 @@
+{
+ "role": "reviewer",
+ "stage": "pr",
+ "run_id": "39089084792",
+ "commit_before": "e122530a1535d2a84b40aea49373afb266844e96",
+ "started_by": "dokima-runtime[bot]",
+ "models": [
+  "claude-opus-5-5"
+ ],
+ "report": {
+  "duration_ms": 9364,
+  "turns": 2,
+  "cost_usd": 0.6323945999999999,
+  "tokens_in": 103903,
+  "tokens_out": 651
+ },
+ "log": "https://github.com/dokima-dev/dokima/blob/logs/logs/820/39089084792-reviewer-pr.md",
+ "run": "https://github.com/dokima-dev/dokima/actions/runs/39089084792",
+ "handback": {
+  "previous_step": {
+   "did": [
+    "The shipped settings name both checks as GitHub shows them in adopter repos.",
+    "The audit asks main to require those shown names when settings give them."
+   ],
+   "decided": [
+    "A repo without such names keeps asking for the plain check names."
+   ],
+   "open": []
+  },
+  "verdict": "approve",
+  "summary": "An adopter's audit now asks for both checks by the names GitHub shows; the planner's tests prove it.",
+  "raises": [],
+  "answers": [],
+  "asks": [],
+  "behaviors": [
+   {
+    "criterion": "820.1",
+    "one_behavior": true,
+    "why": "One check, all tests, asked under its shown name."
+   },
+   {
+    "criterion": "820.2",
+    "one_behavior": true,
+    "why": "One check, Acceptance criteria, asked under its shown name."
+   }
+  ],
+  "edge_cases": [
+   {
+    "criterion": "820.1",
+    "cut": [],
+    "missing": []
+   },
+   {
+    "criterion": "820.2",
+    "cut": [],
+    "missing": []
+   }
+  ],
+  "tests": [
+   {
+    "test": "tests/test_adopter_check_names.py::test_adopter_audit_wants_all_tests_as_github_shows_it",
+    "only_its_behavior": true,
+    "why": "Checks only the all tests line, both the shown and plain name."
+   },
+   {
+    "test": "tests/test_adopter_check_names.py::test_adopter_audit_wants_acceptance_criteria_as_github_shows_it",
+    "only_its_behavior": true,
+    "why": "Checks only the Acceptance criteria line, both the shown and plain name."
+   }
+  ],
+  "size": "ok",
+  "boxes": {
+   "dropped": "none",
+   "added": "none",
+   "superseded": "none",
+   "conflicts": "none",
+   "edges": {
+    "820.1": "covered",
+    "820.2": "covered"
+   },
+   "poor_tests": "none"
+  }
+ },
+ "check": {
+  "passed": true,
+  "problems": []
+ },
+ "url": "https://github.com/dokima-dev/dokima/pull/847#issuecomment-6244578016"
+}
