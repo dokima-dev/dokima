@@ -1,0 +1,137 @@
+{
+ "role": "reviewer",
+ "stage": "pr",
+ "run_id": "39096557853",
+ "commit_before": "e8f303692a4c994fc78ac6056ce28723e87300bf",
+ "started_by": "dokima-runtime[bot]",
+ "models": [
+  "claude-opus-5-5"
+ ],
+ "report": {
+  "duration_ms": 478273,
+  "turns": 13,
+  "cost_usd": 0.5625638,
+  "tokens_in": 534959,
+  "tokens_out": 4453
+ },
+ "log": "https://github.com/dokima-dev/dokima/blob/logs/logs/846/39096557853-reviewer-pr.md",
+ "run": "https://github.com/dokima-dev/dokima/actions/runs/39096557853",
+ "handback": {
+  "previous_step": {
+   "did": [
+    "The card now maps each check's shown name back to its plain name.",
+    "The manifest guard again sees the card read all tests, as the owner asked."
+   ],
+   "decided": [
+    "Only the card changed in this round."
+   ],
+   "open": []
+  },
+  "verdict": "approve",
+  "summary": "The card and branch updates find checks by shown names, the guard works again and every test passes.",
+  "raises": [],
+  "answers": [],
+  "asks": [],
+  "behaviors": [
+   {
+    "criterion": "846.1",
+    "one_behavior": true,
+    "why": "The card shows the test suite verdict by its shown name."
+   },
+   {
+    "criterion": "846.2",
+    "one_behavior": true,
+    "why": "The card shows the acceptance verdict by its shown name."
+   },
+   {
+    "criterion": "846.3",
+    "one_behavior": true,
+    "why": "The card shows a criterion's verdict by its shown check."
+   },
+   {
+    "criterion": "846.4",
+    "one_behavior": true,
+    "why": "Branch updates skip a pull request whose shown all tests failed."
+   },
+   {
+    "criterion": "846.5",
+    "one_behavior": true,
+    "why": "The card says ready when shown checks pass and review approved."
+   }
+  ],
+  "edge_cases": [
+   {
+    "criterion": "846.1",
+    "cut": [],
+    "missing": []
+   },
+   {
+    "criterion": "846.2",
+    "cut": [],
+    "missing": []
+   },
+   {
+    "criterion": "846.3",
+    "cut": [],
+    "missing": []
+   },
+   {
+    "criterion": "846.4",
+    "cut": [],
+    "missing": []
+   },
+   {
+    "criterion": "846.5",
+    "cut": [],
+    "missing": []
+   }
+  ],
+  "tests": [
+   {
+    "test": "tests/test_shown_check_names.py::test_adopter_card_shows_test_suite_passed_by_its_shown_name",
+    "only_its_behavior": true,
+    "why": "Fails on main, passes on the branch, checks passed and failed."
+   },
+   {
+    "test": "tests/test_shown_check_names.py::test_adopter_card_shows_acceptance_tests_passed_by_its_shown_name",
+    "only_its_behavior": true,
+    "why": "Fails on main, passes on the branch, checks passed and failed."
+   },
+   {
+    "test": "tests/test_shown_check_names.py::test_adopter_card_shows_a_criterion_passed_by_its_shown_name",
+    "only_its_behavior": true,
+    "why": "Fails on main, passes on the branch, checks passed and failed."
+   },
+   {
+    "test": "tests/test_shown_check_names.py::test_adopter_pr_whose_all_tests_failed_is_not_brought_up_to_date",
+    "only_its_behavior": true,
+    "why": "Fails on main, passes on the branch, checks both pull requests."
+   },
+   {
+    "test": "tests/test_shown_check_names.py::test_adopter_card_says_ready_for_approval_by_shown_names",
+    "only_its_behavior": true,
+    "why": "Fails on main, passes on the branch, checks ready and not ready."
+   }
+  ],
+  "size": "ok",
+  "boxes": {
+   "dropped": "none",
+   "added": "none",
+   "superseded": "none",
+   "conflicts": "none",
+   "edges": {
+    "846.1": "covered",
+    "846.2": "covered",
+    "846.3": "covered",
+    "846.4": "covered",
+    "846.5": "covered"
+   },
+   "poor_tests": "none"
+  }
+ },
+ "check": {
+  "passed": true,
+  "problems": []
+ },
+ "url": "https://github.com/dokima-dev/dokima/pull/852#issuecomment-6245567079"
+}
