@@ -1,0 +1,67 @@
+{
+ "role": "reviewer",
+ "stage": "pr",
+ "run_id": "39092962395",
+ "commit_before": "e1c81e87893e0842394abb40cf1dd29dcd21e976",
+ "started_by": "dokima-runtime[bot]",
+ "models": [
+  "claude-opus-5-5"
+ ],
+ "report": {
+  "duration_ms": 1351811,
+  "turns": 20,
+  "cost_usd": 0.7359188000000001,
+  "tokens_in": 1043562,
+  "tokens_out": 5999
+ },
+ "log": "https://github.com/dokima-dev/dokima/blob/logs/logs/755/39092962395-reviewer-pr.md",
+ "run": "https://github.com/dokima-dev/dokima/actions/runs/39092962395",
+ "handback": {
+  "previous_step": {
+   "did": [
+    "Mapped release calls in the permission list so the release step may run.",
+    "Installed the settings reader before the release step, as other workflows do."
+   ],
+   "decided": [],
+   "open": [
+    "One test that passes on main now fails on the branch."
+   ]
+  },
+  "verdict": "block",
+  "summary": "The release code works, but its workflow runs Dokima from the wrong copy, failing a test that passes on main.",
+  "raises": [
+   {
+    "kind": "blocker",
+    "to": "worker",
+    "label": "755.1 breaks safety test",
+    "text": "The release workflow runs Dokima from the repo it checks out, not Dokima's own copy. Fix: fetch Dokima's code as `audit.yml` does.",
+    "evidence": "`tests/test_thin_install.py::test_no_shared_workflow_runs_the_adopters_dokima_folder` fails on branch, passes on main: `release.yml:release`.",
+    "raised_by": "reviewer",
+    "id": "R6"
+   }
+  ],
+  "answers": [],
+  "asks": [],
+  "behaviors": [],
+  "edge_cases": [],
+  "tests": [],
+  "size": "ok",
+  "boxes": {
+   "dropped": "none",
+   "added": "none",
+   "superseded": "none",
+   "conflicts": "none",
+   "edges": {
+    "755.1": "covered",
+    "755.2": "covered",
+    "755.3": "covered"
+   },
+   "poor_tests": "none"
+  }
+ },
+ "check": {
+  "passed": true,
+  "problems": []
+ },
+ "url": "https://github.com/dokima-dev/dokima/pull/850#issuecomment-6245089641"
+}
