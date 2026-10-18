@@ -1,0 +1,119 @@
+{
+ "role": "reviewer",
+ "stage": "plan",
+ "run_id": "39103345844",
+ "commit_before": "30e790c8ccd83c55c693c8a8a162e06a1d9c2a8d",
+ "started_by": "dokima-runtime[bot]",
+ "models": [
+  "claude-opus-5-5"
+ ],
+ "report": {
+  "duration_ms": 20943,
+  "turns": 5,
+  "cost_usd": 0.3097384,
+  "tokens_in": 180265,
+  "tokens_out": 1989
+ },
+ "log": "https://github.com/dokima-dev/dokima/blob/logs/logs/859/39103345844-reviewer-plan.md",
+ "run": "https://github.com/dokima-dev/dokima/actions/runs/39103345844",
+ "handback": {
+  "previous_step": {
+   "did": [
+    "The planner made both redraw tests also play a CI with an unguessable name."
+   ],
+   "decided": [
+    "A failed run of the repo's CI is played with the unguessable name."
+   ],
+   "open": []
+  },
+  "verdict": "approve",
+  "summary": "The plan now proves the card redraws for any CI name, and shows every required check.",
+  "raises": [],
+  "answers": [],
+  "asks": [
+   {
+    "ask": "The card redraws only when Dokima's own workflows finish, not when the adopter's CI does.",
+    "source": "https://github.com/dokima-dev/dokima/issues/744",
+    "criterion": "859.1"
+   },
+   {
+    "ask": "The merge gate already waits on every required check; the card must show them.",
+    "source": "https://github.com/dokima-dev/dokima/issues/744",
+    "criterion": "859.2"
+   }
+  ],
+  "behaviors": [
+   {
+    "criterion": "859.1",
+    "one_behavior": true,
+    "why": "One event, the repo's CI finishing; one result, the card redraws."
+   },
+   {
+    "criterion": "859.2",
+    "one_behavior": true,
+    "why": "One result: each required check shows on the card with its state."
+   }
+  ],
+  "edge_cases": [
+   {
+    "criterion": "859.1",
+    "cut": [],
+    "missing": []
+   },
+   {
+    "criterion": "859.2",
+    "cut": [],
+    "missing": []
+   }
+  ],
+  "tests": [
+   {
+    "test": "tests/test_card_repo_ci.py::test_the_repos_own_ci_finishing_redraws_the_card",
+    "only_its_behavior": true,
+    "why": "Checks the redraw for a common and an unguessable CI name."
+   },
+   {
+    "test": "tests/test_card_repo_ci.py::test_the_repos_own_ci_failing_redraws_the_card",
+    "only_its_behavior": true,
+    "why": "Checks the redraw after a failed run of an unguessable CI."
+   },
+   {
+    "test": "tests/test_card_repo_ci.py::test_a_required_repo_check_that_failed_shows_failed",
+    "only_its_behavior": true,
+    "why": "Checks one required check shows as failed."
+   },
+   {
+    "test": "tests/test_card_repo_ci.py::test_a_required_repo_check_that_passed_shows_passed",
+    "only_its_behavior": true,
+    "why": "Checks one required check shows as passed."
+   },
+   {
+    "test": "tests/test_card_repo_ci.py::test_a_required_check_not_yet_run_shows_not_started",
+    "only_its_behavior": true,
+    "why": "Proves the list comes from the branch rule, not from runs."
+   },
+   {
+    "test": "tests/test_card_repo_ci.py::test_a_required_check_reported_as_a_commit_status_shows_its_state",
+    "only_its_behavior": true,
+    "why": "Checks a commit status shows its state."
+   }
+  ],
+  "size": "ok",
+  "boxes": {
+   "dropped": "none",
+   "added": "none",
+   "superseded": "none",
+   "conflicts": "none",
+   "edges": {
+    "859.1": "covered",
+    "859.2": "covered"
+   },
+   "poor_tests": "none"
+  }
+ },
+ "check": {
+  "passed": true,
+  "problems": []
+ },
+ "url": "https://github.com/dokima-dev/dokima/issues/859#issuecomment-6246453508"
+}
