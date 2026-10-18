@@ -291,7 +291,7 @@ def started(c, owners):
     """Column of the stage a code owner's `/work`, or the bot's line or run card, starts."""
     who, body = (c.get("author") or {}).get("login"), (c.get("body") or "").strip()
     card = who in (BOT, f"{BOT}[bot]") and re.match(re.escape(LIVE) + r"[^*]*\*\*(Planner|Worker|Reviewer) ?\(?(\w*)", body)
-    if who in owners and command_of(body) == "worker" and "(approved)" not in c.get("where", "") or who in (BOT, f"{BOT}[bot]") and body == AUTOPILOT_LINES["worker"]:
+    if who in owners and command_of(body) == "worker" and "(approved)" not in c.get("where", "") or who in (BOT, f"{BOT}[bot]") and body in (AUTOPILOT_LINES["worker"], *HOTFIX_LINES.values()):
         return "Work"
     return STAGE_COLUMN.get((card[1].lower(), card[2])) if card else None
 
@@ -328,4 +328,4 @@ from dokima.agent_github import BOT
 from dokima.agent_records import LIVE, records, latest, approved, is_record, settled, owner_raises, for_planner, gate_failed
 from dokima.agent_checks import issue_url, owner_source
 from dokima.agent_roles import command_of
-from dokima.agent_autopilot import AUTOPILOT_LINES, UNREAD, AUTOPILOT_MERGE
+from dokima.agent_autopilot import AUTOPILOT_LINES, HOTFIX_LINES, UNREAD, AUTOPILOT_MERGE

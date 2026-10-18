@@ -7,7 +7,7 @@ The plan is the newest one the planner handed back, once the reviewer approved i
 comments; each criterion's check runs exactly the tests that plan lists for it. A pull request with no approved plan that
 changes only Markdown files outside the folders the text_only.not_text setting lists gets one passing "Text only" check
 instead. A manual fix Dokima's app opens (any branch but try/issue-N) gets one "Manual fix" check that runs the test
-folder setting.
+folder setting, and so does a hotfix: an issue labeled hotfix that was never planned (#863).
 
 A test proves a criterion by calling its tag, the tests.tag setting (record_property by default), as
 tag("proves", "<issue>.<n>"), where n counts the issue's criteria from 1, top to bottom.
@@ -19,7 +19,7 @@ import subprocess
 import sys
 import xml.etree.ElementTree as ET
 
-from dokima import agent, plan, settings
+from dokima import agent, hotfix, plan, settings
 
 
 def proves(tag="record_property"):
@@ -133,6 +133,9 @@ def main(argv):
         number = agent.issue_of_pr(pr["head"]["ref"], pr.get("body")) or plan.pr_issue_number(repo, pr["number"])
         recs = agent.records(agent.conversation(repo, number)[1]) if number else []
         rows = build_matrix(number, recs, (pr.get("user") or {}).get("login"), pr["head"]["ref"])
+        if rows[0]["id"] == "none" and number and hotfix.in_lane(repo, number, recs):
+            # A hotfix has no plan (#863): like a manual fix, its one check runs all tests.
+            rows = [{**manual_fix()[0], "name": "Hotfix: all tests pass"}]
         if rows[0]["id"] == "none" and text_only(repo, pr["number"]):
             rows = TEXT_ONLY
         print("matrix=" + json.dumps(rows))

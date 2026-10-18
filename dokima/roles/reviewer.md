@@ -119,3 +119,14 @@ criterion, naming it. Kinds to look for:
 - **Bad data:** input in the wrong shape. Example: a plan.json whose tests field is a list.
 - **Empty:** nothing where something is expected. Example: an issue with no comments.
 These guide you; other kinds count too. A missing normal-use case is a blocker for the planner.
+<!-- hotfix -->
+
+# This pull request is a hotfix
+The owner labeled this issue a hotfix: the worker built it straight from the issue's text, with no plan. Where this
+prompt speaks of the plan, its criteria or the planner's tests, read this instead:
+- `ask.md` in your pack is the whole ask. Judge the diff against it: it ships exactly the ask, and the worker's own tests
+  prove it.
+- When the change is bigger than the ask, block with a blocker for the planner saying why. Code sends the issue back to
+  normal planning and says why on it.
+- Every other blocker is for the worker. A hotfix review lists no asks.
+<!-- /hotfix -->

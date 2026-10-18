@@ -10,7 +10,7 @@ import subprocess
 import sys
 import urllib.parse
 
-from dokima import agents, body as issue_body
+from dokima import agents, body as issue_body, hotfix
 
 
 def issue_text(d, items):
@@ -170,6 +170,15 @@ def pack(repo, number, role, stage, dest):
     for i, r in enumerate(recs, 1):
         json.dump(r, open(os.path.join(dest, "in", name_of(r, i)), "w"), indent=1)
     plan = latest(recs, "planner")
+    if (role == "worker" or stage == "pr") and os.environ.get("HOTFIX_LABEL") == "true" and not hotfix.planned(recs):
+        # A hotfix has no plan: its worker and its code review get the issue's text as the whole ask (#863). The
+        # workflow read its label from GitHub before the pack.
+        hotfix.write_ask(dest, d.get("body"))
+        if stage == "pr":
+            work = latest(recs, "worker", passed=False)
+            if work and work.get("run_id"):
+                agent_github.gh("run", "download", str(work["run_id"]), "-R", repo, "-n", f"worker-{number}", "-D", os.path.join(dest, "worker-run"))
+        return True
     if role == "worker" and not approved(recs):
         return False
     if role == "worker":
@@ -204,7 +213,12 @@ def problems_pack(role, stage, dest):
     if key not in NEEDS:
         return [f"unknown role {key}"]
     bad = []
-    for name in NEEDS[key]:
+    needs = NEEDS[key]
+    if key in ("worker", "reviewer-pr") and os.path.isfile(os.path.join(dest, hotfix.ASK)) \
+            and not os.path.exists(os.path.join(dest, "plan.json")):
+        # A hotfix's ask is the issue's text, in place of a plan (#863).
+        needs = [hotfix.ASK if n == "plan.json" else n for n in needs]
+    for name in needs:
         path = os.path.join(dest, name)
         if not os.path.exists(path):
             bad.append(f"{name} is missing")
@@ -289,7 +303,7 @@ def scrubbed(value, secrets):
 
 def main(argv):
     """agent pack N ROLE STAGE DIR | agent check-pack ROLE STAGE DIR | agent check
-    review|work FILE PLAN N | agent record ROLE STAGE OUT CHECK_FILE PASSED LOG_DIR  (writes OUT/record.json and
+    review|work FILE PLAN|- N | agent record ROLE STAGE OUT CHECK_FILE PASSED LOG_DIR  (writes OUT/record.json and
     OUT/comment.md) | agent not-started ROLE STAGE OUT WHY_FILE  (the same, for a run or command that failed before its
     agent started) | agent cancelled ROLE STAGE OUT STARTED LOG_DIR  (the same, for a run someone cancelled) | agent
     card ROLE STAGE ready|working  (prints the run's live card, which is not a record) | agent queue ROLE STAGE N
@@ -317,7 +331,8 @@ def main(argv):
         if len(argv) < 6:
             print("the check needs plan.json and the issue number: agent check review|work FILE PLAN N")
             return 1
-        return check(argv[2], argv[3], argv[4], argv[5])
+        # A hotfix has no plan (#863): `-` in its place checks the hand-back's shape alone.
+        return check(argv[2], argv[3], None if argv[4] == "-" else argv[4], argv[5])
     if argv[1] == "check-pack":
         bad = problems_pack(argv[2], argv[3], argv[4])
         for b in bad:
@@ -551,6 +566,12 @@ def main(argv):
                                                f"itself once #{held[0]} merges.")
                         elif held:
                             step = ("stop", f"Nothing is built: {turns.waits_line(held)} Say `/work` once #{held[0]} merges.")
+                pack_dir = os.environ.get("PACK", "")
+                if step[:2] == ("start", "planner") and rec.get("role") == "reviewer" and (rec.get("stage") or "") == "pr" \
+                        and pack_dir and os.path.isfile(os.path.join(pack_dir, hotfix.ASK)) \
+                        and not os.path.exists(os.path.join(pack_dir, "plan.json")):
+                    # A hotfix sent back to planning says why on the issue itself, not only on its pull request (#863).
+                    hotfix.back_to_planning(repo, number, rec)
         except subprocess.CalledProcessError as e:
             # Deciding what runs next needs GitHub; a call it refused, after the one wait for its rate limit, stops
             # for the owner with GitHub's own words, and nothing starts.
