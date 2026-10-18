@@ -207,6 +207,12 @@ class Sandbox:
         """Push the played commit's thin workflow and settings file to the sandbox's default branch."""
         try:
             run("git", *self.git_auth, "clone", "-q", self.url, self.clone, env=self.env)
+            # An old install copied Dokima's code and every workflow in; clear them so they stop running (#829).
+            shutil.rmtree(os.path.join(self.clone, "dokima"), ignore_errors=True)
+            for name in os.listdir(os.path.join(self.played, ".github", "workflows")):
+                old = os.path.join(self.clone, ".github", "workflows", name)
+                if os.path.isfile(old):
+                    os.remove(old)
             for rel, data in install_files(self.played, self.commit).items():
                 path = os.path.join(self.clone, rel)
                 os.makedirs(os.path.dirname(path), exist_ok=True)
