@@ -1,0 +1,65 @@
+{
+ "role": "reviewer",
+ "stage": "pr",
+ "run_id": "39104450684",
+ "commit_before": "9833b6454271a4f0f3e3190bdb99c03e6e83d69d",
+ "started_by": "dokima-runtime[bot]",
+ "models": [
+  "claude-opus-5-5"
+ ],
+ "report": {
+  "duration_ms": 66259,
+  "turns": 10,
+  "cost_usd": 0.418786,
+  "tokens_in": 352614,
+  "tokens_out": 3500
+ },
+ "log": "https://github.com/dokima-dev/dokima/blob/logs/logs/857/39104450684-reviewer-pr.md",
+ "run": "https://github.com/dokima-dev/dokima/actions/runs/39104450684",
+ "handback": {
+  "previous_step": {
+   "did": [
+    "A person's or Dependabot's pull request with no plan now gets one passing check.",
+    "The merge check workflow lets that one check pass."
+   ],
+   "decided": [
+    "The new setting is allow by default; any other value keeps today's failing check.",
+    "A pull request that names no author still fails with no plan."
+   ],
+   "open": []
+  },
+  "verdict": "approve",
+  "summary": "People's and Dependabot's pull requests now pass with no plan; Dokima's own still need one, all proven.",
+  "raises": [],
+  "answers": [
+   {
+    "raise": "W1",
+    "answer": "done",
+    "why": "Right reading: the owner exempted people and Dependabot only, so an unknown author staying held is safe."
+   }
+  ],
+  "asks": [],
+  "boxes": {
+   "dropped": "none",
+   "added": "none",
+   "superseded": "none",
+   "conflicts": "none",
+   "edges": {
+    "857.1": "covered",
+    "857.2": "covered",
+    "857.3": "covered",
+    "857.4": "covered"
+   },
+   "poor_tests": "none"
+  },
+  "behaviors": [],
+  "edge_cases": [],
+  "tests": [],
+  "size": "ok"
+ },
+ "check": {
+  "passed": true,
+  "problems": []
+ },
+ "url": "https://github.com/dokima-dev/dokima/pull/865#issuecomment-6246602993"
+}
