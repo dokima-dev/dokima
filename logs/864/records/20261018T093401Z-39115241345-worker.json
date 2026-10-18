@@ -1,0 +1,74 @@
+{
+ "role": "worker",
+ "stage": null,
+ "run_id": "39115241345",
+ "commit_before": "30bb52b54a4360049561545bdc97d2a3e3eec483",
+ "started_by": "dokima-runtime[bot]",
+ "models": [
+  "claude-opus-5-5"
+ ],
+ "report": {
+  "duration_ms": 464115,
+  "turns": 32,
+  "cost_usd": 1.5191676,
+  "tokens_in": 2389340,
+  "tokens_out": 15853
+ },
+ "log": "https://github.com/dokima-dev/dokima/blob/logs/logs/864/39115241345-worker.md",
+ "run": "https://github.com/dokima-dev/dokima/actions/runs/39115241345",
+ "handback": {
+  "summary": "Hotfix pull requests get the label, design asks return to planning with a comment, and hotfix cards are one line.",
+  "criteria": {
+   "864.1": "`agent.yml` adds `--label` with the hotfix label's name to `gh pr create` when the pack is a hotfix.",
+   "864.2": "`agent_roles.py` starts the planner when a hotfix worker's passed hand-back raises a blocker for the planner.",
+   "864.3": "`hotfix.back_to_planning` now also runs for that worker, saying the ask needs a design choice, with its blockers.",
+   "864.4": "`card.render` draws an unplanned hotfix as one line from `card.hotfix_line`, starting with its status.",
+   "864.5": "`card.hotfix_line` shows the owner's ask from below the marker, its lines joined into one.",
+   "864.6": "`card.hotfix_line` links the open pull request; with none it links nothing.",
+   "864.7": "`card.hotfix_line` says code review approved or blocked from the newest code review since the build.",
+   "864.8": "`card.gate_result` reads that review's Next line: merge gate failed, passed, or nothing before it ran.",
+   "864.9": "Already true: `agent.yml` opens every worker's pull request with `Closes #N`; untouched.",
+   "864.10": "The new `worker.md` hotfix line names nothing from this repo."
+  },
+  "evidence": "`pytest -q tests/*card*.py tests/test_hotfix*.py`: 3 failed, 255 passed; failures are the raised tests.",
+  "raises": [
+   {
+    "kind": "blocker",
+    "to": "planner",
+    "label": "Test cannot pass",
+    "text": "The tests for 864.2 and 864.3 restore the hand-back from itself, so their raises-nothing run still raises the design blocker.",
+    "evidence": "`tests/test_hotfix_pr.py` lines 78 and 100: `monkeypatch.setattr(th, \"WORK\", th.WORK)` runs after `th.WORK` became `WORK_BACK`.",
+    "raised_by": "worker",
+    "id": "W1"
+   },
+   {
+    "kind": "blocker",
+    "to": "planner",
+    "label": "Test cannot pass",
+    "text": "The test for 864.1 gives the planned worker the hotfix hand-back, so code rightly rejects it and no pull request opens.",
+    "evidence": "`test_a_hotfix_pull_request_carries_the_hotfix_label` plain run: rejected, criteria has no line for 57.1.",
+    "raised_by": "worker",
+    "id": "W2"
+   }
+  ],
+  "answers": []
+ },
+ "check": {
+  "passed": false,
+  "problems": [
+   "plan test fails: tests/test_hotfix_pr.py::test_a_hotfix_pull_request_carries_the_hotfix_label",
+   "plan test fails: tests/test_hotfix_pr.py::test_a_hotfix_worker_finding_a_design_choice_starts_the_planner",
+   "plan test fails: tests/test_hotfix_pr.py::test_a_hotfix_worker_sending_it_back_says_why_on_the_issue"
+  ]
+ },
+ "dropped_by_fence": [],
+ "files_changed": [
+  ".github/workflows/agent.yml",
+  "dokima/agent_roles.py",
+  "dokima/card.py",
+  "dokima/hotfix.py",
+  "dokima/roles/worker.md"
+ ],
+ "branch": "try/issue-864",
+ "url": "https://github.com/dokima-dev/dokima/issues/864#issuecomment-6248213782"
+}
