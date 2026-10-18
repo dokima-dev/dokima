@@ -1,0 +1,167 @@
+{
+ "role": "reviewer",
+ "stage": "pr",
+ "run_id": "39108382340",
+ "commit_before": "9bd3c6899f9a242e31ae2e78142f171973703aa1",
+ "started_by": "dokima-runtime[bot]",
+ "models": [
+  "claude-opus-5-5"
+ ],
+ "report": {
+  "duration_ms": 1327583,
+  "turns": 18,
+  "cost_usd": 0.7055754000000001,
+  "tokens_in": 868891,
+  "tokens_out": 7700
+ },
+ "log": "https://github.com/dokima-dev/dokima/blob/logs/logs/867/39108382340-reviewer-pr.md",
+ "run": "https://github.com/dokima-dev/dokima/actions/runs/39108382340",
+ "handback": {
+  "previous_step": {
+   "did": [
+    "Releases now take their version from the changelog's newest version heading.",
+    "Added a v0.1.1 changelog section naming the fixes since v0.1.0.",
+    "Pointed the install file, README and wiki install page at v0.1.1."
+   ],
+   "decided": [
+    "The v0.1.1 section also names the two later changes, 866 and 867."
+   ],
+   "open": [
+    "The worker asked whether the two extra changelog lines should stay."
+   ]
+  },
+  "verdict": "approve",
+  "summary": "The code does what each criterion asks; every test passes locally on the branch merged with main.",
+  "raises": [],
+  "answers": [
+   {
+    "raise": "W1",
+    "answer": "done",
+    "why": "Keep them: the owner asked that merging releases the fixes since v0.1.0, and both ship in it."
+   }
+  ],
+  "asks": [],
+  "behaviors": [
+   {
+    "criterion": "867.1",
+    "one_behavior": true,
+    "why": "One push makes the release the newest heading names."
+   },
+   {
+    "criterion": "867.2",
+    "one_behavior": true,
+    "why": "One changelog section with three named fixes."
+   },
+   {
+    "criterion": "867.3",
+    "one_behavior": true,
+    "why": "One tag in the install file."
+   },
+   {
+    "criterion": "867.4",
+    "one_behavior": true,
+    "why": "One version named in the README install steps."
+   },
+   {
+    "criterion": "867.5",
+    "one_behavior": true,
+    "why": "One version named on the wiki install page."
+   }
+  ],
+  "edge_cases": [
+   {
+    "criterion": "867.1",
+    "cut": [],
+    "missing": []
+   },
+   {
+    "criterion": "867.2",
+    "cut": [],
+    "missing": []
+   },
+   {
+    "criterion": "867.3",
+    "cut": [],
+    "missing": []
+   },
+   {
+    "criterion": "867.4",
+    "cut": [],
+    "missing": []
+   },
+   {
+    "criterion": "867.5",
+    "cut": [],
+    "missing": []
+   }
+  ],
+  "tests": [
+   {
+    "test": "tests/test_newest_release.py::test_release_names_newest_version",
+    "only_its_behavior": true,
+    "why": "A hardcoded v0.1.1 or v0.1.0 fails it."
+   },
+   {
+    "test": "tests/test_newest_release.py::test_release_v011_newest",
+    "only_its_behavior": true,
+    "why": "The owner's own example."
+   },
+   {
+    "test": "tests/test_newest_release.py::test_release_newest_below_unreleased",
+    "only_its_behavior": true,
+    "why": "A draft section on top is normal use."
+   },
+   {
+    "test": "tests/test_newest_release.py::test_release_newest_already_released",
+    "only_its_behavior": true,
+    "why": "Every later push hits this."
+   },
+   {
+    "test": "tests/test_newest_release.py::test_changelog_has_v011_on_top",
+    "only_its_behavior": true,
+    "why": "Checks the three named fixes in the top section."
+   },
+   {
+    "test": "tests/test_newest_release.py::test_install_file_calls_newest_version",
+    "only_its_behavior": true,
+    "why": "Ties the install tag to the changelog."
+   },
+   {
+    "test": "tests/test_newest_release.py::test_readme_names_newest_release",
+    "only_its_behavior": true,
+    "why": "Ties the README to the changelog."
+   },
+   {
+    "test": "tests/test_newest_release.py::test_wiki_names_newest_release",
+    "only_its_behavior": true,
+    "why": "Ties the wiki page to the changelog."
+   }
+  ],
+  "size": "ok",
+  "boxes": {
+   "dropped": "none",
+   "added": [
+    {
+     "what": "Changelog lines for 866 and 867",
+     "kind": "needed",
+     "serves": "867.2"
+    }
+   ],
+   "superseded": "none",
+   "conflicts": "none",
+   "edges": {
+    "867.1": "covered",
+    "867.2": "covered",
+    "867.3": "covered",
+    "867.4": "covered",
+    "867.5": "covered"
+   },
+   "poor_tests": "none"
+  }
+ },
+ "check": {
+  "passed": true,
+  "problems": []
+ },
+ "url": "https://github.com/dokima-dev/dokima/pull/871#issuecomment-6247215723"
+}
