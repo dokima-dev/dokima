@@ -1,0 +1,114 @@
+{
+ "role": "reviewer",
+ "stage": "pr",
+ "run_id": "39109516062",
+ "commit_before": "3e7facaaa1f285ef927d75096395468ce47da778",
+ "started_by": "dokima-runtime[bot]",
+ "models": [
+  "claude-opus-5-5"
+ ],
+ "report": {
+  "duration_ms": 3472,
+  "turns": 1,
+  "cost_usd": 0.8217512,
+  "tokens_in": 67662,
+  "tokens_out": 145
+ },
+ "log": "https://github.com/dokima-dev/dokima/blob/logs/logs/863/39109516062-reviewer-pr.md",
+ "run": "https://github.com/dokima-dev/dokima/actions/runs/39109516062",
+ "handback": {
+  "previous_step": {
+   "did": [
+    "The worker finished the half-done merge of main into the hotfix change."
+   ],
+   "decided": [
+    "A hotfix's all-tests check is chosen before main's checks for pull requests with no plan."
+   ],
+   "open": []
+  },
+  "verdict": "approve",
+  "summary": "The merge with main is now whole; all ten hotfix criteria still hold and every test passes.",
+  "raises": [],
+  "answers": [],
+  "asks": [],
+  "behaviors": [],
+  "edge_cases": [],
+  "tests": [
+   {
+    "test": "tests/test_hotfix.py::test_work_on_a_hotfix_starts_its_worker_with_no_plan",
+    "only_its_behavior": true,
+    "why": "Untouched since the planner; fails on main, passes on the branch."
+   },
+   {
+    "test": "tests/test_hotfix.py::test_autopilot_starts_a_hotfix_worker_instead_of_its_planner",
+    "only_its_behavior": true,
+    "why": "Untouched since the planner; fails on main, passes on the branch."
+   },
+   {
+    "test": "tests/test_hotfix.py::test_a_hotfix_worker_pack_gives_the_issue_text_as_the_ask",
+    "only_its_behavior": true,
+    "why": "Untouched since the planner; fails on main, passes on the branch."
+   },
+   {
+    "test": "tests/test_hotfix.py::test_a_hotfix_worker_change_stays_on_the_pull_request",
+    "only_its_behavior": true,
+    "why": "Untouched since the planner; fails on main, passes on the branch."
+   },
+   {
+    "test": "tests/test_hotfix.py::test_a_finished_hotfix_worker_starts_code_review_on_its_pull_request",
+    "only_its_behavior": true,
+    "why": "Untouched since the planner; fails on main, passes on the branch."
+   },
+   {
+    "test": "tests/test_hotfix.py::test_code_review_of_a_hotfix_gets_the_issue_text_as_the_ask",
+    "only_its_behavior": true,
+    "why": "Untouched since the planner; fails on main, passes on the branch."
+   },
+   {
+    "test": "tests/test_hotfix.py::test_an_approved_hotfix_passes_the_merge_gate_like_any_pull_request",
+    "only_its_behavior": true,
+    "why": "Untouched since the planner; fails on main, passes on the branch."
+   },
+   {
+    "test": "tests/test_hotfix.py::test_code_review_sends_a_too_big_hotfix_to_the_planner",
+    "only_its_behavior": true,
+    "why": "Untouched since the planner; fails on main, passes on the branch."
+   },
+   {
+    "test": "tests/test_hotfix.py::test_a_hotfix_sent_back_to_planning_says_why_on_the_issue",
+    "only_its_behavior": true,
+    "why": "Untouched since the planner; fails on main, passes on the branch."
+   },
+   {
+    "test": "tests/test_hotfix.py::test_hotfix_prompts_name_nothing_from_dokimas_own_repo",
+    "only_its_behavior": true,
+    "why": "Untouched since the planner; fails on main, passes on the branch."
+   }
+  ],
+  "size": "ok",
+  "boxes": {
+   "dropped": "none",
+   "added": "none",
+   "superseded": "none",
+   "conflicts": "none",
+   "edges": {
+    "863.1": "covered",
+    "863.2": "covered",
+    "863.3": "covered",
+    "863.4": "covered",
+    "863.5": "covered",
+    "863.6": "covered",
+    "863.7": "covered",
+    "863.8": "covered",
+    "863.9": "covered",
+    "863.10": "covered"
+   },
+   "poor_tests": "none"
+  }
+ },
+ "check": {
+  "passed": true,
+  "problems": []
+ },
+ "url": "https://github.com/dokima-dev/dokima/pull/868#issuecomment-6247364098"
+}
