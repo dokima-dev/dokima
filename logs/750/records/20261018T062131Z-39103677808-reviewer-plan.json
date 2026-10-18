@@ -1,0 +1,389 @@
+{
+ "role": "reviewer",
+ "stage": "plan",
+ "run_id": "39103677808",
+ "commit_before": "ccbebe20951336dbdfb7da7800bf77e892c34308",
+ "started_by": "dokima-runtime[bot]",
+ "models": [
+  "claude-opus-5-5"
+ ],
+ "report": {
+  "duration_ms": 36846,
+  "turns": 6,
+  "cost_usd": 0.28004260000000003,
+  "tokens_in": 234508,
+  "tokens_out": 4033
+ },
+ "log": "https://github.com/dokima-dev/dokima/blob/logs/logs/750/39103677808-reviewer-plan.md",
+ "run": "https://github.com/dokima-dev/dokima/actions/runs/39103677808",
+ "handback": {
+  "previous_step": {
+   "did": [
+    "The planner added a criterion that keeps the hotfix fix on the pull request.",
+    "The planner split code review starting from what it judges against."
+   ],
+   "decided": [
+    "The owner's work command starts a hotfix worker by hand, as the owner said."
+   ],
+   "open": [
+    "Each story's tests come when its own planner plans it."
+   ]
+  },
+  "verdict": "approve",
+  "summary": "The plan now carries every ask, including the fix landing, and each criterion holds one behavior.",
+  "raises": [],
+  "answers": [],
+  "asks": [
+   {
+    "ask": "An issue labeled `hotfix` skips planning and plan review.",
+    "source": "https://github.com/dokima-dev/dokima/issues/750",
+    "criterion": "S1.2"
+   },
+   {
+    "ask": "When its turn comes (by hand, or on autopilot once nothing open blocks it)",
+    "source": "https://github.com/dokima-dev/dokima/issues/750",
+    "criterion": "S1.2"
+   },
+   {
+    "ask": "By hand, the owner's `/work` starts a hotfix's worker.",
+    "source": "https://github.com/dokima-dev/dokima/issues/750#issuecomment-6246479912",
+    "criterion": "S1.1"
+   },
+   {
+    "ask": "the worker builds straight from the issue's text: the text is the whole ask.",
+    "source": "https://github.com/dokima-dev/dokima/issues/750",
+    "criterion": "S1.3"
+   },
+   {
+    "ask": "Fix the review's two blockers.",
+    "source": "https://github.com/dokima-dev/dokima/issues/750#issuecomment-6246479912",
+    "criterion": "S1.4"
+   },
+   {
+    "ask": "Code review still runs",
+    "source": "https://github.com/dokima-dev/dokima/issues/750",
+    "criterion": "S1.5"
+   },
+   {
+    "ask": "judges the diff against the issue's text; it is the judgment gate.",
+    "source": "https://github.com/dokima-dev/dokima/issues/750",
+    "criterion": "S1.6"
+   },
+   {
+    "ask": "All tests and the merge gate still run, as for any pull request.",
+    "source": "https://github.com/dokima-dev/dokima/issues/750",
+    "criterion": "S1.7"
+   },
+   {
+    "ask": "The worker may add or change a small test that pins the fix",
+    "source": "https://github.com/dokima-dev/dokima/issues/750",
+    "criterion": "S1.8"
+   },
+   {
+    "ask": "Only small asks take the lane: a change the issue names in a sentence or two, touching few files.",
+    "source": "https://github.com/dokima-dev/dokima/issues/750",
+    "criterion": "S1.9"
+   },
+   {
+    "ask": "When code review finds the change bigger than the ask",
+    "source": "https://github.com/dokima-dev/dokima/issues/750",
+    "criterion": "S1.9"
+   },
+   {
+    "ask": "it goes back to normal planning, saying why.",
+    "source": "https://github.com/dokima-dev/dokima/issues/750",
+    "criterion": "S1.10"
+   },
+   {
+    "ask": "Every hotfix PR carries the `hotfix` label",
+    "source": "https://github.com/dokima-dev/dokima/issues/750",
+    "criterion": "S2.1"
+   },
+   {
+    "ask": "links the issue it answers.",
+    "source": "https://github.com/dokima-dev/dokima/issues/750",
+    "criterion": "S2.2"
+   },
+   {
+    "ask": "or the worker finds the ask needs a design choice",
+    "source": "https://github.com/dokima-dev/dokima/issues/750",
+    "criterion": "S2.3"
+   },
+   {
+    "ask": "it goes back to normal planning, saying why.",
+    "source": "https://github.com/dokima-dev/dokima/issues/750",
+    "criterion": "S2.4"
+   },
+   {
+    "ask": "The card shows one line",
+    "source": "https://github.com/dokima-dev/dokima/issues/750",
+    "criterion": "S2.5"
+   },
+   {
+    "ask": "the ask",
+    "source": "https://github.com/dokima-dev/dokima/issues/750",
+    "criterion": "S2.6"
+   },
+   {
+    "ask": "the PR",
+    "source": "https://github.com/dokima-dev/dokima/issues/750",
+    "criterion": "S2.7"
+   },
+   {
+    "ask": "the review verdict",
+    "source": "https://github.com/dokima-dev/dokima/issues/750",
+    "criterion": "S2.8"
+   },
+   {
+    "ask": "the gate.",
+    "source": "https://github.com/dokima-dev/dokima/issues/750",
+    "criterion": "S2.9"
+   },
+   {
+    "ask": "keep the prompts free of anything about Dokima's own repo, so they fit any repo.",
+    "source": "https://github.com/dokima-dev/dokima/issues/750#issuecomment-6246479912",
+    "criterion": "S2.10"
+   }
+  ],
+  "behaviors": [
+   {
+    "criterion": "S1.1",
+    "one_behavior": true,
+    "why": "One result: the work command starts the worker with no plan."
+   },
+   {
+    "criterion": "S1.2",
+    "one_behavior": true,
+    "why": "One result: on autopilot the worker starts instead of the planner."
+   },
+   {
+    "criterion": "S1.3",
+    "one_behavior": true,
+    "why": "One result: the worker's pack holds the issue text as the ask."
+   },
+   {
+    "criterion": "S1.4",
+    "one_behavior": true,
+    "why": "One result: the worker's code change stays on the pull request."
+   },
+   {
+    "criterion": "S1.5",
+    "one_behavior": true,
+    "why": "One result: code review starts."
+   },
+   {
+    "criterion": "S1.6",
+    "one_behavior": true,
+    "why": "One result: the review's pack holds the issue text as the ask."
+   },
+   {
+    "criterion": "S1.7",
+    "one_behavior": true,
+    "why": "One result: the usual checks run on the pull request."
+   },
+   {
+    "criterion": "S1.8",
+    "one_behavior": true,
+    "why": "One result: the worker's test change stays."
+   },
+   {
+    "criterion": "S1.9",
+    "one_behavior": true,
+    "why": "One result: the planner starts."
+   },
+   {
+    "criterion": "S1.10",
+    "one_behavior": true,
+    "why": "One result: a comment saying why."
+   },
+   {
+    "criterion": "S2.1",
+    "one_behavior": true,
+    "why": "One result: the hotfix label on the pull request."
+   },
+   {
+    "criterion": "S2.2",
+    "one_behavior": true,
+    "why": "One result: the pull request links its issue."
+   },
+   {
+    "criterion": "S2.3",
+    "one_behavior": true,
+    "why": "One result: the planner starts."
+   },
+   {
+    "criterion": "S2.4",
+    "one_behavior": true,
+    "why": "One result: a comment saying why."
+   },
+   {
+    "criterion": "S2.5",
+    "one_behavior": true,
+    "why": "One result: the card state fits one line."
+   },
+   {
+    "criterion": "S2.6",
+    "one_behavior": true,
+    "why": "One result: the line shows the ask."
+   },
+   {
+    "criterion": "S2.7",
+    "one_behavior": true,
+    "why": "One result: the line links the pull request."
+   },
+   {
+    "criterion": "S2.8",
+    "one_behavior": true,
+    "why": "One result: the line shows the verdict."
+   },
+   {
+    "criterion": "S2.9",
+    "one_behavior": true,
+    "why": "One result: the line shows the gate."
+   },
+   {
+    "criterion": "S2.10",
+    "one_behavior": true,
+    "why": "One result: hotfix prompt parts name nothing of this repo."
+   }
+  ],
+  "edge_cases": [
+   {
+    "criterion": "S1.1",
+    "cut": [],
+    "missing": []
+   },
+   {
+    "criterion": "S1.2",
+    "cut": [],
+    "missing": []
+   },
+   {
+    "criterion": "S1.3",
+    "cut": [],
+    "missing": []
+   },
+   {
+    "criterion": "S1.4",
+    "cut": [],
+    "missing": []
+   },
+   {
+    "criterion": "S1.5",
+    "cut": [],
+    "missing": []
+   },
+   {
+    "criterion": "S1.6",
+    "cut": [],
+    "missing": []
+   },
+   {
+    "criterion": "S1.7",
+    "cut": [],
+    "missing": []
+   },
+   {
+    "criterion": "S1.8",
+    "cut": [],
+    "missing": []
+   },
+   {
+    "criterion": "S1.9",
+    "cut": [],
+    "missing": []
+   },
+   {
+    "criterion": "S1.10",
+    "cut": [],
+    "missing": []
+   },
+   {
+    "criterion": "S2.1",
+    "cut": [],
+    "missing": []
+   },
+   {
+    "criterion": "S2.2",
+    "cut": [],
+    "missing": []
+   },
+   {
+    "criterion": "S2.3",
+    "cut": [],
+    "missing": []
+   },
+   {
+    "criterion": "S2.4",
+    "cut": [],
+    "missing": []
+   },
+   {
+    "criterion": "S2.5",
+    "cut": [],
+    "missing": []
+   },
+   {
+    "criterion": "S2.6",
+    "cut": [],
+    "missing": []
+   },
+   {
+    "criterion": "S2.7",
+    "cut": [],
+    "missing": []
+   },
+   {
+    "criterion": "S2.8",
+    "cut": [],
+    "missing": []
+   },
+   {
+    "criterion": "S2.9",
+    "cut": [],
+    "missing": []
+   },
+   {
+    "criterion": "S2.10",
+    "cut": [],
+    "missing": []
+   }
+  ],
+  "tests": [],
+  "size": "ok",
+  "boxes": {
+   "dropped": "none",
+   "added": "none",
+   "superseded": "none",
+   "conflicts": "none",
+   "edges": {
+    "S1.1": "covered",
+    "S1.2": "covered",
+    "S1.3": "covered",
+    "S1.4": "covered",
+    "S1.5": "covered",
+    "S1.6": "covered",
+    "S1.7": "covered",
+    "S1.8": "covered",
+    "S1.9": "covered",
+    "S1.10": "covered",
+    "S2.1": "covered",
+    "S2.2": "covered",
+    "S2.3": "covered",
+    "S2.4": "covered",
+    "S2.5": "covered",
+    "S2.6": "covered",
+    "S2.7": "covered",
+    "S2.8": "covered",
+    "S2.9": "covered",
+    "S2.10": "covered"
+   },
+   "poor_tests": "none"
+  }
+ },
+ "check": {
+  "passed": true,
+  "problems": []
+ },
+ "url": "https://github.com/dokima-dev/dokima/issues/750#issuecomment-6246499329"
+}
