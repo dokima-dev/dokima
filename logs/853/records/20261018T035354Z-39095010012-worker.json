@@ -1,0 +1,41 @@
+{
+ "role": "worker",
+ "stage": null,
+ "run_id": "39095010012",
+ "commit_before": "4e3746703c58a49bf967690d7ed1971573cc1b2e",
+ "started_by": "dokima-runtime[bot]",
+ "models": [
+  "claude-opus-5-5"
+ ],
+ "report": {
+  "duration_ms": 169390,
+  "turns": 12,
+  "cost_usd": 0.4119984,
+  "tokens_in": 451346,
+  "tokens_out": 3715
+ },
+ "log": "https://github.com/dokima-dev/dokima/blob/logs/logs/853/39095010012-worker.md",
+ "run": "https://github.com/dokima-dev/dokima/actions/runs/39095010012",
+ "handback": {
+  "summary": "A label run now also does a close's autopilot work, so a close it pushed out is not lost.",
+  "criteria": {
+   "853.1": "The `labeled` branch in `dokima/agent_roles.py` now runs `autopilot_closed`, which closes done parents with the tree-done note.",
+   "853.2": "The same `autopilot_closed` call switches every done tree off autopilot; open trees and the labeled issue stay on.",
+   "853.3": "`autopilot_closed` starts unblocked issues once via `start_unblocked`; it runs after the label starts, so nothing starts twice."
+  },
+  "evidence": "`pytest -q tests/test_autopilot_label.py tests/test_autopilot_label_close.py`: 9 passed",
+  "raises": [],
+  "answers": []
+ },
+ "check": {
+  "passed": true,
+  "problems": []
+ },
+ "dropped_by_fence": [],
+ "files_changed": [
+  "dokima/agent_roles.py",
+  "rules/flow.md"
+ ],
+ "branch": "try/issue-853",
+ "url": "https://github.com/dokima-dev/dokima/issues/853#issuecomment-6245357009"
+}
