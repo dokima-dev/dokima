@@ -64,6 +64,9 @@ merge:
   queue: true
   # allow lets a pull request a person or Dependabot opened pass with no plan; any other value fails it (#857).
   unplanned_prs: allow
+# The repo where Dokima's own problems on this repo are filed, such as dokima-dev/dokima; empty keeps them here (#745).
+upstream:
+  repo: ""
 # Each of Dokima's labels by its key; the name is what the repo calls it.
 labels:
   autopilot: autopilot

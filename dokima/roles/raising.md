@@ -34,6 +34,11 @@ carries. The worker's goes through the reviewer, who answers it first.
   {"kind": "blocker", "to": "planner", "label": "No criterion", "text": "The owner asked for the discount to show on the receipt too, and no criterion carries it.", "evidence": "The issue's comment of 2026-10-09 asks for the receipt; criteria 9.1 to 9.3 name only the cart."}
 An issue is a real problem found in code outside this one; it is for no one, so it has no "to":
   {"kind": "issue", "label": "Outside this issue", "text": "The search page ignores archived items, so their links go stale.", "evidence": "app/search.py, results()"}
+Judge each issue first: is it Dokima's fault (its workflows, code, prompts, settings or install) or the repo's own
+(its code or its tests)? Tag Dokima's with "fault": "dokima"; code files it in Dokima's own repo when the settings name
+one, naming nothing of this repo. Leave the repo's own untagged. When you cannot tell, tag it "fault": "unsure"; it
+stays in this repo, saying so.
+  {"kind": "issue", "label": "Card drops a line", "fault": "dokima", "text": "The card drops the last line of a long plan.", "evidence": "The card is Dokima's; it cuts the plan fold."}
 Code detects and raises these by itself, and each reaches whoever acts on it; never raise them yourself:
 - **Work outside the plan**: a change to a file outside the plan's scope is undone before the judges see it, and the owner sees what was dropped. Example: the worker edits app/cart.py on an issue whose scope is app/receipt.py.
 - **A failing test**: the full suite or a criterion's check goes red on GitHub, and the work goes back to the worker. Example: tests/test_receipt.py::test_total_line fails on the pull request's head commit.

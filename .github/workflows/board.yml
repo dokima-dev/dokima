@@ -154,3 +154,44 @@ jobs:
                END { for (x in t) print t[x], x | "sort -rn | head -4 | paste -sd, - > top"; close("sort -rn | head -4 | paste -sd, - > top")
                      getline top < "top"
                      printf "::notice title=GitHub calls::graphql %d, rest %d; most: %s\n", n["graphql"], n["rest"], top }' calls || true
+  upstream:
+    # A failed job files its failure in the upstream repo the settings name, naming this workflow and the job, with a
+    # key the App's own key mints for that repo's owner; with none set, nothing is filed (#745).
+    needs: [queue, settle, sync]
+    if: failure()
+    environment: keys
+    runs-on: ubuntu-24.04
+    steps:
+      - uses: actions/checkout@v5
+        with:
+          sparse-checkout: .dokima
+          persist-credentials: false
+      - name: Dokima's code from Dokima's own repo
+        uses: actions/checkout@v5
+        with:
+          repository: dokima-dev/dokima
+          ref: ${{ job.workflow_sha }}
+          path: .dokima-code
+          sparse-checkout: dokima
+          persist-credentials: false
+      - name: Every Dokima step runs Dokima's code
+        run: |
+          rm -rf "$RUNNER_TEMP/dokima" && mv .dokima-code "$RUNNER_TEMP/dokima"
+          printf 'PYTHONPATH=%s\nPYTHONSAFEPATH=1\n' "$RUNNER_TEMP/dokima" >> "$GITHUB_ENV"
+      - run: python3 -m pip install -q pyyaml  # the settings reader (#794)
+      - name: Name the upstream repo's owner
+        id: upstream-owner
+        run: echo "owner=$(python3 -m dokima.upstream owner)" >> "$GITHUB_OUTPUT"
+      - id: upstream-key
+        if: steps.upstream-owner.outputs.owner != ''
+        uses: actions/create-github-app-token@v2
+        with:
+          app-id: ${{ vars.DOKIMA_APP_ID }}
+          private-key: ${{ secrets.DOKIMA_APP_KEY }}
+          owner: ${{ steps.upstream-owner.outputs.owner }}
+      - name: File each failed job upstream
+        if: success() || failure()
+        env:
+          RESULTS: "queue=${{ needs.queue.result }} settle=${{ needs.settle.result }} sync=${{ needs.sync.result }}"
+          DOKIMA_UPSTREAM_TOKEN: ${{ steps.upstream-key.outputs.token }}
+        run: python3 -m dokima.upstream failed board

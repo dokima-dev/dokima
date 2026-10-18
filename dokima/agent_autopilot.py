@@ -11,7 +11,7 @@ import subprocess
 import time
 import urllib.parse
 
-from dokima import body as issue_body, card, hotfix, manifest, raises, settings
+from dokima import body as issue_body, card, hotfix, manifest, raises, settings, upstream
 from dokima.card import field_icon
 
 
@@ -200,9 +200,25 @@ def file_issues(repo, number, rec, recs):
     lines, label = [], None
     for x, decided in found:
         title = first_sentence(x.get("text") or x.get("label") or "An issue found")
+        up = upstream.repo() if x.get(raises.FAULT) == "dokima" else ""
+        if up:
+            # Dokima's own problem goes to Dokima's repo, naming nothing of this one; this record links it (#745).
+            try:
+                n, again = upstream.file_problem(up, title, x.get("text") or title,
+                                                 x["evidence"] if filled(x.get("evidence")) else None)
+            except subprocess.CalledProcessError as e:
+                lines.append(f"- Not filed in Dokima's repo: {card.escape(title)} GitHub refused it: "
+                             f"{card.escape(gh_reason(e))}")
+                continue
+            said = "raised before, added as a comment" if again else "Dokima's own problem, filed in Dokima's repo"
+            lines.append(f"- {card.ref(up, n)} · {said}")
+            continue
         by = x.get("raised_by") or "reviewer"
         who = "The reviewer found it" if by == "reviewer" else f"The {by} raised it and the reviewer confirmed it"
         body = [x.get("text") or ""] + (["", f"**Evidence:** {x['evidence']}"] if filled(x.get("evidence")) else [])
+        if x.get(raises.FAULT) == "unsure":
+            body += ["", "**Whose fault:** Dokima cannot tell whether this is its own fault or the repo's, so it stays "
+                         "here and nothing is filed in Dokima's repo."]
         run = os.environ.get("GITHUB_RUN_ID")
         where = f" ([run]({os.environ.get('GITHUB_SERVER_URL', 'https://github.com')}/{repo}/actions/runs/{run}))" if run else ""
         cause = decided.get(raises.CAUSE)
