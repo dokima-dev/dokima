@@ -44,10 +44,25 @@ def made(state):
 
 
 def test_release_names_newest_version(tmp_path, record_property):
+    """With v0.2.0 newest in the changelog, a push to main releases v0.2.0.
+
+    867.1: runs the command release.yml runs on a changelog whose sections are v0.2.0, v0.1.1 and v0.1.0, with the
+    two older ones already released, and checks it made exactly one release, v0.2.0, at the pushed commit. A version
+    other than v0.1.1 proves the release follows the changelog, not one more hardcoded version."""
+    record_property("proves", "867.1")
+    changelog = TWO.replace("# Changelog\n\n", "# Changelog\n\n## v0.2.0\n\n- A later fix.\n\n")
+    done, state = run_release(tmp_path, "867.1", releases=["v0.1.0", "v0.1.1"], changelog=changelog)
+    assert not state["unsupported"], f"867.1: the release command made calls the fake gh does not know: {state['unsupported']}"
+    assert done.returncode == 0, f"867.1: the release command failed: {done.stderr[-800:]}"
+    assert made(state) == [("v0.2.0", SHA)], \
+        f"867.1: the changelog's newest version is v0.2.0, yet the release command made {made(state)}, not v0.2.0"
+
+
+def test_release_v011_newest(tmp_path, record_property):
     """With v0.1.1 newest in the changelog, a push to main releases v0.1.1.
 
-    867.1: runs the command release.yml runs on a changelog whose newest section is v0.1.1, with v0.1.0 already
-    released, and checks it made exactly one release, v0.1.1, at the pushed commit."""
+    867.1, edge case: the issue's own example. Runs the command on a changelog whose newest section is v0.1.1, with
+    v0.1.0 already released, and checks it made exactly one release, v0.1.1, at the pushed commit."""
     record_property("proves", "867.1")
     done, state = run_release(tmp_path, "867.1", releases=["v0.1.0"], changelog=TWO)
     assert not state["unsupported"], f"867.1: the release command made calls the fake gh does not know: {state['unsupported']}"
@@ -85,25 +100,26 @@ def test_release_newest_already_released(tmp_path, record_property):
 
 
 def test_changelog_has_v011_on_top(record_property):
-    """The changelog's newest section is v0.1.1, listing the fixes merged since v0.1.0.
+    """The changelog's newest section is v0.1.1, naming the fixes #852, #856 and #861.
 
-    867.2: reads CHANGELOG.md, checks its top-most version heading names v0.1.1 or later, that a v0.1.1 section
-    sits above v0.1.0, and that it lists at least 3 items, one per fix merged since v0.1.0 (#852, #856, #861)."""
+    867.2: reads CHANGELOG.md, checks its top-most version heading is v0.1.1, sitting above v0.1.0, and that the
+    v0.1.1 section names each fix the issue lists as merged since v0.1.0 by its number: #852, #856 and #861."""
     record_property("proves", "867.2")
     lines = read("CHANGELOG.md").splitlines()
     heads = [(i, m.group(1), m.group(2)) for i, line in enumerate(lines) if (m := HEADING.match(line))]
     names = [v for _, _, v in heads]
-    assert "v0.1.1" in names, f"867.2: CHANGELOG.md has no v0.1.1 section; its version headings are {names}"
-    assert names.index("v0.1.1") < names.index("v0.1.0"), "867.2: the v0.1.1 section is not above v0.1.0"
-    i, level, _ = heads[names.index("v0.1.1")]
-    items = []
+    assert names and names[0] == "v0.1.1", f"867.2: CHANGELOG.md's newest version heading is not v0.1.1; its headings are {names}"
+    assert "v0.1.0" in names, "867.2: CHANGELOG.md lost its v0.1.0 section below v0.1.1"
+    i, level, _ = heads[0]
+    body = []
     for later in lines[i + 1:]:
         h = re.match(r"^(#{1,6})\s", later)
         if h and len(h.group(1)) <= len(level):
             break
-        if re.match(r"\s*[-*]\s+\S", later):
-            items.append(later)
-    assert len(items) >= 3, f"867.2: the v0.1.1 section lists {len(items)} items, fewer than the 3 fixes since v0.1.0"
+        body.append(later)
+    text = "\n".join(body)
+    missing = [n for n in ("#852", "#856", "#861") if not re.search(re.escape(n) + r"(?![0-9])", text)]
+    assert not missing, f"867.2: the v0.1.1 section does not name {missing}, fixes merged since v0.1.0"
 
 
 def test_install_file_calls_newest_version(record_property):
