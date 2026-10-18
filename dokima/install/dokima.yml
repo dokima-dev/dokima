@@ -9,7 +9,8 @@ on:
   merge_group:
   push: {branches: [main]}
   schedule: [{cron: "*/15 * * * *"}, {cron: "17 6 * * *"}]
-  workflow_run: {workflows: [dokima], types: [in_progress, completed]}
+  # Every workflow, the repo's own CI included, so the card redraws when it finishes (#859).
+  workflow_run: {workflows: ["*"], types: [in_progress, completed]}
   repository_dispatch: {types: [dokima-next]}
   workflow_dispatch:
 permissions: {contents: read, issues: write, pull-requests: read, actions: read, checks: read}
