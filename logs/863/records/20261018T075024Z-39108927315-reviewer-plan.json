@@ -1,0 +1,270 @@
+{
+ "role": "reviewer",
+ "stage": "plan",
+ "run_id": "39108927315",
+ "commit_before": "e3ac23ccbc031c74929ed71ec16956d0a5bcd02c",
+ "started_by": "dokima-runtime[bot]",
+ "models": [
+  "claude-opus-5-5"
+ ],
+ "report": {
+  "duration_ms": 177731,
+  "turns": 13,
+  "cost_usd": 0.5066048000000001,
+  "tokens_in": 558895,
+  "tokens_out": 4540
+ },
+ "log": "https://github.com/dokima-dev/dokima/blob/logs/logs/863/39108927315-reviewer-plan.md",
+ "run": "https://github.com/dokima-dev/dokima/actions/runs/39108927315",
+ "handback": {
+  "previous_step": {
+   "did": [
+    "The planner planned the issue again after main changed under its pull request.",
+    "It kept the same ten criteria and the same tests."
+   ],
+   "decided": [
+    "It now lists the two issues the worker filed as waiting on this one."
+   ],
+   "open": [
+    "The worker must merge its hotfix check with main's new check for unplanned pull requests."
+   ]
+  },
+  "verdict": "approve",
+  "summary": "The plan is unchanged after the clash with main; all ten tests still fail on main for the missing feature.",
+  "raises": [],
+  "answers": [],
+  "asks": [
+   {
+    "ask": "An issue labeled `hotfix` skips planning and plan review.",
+    "source": "https://github.com/dokima-dev/dokima/issues/750",
+    "criterion": "863.2"
+   },
+   {
+    "ask": "By hand, the owner's `/work` starts a hotfix's worker.",
+    "source": "https://github.com/dokima-dev/dokima/issues/750#issuecomment-6246479912",
+    "criterion": "863.1"
+   },
+   {
+    "ask": "When its turn comes (by hand, or on autopilot once nothing open blocks it), the worker builds straight from the issue's text",
+    "source": "https://github.com/dokima-dev/dokima/issues/750",
+    "criterion": "863.2"
+   },
+   {
+    "ask": "the text is the whole ask.",
+    "source": "https://github.com/dokima-dev/dokima/issues/750",
+    "criterion": "863.3"
+   },
+   {
+    "ask": "Code review still runs and judges the diff against the issue's text",
+    "source": "https://github.com/dokima-dev/dokima/issues/750",
+    "criterion": "863.6"
+   },
+   {
+    "ask": "All tests and the merge gate still run, as for any pull request.",
+    "source": "https://github.com/dokima-dev/dokima/issues/750",
+    "criterion": "863.7"
+   },
+   {
+    "ask": "The worker may add or change a small test that pins the fix",
+    "source": "https://github.com/dokima-dev/dokima/issues/750",
+    "criterion": "863.4"
+   },
+   {
+    "ask": "When code review finds the change bigger than the ask",
+    "source": "https://github.com/dokima-dev/dokima/issues/750",
+    "criterion": "863.8"
+   },
+   {
+    "ask": "it goes back to normal planning, saying why.",
+    "source": "https://github.com/dokima-dev/dokima/issues/750",
+    "criterion": "863.9"
+   },
+   {
+    "ask": "keep the prompts free of anything about Dokima's own repo, so they fit any repo.",
+    "source": "https://github.com/dokima-dev/dokima/issues/750#issuecomment-6246479912",
+    "criterion": "863.10"
+   }
+  ],
+  "behaviors": [
+   {
+    "criterion": "863.1",
+    "one_behavior": true,
+    "why": "One action, owner's work command; one result, the worker starts."
+   },
+   {
+    "criterion": "863.2",
+    "one_behavior": true,
+    "why": "One case, an unblocked hotfix on autopilot; one result, worker not planner."
+   },
+   {
+    "criterion": "863.3",
+    "one_behavior": true,
+    "why": "One result: the worker's pack holds the issue text as the ask."
+   },
+   {
+    "criterion": "863.4",
+    "one_behavior": true,
+    "why": "One result: the worker's changes stay on the pull request."
+   },
+   {
+    "criterion": "863.5",
+    "one_behavior": true,
+    "why": "One result: code review starts when the worker finishes."
+   },
+   {
+    "criterion": "863.6",
+    "one_behavior": true,
+    "why": "One result: the review pack holds the issue text as the ask."
+   },
+   {
+    "criterion": "863.7",
+    "one_behavior": true,
+    "why": "One result: an approved hotfix with passing checks passes the gate."
+   },
+   {
+    "criterion": "863.8",
+    "one_behavior": true,
+    "why": "One result: a too big hotfix starts the planner."
+   },
+   {
+    "criterion": "863.9",
+    "one_behavior": true,
+    "why": "One result: a comment saying why on the issue."
+   },
+   {
+    "criterion": "863.10",
+    "one_behavior": true,
+    "why": "One result: both hotfix prompts name nothing of Dokima's repo."
+   }
+  ],
+  "edge_cases": [
+   {
+    "criterion": "863.1",
+    "cut": [],
+    "missing": []
+   },
+   {
+    "criterion": "863.2",
+    "cut": [],
+    "missing": []
+   },
+   {
+    "criterion": "863.3",
+    "cut": [],
+    "missing": []
+   },
+   {
+    "criterion": "863.4",
+    "cut": [],
+    "missing": []
+   },
+   {
+    "criterion": "863.5",
+    "cut": [],
+    "missing": []
+   },
+   {
+    "criterion": "863.6",
+    "cut": [],
+    "missing": []
+   },
+   {
+    "criterion": "863.7",
+    "cut": [],
+    "missing": []
+   },
+   {
+    "criterion": "863.8",
+    "cut": [],
+    "missing": []
+   },
+   {
+    "criterion": "863.9",
+    "cut": [],
+    "missing": []
+   },
+   {
+    "criterion": "863.10",
+    "cut": [],
+    "missing": []
+   }
+  ],
+  "tests": [
+   {
+    "test": "tests/test_hotfix.py::test_work_on_a_hotfix_starts_its_worker_with_no_plan",
+    "only_its_behavior": true,
+    "why": "Runs the real flow and checks only 863.1's result, with its named edge cases."
+   },
+   {
+    "test": "tests/test_hotfix.py::test_autopilot_starts_a_hotfix_worker_instead_of_its_planner",
+    "only_its_behavior": true,
+    "why": "Runs the real flow and checks only 863.2's result, with its named edge cases."
+   },
+   {
+    "test": "tests/test_hotfix.py::test_a_hotfix_worker_pack_gives_the_issue_text_as_the_ask",
+    "only_its_behavior": true,
+    "why": "Runs the real flow and checks only 863.3's result, with its named edge cases."
+   },
+   {
+    "test": "tests/test_hotfix.py::test_a_hotfix_worker_change_stays_on_the_pull_request",
+    "only_its_behavior": true,
+    "why": "Runs the real flow and checks only 863.4's result, with its named edge cases."
+   },
+   {
+    "test": "tests/test_hotfix.py::test_a_finished_hotfix_worker_starts_code_review_on_its_pull_request",
+    "only_its_behavior": true,
+    "why": "Runs the real flow and checks only 863.5's result, with its named edge cases."
+   },
+   {
+    "test": "tests/test_hotfix.py::test_code_review_of_a_hotfix_gets_the_issue_text_as_the_ask",
+    "only_its_behavior": true,
+    "why": "Runs the real flow and checks only 863.6's result, with its named edge cases."
+   },
+   {
+    "test": "tests/test_hotfix.py::test_an_approved_hotfix_passes_the_merge_gate_like_any_pull_request",
+    "only_its_behavior": true,
+    "why": "Runs the real flow and checks only 863.7's result, with its named edge cases."
+   },
+   {
+    "test": "tests/test_hotfix.py::test_code_review_sends_a_too_big_hotfix_to_the_planner",
+    "only_its_behavior": true,
+    "why": "Runs the real flow and checks only 863.8's result, with its named edge cases."
+   },
+   {
+    "test": "tests/test_hotfix.py::test_a_hotfix_sent_back_to_planning_says_why_on_the_issue",
+    "only_its_behavior": true,
+    "why": "Runs the real flow and checks only 863.9's result, with its named edge cases."
+   },
+   {
+    "test": "tests/test_hotfix.py::test_hotfix_prompts_name_nothing_from_dokimas_own_repo",
+    "only_its_behavior": true,
+    "why": "Runs the real flow and checks only 863.10's result, with its named edge cases."
+   }
+  ],
+  "size": "ok",
+  "boxes": {
+   "dropped": "none",
+   "added": "none",
+   "superseded": "none",
+   "conflicts": "none",
+   "edges": {
+    "863.1": "covered",
+    "863.2": "covered",
+    "863.3": "covered",
+    "863.4": "covered",
+    "863.5": "covered",
+    "863.6": "covered",
+    "863.7": "covered",
+    "863.8": "covered",
+    "863.9": "covered",
+    "863.10": "covered"
+   },
+   "poor_tests": "none"
+  }
+ },
+ "check": {
+  "passed": true,
+  "problems": []
+ },
+ "url": "https://github.com/dokima-dev/dokima/issues/863#issuecomment-6247287399"
+}
