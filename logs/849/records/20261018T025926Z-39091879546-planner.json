@@ -1,0 +1,77 @@
+{
+ "role": "planner",
+ "stage": null,
+ "run_id": "39091879546",
+ "commit_before": "c68db07f49b74f1109fbcbd2fa85633369cf5092",
+ "started_by": "dokima-runtime[bot]",
+ "models": [
+  "claude-opus-5-5"
+ ],
+ "report": {
+  "duration_ms": 105043,
+  "turns": 16,
+  "cost_usd": 0.6595552,
+  "tokens_in": 775061,
+  "tokens_out": 5950
+ },
+ "log": "https://github.com/dokima-dev/dokima/blob/logs/logs/849/39091879546-planner.md",
+ "run": "https://github.com/dokima-dev/dokima/actions/runs/39091879546",
+ "handback": {
+  "kind": "user_story",
+  "title": "A changelog lists what v0.1.0 does",
+  "summary": "The repo gains a changelog whose v0.1.0 section lists what that version does.",
+  "user_story": "Owners read in one changelog what Dokima's first version, v0.1.0, does.",
+  "acceptance_criteria": [
+   {
+    "text": "When the changes land, the repo's changelog has a v0.1.0 section listing what that version does.",
+    "words": "the changelog listing what v0.1.0 does",
+    "source": "https://github.com/dokima-dev/dokima/issues/849",
+    "files": [
+     "CHANGELOG.md"
+    ],
+    "edge_cases": [
+     {
+      "case": "The v0.1.0 heading has nothing listed under it.",
+      "test": "tests/test_changelog.py::test_changelog_lists_v010"
+     },
+     {
+      "case": "The changelog has no heading naming v0.1.0.",
+      "test": "tests/test_changelog.py::test_changelog_lists_v010"
+     }
+    ]
+   }
+  ],
+  "non_functional": [],
+  "tests": {
+   "849.1": [
+    "tests/test_changelog.py::test_changelog_lists_v010"
+   ]
+  },
+  "test_changes": {},
+  "links": {
+   "blocked_by": [],
+   "blocks": [],
+   "relates_to": [
+    755,
+    752
+   ]
+  },
+  "raises": [
+   {
+    "kind": "question",
+    "to": "owner",
+    "label": "List checked by reading",
+    "text": "A test only checks the list exists. Is your reading at approval enough to judge it true? Plan assumes yes.",
+    "evidence": "`tests/test_changelog.py::test_changelog_lists_v010` checks a v0.1.0 section with at least one list item.",
+    "raised_by": "planner",
+    "id": "P1"
+   }
+  ],
+  "answers": []
+ },
+ "check": {
+  "passed": true,
+  "problems": []
+ },
+ "url": "https://github.com/dokima-dev/dokima/issues/849#issuecomment-6244949027"
+}
