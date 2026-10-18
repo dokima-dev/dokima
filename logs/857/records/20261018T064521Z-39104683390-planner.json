@@ -1,0 +1,118 @@
+{
+ "role": "planner",
+ "stage": null,
+ "run_id": "39104683390",
+ "commit_before": "9833b6454271a4f0f3e3190bdb99c03e6e83d69d",
+ "started_by": "dokima-runtime[bot]",
+ "models": [
+  "claude-opus-5-5"
+ ],
+ "report": {
+  "duration_ms": 433984,
+  "turns": 5,
+  "cost_usd": 0.291038,
+  "tokens_in": 189113,
+  "tokens_out": 1219
+ },
+ "log": "https://github.com/dokima-dev/dokima/blob/logs/logs/857/39104683390-planner.md",
+ "run": "https://github.com/dokima-dev/dokima/actions/runs/39104683390",
+ "handback": {
+  "kind": "user_story",
+  "title": "Pull requests with no plan pass unless Dokima opened them",
+  "summary": "People and Dependabot can merge without a Dokima plan; Dokima's own pull requests still need one.",
+  "user_story": "People and Dependabot merge pull requests without a Dokima plan, while Dokima's own stay held to theirs.",
+  "acceptance_criteria": [
+   {
+    "text": "When a person opens a pull request with no approved plan, the Acceptance criteria check passes.",
+    "words": "The required \"Acceptance criteria\" check fails every PR without an approved Dokima plan, including human and Dependabot PRs.",
+    "source": "https://github.com/dokima-dev/dokima/issues/744",
+    "files": [
+     "dokima/checks.py",
+     "dokima/defaults.yaml",
+     ".github/workflows/acceptance-criteria.yml"
+    ],
+    "edge_cases": [
+     {
+      "case": "The pull request names an issue that has no approved plan.",
+      "test": "tests/test_unplanned_prs.py::test_a_persons_pull_request_with_no_plan_passes"
+     }
+    ]
+   },
+   {
+    "text": "When Dependabot opens a pull request with no approved plan, the Acceptance criteria check passes.",
+    "words": "The required \"Acceptance criteria\" check fails every PR without an approved Dokima plan, including human and Dependabot PRs.",
+    "source": "https://github.com/dokima-dev/dokima/issues/744",
+    "files": [
+     "dokima/checks.py",
+     "dokima/defaults.yaml",
+     ".github/workflows/acceptance-criteria.yml"
+    ],
+    "no_edge_cases": "Dependabot's pull requests name no issue, so there is one case."
+   },
+   {
+    "text": "When Dokima opens an issue's pull request with no approved plan, the Acceptance criteria check still fails.",
+    "words": "only Dokima's own PRs are held to the plan",
+    "source": "https://github.com/dokima-dev/dokima/issues/744",
+    "files": [
+     "dokima/checks.py",
+     "dokima/defaults.yaml"
+    ],
+    "no_edge_cases": "Dokima opens an issue's pull request one way only, from its issue branch."
+   },
+   {
+    "text": "When the unplanned pull requests setting is not allow, a person's unplanned pull request fails the check.",
+    "words": "Setting `merge.unplanned_prs: allow` (default) lets them through",
+    "source": "https://github.com/dokima-dev/dokima/issues/744",
+    "files": [
+     "dokima/checks.py",
+     "dokima/defaults.yaml"
+    ],
+    "edge_cases": [
+     {
+      "case": "The pull request names an issue that has no approved plan.",
+      "test": "tests/test_unplanned_prs.py::test_a_setting_other_than_allow_fails_a_persons_unplanned_pull_request"
+     }
+    ]
+   }
+  ],
+  "non_functional": [],
+  "tests": {
+   "857.1": [
+    "tests/test_unplanned_prs.py::test_a_persons_pull_request_with_no_plan_passes"
+   ],
+   "857.2": [
+    "tests/test_unplanned_prs.py::test_dependabots_pull_request_with_no_plan_passes"
+   ],
+   "857.3": [
+    "tests/test_unplanned_prs.py::test_dokimas_pull_request_with_no_plan_still_fails"
+   ],
+   "857.4": [
+    "tests/test_unplanned_prs.py::test_a_setting_other_than_allow_fails_a_persons_unplanned_pull_request"
+   ]
+  },
+  "test_changes": {
+   "tests/test_manual_fix_check.py::test_only_dokimas_app_gets_the_manual_fix_check": "Owner's #744 lets a person's unplanned pull request pass; only Dokima still gets manual fix.",
+   "tests/test_test_settings.py::test_prompt_folder_changes_take_the_text_only_shortcut": "Owner's #744 lets unplanned pull requests pass; still proves `.github/` gets no shortcut.",
+   "tests/test_test_settings.py::test_the_folders_that_stop_the_text_only_shortcut_come_from_settings": "Owner's #744 lets unplanned pull requests pass; still proves listed folders get no shortcut."
+  },
+  "links": {
+   "blocked_by": [],
+   "blocks": [],
+   "relates_to": [
+    744
+   ]
+  },
+  "answers": [
+   {
+    "raise": "RW1",
+    "answer": "done",
+    "why": "Agreed: the owner exempted people and Dependabot only, so an unknown author stays held."
+   }
+  ]
+ },
+ "check": {
+  "passed": true,
+  "problems": []
+ },
+ "url": "https://github.com/dokima-dev/dokima/issues/857#issuecomment-6246633876"
+}
