@@ -1,0 +1,232 @@
+{
+ "role": "reviewer",
+ "stage": "plan",
+ "run_id": "39102627571",
+ "commit_before": "ccbebe20951336dbdfb7da7800bf77e892c34308",
+ "started_by": "dokima-runtime[bot]",
+ "models": [
+  "claude-opus-5-5"
+ ],
+ "report": {
+  "duration_ms": 42002,
+  "turns": 7,
+  "cost_usd": 0.2841992,
+  "tokens_in": 258935,
+  "tokens_out": 4167
+ },
+ "log": "https://github.com/dokima-dev/dokima/blob/logs/logs/744/39102627571-reviewer-plan.md",
+ "run": "https://github.com/dokima-dev/dokima/actions/runs/39102627571",
+ "handback": {
+  "previous_step": {
+   "did": [
+    "The planner added a criterion: with no board, a missing Dokima check is still listed."
+   ],
+   "decided": [
+    "Installing the repo's needs and leaving out marked tests stay out, as the owner said."
+   ],
+   "open": []
+  },
+  "verdict": "approve",
+  "summary": "The split now carries every remaining ask, and both earlier blockers are settled.",
+  "raises": [],
+  "answers": [],
+  "asks": [
+   {
+    "ask": "Setting `merge.unplanned_prs: allow` (default) lets them through",
+    "source": "https://github.com/dokima-dev/dokima/issues/744",
+    "criterion": "S1.1"
+   },
+   {
+    "ask": "including human and Dependabot PRs",
+    "source": "https://github.com/dokima-dev/dokima/issues/744",
+    "criterion": "S1.2"
+   },
+   {
+    "ask": "only Dokima's own PRs are held to the plan",
+    "source": "https://github.com/dokima-dev/dokima/issues/744",
+    "criterion": "S1.3"
+   },
+   {
+    "ask": "Setting `merge.unplanned_prs: allow` (default)",
+    "source": "https://github.com/dokima-dev/dokima/issues/744",
+    "criterion": "S1.4"
+   },
+   {
+    "ask": "Checks the repo added are not drift.",
+    "source": "https://github.com/dokima-dev/dokima/issues/744",
+    "criterion": "S2.1"
+   },
+   {
+    "ask": "The audit fails when no board is set; boards are optional and only exist for organizations.",
+    "source": "https://github.com/dokima-dev/dokima/issues/744",
+    "criterion": "S2.2"
+   },
+   {
+    "ask": "No board means nothing to report.",
+    "source": "https://github.com/dokima-dev/dokima/issues/744",
+    "criterion": "S2.3"
+   },
+   {
+    "ask": "Fix the review's two blockers.",
+    "source": "https://github.com/dokima-dev/dokima/issues/744#issuecomment-6246343182",
+    "criterion": "S2.4"
+   },
+   {
+    "ask": "The card redraws only when Dokima's own workflows finish, not when the adopter's CI does.",
+    "source": "https://github.com/dokima-dev/dokima/issues/744",
+    "criterion": "S3.1"
+   },
+   {
+    "ask": "The merge gate already waits on every required check; the card must show them.",
+    "source": "https://github.com/dokima-dev/dokima/issues/744",
+    "criterion": "S3.2"
+   },
+   {
+    "ask": "a human PR merges on a trial repo",
+    "source": "https://github.com/dokima-dev/dokima/issues/744",
+    "criterion": "S1.1"
+   },
+   {
+    "ask": "the repo's own CI is neither flagged nor broken",
+    "source": "https://github.com/dokima-dev/dokima/issues/744",
+    "criterion": "S2.1"
+   }
+  ],
+  "behaviors": [
+   {
+    "criterion": "S1.1",
+    "one_behavior": true,
+    "why": "One case, one check result."
+   },
+   {
+    "criterion": "S1.2",
+    "one_behavior": true,
+    "why": "One case, one check result."
+   },
+   {
+    "criterion": "S1.3",
+    "one_behavior": true,
+    "why": "One case, one check result."
+   },
+   {
+    "criterion": "S1.4",
+    "one_behavior": true,
+    "why": "One setting value, one check result."
+   },
+   {
+    "criterion": "S2.1",
+    "one_behavior": true,
+    "why": "One rule state, no line."
+   },
+   {
+    "criterion": "S2.2",
+    "one_behavior": true,
+    "why": "One state, one exit code."
+   },
+   {
+    "criterion": "S2.3",
+    "one_behavior": true,
+    "why": "One state, no board lines."
+   },
+   {
+    "criterion": "S2.4",
+    "one_behavior": true,
+    "why": "One state, one listed check."
+   },
+   {
+    "criterion": "S3.1",
+    "one_behavior": true,
+    "why": "One event, one redraw."
+   },
+   {
+    "criterion": "S3.2",
+    "one_behavior": true,
+    "why": "One card row per required check."
+   }
+  ],
+  "edge_cases": [
+   {
+    "criterion": "S1.1",
+    "cut": [],
+    "missing": []
+   },
+   {
+    "criterion": "S1.2",
+    "cut": [],
+    "missing": []
+   },
+   {
+    "criterion": "S1.3",
+    "cut": [],
+    "missing": []
+   },
+   {
+    "criterion": "S1.4",
+    "cut": [],
+    "missing": []
+   },
+   {
+    "criterion": "S2.1",
+    "cut": [],
+    "missing": []
+   },
+   {
+    "criterion": "S2.2",
+    "cut": [],
+    "missing": []
+   },
+   {
+    "criterion": "S2.3",
+    "cut": [],
+    "missing": []
+   },
+   {
+    "criterion": "S2.4",
+    "cut": [],
+    "missing": []
+   },
+   {
+    "criterion": "S3.1",
+    "cut": [],
+    "missing": []
+   },
+   {
+    "criterion": "S3.2",
+    "cut": [],
+    "missing": []
+   }
+  ],
+  "tests": [],
+  "size": "ok",
+  "boxes": {
+   "dropped": "none",
+   "added": [
+    {
+     "what": "Any setting value other than allow keeps today's failing check.",
+     "kind": "needed",
+     "serves": "S1.4"
+    }
+   ],
+   "superseded": "none",
+   "conflicts": "none",
+   "edges": {
+    "S1.1": "covered",
+    "S1.2": "covered",
+    "S1.3": "covered",
+    "S1.4": "covered",
+    "S2.1": "covered",
+    "S2.2": "covered",
+    "S2.3": "covered",
+    "S2.4": "covered",
+    "S3.1": "covered",
+    "S3.2": "covered"
+   },
+   "poor_tests": "none"
+  }
+ },
+ "check": {
+  "passed": true,
+  "problems": []
+ },
+ "url": "https://github.com/dokima-dev/dokima/issues/744#issuecomment-6246358457"
+}
