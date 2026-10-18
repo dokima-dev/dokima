@@ -175,3 +175,27 @@ def test_adopter_pr_whose_all_tests_failed_is_not_brought_up_to_date(record_prop
                            f"updates {gh.updates()}")
     assert 70 not in updated, (f"846.4: #70's all tests failed in an adopter's repo as {ALL_TESTS!r}, yet it was "
                                f"brought up to date; updates {gh.updates()}")
+
+
+# 846.5: in an adopter's repo, the card's ready status finds the checks by the names GitHub shows
+
+def test_adopter_card_says_ready_for_approval_by_shown_names(record_property, adopter):
+    """In an adopter's repo, all green and approved, the card says Ready for approval.
+
+    Draws a card whose code review approved and whose PR carries criterion 40.1's check and all tests, both named as
+    GitHub shows them in an adopter's repo and both passed. The card must say Ready for approval; with all tests
+    failed instead, it must say See why not every check passed. Proves 846.5."""
+    record_property("proves", "846.5")
+    recs = RECS + [rec("reviewer", "pr", n=14, verdict="approve")]
+    found = lambda runs: {"recs": recs, "pr": PR, "check_runs": runs, "reviews": [], "owners": {"boss"},
+                          "tests": TESTS, "worker": {"status": "completed", "conclusion": "success",
+                                                     "html_url": "https://github.com/o/r/actions/runs/1"},
+                          "children": []}
+    green = card.render(REPO, ISSUE, found([check(CRITERION, n=1), check(ALL_TESTS, n=4)]))
+    assert "Ready for approval" in green, (
+        f"846.5: code review approved and {CRITERION!r} and {ALL_TESTS!r} passed in an adopter's repo, but the card "
+        f"does not say Ready for approval:\n{green}")
+    red = card.render(REPO, ISSUE, found([check(CRITERION, n=1), check(ALL_TESTS, "failure", n=4)]))
+    assert "See why not every check passed" in red and "Ready for approval" not in red, (
+        f"846.5: {ALL_TESTS!r} failed in an adopter's repo, but the card does not say See why not every check "
+        f"passed:\n{red}")
