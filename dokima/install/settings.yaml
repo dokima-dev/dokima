@@ -1,2 +1,7 @@
 # This repo's settings, over Dokima's shipped defaults. Name only what differs, and never a secret's value.
 co_author: "{bot}"
+# GitHub names a check after the workflows that call it, so here Dokima's checks show under these names (#820).
+gates:
+  required:
+    - {name: all tests, shown_as: "dokima / full-suite / all tests"}
+    - {name: Acceptance criteria, shown_as: "dokima / acceptance-criteria / Acceptance criteria"}
