@@ -45,7 +45,7 @@ Your repo's owner gives commands and approves. Optional: a `.github/CODEOWNERS` 
 
 ## 4. Branch rule on main
 
-Require these checks: **all tests** and **Acceptance criteria**. Without a required check the merge gate refuses to pass anything. Enforcing it on private repos needs a paid GitHub plan.
+Require these checks: **`dokima / full-suite / all tests`** and **`dokima / acceptance-criteria / Acceptance criteria`**. GitHub shows them under these full names, since they run inside `dokima.yml`. Without a required check the merge gate refuses to pass anything. Enforcing it on private repos needs a paid GitHub plan.
 
 ## 5. Board (optional)
 

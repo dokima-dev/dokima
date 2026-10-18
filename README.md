@@ -122,7 +122,7 @@ Setup:
 3. Create an Actions environment named `keys` holding the secrets `DOKIMA_APP_KEY` (the app's private key) and `CLAUDE_CODE_OAUTH_TOKEN`.
 4. Set the repo variable `DOKIMA_APP_ID`. Optionally set `DOKIMA_BOARD`.
 5. Add `.github/CODEOWNERS` with a `*` line naming who may give commands and approve.
-6. Protect `main`, requiring the checks `all tests` and `Acceptance criteria`.
+6. Protect `main`, requiring the checks `dokima / full-suite / all tests` and `dokima / acceptance-criteria / Acceptance criteria`. GitHub shows them under these full names, since they run inside `dokima.yml`.
 7. Open an issue and comment `/plan`.
 
 A daily audit ([`audit.yml`](.github/workflows/audit.yml)) compares the repo's settings with what δokima needs ([`dokima/manifest.py`](dokima/manifest.py)) and reports drift on one pinned **Setup** issue.
