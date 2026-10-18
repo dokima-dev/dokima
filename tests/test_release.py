@@ -208,75 +208,72 @@ def run_release(tmp_path, crit, releases=(), refuse=False, changelog=SAMPLE):
     return done, json.loads(state.read_text())
 
 
-def test_release_notes_list_v010(tmp_path, record_property):
-    """The v0.1.0 release's notes list what that version does, taken from the repo's changelog.
+def test_release_notes_are_changelog_section(tmp_path, record_property):
+    """The v0.1.0 release's notes are the changelog's v0.1.0 section.
 
-    755.1: reads the v0.1.0 section of CHANGELOG.md at the repo root, checks it lists at least one thing, then runs the
-    command release.yml runs, on a copy of that changelog, and checks the notes it sends GitHub carry every item."""
-    record_property("proves", "755.1")
-    assert os.path.isfile(CHANGELOG), "755.1: CHANGELOG.md is missing from the repo root"
-    with open(CHANGELOG) as f:
-        text = f.read()
-    section = changelog_section(text, "v0.1.0")
-    assert section is not None, "755.1: CHANGELOG.md has no heading naming v0.1.0"
-    items = [re.sub(r"^\s*([-*+]|\d+\.)\s+", "", line).strip() for line in section
-             if re.match(r"^\s*([-*+]|\d+\.)\s+\S", line)]
-    assert items, "755.1: the v0.1.0 section of CHANGELOG.md lists nothing that version does"
-    done, state = run_release(tmp_path, "755.1", changelog=text)
-    assert not state["unsupported"], f"755.1: the release command made calls the fake gh does not know: {state['unsupported']}"
-    assert done.returncode == 0, f"755.1: the release command failed: {done.stderr[-800:]}"
-    assert len(state["created"]) == 1, f"755.1: expected one release made, got {state['created']}"
+    755.3: runs the command release.yml runs on a changelog holding an Unreleased section above v0.1.0, and checks
+    the notes it sends GitHub carry every v0.1.0 line and nothing from the other section."""
+    record_property("proves", "755.3")
+    changelog = ("# Changelog\n\n## Unreleased\n\n- A draft line not yet released.\n\n"
+                 "## v0.1.0\n\n- Work starts with a comment: /plan, /work and /review.\n- One card on every issue.\n")
+    done, state = run_release(tmp_path, "755.3", changelog=changelog)
+    assert not state["unsupported"], f"755.3: the release command made calls the fake gh does not know: {state['unsupported']}"
+    assert done.returncode == 0, f"755.3: the release command failed: {done.stderr[-800:]}"
+    assert len(state["created"]) == 1, f"755.3: expected one release made, got {state['created']}"
     notes = state["created"][0]["notes"]
-    missing = [i for i in items if i not in notes]
-    assert not missing, f"755.1: the v0.1.0 release notes leave out these changelog lines: {missing}"
+    missing = [i for i in ("Work starts with a comment: /plan, /work and /review.", "One card on every issue.")
+               if i not in notes]
+    assert not missing, f"755.3: the v0.1.0 release notes leave out these changelog lines: {missing}"
+    assert "A draft line not yet released." not in notes, \
+        "755.3: the v0.1.0 release notes carry a line from the changelog's Unreleased section"
 
 
 def test_release_makes_tag(tmp_path, record_property):
     """When the changelog reaches main, the v0.1.0 tag is made at that commit.
 
-    755.2: runs the command release.yml runs on a push to main against a fake GitHub with no releases, and checks it
+    755.1: runs the command release.yml runs on a push to main against a fake GitHub with no releases, and checks it
     made exactly one tag, v0.1.0, at the pushed commit."""
-    record_property("proves", "755.2")
-    done, state = run_release(tmp_path, "755.2")
-    assert not state["unsupported"], f"755.2: the release command made calls the fake gh does not know: {state['unsupported']}"
-    assert done.returncode == 0, f"755.2: the release command failed: {done.stderr[-800:]}"
+    record_property("proves", "755.1")
+    done, state = run_release(tmp_path, "755.1")
+    assert not state["unsupported"], f"755.1: the release command made calls the fake gh does not know: {state['unsupported']}"
+    assert done.returncode == 0, f"755.1: the release command failed: {done.stderr[-800:]}"
     tags = [(c["tag"], c["target"]) for c in state["created"]]
-    assert tags == [("v0.1.0", SHA)], f"755.2: expected one v0.1.0 tag at the pushed commit, got {tags}"
+    assert tags == [("v0.1.0", SHA)], f"755.1: expected one v0.1.0 tag at the pushed commit, got {tags}"
 
 
 def test_release_skips_when_tagged(tmp_path, record_property):
     """A later push to main makes no second v0.1.0 release once it exists.
 
-    755.2, edge case: every push to main runs the workflow, so with v0.1.0 already released the command makes nothing
+    755.1, edge case: every push to main runs the workflow, so with v0.1.0 already released the command makes nothing
     and still succeeds."""
-    record_property("proves", "755.2")
-    done, state = run_release(tmp_path, "755.2", releases=["v0.1.0"])
-    assert not state["unsupported"], f"755.2: the release command made calls the fake gh does not know: {state['unsupported']}"
-    assert done.returncode == 0, f"755.2: the release command failed when v0.1.0 already exists: {done.stderr[-800:]}"
-    assert state["created"] == [], f"755.2: v0.1.0 already exists, yet the command made {state['created']}"
+    record_property("proves", "755.1")
+    done, state = run_release(tmp_path, "755.1", releases=["v0.1.0"])
+    assert not state["unsupported"], f"755.1: the release command made calls the fake gh does not know: {state['unsupported']}"
+    assert done.returncode == 0, f"755.1: the release command failed when v0.1.0 already exists: {done.stderr[-800:]}"
+    assert state["created"] == [], f"755.1: v0.1.0 already exists, yet the command made {state['created']}"
 
 
 def test_release_makes_github_release(tmp_path, record_property):
     """When the changelog reaches main, a GitHub release named v0.1.0 is made.
 
-    755.3: runs the command release.yml runs on a push to main against a fake GitHub, and checks GitHub's releases
+    755.2: runs the command release.yml runs on a push to main against a fake GitHub, and checks GitHub's releases
     then hold v0.1.0."""
-    record_property("proves", "755.3")
-    done, state = run_release(tmp_path, "755.3")
-    assert not state["unsupported"], f"755.3: the release command made calls the fake gh does not know: {state['unsupported']}"
-    assert done.returncode == 0, f"755.3: the release command failed: {done.stderr[-800:]}"
+    record_property("proves", "755.2")
+    done, state = run_release(tmp_path, "755.2")
+    assert not state["unsupported"], f"755.2: the release command made calls the fake gh does not know: {state['unsupported']}"
+    assert done.returncode == 0, f"755.2: the release command failed: {done.stderr[-800:]}"
     assert [r["tag_name"] for r in state["releases"]] == ["v0.1.0"], \
-        f"755.3: expected GitHub to hold one release, v0.1.0, got {state['releases']}"
+        f"755.2: expected GitHub to hold one release, v0.1.0, got {state['releases']}"
 
 
 def test_release_refused_fails_the_run(tmp_path, record_property):
     """When GitHub refuses the release, the run fails, so the owner sees it.
 
-    755.3, edge case: the fake GitHub refuses to make the release; the command must exit non-zero, never pass quietly."""
-    record_property("proves", "755.3")
-    done, state = run_release(tmp_path, "755.3", refuse=True)
-    assert not state["unsupported"], f"755.3: the release command made calls the fake gh does not know: {state['unsupported']}"
+    755.2, edge case: the fake GitHub refuses to make the release; the command must exit non-zero, never pass quietly."""
+    record_property("proves", "755.2")
+    done, state = run_release(tmp_path, "755.2", refuse=True)
+    assert not state["unsupported"], f"755.2: the release command made calls the fake gh does not know: {state['unsupported']}"
     asked = [c for c in state["calls"] if c[:2] == ["release", "create"] or (c[:1] == ["api"] and "POST" in c)
              or (c[:1] == ["api"] and any(a.startswith("tag_name=") for a in c))]
-    assert asked, "755.3: the command never asked GitHub for the release"
-    assert done.returncode != 0, "755.3: GitHub refused the release, yet the command exited 0"
+    assert asked, "755.2: the command never asked GitHub for the release"
+    assert done.returncode != 0, "755.2: GitHub refused the release, yet the command exited 0"
