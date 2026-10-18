@@ -1,0 +1,72 @@
+{
+ "role": "worker",
+ "stage": null,
+ "run_id": "39105352431",
+ "commit_before": "98e53c12419347b2229c3ce36be40325775eac98",
+ "started_by": "dokima-runtime[bot]",
+ "models": [
+  "claude-opus-5-5"
+ ],
+ "report": {
+  "duration_ms": 1632134,
+  "turns": 75,
+  "cost_usd": 4.8567172,
+  "tokens_in": 11613006,
+  "tokens_out": 40130
+ },
+ "log": "https://github.com/dokima-dev/dokima/blob/logs/logs/863/39105352431-worker.md",
+ "run": "https://github.com/dokima-dev/dokima/actions/runs/39105352431",
+ "handback": {
+  "summary": "Issues labeled hotfix now build from their own text, get code review and the merge gate, with no plan.",
+  "criteria": {
+   "863.1": "`agent.yml` reads the hotfix label before the pack and starts the branch from main; `pack` in `dokima/agent_roles.py` builds a hotfix pack with no plan.",
+   "863.2": "`start_first` and `start_unblocked` in `dokima/agent_autopilot.py` start a never-started hotfix's worker, with its own Autopilot line, instead of its planner.",
+   "863.3": "`dokima/hotfix.py` writes the issue's text to `ask.md`; `agent.yml` points the prompt to it and keeps the worker's hotfix section.",
+   "863.4": "`dokima/fence.py` takes `-` for a hotfix and keeps every change; `agent.yml` passes it.",
+   "863.5": "The worker's hand-back is checked with `-` for the plan, so it passes, pushes, opens the draft pull request and starts code review.",
+   "863.6": "The pr-stage pack holds `ask.md`, the diff and the worker's log; `problems_pack` takes `ask.md` in place of `plan.json`.",
+   "863.7": "`dokima/checks.py` gives a never-planned hotfix one all-tests check; the review passes its check, so the usual merge gate runs.",
+   "863.8": "A hotfix review's blocker for the planner starts the planner; once a planner ran, the issue follows the normal flow.",
+   "863.9": "`back_to_planning` in `dokima/hotfix.py` comments the reviewer's blockers on the issue, called from `agent next`.",
+   "863.10": "The hotfix sections in `worker.md` and `reviewer.md` name nothing of Dokima's repo; `dokima.hotfix prompt` drops them from other runs."
+  },
+  "evidence": "`pytest -q tests/test_hotfix.py tests/test_handback_check.py tests/test_autopilot_close.py tests/test_autopilot_start.py`: 33 passed",
+  "raises": [
+   {
+    "kind": "issue",
+    "label": "Switch comment says planning",
+    "text": "After autopilot start, the switch comment says planning started even when a hotfix's worker started instead.",
+    "evidence": "`autopilot_comment` in `dokima/agent_autopilot.py` always writes `Planning started for`.",
+    "raised_by": "worker",
+    "id": "W1"
+   },
+   {
+    "kind": "issue",
+    "label": "Rules omit hotfix lane",
+    "text": "The flow rules and commands rules never describe the hotfix lane, so owners cannot read how it works.",
+    "evidence": "`rules/flow.md` and `rules/commands.md` hold no mention of hotfix.",
+    "raised_by": "worker",
+    "id": "W2"
+   }
+  ],
+  "answers": []
+ },
+ "check": {
+  "passed": true,
+  "problems": []
+ },
+ "dropped_by_fence": [],
+ "files_changed": [
+  ".github/workflows/agent.yml",
+  "dokima/agent_autopilot.py",
+  "dokima/agent_next.py",
+  "dokima/agent_roles.py",
+  "dokima/checks.py",
+  "dokima/fence.py",
+  "dokima/hotfix.py",
+  "dokima/roles/reviewer.md",
+  "dokima/roles/worker.md"
+ ],
+ "branch": "try/issue-863",
+ "url": "https://github.com/dokima-dev/dokima/issues/863#issuecomment-6246739039"
+}
