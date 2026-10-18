@@ -1,0 +1,52 @@
+{
+ "role": "worker",
+ "stage": null,
+ "run_id": "39104217454",
+ "commit_before": "0ac83904b54c6081d3e5d03f9e559df3ddb99e50",
+ "started_by": "dokima-runtime[bot]",
+ "models": [
+  "claude-opus-5-5"
+ ],
+ "report": {
+  "duration_ms": 160285,
+  "turns": 11,
+  "cost_usd": 0.5091218,
+  "tokens_in": 484811,
+  "tokens_out": 4723
+ },
+ "log": "https://github.com/dokima-dev/dokima/blob/logs/logs/857/39104217454-worker.md",
+ "run": "https://github.com/dokima-dev/dokima/actions/runs/39104217454",
+ "handback": {
+  "summary": "Pull requests a person or Dependabot opens with no plan now pass, unless the setting says otherwise.",
+  "criteria": {
+   "857.1": "`dokima/checks.py` main gives a known non-Dokima author's unplanned pull request the passing `unplanned` row; the workflow lets it pass.",
+   "857.2": "Same path: Dependabot is a known author other than Dokima's app, so its unplanned pull request gets the passing row.",
+   "857.3": "`unplanned_allowed` refuses Dokima's app, so its unplanned pull request keeps the failing no-plan row.",
+   "857.4": "`merge.unplanned_prs: allow` in `dokima/defaults.yaml`; any other value keeps the failing no-plan row."
+  },
+  "evidence": "pytest -q tests/test_unplanned_prs.py and neighbours: 60 passed in 22.62s",
+  "raises": [
+   {
+    "kind": "question",
+    "to": "planner",
+    "label": "Unknown author still fails",
+    "text": "A pull request whose event names no author still fails with no plan, as existing tests expect. Is that right?",
+    "evidence": "`tests/test_merge_check.py` and `tests/test_text_only.py` events have no user and expect the no-plan row.",
+    "raised_by": "worker",
+    "id": "W1"
+   }
+  ]
+ },
+ "check": {
+  "passed": true,
+  "problems": []
+ },
+ "dropped_by_fence": [],
+ "files_changed": [
+  ".github/workflows/acceptance-criteria.yml",
+  "dokima/checks.py",
+  "dokima/defaults.yaml"
+ ],
+ "branch": "try/issue-857",
+ "url": "https://github.com/dokima-dev/dokima/issues/857#issuecomment-6246573512"
+}
