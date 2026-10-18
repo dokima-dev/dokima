@@ -1,0 +1,252 @@
+{
+ "role": "planner",
+ "stage": null,
+ "run_id": "39108197683",
+ "commit_before": "45726bbcb0ddcad8aed2ae402637bad426b756b6",
+ "started_by": "RezaSoleymanifar",
+ "models": [
+  "claude-opus-5-5"
+ ],
+ "report": {
+  "duration_ms": 323770,
+  "turns": 17,
+  "cost_usd": 1.4492063999999998,
+  "tokens_in": 1215574,
+  "tokens_out": 26872
+ },
+ "log": "https://github.com/dokima-dev/dokima/blob/logs/logs/745/39108197683-planner.md",
+ "run": "https://github.com/dokima-dev/dokima/actions/runs/39108197683",
+ "handback": {
+  "kind": "user_story",
+  "title": "Dokima's own problems file themselves into Dokima's repo",
+  "summary": "Problems that are Dokima's fault, and its failed runs, on a trial repo file themselves into Dokima's repo.",
+  "user_story": "When Dokima misbehaves on another repo, the owner finds one issue for it in Dokima's repo, linking back.",
+  "acceptance_criteria": [
+   {
+    "text": "When the settings name an upstream repo, a problem tagged as Dokima's fault is filed there.",
+    "words": "Tagged problems file upstream.",
+    "source": "https://github.com/dokima-dev/dokima/issues/745",
+    "files": [
+     "dokima/agent_autopilot.py",
+     "dokima/raises.py",
+     "dokima/defaults.yaml",
+     "dokima/upstream.py",
+     ".github/workflows/agent.yml"
+    ],
+    "edge_cases": [
+     {
+      "case": "With no upstream repo set, the default, a tagged problem stays in the repo itself.",
+      "test": "tests/test_upstream.py::test_with_no_upstream_repo_a_tagged_problem_is_filed_in_the_repo_itself"
+     },
+     {
+      "case": "A problem that is the repo's own stays in the repo itself.",
+      "test": "tests/test_upstream.py::test_with_an_upstream_repo_an_untagged_problem_stays_in_the_repo_itself"
+     }
+    ]
+   },
+   {
+    "text": "When a problem is filed upstream, it links back to the issue where it was seen.",
+    "words": "with a link back",
+    "source": "https://github.com/dokima-dev/dokima/issues/745",
+    "files": [
+     "dokima/agent_autopilot.py",
+     "dokima/upstream.py"
+    ],
+    "no_edge_cases": "One link on one filing; repeats are criterion 4."
+   },
+   {
+    "text": "Every agent's instructions say how to judge and tag a problem as Dokima's, the repo's own, or unclear.",
+    "words": "each problem is first judged as Dokima's (its workflows, code, prompts, settings or install) or the repo's own (its code or its tests)",
+    "source": "https://github.com/dokima-dev/dokima/issues/745#issuecomment-6247192031",
+    "files": [
+     "dokima/raises.py",
+     "dokima/roles/raising.md"
+    ],
+    "no_edge_cases": "Fixed prompt text, checked for every role."
+   },
+   {
+    "text": "When the same tagged problem is raised again, it becomes a comment on the upstream issue, never a second issue.",
+    "words": "Repeats become comments on the existing upstream issue, never a second issue.",
+    "source": "https://github.com/dokima-dev/dokima/issues/745",
+    "files": [
+     "dokima/agent_autopilot.py",
+     "dokima/upstream.py"
+    ],
+    "no_edge_cases": "A first filing is proved by criterion 1."
+   },
+   {
+    "text": "When a shared workflow's job fails, the upstream repo gets an issue linking the failed run.",
+    "words": "files the failure upstream with the run link",
+    "source": "https://github.com/dokima-dev/dokima/issues/745",
+    "files": [
+     "dokima/upstream.py",
+     "dokima/defaults.yaml"
+    ],
+    "edge_cases": [
+     {
+      "case": "With no upstream repo set, a failure files nothing and the step passes.",
+      "test": "tests/test_upstream.py::test_with_no_upstream_repo_a_failed_run_files_nothing"
+     }
+    ]
+   },
+   {
+    "text": "Every job of each shared workflow, except the two test checks, ends with a step filing its failure upstream.",
+    "words": "a failed test check does not file upstream by itself",
+    "source": "https://github.com/dokima-dev/dokima/issues/745#issuecomment-6247192031",
+    "files": [
+     ".github/workflows/agent.yml",
+     ".github/workflows/assign.yml",
+     ".github/workflows/audit.yml",
+     ".github/workflows/autopilot.yml",
+     ".github/workflows/board.yml",
+     ".github/workflows/card.yml",
+     ".github/workflows/commands.yml",
+     ".github/workflows/reviews.yml",
+     ".github/workflows/testmon.yml",
+     ".github/workflows/uptodate.yml",
+     ".github/workflows/entry.yml",
+     "dokima/settings.py",
+     "dokima/upstream.py"
+    ],
+    "edge_cases": [
+     {
+      "case": "A failed test check files nothing upstream, even if its failure step runs.",
+      "test": "tests/test_upstream.py::test_a_failed_test_check_files_nothing_upstream"
+     }
+    ]
+   },
+   {
+    "text": "When the same failure happens twice, the upstream repo holds one issue with two comments, each linking its run.",
+    "words": "forcing the same Dokima-caused failure twice on the trial repo yields one upstream issue with two linked comments",
+    "source": "https://github.com/dokima-dev/dokima/issues/745",
+    "files": [
+     "dokima/upstream.py"
+    ],
+    "edge_cases": [
+     {
+      "case": "A different job's failure opens its own upstream issue.",
+      "test": "tests/test_upstream.py::test_a_different_failure_opens_its_own_upstream_issue"
+     }
+    ]
+   },
+   {
+    "text": "When an agent cannot tell whose fault a problem is, it stays in the repo, its issue saying so.",
+    "words": "When it cannot tell, it says so on the repo's issue and files nothing upstream.",
+    "source": "https://github.com/dokima-dev/dokima/issues/745#issuecomment-6247192031",
+    "files": [
+     "dokima/agent_autopilot.py",
+     "dokima/raises.py",
+     "dokima/upstream.py"
+    ],
+    "no_edge_cases": "One tag, one place; the no-upstream default is under criterion 1."
+   },
+   {
+    "text": "A problem filed upstream carries nothing from the private repo but its links back.",
+    "words": "naming only what Dokima did wrong, with nothing from the private repo",
+    "source": "https://github.com/dokima-dev/dokima/issues/745#issuecomment-6247192031",
+    "files": [
+     "dokima/agent_autopilot.py",
+     "dokima/upstream.py"
+    ],
+    "no_edge_cases": "One filing checked for numbers, names and the issue's words."
+   }
+  ],
+  "non_functional": [
+   {
+    "text": "Filing upstream mints its key from the App's existing key, with no new secret.",
+    "why": "The App's key already covers every repo it is installed on.",
+    "words": "so no new credential",
+    "source": "https://github.com/dokima-dev/dokima/issues/745",
+    "files": [
+     ".github/workflows/agent.yml",
+     ".github/workflows/assign.yml",
+     ".github/workflows/audit.yml",
+     ".github/workflows/autopilot.yml",
+     ".github/workflows/board.yml",
+     ".github/workflows/card.yml",
+     ".github/workflows/commands.yml",
+     ".github/workflows/reviews.yml",
+     ".github/workflows/testmon.yml",
+     ".github/workflows/uptodate.yml",
+     ".github/workflows/entry.yml",
+     "dokima/settings.py"
+    ],
+    "no_edge_cases": "Every workflow file is read."
+   }
+  ],
+  "tests": {
+   "745.1": [
+    "tests/test_upstream.py::test_with_an_upstream_repo_a_tagged_problem_is_filed_there",
+    "tests/test_upstream.py::test_with_no_upstream_repo_a_tagged_problem_is_filed_in_the_repo_itself",
+    "tests/test_upstream.py::test_with_an_upstream_repo_an_untagged_problem_stays_in_the_repo_itself"
+   ],
+   "745.2": [
+    "tests/test_upstream.py::test_a_problem_filed_upstream_links_back_to_the_issue_where_it_was_seen"
+   ],
+   "745.3": [
+    "tests/test_upstream.py::test_every_agent_is_told_how_to_judge_whose_fault_a_problem_is"
+   ],
+   "745.4": [
+    "tests/test_upstream.py::test_a_tagged_problem_raised_again_is_a_comment_on_the_upstream_issue"
+   ],
+   "745.5": [
+    "tests/test_upstream.py::test_a_failed_run_files_the_failure_upstream_with_the_run_link",
+    "tests/test_upstream.py::test_with_no_upstream_repo_a_failed_run_files_nothing"
+   ],
+   "745.6": [
+    "tests/test_upstream.py::test_every_job_of_each_shared_workflow_ends_by_filing_its_failure_upstream",
+    "tests/test_upstream.py::test_a_failed_test_check_files_nothing_upstream"
+   ],
+   "745.7": [
+    "tests/test_upstream.py::test_the_same_failure_twice_gives_one_upstream_issue_with_two_linked_comments",
+    "tests/test_upstream.py::test_a_different_failure_opens_its_own_upstream_issue"
+   ],
+   "745.8": [
+    "tests/test_upstream.py::test_a_problem_whose_fault_is_unclear_stays_in_the_repo_saying_so"
+   ],
+   "745.9": [
+    "tests/test_upstream.py::test_a_problem_filed_upstream_carries_nothing_from_the_private_repo"
+   ],
+   "745.10": [
+    "tests/test_upstream.py::test_filing_upstream_mints_its_key_from_the_apps_own_key"
+   ]
+  },
+  "test_changes": {},
+  "links": {
+   "blocked_by": [],
+   "blocks": [
+    746
+   ],
+   "relates_to": [
+    272,
+    273
+   ]
+  },
+  "raises": [
+   {
+    "kind": "question",
+    "to": "owner",
+    "label": "Link back",
+    "text": "Should an upstream problem still link back to the private repo's issue? The plan assumes yes; outsiders can't open it.",
+    "evidence": "The issue asks for a link back; the newer comment asks for nothing from the private repo.",
+    "raised_by": "planner",
+    "id": "P3"
+   },
+   {
+    "kind": "question",
+    "to": "owner",
+    "label": "Unclear fault",
+    "text": "For an unclear fault, the plan files the problem in the repo as its own issue, saying so. Right?",
+    "evidence": "The comment says it says so on the repo's issue; untagged problems are filed as new issues today.",
+    "raised_by": "planner",
+    "id": "P4"
+   }
+  ],
+  "answers": []
+ },
+ "check": {
+  "passed": true,
+  "problems": []
+ },
+ "url": "https://github.com/dokima-dev/dokima/issues/745#issuecomment-6247194986"
+}
