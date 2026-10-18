@@ -1,0 +1,253 @@
+{
+ "role": "planner",
+ "stage": null,
+ "run_id": "39102862240",
+ "commit_before": "ccbebe20951336dbdfb7da7800bf77e892c34308",
+ "started_by": "dokima-runtime[bot]",
+ "models": [
+  "claude-opus-5-5"
+ ],
+ "report": {
+  "duration_ms": 264194,
+  "turns": 15,
+  "cost_usd": 1.6146554,
+  "tokens_in": 751064,
+  "tokens_out": 11800
+ },
+ "log": "https://github.com/dokima-dev/dokima/blob/logs/logs/750/39102862240-planner.md",
+ "run": "https://github.com/dokima-dev/dokima/actions/runs/39102862240",
+ "handback": {
+  "kind": "feature",
+  "title": "Hotfix label builds a small fix without planning",
+  "summary": "A hotfix label lets a small fix skip planning, while code review, all tests and the merge gate still run.",
+  "feature": "An issue labeled hotfix builds from its text. Code review, all tests and the merge gate still judge it. Big ones return to planning.",
+  "stories": [
+   {
+    "title": "Hotfix issues build from their text and get reviewed",
+    "user_story": "A small fix labeled hotfix is built from its text, reviewed and gated, with no plan.",
+    "acceptance_criteria": [
+     {
+      "text": "When a code owner says work on an issue labeled hotfix, the worker starts with no plan.",
+      "words": "An issue labeled `hotfix` skips planning and plan review.",
+      "source": "https://github.com/dokima-dev/dokima/issues/750",
+      "files": [
+       "dokima/agent_roles.py",
+       ".github/workflows/agent.yml",
+       ".github/workflows/commands.yml"
+      ],
+      "no_edge_cases": "Its planner lists the edge cases with their tests when it plans this story."
+     },
+     {
+      "text": "When an issue labeled hotfix has no open blocker on autopilot, its worker starts instead of its planner.",
+      "words": "An issue labeled `hotfix` skips planning and plan review.",
+      "source": "https://github.com/dokima-dev/dokima/issues/750",
+      "files": [
+       "dokima/agent_autopilot.py",
+       "dokima/agent_roles.py",
+       "dokima/agent_next.py"
+      ],
+      "no_edge_cases": "Its planner lists the edge cases with their tests when it plans this story."
+     },
+     {
+      "text": "When a hotfix worker starts, its pack gives the issue's text as the whole ask, with no plan.",
+      "words": "the worker builds straight from the issue's text: the text is the whole ask.",
+      "source": "https://github.com/dokima-dev/dokima/issues/750",
+      "files": [
+       "dokima/agent_roles.py",
+       "dokima/agent_checks.py",
+       "dokima/roles/worker.md"
+      ],
+      "no_edge_cases": "Its planner lists the edge cases with their tests when it plans this story."
+     },
+     {
+      "text": "When a hotfix worker finishes, code review starts and judges the diff against the issue's text.",
+      "words": "Code review still runs and judges the diff against the issue's text",
+      "source": "https://github.com/dokima-dev/dokima/issues/750",
+      "files": [
+       "dokima/agent_next.py",
+       "dokima/agent_roles.py",
+       "dokima/agent_checks.py",
+       "dokima/roles/reviewer.md"
+      ],
+      "no_edge_cases": "Its planner lists the edge cases with their tests when it plans this story."
+     },
+     {
+      "text": "When code review approves a hotfix pull request, all tests and the merge gate run, as for any pull request.",
+      "words": "All tests and the merge gate still run, as for any pull request.",
+      "source": "https://github.com/dokima-dev/dokima/issues/750",
+      "files": [
+       "dokima/agent_next.py"
+      ],
+      "no_edge_cases": "Its planner lists the edge cases with their tests when it plans this story."
+     },
+     {
+      "text": "When a hotfix worker adds or changes a test, the change stays on the pull request.",
+      "words": "The worker may add or change a small test that pins the fix",
+      "source": "https://github.com/dokima-dev/dokima/issues/750",
+      "files": [
+       "dokima/fence.py",
+       ".github/workflows/agent.yml"
+      ],
+      "no_edge_cases": "Its planner lists the edge cases with their tests when it plans this story."
+     },
+     {
+      "text": "When code review finds a hotfix change bigger than the ask, the planner starts on the issue.",
+      "words": "When code review finds the change bigger than the ask, or the worker finds the ask needs a design choice, it goes back to normal planning, saying why.",
+      "source": "https://github.com/dokima-dev/dokima/issues/750",
+      "files": [
+       "dokima/agent_next.py",
+       "dokima/agent_checks.py",
+       "dokima/roles/reviewer.md"
+      ],
+      "no_edge_cases": "Its planner lists the edge cases with their tests when it plans this story."
+     },
+     {
+      "text": "When code review sends a hotfix back to planning, the issue gets a comment saying why.",
+      "words": "When code review finds the change bigger than the ask, or the worker finds the ask needs a design choice, it goes back to normal planning, saying why.",
+      "source": "https://github.com/dokima-dev/dokima/issues/750",
+      "files": [
+       "dokima/agent_next.py",
+       "dokima/agent_records.py"
+      ],
+      "no_edge_cases": "Its planner lists the edge cases with their tests when it plans this story."
+     },
+     {
+      "text": "When a hotfix worker opens its pull request, the pull request carries the hotfix label.",
+      "words": "Every hotfix PR carries the `hotfix` label",
+      "source": "https://github.com/dokima-dev/dokima/issues/750",
+      "files": [
+       ".github/workflows/agent.yml"
+      ],
+      "no_edge_cases": "Its planner lists the edge cases with their tests when it plans this story."
+     },
+     {
+      "text": "When a hotfix worker opens its pull request, the pull request links the issue it answers.",
+      "words": "links the issue it answers",
+      "source": "https://github.com/dokima-dev/dokima/issues/750",
+      "files": [
+       ".github/workflows/agent.yml",
+       "dokima/card.py"
+      ],
+      "no_edge_cases": "Its planner lists the edge cases with their tests when it plans this story."
+     }
+    ],
+    "non_functional": [],
+    "depends_on": []
+   },
+   {
+    "title": "Hotfix asks needing design return; the card shows one line",
+    "user_story": "A hotfix needing a design choice goes back to planning, and its card shows one line.",
+    "acceptance_criteria": [
+     {
+      "text": "When a hotfix worker finds the ask needs a design choice, the planner starts on the issue.",
+      "words": "When code review finds the change bigger than the ask, or the worker finds the ask needs a design choice, it goes back to normal planning, saying why.",
+      "source": "https://github.com/dokima-dev/dokima/issues/750",
+      "files": [
+       "dokima/agent_next.py",
+       "dokima/agent_checks.py",
+       "dokima/roles/worker.md"
+      ],
+      "no_edge_cases": "Its planner lists the edge cases with their tests when it plans this story."
+     },
+     {
+      "text": "When a hotfix worker sends the issue back to planning, the issue gets a comment saying why.",
+      "words": "When code review finds the change bigger than the ask, or the worker finds the ask needs a design choice, it goes back to normal planning, saying why.",
+      "source": "https://github.com/dokima-dev/dokima/issues/750",
+      "files": [
+       "dokima/agent_next.py",
+       "dokima/agent_records.py"
+      ],
+      "no_edge_cases": "Its planner lists the edge cases with their tests when it plans this story."
+     },
+     {
+      "text": "When an issue labeled hotfix is drawn, its card shows its state in one line.",
+      "words": "The card shows one line: the ask, the PR, the review verdict, the gate.",
+      "source": "https://github.com/dokima-dev/dokima/issues/750",
+      "files": [
+       "dokima/card.py",
+       "dokima/plan.py"
+      ],
+      "no_edge_cases": "Its planner lists the edge cases with their tests when it plans this story."
+     },
+     {
+      "text": "When an issue labeled hotfix is drawn, its card line shows the ask.",
+      "words": "The card shows one line: the ask, the PR, the review verdict, the gate.",
+      "source": "https://github.com/dokima-dev/dokima/issues/750",
+      "files": [
+       "dokima/card.py",
+       "dokima/plan.py"
+      ],
+      "no_edge_cases": "Its planner lists the edge cases with their tests when it plans this story."
+     },
+     {
+      "text": "When a hotfix has a pull request, its card line links that pull request.",
+      "words": "The card shows one line: the ask, the PR, the review verdict, the gate.",
+      "source": "https://github.com/dokima-dev/dokima/issues/750",
+      "files": [
+       "dokima/card.py",
+       "dokima/plan.py"
+      ],
+      "no_edge_cases": "Its planner lists the edge cases with their tests when it plans this story."
+     },
+     {
+      "text": "When a hotfix code review ends, its card line shows the review verdict.",
+      "words": "The card shows one line: the ask, the PR, the review verdict, the gate.",
+      "source": "https://github.com/dokima-dev/dokima/issues/750",
+      "files": [
+       "dokima/card.py",
+       "dokima/plan.py"
+      ],
+      "no_edge_cases": "Its planner lists the edge cases with their tests when it plans this story."
+     },
+     {
+      "text": "When a hotfix merge gate runs, its card line shows the gate's result.",
+      "words": "The card shows one line: the ask, the PR, the review verdict, the gate.",
+      "source": "https://github.com/dokima-dev/dokima/issues/750",
+      "files": [
+       "dokima/card.py",
+       "dokima/plan.py"
+      ],
+      "no_edge_cases": "Its planner lists the edge cases with their tests when it plans this story."
+     }
+    ],
+    "non_functional": [],
+    "depends_on": [
+     0
+    ]
+   }
+  ],
+  "links": {
+   "blocked_by": [],
+   "blocks": [],
+   "relates_to": [
+    748
+   ]
+  },
+  "raises": [
+   {
+    "kind": "question",
+    "to": "owner",
+    "label": "Two readings",
+    "text": "By hand, does the owner's work command start a hotfix's worker? The plan assumes it does.",
+    "evidence": "The issue says by hand or on autopilot, naming no command; `rules/commands.md` gives `/work` to the worker.",
+    "raised_by": "planner",
+    "id": "P1"
+   },
+   {
+    "kind": "question",
+    "to": "owner",
+    "label": "Guarded files",
+    "text": "The lane must change the agent workflow and the worker and reviewer prompts. May it? The plan assumes yes.",
+    "evidence": "`AGENTS.md` guards `.github/workflows/` and `dokima/roles/`; `agent.yml:302` fails a worker with no branch, `agent.yml:533` opens the PR with no label.",
+    "raised_by": "planner",
+    "id": "P2"
+   }
+  ],
+  "answers": []
+ },
+ "check": {
+  "passed": true,
+  "problems": []
+ },
+ "url": "https://github.com/dokima-dev/dokima/issues/750#issuecomment-6246391019"
+}
