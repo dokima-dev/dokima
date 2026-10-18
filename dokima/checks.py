@@ -6,14 +6,9 @@
 The plan is the newest one the planner handed back, once the reviewer approved it, read from the bot's own record
 comments; each criterion's check runs exactly the tests that plan lists for it. A pull request with no approved plan that
 changes only Markdown files outside the folders the text_only.not_text setting lists gets one passing "Text only" check
-<<<<<<< HEAD
-instead. A manual fix Dokima's app opens (any branch but try/issue-N) gets one "Manual fix" check that runs the test
-folder setting, and so does a hotfix: an issue labeled hotfix that was never planned (#863).
-=======
 instead. Any other pull request with no approved plan that a person or Dependabot opened gets one passing "Unplanned"
 check while the merge.unplanned_prs setting is allow (#857). A manual fix Dokima's app opens (any branch but try/issue-N) gets one "Manual fix" check that runs the test
-folder setting.
->>>>>>> origin/main
+folder setting, and so does a hotfix: an issue labeled hotfix that was never planned (#863).
 
 A test proves a criterion by calling its tag, the tests.tag setting (record_property by default), as
 tag("proves", "<issue>.<n>"), where n counts the issue's criteria from 1, top to bottom.
@@ -146,15 +141,11 @@ def main(argv):
         pr = event_pr(repo, json.load(open(os.environ["GITHUB_EVENT_PATH"])))
         number = agent.issue_of_pr(pr["head"]["ref"], pr.get("body")) or plan.pr_issue_number(repo, pr["number"])
         recs = agent.records(agent.conversation(repo, number)[1]) if number else []
-<<<<<<< HEAD
-        rows = build_matrix(number, recs, (pr.get("user") or {}).get("login"), pr["head"]["ref"])
+        author = (pr.get("user") or {}).get("login")
+        rows = build_matrix(number, recs, author, pr["head"]["ref"])
         if rows[0]["id"] == "none" and number and hotfix.in_lane(repo, number, recs):
             # A hotfix has no plan (#863): like a manual fix, its one check runs all tests.
             rows = [{**manual_fix()[0], "name": "Hotfix: all tests pass"}]
-=======
-        author = (pr.get("user") or {}).get("login")
-        rows = build_matrix(number, recs, author, pr["head"]["ref"])
->>>>>>> origin/main
         if rows[0]["id"] == "none" and text_only(repo, pr["number"]):
             rows = TEXT_ONLY
         elif rows[0]["id"] == "none" and unplanned_allowed(author):
