@@ -1,0 +1,48 @@
+{
+ "role": "worker",
+ "stage": null,
+ "run_id": "39090042199",
+ "commit_before": "9750a9d222c317f3c12be9721d2fd17df4bda05c",
+ "started_by": "dokima-runtime[bot]",
+ "models": [
+  "claude-opus-5-5"
+ ],
+ "report": {
+  "duration_ms": 288158,
+  "turns": 13,
+  "cost_usd": 0.4403329999999999,
+  "tokens_in": 460647,
+  "tokens_out": 4708
+ },
+ "log": "https://github.com/dokima-dev/dokima/blob/logs/logs/811/39090042199-worker.md",
+ "run": "https://github.com/dokima-dev/dokima/actions/runs/39090042199",
+ "handback": {
+  "summary": "Autopilot wakes on any label a person adds; code starts the issue only for the repo's own label name.",
+  "criteria": {
+   "811.1": "The autopilot workflow runs on every person-added label and passes its name; the labeled step compares it to the label name in settings."
+  },
+  "evidence": "`pytest -q tests/test_autopilot_label.py`: 8 passed",
+  "raises": [
+   {
+    "kind": "blocker",
+    "to": "planner",
+    "label": "Test cannot pass",
+    "text": "An older test needs the autopilot workflow to name the autopilot label, which this plan's criterion must remove.",
+    "evidence": "`tests/test_manifest.py::test_the_guard_catches_a_label_taken_out_of_the_manifest` fails: the workflow no longer names `autopilot`.",
+    "raised_by": "worker",
+    "id": "W1"
+   }
+  ]
+ },
+ "check": {
+  "passed": true,
+  "problems": []
+ },
+ "dropped_by_fence": [],
+ "files_changed": [
+  ".github/workflows/autopilot.yml",
+  "dokima/agent_roles.py"
+ ],
+ "branch": "try/issue-811",
+ "url": "https://github.com/dokima-dev/dokima/issues/811#issuecomment-6244705417"
+}
