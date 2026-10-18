@@ -1,6 +1,6 @@
 """Compare the repo's live settings with the manifest; report drift on one pinned Setup issue.
 
-    python3 -m dokima.audit OWNER/REPO   # reads DOKIMA_BOARD ("org/number") and .github/CODEOWNERS where it runs
+    python3 -m dokima.audit OWNER/REPO   # reads DOKIMA_BOARD ("org/number", optional) and .github/CODEOWNERS where it runs
 
 compare() gives one plain line per setting that differs from dokima/manifest.py or could not be read; run() puts them
 on the Setup issue (opened, pinned and marked Needs you, or updated), closes it with one line once nothing is off, and
@@ -102,8 +102,6 @@ def compare_rule(branch, live, want):
     have = live.get("required_checks") or []
     return ([f"Branch rule of `{branch}` does not require `{c}`; Dokima needs it required." for c in needed
              if c not in have]
-            + [f"Branch rule of `{branch}` requires `{c}`, a check Dokima does not declare." for c in have
-               if c not in needed]
             + ([f"Branch rule of `{branch}` lets a branch behind it merge; Dokima needs it to demand an up-to-date "
                 f"branch."] if want.get("up_to_date") and not live.get("up_to_date") else []))
 
@@ -159,10 +157,11 @@ def auto_merge(github, repo, rule, queue=True):
             f"it off the other list to keep your approval."], None
 
 
-def check(github, repo, root="."):
+def check(github, repo, root=".", has_board=True):
     """(lines, notes): compare()'s lines, and the auto-merge state, which is no drift.
 
-    What Dokima needs comes from the merged settings of the repo at root."""
+    What Dokima needs comes from the merged settings of the repo at root. With no board, its fields and views are
+    not read."""
     got = settings.read(root)
     rules = {}
 
@@ -170,9 +169,10 @@ def check(github, repo, root="."):
         rules[branch] = github.branch_rule(repo, branch)
         return rules[branch]
 
-    reads = [("Labels", lambda: github.labels(repo), lambda live: compare_labels(live, manifest.labels(got))),
-             ("Board fields", github.fields, lambda live: compare_fields(live, manifest.fields(got))),
-             ("Board views", github.views, compare_views)]
+    reads = [("Labels", lambda: github.labels(repo), lambda live: compare_labels(live, manifest.labels(got)))]
+    if has_board:
+        reads += [("Board fields", github.fields, lambda live: compare_fields(live, manifest.fields(got))),
+                  ("Board views", github.views, compare_views)]
     reads += [(f"Branch rule of `{branch}`", lambda branch=branch: rule(branch),
                lambda live, branch=branch, want=want: compare_rule(branch, live, want))
               for branch, want in manifest.branch_rules(got).items()]
@@ -193,9 +193,9 @@ def check(github, repo, root="."):
     return lines, notes
 
 
-def compare(github, repo, root="."):
+def compare(github, repo, root=".", has_board=True):
     """One line per setting that differs from the manifest or could not be read."""
-    return check(github, repo, root)[0]
+    return check(github, repo, root, has_board)[0]
 
 
 def code_owners(root):
@@ -220,9 +220,11 @@ def setup_body(lines, owners, notes=()):
             + "\nEach audit updates this issue, and closes it once nothing is off.\n")
 
 
-def run(github, repo, root="."):
-    """Report the audit on the Setup issue; returns the Setup issue it touched, or None."""
-    lines, notes = check(github, repo, root)
+def run(github, repo, root=".", has_board=True):
+    """Report the audit on the Setup issue; returns the Setup issue it touched, or None.
+
+    With no board, the board is neither read nor marked."""
+    lines, notes = check(github, repo, root, has_board)
     issue = github.setup_issue(repo)
     if not lines:
         if issue is None:
@@ -238,7 +240,8 @@ def run(github, repo, root="."):
         n = issue["number"]
         if issue["body"] != body:
             github.edit_issue(repo, n, body)
-    github.needs_you(repo, n)
+    if has_board:
+        github.needs_you(repo, n)
     return n
 
 
@@ -266,7 +269,7 @@ class GitHub:
 
     def __init__(self, spec):
         self.spec = spec
-        self.owner, number = spec.split("/")
+        self.owner, number = spec.split("/") if spec else ("", "0")
         self.number = int(number)
         self.project = None
 
@@ -347,11 +350,8 @@ def main(argv):
         print("usage: python3 -m dokima.audit OWNER/REPO", file=sys.stderr)
         return 2
     spec = os.environ.get("DOKIMA_BOARD", "").strip()
-    if not spec:
-        print("::error::No DOKIMA_BOARD set; the audit needs the board to check it and mark the Setup issue.")
-        return 1
     try:
-        n = run(GitHub(spec), argv[0])
+        n = run(GitHub(spec), argv[0], has_board=bool(spec))
     except FAILED as e:
         print(f"::error::The audit could not report on the Setup issue: {reason(e)}")
         return 1
