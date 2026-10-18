@@ -1,0 +1,173 @@
+{
+ "role": "reviewer",
+ "stage": "plan",
+ "run_id": "39089133268",
+ "commit_before": "dc59de68061fd47adcd2f355203516c9ed4382e3",
+ "started_by": "dokima-runtime[bot]",
+ "models": [
+  "claude-opus-5-5"
+ ],
+ "report": {
+  "duration_ms": 115806,
+  "turns": 18,
+  "cost_usd": 0.6679124,
+  "tokens_in": 763963,
+  "tokens_out": 8618
+ },
+ "log": "https://github.com/dokima-dev/dokima/blob/logs/logs/846/39089133268-reviewer-plan.md",
+ "run": "https://github.com/dokima-dev/dokima/actions/runs/39089133268",
+ "handback": {
+  "previous_step": {
+   "did": [
+    "The planner wrote four criteria: three for the card, one for branch updates.",
+    "The planner wrote one test per criterion; all four fail today."
+   ],
+   "decided": [
+    "Each criterion's own check is fixed here too."
+   ],
+   "open": [
+    "The planner asks the owner two questions: criterion checks, and overlap with two open issues."
+   ]
+  },
+  "verdict": "block",
+  "summary": "One card reader is missed: with every check green in an adopter's repo, the card never says ready.",
+  "raises": [
+   {
+    "kind": "blocker",
+    "to": "planner",
+    "label": "No criterion: ready",
+    "text": "The card's ready status also reads all tests by plain name; no criterion carries it. Add one: adopter repo, all green, code review approved, card says Ready for approval.",
+    "evidence": "`dokima/card.py:328` `checks_passed` wants plain `all tests`. Adopter repo, all green: card says `See why not every check passed`.",
+    "raised_by": "reviewer",
+    "id": "R1"
+   }
+  ],
+  "answers": [
+   {
+    "raise": "P1",
+    "answer": "done",
+    "why": "The owner asks every Dokima check to be found by its shown name, criterion checks included.",
+    "words": "Fix: both find a check by the name GitHub shows, plain in Dokima's own repo and prefixed in an adopter's",
+    "source": "https://github.com/dokima-dev/dokima/issues/846",
+    "changes": false
+   }
+  ],
+  "asks": [
+   {
+    "ask": "the card, which reads the check runs by plain name (e.g. `all tests`), so its Definition of Done never shows them passing",
+    "source": "https://github.com/dokima-dev/dokima/issues/846",
+    "criterion": "846.1"
+   },
+   {
+    "ask": "the card, which reads the check runs by plain name ... so its Definition of Done never shows them passing (Acceptance criteria)",
+    "source": "https://github.com/dokima-dev/dokima/issues/846",
+    "criterion": "846.2"
+   },
+   {
+    "ask": "Fix: both find a check by the name GitHub shows, plain in Dokima's own repo and prefixed in an adopter's",
+    "source": "https://github.com/dokima-dev/dokima/issues/846",
+    "criterion": "846.3"
+   },
+   {
+    "ask": "the branch updates (uptodate), which look for the same plain names before bringing a pull request up to date",
+    "source": "https://github.com/dokima-dev/dokima/issues/846",
+    "criterion": "846.4"
+   },
+   {
+    "ask": "the card, which reads the check runs by plain name: its ready status reads all tests the same way",
+    "source": "https://github.com/dokima-dev/dokima/issues/846",
+    "criterion": "missing"
+   }
+  ],
+  "behaviors": [
+   {
+    "criterion": "846.1",
+    "one_behavior": true,
+    "why": "One check, one card field."
+   },
+   {
+    "criterion": "846.2",
+    "one_behavior": true,
+    "why": "One check, one card field."
+   },
+   {
+    "criterion": "846.3",
+    "one_behavior": true,
+    "why": "One criterion check, one bullet."
+   },
+   {
+    "criterion": "846.4",
+    "one_behavior": true,
+    "why": "One failed check, one skipped update."
+   }
+  ],
+  "edge_cases": [
+   {
+    "criterion": "846.1",
+    "cut": [],
+    "missing": []
+   },
+   {
+    "criterion": "846.2",
+    "cut": [],
+    "missing": []
+   },
+   {
+    "criterion": "846.3",
+    "cut": [],
+    "missing": []
+   },
+   {
+    "criterion": "846.4",
+    "cut": [],
+    "missing": []
+   }
+  ],
+  "tests": [
+   {
+    "test": "tests/test_shown_check_names.py::test_adopter_card_shows_test_suite_passed_by_its_shown_name",
+    "only_its_behavior": true,
+    "why": "Checks passed with link, and failed, for the shown name only."
+   },
+   {
+    "test": "tests/test_shown_check_names.py::test_adopter_card_shows_acceptance_tests_passed_by_its_shown_name",
+    "only_its_behavior": true,
+    "why": "Checks passed with link, and failed, for the shown name only."
+   },
+   {
+    "test": "tests/test_shown_check_names.py::test_adopter_card_shows_a_criterion_passed_by_its_shown_name",
+    "only_its_behavior": true,
+    "why": "Checks the criterion bullet passed and failed by the shown name."
+   },
+   {
+    "test": "tests/test_shown_check_names.py::test_adopter_pr_whose_all_tests_failed_is_not_brought_up_to_date",
+    "only_its_behavior": true,
+    "why": "The failed one is skipped and the passed one is updated."
+   }
+  ],
+  "size": "ok",
+  "boxes": {
+   "dropped": [
+    {
+     "words": "the card, which reads the check runs by plain name (e.g. `all tests`)",
+     "source": "https://github.com/dokima-dev/dokima/issues/846"
+    }
+   ],
+   "added": "none",
+   "superseded": "none",
+   "conflicts": "none",
+   "edges": {
+    "846.1": "covered",
+    "846.2": "covered",
+    "846.3": "covered",
+    "846.4": "covered"
+   },
+   "poor_tests": "none"
+  }
+ },
+ "check": {
+  "passed": true,
+  "problems": []
+ },
+ "url": "https://github.com/dokima-dev/dokima/issues/846#issuecomment-6244583830"
+}
