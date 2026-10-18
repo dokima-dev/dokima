@@ -2,6 +2,16 @@
 
 What each version of Dokima does.
 
+## v0.1.1
+
+Fixes merged since v0.1.0.
+
+- Card and branch updates find checks by the names GitHub shows (#852).
+- The install docs name the full checks, so an empty repo reaches its first merge (#856).
+- The audit spares the repo's own checks and a missing board (#861).
+- The card follows the repo's own CI (#866).
+- Each release takes its version from the changelog's newest version heading (#867).
+
 ## v0.1.0
 
 Dokima's first version.

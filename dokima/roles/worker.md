@@ -53,3 +53,15 @@ until every test is green. If the plan itself cannot be built, raise a blocker f
 prove it.
 
 Write code, file paths, commands and quoted code as markdown code: backticks inline, a code block for several lines.
+<!-- hotfix -->
+
+# This issue is a hotfix
+The owner labeled this issue a hotfix: a small fix built straight from its text, with no plan and no planner's tests.
+Where this prompt speaks of the plan, its criteria or the planner's tests, read this instead:
+- `ask.md` in your pack is the whole ask, as the owner wrote it. Build exactly that, nothing more.
+- Add or change a small test that pins the fix. Code keeps every change you make, tests included.
+- In `work.json`, "criteria" holds one line, keyed "ask": where and how the fix is built.
+- Your hand-back check takes `-` in place of the plan.
+- When the fix needs more than the ask, build only the ask and say so in your summary; the code review sends a change
+  bigger than the ask back to planning.
+<!-- /hotfix -->

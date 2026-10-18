@@ -61,11 +61,15 @@ def marked(paths):
 def main(argv):
     """fence BASE PLAN [CLASHED]: apply the fence and print each dropped path.
 
-    PLAN is plan.json; CLASHED lists the files that clashed with main, when that file exists. Exits 1 saying which
-    clashed files still hold conflict markers."""
-    scope = scope_from(json.load(open(argv[2])))
+    PLAN is plan.json, or `-` for a hotfix, which has no plan: every change it made stays, tests included (#863).
+    CLASHED lists the files that clashed with main, when that file exists. Exits 1 saying which clashed files still
+    hold conflict markers."""
     clashed = open(argv[3]).read().split() if len(argv) > 3 and os.path.exists(argv[3]) else []
-    dropped = fence(argv[1], scope, clashed) if clashed else fence(argv[1], scope)
+    if argv[2] == "-":
+        dropped = []
+    else:
+        scope = scope_from(json.load(open(argv[2])))
+        dropped = fence(argv[1], scope, clashed) if clashed else fence(argv[1], scope)
     for p in dropped:
         print(p)
     left = marked(clashed)
