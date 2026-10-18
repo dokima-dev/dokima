@@ -1,0 +1,42 @@
+{
+ "role": "worker",
+ "stage": null,
+ "run_id": "39092726964",
+ "commit_before": "5220a2d260f57b1e9b85278cd8ad7de97e9eafe6",
+ "started_by": "dokima-runtime[bot]",
+ "models": [
+  "claude-opus-5-5"
+ ],
+ "report": {
+  "duration_ms": 9963,
+  "turns": 2,
+  "cost_usd": 0.6040324,
+  "tokens_in": 112831,
+  "tokens_out": 603
+ },
+ "log": "https://github.com/dokima-dev/dokima/blob/logs/logs/846/39092726964-worker.md",
+ "run": "https://github.com/dokima-dev/dokima/actions/runs/39092726964",
+ "handback": {
+  "summary": "The card and branch updates now find Dokima's checks by the names GitHub shows in each repo.",
+  "criteria": {
+   "846.1": "`card.render` finds all tests by `settings.shown_as`, so the Definition of Done shows Test suite from the shown check.",
+   "846.2": "`card.done_line` finds Acceptance criteria by `settings.shown_as`.",
+   "846.3": "`card.checks_by_key` strips the prefix `settings.shown_prefix` gives before reading a criterion's key.",
+   "846.4": "`uptodate.tests_failed` asks GitHub for, and matches, all tests by `settings.shown_as`.",
+   "846.5": "`card.checks_passed` finds all tests by its shown name and criteria through `checks_by_key`."
+  },
+  "evidence": "`pytest -q tests/test_shown_check_names.py`: 5 passed in 0.39s"
+ },
+ "check": {
+  "passed": true,
+  "problems": []
+ },
+ "dropped_by_fence": [],
+ "files_changed": [
+  "dokima/card.py",
+  "dokima/settings.py",
+  "dokima/uptodate.py"
+ ],
+ "branch": "try/issue-846",
+ "url": "https://github.com/dokima-dev/dokima/issues/846#issuecomment-6245058033"
+}
