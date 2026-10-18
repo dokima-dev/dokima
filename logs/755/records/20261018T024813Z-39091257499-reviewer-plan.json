@@ -1,0 +1,184 @@
+{
+ "role": "reviewer",
+ "stage": "plan",
+ "run_id": "39091257499",
+ "commit_before": "7f313ea5a728421ad6af4e1c4fd7f06fde7dccc5",
+ "started_by": "dokima-runtime[bot]",
+ "models": [
+  "claude-opus-5-5"
+ ],
+ "report": {
+  "duration_ms": 78239,
+  "turns": 11,
+  "cost_usd": 0.49640980000000007,
+  "tokens_in": 490114,
+  "tokens_out": 4899
+ },
+ "log": "https://github.com/dokima-dev/dokima/blob/logs/logs/755/39091257499-reviewer-plan.md",
+ "run": "https://github.com/dokima-dev/dokima/actions/runs/39091257499",
+ "handback": {
+  "previous_step": {
+   "did": [
+    "The planner kept three criteria: the tag, the release and its notes.",
+    "The planner proposed a new issue for the changelog list."
+   ],
+   "decided": [
+    "The changelog list moves to its own issue, as the owner said."
+   ],
+   "open": [
+    "Nothing says what happens when main has no changelog yet."
+   ]
+  },
+  "verdict": "block",
+  "summary": "The plan never checks that nothing is released before the changelog reaches main.",
+  "raises": [
+   {
+    "kind": "blocker",
+    "to": "planner",
+    "label": "755.1 no changelog yet",
+    "text": "755.1 tags when the changelog reaches main, yet every test supplies one, so tagging on any push passes. Add: no `CHANGELOG.md`, nothing made, exit 0.",
+    "evidence": "`run_release` in `tests/test_release.py` always writes a changelog; the repo has no `CHANGELOG.md`, so this pull request merges first.",
+    "raised_by": "reviewer",
+    "id": "R3"
+   }
+  ],
+  "answers": [
+   {
+    "raise": "P5",
+    "answer": "done",
+    "why": "Agreed: the owner moved the changelog list to its own issue, and no open issue holds it yet.",
+    "searched": [
+     752,
+     816,
+     742
+    ],
+    "verdict": "new"
+   }
+  ],
+  "asks": [
+   {
+    "ask": "A v0.1.0 tag",
+    "source": "https://github.com/dokima-dev/dokima/issues/755",
+    "criterion": "755.1"
+   },
+   {
+    "ask": "GitHub release",
+    "source": "https://github.com/dokima-dev/dokima/issues/755",
+    "criterion": "755.2"
+   },
+   {
+    "ask": "A workflow makes the tag ... when the changelog merges, not by hand",
+    "source": "https://github.com/dokima-dev/dokima/issues/755#issuecomment-6244761525",
+    "criterion": "755.1"
+   },
+   {
+    "ask": "A workflow makes ... the release when the changelog merges, not by hand",
+    "source": "https://github.com/dokima-dev/dokima/issues/755#issuecomment-6244761525",
+    "criterion": "755.2"
+   },
+   {
+    "ask": "the release notes are the changelog's v0.1.0 section",
+    "source": "https://github.com/dokima-dev/dokima/issues/755#issuecomment-6244761525",
+    "criterion": "755.3"
+   },
+   {
+    "ask": "this story keeps the workflow that tags and releases",
+    "source": "https://github.com/dokima-dev/dokima/issues/755#issuecomment-6244851037",
+    "criterion": "755.1"
+   }
+  ],
+  "behaviors": [
+   {
+    "criterion": "755.1",
+    "one_behavior": true,
+    "why": "One result: the v0.1.0 tag at the pushed commit."
+   },
+   {
+    "criterion": "755.2",
+    "one_behavior": true,
+    "why": "One result: a GitHub release named v0.1.0."
+   },
+   {
+    "criterion": "755.3",
+    "one_behavior": true,
+    "why": "One result: the notes equal the v0.1.0 section."
+   }
+  ],
+  "edge_cases": [
+   {
+    "criterion": "755.1",
+    "cut": [],
+    "missing": [
+     "Main has no changelog or no v0.1.0 section yet: nothing is made."
+    ]
+   },
+   {
+    "criterion": "755.2",
+    "cut": [],
+    "missing": []
+   },
+   {
+    "criterion": "755.3",
+    "cut": [],
+    "missing": []
+   }
+  ],
+  "tests": [
+   {
+    "test": "tests/test_release.py::test_release_makes_tag",
+    "only_its_behavior": true,
+    "why": "Checks one v0.1.0 tag at the pushed commit."
+   },
+   {
+    "test": "tests/test_release.py::test_release_skips_when_tagged",
+    "only_its_behavior": true,
+    "why": "Checks nothing new is made once v0.1.0 exists."
+   },
+   {
+    "test": "tests/test_release.py::test_release_makes_github_release",
+    "only_its_behavior": true,
+    "why": "Checks GitHub then holds the v0.1.0 release."
+   },
+   {
+    "test": "tests/test_release.py::test_release_refused_fails_the_run",
+    "only_its_behavior": true,
+    "why": "Checks a refused release fails the run."
+   },
+   {
+    "test": "tests/test_release.py::test_release_notes_are_changelog_section",
+    "only_its_behavior": true,
+    "why": "Checks the notes hold the v0.1.0 lines and no Unreleased line."
+   }
+  ],
+  "size": "ok",
+  "boxes": {
+   "dropped": "none",
+   "added": "none",
+   "superseded": [
+    {
+     "old": "a CHANGELOG.md listing what that version does",
+     "new": "comment:6244851037",
+     "retired": "none: moved to its own issue"
+    }
+   ],
+   "conflicts": "none",
+   "edges": {
+    "755.1": "missing: no changelog on main yet",
+    "755.2": "covered",
+    "755.3": "covered"
+   },
+   "poor_tests": [
+    {
+     "test": "tests/test_release.py::test_release_makes_tag",
+     "passes_with": "code that tags v0.1.0 on every push, changelog or not",
+     "fix": "add a test with no changelog that expects nothing made and exit 0"
+    }
+   ]
+  }
+ },
+ "check": {
+  "passed": true,
+  "problems": []
+ },
+ "url": "https://github.com/dokima-dev/dokima/issues/755#issuecomment-6244865238"
+}
