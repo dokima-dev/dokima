@@ -1,0 +1,288 @@
+{
+ "role": "reviewer",
+ "stage": "plan",
+ "run_id": "39116662405",
+ "commit_before": "b5511f884d9240a706963d0fdd4562a0da38305f",
+ "started_by": "dokima-runtime[bot]",
+ "models": [
+  "claude-opus-5-5"
+ ],
+ "report": {
+  "duration_ms": 89238,
+  "turns": 13,
+  "cost_usd": 0.6213466000000001,
+  "tokens_in": 650874,
+  "tokens_out": 4728
+ },
+ "log": "https://github.com/dokima-dev/dokima/blob/logs/logs/864/39116662405-reviewer-plan.md",
+ "run": "https://github.com/dokima-dev/dokima/actions/runs/39116662405",
+ "handback": {
+  "previous_step": {
+   "did": [
+    "The planner fixed the label test: its comparison run hands back a planned result.",
+    "The planner fixed the two send-back tests so their raises-nothing run truly raises nothing."
+   ],
+   "decided": [
+    "The planner left every criterion and the worker's approach unchanged, as the owner asked."
+   ],
+   "open": []
+  },
+  "verdict": "approve",
+  "summary": "The three tests the owner named are fixed; all eight new tests fail today for the right reason.",
+  "raises": [],
+  "answers": [],
+  "asks": [
+   {
+    "ask": "When a hotfix worker opens its pull request, the pull request carries the hotfix label.",
+    "source": "https://github.com/dokima-dev/dokima/issues/864",
+    "criterion": "864.1"
+   },
+   {
+    "ask": "When a hotfix worker opens its pull request, the pull request links the issue it answers.",
+    "source": "https://github.com/dokima-dev/dokima/issues/864",
+    "criterion": "864.9"
+   },
+   {
+    "ask": "Keep the ask that a hotfix pull request links its issue, and give it a criterion.",
+    "source": "https://github.com/dokima-dev/dokima/issues/864",
+    "criterion": "864.9"
+   },
+   {
+    "ask": "When a hotfix worker finds the ask needs a design choice, the planner starts on the issue.",
+    "source": "https://github.com/dokima-dev/dokima/issues/864",
+    "criterion": "864.2"
+   },
+   {
+    "ask": "When a hotfix worker sends the issue back to planning, the issue gets a comment saying why.",
+    "source": "https://github.com/dokima-dev/dokima/issues/864",
+    "criterion": "864.3"
+   },
+   {
+    "ask": "When an issue labeled hotfix is drawn, its card shows its state in one line.",
+    "source": "https://github.com/dokima-dev/dokima/issues/864",
+    "criterion": "864.4"
+   },
+   {
+    "ask": "When an issue labeled hotfix is drawn, its card line shows the ask.",
+    "source": "https://github.com/dokima-dev/dokima/issues/864",
+    "criterion": "864.5"
+   },
+   {
+    "ask": "When a hotfix has a pull request, its card line links that pull request.",
+    "source": "https://github.com/dokima-dev/dokima/issues/864",
+    "criterion": "864.6"
+   },
+   {
+    "ask": "When a hotfix code review ends, its card line shows the review verdict.",
+    "source": "https://github.com/dokima-dev/dokima/issues/864",
+    "criterion": "864.7"
+   },
+   {
+    "ask": "When a hotfix merge gate runs, its card line shows the gate's result.",
+    "source": "https://github.com/dokima-dev/dokima/issues/864",
+    "criterion": "864.8"
+   },
+   {
+    "ask": "The hotfix parts of the worker and reviewer prompts name nothing about Dokima's own repo.",
+    "source": "https://github.com/dokima-dev/dokima/issues/864",
+    "criterion": "864.10"
+   },
+   {
+    "ask": "864.2 and 864.3: ... Save the original before patching (or call `monkeypatch.undo()`) and restore that instead.",
+    "source": "https://github.com/dokima-dev/dokima/issues/864",
+    "criterion": "864.2"
+   },
+   {
+    "ask": "864.2 and 864.3: ... Save the original before patching (or call `monkeypatch.undo()`) and restore that instead.",
+    "source": "https://github.com/dokima-dev/dokima/issues/864",
+    "criterion": "864.3"
+   },
+   {
+    "ask": "864.1: ... Give that run a planned worker's hand-back.",
+    "source": "https://github.com/dokima-dev/dokima/issues/864",
+    "criterion": "864.1"
+   }
+  ],
+  "behaviors": [
+   {
+    "criterion": "864.1",
+    "one_behavior": true,
+    "why": "One result: the label on the pull request."
+   },
+   {
+    "criterion": "864.2",
+    "one_behavior": true,
+    "why": "One result: the planner starts."
+   },
+   {
+    "criterion": "864.3",
+    "one_behavior": true,
+    "why": "One result: a comment saying why."
+   },
+   {
+    "criterion": "864.4",
+    "one_behavior": true,
+    "why": "One result: a one line card naming the state."
+   },
+   {
+    "criterion": "864.5",
+    "one_behavior": true,
+    "why": "One result: the ask in the line."
+   },
+   {
+    "criterion": "864.6",
+    "one_behavior": true,
+    "why": "One result: the pull request link in the line."
+   },
+   {
+    "criterion": "864.7",
+    "one_behavior": true,
+    "why": "One result: the review verdict in the line."
+   },
+   {
+    "criterion": "864.8",
+    "one_behavior": true,
+    "why": "One result: the gate result in the line."
+   },
+   {
+    "criterion": "864.9",
+    "one_behavior": true,
+    "why": "One result: the pull request links its issue."
+   },
+   {
+    "criterion": "864.10",
+    "one_behavior": true,
+    "why": "One rule on prompt text."
+   }
+  ],
+  "edge_cases": [
+   {
+    "criterion": "864.1",
+    "cut": [],
+    "missing": []
+   },
+   {
+    "criterion": "864.2",
+    "cut": [],
+    "missing": []
+   },
+   {
+    "criterion": "864.3",
+    "cut": [],
+    "missing": []
+   },
+   {
+    "criterion": "864.4",
+    "cut": [],
+    "missing": []
+   },
+   {
+    "criterion": "864.5",
+    "cut": [],
+    "missing": []
+   },
+   {
+    "criterion": "864.6",
+    "cut": [],
+    "missing": []
+   },
+   {
+    "criterion": "864.7",
+    "cut": [],
+    "missing": []
+   },
+   {
+    "criterion": "864.8",
+    "cut": [],
+    "missing": []
+   },
+   {
+    "criterion": "864.9",
+    "cut": [],
+    "missing": []
+   },
+   {
+    "criterion": "864.10",
+    "cut": [],
+    "missing": []
+   }
+  ],
+  "tests": [
+   {
+    "test": "tests/test_hotfix_pr.py::test_a_hotfix_pull_request_carries_the_hotfix_label",
+    "only_its_behavior": true,
+    "why": "Checks the label; the unlabeled comparison now hands back a planned result."
+   },
+   {
+    "test": "tests/test_hotfix_pr.py::test_a_hotfix_worker_finding_a_design_choice_starts_the_planner",
+    "only_its_behavior": true,
+    "why": "Checks the planner starts; the raises-nothing run now restores the plain result."
+   },
+   {
+    "test": "tests/test_hotfix_pr.py::test_a_hotfix_worker_sending_it_back_says_why_on_the_issue",
+    "only_its_behavior": true,
+    "why": "Checks the comment says why; the raises-nothing run now raises nothing."
+   },
+   {
+    "test": "tests/test_hotfix_card.py::test_a_hotfix_card_shows_its_state_in_one_line",
+    "only_its_behavior": true,
+    "why": "Draws the real card; checks one line with the state."
+   },
+   {
+    "test": "tests/test_hotfix_card.py::test_a_hotfix_card_line_shows_the_ask",
+    "only_its_behavior": true,
+    "why": "Checks the ask whole in the line, also after the fold."
+   },
+   {
+    "test": "tests/test_hotfix_card.py::test_a_hotfix_card_line_links_its_pull_request",
+    "only_its_behavior": true,
+    "why": "Checks the link, and none with no pull request."
+   },
+   {
+    "test": "tests/test_hotfix_card.py::test_a_hotfix_card_line_shows_the_review_verdict",
+    "only_its_behavior": true,
+    "why": "Checks approved, blocked and no verdict yet."
+   },
+   {
+    "test": "tests/test_hotfix_card.py::test_a_hotfix_card_line_shows_the_gate_result",
+    "only_its_behavior": true,
+    "why": "Checks passed, failed and no result yet."
+   },
+   {
+    "test": "tests/test_hotfix.py::test_a_finished_hotfix_worker_starts_code_review_on_its_pull_request",
+    "only_its_behavior": true,
+    "why": "Runs the real workflow; new check reads the pull request body for the issue link."
+   },
+   {
+    "test": "tests/test_hotfix.py::test_hotfix_prompts_name_nothing_from_dokimas_own_repo",
+    "only_its_behavior": true,
+    "why": "Runs both agents and scans their prompts; checks unchanged."
+   }
+  ],
+  "size": "ok",
+  "boxes": {
+   "dropped": "none",
+   "added": "none",
+   "superseded": "none",
+   "conflicts": "none",
+   "edges": {
+    "864.1": "covered",
+    "864.2": "covered",
+    "864.3": "covered",
+    "864.4": "covered",
+    "864.5": "covered",
+    "864.6": "covered",
+    "864.7": "covered",
+    "864.8": "covered",
+    "864.9": "covered",
+    "864.10": "covered"
+   },
+   "poor_tests": "none"
+  }
+ },
+ "check": {
+  "passed": true,
+  "problems": []
+ },
+ "url": "https://github.com/dokima-dev/dokima/issues/864#issuecomment-6248399113"
+}
