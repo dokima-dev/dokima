@@ -1,0 +1,212 @@
+{
+ "role": "reviewer",
+ "stage": "plan",
+ "run_id": "39106080633",
+ "commit_before": "38c6e1c95c73da2f650e06f9678836de8d17b9de",
+ "started_by": "dokima-runtime[bot]",
+ "models": [
+  "claude-opus-5-5"
+ ],
+ "report": {
+  "duration_ms": 90280,
+  "turns": 10,
+  "cost_usd": 0.5628242,
+  "tokens_in": 411602,
+  "tokens_out": 8460
+ },
+ "log": "https://github.com/dokima-dev/dokima/blob/logs/logs/867/39106080633-reviewer-plan.md",
+ "run": "https://github.com/dokima-dev/dokima/actions/runs/39106080633",
+ "handback": {
+  "previous_step": {
+   "did": [
+    "Wrote five criteria: release from the newest changelog version, v0.1.1 section, install file, README, wiki.",
+    "Wrote seven new tests; all fail today because the feature is missing."
+   ],
+   "decided": [
+    "Plans to add a v0.1.1 section so merging this ships the fixes."
+   ],
+   "open": [
+    "Asks the owner whether this change should also ship v0.1.1."
+   ]
+  },
+  "verdict": "block",
+  "summary": "Release criterion only covers v0.1.1, not any newest version; the changelog test passes with any three lines.",
+  "raises": [
+   {
+    "kind": "blocker",
+    "to": "planner",
+    "label": "867.1 too narrow",
+    "text": "867.1 and its tests only try v0.1.1, so hardcoding v0.1.1 passes. Fix: word 867.1 for any newest version; test v0.2.0 above v0.1.1 makes v0.2.0.",
+    "evidence": "Issue: `each release names its version from the changelog's newest version heading`. Every changelog in `tests/test_newest_release.py` tops out at v0.1.1.",
+    "raised_by": "reviewer",
+    "id": "R1"
+   },
+   {
+    "kind": "blocker",
+    "to": "planner",
+    "label": "867.2 weak test",
+    "text": "The 867.2 test passes with any three bullet lines under v0.1.1. Fix: check the section names 852, 856 and 861, or mark it manual.",
+    "evidence": "`tests/test_newest_release.py::test_changelog_has_v011_on_top` only counts items: `assert len(items) >= 3`.",
+    "raised_by": "reviewer",
+    "id": "R2"
+   }
+  ],
+  "answers": [],
+  "asks": [
+   {
+    "ask": "each release names its version from the changelog's newest version heading, so adding a `## v0.1.1` section and merging it makes v0.1.1",
+    "source": "https://github.com/dokima-dev/dokima/issues/867",
+    "criterion": "867.1"
+   },
+   {
+    "ask": "every fix merged after v0.1.0 never reaches an adopter ... The trial (#746) would run without them.",
+    "source": "https://github.com/dokima-dev/dokima/issues/867",
+    "criterion": "867.2"
+   },
+   {
+    "ask": "the install file and the install docs name the newest release",
+    "source": "https://github.com/dokima-dev/dokima/issues/867",
+    "criterion": "867.3"
+   },
+   {
+    "ask": "the install docs name the newest release (the README install steps)",
+    "source": "https://github.com/dokima-dev/dokima/issues/867",
+    "criterion": "867.4"
+   },
+   {
+    "ask": "the install docs name the newest release (the wiki install page)",
+    "source": "https://github.com/dokima-dev/dokima/issues/867",
+    "criterion": "867.5"
+   },
+   {
+    "ask": "a test checks they match the changelog's newest version",
+    "source": "https://github.com/dokima-dev/dokima/issues/867",
+    "criterion": "867.3"
+   }
+  ],
+  "behaviors": [
+   {
+    "criterion": "867.1",
+    "one_behavior": true,
+    "why": "One result: the release named by the newest heading, though worded too narrowly."
+   },
+   {
+    "criterion": "867.2",
+    "one_behavior": true,
+    "why": "One state of the changelog's top section."
+   },
+   {
+    "criterion": "867.3",
+    "one_behavior": true,
+    "why": "One value: the tag the install file calls."
+   },
+   {
+    "criterion": "867.4",
+    "one_behavior": true,
+    "why": "One value: the version the README install steps name."
+   },
+   {
+    "criterion": "867.5",
+    "one_behavior": true,
+    "why": "One value: the version the wiki install page names."
+   }
+  ],
+  "edge_cases": [
+   {
+    "criterion": "867.1",
+    "cut": [],
+    "missing": [
+     "A newest version other than v0.1.1, such as v0.2.0, is released."
+    ]
+   },
+   {
+    "criterion": "867.2",
+    "cut": [],
+    "missing": []
+   },
+   {
+    "criterion": "867.3",
+    "cut": [],
+    "missing": []
+   },
+   {
+    "criterion": "867.4",
+    "cut": [],
+    "missing": []
+   },
+   {
+    "criterion": "867.5",
+    "cut": [],
+    "missing": []
+   }
+  ],
+  "tests": [
+   {
+    "test": "tests/test_newest_release.py::test_release_names_newest_version",
+    "only_its_behavior": true,
+    "why": "Runs the real release command; checks only which release is made."
+   },
+   {
+    "test": "tests/test_newest_release.py::test_release_newest_below_unreleased",
+    "only_its_behavior": true,
+    "why": "Owner-adjacent normal case: draft section on top."
+   },
+   {
+    "test": "tests/test_newest_release.py::test_release_newest_already_released",
+    "only_its_behavior": true,
+    "why": "Normal case: every push to main reruns the command."
+   },
+   {
+    "test": "tests/test_newest_release.py::test_changelog_has_v011_on_top",
+    "only_its_behavior": true,
+    "why": "Checks only the section, but counts lines instead of naming the fixes."
+   },
+   {
+    "test": "tests/test_newest_release.py::test_install_file_calls_newest_version",
+    "only_its_behavior": true,
+    "why": "Reads the real install file's tag against the changelog."
+   },
+   {
+    "test": "tests/test_newest_release.py::test_readme_names_newest_release",
+    "only_its_behavior": true,
+    "why": "Reads only the README install section's versions."
+   },
+   {
+    "test": "tests/test_newest_release.py::test_wiki_names_newest_release",
+    "only_its_behavior": true,
+    "why": "Reads only the wiki install page's versions."
+   }
+  ],
+  "size": "ok",
+  "boxes": {
+   "dropped": "none",
+   "added": "none",
+   "superseded": "none",
+   "conflicts": "none",
+   "edges": {
+    "867.1": "missing: a newest version other than v0.1.1",
+    "867.2": "covered",
+    "867.3": "covered",
+    "867.4": "covered",
+    "867.5": "covered"
+   },
+   "poor_tests": [
+    {
+     "test": "tests/test_newest_release.py::test_release_names_newest_version",
+     "passes_with": "release code that hardcodes v0.1.1 instead of reading the newest heading",
+     "fix": "add a changelog whose newest heading is v0.2.0 and expect v0.2.0"
+    },
+    {
+     "test": "tests/test_newest_release.py::test_changelog_has_v011_on_top",
+     "passes_with": "a v0.1.1 section of any three unrelated bullet lines",
+     "fix": "check the section names 852, 856 and 861, or mark manual"
+    }
+   ]
+  }
+ },
+ "check": {
+  "passed": true,
+  "problems": []
+ },
+ "url": "https://github.com/dokima-dev/dokima/issues/867#issuecomment-6246873540"
+}
