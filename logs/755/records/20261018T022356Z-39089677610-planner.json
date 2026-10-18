@@ -1,0 +1,133 @@
+{
+ "role": "planner",
+ "stage": null,
+ "run_id": "39089677610",
+ "commit_before": "c074448aa112b1826f24cc0429b50a8a69f66344",
+ "started_by": "dokima-runtime[bot]",
+ "models": [
+  "claude-opus-5-5"
+ ],
+ "report": {
+  "duration_ms": 209054,
+  "turns": 19,
+  "cost_usd": 1.0809648,
+  "tokens_in": 970231,
+  "tokens_out": 21879
+ },
+ "log": "https://github.com/dokima-dev/dokima/blob/logs/logs/755/39089677610-planner.md",
+ "run": "https://github.com/dokima-dev/dokima/actions/runs/39089677610",
+ "handback": {
+  "kind": "user_story",
+  "title": "First release v0.1.0 with a changelog",
+  "summary": "Dokima gets its first version, v0.1.0, with a tag, a GitHub release and a changelog.",
+  "user_story": "Owners see Dokima as a product with versions: a v0.1.0 release and a changelog saying what it does.",
+  "acceptance_criteria": [
+   {
+    "text": "When v0.1.0 is released, its notes list what that version does, taken from the changelog.",
+    "words": "a CHANGELOG.md listing what that version does",
+    "source": "https://github.com/dokima-dev/dokima/issues/755",
+    "files": [
+     "CHANGELOG.md",
+     "dokima/release.py",
+     ".github/workflows/release.yml"
+    ],
+    "edge_cases": [
+     {
+      "case": "The changelog has a v0.1.0 heading with nothing listed under it.",
+      "test": "tests/test_release.py::test_release_notes_list_v010"
+     }
+    ]
+   },
+   {
+    "text": "When the changelog reaches main, the v0.1.0 tag is made at that commit.",
+    "words": "A v0.1.0 tag",
+    "source": "https://github.com/dokima-dev/dokima/issues/755",
+    "files": [
+     "dokima/release.py",
+     ".github/workflows/release.yml"
+    ],
+    "edge_cases": [
+     {
+      "case": "A later push to main, once v0.1.0 exists, makes nothing new.",
+      "test": "tests/test_release.py::test_release_skips_when_tagged"
+     }
+    ]
+   },
+   {
+    "text": "When the changelog reaches main, a GitHub release named v0.1.0 is made.",
+    "words": "GitHub release",
+    "source": "https://github.com/dokima-dev/dokima/issues/755",
+    "files": [
+     "dokima/release.py",
+     ".github/workflows/release.yml"
+    ],
+    "edge_cases": [
+     {
+      "case": "GitHub refuses the release, so the run fails where the owner sees it.",
+      "test": "tests/test_release.py::test_release_refused_fails_the_run"
+     }
+    ]
+   }
+  ],
+  "non_functional": [],
+  "tests": {
+   "755.1": [
+    "tests/test_release.py::test_release_notes_list_v010"
+   ],
+   "755.2": [
+    "tests/test_release.py::test_release_makes_tag",
+    "tests/test_release.py::test_release_skips_when_tagged"
+   ],
+   "755.3": [
+    "tests/test_release.py::test_release_makes_github_release",
+    "tests/test_release.py::test_release_refused_fails_the_run"
+   ]
+  },
+  "test_changes": {},
+  "links": {
+   "blocked_by": [],
+   "blocks": [
+    816
+   ],
+   "relates_to": [
+    742,
+    752
+   ]
+  },
+  "raises": [
+   {
+    "kind": "question",
+    "to": "owner",
+    "label": "Release by workflow",
+    "text": "Should a new workflow make the tag and release when the changelog merges? The plan assumes yes, not by hand.",
+    "evidence": "AGENTS.md forbids changing `.github/workflows/` unless asked; a pull request cannot make a tag itself.",
+    "raised_by": "planner",
+    "id": "P1"
+   },
+   {
+    "kind": "question",
+    "to": "owner",
+    "label": "Notes from changelog",
+    "text": "Should the release notes be the changelog's v0.1.0 section? The plan assumes yes, so both say the same.",
+    "evidence": "The issue asks for a release and a changelog, and names no release notes.",
+    "raised_by": "planner",
+    "id": "P2"
+   },
+   {
+    "kind": "question",
+    "to": "owner",
+    "label": "Parked, yet on autopilot",
+    "text": "The issue says not for autopilot, yet autopilot started it. Go on? The plan assumes yes.",
+    "evidence": "The issue body says `Parked story, not for autopilot`; the comment of 2026-10-18 says autopilot switched on.",
+    "raised_by": "planner",
+    "id": "P3"
+   }
+  ],
+  "answers": []
+ },
+ "check": {
+  "passed": true,
+  "problems": []
+ },
+ "url": "https://github.com/dokima-dev/dokima/issues/755#issuecomment-6244659418"
+}
