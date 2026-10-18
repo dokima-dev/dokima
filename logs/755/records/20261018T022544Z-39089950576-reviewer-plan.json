@@ -1,0 +1,155 @@
+{
+ "role": "reviewer",
+ "stage": "plan",
+ "run_id": "39089950576",
+ "commit_before": "890cf4974d3f5c89f7da6f8689fc2b2c67c54df2",
+ "started_by": "dokima-runtime[bot]",
+ "models": [
+  "claude-opus-5-5"
+ ],
+ "report": {
+  "duration_ms": 49137,
+  "turns": 7,
+  "cost_usd": 0.3815215999999999,
+  "tokens_in": 257451,
+  "tokens_out": 4382
+ },
+ "log": "https://github.com/dokima-dev/dokima/blob/logs/logs/755/39089950576-reviewer-plan.md",
+ "run": "https://github.com/dokima-dev/dokima/actions/runs/39089950576",
+ "handback": {
+  "previous_step": {
+   "did": [
+    "The planner wrote three criteria: changelog-based release notes, the v0.1.0 tag, and the GitHub release.",
+    "The planner added five tests that run a release command against a fake GitHub."
+   ],
+   "decided": [
+    "A new workflow makes the tag and release on a push to main.",
+    "The release notes are the changelog's v0.1.0 section."
+   ],
+   "open": [
+    "Three questions wait for the owner: the workflow, the notes, and the parked label."
+   ]
+  },
+  "verdict": "block",
+  "summary": "The plan waits on three owner questions, and its first criterion bundles the changelog with the release notes.",
+  "raises": [
+   {
+    "kind": "blocker",
+    "to": "planner",
+    "label": "755.1 bundles two",
+    "text": "755.1 bundles two behaviors: the changelog lists what v0.1.0 does, and the release notes copy it. The owner asked only the first. Split them, one test each.",
+    "evidence": "`tests/test_release.py::test_release_notes_list_v010` checks both `CHANGELOG.md` items and release notes.",
+    "raised_by": "reviewer",
+    "id": "R1"
+   }
+  ],
+  "answers": [],
+  "asks": [
+   {
+    "ask": "A v0.1.0 tag",
+    "source": "https://github.com/dokima-dev/dokima/issues/755",
+    "criterion": "755.2"
+   },
+   {
+    "ask": "GitHub release",
+    "source": "https://github.com/dokima-dev/dokima/issues/755",
+    "criterion": "755.3"
+   },
+   {
+    "ask": "a CHANGELOG.md listing what that version does",
+    "source": "https://github.com/dokima-dev/dokima/issues/755",
+    "criterion": "755.1"
+   }
+  ],
+  "behaviors": [
+   {
+    "criterion": "755.1",
+    "one_behavior": false,
+    "why": "Bundles a changelog that lists v0.1.0 with release notes copied from it."
+   },
+   {
+    "criterion": "755.2",
+    "one_behavior": true,
+    "why": "One result: the v0.1.0 tag at the pushed commit."
+   },
+   {
+    "criterion": "755.3",
+    "one_behavior": true,
+    "why": "One result: a GitHub release named v0.1.0."
+   }
+  ],
+  "edge_cases": [
+   {
+    "criterion": "755.1",
+    "cut": [],
+    "missing": []
+   },
+   {
+    "criterion": "755.2",
+    "cut": [],
+    "missing": []
+   },
+   {
+    "criterion": "755.3",
+    "cut": [],
+    "missing": []
+   }
+  ],
+  "tests": [
+   {
+    "test": "tests/test_release.py::test_release_notes_list_v010",
+    "only_its_behavior": false,
+    "why": "Checks both the changelog's v0.1.0 list and the release notes."
+   },
+   {
+    "test": "tests/test_release.py::test_release_makes_tag",
+    "only_its_behavior": true,
+    "why": "Checks one v0.1.0 tag at the pushed commit."
+   },
+   {
+    "test": "tests/test_release.py::test_release_skips_when_tagged",
+    "only_its_behavior": true,
+    "why": "Checks a later push makes nothing; paired with the tag test."
+   },
+   {
+    "test": "tests/test_release.py::test_release_makes_github_release",
+    "only_its_behavior": true,
+    "why": "Checks GitHub then holds one release, v0.1.0."
+   },
+   {
+    "test": "tests/test_release.py::test_release_refused_fails_the_run",
+    "only_its_behavior": true,
+    "why": "Checks a refused release makes the run fail."
+   }
+  ],
+  "size": "755.1 bundles two behaviors: the changelog list and the release notes.",
+  "boxes": {
+   "dropped": "none",
+   "added": [
+    {
+     "what": "A release workflow that runs on every push to main",
+     "kind": "needed",
+     "serves": "755.2"
+    },
+    {
+     "what": "Release notes copied from the changelog",
+     "kind": "creep",
+     "serves": "755.1"
+    }
+   ],
+   "superseded": "none",
+   "conflicts": "none",
+   "edges": {
+    "755.1": "covered",
+    "755.2": "covered",
+    "755.3": "covered"
+   },
+   "poor_tests": "none"
+  }
+ },
+ "check": {
+  "passed": true,
+  "problems": []
+ },
+ "url": "https://github.com/dokima-dev/dokima/issues/755#issuecomment-6244693422"
+}
