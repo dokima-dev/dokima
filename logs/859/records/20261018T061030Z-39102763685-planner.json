@@ -1,0 +1,96 @@
+{
+ "role": "planner",
+ "stage": null,
+ "run_id": "39102763685",
+ "commit_before": "ccbebe20951336dbdfb7da7800bf77e892c34308",
+ "started_by": "dokima-runtime[bot]",
+ "models": [
+  "claude-opus-5-5"
+ ],
+ "report": {
+  "duration_ms": 298220,
+  "turns": 27,
+  "cost_usd": 1.5706980999999998,
+  "tokens_in": 1898974,
+  "tokens_out": 23162
+ },
+ "log": "https://github.com/dokima-dev/dokima/blob/logs/logs/859/39102763685-planner.md",
+ "run": "https://github.com/dokima-dev/dokima/actions/runs/39102763685",
+ "handback": {
+  "kind": "user_story",
+  "title": "The card follows the repo's own CI",
+  "summary": "The card redraws when the repo's own CI finishes, and shows every check the merge needs.",
+  "user_story": "The owner sees the repo's own checks on the card, current as soon as their CI finishes.",
+  "acceptance_criteria": [
+   {
+    "text": "When the repo's own CI finishes on a pull request, its issue's card redraws.",
+    "words": "The card redraws only when Dokima's own workflows finish, not when the adopter's CI does.",
+    "source": "https://github.com/dokima-dev/dokima/issues/744",
+    "files": [
+     "dokima/install/dokima.yml",
+     ".github/workflows/entry.yml",
+     "dokima/card.py"
+    ],
+    "edge_cases": [
+     {
+      "case": "The repo's CI run ends in failure: the card still redraws.",
+      "test": "tests/test_card_repo_ci.py::test_the_repos_own_ci_failing_redraws_the_card"
+     }
+    ]
+   },
+   {
+    "text": "When the branch rule requires a check, the card shows that check, the repo's own included, with its state.",
+    "words": "The merge gate already waits on every required check; the card must show them.",
+    "source": "https://github.com/dokima-dev/dokima/issues/744",
+    "files": [
+     "dokima/card.py"
+    ],
+    "edge_cases": [
+     {
+      "case": "A required check of the repo's own passed: it shows as passed.",
+      "test": "tests/test_card_repo_ci.py::test_a_required_repo_check_that_passed_shows_passed"
+     },
+     {
+      "case": "A required check has not run yet: it shows as not started.",
+      "test": "tests/test_card_repo_ci.py::test_a_required_check_not_yet_run_shows_not_started"
+     },
+     {
+      "case": "The repo's CI reports a required check as a commit status: it shows its state.",
+      "test": "tests/test_card_repo_ci.py::test_a_required_check_reported_as_a_commit_status_shows_its_state"
+     }
+    ]
+   }
+  ],
+  "non_functional": [],
+  "tests": {
+   "859.1": [
+    "tests/test_card_repo_ci.py::test_the_repos_own_ci_finishing_redraws_the_card",
+    "tests/test_card_repo_ci.py::test_the_repos_own_ci_failing_redraws_the_card"
+   ],
+   "859.2": [
+    "tests/test_card_repo_ci.py::test_a_required_repo_check_that_failed_shows_failed",
+    "tests/test_card_repo_ci.py::test_a_required_repo_check_that_passed_shows_passed",
+    "tests/test_card_repo_ci.py::test_a_required_check_not_yet_run_shows_not_started",
+    "tests/test_card_repo_ci.py::test_a_required_check_reported_as_a_commit_status_shows_its_state"
+   ]
+  },
+  "test_changes": {},
+  "links": {
+   "blocked_by": [],
+   "blocks": [],
+   "relates_to": [
+    744,
+    785,
+    771,
+    292
+   ]
+  },
+  "raises": [],
+  "answers": []
+ },
+ "check": {
+  "passed": true,
+  "problems": []
+ },
+ "url": "https://github.com/dokima-dev/dokima/issues/859#issuecomment-6246377615"
+}
