@@ -1,0 +1,233 @@
+{
+ "role": "planner",
+ "stage": null,
+ "run_id": "39101790236",
+ "commit_before": "ccbebe20951336dbdfb7da7800bf77e892c34308",
+ "started_by": "dokima-runtime[bot]",
+ "models": [
+  "claude-opus-5-5"
+ ],
+ "report": {
+  "duration_ms": 2133289,
+  "turns": 36,
+  "cost_usd": 2.7338629999999995,
+  "tokens_in": 3283144,
+  "tokens_out": 50895
+ },
+ "log": "https://github.com/dokima-dev/dokima/blob/logs/logs/745/39101790236-planner.md",
+ "run": "https://github.com/dokima-dev/dokima/actions/runs/39101790236",
+ "handback": {
+  "kind": "user_story",
+  "title": "Dokima's own problems file themselves into Dokima's repo",
+  "summary": "Problems that are Dokima's fault, and failed runs, on a trial repo file themselves into Dokima's repo.",
+  "user_story": "When Dokima misbehaves on another repo, the owner finds one issue for it in Dokima's repo, linking back.",
+  "acceptance_criteria": [
+   {
+    "text": "When the settings name no upstream repo, a problem tagged as Dokima's fault is filed in the repo itself.",
+    "words": "default: none, so an adopter's issues stay local",
+    "source": "https://github.com/dokima-dev/dokima/issues/745",
+    "files": [
+     "dokima/agent_autopilot.py",
+     "dokima/raises.py",
+     "dokima/defaults.yaml",
+     "dokima/upstream.py"
+    ],
+    "no_edge_cases": "One fixed default; the untagged case is filed under criterion 2."
+   },
+   {
+    "text": "When the settings name an upstream repo, a problem tagged as Dokima's fault is filed there.",
+    "words": "Tagged problems file upstream.",
+    "source": "https://github.com/dokima-dev/dokima/issues/745",
+    "files": [
+     "dokima/agent_autopilot.py",
+     "dokima/raises.py",
+     "dokima/defaults.yaml",
+     "dokima/upstream.py",
+     ".github/workflows/agent.yml"
+    ],
+    "edge_cases": [
+     {
+      "case": "An untagged problem in the same review stays in the repo itself.",
+      "test": "tests/test_upstream.py::test_with_an_upstream_repo_an_untagged_problem_stays_in_the_repo_itself"
+     }
+    ]
+   },
+   {
+    "text": "When a problem is filed upstream, it links back to the issue where it was seen.",
+    "words": "with a link back",
+    "source": "https://github.com/dokima-dev/dokima/issues/745",
+    "files": [
+     "dokima/agent_autopilot.py",
+     "dokima/upstream.py"
+    ],
+    "no_edge_cases": "One link on one filing; repeats are criterion 5."
+   },
+   {
+    "text": "Every agent's instructions show the tag that marks a problem as Dokima's fault.",
+    "words": "gains a tag agents put on problems that are Dokima's fault, not the repo's",
+    "source": "https://github.com/dokima-dev/dokima/issues/745",
+    "files": [
+     "dokima/raises.py",
+     "dokima/roles/raising.md"
+    ],
+    "no_edge_cases": "Fixed prompt text, checked for every role."
+   },
+   {
+    "text": "When the same tagged problem is raised again, it becomes a comment on the upstream issue, never a second issue.",
+    "words": "Repeats become comments on the existing upstream issue, never a second issue.",
+    "source": "https://github.com/dokima-dev/dokima/issues/745",
+    "files": [
+     "dokima/agent_autopilot.py",
+     "dokima/upstream.py"
+    ],
+    "no_edge_cases": "A first filing is proved by criterion 2."
+   },
+   {
+    "text": "When a shared workflow's job fails, the upstream repo gets an issue linking the failed run.",
+    "words": "files the failure upstream with the run link",
+    "source": "https://github.com/dokima-dev/dokima/issues/745",
+    "files": [
+     "dokima/upstream.py",
+     "dokima/defaults.yaml"
+    ],
+    "edge_cases": [
+     {
+      "case": "With no upstream repo set, a failure files nothing and the step passes.",
+      "test": "tests/test_upstream.py::test_with_no_upstream_repo_a_failed_run_files_nothing"
+     }
+    ]
+   },
+   {
+    "text": "Every job of each shared workflow ends with a step that files its failure upstream.",
+    "words": "A final step in each shared workflow",
+    "source": "https://github.com/dokima-dev/dokima/issues/745",
+    "files": [
+     ".github/workflows/acceptance-criteria.yml",
+     ".github/workflows/agent.yml",
+     ".github/workflows/assign.yml",
+     ".github/workflows/audit.yml",
+     ".github/workflows/autopilot.yml",
+     ".github/workflows/board.yml",
+     ".github/workflows/card.yml",
+     ".github/workflows/commands.yml",
+     ".github/workflows/full-suite.yml",
+     ".github/workflows/reviews.yml",
+     ".github/workflows/testmon.yml",
+     ".github/workflows/uptodate.yml",
+     ".github/workflows/entry.yml",
+     "dokima/settings.py",
+     "dokima/upstream.py"
+    ],
+    "no_edge_cases": "Every job of every shared workflow is checked."
+   },
+   {
+    "text": "When the same failure happens twice, the upstream repo holds one issue with two comments, each linking its run.",
+    "words": "forcing the same Dokima-caused failure twice on the trial repo yields one upstream issue with two linked comments",
+    "source": "https://github.com/dokima-dev/dokima/issues/745",
+    "files": [
+     "dokima/upstream.py"
+    ],
+    "edge_cases": [
+     {
+      "case": "A different job's failure opens its own upstream issue.",
+      "test": "tests/test_upstream.py::test_a_different_failure_opens_its_own_upstream_issue"
+     }
+    ]
+   }
+  ],
+  "non_functional": [
+   {
+    "text": "Filing upstream mints its key from the App's existing key, with no new secret.",
+    "why": "The App's key already covers every repo it is installed on.",
+    "words": "so no new credential",
+    "source": "https://github.com/dokima-dev/dokima/issues/745",
+    "files": [
+     ".github/workflows/acceptance-criteria.yml",
+     ".github/workflows/agent.yml",
+     ".github/workflows/assign.yml",
+     ".github/workflows/audit.yml",
+     ".github/workflows/autopilot.yml",
+     ".github/workflows/board.yml",
+     ".github/workflows/card.yml",
+     ".github/workflows/commands.yml",
+     ".github/workflows/full-suite.yml",
+     ".github/workflows/reviews.yml",
+     ".github/workflows/testmon.yml",
+     ".github/workflows/uptodate.yml",
+     ".github/workflows/entry.yml",
+     "dokima/settings.py"
+    ],
+    "no_edge_cases": "Every workflow file is read."
+   }
+  ],
+  "tests": {
+   "745.1": [
+    "tests/test_upstream.py::test_with_no_upstream_repo_a_tagged_problem_is_filed_in_the_repo_itself"
+   ],
+   "745.2": [
+    "tests/test_upstream.py::test_with_an_upstream_repo_a_tagged_problem_is_filed_there",
+    "tests/test_upstream.py::test_with_an_upstream_repo_an_untagged_problem_stays_in_the_repo_itself"
+   ],
+   "745.3": [
+    "tests/test_upstream.py::test_a_problem_filed_upstream_links_back_to_the_issue_where_it_was_seen"
+   ],
+   "745.4": [
+    "tests/test_upstream.py::test_every_agent_is_told_how_to_tag_a_problem_as_dokimas_fault"
+   ],
+   "745.5": [
+    "tests/test_upstream.py::test_a_tagged_problem_raised_again_is_a_comment_on_the_upstream_issue"
+   ],
+   "745.6": [
+    "tests/test_upstream.py::test_a_failed_run_files_the_failure_upstream_with_the_run_link",
+    "tests/test_upstream.py::test_with_no_upstream_repo_a_failed_run_files_nothing"
+   ],
+   "745.7": [
+    "tests/test_upstream.py::test_every_job_of_each_shared_workflow_ends_by_filing_its_failure_upstream"
+   ],
+   "745.8": [
+    "tests/test_upstream.py::test_the_same_failure_twice_gives_one_upstream_issue_with_two_linked_comments",
+    "tests/test_upstream.py::test_a_different_failure_opens_its_own_upstream_issue"
+   ],
+   "745.9": [
+    "tests/test_upstream.py::test_filing_upstream_mints_its_key_from_the_apps_own_key"
+   ]
+  },
+  "test_changes": {},
+  "links": {
+   "blocked_by": [],
+   "blocks": [
+    746
+   ],
+   "relates_to": [
+    272,
+    273
+   ]
+  },
+  "raises": [
+   {
+    "kind": "question",
+    "to": "owner",
+    "label": "Failed test checks",
+    "text": "Should failed test checks also file upstream? They usually fail on the repo's code, not Dokima's. The plan assumes yes.",
+    "evidence": "`entry.yml` calls `full-suite.yml` and `acceptance-criteria.yml`, which run the repo's tests; the plan covers every shared workflow.",
+    "raised_by": "planner",
+    "id": "P1"
+   },
+   {
+    "kind": "question",
+    "to": "owner",
+    "label": "First failure comments",
+    "text": "Should the first failure also post a comment, so two failures give two linked comments? The plan assumes it does.",
+    "evidence": "The issue's Done when asks for one upstream issue with two linked comments after two failures.",
+    "raised_by": "planner",
+    "id": "P2"
+   }
+  ],
+  "answers": []
+ },
+ "check": {
+  "passed": true,
+  "problems": []
+ },
+ "url": "https://github.com/dokima-dev/dokima/issues/745#issuecomment-6246247889"
+}
