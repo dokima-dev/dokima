@@ -5,7 +5,7 @@ test_start.py, with the fake GitHub of test_autopilot_close.py (labels, sub-issu
 signals). A thin layer in front of that fake also answers what a hotfix's run needs: `gh pr create` (noted, and the
 pull request #60 exists from then on), `gh run download` (a session log of the worker's run), the merge gate's reads
 of pull request #60 (its head commit, its draft flag, `gh pr ready`), main's branch rule (it requires the `all tests`
-check) and the check runs on the head commit (all green). A `--jq` filter on an issue read is applied with jq.
+check) and the check runs on the head commit (green, or red when the test asks). A `--jq` filter on an issue read is applied with jq.
 
 The issue is #57 in repo o/r, labeled `hotfix`, its text the owner's ask: ASK. Main holds app.py (the title with a
 typo), lib/ (nothing yet) and an older test, tests/test_old.py. The stand-in agent keeps a copy of its pack and its
@@ -18,6 +18,7 @@ The autopilot test runs the close and command workflows on test_autopilot_close.
 """
 import json
 import os
+import re
 import subprocess
 import sys
 
@@ -25,6 +26,7 @@ sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
 import test_autopilot_close as tac  # noqa: E402
 import test_start as ts  # noqa: E402
 from dokima import agent, agent_github, checks  # noqa: E402
+from dokima.agent_records import GATE_FAILED  # noqa: E402
 
 HOTFIX = "hotfix"
 ISSUE = int(ts.N)
@@ -95,7 +97,9 @@ if re.fullmatch(r"repos/o/r/branches/[^/]+", path):
     sys.exit(0)
 if re.fullmatch(r"repos/o/r/commits/[0-9a-f]+/check-runs", path):
     noted()
-    print(json.dumps({"check_runs": [{"name": "all tests", "status": "completed", "conclusion": "success"}]}))
+    opts_file = os.path.join(d, "options.json")
+    conclusion = (json.load(open(opts_file)) if os.path.exists(opts_file) else {}).get("checks", "success")
+    print(json.dumps({"check_runs": [{"name": "all tests", "status": "completed", "conclusion": conclusion}]}))
     sys.exit(0)
 if re.fullmatch(r"repos/o/r/commits/[0-9a-f]+/status", path):
     noted()
@@ -149,11 +153,14 @@ class Hotfix(ts.Machine):
     """One whole run of agent.yml on #57 for ROLE at STAGE, the issue carrying `labels`.
 
     With `built`, try/issue-57 already holds the worker's fix and pull request #60 is open, as when code review starts.
-    With `try_branch`, the branch holds test_start's planner test, as for an approved plan."""
+    With `try_branch`, the branch holds test_start's planner test, as for an approved plan. `checks` is the conclusion
+    GitHub gives the required check on the pull request's head commit."""
 
-    def __init__(self, tmp, role, stage="", labels=(HOTFIX,), comments=(), review=None, built=False, try_branch=False):
+    def __init__(self, tmp, role, stage="", labels=(HOTFIX,), comments=(), review=None, built=False, try_branch=False,
+                 checks="success"):
         """Set up the repo, the fakes and the issue, then run the job."""
-        super().__init__(tmp, list(comments), options={"pr_open": True} if built else None, files=MAIN_FILES)
+        options = {"pr_open": True, "checks": checks} if built else {"checks": checks}
+        super().__init__(tmp, list(comments), options=options, files=MAIN_FILES)
         t, src = self.tmp, f"{self.tmp}/src"
         os.rename(f"{t}/bin/gh", f"{t}/bin/gh-unused")
         open(f"{t}/bin/gh-inner", "w").write(tac.fake_gh())
@@ -286,19 +293,24 @@ def test_a_hotfix_worker_pack_gives_the_issue_text_as_the_ask(record_property, t
     assert "ask.md" in r.prompt(), "863.3: the hotfix worker's prompt never points it to ask.md"
 
 
-def test_a_hotfix_worker_code_change_stays_on_the_pull_request(record_property, tmp_path):
-    """The code a hotfix worker changes is pushed as it wrote it, nothing dropped.
+def test_a_hotfix_worker_change_stays_on_the_pull_request(record_property, tmp_path):
+    """A hotfix worker's code and test changes are pushed as written, nothing dropped.
 
-    Proves 863.4. The hotfix worker fixes app.py and adds lib/title.py, with no plan naming either. After the run
-    try/issue-57 must hold both exactly as the worker wrote them, and the fence must list neither as dropped."""
+    Proves 863.4. The hotfix worker fixes app.py, adds lib/title.py, adds tests/test_app.py and changes the older
+    tests/test_old.py, with no plan naming any of them. After the run try/issue-57 must hold all four exactly as the
+    worker wrote them, and the fence must list none as dropped."""
     record_property("proves", "863.4")
     r = Hotfix(tmp_path, "worker")
     assert not r.failed, f"863.4: the hotfix worker's run failed; {r.why()}"
     assert r.pushed("app.py") == FIXED_APP, f"863.4: the worker's fix to app.py was not pushed: {r.pushed('app.py')!r}"
     assert r.pushed("lib/title.py") == NEW_LIB, "863.4: the worker's new lib/title.py was not pushed"
+    assert r.pushed("tests/test_app.py") == NEW_TEST, "863.4: the worker's new tests/test_app.py was not pushed"
+    assert r.pushed("tests/test_old.py") == CHANGED_OLD, \
+        f"863.4: the worker's change to tests/test_old.py was not pushed: {r.pushed('tests/test_old.py')!r}"
     dropped = os.path.join(r.env.get("OUT", ""), "dropped.txt")
     listed = open(dropped).read().split() if os.path.exists(dropped) else []
-    assert not {"app.py", "lib/title.py"} & set(listed), f"863.4: the fence listed the worker's code as dropped: {listed}"
+    assert not {"app.py", "lib/title.py", "tests/test_app.py", "tests/test_old.py"} & set(listed), \
+        f"863.4: the fence listed the worker's changes as dropped: {listed}"
 
 
 def test_a_finished_hotfix_worker_starts_code_review_on_its_pull_request(record_property, tmp_path):
@@ -337,8 +349,9 @@ def test_an_approved_hotfix_passes_the_merge_gate_like_any_pull_request(record_p
 
     Proves 863.7. Code review approves #57's hotfix pull request #60, whose required check is green. The review's
     record must pass its check, the gate must mark #60 ready so its tests run, and the record's Next line must say all
-    tests passed. Then the Acceptance criteria check list for #60, opened by Dokima's app from try/issue-57, must
-    hold no "No approved plan found" row that can only fail; beside it, the same pull request without the label still
+    tests passed. Beside it, the same approval with the required check red must not pass the gate: the record says
+    the merge gate failed and the worker starts again. Then the Acceptance criteria check list for #60, opened by
+    Dokima's app from try/issue-57, must hold no "No approved plan found" row that can only fail; beside it, the same pull request without the label still
     gets that row."""
     record_property("proves", "863.7")
     r = Hotfix(tmp_path, "reviewer", "pr", comments=[ts.record_comment(worker_record(), "2026-10-07T10:30:00Z")],
@@ -350,6 +363,15 @@ def test_an_approved_hotfix_passes_the_merge_gate_like_any_pull_request(record_p
         f"863.7: the merge gate never marked #60 ready, so its tests never ran; {r.why()}"
     assert any("All tests passed with main's newest commit" in b for b in r.on("pr", ts.PR)), \
         f"863.7: the record does not say all tests passed at the merge gate: {r.on('pr', ts.PR)}"
+    red = Hotfix(tmp_path / "red", "reviewer", "pr", comments=[ts.record_comment(worker_record(), "2026-10-07T10:30:00Z")],
+                 review=APPROVE, built=True, checks="failure")
+    said = red.on("pr", ts.PR) + red.on("issue", ISSUE)
+    assert not any("All tests passed" in b for b in said), \
+        f"863.7: an approved hotfix whose required check failed still passed the merge gate: {said}"
+    assert any(GATE_FAILED in b for b in said), \
+        f"863.7: an approved hotfix whose required check failed was not stopped by the merge gate; {red.why()}"
+    assert [s[0] for s in red.signals()] == ["worker"], \
+        f"863.7: a hotfix that failed the merge gate did not go back to its worker: {red.signals()}"
 
     def matrix(labels):
         issue = {"number": ISSUE, "title": "Page title typo", "body": ASK, "comments": [], "state": "OPEN",
@@ -380,50 +402,60 @@ def test_an_approved_hotfix_passes_the_merge_gate_like_any_pull_request(record_p
     assert [x["id"] for x in matrix([])] == ["none"], "863.7: a Dokima pull request with no plan and no label lost its failing row"
 
 
-def test_a_hotfix_worker_test_change_stays_on_the_pull_request(record_property, tmp_path):
-    """The tests a hotfix worker adds or changes are pushed as it wrote them.
-
-    Proves 863.8. The hotfix worker adds tests/test_app.py and changes the older tests/test_old.py. After the run
-    try/issue-57 must hold both exactly as the worker wrote them, and the fence must list neither as dropped."""
-    record_property("proves", "863.8")
-    r = Hotfix(tmp_path, "worker")
-    assert not r.failed, f"863.8: the hotfix worker's run failed; {r.why()}"
-    assert r.pushed("tests/test_app.py") == NEW_TEST, "863.8: the worker's new tests/test_app.py was not pushed"
-    assert r.pushed("tests/test_old.py") == CHANGED_OLD, \
-        f"863.8: the worker's change to tests/test_old.py was not pushed: {r.pushed('tests/test_old.py')!r}"
-    dropped = os.path.join(r.env.get("OUT", ""), "dropped.txt")
-    listed = open(dropped).read().split() if os.path.exists(dropped) else []
-    assert not {"tests/test_app.py", "tests/test_old.py"} & set(listed), \
-        f"863.8: the fence listed the worker's tests as dropped: {listed}"
-
-
 def test_code_review_sends_a_too_big_hotfix_to_the_planner(record_property, tmp_path):
     """Code review finding a hotfix bigger than its ask starts the planner on the issue.
 
-    Proves 863.9. Code review of #57's hotfix blocks it, raising a blocker for the planner: the change is bigger than
+    Proves 863.8. Code review of #57's hotfix blocks it, raising a blocker for the planner: the change is bigger than
     the ask. Its record must pass its check, and exactly one signal must start the planner for #57, with no worker.
     Then, once a plan for #57 is approved, its worker must build that plan: its pack holds the plan."""
-    record_property("proves", "863.9")
+    record_property("proves", "863.8")
     r = Hotfix(tmp_path / "review", "reviewer", "pr", comments=[ts.record_comment(worker_record(), "2026-10-07T10:30:00Z")],
                review=BLOCK, built=True)
     recs = r.records()
     assert [(x["role"], x["check"]["passed"]) for x in recs] == [("reviewer", True)], \
-        f"863.9: the blocking hotfix review did not post one passed record; {r.why()}"
-    assert r.signals() == [("planner", "plan", ts.N)], f"863.9: the planner did not start once on #57: {r.signals()}"
+        f"863.8: the blocking hotfix review did not post one passed record; {r.why()}"
+    assert r.signals() == [("planner", "plan", ts.N)], f"863.8: the planner did not start once on #57: {r.signals()}"
     planned = Hotfix(tmp_path / "planned", "worker", comments=ts.STORY_APPROVED, try_branch=True)
-    assert planned.agent_started(), f"863.9: the worker of the planned issue never started; {planned.why()}"
+    assert planned.agent_started(), f"863.8: the worker of the planned issue never started; {planned.why()}"
     plan = json.loads(planned.pack_file("plan.json") or "{}")
-    assert plan.get("kind") == "user_story", "863.9: once planned, the hotfix's worker was not given the approved plan"
+    assert plan.get("kind") == "user_story", "863.8: once planned, the hotfix's worker was not given the approved plan"
 
 
 def test_a_hotfix_sent_back_to_planning_says_why_on_the_issue(record_property, tmp_path):
     """A hotfix sent back to planning gets a comment on the issue saying why.
 
-    Proves 863.10. Code review of #57's hotfix blocks it with a blocker for the planner whose text says the change
+    Proves 863.9. Code review of #57's hotfix blocks it with a blocker for the planner whose text says the change
     is bigger than the ask. Issue #57 itself, not only its pull request, must get a new comment carrying that text."""
-    record_property("proves", "863.10")
+    record_property("proves", "863.9")
     r = Hotfix(tmp_path, "reviewer", "pr", comments=[ts.record_comment(worker_record(), "2026-10-07T10:30:00Z")],
                review=BLOCK, built=True)
-    assert r.agent_started(), f"863.10: code review of the hotfix never started; {r.why()}"
+    assert r.agent_started(), f"863.9: code review of the hotfix never started; {r.why()}"
     said = [b for b in r.on("issue", ISSUE) if TOO_BIG in b]
-    assert said, f"863.10: issue #57 got no comment saying why it went back to planning: {r.on('issue', ISSUE)}"
+    assert said, f"863.9: issue #57 got no comment saying why it went back to planning: {r.on('issue', ISSUE)}"
+
+
+# What only Dokima's own repo has: its GitHub home, its code and topic paths, its workflow file.
+DOKIMA_OWN = re.compile(r"dokima-dev|(?<![\w-])dokima/|(?<![\w-])rules/[\w-]+\.md|agent\.yml")
+# Issue numbers a prompt may name: the issue at hand, its pull request and the shared raising example.
+OWN_NUMBERS = {ISSUE, int(ts.PR), 164}
+
+
+def test_hotfix_prompts_name_nothing_from_dokimas_own_repo(record_property, tmp_path):
+    """The hotfix worker's and code reviewer's prompts name nothing from Dokima's own repo.
+
+    Proves 863.10. Runs the hotfix worker, then code review of its pull request, on #57 in repo o/r. Each agent must
+    start with a prompt that points it to ask.md, so the hotfix lane's words are there to read. Neither prompt may
+    name Dokima's GitHub home, a path into Dokima's code or topic files, its workflow file, or an issue number other
+    than #57, its pull request #60 and the shared example #164."""
+    record_property("proves", "863.10")
+    worker = Hotfix(tmp_path / "worker", "worker")
+    review = Hotfix(tmp_path / "review", "reviewer", "pr",
+                    comments=[ts.record_comment(worker_record(), "2026-10-07T10:30:00Z")], review=APPROVE, built=True)
+    for name, r in (("worker", worker), ("code reviewer", review)):
+        text = r.prompt()
+        assert r.agent_started() and "ask.md" in text, \
+            f"863.10: the hotfix {name} never started with the hotfix lane's prompt; {r.why()}"
+        own = sorted(set(DOKIMA_OWN.findall(text)))
+        assert not own, f"863.10: the hotfix {name}'s prompt names Dokima's own repo: {own}"
+        numbers = sorted({int(n) for n in re.findall(r"(?<![\w&])#(\d+)\b", text)} - OWN_NUMBERS)
+        assert not numbers, f"863.10: the hotfix {name}'s prompt names Dokima's own issues: {numbers}"
