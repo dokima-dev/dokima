@@ -303,6 +303,12 @@ def asked(rec, url=None):
     return f"{f'[{words}]({url})' if url else words} {how}"
 
 
+def plain(check_runs):
+    """The check runs, each Dokima gate under its plain name, as `all tests` (#846)."""
+    shown = {settings.shown_as(name): name for name in (ALL_TESTS, ACCEPTANCE)}
+    return [dict(r, name=shown.get(r["name"], r["name"])) for r in check_runs]
+
+
 def checks_by_key(check_runs):
     """Index criterion checks by their key ('67.1') from names like '67.1 · ...'.
 
@@ -328,7 +334,7 @@ def checks_passed(number, h, check_runs):
     count = len(h.get("acceptance_criteria") or []) + len(h.get("non_functional") or []) if h else 0
     by_key = checks_by_key(check_runs)
     runs = [by_key.get(f"{number}.{k}") for k in range(1, count + 1)]
-    runs.append(next((r for r in check_runs if r["name"] == settings.shown_as(ALL_TESTS)), None))
+    runs.append(next((r for r in plain(check_runs) if r["name"] == ALL_TESTS), None))
     return count > 0 and all(state(r) == "passed" for r in runs)
 
 
@@ -548,7 +554,7 @@ def done_row(repo, found, all_tests, planned=False):
     approval = {"state": "APPROVED", "html_url": merge.get("html_url")} if merge else owner_review(found["reviews"], found["owners"])
     approval_st = "not started" if not approval else "passed" if approval["state"] == "APPROVED" else "failed"
     if planned:
-        accepted = next((r for r in found["check_runs"] if r["name"] == settings.shown_as(ACCEPTANCE)), None)
+        accepted = next((r for r in plain(found["check_runs"]) if r["name"] == ACCEPTANCE), None)
         return ("**Definition of Done:** "
                 f"{circle(repo, state(accepted), accepted and accepted['html_url'])} Acceptance tests · "
                 f"{circle(repo, review_st, review and review.get('run'))} Code review · "
@@ -568,7 +574,7 @@ def render(repo, issue, found, page="issue"):
     from dokima import agent
     recs, pr, check_runs, worker = found["recs"], found["pr"], found["check_runs"], found.get("worker")
     by_key = checks_by_key(check_runs)
-    all_tests = next((r for r in check_runs if r["name"] == settings.shown_as(ALL_TESTS)), None)
+    all_tests = next((r for r in plain(check_runs) if r["name"] == ALL_TESTS), None)
     planned = agent.latest(recs, "planner")
     h = planned["handback"] if planned else None
     lines = [plan.CARD_START]
