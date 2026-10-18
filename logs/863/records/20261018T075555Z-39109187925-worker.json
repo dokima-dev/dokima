@@ -1,0 +1,47 @@
+{
+ "role": "worker",
+ "stage": null,
+ "run_id": "39109187925",
+ "commit_before": "812d06dff725fe6a3a3465707513dfa51d431c14",
+ "started_by": "dokima-runtime[bot]",
+ "models": [
+  "claude-opus-5-5"
+ ],
+ "report": {
+  "duration_ms": 204101,
+  "turns": 12,
+  "cost_usd": 0.41011679999999995,
+  "tokens_in": 416591,
+  "tokens_out": 3144
+ },
+ "log": "https://github.com/dokima-dev/dokima/blob/logs/logs/863/39109187925-worker.md",
+ "run": "https://github.com/dokima-dev/dokima/actions/runs/39109187925",
+ "handback": {
+  "summary": "Fixed the main merge left half done, so the hotfix check and main's unplanned check now both work.",
+  "criteria": {
+   "863.1": "`agent.yml` reads the hotfix label before the pack; `pack` in `dokima/agent_roles.py` builds a hotfix pack with no plan.",
+   "863.2": "`start_first` and `start_unblocked` in `dokima/agent_autopilot.py` start an unplanned hotfix's worker instead of its planner.",
+   "863.3": "`dokima/hotfix.py` writes the issue's text to `ask.md`; `agent.yml` points the worker's prompt to it.",
+   "863.4": "`dokima/fence.py` keeps every change for a hotfix; `agent.yml` passes it.",
+   "863.5": "The worker's hand-back is checked with no plan, so it pushes, opens the pull request and starts code review.",
+   "863.6": "The pr-stage pack holds `ask.md`; `problems_pack` takes it in place of `plan.json`.",
+   "863.7": "`dokima/checks.py` gives an unplanned hotfix one all-tests check, now merged with main's unplanned check; the usual gate runs.",
+   "863.8": "A hotfix review's blocker for the planner starts the planner; after that the issue follows the normal flow.",
+   "863.9": "`back_to_planning` in `dokima/hotfix.py` comments the reviewer's blockers on the issue, called from `agent next`.",
+   "863.10": "The hotfix sections in `worker.md` and `reviewer.md` name nothing of Dokima's repo."
+  },
+  "evidence": "`pytest -q tests/test_hotfix.py`: 10 passed",
+  "raises": [],
+  "answers": []
+ },
+ "check": {
+  "passed": true,
+  "problems": []
+ },
+ "dropped_by_fence": [],
+ "files_changed": [
+  "dokima/checks.py"
+ ],
+ "branch": "try/issue-863",
+ "url": "https://github.com/dokima-dev/dokima/pull/868#issuecomment-6247321178"
+}
