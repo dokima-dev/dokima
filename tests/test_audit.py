@@ -224,10 +224,10 @@ def test_each_difference_gets_one_line_saying_what_is_off_and_what_dokima_needs(
 
 
 def test_too_much_is_a_difference_too(record_property):
-    """A broader permission, a missing one and an extra required check each get a line.
+    """Broader and missing permissions each get a line; a repo's own check gets none.
 
     Proves 283.1. The faked app has administration: write where Dokima needs read, and no workflows permission; main's rule also
-    requires a lint check Dokima does not declare. The audit returns three lines, one for each."""
+    requires the repo's own lint check, which is not drift. The audit returns two lines, one for each permission."""
     record_property("proves", "283.1")
     a = audit("283.1")
     g = GitHub()
@@ -237,8 +237,7 @@ def test_too_much_is_a_difference_too(record_property):
     lines = a.compare(g, REPO)
     one_line(lines, "283.1", "the broader administration permission", "administration", "write", "read")
     one_line(lines, "283.1", "the missing workflows permission", "workflows", "write")
-    one_line(lines, "283.1", "the extra required check", "main", "lint")
-    assert len(lines) == 3, f"283.1: three differences gave {len(lines)} lines: {lines}"
+    assert len(lines) == 2, f"283.1: two differences gave {len(lines)} lines: {lines}"
 
 
 def test_a_missing_branch_rule_and_a_missing_view_are_reported(record_property):
