@@ -1,0 +1,300 @@
+{
+ "role": "reviewer",
+ "stage": "plan",
+ "run_id": "39104711675",
+ "commit_before": "2a74b9455f2cd1103b65a5b5dd04f545ce62f4ae",
+ "started_by": "dokima-runtime[bot]",
+ "models": [
+  "claude-opus-5-5"
+ ],
+ "report": {
+  "duration_ms": 113200,
+  "turns": 11,
+  "cost_usd": 0.6879514,
+  "tokens_in": 538193,
+  "tokens_out": 7790
+ },
+ "log": "https://github.com/dokima-dev/dokima/blob/logs/logs/863/39104711675-reviewer-plan.md",
+ "run": "https://github.com/dokima-dev/dokima/actions/runs/39104711675",
+ "handback": {
+  "previous_step": {
+   "did": [
+    "The planner wrote ten criteria for the hotfix lane, each with one test.",
+    "All ten tests fail today because a hotfix still needs a plan."
+   ],
+   "decided": [
+    "The hotfix worker and its code review read the issue text, no plan."
+   ],
+   "open": []
+  },
+  "verdict": "block",
+  "summary": "Two gaps: no test shows failing tests stop a hotfix, and the any-repo prompt rule has no criterion.",
+  "raises": [
+   {
+    "kind": "blocker",
+    "to": "planner",
+    "label": "863.7: gate unproven",
+    "text": "The test for 863.7 only runs with green checks, so a hotfix that skips its tests still passes. Add a red-check run beside it that must not pass the gate.",
+    "evidence": "`tests/test_hotfix.py::test_an_approved_hotfix_passes_the_merge_gate_like_any_pull_request`; the fake gh always answers check runs `success`.",
+    "raised_by": "reviewer",
+    "id": "R1"
+   },
+   {
+    "kind": "blocker",
+    "to": "planner",
+    "label": "No criterion: prompts",
+    "text": "The owner asked to keep the prompts free of anything about Dokima's own repo. This plan edits the worker and reviewer prompts, and no criterion carries it.",
+    "evidence": "Owner comment on #750 (issuecomment-6246479912); criteria 863.3, 863.6, 863.9 list `dokima/roles/worker.md` and `dokima/roles/reviewer.md`.",
+    "raised_by": "reviewer",
+    "id": "R2"
+   }
+  ],
+  "answers": [],
+  "asks": [
+   {
+    "ask": "An issue labeled `hotfix` skips planning and plan review.",
+    "source": "https://github.com/dokima-dev/dokima/issues/750",
+    "criterion": "863.2"
+   },
+   {
+    "ask": "By hand, the owner's `/work` starts a hotfix's worker.",
+    "source": "https://github.com/dokima-dev/dokima/issues/750#issuecomment-6246479912",
+    "criterion": "863.1"
+   },
+   {
+    "ask": "When its turn comes (by hand, or on autopilot once nothing open blocks it), the worker builds straight from the issue's text",
+    "source": "https://github.com/dokima-dev/dokima/issues/750",
+    "criterion": "863.2"
+   },
+   {
+    "ask": "the text is the whole ask.",
+    "source": "https://github.com/dokima-dev/dokima/issues/750",
+    "criterion": "863.3"
+   },
+   {
+    "ask": "Code review still runs and judges the diff against the issue's text",
+    "source": "https://github.com/dokima-dev/dokima/issues/750",
+    "criterion": "863.6"
+   },
+   {
+    "ask": "All tests and the merge gate still run, as for any pull request.",
+    "source": "https://github.com/dokima-dev/dokima/issues/750",
+    "criterion": "863.7"
+   },
+   {
+    "ask": "The worker may add or change a small test that pins the fix",
+    "source": "https://github.com/dokima-dev/dokima/issues/750",
+    "criterion": "863.8"
+   },
+   {
+    "ask": "When code review finds the change bigger than the ask",
+    "source": "https://github.com/dokima-dev/dokima/issues/750",
+    "criterion": "863.9"
+   },
+   {
+    "ask": "it goes back to normal planning, saying why.",
+    "source": "https://github.com/dokima-dev/dokima/issues/750",
+    "criterion": "863.10"
+   },
+   {
+    "ask": "keep the prompts free of anything about Dokima's own repo, so they fit any repo.",
+    "source": "https://github.com/dokima-dev/dokima/issues/750#issuecomment-6246479912",
+    "criterion": "missing"
+   }
+  ],
+  "behaviors": [
+   {
+    "criterion": "863.1",
+    "one_behavior": true,
+    "why": "Owner's work starts a hotfix worker."
+   },
+   {
+    "criterion": "863.2",
+    "one_behavior": true,
+    "why": "Autopilot starts the worker instead of the planner."
+   },
+   {
+    "criterion": "863.3",
+    "one_behavior": true,
+    "why": "The worker's pack holds the issue text as the ask."
+   },
+   {
+    "criterion": "863.4",
+    "one_behavior": true,
+    "why": "Code changes stay on the pull request."
+   },
+   {
+    "criterion": "863.5",
+    "one_behavior": true,
+    "why": "Code review starts after the worker."
+   },
+   {
+    "criterion": "863.6",
+    "one_behavior": true,
+    "why": "The review's pack holds the issue text as the ask."
+   },
+   {
+    "criterion": "863.7",
+    "one_behavior": true,
+    "why": "The merge gate judges a hotfix as any pull request."
+   },
+   {
+    "criterion": "863.8",
+    "one_behavior": true,
+    "why": "Test changes stay on the pull request."
+   },
+   {
+    "criterion": "863.9",
+    "one_behavior": true,
+    "why": "A too-big hotfix starts the planner."
+   },
+   {
+    "criterion": "863.10",
+    "one_behavior": true,
+    "why": "The issue gets a comment saying why."
+   }
+  ],
+  "edge_cases": [
+   {
+    "criterion": "863.1",
+    "cut": [],
+    "missing": []
+   },
+   {
+    "criterion": "863.2",
+    "cut": [],
+    "missing": []
+   },
+   {
+    "criterion": "863.3",
+    "cut": [],
+    "missing": []
+   },
+   {
+    "criterion": "863.4",
+    "cut": [],
+    "missing": []
+   },
+   {
+    "criterion": "863.5",
+    "cut": [],
+    "missing": []
+   },
+   {
+    "criterion": "863.6",
+    "cut": [],
+    "missing": []
+   },
+   {
+    "criterion": "863.7",
+    "cut": [],
+    "missing": [
+     "An approved hotfix whose tests fail does not pass the gate."
+    ]
+   },
+   {
+    "criterion": "863.8",
+    "cut": [],
+    "missing": []
+   },
+   {
+    "criterion": "863.9",
+    "cut": [],
+    "missing": []
+   },
+   {
+    "criterion": "863.10",
+    "cut": [],
+    "missing": []
+   }
+  ],
+  "tests": [
+   {
+    "test": "tests/test_hotfix.py::test_work_on_a_hotfix_starts_its_worker_with_no_plan",
+    "only_its_behavior": true,
+    "why": "Runs the workflow; unlabeled case beside it."
+   },
+   {
+    "test": "tests/test_hotfix.py::test_autopilot_starts_a_hotfix_worker_instead_of_its_planner",
+    "only_its_behavior": true,
+    "why": "Close and autopilot start, with blocked and unlabeled siblings."
+   },
+   {
+    "test": "tests/test_hotfix.py::test_a_hotfix_worker_pack_gives_the_issue_text_as_the_ask",
+    "only_its_behavior": true,
+    "why": "Reads the pack the agent found."
+   },
+   {
+    "test": "tests/test_hotfix.py::test_a_hotfix_worker_code_change_stays_on_the_pull_request",
+    "only_its_behavior": true,
+    "why": "Reads the pushed branch."
+   },
+   {
+    "test": "tests/test_hotfix.py::test_a_finished_hotfix_worker_starts_code_review_on_its_pull_request",
+    "only_its_behavior": true,
+    "why": "Checks the pull request and the review signal."
+   },
+   {
+    "test": "tests/test_hotfix.py::test_code_review_of_a_hotfix_gets_the_issue_text_as_the_ask",
+    "only_its_behavior": true,
+    "why": "Reads the review pack."
+   },
+   {
+    "test": "tests/test_hotfix.py::test_an_approved_hotfix_passes_the_merge_gate_like_any_pull_request",
+    "only_its_behavior": true,
+    "why": "Checks the gate only, but lacks a red-check case."
+   },
+   {
+    "test": "tests/test_hotfix.py::test_a_hotfix_worker_test_change_stays_on_the_pull_request",
+    "only_its_behavior": true,
+    "why": "Reads the pushed branch."
+   },
+   {
+    "test": "tests/test_hotfix.py::test_code_review_sends_a_too_big_hotfix_to_the_planner",
+    "only_its_behavior": true,
+    "why": "Checks the planner signal and the replanned worker."
+   },
+   {
+    "test": "tests/test_hotfix.py::test_a_hotfix_sent_back_to_planning_says_why_on_the_issue",
+    "only_its_behavior": true,
+    "why": "Checks the issue comment text."
+   }
+  ],
+  "size": "ok",
+  "boxes": {
+   "dropped": [
+    {
+     "words": "keep the prompts free of anything about Dokima's own repo, so they fit any repo",
+     "source": "https://github.com/dokima-dev/dokima/issues/750#issuecomment-6246479912"
+    }
+   ],
+   "added": "none",
+   "superseded": "none",
+   "conflicts": "none",
+   "edges": {
+    "863.1": "covered",
+    "863.2": "covered",
+    "863.3": "covered",
+    "863.4": "covered",
+    "863.5": "covered",
+    "863.6": "covered",
+    "863.7": "missing: an approved hotfix whose tests fail does not pass the gate",
+    "863.8": "covered",
+    "863.9": "covered",
+    "863.10": "covered"
+   },
+   "poor_tests": [
+    {
+     "test": "tests/test_hotfix.py::test_an_approved_hotfix_passes_the_merge_gate_like_any_pull_request",
+     "passes_with": "A hotfix path that marks the pull request ready and passes without reading its checks.",
+     "fix": "Run again with a failing all tests check and assert the gate does not pass."
+    }
+   ]
+  }
+ },
+ "check": {
+  "passed": true,
+  "problems": []
+ },
+ "url": "https://github.com/dokima-dev/dokima/issues/863#issuecomment-6246637583"
+}
