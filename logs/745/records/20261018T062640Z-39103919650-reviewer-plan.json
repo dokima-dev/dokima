@@ -1,0 +1,279 @@
+{
+ "role": "reviewer",
+ "stage": "plan",
+ "run_id": "39103919650",
+ "commit_before": "389f34d3808daed9e3585cf15dc7365dd7f1a3d2",
+ "started_by": "dokima-runtime[bot]",
+ "models": [
+  "claude-opus-5-5"
+ ],
+ "report": {
+  "duration_ms": 96557,
+  "turns": 10,
+  "cost_usd": 0.660269,
+  "tokens_in": 485405,
+  "tokens_out": 9264
+ },
+ "log": "https://github.com/dokima-dev/dokima/blob/logs/logs/745/39103919650-reviewer-plan.md",
+ "run": "https://github.com/dokima-dev/dokima/actions/runs/39103919650",
+ "handback": {
+  "previous_step": {
+   "did": [
+    "Wrote nine criteria with tests: tagged problems and failed runs file upstream, linking back.",
+    "Added a fake GitHub holding the trial repo and Dokima's repo side by side."
+   ],
+   "decided": [
+    "Every job of every shared workflow ends with a step filing its failure upstream.",
+    "The first failure also posts a comment, so two failures give two linked comments."
+   ],
+   "open": [
+    "Asks the owner whether failed test checks should file upstream too."
+   ]
+  },
+  "verdict": "approve",
+  "summary": "Every ask has a criterion and a test that fails today for the missing feature; one owner question waits.",
+  "raises": [],
+  "answers": [
+   {
+    "raise": "P2",
+    "answer": "done",
+    "why": "The owner asks for two linked comments after two failures, so the first failure comments too.",
+    "words": "forcing the same Dokima-caused failure twice on the trial repo yields one upstream issue with two linked comments",
+    "source": "https://github.com/dokima-dev/dokima/issues/745",
+    "changes": false
+   }
+  ],
+  "asks": [
+   {
+    "ask": "A setting names the upstream repo where Dokima's own problems go",
+    "source": "https://github.com/dokima-dev/dokima/issues/745",
+    "criterion": "745.2"
+   },
+   {
+    "ask": "default: none, so an adopter's issues stay local",
+    "source": "https://github.com/dokima-dev/dokima/issues/745",
+    "criterion": "745.1"
+   },
+   {
+    "ask": "gains a tag agents put on problems that are Dokima's fault, not the repo's",
+    "source": "https://github.com/dokima-dev/dokima/issues/745",
+    "criterion": "745.4"
+   },
+   {
+    "ask": "Tagged problems file upstream.",
+    "source": "https://github.com/dokima-dev/dokima/issues/745",
+    "criterion": "745.2"
+   },
+   {
+    "ask": "must land in dokima-dev/dokima by themselves, with a link back",
+    "source": "https://github.com/dokima-dev/dokima/issues/745",
+    "criterion": "745.3"
+   },
+   {
+    "ask": "A final step in each shared workflow files the failure upstream with the run link.",
+    "source": "https://github.com/dokima-dev/dokima/issues/745",
+    "criterion": "745.6"
+   },
+   {
+    "ask": "A final step in each shared workflow",
+    "source": "https://github.com/dokima-dev/dokima/issues/745",
+    "criterion": "745.7"
+   },
+   {
+    "ask": "Repeats become comments on the existing upstream issue, never a second issue.",
+    "source": "https://github.com/dokima-dev/dokima/issues/745",
+    "criterion": "745.5"
+   },
+   {
+    "ask": "The App's key already covers every repo it is installed on in the org, so no new credential.",
+    "source": "https://github.com/dokima-dev/dokima/issues/745",
+    "criterion": "745.9"
+   },
+   {
+    "ask": "forcing the same Dokima-caused failure twice on the trial repo yields one upstream issue with two linked comments",
+    "source": "https://github.com/dokima-dev/dokima/issues/745",
+    "criterion": "745.8"
+   }
+  ],
+  "behaviors": [
+   {
+    "criterion": "745.1",
+    "one_behavior": true,
+    "why": "With no upstream set, a tagged problem files locally."
+   },
+   {
+    "criterion": "745.2",
+    "one_behavior": true,
+    "why": "With an upstream set, a tagged problem files there."
+   },
+   {
+    "criterion": "745.3",
+    "one_behavior": true,
+    "why": "An upstream filing links back to its issue."
+   },
+   {
+    "criterion": "745.4",
+    "one_behavior": true,
+    "why": "Every prompt shows the tag."
+   },
+   {
+    "criterion": "745.5",
+    "one_behavior": true,
+    "why": "A repeated tagged problem becomes a comment."
+   },
+   {
+    "criterion": "745.6",
+    "one_behavior": true,
+    "why": "A failed job files one upstream issue linking its run."
+   },
+   {
+    "criterion": "745.7",
+    "one_behavior": true,
+    "why": "Every shared workflow job ends with the failure step."
+   },
+   {
+    "criterion": "745.8",
+    "one_behavior": true,
+    "why": "Two same failures give one issue, two linked comments."
+   },
+   {
+    "criterion": "745.9",
+    "one_behavior": true,
+    "why": "The upstream key is minted from the App's key."
+   }
+  ],
+  "edge_cases": [
+   {
+    "criterion": "745.1",
+    "cut": [],
+    "missing": []
+   },
+   {
+    "criterion": "745.2",
+    "cut": [],
+    "missing": []
+   },
+   {
+    "criterion": "745.3",
+    "cut": [],
+    "missing": []
+   },
+   {
+    "criterion": "745.4",
+    "cut": [],
+    "missing": []
+   },
+   {
+    "criterion": "745.5",
+    "cut": [],
+    "missing": []
+   },
+   {
+    "criterion": "745.6",
+    "cut": [],
+    "missing": []
+   },
+   {
+    "criterion": "745.7",
+    "cut": [],
+    "missing": []
+   },
+   {
+    "criterion": "745.8",
+    "cut": [],
+    "missing": []
+   },
+   {
+    "criterion": "745.9",
+    "cut": [],
+    "missing": []
+   }
+  ],
+  "tests": [
+   {
+    "test": "tests/test_upstream.py::test_with_no_upstream_repo_a_tagged_problem_is_filed_in_the_repo_itself",
+    "only_its_behavior": true,
+    "why": "Fails if the default names a repo or the problem goes upstream."
+   },
+   {
+    "test": "tests/test_upstream.py::test_with_an_upstream_repo_a_tagged_problem_is_filed_there",
+    "only_its_behavior": true,
+    "why": "Fails if the problem stays local or uses the wrong key."
+   },
+   {
+    "test": "tests/test_upstream.py::test_with_an_upstream_repo_an_untagged_problem_stays_in_the_repo_itself",
+    "only_its_behavior": true,
+    "why": "Fails if untagged problems also go upstream."
+   },
+   {
+    "test": "tests/test_upstream.py::test_a_problem_filed_upstream_links_back_to_the_issue_where_it_was_seen",
+    "only_its_behavior": true,
+    "why": "Needs the full link to the trial repo's issue."
+   },
+   {
+    "test": "tests/test_upstream.py::test_every_agent_is_told_how_to_tag_a_problem_as_dokimas_fault",
+    "only_its_behavior": true,
+    "why": "Builds each real prompt and checks the check accepts the tag."
+   },
+   {
+    "test": "tests/test_upstream.py::test_a_tagged_problem_raised_again_is_a_comment_on_the_upstream_issue",
+    "only_its_behavior": true,
+    "why": "Fails on a second issue or a comment without the link."
+   },
+   {
+    "test": "tests/test_upstream.py::test_a_failed_run_files_the_failure_upstream_with_the_run_link",
+    "only_its_behavior": true,
+    "why": "Runs the real step; needs one upstream issue linking the run."
+   },
+   {
+    "test": "tests/test_upstream.py::test_with_no_upstream_repo_a_failed_run_files_nothing",
+    "only_its_behavior": true,
+    "why": "Fails on any call or a failing step."
+   },
+   {
+    "test": "tests/test_upstream.py::test_every_job_of_each_shared_workflow_ends_by_filing_its_failure_upstream",
+    "only_its_behavior": true,
+    "why": "Names each job lacking the failure step."
+   },
+   {
+    "test": "tests/test_upstream.py::test_the_same_failure_twice_gives_one_upstream_issue_with_two_linked_comments",
+    "only_its_behavior": true,
+    "why": "Counts issues and comments and checks each run link."
+   },
+   {
+    "test": "tests/test_upstream.py::test_a_different_failure_opens_its_own_upstream_issue",
+    "only_its_behavior": true,
+    "why": "Fails if unlike failures merge into one issue."
+   },
+   {
+    "test": "tests/test_upstream.py::test_filing_upstream_mints_its_key_from_the_apps_own_key",
+    "only_its_behavior": true,
+    "why": "Fails on a new secret or a key not minted from the App."
+   }
+  ],
+  "size": "ok",
+  "boxes": {
+   "dropped": "none",
+   "added": "none",
+   "superseded": "none",
+   "conflicts": "none",
+   "edges": {
+    "745.1": "covered",
+    "745.2": "covered",
+    "745.3": "covered",
+    "745.4": "covered",
+    "745.5": "covered",
+    "745.6": "covered",
+    "745.7": "covered",
+    "745.8": "covered",
+    "745.9": "covered"
+   },
+   "poor_tests": "none"
+  }
+ },
+ "check": {
+  "passed": true,
+  "problems": []
+ },
+ "url": "https://github.com/dokima-dev/dokima/issues/745#issuecomment-6246532165"
+}
