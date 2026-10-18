@@ -1,0 +1,122 @@
+{
+ "role": "reviewer",
+ "stage": "plan",
+ "run_id": "39094914009",
+ "commit_before": "4e3746703c58a49bf967690d7ed1971573cc1b2e",
+ "started_by": "dokima-runtime[bot]",
+ "models": [
+  "claude-opus-5-5"
+ ],
+ "report": {
+  "duration_ms": 43384,
+  "turns": 8,
+  "cost_usd": 0.35358459999999997,
+  "tokens_in": 243839,
+  "tokens_out": 3826
+ },
+ "log": "https://github.com/dokima-dev/dokima/blob/logs/logs/853/39094914009-reviewer-plan.md",
+ "run": "https://github.com/dokima-dev/dokima/actions/runs/39094914009",
+ "handback": {
+  "previous_step": {
+   "did": [
+    "The planner wrote three criteria for the close work a label run must now do.",
+    "The planner added three tests, each failing today because the close work is lost."
+   ],
+   "decided": [
+    "A label run now also does the work of any close it pushed out."
+   ],
+   "open": []
+  },
+  "verdict": "approve",
+  "summary": "The plan makes a label run do the close work it pushed out, with a failing test for each part.",
+  "raises": [],
+  "answers": [],
+  "asks": [
+   {
+    "ask": "a waiting close run it replaces loses its close work",
+    "source": "https://github.com/dokima-dev/dokima/issues/853",
+    "criterion": "853.1"
+   },
+   {
+    "ask": "`labeled` branch never calls `autopilot_closed`",
+    "source": "https://github.com/dokima-dev/dokima/issues/853",
+    "criterion": "853.2"
+   }
+  ],
+  "behaviors": [
+   {
+    "criterion": "853.1",
+    "one_behavior": true,
+    "why": "One result: the done parent closes with its tree-done note."
+   },
+   {
+    "criterion": "853.2",
+    "one_behavior": true,
+    "why": "One result: a done tree goes off autopilot."
+   },
+   {
+    "criterion": "853.3",
+    "one_behavior": true,
+    "why": "One result: the unblocked issue's planner starts once."
+   }
+  ],
+  "edge_cases": [
+   {
+    "criterion": "853.1",
+    "cut": [],
+    "missing": []
+   },
+   {
+    "criterion": "853.2",
+    "cut": [],
+    "missing": []
+   },
+   {
+    "criterion": "853.3",
+    "cut": [],
+    "missing": []
+   }
+  ],
+  "tests": [
+   {
+    "test": "tests/test_autopilot_label_close.py::test_a_label_run_closes_the_done_parent_of_a_dropped_close",
+    "only_its_behavior": true,
+    "why": "Runs the real label workflow; fails today with the parent still open."
+   },
+   {
+    "test": "tests/test_autopilot_label_close.py::test_a_label_run_switches_a_dropped_closes_done_tree_off_autopilot",
+    "only_its_behavior": true,
+    "why": "Fails today with the done trees still on autopilot; checks open trees stay on."
+   },
+   {
+    "test": "tests/test_autopilot_label_close.py::test_a_label_run_plans_again_an_issue_a_dropped_close_unblocked",
+    "only_its_behavior": true,
+    "why": "Fails today with the planner started zero times; checks exactly once."
+   }
+  ],
+  "size": "ok",
+  "boxes": {
+   "dropped": "none",
+   "added": [
+    {
+     "what": "A note in the flow rules on what a label run does",
+     "kind": "needed",
+     "serves": "853.1"
+    }
+   ],
+   "superseded": "none",
+   "conflicts": "none",
+   "edges": {
+    "853.1": "covered",
+    "853.2": "covered",
+    "853.3": "covered"
+   },
+   "poor_tests": "none"
+  }
+ },
+ "check": {
+  "passed": true,
+  "problems": []
+ },
+ "url": "https://github.com/dokima-dev/dokima/issues/853#issuecomment-6245344316"
+}
