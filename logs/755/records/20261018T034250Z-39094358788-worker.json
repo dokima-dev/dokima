@@ -1,0 +1,45 @@
+{
+ "role": "worker",
+ "stage": null,
+ "run_id": "39094358788",
+ "commit_before": "e1c81e87893e0842394abb40cf1dd29dcd21e976",
+ "started_by": "dokima-runtime[bot]",
+ "models": [
+  "claude-opus-5-5"
+ ],
+ "report": {
+  "duration_ms": 188467,
+  "turns": 11,
+  "cost_usd": 0.31045239999999996,
+  "tokens_in": 313736,
+  "tokens_out": 3055
+ },
+ "log": "https://github.com/dokima-dev/dokima/blob/logs/logs/755/39094358788-worker.md",
+ "run": "https://github.com/dokima-dev/dokima/actions/runs/39094358788",
+ "handback": {
+  "summary": "The release workflow now runs Dokima's own code, fetched from Dokima's repo, not the checked out copy.",
+  "criteria": {
+   "755.1": "`dokima/release.py` `run()` tags v0.1.0 at the pushed commit; `release.yml` runs it from Dokima's own code.",
+   "755.2": "`run()` calls `gh release create`; refusal exits 1 with the reason; `dokima/manifest.py` maps the release calls.",
+   "755.3": "`section()` takes only the lines under the v0.1.0 heading, up to the next heading, as the notes."
+  },
+  "evidence": "`pytest -q tests/test_thin_install.py tests/test_release.py`: 20 passed",
+  "answers": [
+   {
+    "raise": "R6",
+    "answer": "done",
+    "why": "The release workflow now fetches Dokima's code from its own repo first, as the audit workflow does."
+   }
+  ]
+ },
+ "check": {
+  "passed": true,
+  "problems": []
+ },
+ "dropped_by_fence": [],
+ "files_changed": [
+  ".github/workflows/release.yml"
+ ],
+ "branch": "try/issue-755",
+ "url": "https://github.com/dokima-dev/dokima/pull/850#issuecomment-6245271923"
+}
