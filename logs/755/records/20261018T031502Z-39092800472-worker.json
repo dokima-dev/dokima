@@ -1,0 +1,46 @@
+{
+ "role": "worker",
+ "stage": null,
+ "run_id": "39092800472",
+ "commit_before": "2c3594d1f3bc23aea786f6d8ed41a33de0574cc1",
+ "started_by": "dokima-runtime[bot]",
+ "models": [
+  "claude-opus-5-5"
+ ],
+ "report": {
+  "duration_ms": 105025,
+  "turns": 9,
+  "cost_usd": 0.28028780000000003,
+  "tokens_in": 270157,
+  "tokens_out": 2589
+ },
+ "log": "https://github.com/dokima-dev/dokima/blob/logs/logs/755/39092800472-worker.md",
+ "run": "https://github.com/dokima-dev/dokima/actions/runs/39092800472",
+ "handback": {
+  "summary": "Mapped release calls in the permission manifest and installed the settings reader before the release step.",
+  "criteria": {
+   "755.1": "`dokima/release.py` `run()` makes the v0.1.0 tag at the pushed commit; skips with no changelog, no section, or an existing release.",
+   "755.2": "`run()` calls `gh release create`; refusal exits 1 with the reason. `dokima/manifest.py` maps release view and create to contents.",
+   "755.3": "`section()` takes only the lines under the v0.1.0 heading as the notes, up to the next heading."
+  },
+  "evidence": "`pytest -q` on release, settings setup, manifest tests: 80 passed",
+  "answers": [
+   {
+    "raise": "R4",
+    "answer": "done",
+    "why": "The release workflow now installs the settings reader before running Dokima, as other workflows do."
+   }
+  ]
+ },
+ "check": {
+  "passed": true,
+  "problems": []
+ },
+ "dropped_by_fence": [],
+ "files_changed": [
+  ".github/workflows/release.yml",
+  "dokima/manifest.py"
+ ],
+ "branch": "try/issue-755",
+ "url": "https://github.com/dokima-dev/dokima/pull/850#issuecomment-6245067664"
+}
