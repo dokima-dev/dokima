@@ -1,0 +1,62 @@
+{
+ "role": "planner",
+ "stage": null,
+ "run_id": "39089690209",
+ "commit_before": "c074448aa112b1826f24cc0429b50a8a69f66344",
+ "started_by": "dokima-runtime[bot]",
+ "models": [
+  "claude-opus-5-5"
+ ],
+ "report": {
+  "duration_ms": 149522,
+  "turns": 20,
+  "cost_usd": 0.788168,
+  "tokens_in": 1007514,
+  "tokens_out": 7800
+ },
+ "log": "https://github.com/dokima-dev/dokima/blob/logs/logs/811/39089690209-planner.md",
+ "run": "https://github.com/dokima-dev/dokima/actions/runs/39089690209",
+ "handback": {
+  "kind": "user_story",
+  "title": "A renamed autopilot label starts autopilot",
+  "summary": "Autopilot wakes only for a label named autopilot, so a repo that renames the label never starts it.",
+  "user_story": "Owners who rename the autopilot label in settings can still switch an issue on by adding that label.",
+  "acceptance_criteria": [
+   {
+    "text": "When a person adds the repo's renamed autopilot label to an issue, its planner starts.",
+    "words": "The autopilot workflow still triggers on the fixed label name, so a renamed label never starts it.",
+    "source": "https://github.com/dokima-dev/dokima/issues/811",
+    "files": [
+     ".github/workflows/autopilot.yml",
+     "dokima/agent_roles.py"
+    ],
+    "edge_cases": [
+     {
+      "case": "After a rename, a label still called autopilot starts nothing.",
+      "test": "tests/test_autopilot_label.py::test_the_old_label_name_starts_nothing_once_the_label_is_renamed"
+     }
+    ]
+   }
+  ],
+  "non_functional": [],
+  "tests": {
+   "811.1": [
+    "tests/test_autopilot_label.py::test_a_renamed_label_added_by_hand_starts_the_issue",
+    "tests/test_autopilot_label.py::test_the_old_label_name_starts_nothing_once_the_label_is_renamed"
+   ]
+  },
+  "test_changes": {},
+  "links": {
+   "blocked_by": [],
+   "blocks": [],
+   "relates_to": [
+    791
+   ]
+  }
+ },
+ "check": {
+  "passed": true,
+  "problems": []
+ },
+ "url": "https://github.com/dokima-dev/dokima/issues/811#issuecomment-6244661062"
+}
