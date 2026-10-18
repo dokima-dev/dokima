@@ -1,0 +1,119 @@
+{
+ "role": "planner",
+ "stage": null,
+ "run_id": "39091146570",
+ "commit_before": "7f313ea5a728421ad6af4e1c4fd7f06fde7dccc5",
+ "started_by": "RezaSoleymanifar",
+ "models": [
+  "claude-opus-5-5"
+ ],
+ "report": {
+  "duration_ms": 28717,
+  "turns": 6,
+  "cost_usd": 0.33587360000000005,
+  "tokens_in": 231718,
+  "tokens_out": 2151
+ },
+ "log": "https://github.com/dokima-dev/dokima/blob/logs/logs/755/39091146570-planner.md",
+ "run": "https://github.com/dokima-dev/dokima/actions/runs/39091146570",
+ "handback": {
+  "kind": "user_story",
+  "title": "First release v0.1.0 with a changelog",
+  "summary": "Dokima gets its first version, v0.1.0, with a tag, a GitHub release and a changelog.",
+  "user_story": "Owners see Dokima as a product with versions: a v0.1.0 release and a changelog saying what it does.",
+  "acceptance_criteria": [
+   {
+    "text": "When the changelog reaches main, the v0.1.0 tag is made at that commit.",
+    "words": "A workflow makes the tag and the release when the changelog merges",
+    "source": "https://github.com/dokima-dev/dokima/issues/755#issuecomment-6244761525",
+    "files": [
+     "dokima/release.py",
+     ".github/workflows/release.yml"
+    ],
+    "edge_cases": [
+     {
+      "case": "A later push to main, once v0.1.0 exists, makes nothing new.",
+      "test": "tests/test_release.py::test_release_skips_when_tagged"
+     }
+    ]
+   },
+   {
+    "text": "When the changelog reaches main, a GitHub release named v0.1.0 is made.",
+    "words": "A workflow makes the tag and the release when the changelog merges",
+    "source": "https://github.com/dokima-dev/dokima/issues/755#issuecomment-6244761525",
+    "files": [
+     "dokima/release.py",
+     ".github/workflows/release.yml"
+    ],
+    "edge_cases": [
+     {
+      "case": "GitHub refuses the release, so the run fails where the owner sees it.",
+      "test": "tests/test_release.py::test_release_refused_fails_the_run"
+     }
+    ]
+   },
+   {
+    "text": "When v0.1.0 is released, its notes are the changelog's v0.1.0 section, nothing more.",
+    "words": "the release notes are the changelog's v0.1.0 section",
+    "source": "https://github.com/dokima-dev/dokima/issues/755#issuecomment-6244761525",
+    "files": [
+     "dokima/release.py",
+     ".github/workflows/release.yml"
+    ],
+    "edge_cases": [
+     {
+      "case": "The changelog also holds an Unreleased section, which stays out of the notes.",
+      "test": "tests/test_release.py::test_release_notes_are_changelog_section"
+     }
+    ]
+   }
+  ],
+  "non_functional": [],
+  "tests": {
+   "755.1": [
+    "tests/test_release.py::test_release_makes_tag",
+    "tests/test_release.py::test_release_skips_when_tagged"
+   ],
+   "755.2": [
+    "tests/test_release.py::test_release_makes_github_release",
+    "tests/test_release.py::test_release_refused_fails_the_run"
+   ],
+   "755.3": [
+    "tests/test_release.py::test_release_notes_are_changelog_section"
+   ]
+  },
+  "test_changes": {},
+  "links": {
+   "blocked_by": [],
+   "blocks": [
+    816
+   ],
+   "relates_to": [
+    742,
+    752
+   ]
+  },
+  "raises": [
+   {
+    "kind": "issue",
+    "label": "Changelog needs own issue",
+    "text": "The owner moved the changelog listing what v0.1.0 does to its own issue. No open issue holds it yet.",
+    "evidence": "Owner's comment https://github.com/dokima-dev/dokima/issues/755#issuecomment-6244851037; no open issue in open_issues.json names a changelog.",
+    "raised_by": "planner",
+    "id": "P5"
+   }
+  ],
+  "answers": [
+   {
+    "raise": "R2",
+    "answer": "disagree",
+    "why": "The owner settled it: the changelog list is its own issue; this story keeps the tag and release."
+   }
+  ]
+ },
+ "check": {
+  "passed": true,
+  "problems": []
+ },
+ "url": "https://github.com/dokima-dev/dokima/issues/755#issuecomment-6244854337"
+}
