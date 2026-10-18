@@ -1,0 +1,39 @@
+{
+ "role": "worker",
+ "stage": null,
+ "run_id": "39099236972",
+ "commit_before": "04592a64b9f290d98325afc7a98a6443daff7c1c",
+ "started_by": "dokima-runtime[bot]",
+ "models": [
+  "claude-opus-5-5"
+ ],
+ "report": {
+  "duration_ms": 29504,
+  "turns": 7,
+  "cost_usd": 0.2506534,
+  "tokens_in": 214536,
+  "tokens_out": 1674
+ },
+ "log": "https://github.com/dokima-dev/dokima/blob/logs/logs/816/39099236972-worker.md",
+ "run": "https://github.com/dokima-dev/dokima/actions/runs/39099236972",
+ "handback": {
+  "summary": "The install docs now name both required checks by the full names GitHub shows in an adopter's repo.",
+  "criteria": {
+   "816.1": "README Install step 6 and the wiki's branch rule step name `dokima / full-suite / all tests` and `dokima / acceptance-criteria / Acceptance criteria`."
+  },
+  "evidence": "`pytest -q tests/test_first_merge_docs.py` and nearby doc tests: 18 passed.",
+  "raises": [],
+  "answers": []
+ },
+ "check": {
+  "passed": true,
+  "problems": []
+ },
+ "dropped_by_fence": [],
+ "files_changed": [
+  "README.md",
+  "docs/wiki/Installing.md"
+ ],
+ "branch": "try/issue-816",
+ "url": "https://github.com/dokima-dev/dokima/issues/816#issuecomment-6245914109"
+}
