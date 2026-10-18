@@ -1,0 +1,238 @@
+{
+ "role": "planner",
+ "stage": null,
+ "run_id": "39108653998",
+ "commit_before": "e3ac23ccbc031c74929ed71ec16956d0a5bcd02c",
+ "started_by": "dokima-runtime[bot]",
+ "models": [
+  "claude-opus-5-5"
+ ],
+ "report": {
+  "duration_ms": 163153,
+  "turns": 9,
+  "cost_usd": 0.5356168,
+  "tokens_in": 453979,
+  "tokens_out": 3121
+ },
+ "log": "https://github.com/dokima-dev/dokima/blob/logs/logs/863/39108653998-planner.md",
+ "run": "https://github.com/dokima-dev/dokima/actions/runs/39108653998",
+ "handback": {
+  "kind": "user_story",
+  "title": "Hotfix issues build from their text and get reviewed",
+  "summary": "An issue labeled hotfix is built from its own text, then code-reviewed and gated, with no plan.",
+  "user_story": "A small fix labeled hotfix is built straight from its text, reviewed and gated, with no plan.",
+  "acceptance_criteria": [
+   {
+    "text": "When a code owner says work on an issue labeled hotfix, the worker starts with no plan.",
+    "words": "By hand, the owner's `/work` starts a hotfix's worker.",
+    "source": "https://github.com/dokima-dev/dokima/issues/750#issuecomment-6246479912",
+    "files": [
+     ".github/workflows/agent.yml",
+     "dokima/agent_roles.py",
+     "dokima/hotfix.py",
+     "dokima/defaults.yaml"
+    ],
+    "edge_cases": [
+     {
+      "case": "An issue without the label and with no plan still starts no worker.",
+      "test": "tests/test_hotfix.py::test_work_on_a_hotfix_starts_its_worker_with_no_plan"
+     }
+    ]
+   },
+   {
+    "text": "When an issue labeled hotfix has no open blocker on autopilot, its worker starts instead of its planner.",
+    "words": "When its turn comes (by hand, or on autopilot once nothing open blocks it), the worker builds straight from the issue's text",
+    "source": "https://github.com/dokima-dev/dokima/issues/750",
+    "files": [
+     "dokima/agent_autopilot.py",
+     "dokima/hotfix.py",
+     "dokima/defaults.yaml"
+    ],
+    "edge_cases": [
+     {
+      "case": "A hotfix still blocked by an open issue starts nothing.",
+      "test": "tests/test_hotfix.py::test_autopilot_starts_a_hotfix_worker_instead_of_its_planner"
+     },
+     {
+      "case": "A sibling without the label still starts its planner.",
+      "test": "tests/test_hotfix.py::test_autopilot_starts_a_hotfix_worker_instead_of_its_planner"
+     },
+     {
+      "case": "Switching autopilot on starts an unblocked hotfix's worker.",
+      "test": "tests/test_hotfix.py::test_autopilot_starts_a_hotfix_worker_instead_of_its_planner"
+     }
+    ]
+   },
+   {
+    "text": "When a hotfix worker starts, its pack gives the issue's text as the whole ask, with no plan.",
+    "words": "the worker builds straight from the issue's text: the text is the whole ask.",
+    "source": "https://github.com/dokima-dev/dokima/issues/750",
+    "files": [
+     ".github/workflows/agent.yml",
+     "dokima/agent_roles.py",
+     "dokima/hotfix.py",
+     "dokima/roles/worker.md"
+    ],
+    "no_edge_cases": "The ask is the issue's text as written; the owner named no other case."
+   },
+   {
+    "text": "When a hotfix worker changes a code file or a test, the change stays on the pull request.",
+    "words": "The worker may add or change a small test that pins the fix",
+    "source": "https://github.com/dokima-dev/dokima/issues/750",
+    "files": [
+     ".github/workflows/agent.yml",
+     "dokima/fence.py",
+     "dokima/hotfix.py"
+    ],
+    "edge_cases": [
+     {
+      "case": "A new code file the worker adds stays too.",
+      "test": "tests/test_hotfix.py::test_a_hotfix_worker_change_stays_on_the_pull_request"
+     },
+     {
+      "case": "An older test the worker changes stays changed.",
+      "test": "tests/test_hotfix.py::test_a_hotfix_worker_change_stays_on_the_pull_request"
+     }
+    ]
+   },
+   {
+    "text": "When a hotfix worker finishes, code review starts on its pull request.",
+    "words": "Code review still runs and judges the diff against the issue's text",
+    "source": "https://github.com/dokima-dev/dokima/issues/750",
+    "files": [
+     ".github/workflows/agent.yml",
+     "dokima/agent_checks.py",
+     "dokima/agent_records.py",
+     "dokima/hotfix.py"
+    ],
+    "no_edge_cases": "Opening the pull request and starting review have no case the owner named."
+   },
+   {
+    "text": "When code review judges a hotfix, its pack gives the issue's text as the ask to judge against.",
+    "words": "judges the diff against the issue's text; it is the judgment gate.",
+    "source": "https://github.com/dokima-dev/dokima/issues/750",
+    "files": [
+     ".github/workflows/agent.yml",
+     "dokima/agent_roles.py",
+     "dokima/hotfix.py",
+     "dokima/roles/reviewer.md"
+    ],
+    "no_edge_cases": "The review reads the same issue text as the worker; the owner named no other case."
+   },
+   {
+    "text": "When code review approves a hotfix pull request whose checks pass, its merge gate passes, as for any pull request.",
+    "words": "All tests and the merge gate still run, as for any pull request.",
+    "source": "https://github.com/dokima-dev/dokima/issues/750",
+    "files": [
+     ".github/workflows/agent.yml",
+     "dokima/agent_checks.py",
+     "dokima/agent_records.py",
+     "dokima/checks.py",
+     "dokima/hotfix.py"
+    ],
+    "edge_cases": [
+     {
+      "case": "A Dokima pull request with no plan and no label still fails its check.",
+      "test": "tests/test_hotfix.py::test_an_approved_hotfix_passes_the_merge_gate_like_any_pull_request"
+     },
+     {
+      "case": "An approved hotfix whose required check fails does not pass the gate.",
+      "test": "tests/test_hotfix.py::test_an_approved_hotfix_passes_the_merge_gate_like_any_pull_request"
+     }
+    ]
+   },
+   {
+    "text": "When code review finds a hotfix change bigger than the ask, the planner starts on the issue.",
+    "words": "When code review finds the change bigger than the ask",
+    "source": "https://github.com/dokima-dev/dokima/issues/750",
+    "files": [
+     ".github/workflows/agent.yml",
+     "dokima/agent_checks.py",
+     "dokima/agent_next.py",
+     "dokima/hotfix.py",
+     "dokima/roles/reviewer.md"
+    ],
+    "edge_cases": [
+     {
+      "case": "Once planned again, the worker builds the approved plan.",
+      "test": "tests/test_hotfix.py::test_code_review_sends_a_too_big_hotfix_to_the_planner"
+     }
+    ]
+   },
+   {
+    "text": "When code review sends a hotfix back to planning, the issue gets a comment saying why.",
+    "words": "it goes back to normal planning, saying why.",
+    "source": "https://github.com/dokima-dev/dokima/issues/750",
+    "files": [
+     "dokima/agent_roles.py",
+     "dokima/agent_next.py",
+     "dokima/hotfix.py"
+    ],
+    "no_edge_cases": "One comment naming the reviewer's reason; the owner named no other case."
+   },
+   {
+    "text": "When a hotfix's worker or code review starts, its prompt names nothing from Dokima's own repo.",
+    "words": "keep the prompts free of anything about Dokima's own repo, so they fit any repo.",
+    "source": "https://github.com/dokima-dev/dokima/issues/750#issuecomment-6246479912",
+    "files": [
+     "dokima/roles/worker.md",
+     "dokima/roles/reviewer.md",
+     "dokima/hotfix.py"
+    ],
+    "no_edge_cases": "The owner named no other case; both prompts are checked in one run each."
+   }
+  ],
+  "non_functional": [],
+  "tests": {
+   "863.1": [
+    "tests/test_hotfix.py::test_work_on_a_hotfix_starts_its_worker_with_no_plan"
+   ],
+   "863.2": [
+    "tests/test_hotfix.py::test_autopilot_starts_a_hotfix_worker_instead_of_its_planner"
+   ],
+   "863.3": [
+    "tests/test_hotfix.py::test_a_hotfix_worker_pack_gives_the_issue_text_as_the_ask"
+   ],
+   "863.4": [
+    "tests/test_hotfix.py::test_a_hotfix_worker_change_stays_on_the_pull_request"
+   ],
+   "863.5": [
+    "tests/test_hotfix.py::test_a_finished_hotfix_worker_starts_code_review_on_its_pull_request"
+   ],
+   "863.6": [
+    "tests/test_hotfix.py::test_code_review_of_a_hotfix_gets_the_issue_text_as_the_ask"
+   ],
+   "863.7": [
+    "tests/test_hotfix.py::test_an_approved_hotfix_passes_the_merge_gate_like_any_pull_request"
+   ],
+   "863.8": [
+    "tests/test_hotfix.py::test_code_review_sends_a_too_big_hotfix_to_the_planner"
+   ],
+   "863.9": [
+    "tests/test_hotfix.py::test_a_hotfix_sent_back_to_planning_says_why_on_the_issue"
+   ],
+   "863.10": [
+    "tests/test_hotfix.py::test_hotfix_prompts_name_nothing_from_dokimas_own_repo"
+   ]
+  },
+  "test_changes": {},
+  "links": {
+   "blocked_by": [],
+   "blocks": [
+    864,
+    869,
+    870
+   ],
+   "relates_to": [
+    748
+   ]
+  },
+  "raises": [],
+  "answers": []
+ },
+ "check": {
+  "passed": true,
+  "problems": []
+ },
+ "url": "https://github.com/dokima-dev/dokima/issues/863#issuecomment-6247253580"
+}
