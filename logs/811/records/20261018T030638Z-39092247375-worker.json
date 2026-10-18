@@ -1,0 +1,36 @@
+{
+ "role": "worker",
+ "stage": null,
+ "run_id": "39092247375",
+ "commit_before": "bcf4c5051220ebc8111bf8885b8be4e596d7b0b3",
+ "started_by": "dokima-runtime[bot]",
+ "models": [
+  "claude-opus-5-5"
+ ],
+ "report": {
+  "duration_ms": 159949,
+  "turns": 8,
+  "cost_usd": 0.2551144,
+  "tokens_in": 252785,
+  "tokens_out": 1724
+ },
+ "log": "https://github.com/dokima-dev/dokima/blob/logs/logs/811/39092247375-worker.md",
+ "run": "https://github.com/dokima-dev/dokima/actions/runs/39092247375",
+ "handback": {
+  "summary": "Autopilot wakes on any label a person adds; code starts the issue only for the repo's own label name.",
+  "criteria": {
+   "811.1": "`autopilot.yml` wakes on any human-added label and passes `LABEL`; `agent_roles.main` starts the planner only when it equals `autopilot_label()`."
+  },
+  "evidence": "`pytest -q tests/test_autopilot_label.py tests/test_manifest.py`: 70 passed",
+  "raises": [],
+  "answers": []
+ },
+ "check": {
+  "passed": true,
+  "problems": []
+ },
+ "dropped_by_fence": [],
+ "files_changed": [],
+ "branch": "try/issue-811",
+ "url": "https://github.com/dokima-dev/dokima/pull/848#issuecomment-6244993996"
+}
