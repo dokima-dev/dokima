@@ -1,0 +1,126 @@
+{
+ "role": "reviewer",
+ "stage": "pr",
+ "run_id": "39095231323",
+ "commit_before": "6357a2c1bb2d0ef8a565860722e5ce9f49dd5be0",
+ "started_by": "dokima-runtime[bot]",
+ "models": [
+  "claude-opus-5-5"
+ ],
+ "report": {
+  "duration_ms": 132659,
+  "turns": 10,
+  "cost_usd": 0.43062359999999994,
+  "tokens_in": 374696,
+  "tokens_out": 4162
+ },
+ "log": "https://github.com/dokima-dev/dokima/blob/logs/logs/853/39095231323-reviewer-pr.md",
+ "run": "https://github.com/dokima-dev/dokima/actions/runs/39095231323",
+ "handback": {
+  "previous_step": {
+   "did": [
+    "The worker made a label run also do a close's autopilot work.",
+    "The worker added one line to the flow rules on what a label run does."
+   ],
+   "decided": [
+    "The close work runs after the label run starts its planners."
+   ],
+   "open": []
+  },
+  "verdict": "approve",
+  "summary": "A label run now does the close work it pushed out; all three tests fail on main and pass here.",
+  "raises": [
+   {
+    "kind": "issue",
+    "label": "Parent off autopilot",
+    "text": "A parent not on autopilot stays open when its last sub-issue's close run is dropped, since only autopilot parents are swept.",
+    "evidence": "`dokima/agent_autopilot.py` `autopilot_closed` reads only issues with the autopilot label; `close_done_parents` runs only on a close.",
+    "searched": [
+     619,
+     491,
+     386
+    ],
+    "verdict": "new",
+    "raised_by": "reviewer",
+    "id": "R1"
+   }
+  ],
+  "answers": [],
+  "asks": [],
+  "behaviors": [
+   {
+    "criterion": "853.1",
+    "one_behavior": true,
+    "why": "One result: the done parent closes with its tree-done note."
+   },
+   {
+    "criterion": "853.2",
+    "one_behavior": true,
+    "why": "One result: a done tree goes off autopilot."
+   },
+   {
+    "criterion": "853.3",
+    "one_behavior": true,
+    "why": "One result: the unblocked issue's planner starts once."
+   }
+  ],
+  "edge_cases": [
+   {
+    "criterion": "853.1",
+    "cut": [],
+    "missing": []
+   },
+   {
+    "criterion": "853.2",
+    "cut": [],
+    "missing": []
+   },
+   {
+    "criterion": "853.3",
+    "cut": [],
+    "missing": []
+   }
+  ],
+  "tests": [
+   {
+    "test": "tests/test_autopilot_label_close.py::test_a_label_run_closes_the_done_parent_of_a_dropped_close",
+    "only_its_behavior": true,
+    "why": "Fails on main with the parent open; passes on the branch."
+   },
+   {
+    "test": "tests/test_autopilot_label_close.py::test_a_label_run_switches_a_dropped_closes_done_tree_off_autopilot",
+    "only_its_behavior": true,
+    "why": "Fails on main with done trees on autopilot; passes on the branch."
+   },
+   {
+    "test": "tests/test_autopilot_label_close.py::test_a_label_run_plans_again_an_issue_a_dropped_close_unblocked",
+    "only_its_behavior": true,
+    "why": "Fails on main with zero planner starts; passes on the branch."
+   }
+  ],
+  "size": "ok",
+  "boxes": {
+   "dropped": "none",
+   "added": [
+    {
+     "what": "A line in the flow rules on what a label run does",
+     "kind": "needed",
+     "serves": "853.1"
+    }
+   ],
+   "superseded": "none",
+   "conflicts": "none",
+   "edges": {
+    "853.1": "covered",
+    "853.2": "covered",
+    "853.3": "covered"
+   },
+   "poor_tests": "none"
+  }
+ },
+ "check": {
+  "passed": true,
+  "problems": []
+ },
+ "url": "https://github.com/dokima-dev/dokima/pull/854#issuecomment-6245386910"
+}
