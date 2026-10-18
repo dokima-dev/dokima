@@ -1,0 +1,59 @@
+{
+ "role": "reviewer",
+ "stage": "pr",
+ "run_id": "39106707292",
+ "commit_before": "a9265e81dba365b3a25ae361e98d78eba13efad4",
+ "started_by": "dokima-runtime[bot]",
+ "models": [
+  "claude-opus-5-5"
+ ],
+ "report": {
+  "duration_ms": 60985,
+  "turns": 12,
+  "cost_usd": 0.5520702000000001,
+  "tokens_in": 595610,
+  "tokens_out": 4399
+ },
+ "log": "https://github.com/dokima-dev/dokima/blob/logs/logs/857/39106707292-reviewer-pr.md",
+ "run": "https://github.com/dokima-dev/dokima/actions/runs/39106707292",
+ "handback": {
+  "previous_step": {
+   "did": [
+    "The worker changed no code; the earlier build stands after two merges from main."
+   ],
+   "decided": [
+    "The earlier build already meets all four criteria, so nothing new was built."
+   ],
+   "open": [
+    "Card shows red checks from before the latest merge; they rerun on the last commit."
+   ]
+  },
+  "verdict": "approve",
+  "summary": "People's and Dependabot's pull requests pass with no plan; Dokima's own still need one, all proven.",
+  "raises": [],
+  "answers": [],
+  "asks": [],
+  "boxes": {
+   "dropped": "none",
+   "added": "none",
+   "superseded": "none",
+   "conflicts": "none",
+   "edges": {
+    "857.1": "covered",
+    "857.2": "covered",
+    "857.3": "covered",
+    "857.4": "covered"
+   },
+   "poor_tests": "none"
+  },
+  "behaviors": [],
+  "edge_cases": [],
+  "tests": [],
+  "size": "ok"
+ },
+ "check": {
+  "passed": true,
+  "problems": []
+ },
+ "url": "https://github.com/dokima-dev/dokima/pull/865#issuecomment-6246992759"
+}
