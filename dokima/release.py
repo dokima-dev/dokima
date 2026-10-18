@@ -2,16 +2,26 @@
 
     python3 -m dokima.release <owner/repo> <commit>     # run from the repo root
 
-When CHANGELOG.md holds a section for VERSION and GitHub has no VERSION release yet, makes the VERSION tag and its
-GitHub release at the commit, with that section as the release notes. With no changelog, no section, or the release
-already made, it makes nothing and exits 0. When GitHub refuses, it exits 1 and says why.
+The version is the changelog's newest: its top-most heading naming a version like v0.1.1 (#867). When GitHub has no
+release of it yet, makes that tag and its GitHub release at the commit, with that section as the release notes. With no
+changelog, no version heading, or the newest version already released, it makes nothing and exits 0. When GitHub
+refuses, it exits 1 and says why.
 """
 import re
 import subprocess
 import sys
 
-VERSION = "v0.1.0"
 CHANGELOG = "CHANGELOG.md"
+HEADING = re.compile(r"^#{1,6}\s+.*?\b(v\d+\.\d+\.\d+)(?![0-9])")
+
+
+def newest(text):
+    """The version named by the changelog's top-most version heading; else None."""
+    for line in text.splitlines():
+        m = HEADING.match(line)
+        if m:
+            return m.group(1)
+    return None
 
 
 def section(text, version):
@@ -36,17 +46,19 @@ def gh(*args):
     return subprocess.run(["gh", *args], capture_output=True, text=True)
 
 
-def run(repo, sha, path=CHANGELOG, version=VERSION):
-    """Makes the release when it is due; returns the exit code."""
+def run(repo, sha, path=CHANGELOG):
+    """Releases the changelog's newest version when it is due; returns the exit code."""
     try:
         with open(path) as f:
-            notes = section(f.read(), version)
+            text = f.read()
     except FileNotFoundError:
         print(f"No {path} yet, so no release.")
         return 0
-    if notes is None:
-        print(f"{path} has no {version} section yet, so no release.")
+    version = newest(text)
+    if version is None:
+        print(f"{path} has no version section yet, so no release.")
         return 0
+    notes = section(text, version)
     seen = gh("release", "view", version, "--repo", repo)
     if seen.returncode == 0:
         print(f"{version} is already released.")
