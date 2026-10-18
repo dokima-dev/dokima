@@ -1,0 +1,106 @@
+{
+ "role": "reviewer",
+ "stage": "pr",
+ "run_id": "39092471468",
+ "commit_before": "bcf4c5051220ebc8111bf8885b8be4e596d7b0b3",
+ "started_by": "dokima-runtime[bot]",
+ "models": [
+  "claude-opus-5-5"
+ ],
+ "report": {
+  "duration_ms": 1310509,
+  "turns": 19,
+  "cost_usd": 0.6488899999999999,
+  "tokens_in": 898537,
+  "tokens_out": 7162
+ },
+ "log": "https://github.com/dokima-dev/dokima/blob/logs/logs/811/39092471468-reviewer-pr.md",
+ "run": "https://github.com/dokima-dev/dokima/actions/runs/39092471468",
+ "handback": {
+  "previous_step": {
+   "did": [
+    "The worker kept its earlier build: autopilot wakes on any label a person adds.",
+    "Code starts the issue's planner only when the label matches the repo's own label name."
+   ],
+   "decided": [
+    "Any other label starts nothing there, but still picks up other waiting autopilot issues."
+   ],
+   "open": [
+    "GitHub's checks rerun on the pull request once its merge gate readies it."
+   ]
+  },
+  "verdict": "approve",
+  "summary": "A renamed autopilot label now starts the planner, and the old name no longer does.",
+  "raises": [
+   {
+    "kind": "issue",
+    "label": "Label runs drop closes",
+    "text": "Every label a person adds now queues an autopilot run; a waiting close run it replaces loses its close work.",
+    "evidence": "`dokima/agent_roles.py` `labeled` branch never calls `autopilot_closed`; `autopilot.yml` queue keeps one waiting run.",
+    "searched": [
+     491,
+     386,
+     111
+    ],
+    "verdict": "new",
+    "raised_by": "reviewer",
+    "id": "R2"
+   }
+  ],
+  "answers": [],
+  "asks": [],
+  "behaviors": [
+   {
+    "criterion": "811.1",
+    "one_behavior": true,
+    "why": "One action, adding the renamed label, with one result, the planner starts."
+   }
+  ],
+  "edge_cases": [
+   {
+    "criterion": "811.1",
+    "cut": [],
+    "missing": []
+   }
+  ],
+  "tests": [
+   {
+    "test": "tests/test_autopilot_label.py::test_a_renamed_label_added_by_hand_starts_the_issue",
+    "only_its_behavior": true,
+    "why": "Fails on main: the renamed label starts nothing; passes on the branch."
+   },
+   {
+    "test": "tests/test_autopilot_label.py::test_the_old_label_name_starts_nothing_once_the_label_is_renamed",
+    "only_its_behavior": true,
+    "why": "Fails on main: the old name still starts a planner; passes on the branch."
+   }
+  ],
+  "size": "ok",
+  "boxes": {
+   "dropped": "none",
+   "added": [
+    {
+     "what": "Workflow passes the added label's name to code.",
+     "kind": "needed",
+     "serves": "811.1"
+    },
+    {
+     "what": "Test helper lets a fake repo hold a settings file.",
+     "kind": "needed",
+     "serves": "811.1"
+    }
+   ],
+   "superseded": "none",
+   "conflicts": "none",
+   "edges": {
+    "811.1": "covered"
+   },
+   "poor_tests": "none"
+  }
+ },
+ "check": {
+  "passed": true,
+  "problems": []
+ },
+ "url": "https://github.com/dokima-dev/dokima/pull/848#issuecomment-6245023158"
+}
