@@ -1,0 +1,90 @@
+{
+ "role": "reviewer",
+ "stage": "plan",
+ "run_id": "39089900933",
+ "commit_before": "9750a9d222c317f3c12be9721d2fd17df4bda05c",
+ "started_by": "dokima-runtime[bot]",
+ "models": [
+  "claude-opus-5-5"
+ ],
+ "report": {
+  "duration_ms": 90197,
+  "turns": 8,
+  "cost_usd": 0.3411974,
+  "tokens_in": 286237,
+  "tokens_out": 3035
+ },
+ "log": "https://github.com/dokima-dev/dokima/blob/logs/logs/811/39089900933-reviewer-plan.md",
+ "run": "https://github.com/dokima-dev/dokima/actions/runs/39089900933",
+ "handback": {
+  "previous_step": {
+   "did": [
+    "The planner wrote one criterion: adding the renamed autopilot label starts the issue's planner.",
+    "The planner added two tests: the renamed label starts it; the old name starts nothing."
+   ],
+   "decided": [
+    "After a rename, a label still called autopilot no longer switches an issue on."
+   ],
+   "open": []
+  },
+  "verdict": "approve",
+  "summary": "The plan covers the one ask, and both new tests fail today because the renamed label is ignored.",
+  "raises": [],
+  "answers": [],
+  "asks": [
+   {
+    "ask": "The autopilot workflow still triggers on the fixed label name, so a renamed label never starts it.",
+    "source": "https://github.com/dokima-dev/dokima/issues/811",
+    "criterion": "811.1"
+   }
+  ],
+  "behaviors": [
+   {
+    "criterion": "811.1",
+    "one_behavior": true,
+    "why": "One action, adding the renamed label, and one result, the planner starts."
+   }
+  ],
+  "edge_cases": [
+   {
+    "criterion": "811.1",
+    "cut": [],
+    "missing": []
+   }
+  ],
+  "tests": [
+   {
+    "test": "tests/test_autopilot_label.py::test_a_renamed_label_added_by_hand_starts_the_issue",
+    "only_its_behavior": true,
+    "why": "Runs the real workflows on a labeled event; fails today with no planner started."
+   },
+   {
+    "test": "tests/test_autopilot_label.py::test_the_old_label_name_starts_nothing_once_the_label_is_renamed",
+    "only_its_behavior": true,
+    "why": "Stops code that starts on any label; fails today as the old name starts a planner."
+   }
+  ],
+  "size": "ok",
+  "boxes": {
+   "dropped": "none",
+   "added": [
+    {
+     "what": "After a rename, the old label name starts nothing",
+     "kind": "needed",
+     "serves": "811.1"
+    }
+   ],
+   "superseded": "none",
+   "conflicts": "none",
+   "edges": {
+    "811.1": "covered"
+   },
+   "poor_tests": "none"
+  }
+ },
+ "check": {
+  "passed": true,
+  "problems": []
+ },
+ "url": "https://github.com/dokima-dev/dokima/issues/811#issuecomment-6244686589"
+}
