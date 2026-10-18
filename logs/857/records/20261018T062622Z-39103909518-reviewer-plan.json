@@ -1,0 +1,164 @@
+{
+ "role": "reviewer",
+ "stage": "plan",
+ "run_id": "39103909518",
+ "commit_before": "0ac83904b54c6081d3e5d03f9e559df3ddb99e50",
+ "started_by": "dokima-runtime[bot]",
+ "models": [
+  "claude-opus-5-5"
+ ],
+ "report": {
+  "duration_ms": 81180,
+  "turns": 10,
+  "cost_usd": 0.44487079999999996,
+  "tokens_in": 396072,
+  "tokens_out": 5051
+ },
+ "log": "https://github.com/dokima-dev/dokima/blob/logs/logs/857/39103909518-reviewer-plan.md",
+ "run": "https://github.com/dokima-dev/dokima/actions/runs/39103909518",
+ "handback": {
+  "previous_step": {
+   "did": [
+    "The planner wrote four criteria and four new tests, one per criterion.",
+    "The planner loosened three older tests so unplanned pull requests may pass."
+   ],
+   "decided": [
+    "Only the value allow lets unplanned pull requests through; block is tested as another value."
+   ],
+   "open": [
+    "The plan names no change to the merge check's workflow file."
+   ]
+  },
+  "verdict": "block",
+  "summary": "The tests are right, but the plan leaves out the workflow file the issue says must change.",
+  "raises": [
+   {
+    "kind": "blocker",
+    "to": "planner",
+    "label": "Scope misses a file",
+    "text": "For 857.1 and 857.2, a passing no-plan row needs its own exit in the workflow, as the issue says. Add `.github/workflows/acceptance-criteria.yml` to those criteria's files.",
+    "evidence": "`.github/workflows/acceptance-criteria.yml:118` fails any row with no tests except `text-only` and `manual-fix`.",
+    "raised_by": "reviewer",
+    "id": "R1"
+   }
+  ],
+  "answers": [],
+  "asks": [
+   {
+    "ask": "When a person opens a pull request with no approved plan, the Acceptance criteria check passes.",
+    "source": "https://github.com/dokima-dev/dokima/issues/857",
+    "criterion": "857.1"
+   },
+   {
+    "ask": "When Dependabot opens a pull request with no approved plan, the Acceptance criteria check passes.",
+    "source": "https://github.com/dokima-dev/dokima/issues/857",
+    "criterion": "857.2"
+   },
+   {
+    "ask": "When Dokima opens an issue's pull request with no approved plan, the Acceptance criteria check still fails.",
+    "source": "https://github.com/dokima-dev/dokima/issues/857",
+    "criterion": "857.3"
+   },
+   {
+    "ask": "When the unplanned pull requests setting is not allow, a person's unplanned pull request fails the check.",
+    "source": "https://github.com/dokima-dev/dokima/issues/857",
+    "criterion": "857.4"
+   },
+   {
+    "ask": "Add merge.unplanned_prs to dokima/defaults.yaml with allow as the default",
+    "source": "https://github.com/dokima-dev/dokima/issues/857",
+    "criterion": "857.1"
+   },
+   {
+    "ask": "any other value (for example block) keeps today's failing check",
+    "source": "https://github.com/dokima-dev/dokima/issues/857",
+    "criterion": "857.4"
+   }
+  ],
+  "behaviors": [
+   {
+    "criterion": "857.1",
+    "one_behavior": true,
+    "why": "One author, one result: the check passes."
+   },
+   {
+    "criterion": "857.2",
+    "one_behavior": true,
+    "why": "One author, one result: the check passes."
+   },
+   {
+    "criterion": "857.3",
+    "one_behavior": true,
+    "why": "Dokima's unplanned pull request fails; one result."
+   },
+   {
+    "criterion": "857.4",
+    "one_behavior": true,
+    "why": "A non-allow setting makes a person's pull request fail."
+   }
+  ],
+  "edge_cases": [
+   {
+    "criterion": "857.1",
+    "cut": [],
+    "missing": []
+   },
+   {
+    "criterion": "857.2",
+    "cut": [],
+    "missing": []
+   },
+   {
+    "criterion": "857.3",
+    "cut": [],
+    "missing": []
+   },
+   {
+    "criterion": "857.4",
+    "cut": [],
+    "missing": []
+   }
+  ],
+  "tests": [
+   {
+    "test": "tests/test_unplanned_prs.py::test_a_persons_pull_request_with_no_plan_passes",
+    "only_its_behavior": true,
+    "why": "Runs the real matrix and workflow steps; fails today on the no-plan row."
+   },
+   {
+    "test": "tests/test_unplanned_prs.py::test_dependabots_pull_request_with_no_plan_passes",
+    "only_its_behavior": true,
+    "why": "Runs the real check for Dependabot; fails today on the no-plan row."
+   },
+   {
+    "test": "tests/test_unplanned_prs.py::test_dokimas_pull_request_with_no_plan_still_fails",
+    "only_its_behavior": true,
+    "why": "Pairs Dokima's failing case with a person's passing one; fails today on the person."
+   },
+   {
+    "test": "tests/test_unplanned_prs.py::test_a_setting_other_than_allow_fails_a_persons_unplanned_pull_request",
+    "only_its_behavior": true,
+    "why": "Block fails, allow passes; fails today because the setting is unknown."
+   }
+  ],
+  "size": "ok",
+  "boxes": {
+   "dropped": "none",
+   "added": "none",
+   "superseded": "none",
+   "conflicts": "none",
+   "edges": {
+    "857.1": "covered",
+    "857.2": "covered",
+    "857.3": "covered",
+    "857.4": "covered"
+   },
+   "poor_tests": "none"
+  }
+ },
+ "check": {
+  "passed": true,
+  "problems": []
+ },
+ "url": "https://github.com/dokima-dev/dokima/issues/857#issuecomment-6246530788"
+}
