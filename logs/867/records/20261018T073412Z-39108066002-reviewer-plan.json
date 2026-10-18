@@ -1,0 +1,178 @@
+{
+ "role": "reviewer",
+ "stage": "plan",
+ "run_id": "39108066002",
+ "commit_before": "f833de2be7c0456340a9f81f980ed3c399a60f7d",
+ "started_by": "dokima-runtime[bot]",
+ "models": [
+  "claude-opus-5-5"
+ ],
+ "report": {
+  "duration_ms": 42683,
+  "turns": 8,
+  "cost_usd": 0.4358922,
+  "tokens_in": 330812,
+  "tokens_out": 3954
+ },
+ "log": "https://github.com/dokima-dev/dokima/blob/logs/logs/867/39108066002-reviewer-plan.md",
+ "run": "https://github.com/dokima-dev/dokima/actions/runs/39108066002",
+ "handback": {
+  "previous_step": {
+   "did": [
+    "Widened the release criterion to any newest version; its main test releases v0.2.0.",
+    "Made the changelog test check the v0.1.1 section names #852, #856 and #861."
+   ],
+   "decided": [
+    "Adds the v0.1.1 section in this change, as the owner answered."
+   ],
+   "open": []
+  },
+  "verdict": "approve",
+  "summary": "Both blockers are fixed; every ask has a criterion and every new test fails today because the feature is missing.",
+  "raises": [],
+  "answers": [],
+  "asks": [
+   {
+    "ask": "each release names its version from the changelog's newest version heading, so adding a `## v0.1.1` section and merging it makes v0.1.1",
+    "source": "https://github.com/dokima-dev/dokima/issues/867",
+    "criterion": "867.1"
+   },
+   {
+    "ask": "Yes: this change also adds the v0.1.1 section, so merging it releases the fixes since v0.1.0.",
+    "source": "https://github.com/dokima-dev/dokima/issues/867#issuecomment-6247154689",
+    "criterion": "867.2"
+   },
+   {
+    "ask": "the install file and the install docs name the newest release, and a test checks they match the changelog's newest version (install file)",
+    "source": "https://github.com/dokima-dev/dokima/issues/867",
+    "criterion": "867.3"
+   },
+   {
+    "ask": "the install docs name the newest release (README install steps)",
+    "source": "https://github.com/dokima-dev/dokima/issues/867",
+    "criterion": "867.4"
+   },
+   {
+    "ask": "the install docs name the newest release (wiki install page)",
+    "source": "https://github.com/dokima-dev/dokima/issues/867",
+    "criterion": "867.5"
+   }
+  ],
+  "behaviors": [
+   {
+    "criterion": "867.1",
+    "one_behavior": true,
+    "why": "One action, a push, makes the newest changelog version's release."
+   },
+   {
+    "criterion": "867.2",
+    "one_behavior": true,
+    "why": "One fixed state: v0.1.1 on top naming three fixes."
+   },
+   {
+    "criterion": "867.3",
+    "one_behavior": true,
+    "why": "The install file's tag equals the newest version."
+   },
+   {
+    "criterion": "867.4",
+    "one_behavior": true,
+    "why": "The README install steps name the newest version."
+   },
+   {
+    "criterion": "867.5",
+    "one_behavior": true,
+    "why": "The wiki install page names the newest version."
+   }
+  ],
+  "edge_cases": [
+   {
+    "criterion": "867.1",
+    "cut": [],
+    "missing": []
+   },
+   {
+    "criterion": "867.2",
+    "cut": [],
+    "missing": []
+   },
+   {
+    "criterion": "867.3",
+    "cut": [],
+    "missing": []
+   },
+   {
+    "criterion": "867.4",
+    "cut": [],
+    "missing": []
+   },
+   {
+    "criterion": "867.5",
+    "cut": [],
+    "missing": []
+   }
+  ],
+  "tests": [
+   {
+    "test": "tests/test_newest_release.py::test_release_names_newest_version",
+    "only_its_behavior": true,
+    "why": "Releases v0.2.0, so a hardcoded version fails; fails today with nothing made."
+   },
+   {
+    "test": "tests/test_newest_release.py::test_release_v011_newest",
+    "only_its_behavior": true,
+    "why": "The issue's own example; fails today with nothing made."
+   },
+   {
+    "test": "tests/test_newest_release.py::test_release_newest_below_unreleased",
+    "only_its_behavior": true,
+    "why": "Draft section on top is skipped; fails today with nothing made."
+   },
+   {
+    "test": "tests/test_newest_release.py::test_release_newest_already_released",
+    "only_its_behavior": true,
+    "why": "Fails today: the old code releases v0.1.0 instead of nothing."
+   },
+   {
+    "test": "tests/test_newest_release.py::test_changelog_has_v011_on_top",
+    "only_its_behavior": true,
+    "why": "Checks v0.1.1 heading on top and the three fix numbers in it."
+   },
+   {
+    "test": "tests/test_newest_release.py::test_install_file_calls_newest_version",
+    "only_its_behavior": true,
+    "why": "Compares the install tag with the changelog; fails today at v0.1.0."
+   },
+   {
+    "test": "tests/test_newest_release.py::test_readme_names_newest_release",
+    "only_its_behavior": true,
+    "why": "Reads the README Install section; fails today, it names no version."
+   },
+   {
+    "test": "tests/test_newest_release.py::test_wiki_names_newest_release",
+    "only_its_behavior": true,
+    "why": "Reads the wiki install page; fails today, it names no version."
+   }
+  ],
+  "size": "ok",
+  "boxes": {
+   "dropped": "none",
+   "added": "none",
+   "superseded": "none",
+   "conflicts": "none",
+   "edges": {
+    "867.1": "covered",
+    "867.2": "covered",
+    "867.3": "covered",
+    "867.4": "covered",
+    "867.5": "covered"
+   },
+   "poor_tests": "none"
+  }
+ },
+ "check": {
+  "passed": true,
+  "problems": []
+ },
+ "url": "https://github.com/dokima-dev/dokima/issues/867#issuecomment-6247174852"
+}
