@@ -1,0 +1,78 @@
+{
+ "role": "reviewer",
+ "stage": "plan",
+ "run_id": "39099136369",
+ "commit_before": "04592a64b9f290d98325afc7a98a6443daff7c1c",
+ "started_by": "dokima-runtime[bot]",
+ "models": [
+  "claude-opus-5-5"
+ ],
+ "report": {
+  "duration_ms": 38793,
+  "turns": 8,
+  "cost_usd": 0.3435516,
+  "tokens_in": 283827,
+  "tokens_out": 3029
+ },
+ "log": "https://github.com/dokima-dev/dokima/blob/logs/logs/816/39099136369-reviewer-plan.md",
+ "run": "https://github.com/dokima-dev/dokima/actions/runs/39099136369",
+ "handback": {
+  "previous_step": {
+   "did": [
+    "The planner planned again on the new main, keeping one criterion and one test."
+   ],
+   "decided": [
+    "The planner proves only the branch rule step; the trial repo proves the real merge."
+   ],
+   "open": []
+  },
+  "verdict": "approve",
+  "summary": "One criterion with a sound test that fails today for the right reason; the owner's answers are followed.",
+  "raises": [],
+  "answers": [],
+  "asks": [
+   {
+    "ask": "An empty repo reaches its first merged pull request following only the docs.",
+    "source": "https://github.com/dokima-dev/dokima/issues/816",
+    "criterion": "816.1"
+   }
+  ],
+  "behaviors": [
+   {
+    "criterion": "816.1",
+    "one_behavior": true,
+    "why": "One result: the install pages name each required check as GitHub shows it."
+   }
+  ],
+  "edge_cases": [
+   {
+    "criterion": "816.1",
+    "cut": [],
+    "missing": []
+   }
+  ],
+  "tests": [
+   {
+    "test": "tests/test_first_merge_docs.py::test_the_docs_name_the_required_checks_as_an_adopters_repo_shows_them",
+    "only_its_behavior": true,
+    "why": "Fails today: both pages still name the short check names; checks nothing else."
+   }
+  ],
+  "size": "ok",
+  "boxes": {
+   "dropped": "none",
+   "added": "none",
+   "superseded": "none",
+   "conflicts": "none",
+   "edges": {
+    "816.1": "covered"
+   },
+   "poor_tests": "none"
+  }
+ },
+ "check": {
+  "passed": true,
+  "problems": []
+ },
+ "url": "https://github.com/dokima-dev/dokima/issues/816#issuecomment-6245900950"
+}
