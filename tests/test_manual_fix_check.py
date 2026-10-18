@@ -132,16 +132,16 @@ def test_a_manual_fix_check_fails_when_a_test_fails(record_property, tmp_path):
 
 
 def test_only_dokimas_app_gets_the_manual_fix_check(record_property, tmp_path):
-    """A pull request with no issue, opened by anyone else, still fails.
+    """A pull request with no issue, opened by anyone else, gets no manual fix check.
 
-    Proves 643.3. Runs the matrix command for the same code change twice: opened by a person, it must get only the failing
-    no-plan check; opened by Dokima's app, it must get the manual fix check instead. Since 2026-10-17 every manual fix
+    Proves 643.3. Runs the matrix command for the same code change twice: opened by a person, it must not get the manual
+    fix check (since #857 it may pass as an unplanned pull request); opened by Dokima's app, it must get the manual fix check instead. Since 2026-10-17 every manual fix
     names the issue it fixes (owner, #830), so one by Dokima's app from its fix branch naming an issue still gets the
     manual fix check; a planned build from try/issue-N with no approved plan still fails (830.7)."""
     record_property("proves", "643.3")
     rows, output = run_matrix(tmp_path, OWNER)
-    assert rows == [{"id": "none", "name": NO_ISSUE, "tests": ""}], \
-        f"643.3: a pull request a person opened with no linked issue no longer fails '{NO_ISSUE}': {rows}\n{output}"
+    assert rows and [r["name"] for r in rows] != ["Manual fix: all tests pass"], \
+        f"643.3: a pull request a person opened with no linked issue got the manual fix check: {rows}\n{output}"
     rows, output = run_matrix(tmp_path, APP, body="Fixes #77")
     assert [r["id"] for r in rows or []] == ["manual-fix"], \
         f"643.3: a manual fix by Dokima's app naming the issue it fixes lost its manual fix check: {rows}\n{output}"
