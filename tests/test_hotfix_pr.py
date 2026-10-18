@@ -22,6 +22,8 @@ WORK_BACK = {"summary": "Stopped: the ask needs a design choice.", "criteria": {
              "raises": [{"kind": "blocker", "to": "planner", "label": "Design choice", "text": DESIGN,
                          "evidence": "`app.py` holds the title; the name also shows in other files."}],
              "answers": []}
+PLANNED_WORK = {"summary": "Fixed the page title.", "criteria": {"57.1": "`app.py` now says Dokima."},
+                "evidence": "pytest -q: 2 passed", "raises": [], "answers": []}
 
 
 def pr_labels(r, pr=ts.PR):
@@ -37,12 +39,12 @@ def pr_labels(r, pr=ts.PR):
     return [l for x in out for l in x.split(",")]
 
 
-def test_a_hotfix_pull_request_carries_the_hotfix_label(record_property, tmp_path):
+def test_a_hotfix_pull_request_carries_the_hotfix_label(record_property, tmp_path, monkeypatch):
     """A hotfix worker's pull request opens with the hotfix label on it.
 
     Proves 864.1. Runs the hotfix worker on #57, labeled hotfix and never planned, which opens pull request #60. The
     run must put the hotfix label on #60, when opening it or right after. Beside it, the worker of an unlabeled issue
-    with an approved plan opens its pull request without the hotfix label."""
+    with an approved plan, handing back a planned worker's hand-back, opens its pull request without the hotfix label."""
     record_property("proves", "864.1")
     r = th.Hotfix(tmp_path / "hotfix", "worker")
     assert not r.failed, f"864.1: the hotfix worker's run failed; {r.why()}"
@@ -50,6 +52,7 @@ def test_a_hotfix_pull_request_carries_the_hotfix_label(record_property, tmp_pat
     assert len(opened) == 1, f"864.1: the hotfix worker did not open one pull request: {opened}"
     assert th.HOTFIX in pr_labels(r), \
         f"864.1: the hotfix pull request was opened without the hotfix label; pr create: {opened[0]}"
+    monkeypatch.setattr(th, "WORK", PLANNED_WORK)
     plain = th.Hotfix(tmp_path / "plain", "worker", labels=(), comments=ts.STORY_APPROVED, try_branch=True)
     assert any(c[:2] == ["pr", "create"] for c in plain.calls()), \
         f"864.1: the planned worker opened no pull request to compare with; {plain.why()}"
@@ -75,7 +78,7 @@ def test_a_hotfix_worker_finding_a_design_choice_starts_the_planner(record_prope
     prompt = r.prompt().lower()
     assert "design choice" in prompt and "blocker for the planner" in prompt, \
         "864.2: the hotfix worker's prompt never tells it to raise a blocker for the planner on a design choice"
-    monkeypatch.setattr(th, "WORK", th.WORK)
+    monkeypatch.undo()
     plain = th.Hotfix(tmp_path / "plain", "worker")
     assert [s[0] for s in plain.signals()] == ["reviewer"], \
         f"864.2: a hotfix worker raising nothing did not start code review: {plain.signals()}"
@@ -97,7 +100,7 @@ def test_a_hotfix_worker_sending_it_back_says_why_on_the_issue(record_property, 
     said = [b for b in told if DESIGN in b]
     assert said, f"864.3: issue #57 got no comment saying why the hotfix went back to planning: {told}"
     assert "planning" in said[0].lower(), f"864.3: the comment does not say the hotfix goes back to planning: {said[0]!r}"
-    monkeypatch.setattr(th, "WORK", th.WORK)
+    monkeypatch.undo()
     plain = th.Hotfix(tmp_path / "plain", "worker")
     assert not any("planning" in b.lower() for b in plain.on("issue", th.ISSUE)
                    if not agent.is_record({"author": {"login": agent.BOT}, "body": b}) and agent.LIVE not in b), \
