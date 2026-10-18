@@ -1,0 +1,61 @@
+{
+ "role": "worker",
+ "stage": null,
+ "run_id": "39114970816",
+ "commit_before": "6e44742d4f3ea6500e4021415154502d04788172",
+ "started_by": "dokima-runtime[bot]",
+ "models": [
+  "claude-opus-5-5"
+ ],
+ "report": {
+  "duration_ms": 2033300,
+  "turns": 45,
+  "cost_usd": 2.388664,
+  "tokens_in": 4242002,
+  "tokens_out": 29294
+ },
+ "log": "https://github.com/dokima-dev/dokima/blob/logs/logs/745/39114970816-worker.md",
+ "run": "https://github.com/dokima-dev/dokima/actions/runs/39114970816",
+ "handback": {
+  "summary": "Dokima's own problems and failed shared workflow jobs now file once upstream, naming nothing of the private repo.",
+  "criteria": {
+   "745.1": "`file_issues` in `dokima/agent_autopilot.py` sends a raise tagged `fault: dokima` to `upstream.file_problem` when `upstream.repo` is set; else files locally.",
+   "745.2": "The record line for an upstream filing is `card.ref(upstream repo, number)`, linking the upstream issue.",
+   "745.3": "`dokima/roles/raising.md` says how to judge fault and shows both tags; `raises.check_raises` accepts `fault` on issues.",
+   "745.4": "`upstream.file` finds the open filed issue with the same title and comments on it instead of opening another.",
+   "745.5": "`python3 -m dokima.upstream failed WORKFLOW JOB` files `Failed run: the JOB job of WORKFLOW.yml`; no upstream repo files nothing.",
+   "745.6": "Each shared workflow but the test checks and `reviews.yml` ends with an `upstream` job filing each failed job.",
+   "745.7": "One issue per workflow and job, plus one comment per failed run, so two runs give two comments.",
+   "745.8": "A raise tagged `fault: unsure` is filed locally with a line saying Dokima cannot tell whose fault it is.",
+   "745.9": "`upstream.scrub` drops the repo's name, links and issue numbers; upstream bodies carry no run links or searched issues.",
+   "745.10": "Each filing step takes `DOKIMA_UPSTREAM_TOKEN` from `actions/create-github-app-token` with the App's id, key and upstream owner."
+  },
+  "evidence": "`pytest tests/test_upstream.py`: 27 passed; 944 neighbouring tests passed.",
+  "raises": [],
+  "answers": []
+ },
+ "check": {
+  "passed": true,
+  "problems": []
+ },
+ "dropped_by_fence": [],
+ "files_changed": [
+  ".github/workflows/agent.yml",
+  ".github/workflows/assign.yml",
+  ".github/workflows/audit.yml",
+  ".github/workflows/autopilot.yml",
+  ".github/workflows/board.yml",
+  ".github/workflows/card.yml",
+  ".github/workflows/commands.yml",
+  ".github/workflows/entry.yml",
+  ".github/workflows/testmon.yml",
+  ".github/workflows/uptodate.yml",
+  "dokima/agent_autopilot.py",
+  "dokima/defaults.yaml",
+  "dokima/raises.py",
+  "dokima/roles/raising.md",
+  "dokima/upstream.py"
+ ],
+ "branch": "try/issue-745",
+ "url": "https://github.com/dokima-dev/dokima/issues/745#issuecomment-6248175960"
+}
