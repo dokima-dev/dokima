@@ -1,0 +1,140 @@
+{
+ "role": "planner",
+ "stage": null,
+ "run_id": "39088892817",
+ "commit_before": "5583bcce6d4c233e8cae8ac7c14faa9fedbd0454",
+ "started_by": "dokima-runtime[bot]",
+ "models": [
+  "claude-opus-5-5"
+ ],
+ "report": {
+  "duration_ms": 171640,
+  "turns": 25,
+  "cost_usd": 1.2563122,
+  "tokens_in": 1441698,
+  "tokens_out": 17950
+ },
+ "log": "https://github.com/dokima-dev/dokima/blob/logs/logs/846/39088892817-planner.md",
+ "run": "https://github.com/dokima-dev/dokima/actions/runs/39088892817",
+ "handback": {
+  "kind": "user_story",
+  "title": "Card and branch updates find checks by shown names",
+  "summary": "In an adopter's repo, the card and branch updates must find Dokima's checks by the names GitHub shows there.",
+  "user_story": "In an adopter's repo, the card shows Dokima's checks passing, and failing pull requests are not updated.",
+  "acceptance_criteria": [
+   {
+    "text": "When all tests passes in an adopter's repo, the card's Definition of Done shows Test suite passed.",
+    "words": "the card, which reads the check runs by plain name (e.g. `all tests`), so its Definition of Done never shows them passing",
+    "source": "https://github.com/dokima-dev/dokima/issues/846",
+    "files": [
+     "dokima/card.py",
+     "dokima/settings.py"
+    ],
+    "edge_cases": [
+     {
+      "case": "The check failed: the card shows Test suite failed.",
+      "test": "tests/test_shown_check_names.py::test_adopter_card_shows_test_suite_passed_by_its_shown_name"
+     }
+    ]
+   },
+   {
+    "text": "When Acceptance criteria passes in an adopter's repo, the card's Definition of Done shows Acceptance tests passed.",
+    "words": "the card, which reads the check runs by plain name (e.g. `all tests`), so its Definition of Done never shows them passing",
+    "source": "https://github.com/dokima-dev/dokima/issues/846",
+    "files": [
+     "dokima/card.py",
+     "dokima/settings.py"
+    ],
+    "edge_cases": [
+     {
+      "case": "The check failed: the card shows Acceptance tests failed.",
+      "test": "tests/test_shown_check_names.py::test_adopter_card_shows_acceptance_tests_passed_by_its_shown_name"
+     }
+    ]
+   },
+   {
+    "text": "When a criterion's own check passes in an adopter's repo, the card shows that criterion passed.",
+    "words": "Fix: both find a check by the name GitHub shows, plain in Dokima's own repo and prefixed in an adopter's",
+    "source": "https://github.com/dokima-dev/dokima/issues/846",
+    "files": [
+     "dokima/card.py",
+     "dokima/settings.py"
+    ],
+    "edge_cases": [
+     {
+      "case": "The criterion's check failed: the card shows it failed.",
+      "test": "tests/test_shown_check_names.py::test_adopter_card_shows_a_criterion_passed_by_its_shown_name"
+     }
+    ]
+   },
+   {
+    "text": "When all tests failed on a pull request's head in an adopter's repo, branch updates leave it behind main.",
+    "words": "the branch updates (uptodate), which look for the same plain names before bringing a pull request up to date",
+    "source": "https://github.com/dokima-dev/dokima/issues/846",
+    "files": [
+     "dokima/uptodate.py",
+     "dokima/settings.py"
+    ],
+    "edge_cases": [
+     {
+      "case": "All tests passed: the pull request is still brought up to date.",
+      "test": "tests/test_shown_check_names.py::test_adopter_pr_whose_all_tests_failed_is_not_brought_up_to_date"
+     }
+    ]
+   }
+  ],
+  "non_functional": [],
+  "tests": {
+   "846.1": [
+    "tests/test_shown_check_names.py::test_adopter_card_shows_test_suite_passed_by_its_shown_name"
+   ],
+   "846.2": [
+    "tests/test_shown_check_names.py::test_adopter_card_shows_acceptance_tests_passed_by_its_shown_name"
+   ],
+   "846.3": [
+    "tests/test_shown_check_names.py::test_adopter_card_shows_a_criterion_passed_by_its_shown_name"
+   ],
+   "846.4": [
+    "tests/test_shown_check_names.py::test_adopter_pr_whose_all_tests_failed_is_not_brought_up_to_date"
+   ]
+  },
+  "test_changes": {},
+  "links": {
+   "blocked_by": [
+    820
+   ],
+   "blocks": [
+    816
+   ],
+   "relates_to": [
+    785,
+    786
+   ]
+  },
+  "raises": [
+   {
+    "kind": "question",
+    "to": "owner",
+    "label": "Criterion checks too",
+    "text": "Each criterion's own check is prefixed too, so the card misses it. Fix that here as well? The plan does.",
+    "evidence": "`dokima/card.py` `checks_by_key` wants names starting `N.k \u00b7 `; adopters' start `dokima / acceptance-criteria / `.",
+    "raised_by": "planner",
+    "id": "P1"
+   },
+   {
+    "kind": "question",
+    "to": "owner",
+    "label": "Doubt: overlaps open issues",
+    "text": "This overlaps #785 and #786, which move these names into settings. Should they keep only their other asks? Assumed yes.",
+    "evidence": "#785: card finds checks by settings names; #786: updates wait on all tests by settings name.",
+    "raised_by": "planner",
+    "id": "P2"
+   }
+  ]
+ },
+ "check": {
+  "passed": true,
+  "problems": []
+ },
+ "url": "https://github.com/dokima-dev/dokima/issues/846#issuecomment-6244554942"
+}
