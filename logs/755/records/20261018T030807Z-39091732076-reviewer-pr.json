@@ -1,0 +1,84 @@
+{
+ "role": "reviewer",
+ "stage": "pr",
+ "run_id": "39091732076",
+ "commit_before": "79d4fd10fb993c512f62aea9695119c0787c9ae7",
+ "started_by": "dokima-runtime[bot]",
+ "models": [
+  "claude-opus-5-5"
+ ],
+ "report": {
+  "duration_ms": 759576,
+  "turns": 20,
+  "cost_usd": 0.7782,
+  "tokens_in": 1092141,
+  "tokens_out": 6460
+ },
+ "log": "https://github.com/dokima-dev/dokima/blob/logs/logs/755/39091732076-reviewer-pr.md",
+ "run": "https://github.com/dokima-dev/dokima/actions/runs/39091732076",
+ "handback": {
+  "previous_step": {
+   "did": [
+    "Added a release command that makes the v0.1.0 tag and release from the changelog.",
+    "Added a workflow that runs it on every push to main."
+   ],
+   "decided": [
+    "Nothing is made while the changelog or its v0.1.0 section is missing."
+   ],
+   "open": [
+    "Two existing tests now fail, so the full test suite is red."
+   ]
+  },
+  "verdict": "block",
+  "summary": "The release code works, but it breaks two existing tests, and one fix needs a file the plan leaves out.",
+  "raises": [
+   {
+    "kind": "blocker",
+    "to": "worker",
+    "label": "755.2 YAML not installed",
+    "text": "The release workflow runs Dokima before installing the YAML reader, which every Dokima workflow must do. Fix: install pyyaml in an earlier step, as other workflows do.",
+    "evidence": "`tests/test_settings_setup.py::test_every_machine_that_runs_dokima_can_read_the_settings_file` fails on the branch, passes on main.",
+    "raised_by": "reviewer",
+    "id": "R4"
+   },
+   {
+    "kind": "blocker",
+    "to": "planner",
+    "label": "755.2 manifest left out",
+    "text": "Making a GitHub release needs a permission the manifest does not know, and the plan leaves the manifest out. Fix: add `dokima/manifest.py` to 755.2, mapping release calls to contents.",
+    "evidence": "`tests/test_manifest.py::test_the_guard_passes_settings_the_manifest_declares` fails: `gh release view`, `gh release create` in `dokima/release.py` unknown.",
+    "raised_by": "reviewer",
+    "id": "R5"
+   }
+  ],
+  "answers": [
+   {
+    "raise": "W1",
+    "answer": "disagree",
+    "why": "True, but issue 849 already holds the changelog, so a new issue would repeat it."
+   }
+  ],
+  "asks": [],
+  "behaviors": [],
+  "edge_cases": [],
+  "tests": [],
+  "size": "ok",
+  "boxes": {
+   "dropped": "none",
+   "added": "none",
+   "superseded": "none",
+   "conflicts": "none",
+   "edges": {
+    "755.1": "covered",
+    "755.2": "covered",
+    "755.3": "covered"
+   },
+   "poor_tests": "none"
+  }
+ },
+ "check": {
+  "passed": true,
+  "problems": []
+ },
+ "url": "https://github.com/dokima-dev/dokima/pull/850#issuecomment-6244927899"
+}
