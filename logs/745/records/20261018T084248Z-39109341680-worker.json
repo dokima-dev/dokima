@@ -1,0 +1,79 @@
+{
+ "role": "worker",
+ "stage": null,
+ "run_id": "39109341680",
+ "commit_before": "d08102386b15dcb706109d60646a6ad937623574",
+ "started_by": "dokima-runtime[bot]",
+ "models": [
+  "claude-opus-5-5"
+ ],
+ "report": {
+  "duration_ms": 2923013,
+  "turns": 55,
+  "cost_usd": 2.8981472,
+  "tokens_in": 5618770,
+  "tokens_out": 36663
+ },
+ "log": "https://github.com/dokima-dev/dokima/blob/logs/logs/745/39109341680-worker.md",
+ "run": "https://github.com/dokima-dev/dokima/actions/runs/39109341680",
+ "handback": {
+  "summary": "Dokima's own problems and failed shared workflow jobs now file into the upstream repo, once, naming nothing private.",
+  "criteria": {
+   "745.1": "`file_issues` in `dokima/agent_autopilot.py` sends a raise tagged `fault: dokima` to `upstream.file_problem` when `upstream.repo` is set; else files locally.",
+   "745.2": "The record line for an upstream filing links `card.ref(upstream repo, number)`.",
+   "745.3": "`dokima/roles/raising.md` says how to judge fault and shows both tags; `raises.check_raises` accepts `fault`.",
+   "745.4": "`upstream.file` finds the open filed issue by exact title and comments on it instead of opening another.",
+   "745.5": "`python3 -m dokima.upstream failed WORKFLOW JOB` files `Failed run: the JOB job of WORKFLOW.yml`; no upstream repo means no call.",
+   "745.6": "Every keyed job ends with owner, mint and file steps on failure; keyless jobs are covered by an `upstream` job, but `reviews.yml` is not (see raise).",
+   "745.7": "A failure files one issue per workflow and job, plus one comment per run, so two runs give two comments.",
+   "745.8": "A raise tagged `fault: unsure` is filed locally with a line saying Dokima cannot tell whose fault it is.",
+   "745.9": "`upstream.scrub` drops the local repo's name, links and `#N` refs; upstream bodies carry no searched issues or run links.",
+   "745.10": "Each filing step takes `DOKIMA_UPSTREAM_TOKEN` from `actions/create-github-app-token` with the App's id and key and the upstream owner."
+  },
+  "evidence": "`pytest tests/test_upstream.py`: 1 failed (reviews.yml), 27 passed.",
+  "raises": [
+   {
+    "kind": "blocker",
+    "to": "planner",
+    "label": "Test cannot pass",
+    "text": "745.6 needs a keyed filing step in `reviews.yml`, but 396.3 forbids any key there. I kept 396.3.",
+    "evidence": "`test_the_review_relay_holds_no_key` fails once `reviews.yml` mints a key; `test_every_job...[reviews.yml]` fails without it.",
+    "raised_by": "worker",
+    "id": "W1"
+   },
+   {
+    "kind": "issue",
+    "label": "Keyless reviews failures",
+    "text": "A failed review relay run can never file upstream, because that relay must hold no key.",
+    "evidence": "`.github/workflows/reviews.yml` runs the pull request's own copy; `tests/test_review_relay.py` pins it keyless.",
+    "raised_by": "worker",
+    "id": "W2"
+   }
+  ]
+ },
+ "check": {
+  "passed": false,
+  "problems": [
+   "plan test fails: tests/test_upstream.py::test_every_job_of_each_shared_workflow_ends_by_filing_its_failure_upstream"
+  ]
+ },
+ "dropped_by_fence": [],
+ "files_changed": [
+  ".github/workflows/agent.yml",
+  ".github/workflows/assign.yml",
+  ".github/workflows/audit.yml",
+  ".github/workflows/autopilot.yml",
+  ".github/workflows/board.yml",
+  ".github/workflows/card.yml",
+  ".github/workflows/commands.yml",
+  ".github/workflows/testmon.yml",
+  ".github/workflows/uptodate.yml",
+  "dokima/agent_autopilot.py",
+  "dokima/defaults.yaml",
+  "dokima/raises.py",
+  "dokima/roles/raising.md",
+  "dokima/upstream.py"
+ ],
+ "branch": "try/issue-745",
+ "url": "https://github.com/dokima-dev/dokima/issues/745#issuecomment-6247340953"
+}
