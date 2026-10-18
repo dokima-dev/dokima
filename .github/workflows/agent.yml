@@ -228,6 +228,10 @@ jobs:
             [ -n "$CO" ] && [ "$(git rev-parse HEAD)" != "$BRANCH_TIP" ] && git rev-parse -q --verify HEAD^2 >/dev/null || return 0
             git -c user.name="${SLUG}[bot]" -c user.email="${BOT_ID}+${SLUG}[bot]@users.noreply.github.com" commit -q --amend --no-edit "${CREDIT[@]}"
           }
+          # An issue labeled hotfix is built from its text with no plan until a planner runs on it (#863).
+          if { [ "$ROLE" = worker ] || [ "$STAGE" = pr ]; } && python3 -m dokima.hotfix labeled "$N"; then
+            HOTFIX_LABEL=true; echo "HOTFIX_LABEL=true" >> "$GITHUB_ENV"
+          fi
           if git ls-remote --exit-code --heads origin "try/issue-$N" >/dev/null; then
             git fetch -q origin "try/issue-$N" && git checkout -q -B "try/issue-$N" FETCH_HEAD
             BRANCH_TIP=$(git rev-parse HEAD); echo "BRANCH_TIP=$BRANCH_TIP" >> "$GITHUB_ENV"
@@ -302,6 +306,9 @@ jobs:
           elif [ "$ROLE" = planner ] || [ "$STAGE" = plan ]; then
             # A plan review needs no branch: a split never makes one, so it reviews from main.
             git checkout -q -B "try/issue-$N" "origin/$DEFAULT_BRANCH"
+          elif [ "$ROLE" = worker ] && [ "${HOTFIX_LABEL:-}" = true ]; then
+            # A hotfix is built from its text with no plan, so its worker starts the branch from main (#863).
+            git checkout -q -B "try/issue-$N" "origin/$DEFAULT_BRANCH"
           else
             echo "try/issue-$N does not exist; run the planner first." > /tmp/why.txt
             echo "::error title=Nothing to $ROLE::$(cat /tmp/why.txt)"; exit 1
@@ -329,6 +336,8 @@ jobs:
             fi
             cat /tmp/pack-err.txt >&2; echo "::error title=No pack::$(cat /tmp/why.txt)"; exit 1; }
           if [ "$STAGE" = pr ]; then git diff "origin/$DEFAULT_BRANCH...HEAD" > "$PACK/diff.patch"; fi
+          # A hotfix's pack holds its ask in place of a plan (#863): the later steps judge it with no plan.
+          if [ -f "$PACK/ask.md" ] && [ ! -f "$PACK/plan.json" ]; then echo "HOTFIX=true" >> "$GITHUB_ENV"; fi
           ls -R "$PACK" | head -60
       # The repo's Python, test tools and install command, from main's settings file over Dokima's defaults (#794).
       # A runtime whose settings reader has no setup mode (main before #794) sets up as this workflow did before.
@@ -426,11 +435,14 @@ jobs:
             reviewerpr)   GRADE=result-grade; FILE=review.json; CHECK="python3 -m dokima.agent check review $OUT/review.json $PACK/plan.json $N" ;;
             worker)       GRADE=result-grade; FILE=work.json;   CHECK="python3 -m dokima.agent check work $OUT/work.json $PACK/plan.json $N" ;;
           esac
+          # A hotfix has no plan: `-` in its place checks its hand-back by its shape alone (#863).
+          [ "$HOTFIX" != true ] || CHECK="${CHECK/ $PACK\/plan.json / - }"
           CHECK="$CHECK && python3 -m dokima.agent check-round $ROLE $OUT/$FILE $PACK"
           echo "CHECK=$CHECK" >> "$GITHUB_ENV"
           # The shipped prompt with main's settings drawn in, then main's house rules for this role (#796).
           (cd /tmp/runtime && python3 -m dokima.prompt "$ROLE" "$GRADE") > /tmp/shipped.md 2> /tmp/prompt-err.txt \
             && (cd /tmp/runtime && python3 -m dokima.prompt house "$ROLE") > /tmp/house.md 2>> /tmp/prompt-err.txt \
+            && (cd /tmp/runtime && python3 -m dokima.hotfix prompt "$([ "$HOTFIX" = true ] && echo on || echo off)" /tmp/shipped.md) 2>> /tmp/prompt-err.txt \
             || { echo "The prompt could not be built: $(paste -sd' ' /tmp/prompt-err.txt)" > /tmp/why.txt
                  echo "::error title=Prompt not built::$(cat /tmp/why.txt)"; exit 1; }
           printf '%s' "$(cat /tmp/shipped.md)
@@ -439,7 +451,8 @@ jobs:
           - $PACK/issue.md: issue #$N as it stands, with every comment (the owner's words and answers are here).
           - $PACK/in/: every earlier record of this issue, oldest first (NN-role.json). Each holds that run's hand-back,
             the code check's verdict and the run it came from. Answer open blockers by id from the newest review.
-          - $PACK/plan.json: the newest plan that passed its check (absent until the planner has one).
+          $( [ "$HOTFIX" = true ] && echo "- $PACK/ask.md: the issue's text, the whole ask. This issue is a hotfix: it has no plan." \
+            || echo "- $PACK/plan.json: the newest plan that passed its check (absent until the planner has one).")
           - $PACK/open_blockers.json: the open blockers from the newest review at your stage. Answer every one by id.$( [ "$STAGE" = pr ] && echo "
           - $PACK/diff.patch: the work against main. $PACK/tests.txt and tests.xml: the tests the change can affect (every test with no baseline), run by code on this machine.
           - $PACK/worker-run/: the worker's session log." )
@@ -473,7 +486,8 @@ jobs:
         run: |
           # First, so the check runs the planner's tests as committed, on the code that gets pushed (#597).
           # A clashed file still holding conflict markers fails the hand-back, saying which, so nothing is pushed.
-          if ! python3 -m dokima.fence "$BASE" "$PACK/plan.json" /tmp/clashed.txt > "$OUT/dropped.txt" 2> /tmp/fence-err.txt; then
+          # A hotfix has no plan, so every change it made stays, tests included (#863).
+          if ! python3 -m dokima.fence "$BASE" "$([ "$HOTFIX" = true ] && echo - || echo "$PACK/plan.json")" /tmp/clashed.txt > "$OUT/dropped.txt" 2> /tmp/fence-err.txt; then
             cat /tmp/fence-err.txt | tee -a "$OUT/check.txt"; echo "PASSED=false" >> "$GITHUB_ENV"
             echo "::error title=Fence::$(paste -sd' ' /tmp/fence-err.txt)"
           fi
