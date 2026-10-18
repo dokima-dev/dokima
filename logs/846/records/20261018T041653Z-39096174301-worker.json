@@ -1,0 +1,40 @@
+{
+ "role": "worker",
+ "stage": null,
+ "run_id": "39096174301",
+ "commit_before": "4e0e57c93d912e76f4a7e0ddd420af5bc0d3d4db",
+ "started_by": "RezaSoleymanifar",
+ "models": [
+  "claude-opus-5-5"
+ ],
+ "report": {
+  "duration_ms": 7453,
+  "turns": 2,
+  "cost_usd": 0.5658993999999999,
+  "tokens_in": 105118,
+  "tokens_out": 240
+ },
+ "log": "https://github.com/dokima-dev/dokima/blob/logs/logs/846/39096174301-worker.md",
+ "run": "https://github.com/dokima-dev/dokima/actions/runs/39096174301",
+ "handback": {
+  "summary": "The card now puts each gate's shown name back to its plain name, so the manifest guard sees it again.",
+  "criteria": {
+   "846.1": "`dokima/card.py` `render` finds all tests among `plain(check_runs)`, which maps the shown name back to the plain one.",
+   "846.2": "`dokima/card.py` `done_row` finds Acceptance criteria among `plain(found[\"check_runs\"])`.",
+   "846.3": "`dokima/card.py` `checks_by_key` strips the Acceptance criteria check's shown prefix from criterion names.",
+   "846.4": "`dokima/uptodate.py` `tests_failed` asks GitHub for all tests by `settings.shown_as`.",
+   "846.5": "`dokima/card.py` `checks_passed` reads all tests from `plain(check_runs)` and criteria by `checks_by_key`."
+  },
+  "evidence": "`pytest -q tests/test_manifest.py tests/test_shown_check_names.py`: 67 passed in 6.02s"
+ },
+ "check": {
+  "passed": true,
+  "problems": []
+ },
+ "dropped_by_fence": [],
+ "files_changed": [
+  "dokima/card.py"
+ ],
+ "branch": "try/issue-846",
+ "url": "https://github.com/dokima-dev/dokima/pull/852#issuecomment-6245519528"
+}
