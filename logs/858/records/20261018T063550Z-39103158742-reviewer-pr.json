@@ -1,0 +1,130 @@
+{
+ "role": "reviewer",
+ "stage": "pr",
+ "run_id": "39103158742",
+ "commit_before": "db83fecd2eeeaa515138ea67c9bc0482841b433b",
+ "started_by": "dokima-runtime[bot]",
+ "models": [
+  "claude-opus-5-5"
+ ],
+ "report": {
+  "duration_ms": 2218,
+  "turns": 1,
+  "cost_usd": 0.5671952,
+  "tokens_in": 52848,
+  "tokens_out": 144
+ },
+ "log": "https://github.com/dokima-dev/dokima/blob/logs/logs/858/39103158742-reviewer-pr.md",
+ "run": "https://github.com/dokima-dev/dokima/actions/runs/39103158742",
+ "handback": {
+  "previous_step": {
+   "did": [
+    "The audit no longer lists checks the repo added to the branch rule.",
+    "The audit runs with no board set and finishes cleanly.",
+    "With no board, the audit skips board fields, views and the Needs you mark."
+   ],
+   "decided": [
+    "An empty or unset board setting both count as no board."
+   ],
+   "open": [
+    "GitHub showed the test runs red when review began; code reports that itself."
+   ]
+  },
+  "verdict": "approve",
+  "summary": "The change delivers all four criteria; their tests fail on main and pass here, with the full suite green.",
+  "raises": [],
+  "answers": [],
+  "asks": [],
+  "behaviors": [
+   {
+    "criterion": "858.1",
+    "one_behavior": true,
+    "why": "Only the line for a repo's own check goes away."
+   },
+   {
+    "criterion": "858.2",
+    "one_behavior": true,
+    "why": "Only the exit code with no board."
+   },
+   {
+    "criterion": "858.3",
+    "one_behavior": true,
+    "why": "Only the absence of board lines."
+   },
+   {
+    "criterion": "858.4",
+    "one_behavior": true,
+    "why": "Only the missing needed check, with no board."
+   }
+  ],
+  "edge_cases": [
+   {
+    "criterion": "858.1",
+    "cut": [],
+    "missing": []
+   },
+   {
+    "criterion": "858.2",
+    "cut": [],
+    "missing": []
+   },
+   {
+    "criterion": "858.3",
+    "cut": [],
+    "missing": []
+   },
+   {
+    "criterion": "858.4",
+    "cut": [],
+    "missing": []
+   }
+  ],
+  "tests": [
+   {
+    "test": "tests/test_audit_no_board.py::test_a_check_the_repo_added_gets_no_line",
+    "only_its_behavior": true,
+    "why": "Fails on main naming lint; passes on the branch."
+   },
+   {
+    "test": "tests/test_audit_no_board.py::test_the_audit_with_no_board_exits_0",
+    "only_its_behavior": true,
+    "why": "Fails on main with exit 1; passes for empty and unset."
+   },
+   {
+    "test": "tests/test_audit_no_board.py::test_the_audit_with_no_board_lists_no_board_lines",
+    "only_its_behavior": true,
+    "why": "Board drift is faked, so reading the board would show lines."
+   },
+   {
+    "test": "tests/test_audit_no_board.py::test_the_audit_with_no_board_lists_a_missing_needed_check",
+    "only_its_behavior": true,
+    "why": "Fails on main; passes once the audit runs with no board."
+   }
+  ],
+  "size": "ok",
+  "boxes": {
+   "dropped": "none",
+   "added": [
+    {
+     "what": "The board setting is marked optional in the module's usage line.",
+     "kind": "needed",
+     "serves": "858.2"
+    }
+   ],
+   "superseded": "none",
+   "conflicts": "none",
+   "edges": {
+    "858.1": "covered",
+    "858.2": "covered",
+    "858.3": "covered",
+    "858.4": "covered"
+   },
+   "poor_tests": "none"
+  }
+ },
+ "check": {
+  "passed": true,
+  "problems": []
+ },
+ "url": "https://github.com/dokima-dev/dokima/pull/861#issuecomment-6246428302"
+}
