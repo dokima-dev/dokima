@@ -62,6 +62,8 @@ merge:
   method: squash
   # false for a repo with no merge queue, such as a personal one: auto-merge then needs only main's review exemption.
   queue: true
+  # allow lets a pull request a person or Dependabot opened pass with no plan; any other value fails it (#857).
+  unplanned_prs: allow
 # Each of Dokima's labels by its key; the name is what the repo calls it.
 labels:
   autopilot: autopilot

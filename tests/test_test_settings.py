@@ -219,13 +219,15 @@ def test_prompt_folder_changes_take_the_text_only_shortcut(record_property, tmp_
     """A pull request changing only a prompt file gets the text-only check.
 
     Proves 804.5. Runs the merge check from Dokima's own repo for a pull request with no issue that changes only
-    `dokima/roles/planner.md`: it must get the text-only check. A Markdown file under `.github/` must still not.
+    `dokima/roles/planner.md`: it must get the text-only check. A Markdown file under `.github/` must still not (since
+    #857 a person's unplanned pull request may pass another way, so only the shortcut is checked).
     """
     record_property("proves", "804.5")
     rows, out = run_matrix(Path(ROOT), ["dokima/roles/planner.md"], work=tmp_path)
     assert names(rows) == [SHORTCUT], f"804.5: a prompt-only change did not get the text-only check: {rows}\n{out}"
     rows, out = run_matrix(Path(ROOT), [".github/PULL_REQUEST_TEMPLATE.md"], work=tmp_path)
-    assert names(rows) == [NO_ISSUE], f"804.5: a Markdown file under .github/ took the text-only shortcut: {rows}\n{out}"
+    assert rows is not None and names(rows) != [SHORTCUT], \
+        f"804.5: a Markdown file under .github/ took the text-only shortcut: {rows}\n{out}"
 
 
 # 804.6: the folders that stop the text-only shortcut come from settings
@@ -233,13 +235,14 @@ def test_prompt_folder_changes_take_the_text_only_shortcut(record_property, tmp_
 def test_the_folders_that_stop_the_text_only_shortcut_come_from_settings(record_property, tmp_path):
     """The repo's own list of folders decides which Markdown changes skip the plan.
 
-    Proves 804.6. In a repo whose settings list only `docs/` as not text, a Markdown change under `docs/` must get the
-    full checks, and a Markdown change under `tests/`, no longer listed, must get the text-only check.
+    Proves 804.6. In a repo whose settings list only `docs/` as not text, a Markdown change under `docs/` must not get
+    the text-only check, and a Markdown change under `tests/`, no longer listed, must get the text-only check.
     """
     record_property("proves", "804.6")
     repo = make_repo(tmp_path, {"text_only": {"not_text": ["docs/"]}})
     rows, out = run_matrix(repo, ["docs/guide.md"])
-    assert names(rows) == [NO_ISSUE], f"804.6: a Markdown file under a folder the settings list took the shortcut: {rows}\n{out}"
+    assert rows is not None and names(rows) != [SHORTCUT], \
+        f"804.6: a Markdown file under a folder the settings list took the shortcut: {rows}\n{out}"
     rows, out = run_matrix(repo, ["tests/notes.md"])
     assert names(rows) == [SHORTCUT], f"804.6: a Markdown file under a folder the settings no longer list lost the shortcut: {rows}\n{out}"
 

@@ -115,6 +115,7 @@ jobs:
           ID: ${{ matrix.id }}
         run: |
           if [ "$ID" = "text-only" ] && [ -z "$TESTS" ]; then echo "::notice title=Text only::Only text files changed: no plan or tests needed."; exit 0; fi
+          if [ "$ID" = "unplanned" ] && [ -z "$TESTS" ]; then echo "::notice title=Unplanned::Not opened by Dokima, so no plan is needed."; exit 0; fi
           if [ -z "$TESTS" ]; then echo "::error title=$ID has no test::No test verifies this criterion yet."; exit 1; fi
           # A manual fix has no plan; every test it must pass runs once, in the all tests check main requires (#840).
           if [ "$ID" = "manual-fix" ]; then
