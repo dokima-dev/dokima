@@ -1,0 +1,19 @@
+name: release
+on:
+  push:
+    branches: [main]
+permissions:
+  contents: write
+jobs:
+  release:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v6
+        with:
+          python-version: "3.12"
+      # Makes the tag and GitHub release once the changelog holds their section (#755).
+      - name: Release from the changelog
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: python3 -m dokima.release "${{ github.repository }}" "${{ github.sha }}"
