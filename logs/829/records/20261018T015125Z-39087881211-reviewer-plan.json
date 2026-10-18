@@ -1,0 +1,110 @@
+{
+ "role": "reviewer",
+ "stage": "plan",
+ "run_id": "39087881211",
+ "commit_before": "45cbb1254760414b0256fd933a306f1e637f74dd",
+ "started_by": "dokima-runtime[bot]",
+ "models": [
+  "claude-opus-5-5"
+ ],
+ "report": {
+  "duration_ms": 51693,
+  "turns": 9,
+  "cost_usd": 0.3658144000000001,
+  "tokens_in": 329755,
+  "tokens_out": 3358
+ },
+ "log": "https://github.com/dokima-dev/dokima/blob/logs/logs/829/39087881211-reviewer-plan.md",
+ "run": "https://github.com/dokima-dev/dokima/actions/runs/39087881211",
+ "handback": {
+  "previous_step": {
+   "did": [
+    "The planner wrote two criteria: a new install removes old Dokima code and workflows.",
+    "The planner added four tests that fake an old install, then check what remains."
+   ],
+   "decided": [
+    "The repo's own files and own workflows stay unchanged."
+   ],
+   "open": []
+  },
+  "verdict": "approve",
+  "summary": "The plan covers both asks, old code and workflows removed; its four tests fail today as they should.",
+  "raises": [],
+  "answers": [],
+  "asks": [
+   {
+    "ask": "The sandbox already holds the old copied Dokima code",
+    "source": "https://github.com/dokima-dev/dokima/issues/829",
+    "criterion": "829.1"
+   },
+   {
+    "ask": "and workflows; a new install leaves them there, still running.",
+    "source": "https://github.com/dokima-dev/dokima/issues/829",
+    "criterion": "829.2"
+   }
+  ],
+  "behaviors": [
+   {
+    "criterion": "829.1",
+    "one_behavior": true,
+    "why": "One action, install over an old install; one result, the old code is gone."
+   },
+   {
+    "criterion": "829.2",
+    "one_behavior": true,
+    "why": "One action, install over an old install; one result, only the new workflow is left."
+   }
+  ],
+  "edge_cases": [
+   {
+    "criterion": "829.1",
+    "cut": [],
+    "missing": []
+   },
+   {
+    "criterion": "829.2",
+    "cut": [],
+    "missing": []
+   }
+  ],
+  "tests": [
+   {
+    "test": "tests/test_install.py::test_installing_over_an_old_install_removes_the_old_copy_of_dokimas_code",
+    "only_its_behavior": true,
+    "why": "Fails today listing `dokima/card.py` still on the branch after install."
+   },
+   {
+    "test": "tests/test_install.py::test_installing_over_an_old_install_keeps_the_repos_own_files",
+    "only_its_behavior": true,
+    "why": "Fails code that wipes the whole repo; also needs the old code gone, so cannot pass idle."
+   },
+   {
+    "test": "tests/test_install.py::test_installing_over_an_old_install_removes_the_old_copies_of_dokimas_workflows",
+    "only_its_behavior": true,
+    "why": "Fails today listing all sixteen old workflows still on the branch."
+   },
+   {
+    "test": "tests/test_install.py::test_installing_over_an_old_install_keeps_the_repos_own_workflow",
+    "only_its_behavior": true,
+    "why": "Fails code that deletes every workflow; also needs old `card.yml` gone."
+   }
+  ],
+  "size": "ok",
+  "boxes": {
+   "dropped": "none",
+   "added": "none",
+   "superseded": "none",
+   "conflicts": "none",
+   "edges": {
+    "829.1": "covered",
+    "829.2": "covered"
+   },
+   "poor_tests": "none"
+  }
+ },
+ "check": {
+  "passed": true,
+  "problems": []
+ },
+ "url": "https://github.com/dokima-dev/dokima/issues/829#issuecomment-6244421221"
+}
