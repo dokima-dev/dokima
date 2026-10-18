@@ -1,0 +1,94 @@
+{
+ "role": "planner",
+ "stage": null,
+ "run_id": "39087738592",
+ "commit_before": "5583bcce6d4c233e8cae8ac7c14faa9fedbd0454",
+ "started_by": "dokima-runtime[bot]",
+ "models": [
+  "claude-opus-5-5"
+ ],
+ "report": {
+  "duration_ms": 205336,
+  "turns": 22,
+  "cost_usd": 1.2372470000000002,
+  "tokens_in": 1367644,
+  "tokens_out": 17373
+ },
+ "log": "https://github.com/dokima-dev/dokima/blob/logs/logs/820/39087738592-planner.md",
+ "run": "https://github.com/dokima-dev/dokima/actions/runs/39087738592",
+ "handback": {
+  "kind": "user_story",
+  "title": "Adopter repos require Dokima's checks by the names GitHub shows",
+  "summary": "In an adopter's repo, Dokima's checks carry their callers' names, so the audit must ask for those names.",
+  "user_story": "An adopter's Setup issue asks main to require Dokima's checks under the exact names GitHub shows there.",
+  "acceptance_criteria": [
+   {
+    "text": "When an adopter's repo holds the installed settings file, the audit wants all tests under the name GitHub shows there.",
+    "words": "the required check names will not match",
+    "source": "https://github.com/dokima-dev/dokima/issues/820",
+    "files": [
+     "dokima/install/settings.yaml",
+     "dokima/manifest.py",
+     "dokima/settings.py"
+    ],
+    "no_edge_cases": "The installed settings are fixed text; repos without them keep today's names, already tested."
+   },
+   {
+    "text": "When an adopter's repo holds the installed settings file, the audit wants Acceptance criteria under the name GitHub shows there.",
+    "words": "the required check names will not match",
+    "source": "https://github.com/dokima-dev/dokima/issues/820",
+    "files": [
+     "dokima/install/settings.yaml",
+     "dokima/manifest.py",
+     "dokima/settings.py"
+    ],
+    "no_edge_cases": "The installed settings are fixed text; repos without them keep today's names, already tested."
+   }
+  ],
+  "non_functional": [],
+  "tests": {
+   "820.1": [
+    "tests/test_adopter_check_names.py::test_adopter_audit_wants_all_tests_as_github_shows_it"
+   ],
+   "820.2": [
+    "tests/test_adopter_check_names.py::test_adopter_audit_wants_acceptance_criteria_as_github_shows_it"
+   ]
+  },
+  "test_changes": {},
+  "links": {
+   "blocked_by": [],
+   "blocks": [
+    816
+   ],
+   "relates_to": [
+    785,
+    786
+   ]
+  },
+  "raises": [
+   {
+    "kind": "question",
+    "to": "owner",
+    "label": "Nested caller names",
+    "text": "Does GitHub name an adopter's checks after both callers, dokima then full-suite, before all tests? The plan assumes so.",
+    "evidence": "`dokima/install/dokima.yml` job `dokima` calls `entry.yml`, whose job `full-suite` calls `full-suite.yml`.",
+    "raised_by": "planner",
+    "id": "P1"
+   },
+   {
+    "kind": "question",
+    "to": "owner",
+    "label": "Card and updates",
+    "text": "The card and branch updates still look for the plain names. Leave them to their own issues? The plan does.",
+    "evidence": "`dokima/card.py:25` and `dokima/uptodate.py:20` match `all tests` exactly; #785 and #786 move them to settings.",
+    "raised_by": "planner",
+    "id": "P2"
+   }
+  ]
+ },
+ "check": {
+  "passed": true,
+  "problems": []
+ },
+ "url": "https://github.com/dokima-dev/dokima/issues/820#issuecomment-6244402155"
+}
