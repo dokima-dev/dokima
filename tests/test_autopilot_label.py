@@ -52,3 +52,16 @@ def test_another_label_starts_nothing(record_property, tmp_path):
     m = Repo(tmp_path / "other", {57: [101]}, {})
     m.add_label(101, name="bug")
     assert m.planners_started("label") == {}, f"started: {m.planners_started('label')}"
+
+
+def test_a_label_run_also_starts_issues_whose_own_label_run_github_dropped(record_property, tmp_path):
+    """#101 and #103 were labeled together; GitHub dropped #101's run. #103's run starts both, once each; #102, blocked,
+    and #104, already planned, still start nothing (#843)."""
+    record_property("proves", "843.1")
+    m = Repo(tmp_path / "dropped", {57: [101, 102, 103, 104]}, {101: [LABEL], 102: [LABEL], 104: [LABEL]},
+             deps={102: [101]}, seed=[planned(104, 4001)])
+    m.add_label(103)
+    assert not m.failed, f"843.1: a workflow failed: {m.failures}\n{m.tail()}"
+    assert m.planners_started("843.1") == {101: 1, 103: 1}, \
+        f"843.1: a label run did not pick up the issue whose own run was dropped: {m.planners_started('843.1')}\n{m.tail()}"
+    assert start_lines(m, 101) == 1 and start_lines(m, 103) == 1
