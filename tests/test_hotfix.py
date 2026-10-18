@@ -446,8 +446,10 @@ def test_hotfix_prompts_name_nothing_from_dokimas_own_repo(record_property, tmp_
     Proves 863.10. Runs the hotfix worker, then code review of its pull request, on #57 in repo o/r. Each agent must
     start with a prompt that points it to ask.md, so the hotfix lane's words are there to read. Neither prompt may
     name Dokima's GitHub home, a path into Dokima's code or topic files, its workflow file, or an issue number other
-    than #57, its pull request #60 and the shared example #164."""
+    than #57, its pull request #60 and the shared example #164. Proves 864.9 too: the same check covers every hotfix
+    word the later story adds to these prompts."""
     record_property("proves", "863.10")
+    record_property("proves", "864.9")
     worker = Hotfix(tmp_path / "worker", "worker")
     review = Hotfix(tmp_path / "review", "reviewer", "pr",
                     comments=[ts.record_comment(worker_record(), "2026-10-07T10:30:00Z")], review=APPROVE, built=True)
