@@ -1,0 +1,131 @@
+{
+ "role": "planner",
+ "stage": null,
+ "run_id": "39105795517",
+ "commit_before": "8db728ac0c13de95360d3f9828fc651c46060a74",
+ "started_by": "dokima-runtime[bot]",
+ "models": [
+  "claude-opus-5-5"
+ ],
+ "report": {
+  "duration_ms": 218201,
+  "turns": 17,
+  "cost_usd": 0.9550578000000001,
+  "tokens_in": 904043,
+  "tokens_out": 16047
+ },
+ "log": "https://github.com/dokima-dev/dokima/blob/logs/logs/867/39105795517-planner.md",
+ "run": "https://github.com/dokima-dev/dokima/actions/runs/39105795517",
+ "handback": {
+  "kind": "user_story",
+  "title": "Each release takes its version from the changelog",
+  "summary": "Dokima can release only v0.1.0, so adopters never get later fixes.",
+  "user_story": "Adding a new version section to the changelog and merging it makes that release, and adopters run it.",
+  "acceptance_criteria": [
+   {
+    "text": "When the changelog's newest version heading is v0.1.1, a push to main makes the v0.1.1 release.",
+    "words": "each release names its version from the changelog's newest version heading, so adding a `## v0.1.1` section and merging it makes v0.1.1",
+    "source": "https://github.com/dokima-dev/dokima/issues/867",
+    "files": [
+     "dokima/release.py"
+    ],
+    "edge_cases": [
+     {
+      "case": "An Unreleased section sits above v0.1.1: v0.1.1 is still made, without the draft lines.",
+      "test": "tests/test_newest_release.py::test_release_newest_below_unreleased"
+     },
+     {
+      "case": "The newest version is already released: nothing is made, not an older version.",
+      "test": "tests/test_newest_release.py::test_release_newest_already_released"
+     }
+    ]
+   },
+   {
+    "text": "The changelog's newest section is v0.1.1, listing the fixes merged since v0.1.0.",
+    "words": "adding a `## v0.1.1` section and merging it makes v0.1.1",
+    "source": "https://github.com/dokima-dev/dokima/issues/867",
+    "files": [
+     "CHANGELOG.md",
+     "dokima/release.py"
+    ],
+    "no_edge_cases": "It is one fixed file in the repo; no input varies."
+   },
+   {
+    "text": "The install file calls Dokima at the changelog's newest version, newer than v0.1.0.",
+    "words": "the install file and the install docs name the newest release, and a test checks they match the changelog's newest version",
+    "source": "https://github.com/dokima-dev/dokima/issues/867",
+    "files": [
+     "dokima/install/dokima.yml",
+     "CHANGELOG.md",
+     "dokima/release.py"
+    ],
+    "no_edge_cases": "It is one fixed file in the repo; no input varies."
+   },
+   {
+    "text": "The README's install steps name the newest release, the one the install file calls.",
+    "words": "the install file and the install docs name the newest release, and a test checks they match the changelog's newest version",
+    "source": "https://github.com/dokima-dev/dokima/issues/867",
+    "files": [
+     "README.md",
+     "dokima/install/dokima.yml"
+    ],
+    "no_edge_cases": "It is one fixed file in the repo; no input varies."
+   },
+   {
+    "text": "The wiki's install page names the newest release, the one the install file calls.",
+    "words": "the install file and the install docs name the newest release, and a test checks they match the changelog's newest version",
+    "source": "https://github.com/dokima-dev/dokima/issues/867",
+    "files": [
+     "docs/wiki/Installing.md",
+     "dokima/install/dokima.yml"
+    ],
+    "no_edge_cases": "It is one fixed file in the repo; no input varies."
+   }
+  ],
+  "non_functional": [],
+  "tests": {
+   "867.1": [
+    "tests/test_newest_release.py::test_release_names_newest_version",
+    "tests/test_newest_release.py::test_release_newest_below_unreleased",
+    "tests/test_newest_release.py::test_release_newest_already_released"
+   ],
+   "867.2": [
+    "tests/test_newest_release.py::test_changelog_has_v011_on_top"
+   ],
+   "867.3": [
+    "tests/test_newest_release.py::test_install_file_calls_newest_version"
+   ],
+   "867.4": [
+    "tests/test_newest_release.py::test_readme_names_newest_release"
+   ],
+   "867.5": [
+    "tests/test_newest_release.py::test_wiki_names_newest_release"
+   ]
+  },
+  "test_changes": {},
+  "links": {
+   "blocked_by": [],
+   "blocks": [
+    746
+   ],
+   "relates_to": []
+  },
+  "raises": [
+   {
+    "kind": "question",
+    "to": "owner",
+    "label": "Ship v0.1.1 now",
+    "text": "Should this change also add the v0.1.1 section, so merging it releases the fixes? The plan assumes yes.",
+    "evidence": "The issue says #852, #856 and #861 merged after v0.1.0 and the trial #746 would run without them.",
+    "raised_by": "planner",
+    "id": "P1"
+   }
+  ],
+  "answers": []
+ },
+ "check": {
+  "passed": true,
+  "problems": []
+ },
+ "url": "https://github.com/dokima-dev/dokima/issues/867#issuecomment-6246810853"
+}
