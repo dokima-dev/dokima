@@ -1,4 +1,4 @@
-"""A manual fix by Dokima's app gets a merge check that runs all tests (#643).
+"""A manual fix by Dokima's app gets a merge check; its tests run once, in all tests (#643, #840).
 
 `.github/workflows/fix.yml` (#589) opens an agent's manual fix as Dokima's app, with no linked issue and so no plan.
 The required Acceptance criteria check then listed one failing "No approved plan found: no issue linked" row, so such a
@@ -26,7 +26,7 @@ import json, os, subprocess, sys
 data = json.load(open(os.environ["STUB_DATA"]))
 a = sys.argv[1:]
 if a[:2] == ["api", "repos/o/r/pulls/%d" % data["pr"]]:
-    print(json.dumps({"number": data["pr"], "head": {"ref": "fix/typo"}, "body": data["body"],
+    print(json.dumps({"number": data["pr"], "head": {"ref": "fix/issue-77-typo"}, "body": data["body"],
                       "user": {"login": data["author"]}}))
     sys.exit(0)
 sys.exit(subprocess.run([sys.executable, os.environ["STUB_BASE"], *a]).returncode)
@@ -52,7 +52,7 @@ def run_matrix(tmp_path, author, body="", queue=False):
         event.write_text(json.dumps({"merge_group": {"head_ref": f"refs/heads/gh-readonly-queue/main/pr-{PR}-abc123",
                                                      "base_ref": "refs/heads/main"}}))
     else:
-        event.write_text(json.dumps({"pull_request": {"number": PR, "head": {"ref": "fix/typo"}, "body": body,
+        event.write_text(json.dumps({"pull_request": {"number": PR, "head": {"ref": "fix/issue-77-typo"}, "body": body,
                                                       "user": {"login": author}}}))
     env = {**os.environ, "PATH": f"{bin_dir}{os.pathsep}{os.environ['PATH']}", "GITHUB_REPOSITORY": "o/r",
            "GITHUB_EVENT_PATH": str(event), "STUB_DATA": str(data), "STUB_BASE": str(base), "GH_TOKEN": "x",
@@ -97,33 +97,38 @@ def manual_fix_row(rows, output, criterion):
 
 
 def test_a_manual_fix_by_dokimas_app_gets_a_check_that_runs_all_tests_and_passes(record_property, tmp_path):
-    """A manual fix by Dokima's app gets a check that runs all tests and passes.
+    """A manual fix by Dokima's app gets a check that passes, and its tests run once, in all tests.
 
-    Proves 643.1. Runs the matrix command for a pull request by Dokima's app with no linked issue, once as opened and once in the
-    merge queue, then runs the workflow's own test step with that row and a passing fake pytest. The step must pass
-    and must have run pytest on the whole tests folder."""
+    Proves 643.1. Runs the matrix command for a pull request by Dokima's app with no linked issue, once as opened and
+    once in the merge queue, then runs the workflow's own test step with that row. Since #840 the step runs no second
+    suite: it passes and names the all tests check, which main requires, as where every test runs."""
     record_property("proves", "643.1")
+    from dokima import manifest
+    assert "all tests" in manifest.BRANCH_RULES["main"]["required_checks"], "643.1: main no longer requires all tests"
     for queue in (False, True):
         where = "in the merge queue" if queue else "on the pull request"
         rows, output = run_matrix(tmp_path, APP, queue=queue)
         row = manual_fix_row(rows, output, f"643.1 ({where})")
         code, out, args = run_check(tmp_path, row, tests_pass=True)
-        assert args is not None, f"643.1 ({where}): the manual fix's check ran no tests:\n{out}"
-        assert "tests" in args, f"643.1 ({where}): the manual fix's check did not run all tests, only {args}"
-        assert code == 0, f"643.1 ({where}): the manual fix's check failed although all tests passed:\n{out}"
+        assert code == 0 and "all tests" in out, f"643.1 ({where}): the manual fix's check does not defer to all tests:\n{out}"
+        assert args is None, f"643.1 ({where}): the manual fix's check ran the suite a second time: {args}"
 
 
 def test_a_manual_fix_check_fails_when_a_test_fails(record_property, tmp_path):
-    """A manual fix's check fails when any test fails.
+    """A manual fix cannot merge when any test fails.
 
-    Proves 643.2. Gets the row a manual fix opened by Dokima's app receives, then runs the workflow's own test step with a fake
-    pytest that fails. The step must have run all tests and must fail."""
+    Proves 643.2. The manual fix's check runs no tests since #840, so the gate is all tests: main requires it, and its
+    job runs the whole test folder, so a failing test fails it."""
     record_property("proves", "643.2")
+    import yaml
+    from dokima import manifest
+    assert "all tests" in manifest.BRANCH_RULES["main"]["required_checks"], "643.2: main no longer requires all tests"
+    suite = yaml.safe_load(open(os.path.join(ROOT, ".github/workflows/full-suite.yml")))
+    assert any(j.get("name") == "all tests" for j in suite["jobs"].values()), "643.2: no job is named all tests"
     rows, output = run_matrix(tmp_path, APP)
     row = manual_fix_row(rows, output, "643.2")
     code, out, args = run_check(tmp_path, row, tests_pass=False)
-    assert args is not None and "tests" in args, f"643.2: the manual fix's check did not run all tests: {args}\n{out}"
-    assert code != 0, f"643.2: the manual fix's check passed although a test failed:\n{out}"
+    assert args is None, f"643.2: the manual fix's check ran tests that all tests already runs: {args}\n{out}"
 
 
 def test_only_dokimas_app_gets_the_manual_fix_check(record_property, tmp_path):
@@ -152,7 +157,7 @@ def test_a_manual_fix_naming_its_issue_still_gets_the_manual_fix_check(record_pr
     gets the failing no-plan check."""
     record_property("proves", "830.7")
     from dokima import checks
-    rows = checks.build_matrix("807", [], APP, "fix/queue-failed")
+    rows = checks.build_matrix("807", [], APP, "fix/issue-77-typo")
     assert [r["id"] for r in rows] == ["manual-fix"], f"830.7: a manual fix naming its issue got {rows}"
     rows = checks.build_matrix("807", [], APP, "try/issue-807")
     assert rows[0]["id"] == "none", f"830.7: a planned build with no approved plan did not fail: {rows}"

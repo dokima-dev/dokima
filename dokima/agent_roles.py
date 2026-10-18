@@ -683,9 +683,21 @@ def main(argv):
     if argv[1] == "labeled":
         # A person put the autopilot label on by hand: the issue starts its planner as `/autopilot start` would start it,
         # when it waits on nothing open and nothing started on it yet.
+        # The label's name is the repo's own, from its settings; any other label starts nothing on this issue (#811).
         repo = os.environ["GITHUB_REPOSITORY"]
-        started = start_waiting(repo, [int(argv[2])], line=AUTOPILOT_START_LINE)
-        print(f"started the planner for #{argv[2]}" if started else f"#{argv[2]} on autopilot: nothing to start yet.")
+        if os.environ.get("LABEL", "") == autopilot_label():
+            started = start_waiting(repo, [int(argv[2])], line=AUTOPILOT_START_LINE)
+            print(f"started the planner for #{argv[2]}" if started else f"#{argv[2]} on autopilot: nothing to start yet.")
+        else:
+            print(f"#{argv[2]} got a label other than {autopilot_label()!r}: nothing to start on it.")
+        # Labels put on together share one queue, where GitHub keeps one waiting run and cancels the rest, so this
+        # run also starts every other issue on autopilot that waits on nothing and never started (#843).
+        others = start_waiting(repo, [n for n in open_on_autopilot(repo) if n != int(argv[2])], line=AUTOPILOT_START_LINE)
+        for n in others:
+            print(f"started the planner for #{n}, whose own label run GitHub dropped")
+        # A close waiting in the same queue was dropped too, so this run also does what autopilot does on a close (#853).
+        for line in autopilot_closed(repo):
+            print(line)
         return 0
     if argv[1] == "queue-failed":
         # A merge queue run failed (#830): put the pull request back once, then send it back to its worker.
@@ -719,7 +731,7 @@ from dokima.agent_records import (
 from dokima.agent_checks import problems_round, issue_url, check
 from dokima.agent_autopilot import (
     file_split, AUTOPILOT, autopilot_label, issue_tree, switch_autopilot, autopilot_comment, AUTOPILOT_START_LINE, named,
-    file_issues, record_links, set_title, rerun_checks, start_waiting, open_blockers_of, close_done_parents,
+    file_issues, record_links, set_title, rerun_checks, start_waiting, open_on_autopilot, open_blockers_of, close_done_parents,
     autopilot_closed, AUTOPILOT_LINES, UNREAD, on_autopilot, approves_work, merge_gate, open_pr, automerge,
     unconfirmed_comment, merge_tree, queue_failed)
 from dokima.plan import repo_approvers

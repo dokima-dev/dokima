@@ -132,9 +132,13 @@ jobs:
           HEAD: ${{ github.event.pull_request.head.ref }}
           PR: ${{ github.event.pull_request.number }}
         run: |
-          if [[ "$HEAD" =~ ^(try|work)/issue-([0-9]+)$ ]]; then
-            gh issue close "${BASH_REMATCH[2]}" -R "$GITHUB_REPOSITORY" --reason completed \
-              --comment "Closed: pull request #$PR merged." || echo "::warning title=Issue not closed::#${BASH_REMATCH[2]}"
+          # A planned build names its issue in its branch, try/issue-N; a manual fix in its, fix/issue-N (#837).
+          n=
+          if [[ "$HEAD" =~ ^(try|work)/issue-([0-9]+)$ ]]; then n="${BASH_REMATCH[2]}"
+          elif [[ "$HEAD" =~ ^fix/issue-([0-9]+)(-[A-Za-z0-9._-]+)?$ ]]; then n="${BASH_REMATCH[1]}"; fi
+          if [ -n "$n" ]; then
+            gh issue close "$n" -R "$GITHUB_REPOSITORY" --reason completed \
+              --comment "Closed: pull request #$PR merged." || echo "::warning title=Issue not closed::#$n"
           fi
       - name: Report this run's GitHub calls
         if: always()

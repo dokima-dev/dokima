@@ -83,8 +83,12 @@ def fields(got):
 
 
 def branch_rules(got):
-    """BRANCH_RULES with main requiring exactly the checks the merged settings GOT name."""
-    required = [e.get("name") if isinstance(e, dict) else e for e in (got.get("gates") or {}).get("required") or []]
+    """BRANCH_RULES with main requiring exactly the checks the merged settings GOT name.
+
+    A gate that says how GitHub shows it in this repo (`shown_as`, as when called from another workflow) is required
+    under that name (#820)."""
+    required = [(e.get("shown_as") or e.get("name")) if isinstance(e, dict) else e
+                for e in (got.get("gates") or {}).get("required") or []]
     return {branch: {**rule, "required_checks": required} if branch == "main" else rule
             for branch, rule in BRANCH_RULES.items()}
 
@@ -103,6 +107,8 @@ GH_COMMANDS = {
     ("pr", "merge"): ("contents", "write"),
     **{("run", s): ("actions", "read") for s in ("view", "list", "download", "watch")},
     **{("run", s): ("actions", "write") for s in ("rerun", "cancel", "delete")},
+    ("release", "view"): ("contents", "read"),
+    ("release", "create"): ("contents", "write"),
 }
 
 # REST paths inside a repo (after repos/<owner>/<name>/), first match wins: (pattern, permission)

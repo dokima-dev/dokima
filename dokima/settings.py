@@ -88,6 +88,25 @@ def read(repo=".", warn=None):
     return merge(load(DEFAULTS), mine, warn)
 
 
+def shown_as(name, got=None):
+    """The name GitHub shows for the gate NAME in this repo (#846).
+
+    Its `shown_as` in the merged settings GOT, else NAME."""
+    got = read() if got is None else got
+    for entry in (got.get("gates") or {}).get("required") or []:
+        if isinstance(entry, dict) and entry.get("name") == name:
+            return entry.get("shown_as") or name
+    return name
+
+
+def shown_prefix(name, got=None):
+    """What GitHub puts before a check named beside the gate NAME (#846).
+
+    E.g. `dokima / acceptance-criteria / `; empty when GitHub shows that gate by its plain name."""
+    shown = shown_as(name, got)
+    return shown[:-len(name)] if shown != name and shown.endswith(name) else ""
+
+
 def setup_lines(got):
     """The setup group as `name=value` lines; a value on several lines fails."""
     lines = []

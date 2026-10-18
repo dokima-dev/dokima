@@ -269,8 +269,12 @@ def starts_on_issue_labeled(wf):
 class Repo(ts.Machine):
     """A repo whose fake GitHub knows one issue tree: who is under whom, labels, states, blocked-by links, comments."""
 
-    def __init__(self, tmp, tree, labels=None, deps=None, closed=(), seed=(), history=None, running_runs=()):
-        super().__init__(tmp, history or ta.HISTORY, actor=OWNER, options={"running_runs": [str(r) for r in running_runs]})
+    def __init__(self, tmp, tree, labels=None, deps=None, closed=(), seed=(), history=None, running_runs=(), files=None):
+        """Set up the fake GitHub's issue tree and the repo's main branch.
+
+        `files` ({path: text}), such as a settings file, are committed on main."""
+        super().__init__(tmp, history or ta.HISTORY, actor=OWNER, options={"running_runs": [str(r) for r in running_runs]},
+                         files=files)
         t = self.tmp
         open(f"{t}/bin/gh", "w").write(fake_gh())
         json.dump({str(k): list(v) for k, v in tree.items()}, open(f"{t}/gh/tree.json", "w"))

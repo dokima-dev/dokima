@@ -19,7 +19,8 @@ import subprocess
 import sys
 
 sys.path.insert(0, os.path.join(os.path.dirname(os.path.abspath(__file__)), ".."))
-from dokima import body, plan, retry  # noqa: E402
+from dokima import body, plan, retry, settings  # noqa: E402
+from dokima.agent_github import manual_fix_issue  # noqa: E402
 
 ALL_TESTS = "all tests"
 ACCEPTANCE = "Acceptance criteria"
@@ -302,11 +303,20 @@ def asked(rec, url=None):
     return f"{f'[{words}]({url})' if url else words} {how}"
 
 
+def plain(check_runs):
+    """The check runs, each Dokima gate under its plain name, as `all tests` (#846)."""
+    shown = {settings.shown_as(name): name for name in (ALL_TESTS, ACCEPTANCE)}
+    return [dict(r, name=shown.get(r["name"], r["name"])) for r in check_runs]
+
+
 def checks_by_key(check_runs):
-    """Index criterion checks by their key ('67.1') from names like '67.1 · ...'."""
-    found = {}
+    """Index criterion checks by their key ('67.1') from names like '67.1 · ...'.
+
+    In an adopter's repo the name follows the Acceptance criteria check's shown prefix (#846)."""
+    found, prefix = {}, settings.shown_prefix(ACCEPTANCE)
     for run in check_runs:
-        key = run["name"].split(" · ")[0]
+        name = run["name"][len(prefix):] if run["name"].startswith(prefix) else run["name"]
+        key = name.split(" · ")[0]
         if re.fullmatch(r"\d+\.\d+", key):
             found[key] = run
     return found
@@ -324,7 +334,7 @@ def checks_passed(number, h, check_runs):
     count = len(h.get("acceptance_criteria") or []) + len(h.get("non_functional") or []) if h else 0
     by_key = checks_by_key(check_runs)
     runs = [by_key.get(f"{number}.{k}") for k in range(1, count + 1)]
-    runs.append(next((r for r in check_runs if r["name"] == ALL_TESTS), None))
+    runs.append(next((r for r in plain(check_runs) if r["name"] == ALL_TESTS), None))
     return count > 0 and all(state(r) == "passed" for r in runs)
 
 
@@ -544,7 +554,7 @@ def done_row(repo, found, all_tests, planned=False):
     approval = {"state": "APPROVED", "html_url": merge.get("html_url")} if merge else owner_review(found["reviews"], found["owners"])
     approval_st = "not started" if not approval else "passed" if approval["state"] == "APPROVED" else "failed"
     if planned:
-        accepted = next((r for r in found["check_runs"] if r["name"] == ACCEPTANCE), None)
+        accepted = next((r for r in plain(found["check_runs"]) if r["name"] == ACCEPTANCE), None)
         return ("**Definition of Done:** "
                 f"{circle(repo, state(accepted), accepted and accepted['html_url'])} Acceptance tests · "
                 f"{circle(repo, review_st, review and review.get('run'))} Code review · "
@@ -564,7 +574,7 @@ def render(repo, issue, found, page="issue"):
     from dokima import agent
     recs, pr, check_runs, worker = found["recs"], found["pr"], found["check_runs"], found.get("worker")
     by_key = checks_by_key(check_runs)
-    all_tests = next((r for r in check_runs if r["name"] == ALL_TESTS), None)
+    all_tests = next((r for r in plain(check_runs) if r["name"] == ALL_TESTS), None)
     planned = agent.latest(recs, "planner")
     h = planned["handback"] if planned else None
     lines = [plan.CARD_START]
@@ -660,7 +670,7 @@ def find_work(repo):
     if os.environ.get("ON_PR"):
         # A comment on a pull request carries the pull request's number as the issue's.
         pr = int(os.environ["ON_PR"])
-        return plan.pr_issue_number(repo, pr), pr
+        return pr_issue(repo, pr), pr
     if os.environ.get("ISSUE_NUMBER"):
         n = int(os.environ["ISSUE_NUMBER"])
         return n, issue_pr(repo, n)
@@ -670,7 +680,13 @@ def find_work(repo):
         pr = prs[0]["number"] if prs else None
     if not pr:
         return None, None
-    return plan.pr_issue_number(repo, pr), int(pr)
+    return pr_issue(repo, pr), int(pr)
+
+
+def pr_issue(repo, pr):
+    """The issue PR pr is for: a manual fix's from its fix/issue-N branch (#837), else the one it closes."""
+    head = json.loads(gh("api", f"repos/{repo}/pulls/{pr}")).get("head", {}).get("ref")
+    return manual_fix_issue(head) or plan.pr_issue_number(repo, pr)
 
 
 def test_entry(repo, ref, path, source, name):

@@ -400,15 +400,29 @@ def test_the_guard_passes_settings_the_manifest_declares(record_property, tmp_pa
 
 
 @pytest.mark.parametrize("label,path", [("autopilot", ".github/workflows/autopilot.yml")])
-def test_the_guard_catches_a_label_taken_out_of_the_manifest(record_property, monkeypatch, label, path):
-    """A label taken out of the manifest is named with the code that sets it.
+def test_the_guard_catches_a_label_taken_out_of_the_manifest(record_property, monkeypatch, tmp_path, label, path):
+    """A label taken out of the manifest is named with the file using it.
 
-    Proves 282.3. With autopilot left out of the manifest's labels, the guard run on this repo names that label and
-    .github/workflows/autopilot.yml, which reacts to it by that name; code reads the label's name from settings (#787)."""
+    Proves 282.3. A repo whose .github/workflows/autopilot.yml reacts to the label autopilot by that name passes the guard
+    while the manifest declares it; with autopilot left out of the manifest's labels, the guard names that label and that
+    file. The repo is a temp one, since this repo's own workflow reads the label's name from settings (#811)."""
     record_property("proves", "282.3")
     m = manifest("282.3")
+    write(str(tmp_path), path, f"""\
+        on:
+          issues:
+            types: [labeled]
+        jobs:
+          go:
+            if: github.event.label.name == '{label}'
+            runs-on: ubuntu-24.04
+            steps:
+              - run: echo hi
+        """)
+    assert m.undeclared(str(tmp_path)) == [], \
+        f"282.3: the guard reported {label} while the manifest declares it: {m.undeclared(str(tmp_path))}"
     monkeypatch.delitem(m.LABELS, label)
-    lines = m.undeclared(ROOT)
+    lines = m.undeclared(str(tmp_path))
     assert reported(lines, label, path), \
         f"282.3: with {label} left out of the manifest, the guard did not name it and {path}: {lines}"
 

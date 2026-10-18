@@ -1,4 +1,4 @@
-"""Tests for #813: installing Dokima adds only its one workflow and its settings file.
+"""Tests for #813 and #829: installing adds only two Dokima files and clears old copies.
 
 Installing is the play-through's `Sandbox.install` (dokima/playthrough.py), the one installer Dokima has. Each test
 installs this checkout of Dokima into a temp git repo standing in for the adopter's, then reads what landed there.
@@ -134,3 +134,80 @@ def test_the_installed_settings_file_never_ships_the_owners_co_author_line(recor
     mine = str((yaml.safe_load(open(os.path.join(ROOT, SETTINGS))) or {}).get("co_author") or "")
     assert mine and "{bot}" not in mine, f"813.3: Dokima's own {SETTINGS} names no owner as co-author to compare with"
     assert mine not in got[SETTINGS], f"813.3: the installed {SETTINGS} ships the owner's co-author line {mine!r}"
+
+
+def old_install(tmp_path):
+    """A bare repo standing in for the sandbox after the old install (#829).
+
+    It holds a README, the repo's own `ci.yml` workflow, and old copies of Dokima's code under `dokima/` and of every
+    workflow in Dokima's own `.github/workflows/`, as the old install pushed them."""
+    bare = tmp_path / "sandbox.git"
+    subprocess.run(["git", "init", "-q", "--bare", "-b", "main", str(bare)], check=True)
+    seed = tmp_path / "old"
+    subprocess.run(["git", "init", "-q", "-b", "main", str(seed)], check=True)
+    old = {"README.md": "The sandbox.\n", ".github/workflows/ci.yml": "name: ci\non: push\n",
+           "dokima/card.py": "OLD = 1\n", "dokima/icons/x.svg": "<svg/>\n"}
+    for name in os.listdir(os.path.join(ROOT, ".github", "workflows")):
+        old[f".github/workflows/{name}"] = f"name: old copy of {name}\n"
+    for rel, text in old.items():
+        (seed / rel).parent.mkdir(parents=True, exist_ok=True)
+        (seed / rel).write_text(text)
+    git(seed, "add", "-A")
+    git(seed, "commit", "-qm", "old install")
+    git(seed, "push", "-q", str(bare), "main")
+    return bare
+
+
+def test_installing_over_an_old_install_removes_the_old_copy_of_dokimas_code(record_property, tmp_path):
+    """A new install removes the old copy of Dokima's code the sandbox still holds.
+
+    Proves 829.1. Installs this checkout into a repo holding Dokima's code under `dokima/`, as the old install left it,
+    and checks no file under `dokima/` is left on its branch."""
+    record_property("proves", "829.1")
+    bare = old_install(tmp_path)
+    install(bare, "829.1")
+    left = sorted(p for p in files(bare) if p.startswith("dokima/"))
+    assert not left, f"829.1: after a new install the old copy of Dokima's code is still there: {left[:12]}"
+
+
+def test_installing_over_an_old_install_keeps_the_repos_own_files(record_property, tmp_path):
+    """Removing the old Dokima code keeps the repo's own files.
+
+    Proves 829.1, for the files beside the old copy. Installs over an old install and checks the old `dokima/card.py`
+    is gone while the README is still on the branch, unchanged."""
+    record_property("proves", "829.1")
+    bare = old_install(tmp_path)
+    install(bare, "829.1")
+    assert "dokima/card.py" not in files(bare), "829.1: the old copy of Dokima's card.py is still there"
+    assert "README.md" in files(bare), "829.1: removing the old Dokima code also removed the repo's README"
+    assert git(bare, "show", f"{branch(bare)}:README.md") == "The sandbox.\n", "829.1: the install changed the README"
+
+
+def test_installing_over_an_old_install_removes_the_old_copies_of_dokimas_workflows(record_property, tmp_path):
+    """A new install removes the old copies of Dokima's workflows, so they stop running.
+
+    Proves 829.2. Installs this checkout into a repo holding an old copy of every workflow Dokima has, and checks the
+    only Dokima workflow left is the new `.github/workflows/dokima.yml`, calling Dokima's shared workflows."""
+    record_property("proves", "829.2")
+    bare = old_install(tmp_path)
+    install(bare, "829.2")
+    got = files(bare)
+    flows = sorted(p for p in got if p.startswith(".github/workflows/") and p != ".github/workflows/ci.yml")
+    assert flows == [WORKFLOW], f"829.2: after a new install, old Dokima workflows are still there: {flows}"
+    assert calls_entry(git(bare, "show", f"{branch(bare)}:{WORKFLOW}")), \
+        f"829.2: the {WORKFLOW} left is not the short one calling Dokima's shared workflows"
+
+
+def test_installing_over_an_old_install_keeps_the_repos_own_workflow(record_property, tmp_path):
+    """Removing the old Dokima workflows keeps the repo's own workflow.
+
+    Proves 829.2, for a workflow that is not Dokima's. Installs over an old install that also holds the repo's own
+    `ci.yml`, and checks it is still there, unchanged, while the old Dokima workflows are gone."""
+    record_property("proves", "829.2")
+    bare = old_install(tmp_path)
+    install(bare, "829.2")
+    got = files(bare)
+    assert ".github/workflows/card.yml" not in got, "829.2: the old copy of Dokima's card.yml is still there"
+    assert ".github/workflows/ci.yml" in got, "829.2: removing the old Dokima workflows also removed the repo's own ci.yml"
+    assert git(bare, "show", f"{branch(bare)}:.github/workflows/ci.yml") == "name: ci\non: push\n", \
+        "829.2: the install changed the repo's own ci.yml"
