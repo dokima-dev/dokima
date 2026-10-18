@@ -1,0 +1,54 @@
+{
+ "role": "reviewer",
+ "stage": "pr",
+ "run_id": "39094598232",
+ "commit_before": "ed1b1f559fb59589070af05534ea19d47d5fa24f",
+ "started_by": "dokima-runtime[bot]",
+ "models": [
+  "claude-opus-5-5"
+ ],
+ "report": {
+  "duration_ms": 2999,
+  "turns": 1,
+  "cost_usd": 0.545655,
+  "tokens_in": 56990,
+  "tokens_out": 80
+ },
+ "log": "https://github.com/dokima-dev/dokima/blob/logs/logs/755/39094598232-reviewer-pr.md",
+ "run": "https://github.com/dokima-dev/dokima/actions/runs/39094598232",
+ "handback": {
+  "previous_step": {
+   "did": [
+    "The release workflow now runs Dokima's own code, fetched from Dokima's repo."
+   ],
+   "decided": [],
+   "open": []
+  },
+  "verdict": "approve",
+  "summary": "The release workflow now runs Dokima's own code, and every test passes on the branch.",
+  "raises": [],
+  "answers": [],
+  "asks": [],
+  "behaviors": [],
+  "edge_cases": [],
+  "tests": [],
+  "size": "ok",
+  "boxes": {
+   "dropped": "none",
+   "added": "none",
+   "superseded": "none",
+   "conflicts": "none",
+   "edges": {
+    "755.1": "covered",
+    "755.2": "covered",
+    "755.3": "covered"
+   },
+   "poor_tests": "none"
+  }
+ },
+ "check": {
+  "passed": true,
+  "problems": []
+ },
+ "url": "https://github.com/dokima-dev/dokima/pull/850#issuecomment-6245303308"
+}
