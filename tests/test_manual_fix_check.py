@@ -26,7 +26,7 @@ import json, os, subprocess, sys
 data = json.load(open(os.environ["STUB_DATA"]))
 a = sys.argv[1:]
 if a[:2] == ["api", "repos/o/r/pulls/%d" % data["pr"]]:
-    print(json.dumps({"number": data["pr"], "head": {"ref": "fix/typo"}, "body": data["body"],
+    print(json.dumps({"number": data["pr"], "head": {"ref": "fix/issue-77-typo"}, "body": data["body"],
                       "user": {"login": data["author"]}}))
     sys.exit(0)
 sys.exit(subprocess.run([sys.executable, os.environ["STUB_BASE"], *a]).returncode)
@@ -52,7 +52,7 @@ def run_matrix(tmp_path, author, body="", queue=False):
         event.write_text(json.dumps({"merge_group": {"head_ref": f"refs/heads/gh-readonly-queue/main/pr-{PR}-abc123",
                                                      "base_ref": "refs/heads/main"}}))
     else:
-        event.write_text(json.dumps({"pull_request": {"number": PR, "head": {"ref": "fix/typo"}, "body": body,
+        event.write_text(json.dumps({"pull_request": {"number": PR, "head": {"ref": "fix/issue-77-typo"}, "body": body,
                                                       "user": {"login": author}}}))
     env = {**os.environ, "PATH": f"{bin_dir}{os.pathsep}{os.environ['PATH']}", "GITHUB_REPOSITORY": "o/r",
            "GITHUB_EVENT_PATH": str(event), "STUB_DATA": str(data), "STUB_BASE": str(base), "GH_TOKEN": "x",
@@ -157,7 +157,7 @@ def test_a_manual_fix_naming_its_issue_still_gets_the_manual_fix_check(record_pr
     gets the failing no-plan check."""
     record_property("proves", "830.7")
     from dokima import checks
-    rows = checks.build_matrix("807", [], APP, "fix/queue-failed")
+    rows = checks.build_matrix("807", [], APP, "fix/issue-77-typo")
     assert [r["id"] for r in rows] == ["manual-fix"], f"830.7: a manual fix naming its issue got {rows}"
     rows = checks.build_matrix("807", [], APP, "try/issue-807")
     assert rows[0]["id"] == "none", f"830.7: a planned build with no approved plan did not fail: {rows}"

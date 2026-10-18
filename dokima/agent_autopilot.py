@@ -948,8 +948,8 @@ def queue_failed(repo, head_ref, run_id, run_url, owners):
         return f"PR #{pr}: " + ("re-queued once." if asked else f"not re-queued: {why}")
     # The same head failed in the queue again: not a flake.
     if issue is None:
-        # A manual fix names the issue it fixes ("Fixes #N", #830); the failure is said there too, so it is traceable.
-        fixes = issue_of_pr("", p.get("body"))
+        # A manual fix names the issue it fixes in its branch, fix/issue-N (#837); the failure is said there too, so it is traceable.
+        fixes = manual_fix_issue((p.get("head") or {}).get("ref"))
         said = (f"{tag}\nThe merge queue's checks failed again on the same commit of PR #{pr} ([run]({run_url})). "
                 f"{named} {mention} Dokima didn't build this pull request from a plan, so it starts nothing: fix its branch.")
         agent_github.gh("pr", "comment", pr, "-R", repo, "--body", said)
@@ -1021,7 +1021,7 @@ def merge_tree(repo, number, owners):
 
 # The other agent job files, imported last so the job files can use each other (#636).
 from dokima import agent_github
-from dokima.agent_github import BOT, conversation, sub_issues, blocked_by, gh_reason, NO_PERMISSION, pages, issue_of_pr
+from dokima.agent_github import BOT, conversation, sub_issues, blocked_by, gh_reason, NO_PERMISSION, pages, issue_of_pr, manual_fix_issue
 from dokima.agent_records import (
     MARK, LIVE, HANDBACK, records, latest, approved_plan, is_record, open_raises, settled, owner_raises, plan_links,
     filled, first_sentence, GATE_FAILED, QUEUE_FAILED)

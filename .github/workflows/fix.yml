@@ -62,6 +62,10 @@ jobs:
           if [ "$BRANCH" = "$DEFAULT_BRANCH" ]; then echo "::error::A fix comes from the branch the agent pushed, not $DEFAULT_BRANCH"; exit 1; fi
           case "$ISSUE" in ''|*[!0-9]*) echo "::error::A fix names the issue it fixes by number; got '$ISSUE'. File the issue first."; exit 1;; esac
           gh issue view "$ISSUE" --json number >/dev/null || { echo "::error::Issue #$ISSUE does not exist here. File the issue first."; exit 1; }
+          # The branch names the issue too, as a planned build's try/issue-N does, so the card, the close on merge and a
+          # failed queue run all find it from the branch (#837).
+          if ! [[ "$BRANCH" =~ ^fix/issue-$ISSUE(-[A-Za-z0-9._-]+)?$ ]]; then
+            echo "::error::Name a fix's branch fix/issue-$ISSUE or fix/issue-$ISSUE-<what>, not $BRANCH"; exit 1; fi
           open=$(gh pr list --head "$BRANCH" --base "$DEFAULT_BRANCH" --state open --json number --jq '.[0].number // empty')
           if [ -n "$open" ]; then echo "Pull request #$open is already open for $BRANCH"; exit 0; fi
           gh pr create --base "$DEFAULT_BRANCH" --head "$BRANCH" --title "Manual fix: $BRANCH" \
