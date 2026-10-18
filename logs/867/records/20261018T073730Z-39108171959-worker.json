@@ -1,0 +1,55 @@
+{
+ "role": "worker",
+ "stage": null,
+ "run_id": "39108171959",
+ "commit_before": "f833de2be7c0456340a9f81f980ed3c399a60f7d",
+ "started_by": "dokima-runtime[bot]",
+ "models": [
+  "claude-opus-5-5"
+ ],
+ "report": {
+  "duration_ms": 141872,
+  "turns": 15,
+  "cost_usd": 0.5720632000000001,
+  "tokens_in": 652590,
+  "tokens_out": 5401
+ },
+ "log": "https://github.com/dokima-dev/dokima/blob/logs/logs/867/39108171959-worker.md",
+ "run": "https://github.com/dokima-dev/dokima/actions/runs/39108171959",
+ "handback": {
+  "summary": "Releases now take the changelog's newest version; added v0.1.1 and pointed the install file and docs at it.",
+  "criteria": {
+   "867.1": "`dokima/release.py`: `newest()` picks the top-most version heading; `run()` releases that version, skipping Unreleased.",
+   "867.2": "`CHANGELOG.md`: new v0.1.1 section above v0.1.0 naming #852, #856, #861, plus #866 and #867.",
+   "867.3": "`dokima/install/dokima.yml` calls `entry.yml@v0.1.1`.",
+   "867.4": "`README.md` Install step 1 names the newest release, `v0.1.1`.",
+   "867.5": "`docs/wiki/Installing.md` step 1 names the newest release, `v0.1.1`."
+  },
+  "evidence": "`pytest -q tests/test_newest_release.py tests/test_release.py`: 15 passed",
+  "raises": [
+   {
+    "kind": "question",
+    "to": "planner",
+    "label": "Extra changelog lines",
+    "text": "The v0.1.1 section also names 866 and 867, both merged after v0.1.0 and shipping in it. Keep them?",
+    "evidence": "`git log main`: #866 merged 2026-10-18T06:55Z, after v0.1.0 at 04:32Z.",
+    "raised_by": "worker",
+    "id": "W1"
+   }
+  ]
+ },
+ "check": {
+  "passed": true,
+  "problems": []
+ },
+ "dropped_by_fence": [],
+ "files_changed": [
+  "CHANGELOG.md",
+  "README.md",
+  "docs/wiki/Installing.md",
+  "dokima/install/dokima.yml",
+  "dokima/release.py"
+ ],
+ "branch": "try/issue-867",
+ "url": "https://github.com/dokima-dev/dokima/issues/867#issuecomment-6247188551"
+}
