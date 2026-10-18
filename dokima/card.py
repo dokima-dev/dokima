@@ -553,18 +553,20 @@ def done_row(repo, found, all_tests, planned=False):
     merge = owner_merge(found["pr"], found["owners"])
     approval = {"state": "APPROVED", "html_url": merge.get("html_url")} if merge else owner_review(found["reviews"], found["owners"])
     approval_st = "not started" if not approval else "passed" if approval["state"] == "APPROVED" else "failed"
+    # Every other check the branch rule requires, the repo's own included, with its state (#859).
+    required = "".join(f" · {circle(repo, st, url)} {escape(name)}" for name, st, url in found.get("required") or [])
     if planned:
         accepted = next((r for r in plain(found["check_runs"]) if r["name"] == ACCEPTANCE), None)
         return ("**Definition of Done:** "
                 f"{circle(repo, state(accepted), accepted and accepted['html_url'])} Acceptance tests · "
                 f"{circle(repo, review_st, review and review.get('run'))} Code review · "
                 f"{circle(repo, state(all_tests), all_tests and all_tests['html_url'])} Test suite · "
-                f"{circle(repo, approval_st, approval and approval.get('html_url'))} Owner approval")
+                f"{circle(repo, approval_st, approval and approval.get('html_url'))} Owner approval{required}")
     return ("**Definition of Done:** "
             f"{circle(repo, state(all_tests), all_tests and all_tests['html_url'])} All tests · "
             f"{circle(repo, review_st, review and review.get('run'))} {field_icon(repo, 'code review')} Code review · "
             f"{circle(repo, approval_st, approval and approval.get('html_url'))} {field_icon(repo, 'owner approval')} "
-            "Owner approval")
+            f"Owner approval{required}")
 
 
 def render(repo, issue, found, page="issue"):
@@ -754,6 +756,31 @@ def gather(repo, number, pr_number):
                 for st in (split["handback"].get("stories") or [] if split else [])]
     return {"recs": recs, "items": items, "pr": pr, "check_runs": check_runs, "reviews": reviews, "owners": owners,
             "tests": tests, "children": children}
+
+
+def required_rows(repo, pr, check_runs):
+    """Each check the branch rule requires besides Dokima's own, as (name, state, proof url).
+
+    Read from the PR's latest commit's check runs and commit statuses alike (#859). None when GitHub would not say
+    which checks are required."""
+    from dokima import agent_autopilot
+    try:
+        required = agent_autopilot.required_checks(repo, (pr.get("base") or {}).get("ref") or "main")
+        statuses = json.loads(gh("api", f"repos/{repo}/commits/{pr['head']['sha']}/status?per_page=100")).get("statuses") or []
+    except (subprocess.CalledProcessError, ValueError, AttributeError) as e:
+        print(f"The card shows no required checks: GitHub did not say which are required: {e}", file=sys.stderr)
+        return None
+    ours = {ALL_TESTS, ACCEPTANCE} | {settings.shown_as(n) for n in (ALL_TESTS, ACCEPTANCE)}
+    rows = []
+    for name in sorted(required - ours):
+        run = next((r for r in check_runs if r.get("name") == name), None)
+        status = next((st for st in statuses if st.get("context") == name), None)
+        if run or not status:
+            rows.append((name, state(run), run and run.get("html_url")))
+        else:
+            st = {"success": "passed", "pending": "running"}.get(status.get("state"), "failed")
+            rows.append((name, st, status.get("target_url")))
+    return rows
 
 
 def gallery(repo, out):
@@ -1012,6 +1039,7 @@ def draw(repo, number, pr_number, plans=None, noted=None, cache=None, changed_on
     found["linked"] = {"relates_to": their_links(repo, number, found["sources"], plans)["relates_to"],
                        "blocked_by": now.get("blocked_by") or [], "blocks": now.get("blocks") or []}
     pr = found["pr"]
+    found["required"] = required_rows(repo, pr, found["check_runs"]) if pr else None
     # Only the part above the marker is code's; the owner's ask below it is saved as it is, or the save is refused.
     current, top = issue["current_body"] or "", render(repo, issue, found)
     if not (changed_only and shows(current, top)) and body.save(repo, number, current, top):
