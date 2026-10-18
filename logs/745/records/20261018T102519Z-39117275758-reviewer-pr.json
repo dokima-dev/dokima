@@ -1,0 +1,68 @@
+{
+ "role": "reviewer",
+ "stage": "pr",
+ "run_id": "39117275758",
+ "commit_before": "66184f5def59928745635f0d8ffa3e19a6835747",
+ "started_by": "dokima-runtime[bot]",
+ "models": [
+  "claude-opus-5-5"
+ ],
+ "report": {
+  "duration_ms": 1567815,
+  "turns": 22,
+  "cost_usd": 0.8941951999999999,
+  "tokens_in": 1200863,
+  "tokens_out": 7154
+ },
+ "log": "https://github.com/dokima-dev/dokima/blob/logs/logs/745/39117275758-reviewer-pr.md",
+ "run": "https://github.com/dokima-dev/dokima/actions/runs/39117275758",
+ "handback": {
+  "previous_step": {
+   "did": [
+    "Dokima's own problems and failed shared jobs now file in Dokima's repo, when set.",
+    "Repeats become comments; nothing filed names the private repo.",
+    "Every agent is told how to tag whose fault a problem is."
+   ],
+   "decided": [
+    "Failed test checks and the review relay file nothing upstream."
+   ],
+   "open": []
+  },
+  "verdict": "approve",
+  "summary": "The build delivers all ten criteria, and every test passes on the branch.",
+  "raises": [],
+  "answers": [],
+  "asks": [],
+  "boxes": {
+   "dropped": "none",
+   "added": [
+    {
+     "what": "The test baseline workflow now gets the App's keys to file its failure.",
+     "kind": "needed",
+     "serves": "745.10"
+    }
+   ],
+   "superseded": "none",
+   "conflicts": "none",
+   "edges": {
+    "745.1": "covered",
+    "745.2": "covered",
+    "745.3": "covered",
+    "745.4": "covered",
+    "745.5": "covered",
+    "745.6": "covered",
+    "745.7": "covered",
+    "745.8": "covered",
+    "745.9": "covered",
+    "745.10": "covered"
+   },
+   "poor_tests": "none"
+  },
+  "size": "ok"
+ },
+ "check": {
+  "passed": true,
+  "problems": []
+ },
+ "url": "https://github.com/dokima-dev/dokima/pull/872#issuecomment-6248481221"
+}
