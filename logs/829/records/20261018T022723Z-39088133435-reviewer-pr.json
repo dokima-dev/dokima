@@ -1,0 +1,99 @@
+{
+ "role": "reviewer",
+ "stage": "pr",
+ "run_id": "39088133435",
+ "commit_before": "45fd95d2f68eeb44b109bbdc695e8978435ba40e",
+ "started_by": "dokima-runtime[bot]",
+ "models": [
+  "claude-opus-5-5"
+ ],
+ "report": {
+  "duration_ms": 3590,
+  "turns": 1,
+  "cost_usd": 0.6534982,
+  "tokens_in": 52725,
+  "tokens_out": 119
+ },
+ "log": "https://github.com/dokima-dev/dokima/blob/logs/logs/829/39088133435-reviewer-pr.md",
+ "run": "https://github.com/dokima-dev/dokima/actions/runs/39088133435",
+ "handback": {
+  "previous_step": {
+   "did": [
+    "A new install now removes the old copy of Dokima's code before adding new files.",
+    "A new install now removes old copies of Dokima's workflows, keeping the repo's own."
+   ],
+   "decided": [
+    "Old workflows are found by the names of Dokima's own workflows."
+   ],
+   "open": []
+  },
+  "verdict": "approve",
+  "summary": "The install now clears old Dokima code and workflows; all tests pass here; the four new ones fail on main.",
+  "raises": [],
+  "answers": [],
+  "asks": [],
+  "behaviors": [
+   {
+    "criterion": "829.1",
+    "one_behavior": true,
+    "why": "One action, the install; one result, the old code is gone."
+   },
+   {
+    "criterion": "829.2",
+    "one_behavior": true,
+    "why": "One action, the install; one result, only the new workflow is left."
+   }
+  ],
+  "edge_cases": [
+   {
+    "criterion": "829.1",
+    "cut": [],
+    "missing": []
+   },
+   {
+    "criterion": "829.2",
+    "cut": [],
+    "missing": []
+   }
+  ],
+  "tests": [
+   {
+    "test": "tests/test_install.py::test_installing_over_an_old_install_removes_the_old_copy_of_dokimas_code",
+    "only_its_behavior": true,
+    "why": "Checks nothing under the old code folder is left; fails on main."
+   },
+   {
+    "test": "tests/test_install.py::test_installing_over_an_old_install_keeps_the_repos_own_files",
+    "only_its_behavior": true,
+    "why": "Checks old code gone and the README kept unchanged; fails on main."
+   },
+   {
+    "test": "tests/test_install.py::test_installing_over_an_old_install_removes_the_old_copies_of_dokimas_workflows",
+    "only_its_behavior": true,
+    "why": "Checks the new workflow is the only Dokima one left; fails on main."
+   },
+   {
+    "test": "tests/test_install.py::test_installing_over_an_old_install_keeps_the_repos_own_workflow",
+    "only_its_behavior": true,
+    "why": "Checks the repo's own workflow is kept unchanged; fails on main."
+   }
+  ],
+  "size": "ok",
+  "boxes": {
+   "dropped": "none",
+   "added": "none",
+   "superseded": "none",
+   "conflicts": "none",
+   "edges": {
+    "829.1": "covered",
+    "829.2": "covered"
+   },
+   "poor_tests": "none"
+  }
+ },
+ "check": {
+  "passed": true,
+  "problems": []
+ },
+ "url": "https://github.com/dokima-dev/dokima/pull/845#issuecomment-6244455604"
+}
