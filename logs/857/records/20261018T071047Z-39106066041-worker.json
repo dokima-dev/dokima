@@ -1,0 +1,37 @@
+{
+ "role": "worker",
+ "stage": null,
+ "run_id": "39106066041",
+ "commit_before": "803085e25503cedd7dd4657ec8e1937736353890",
+ "started_by": "dokima-runtime[bot]",
+ "models": [
+  "claude-opus-5-5"
+ ],
+ "report": {
+  "duration_ms": 562051,
+  "turns": 8,
+  "cost_usd": 0.3201372,
+  "tokens_in": 288426,
+  "tokens_out": 2159
+ },
+ "log": "https://github.com/dokima-dev/dokima/blob/logs/logs/857/39106066041-worker.md",
+ "run": "https://github.com/dokima-dev/dokima/actions/runs/39106066041",
+ "handback": {
+  "summary": "No code change this round; the earlier build stands and its tests pass after the merge from main.",
+  "criteria": {
+   "857.1": "`dokima/checks.py` main gives a person's unplanned pull request the passing `unplanned` row; the workflow lets it pass.",
+   "857.2": "Same path: Dependabot is a known author other than Dokima's app, so it gets the passing row.",
+   "857.3": "`unplanned_allowed` refuses Dokima's app, so its unplanned pull request keeps the failing no-plan row.",
+   "857.4": "`merge.unplanned_prs: allow` in `dokima/defaults.yaml`; any other value keeps the failing no-plan row."
+  },
+  "evidence": "pytest -q on 157 related test files: 1260 passed in 483.93s"
+ },
+ "check": {
+  "passed": true,
+  "problems": []
+ },
+ "dropped_by_fence": [],
+ "files_changed": [],
+ "branch": "try/issue-857",
+ "url": "https://github.com/dokima-dev/dokima/pull/865#issuecomment-6246871060"
+}
