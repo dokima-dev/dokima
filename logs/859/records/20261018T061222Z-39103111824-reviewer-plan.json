@@ -1,0 +1,139 @@
+{
+ "role": "reviewer",
+ "stage": "plan",
+ "run_id": "39103111824",
+ "commit_before": "f893d73f3ce3fe93e58361989a098edfec789f47",
+ "started_by": "dokima-runtime[bot]",
+ "models": [
+  "claude-opus-5-5"
+ ],
+ "report": {
+  "duration_ms": 57372,
+  "turns": 8,
+  "cost_usd": 0.4358818,
+  "tokens_in": 323695,
+  "tokens_out": 4284
+ },
+ "log": "https://github.com/dokima-dev/dokima/blob/logs/logs/859/39103111824-reviewer-plan.md",
+ "run": "https://github.com/dokima-dev/dokima/actions/runs/39103111824",
+ "handback": {
+  "previous_step": {
+   "did": [
+    "The planner wrote two criteria: redraw on the repo's CI, show required checks.",
+    "The planner wrote six tests against a fake GitHub."
+   ],
+   "decided": [
+    "A required check that has not run shows as not started.",
+    "A check reported as a commit status counts like a check run."
+   ],
+   "open": []
+  },
+  "verdict": "block",
+  "summary": "The redraw test only plays a CI named ci, so listening for that one name would pass it.",
+  "raises": [
+   {
+    "kind": "blocker",
+    "to": "planner",
+    "label": "859.1 weak test",
+    "text": "The 859.1 tests play only a CI named `ci`, so listening for that name passes. Fix: also play a CI with an unguessable name.",
+    "evidence": "`tests/test_card_repo_ci.py` line 30 sets `CI = \"ci\"`; `thin_starts` checks only that name against `dokima/install/dokima.yml` line 12.",
+    "raised_by": "reviewer",
+    "id": "R1"
+   }
+  ],
+  "answers": [],
+  "asks": [
+   {
+    "ask": "The card redraws only when Dokima's own workflows finish, not when the adopter's CI does.",
+    "source": "https://github.com/dokima-dev/dokima/issues/744",
+    "criterion": "859.1"
+   },
+   {
+    "ask": "The merge gate already waits on every required check; the card must show them.",
+    "source": "https://github.com/dokima-dev/dokima/issues/744",
+    "criterion": "859.2"
+   }
+  ],
+  "behaviors": [
+   {
+    "criterion": "859.1",
+    "one_behavior": true,
+    "why": "One event, the repo's CI finishing; one result, the card redraws."
+   },
+   {
+    "criterion": "859.2",
+    "one_behavior": true,
+    "why": "One result: each required check shows on the card with its state."
+   }
+  ],
+  "edge_cases": [
+   {
+    "criterion": "859.1",
+    "cut": [],
+    "missing": [
+     "The repo's CI has a name other than ci."
+    ]
+   },
+   {
+    "criterion": "859.2",
+    "cut": [],
+    "missing": []
+   }
+  ],
+  "tests": [
+   {
+    "test": "tests/test_card_repo_ci.py::test_the_repos_own_ci_finishing_redraws_the_card",
+    "only_its_behavior": true,
+    "why": "Checks only the redraw, but with one guessable name."
+   },
+   {
+    "test": "tests/test_card_repo_ci.py::test_the_repos_own_ci_failing_redraws_the_card",
+    "only_its_behavior": true,
+    "why": "Checks only the redraw after a failed run."
+   },
+   {
+    "test": "tests/test_card_repo_ci.py::test_a_required_repo_check_that_failed_shows_failed",
+    "only_its_behavior": true,
+    "why": "Checks one required check shows as failed."
+   },
+   {
+    "test": "tests/test_card_repo_ci.py::test_a_required_repo_check_that_passed_shows_passed",
+    "only_its_behavior": true,
+    "why": "Checks one required check shows as passed."
+   },
+   {
+    "test": "tests/test_card_repo_ci.py::test_a_required_check_not_yet_run_shows_not_started",
+    "only_its_behavior": true,
+    "why": "Proves the list comes from the branch rule, not from runs."
+   },
+   {
+    "test": "tests/test_card_repo_ci.py::test_a_required_check_reported_as_a_commit_status_shows_its_state",
+    "only_its_behavior": true,
+    "why": "Checks a commit status shows its state."
+   }
+  ],
+  "size": "ok",
+  "boxes": {
+   "dropped": "none",
+   "added": "none",
+   "superseded": "none",
+   "conflicts": "none",
+   "edges": {
+    "859.1": "missing: a CI with a name other than ci",
+    "859.2": "covered"
+   },
+   "poor_tests": [
+    {
+     "test": "tests/test_card_repo_ci.py::test_the_repos_own_ci_finishing_redraws_the_card",
+     "passes_with": "the thin workflow listening for a workflow named ci only",
+     "fix": "also play a CI with an unguessable name and require the redraw"
+    }
+   ]
+  }
+ },
+ "check": {
+  "passed": true,
+  "problems": []
+ },
+ "url": "https://github.com/dokima-dev/dokima/issues/859#issuecomment-6246422287"
+}
