@@ -8,7 +8,7 @@ comments; each criterion's check runs exactly the tests that plan lists for it. 
 changes only Markdown files outside the folders the text_only.not_text setting lists gets one passing "Text only" check
 instead. Any other pull request with no approved plan that a person or Dependabot opened gets one passing "Unplanned"
 check while the merge.unplanned_prs setting is allow (#857). A manual fix Dokima's app opens (any branch but try/issue-N) gets one "Manual fix" check that runs the test
-folder setting.
+folder setting, and so does a hotfix: an issue labeled hotfix that was never planned (#863).
 
 A test proves a criterion by calling its tag, the tests.tag setting (record_property by default), as
 tag("proves", "<issue>.<n>"), where n counts the issue's criteria from 1, top to bottom.
@@ -20,7 +20,7 @@ import subprocess
 import sys
 import xml.etree.ElementTree as ET
 
-from dokima import agent, plan, settings
+from dokima import agent, hotfix, plan, settings
 
 
 def proves(tag="record_property"):
@@ -143,6 +143,9 @@ def main(argv):
         recs = agent.records(agent.conversation(repo, number)[1]) if number else []
         author = (pr.get("user") or {}).get("login")
         rows = build_matrix(number, recs, author, pr["head"]["ref"])
+        if rows[0]["id"] == "none" and number and hotfix.in_lane(repo, number, recs):
+            # A hotfix has no plan (#863): like a manual fix, its one check runs all tests.
+            rows = [{**manual_fix()[0], "name": "Hotfix: all tests pass"}]
         if rows[0]["id"] == "none" and text_only(repo, pr["number"]):
             rows = TEXT_ONLY
         elif rows[0]["id"] == "none" and unplanned_allowed(author):

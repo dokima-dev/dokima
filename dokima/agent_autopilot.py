@@ -11,7 +11,7 @@ import subprocess
 import time
 import urllib.parse
 
-from dokima import body as issue_body, card, manifest, raises, settings
+from dokima import body as issue_body, card, hotfix, manifest, raises, settings
 from dokima.card import field_icon
 
 
@@ -124,6 +124,9 @@ def autopilot_comment(number, switch, switched, started=(), picked=""):
 
 AUTOPILOT_LINE = "Autopilot: blockers merged, starting plan"
 AUTOPILOT_START_LINE = "Autopilot: switched on, starting plan"
+# A hotfix starts its worker in place of its planner, with the line that says so (#863).
+HOTFIX_LINES = {AUTOPILOT_LINE: "Autopilot: blockers merged, starting work",
+                AUTOPILOT_START_LINE: "Autopilot: switched on, starting work"}
 
 
 def link_edges(number, links):
@@ -405,7 +408,7 @@ def started_before(repo, number):
     for c in d.get("comments") or []:
         body = c.get("body") or ""
         if (c.get("author") or {}).get("login") in (BOT, f"{BOT}[bot]") and (
-                MARK in body or LIVE in body or body.strip() in (AUTOPILOT_LINE, AUTOPILOT_START_LINE)):
+                MARK in body or LIVE in body or body.strip() in (AUTOPILOT_LINE, AUTOPILOT_START_LINE, *HOTFIX_LINES.values())):
             return True
     return False
 
@@ -420,9 +423,28 @@ def start_planner(repo, number, line=AUTOPILOT_LINE):
        "-f", "client_payload[stage]=plan", "-f", f"client_payload[issue]={number}")
 
 
+def start_worker(repo, number, line):
+    """Start a hotfix's worker with the river's own signal, after one Autopilot line (#863).
+
+    The line stands where the owner would have said /work. It goes first, so no later close starts it again."""
+    agent_github.gh("issue", "comment", str(number), "-R", repo, "--body", line)
+    agent_github.gh("api", "-X", "POST", f"repos/{repo}/dispatches", "-f", "event_type=dokima-next", "-f", "client_payload[role]=worker",
+       "-f", "client_payload[stage]=plan", "-f", f"client_payload[issue]={number}")
+
+
+def start_first(repo, number, line=AUTOPILOT_LINE):
+    """Start an issue nothing started on yet: a hotfix's worker, else its planner (#863)."""
+    if hotfix.labeled(repo, number):
+        start_worker(repo, number, HOTFIX_LINES[line])
+    else:
+        start_planner(repo, number, line)
+
+
 def start_waiting(repo, numbers, line=AUTOPILOT_LINE):
-    """Start the planner of every open issue among `numbers` with no sub-issues, nothing open blocking it and nothing
-    started on it yet. Returns those started."""
+    """Start every open issue among `numbers` that waits on nothing and never started.
+
+    Each has no sub-issues and nothing open blocking it; it starts its planner, or a hotfix its worker. Returns those
+    started."""
     started = []
     for n in numbers:
         if json.loads(agent_github.gh("api", f"repos/{repo}/issues/{n}")).get("state") != "open" or sub_issues(repo, n):
@@ -432,7 +454,7 @@ def start_waiting(repo, numbers, line=AUTOPILOT_LINE):
             continue
         if started_before(repo, n):
             continue
-        start_planner(repo, n, line)
+        start_first(repo, n, line)
         started.append(n)
     return started
 
@@ -461,7 +483,7 @@ def plans_again(items, owners, body, number):
     rec = records([items[at]])[0]
     if not rec.get("check", {}).get("passed") or (rec.get("handback") or {}).get("verdict") != "approve":
         return False
-    lines = (AUTOPILOT_LINE, AUTOPILOT_START_LINE, *AUTOPILOT_LINES.values())
+    lines = (AUTOPILOT_LINE, AUTOPILOT_START_LINE, *AUTOPILOT_LINES.values(), *HOTFIX_LINES.values())
     for c in items[at + 1:]:
         who, said = (c.get("author") or {}).get("login"), (c.get("body") or "").strip()
         if (who in owners and command_of(said)) or (who in (BOT, f"{BOT}[bot]") and (LIVE in said or said in lines)):
@@ -472,6 +494,8 @@ def plans_again(items, owners, body, number):
 
 def start_unblocked(repo, numbers, owners):
     """Start a fresh planner on every issue among `numbers` whose blockers have all closed.
+
+    A hotfix nothing started on yet starts its worker instead (#863).
 
     Each was blocked, and has nothing started on it yet or a plan approved while it was blocked; its old plan's worker
     never starts. Returns (the issues started, what was done as lines). When GitHub cannot list an issue's blockers nothing
@@ -491,9 +515,14 @@ def start_unblocked(repo, numbers, owners):
             did.append(f"could not list the blockers of #{n}")
             continue
         if blockers and all(b.get("state") == "closed" for b in blockers):
-            start_planner(repo, n)
+            # Only an issue nothing started on yet can be a hotfix built from its text; one planned before plans again.
+            hot = items is None and hotfix.labeled(repo, n)
+            if hot:
+                start_worker(repo, n, HOTFIX_LINES[AUTOPILOT_LINE])
+            else:
+                start_planner(repo, n)
             started.append(n)
-            did.append(f"started the planner for #{n}")
+            did.append(f"started the {'worker' if hot else 'planner'} for #{n}")
         elif not blockers and items is not None:
             # A story whose approved plan waited its turn to build plans again once the story it waited for merged (#668).
             from dokima import turns
