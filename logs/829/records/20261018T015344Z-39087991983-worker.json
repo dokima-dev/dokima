@@ -1,0 +1,39 @@
+{
+ "role": "worker",
+ "stage": null,
+ "run_id": "39087991983",
+ "commit_before": "45cbb1254760414b0256fd933a306f1e637f74dd",
+ "started_by": "dokima-runtime[bot]",
+ "models": [
+  "claude-opus-5-5"
+ ],
+ "report": {
+  "duration_ms": 74287,
+  "turns": 10,
+  "cost_usd": 0.2987254,
+  "tokens_in": 301351,
+  "tokens_out": 2245
+ },
+ "log": "https://github.com/dokima-dev/dokima/blob/logs/logs/829/39087991983-worker.md",
+ "run": "https://github.com/dokima-dev/dokima/actions/runs/39087991983",
+ "handback": {
+  "summary": "Installing now removes the old Dokima code folder and old copies of Dokima's workflows before adding the new files.",
+  "criteria": {
+   "829.1": "The install deletes the old Dokima code folder from the clone before writing the new files.",
+   "829.2": "The install deletes each old workflow named like one of Dokima's own, keeping the repo's other workflows."
+  },
+  "evidence": "`pytest -q tests/test_install.py`: 8 passed in 0.56s",
+  "raises": [],
+  "answers": []
+ },
+ "check": {
+  "passed": true,
+  "problems": []
+ },
+ "dropped_by_fence": [],
+ "files_changed": [
+  "dokima/playthrough.py"
+ ],
+ "branch": "try/issue-829",
+ "url": "https://github.com/dokima-dev/dokima/issues/829#issuecomment-6244436286"
+}
