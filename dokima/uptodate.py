@@ -11,8 +11,9 @@ import os
 import re
 import subprocess
 import sys
+from urllib.parse import quote
 
-from dokima import agent, agent_autopilot, plan
+from dokima import agent, agent_autopilot, plan, settings
 from dokima.board import api
 
 PER_PAGE = 100
@@ -75,13 +76,15 @@ def say(repo, n, body, rest, refused):
 def tests_failed(repo, head, rest):
     """True when every all tests run on the head finished and failed.
 
-    False when one passed or is still running, there is none, or GitHub cannot say."""
+    False when one passed or is still running, there is none, or GitHub cannot say. The check is found by the name
+    GitHub shows in this repo (#846)."""
+    name = settings.shown_as(ALL_TESTS)
     try:
-        runs = (rest("GET", f"repos/{repo}/commits/{head}/check-runs?check_name={ALL_TESTS.replace(' ', '%20')}"
+        runs = (rest("GET", f"repos/{repo}/commits/{head}/check-runs?check_name={quote(name)}"
                             f"&per_page={PER_PAGE}") or {}).get("check_runs") or []
     except (subprocess.CalledProcessError, AttributeError):
         return False
-    runs = [r for r in runs if r.get("name") == ALL_TESTS]
+    runs = [r for r in runs if r.get("name") == name]
     return bool(runs) and all(r.get("status") == "completed" and r.get("conclusion") in FAILED for r in runs)
 
 
