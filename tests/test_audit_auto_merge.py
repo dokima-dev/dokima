@@ -13,7 +13,7 @@ the Setup issue to say:
               it, "merge queue" when the merge queue ruleset lacks it; it says neither "is on" nor "is off"
     unknown   a line about auto-merge saying it is not verified, with GitHub's reason; neither "is on" nor "is off"
 On and off are not drift: on their own they open no Setup issue, so the on and off tests put one other setting off
-(a missing label) to make the audit write one.
+(a label's color) to make the audit write one.
 """
 import copy
 import json
@@ -42,12 +42,12 @@ def merge_queue(*bypass):
 
 
 def repo(review, queue, drift=True):
-    """A fake repo with the app on each list as asked, maybe one label missing."""
+    """A fake repo with the app on each list as asked, maybe one label off."""
     s = clean()
     s["review_bypass_apps"] = [APP] if review else [42]
     s["rulesets"] = [merge_queue(ADMIN_BYPASS, *([APP_BYPASS] if queue else []))]
     if drift:
-        del s["labels"]["filed-by-dokima"]
+        s["labels"]["filed-by-dokima"]["color"] = "000000"
     return s
 
 
@@ -70,7 +70,7 @@ def test_with_the_app_on_both_lists_the_setup_issue_says_auto_merge_is_on(record
     """With the app on both exemption lists, the Setup issue says auto-merge is on.
 
     Proves 588.1. The fake repo lists the app on the branch rule's review exemption and as a pull-request bypass of
-    the merge queue ruleset; one label is missing so a Setup issue opens. Its body must say auto-merge is on and never
+    the merge queue ruleset; one label's color is off so a Setup issue opens. Its body must say auto-merge is on and never
     that it is off. With the app on only one list, the issue opens even with nothing else off and names only the list
     that lacks the app. When GitHub refuses to show the rulesets, the issue says auto-merge is not verified, with
     GitHub's reason, and claims neither on nor off."""
@@ -108,7 +108,7 @@ def test_with_the_app_on_neither_list_the_setup_issue_says_auto_merge_is_off(rec
     """With the app on neither exemption list, the Setup issue says auto-merge is off.
 
     Proves 588.2. The fake repo lists another app on the review exemption and only the admin role on the merge queue
-    ruleset; one label is missing so a Setup issue opens. Its body must say auto-merge is off and that this is the
+    ruleset; one label's color is off so a Setup issue opens. Its body must say auto-merge is off and that this is the
     default, and never that it is on. With nothing else off, auto-merge off is not drift: the audit opens no Setup
     issue."""
     record_property("proves", "588.2")

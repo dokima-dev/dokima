@@ -27,6 +27,7 @@ What the faked GitHub offers, and the audit is expected to use (a read may raise
                               "merge_queue", and Dokima's app is the actor of type "Integration" whose id is app_id()
     app_id(repo)              the id of Dokima's app, as the repo's installation answers it
     setup_issue(repo)         the open Setup issue as {"number": n, "body": str}, or None
+    create_label(repo, name, color, description)   creates a label the repo lacks
     create_issue(repo, title, body) -> n
     edit_issue(repo, n, body)
     comment(repo, n, text)
@@ -105,6 +106,12 @@ class GitHub:
     def labels(self, repo):
         return self._read("labels", self.label_list)
 
+    def create_label(self, repo, name, color, description):
+        if "create_label" in self.fail:
+            raise refused(self.fail["create_label"])
+        self.label_list[name] = {"color": color, "description": description}
+        self.writes.append(("create_label", repo, name))
+
     def fields(self):
         return self._read("fields", self.field_map)
 
@@ -175,7 +182,7 @@ def open_setup(body="Old drift\n"):
 def drifted():
     """A repo with seven differences from the manifest, one of each kind."""
     g = GitHub()
-    del g.label_list["filed-by-dokima"]
+    g.label_list["filed-by-dokima"]["color"] = "000000"
     g.label_list["autopilot"]["color"] = "000000"
     del g.field_map["Action"]["Autopilot"]
     g.field_map["Priority"]["Blocker"]["color"] = "ORANGE"
@@ -209,7 +216,7 @@ def codeowners(tmp_path, text):
 def test_each_difference_gets_one_line_saying_what_is_off_and_what_dokima_needs(record_property):
     """Each setting that differs gets one line saying what is off and what Dokima needs.
 
-    Proves 283.1. The faked repo differs in seven ways: the filed-by-dokima label is missing, the autopilot label's color is 000000, the Action field
+    Proves 283.1. The faked repo differs in seven ways: the filed-by-dokima label's color is 000000, the autopilot label's color is 000000, the Action field
     has no Autopilot option, the Blocker priority option is ORANGE, the Autopilot view filters on label:autopilot, main's
     rule lacks the Acceptance criteria check, and the app has issues: read. The audit returns seven single lines, one
     per difference, each naming the setting and the value Dokima needs (with the live value where there is one; a
@@ -218,7 +225,7 @@ def test_each_difference_gets_one_line_saying_what_is_off_and_what_dokima_needs(
     a = audit("283.1")
     lines = a.compare(drifted(), REPO)
     assert all("\n" not in l and l.strip() for l in lines), f"283.1: every difference must be one plain line: {lines}"
-    one_line(lines, "283.1", "the missing filed-by-dokima label", "filed-by-dokima", "bfd4f2")
+    one_line(lines, "283.1", "the filed-by-dokima label's color", "filed-by-dokima", "bfd4f2")
     one_line(lines, "283.1", "the autopilot label's color", "autopilot", "000000", "8250df")
     one_line(lines, "283.1", "the missing Autopilot option of the Action field", "Action", "Autopilot", "PURPLE")
     one_line(lines, "283.1", "the Blocker option's color", "Blocker", "ORANGE", "RED")
@@ -321,14 +328,14 @@ def test_drift_opens_one_pinned_setup_issue_marked_needs_you(record_property, tm
 def test_a_later_run_updates_the_same_setup_issue(record_property, tmp_path):
     """A later run updates the open Setup issue with what is off now.
 
-    Proves 283.2. A first run opens the Setup issue for a missing filed-by-dokima label. The label is then put back and the autopilot label's
+    Proves 283.2. A first run opens the Setup issue for the filed-by-dokima label's color. The label is then put back and the autopilot label's
     color changes. The second run opens no issue; the same issue now lists the autopilot label and no longer the filed-by-dokima label,
     and is still marked Needs you."""
     record_property("proves", "283.2")
     a = audit("283.2")
     root = codeowners(tmp_path, "* @alice\n")
     g = GitHub()
-    del g.label_list["filed-by-dokima"]
+    g.label_list["filed-by-dokima"]["color"] = "000000"
     n = a.run(g, REPO, root)
     g.label_list["filed-by-dokima"] = copy.deepcopy(manifest.LABELS["filed-by-dokima"])
     g.label_list["autopilot"]["color"] = "000000"
