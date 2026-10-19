@@ -7,16 +7,20 @@ comments carried records seed the same records here, so the pack still finds the
 import json
 import os
 import re
+import shutil
 import subprocess
 import tempfile
 
 IDENTITY = {"GIT_AUTHOR_NAME": "t", "GIT_AUTHOR_EMAIL": "t@example.com",
             "GIT_COMMITTER_NAME": "t", "GIT_COMMITTER_EMAIL": "t@example.com"}
+# No background gc or maintenance: a detached one left writing to the remote after a push races the test's next write.
+# A push's receive side never sees `-c`, so seed sets these in the remote's own config too.
+QUIET = ("-c", "gc.auto=0", "-c", "receive.autogc=false", "-c", "maintenance.auto=false")
 
 
 def _git(*args, cwd=None):
-    """Run git with an identity; a failure shows git's own words."""
-    r = subprocess.run(["git", *args], cwd=cwd, env={**os.environ, **IDENTITY}, capture_output=True, text=True)
+    """Run git with an identity and no background tidying; a failure shows git's own words."""
+    r = subprocess.run(["git", *QUIET, *args], cwd=cwd, env={**os.environ, **IDENTITY}, capture_output=True, text=True)
     assert r.returncode == 0, f"test setup: git {' '.join(args)} failed: {r.stderr}"
     return r.stdout
 
@@ -24,11 +28,14 @@ def _git(*args, cwd=None):
 def seed(number, recs, remote=None):
     """Save each record as its own file on the remote's logs branch, oldest first.
 
-    One commit per record; returns the remote. With no remote, a fresh bare repo is made. A remote that already has a logs branch keeps it and gains the files."""
+    One commit per record; returns the remote. With no remote, a fresh bare repo is made. A remote that already has a logs branch keeps it and gains the files.
+    The scratch clone lives beside the remote, in the test's own folder, and is removed once pushed."""
     if remote is None:
         remote = os.path.join(tempfile.mkdtemp(prefix="dokima-seed-"), "logs.git")
         _git("init", "-q", "--bare", remote)
-    work = tempfile.mkdtemp(prefix="dokima-seed-work-")
+    for setting in QUIET[1::2]:
+        _git("--git-dir", str(remote), "config", *setting.split("="))
+    work = tempfile.mkdtemp(prefix="dokima-seed-work-", dir=os.path.dirname(os.path.abspath(str(remote))))
     if _git("ls-remote", "--heads", str(remote), "logs").strip():
         _git("clone", "-q", "-b", "logs", str(remote), work)
     else:
@@ -45,6 +52,7 @@ def seed(number, recs, remote=None):
         _git("commit", "-qm", f"record {name}", cwd=work)
     if recs:
         _git("push", "-q", str(remote), "HEAD:logs", cwd=work)
+    shutil.rmtree(work, ignore_errors=True)
     return str(remote)
 
 

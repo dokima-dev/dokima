@@ -8,6 +8,8 @@ stderr ("gh: ... (HTTP 403)") and exit 1.
 
 What it answers (OWNER/REPO is the state's repo; any other repo is logged as unsupported):
     gh api [-X GET] repos/OWNER/REPO/labels[?...]                       labels, as GitHub's REST list
+    gh api -X POST repos/OWNER/REPO/labels -f name=.. -f color=.. -f description=..   creates a label (write "label");
+                                                                        "fail" key "create_label"
     gh api [-X GET] repos/OWNER/REPO/branches/main/protection[/required_status_checks]
                                                                         main's rule; 404 "Branch not protected" if none
                                         its "strict" (must be up to date) is the state's "strict"[branch], true when absent
@@ -191,6 +193,12 @@ def rest(state, method, path, fields):
             refuse(state, fail["labels"])
         reply(state, [{"id": k, "name": n, "color": l["color"], "description": l["description"], "default": False}
                       for k, (n, l) in enumerate(state["labels"].items())])
+    if method == "POST" and rest_path == "labels":
+        if "create_label" in fail:
+            refuse(state, fail["create_label"])
+        state["labels"][fields["name"]] = {"color": fields["color"], "description": fields.get("description", "")}
+        state["writes"].append({"kind": "label", "repo": state["repo"], "number": None})
+        reply(state, {"name": fields["name"], "color": fields["color"], "description": fields.get("description", "")})
     b = re.fullmatch(r"branches/([^/]+)", rest_path)
     if method == "GET" and b:
         if "protection" in fail:

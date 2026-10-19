@@ -45,7 +45,7 @@ def clean():
 def drifted():
     """A fake GitHub off in one setting of each kind the audit reads."""
     s = clean()
-    del s["labels"]["filed-by-dokima"]
+    s["labels"]["filed-by-dokima"]["color"] = "000000"
     s["labels"]["autopilot"]["description"] = "Old words"
     del s["fields"]["Action"]["Autopilot"]
     s["fields"]["Priority"]["Blocker"]["color"] = "ORANGE"
@@ -122,7 +122,7 @@ def test_the_audit_command_reads_every_live_setting_through_gh(record_property, 
     """The audit command reads labels, board, main's rule and app permissions from GitHub.
 
     Proves 283.1. Runs `python3 -m dokima.audit acme/widgets` against a fake gh whose repo is off in one setting of each kind: a
-    missing filed-by-dokima label, the autopilot label's description, the Action field's missing Autopilot option, the Blocker option's
+    filed-by-dokima label's color, the autopilot label's description, the Action field's missing Autopilot option, the Blocker option's
     color, the Autopilot view's filter, main's missing required check and the app's issues permission. Each can only
     be found by reading it through gh, and each must be its own line on the Setup issue the command opens."""
     record_property("proves", "283.1")
@@ -130,7 +130,7 @@ def test_the_audit_command_reads_every_live_setting_through_gh(record_property, 
     a.run("283.1")
     n, issue = created(a, "283.1")
     lines = body_lines(issue["body"])
-    one_line(lines, "283.1", "the missing filed-by-dokima label", "filed-by-dokima", "bfd4f2")
+    one_line(lines, "283.1", "the filed-by-dokima label's color", "filed-by-dokima", "bfd4f2")
     one_line(lines, "283.1", "the autopilot label's description", "autopilot", "Old words", "Running on its own")
     one_line(lines, "283.1", "the missing Autopilot option of the Action field", "Action", "Autopilot", "PURPLE")
     one_line(lines, "283.1", "the Blocker option's color", "Blocker", "ORANGE", "RED")
@@ -291,3 +291,51 @@ def test_the_audit_command_reports_failed_calls_as_not_verified(record_property,
         f"283.6: one line should name main's rule and the other the labels: {lines}"
     for line in lines:
         assert BROKEN in line, f"283.6: the line does not give GitHub's reason: {line!r}"
+
+
+# 881: the audit creates every label Dokima needs that the repo lacks, and never overwrites one
+
+def test_the_audit_creates_every_missing_label_and_keeps_a_drifted_one(record_property, tmp_path):
+    """Missing labels are all created; a drifted label is kept and gets one line.
+
+    Proves 881. The first repo has none of Dokima's labels: the audit creates each, hotfix among them, with the
+    manifest's color and description, and opens no Setup issue. The second lacks every label but autopilot, whose color
+    is 000000: the others are created, autopilot keeps 000000, and the Setup issue has one line about it."""
+    record_property("proves", "881")
+    s = clean()
+    s["labels"] = {}
+    a = Audit(tmp_path / "bare", s)
+    a.run("881")
+    st = a.state()
+    assert "hotfix" in manifest.LABELS, f"881: the manifest's labels lack hotfix: {sorted(manifest.LABELS)}"
+    assert st["labels"] == manifest.LABELS, f"881: the bare repo ends the audit with {st['labels']}\n{a.why()}"
+    assert not [w for w in st["writes"] if w["kind"] == "create"], \
+        f"881: a repo whose labels were all created should open no Setup issue\n{a.why()}"
+
+    s = clean()
+    s["labels"] = {"autopilot": dict(manifest.LABELS["autopilot"], color="000000")}
+    a = Audit(tmp_path / "drifted", s)
+    a.run("881")
+    st = a.state()
+    assert st["labels"] == dict(manifest.LABELS, autopilot=s["labels"]["autopilot"]), \
+        f"881: the repo ends the audit with {st['labels']}, not every label with autopilot kept\n{a.why()}"
+    n, issue = created(a, "881")
+    labels = [l for l in body_lines(issue["body"]) if l.startswith("Label")]
+    assert len(labels) == 1, f"881: only the drifted autopilot label should get a line: {labels}"
+    one_line(labels, "881", "the autopilot label's color", "autopilot", "000000", "8250df")
+
+
+def test_a_label_github_will_not_create_is_reported_with_its_reason(record_property, tmp_path):
+    """A label GitHub refuses to create gets one Setup line with GitHub's reason.
+
+    Proves 881. The repo lacks the hotfix label and GitHub answers 403 to creating it. The Setup issue says hotfix is
+    missing, could not be created, and gives GitHub's reason and the color Dokima needs."""
+    record_property("proves", "881")
+    s = clean()
+    del s["labels"]["hotfix"]
+    s["fail"] = {"create_label": FORBIDDEN}
+    a = Audit(tmp_path, s)
+    a.run("881")
+    n, issue = created(a, "881")
+    line = one_line(body_lines(issue["body"]), "881", "the hotfix label GitHub refused", "hotfix", "b60205")
+    assert "could not be created" in line and FORBIDDEN in line, f"881: the line does not say why: {line!r}"

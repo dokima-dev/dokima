@@ -32,7 +32,7 @@ Add these as **repo** secrets and variables (Settings, Secrets and variables, Ac
 | `CLAUDE_CODE_OAUTH_TOKEN` | secret | Claude Code token for the agents |
 | `DOKIMA_BOARD` | variable, optional | Project board as `org/number` |
 
-`dokima.yml` hands each secret to δokima by name. If your settings name another agent key (`CODEX_API_KEY` or `KIMI_API_KEY`), add its line under `secrets:` in `dokima.yml` too.
+`dokima.yml` hands each secret to δokima by name. If your settings name another agent key (`CODEX_API_KEY` or `KIMI_API_KEY`), add its line under `secrets:` in `dokima.yml` too. Settings may name only the agent keys `CLAUDE_CODE_OAUTH_TOKEN`, `CODEX_API_KEY` and `KIMI_API_KEY`. Any other never reaches the jobs, and the audit and the run say so. Use a declared name, or ask for yours to be declared in a release.
 
 Secrets are scrubbed from cards and saved conversations. Agents hold no GitHub key while they work.
 
@@ -40,7 +40,7 @@ Secrets are scrubbed from cards and saved conversations. Agents hold no GitHub k
 
 `.github/workflows/dokima.yml` and `.dokima/settings.yaml` are the only files you add; nothing else of δokima lands in your repo.
 
-1. Add [`dokima/install/dokima.yml`](https://github.com/dokima-dev/dokima/blob/main/dokima/install/dokima.yml) to your repo as `.github/workflows/dokima.yml`. It runs δokima from its own repo at the newest release, `v0.1.4`.
+1. Add [`dokima/install/dokima.yml`](https://github.com/dokima-dev/dokima/blob/main/dokima/install/dokima.yml) to your repo as `.github/workflows/dokima.yml`. It runs δokima from its own repo at the newest release, `v0.1.6`.
 2. Add [`dokima/install/settings.yaml`](https://github.com/dokima-dev/dokima/blob/main/dokima/install/settings.yaml) to your repo as `.dokima/settings.yaml`, naming only what differs from the defaults.
 
 Your repo's owner gives commands and approves. Optional: a `.github/CODEOWNERS` file with a `*` line names other approvers.
@@ -61,7 +61,7 @@ A Project with single-select fields:
 
 ## 6. Labels
 
-`autopilot` is created on first use. `filed-by-dokima` marks issues δokima files itself. The manifest also declares `plan` and `work` labels, so the audit expects them, but they start nothing: commands do.
+The audit creates every label δokima needs that the repo lacks: `autopilot`, `filed-by-dokima` (issues δokima files itself) and `hotfix` (built from the issue's text, with no plan). A label you changed is kept; the audit reports it.
 
 ## Checking your setup
 

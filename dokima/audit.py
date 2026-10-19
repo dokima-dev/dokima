@@ -2,7 +2,8 @@
 
     python3 -m dokima.audit OWNER/REPO   # reads DOKIMA_BOARD ("org/number", optional) and .github/CODEOWNERS where it runs
 
-compare() gives one plain line per setting that differs from dokima/manifest.py or could not be read; run() puts them
+compare() first creates every label Dokima needs that the repo lacks, then gives one plain line per setting that
+differs from dokima/manifest.py or could not be read; run() puts them
 on the Setup issue (opened, pinned and marked Needs you, or updated), closes it with one line once nothing is off, and
 writes nothing when nothing is off and none is open. Both take a GitHub object for every read and write; GitHub below
 is the real one, through gh.
@@ -52,6 +53,25 @@ def compare_labels(live, wanted=None):
         if (have.get("description") or "") != want["description"]:
             lines.append(f"Label `{name}` has description `{have.get('description') or ''}`; Dokima needs "
                          f"`{want['description']}`.")
+    return lines
+
+
+def create_labels(github, repo, live, wanted):
+    """Create each label in WANTED that LIVE lacks; one line per label GitHub refused.
+
+    Each gets its color and description from WANTED. LIVE then holds every label as it now stands, so
+    compare_labels() reports only drift; a refused label keeps its one line here. An existing label is never
+    overwritten."""
+    lines = []
+    for name, want in wanted.items():
+        if name in live:
+            continue
+        try:
+            github.create_label(repo, name, want["color"], want["description"])
+        except FAILED as e:
+            lines.append(f"Label `{name}` is missing and could not be created: GitHub said `{reason(e)}`; Dokima "
+                         f"needs it with color `{want['color']}` and description `{want['description']}`.")
+        live[name] = dict(want)
     return lines
 
 
@@ -142,13 +162,26 @@ def needed_secrets(got):
     return needed
 
 
+def own_repo(root):
+    """Whether the repo at ROOT is Dokima's own, holding the shared workflows themselves.
+
+    Its jobs run in its `keys` environment, so its keys reach them from there and need not be repo secrets (#885)."""
+    return os.path.isfile(os.path.join(root, ".github", "workflows", "entry.yml"))
+
+
 def compare_secrets(live, needed):
-    """One line per secret in NEEDED that the repo's own secrets LIVE lack.
+    """One line per secret in NEEDED that LIVE lacks or that is undeclared (#896).
 
     Dokima runs from its own repo, so its jobs see only repo secrets; a key kept in the `keys` environment never
     reaches them (#876)."""
-    return [f"Repo secret `{name}` is missing; Dokima needs it as a repo secret, since a secret kept only in the "
-            f"`keys` environment never reaches its jobs." for name in needed if name not in live]
+    lines = []
+    for name in needed:
+        if name != "DOKIMA_APP_KEY" and agents.undeclared(name):
+            lines.append(agents.undeclared(name))
+        elif name not in live:
+            lines.append(f"Repo secret `{name}` is missing; Dokima needs it as a repo secret, since a secret kept "
+                         f"only in the `keys` environment never reaches its jobs.")
+    return lines
 
 
 def auto_merge(github, repo, rule, queue=True):
@@ -198,7 +231,9 @@ def check(github, repo, root=".", has_board=True):
         rules[branch] = github.branch_rule(repo, branch)
         return rules[branch]
 
-    reads = [("Labels", lambda: github.labels(repo), lambda live: compare_labels(live, manifest.labels(got)))]
+    labels = manifest.labels(got)
+    reads = [("Labels", lambda: github.labels(repo),
+              lambda live: create_labels(github, repo, live, labels) + compare_labels(live, labels))]
     if has_board:
         reads += [("Board fields", github.fields, lambda live: compare_fields(live, manifest.fields(got))),
                   ("Board views", github.views, compare_views)]
@@ -206,7 +241,9 @@ def check(github, repo, root=".", has_board=True):
                lambda live, branch=branch, want=want: compare_rule(branch, live, want))
               for branch, want in manifest.branch_rules(got).items()]
     reads += [("App permissions", lambda: github.permissions(repo), compare_permissions)]
-    reads += [("Repo secrets", lambda: github.secrets(repo), lambda live: compare_secrets(live, needed_secrets(got)))]
+    if not own_repo(root):
+        reads += [("Repo secrets", lambda: github.secrets(repo),
+                   lambda live: compare_secrets(live, needed_secrets(got)))]
     lines = []
     for what, read, check_live in reads:
         try:
@@ -314,6 +351,10 @@ class GitHub:
     def labels(self, repo):
         return {l["name"]: {"color": l["color"], "description": l.get("description") or ""}
                 for l in pages(gh("api", "--paginate", f"repos/{repo}/labels?per_page=100"))}
+
+    def create_label(self, repo, name, color, description):
+        gh("api", "-X", "POST", f"repos/{repo}/labels", "-f", f"name={name}", "-f", f"color={color}",
+           "-f", f"description={description}")
 
     def fields(self):
         return {f["name"]: {o["name"]: {"color": o.get("color"), "description": o.get("description") or ""}

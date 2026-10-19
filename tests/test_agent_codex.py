@@ -31,7 +31,7 @@ SETTINGS = textwrap.dedent('''\
     subscriptions:
       codex-pro:
         agent: codex
-        key: CODEX_KEY
+        key: CODEX_API_KEY
     roles:
       worker:
         subscription: codex-pro

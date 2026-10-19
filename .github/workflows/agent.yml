@@ -134,14 +134,15 @@ jobs:
               if [ -f "$f" ]; then cp --parents "$f" /tmp/runtime/; fi
             done
           fi
-      # The bot is the repo's Dokima app: its id a variable and its key a secret, both in the keys environment.
+      # The bot is the repo's Dokima app: its id a repo variable and its key a repo secret; secrets kept only in an
+      # environment never reach a shared workflow's jobs (#884).
       - name: The bot is set up
         env:
           APP_ID: ${{ vars.DOKIMA_APP_ID }}
           HAS_APP_KEY: ${{ secrets.DOKIMA_APP_KEY != '' }}
         run: |
           [ -n "$APP_ID" ] && [ "$HAS_APP_KEY" = true ] && exit 0
-          echo "No bot is set up: add the app's id as the variable DOKIMA_APP_ID and its private key as the secret DOKIMA_APP_KEY, both in the repo's keys environment (Settings, Environments, keys)." > /tmp/why.txt
+          echo "No bot is set up: add the app's id as the variable DOKIMA_APP_ID and its private key as the repo secret DOKIMA_APP_KEY (Settings, Secrets and variables, Actions), not only in an environment, which never reaches these jobs." > /tmp/why.txt
           echo "::error title=No bot::$(cat /tmp/why.txt)"; exit 1
       - name: Only a code owner starts an agent
         env:
@@ -165,7 +166,7 @@ jobs:
           HAS_KEY: ${{ secrets[env.AGENT_KEY || 'CLAUDE_CODE_OAUTH_TOKEN'] != '' }}
         run: |
           [ "$HAS_KEY" = true ] && exit 0
-          echo "The secret ${AGENT_KEY:-CLAUDE_CODE_OAUTH_TOKEN}, which holds the $ROLE's model key, is missing: add it to the repo's keys environment (Settings, Environments, keys)." > /tmp/why.txt
+          echo "The secret ${AGENT_KEY:-CLAUDE_CODE_OAUTH_TOKEN}, which holds the $ROLE's model key, is missing: add it as a repo secret (Settings, Secrets and variables, Actions), not only in an environment, which never reaches these jobs." > /tmp/why.txt
           echo "::error title=No model key::$(cat /tmp/why.txt)"; exit 1
       # The run's card moves through its stages (queued, setting up, agent working, checking, then its record), each
       # written by this job's own steps, each with a key made for that one call and revoked at once: no bot key stays
@@ -218,10 +219,28 @@ jobs:
           gh api -X PATCH "repos/$GITHUB_REPOSITORY/issues/comments/$CARD_ID" -F body=@/tmp/card.md --silent \
             || echo "::warning title=Card not updated::the card could not say setting up"
           gh api -X DELETE installation/token --silent || echo "::warning title=Key not revoked::the card's key could not be revoked"
+      # Git asks origin with the app's key, as the push does: on a private repo an anonymous ask fails (#914). The key
+      # is made for this one step and revoked when it ends, before the branch's code or the agent run.
+      - id: start-key
+        continue-on-error: true
+        uses: actions/create-github-app-token@v2
+        with:
+          app-id: ${{ vars.DOKIMA_APP_ID }}
+          private-key: ${{ secrets.DOKIMA_APP_KEY }}
+          skip-token-revoke: true
       - name: Starting branch
         env:
           GH_TOKEN: ${{ github.token }}
+          ORIGIN_TOKEN: ${{ steps.start-key.outputs.token }}
         run: |
+          [ -n "$ORIGIN_TOKEN" ] || { echo "No key to read the repo with: the app's key could not be made." > /tmp/why.txt
+                                      echo "::error title=No key::$(cat /tmp/why.txt)"; exit 1; }
+          trap 'GH_TOKEN="$ORIGIN_TOKEN" gh api -X DELETE installation/token --silent || echo "::warning title=Key not revoked::the starting key could not be revoked"' EXIT
+          R="https://x-access-token:${ORIGIN_TOKEN}@github.com/${GITHUB_REPOSITORY}.git"
+          said() { paste -sd' ' /tmp/git-err.txt | sed "s#${ORIGIN_TOKEN}#***#g"; }
+          git fetch -q "$R" "+refs/heads/$DEFAULT_BRANCH:refs/remotes/origin/$DEFAULT_BRANCH" 2> /tmp/git-err.txt \
+            || { echo "Main could not be fetched: $(said)" > /tmp/why.txt
+                 echo "::error title=Fetch failed::$(cat /tmp/why.txt)"; exit 1; }
           # Merges of the default branch commit as the bot the settings name.
           SLUG="$BOT_SLUG"
           BOT_ID=$(gh api "users/${SLUG}[bot]" --jq .id) \
@@ -238,8 +257,17 @@ jobs:
           if { [ "$ROLE" = worker ] || [ "$STAGE" = pr ]; } && python3 -m dokima.hotfix labeled "$N"; then
             HOTFIX_LABEL=true; echo "HOTFIX_LABEL=true" >> "$GITHUB_ENV"
           fi
-          if git ls-remote --exit-code --heads origin "try/issue-$N" >/dev/null; then
-            git fetch -q origin "try/issue-$N" && git checkout -q -B "try/issue-$N" FETCH_HEAD
+          # Exit 2 is git's "no such branch"; any other failure is a question origin could not answer, so the run stops.
+          rc=0; git ls-remote --exit-code --heads "$R" "try/issue-$N" > /dev/null 2> /tmp/git-err.txt || rc=$?
+          if [ "$rc" != 0 ] && [ "$rc" != 2 ]; then
+            echo "Could not ask whether try/issue-$N exists: $(said)" > /tmp/why.txt
+            echo "::error title=Branch unknown::$(cat /tmp/why.txt)"; exit 1
+          fi
+          if [ "$rc" = 0 ]; then
+            git fetch -q "$R" "try/issue-$N" 2> /tmp/git-err.txt \
+              || { echo "try/issue-$N could not be fetched: $(said)" > /tmp/why.txt
+                   echo "::error title=Fetch failed::$(cat /tmp/why.txt)"; exit 1; }
+            git checkout -q -B "try/issue-$N" FETCH_HEAD
             BRANCH_TIP=$(git rev-parse HEAD); echo "BRANCH_TIP=$BRANCH_TIP" >> "$GITHUB_ENV"
             # A worker's branch that clashes with main still starts: the merge is committed with its conflict markers,
             # the clashed files are listed for the fence, and the worker resolves them. Main's changes are in BASE.
@@ -383,11 +411,13 @@ jobs:
         run: |
           # With a baseline testmon picks the affected tests; with none, or one it cannot read, every test runs, and
           # so with affected tests set to all in the settings (#795).
-          code=0; every=
+          # Only the settings' tests folder and file pattern, as the all tests check collects them (#923).
+          code=0; every=; scope=()
+          if [ -d "${TESTS_DIR:-tests}" ]; then scope=(-o "python_files=${TESTS_FILE_PATTERN:-test_*.py}" "${TESTS_DIR:-tests}"); fi
           if [ "$TESTS_AFFECTED" = all ]; then every="affected tests are set to all in the settings"
           elif [ ! -f .testmondata ]; then every="no baseline from main was restored"
           else
-            PYTHONPATH= PYTHONSAFEPATH= python3 -m pytest -q -rA --testmon --junitxml="$PACK/tests.xml" > "$PACK/tests.txt" 2>&1 || code=$?
+            PYTHONPATH= PYTHONSAFEPATH= python3 -m pytest -q -rA --testmon --junitxml="$PACK/tests.xml" "${scope[@]}" > "$PACK/tests.txt" 2>&1 || code=$?
             # Exit 0, 1 (a test failed) and 5 (no test affected) are testmon's real answers; anything else is a crash.
             if [ "$code" -gt 1 ] && [ "$code" -ne 5 ]; then
               echo "::warning title=No usable baseline::testmon stopped with exit $code; running every test"
@@ -398,7 +428,7 @@ jobs:
             # The code review's record reads this note and says every test ran, and why.
             echo "$every" > "$PACK/no-baseline.txt"
             rm -f "$PACK/tests.xml"
-            PYTHONPATH= PYTHONSAFEPATH= python3 -m pytest -q -rA --junitxml="$PACK/tests.xml" > "$PACK/tests.txt" 2>&1 || true
+            PYTHONPATH= PYTHONSAFEPATH= python3 -m pytest -q -rA --junitxml="$PACK/tests.xml" "${scope[@]}" > "$PACK/tests.txt" 2>&1 || true
           fi
           tail -5 "$PACK/tests.txt"
       - name: Code checks the pack has everything this role needs
@@ -612,7 +642,13 @@ jobs:
         run: |
           W=/tmp/logs-branch; R="https://x-access-token:${GH_TOKEN}@github.com/${GITHUB_REPOSITORY}.git"
           B="$RECORDS_BRANCH"
-          if git ls-remote --exit-code --heads origin "$B" >/dev/null; then git clone -q --depth 1 -b "$B" "$R" "$W"
+          # Origin is asked with the app's key: on a private repo an anonymous ask fails and would start an orphan (#917).
+          # Exit 2 is git's "no such branch"; any other failure is a question origin could not answer, so nothing is saved.
+          rc=0; git ls-remote --exit-code --heads "$R" "$B" > /dev/null 2> /tmp/git-err.txt || rc=$?
+          if [ "$rc" != 0 ] && [ "$rc" != 2 ]; then
+            echo "::error title=Conversation not saved::could not ask whether $B exists: $(paste -sd' ' /tmp/git-err.txt | sed "s#${GH_TOKEN}#***#g")"; exit 1
+          fi
+          if [ "$rc" = 0 ]; then git clone -q --depth 1 -b "$B" "$R" "$W"
           else git init -q "$W" && git -C "$W" checkout -q --orphan "$B" && git -C "$W" remote add origin "$R"; fi
           mkdir -p "$W/$(dirname "$LOG")"
           { echo "# ${ROLE}${STAGE:+ ($STAGE)} for #$N"; echo; echo "Run: ${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }}"; echo
@@ -620,7 +656,22 @@ jobs:
           BOT_ID=$(gh api "users/${SLUG}[bot]" --jq .id)
           git -C "$W" -c user.name="${SLUG}[bot]" -c user.email="${BOT_ID}+${SLUG}[bot]@users.noreply.github.com" add -A
           git -C "$W" -c user.name="${SLUG}[bot]" -c user.email="${BOT_ID}+${SLUG}[bot]@users.noreply.github.com" commit -qm "Conversation of run ${{ github.run_id }}"
-          for i in 1 2 3; do git -C "$W" push -q origin "HEAD:$B" && break; git -C "$W" pull -q --rebase origin "$B" || true; done
+          for i in 1 2 3; do git -C "$W" push -q origin "HEAD:$B" && break; git -C "$W" -c user.name="${SLUG}[bot]" -c user.email="${BOT_ID}+${SLUG}[bot]@users.noreply.github.com" pull -q --rebase origin "$B" || true; done
+      # Dokima's own problems a review confirms file in the upstream repo the settings name, with a key the App's own
+      # key mints for that repo's owner; with none set, no key is minted (#745).
+      - name: Name the upstream repo's owner
+        id: upstream-owner
+        if: always()
+        continue-on-error: true
+        run: echo "owner=$(python3 -m dokima.upstream owner)" >> "$GITHUB_OUTPUT"
+      - id: upstream-key
+        if: always() && steps.upstream-owner.outputs.owner != ''
+        continue-on-error: true
+        uses: actions/create-github-app-token@v2
+        with:
+          app-id: ${{ vars.DOKIMA_APP_ID }}
+          private-key: ${{ secrets.DOKIMA_APP_KEY }}
+          owner: ${{ steps.upstream-owner.outputs.owner }}
       # On autopilot, a code review's approval with every check green merges the pull request here, so this step
       # holds the app's key (minted after the agent finished).
       - name: Decide what follows, merge on autopilot, and say it on the card
@@ -628,6 +679,7 @@ jobs:
         if: always()
         env:
           GH_TOKEN: ${{ steps.app.outputs.token }}
+          DOKIMA_UPSTREAM_TOKEN: ${{ steps.upstream-key.outputs.token }}
         run: |
           export OWNERS=$(python3 -m dokima.plan approvers)
           NEXT=$(python3 -m dokima.agent next "$N" "$OUT") || NEXT=stop
@@ -785,3 +837,44 @@ jobs:
         run: |
           [ -s "$OUT/record.json" ] || exit 0
           python3 -m dokima.agent board "$N" "$OUT"
+  upstream:
+    # A failed job files its failure in the upstream repo the settings name, naming this workflow and the job, with a
+    # key the App's own key mints for that repo's owner; with none set, nothing is filed (#745).
+    needs: [run, unrecorded]
+    if: failure() && needs.run.result == 'failure'
+    environment: keys
+    runs-on: ubuntu-24.04
+    steps:
+      - uses: actions/checkout@v5
+        with:
+          sparse-checkout: .dokima
+          persist-credentials: false
+      - name: Dokima's code from Dokima's own repo
+        uses: actions/checkout@v5
+        with:
+          repository: dokima-dev/dokima
+          ref: ${{ job.workflow_sha }}
+          path: .dokima-code
+          sparse-checkout: dokima
+          persist-credentials: false
+      - name: Every Dokima step runs Dokima's code
+        run: |
+          rm -rf "$RUNNER_TEMP/dokima" && mv .dokima-code "$RUNNER_TEMP/dokima"
+          printf 'PYTHONPATH=%s\nPYTHONSAFEPATH=1\n' "$RUNNER_TEMP/dokima" >> "$GITHUB_ENV"
+      - run: python3 -m pip install -q pyyaml  # the settings reader (#794)
+      - name: Name the upstream repo's owner
+        id: upstream-owner
+        run: echo "owner=$(python3 -m dokima.upstream owner)" >> "$GITHUB_OUTPUT"
+      - id: upstream-key
+        if: steps.upstream-owner.outputs.owner != ''
+        uses: actions/create-github-app-token@v2
+        with:
+          app-id: ${{ vars.DOKIMA_APP_ID }}
+          private-key: ${{ secrets.DOKIMA_APP_KEY }}
+          owner: ${{ steps.upstream-owner.outputs.owner }}
+      - name: File each failed job upstream
+        if: success() || failure()
+        env:
+          RESULTS: "run=${{ needs.run.result }} unrecorded=${{ needs.unrecorded.result }}"
+          DOKIMA_UPSTREAM_TOKEN: ${{ steps.upstream-key.outputs.token }}
+        run: python3 -m dokima.upstream failed agent

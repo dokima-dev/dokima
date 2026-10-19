@@ -39,10 +39,10 @@ def test_the_audit_checks_the_key_the_settings_name(record_property, tmp_path):
     a = audit("876")
     os.makedirs(tmp_path / ".dokima")
     (tmp_path / ".dokima" / "settings.yaml").write_text(
-        "agents:\n  subscriptions:\n    mine:\n      agent: claude\n      key: MY_KEY\n"
+        "agents:\n  subscriptions:\n    mine:\n      agent: claude\n      key: CODEX_API_KEY\n"
         "  roles:\n    worker:\n      subscription: mine\n      model: claude-opus-5-5\n")
     lines = secret_lines(a.compare(GitHub(), REPO, root=str(tmp_path)))
-    assert len(lines) == 1 and "`MY_KEY`" in lines[0], f"876: the worker's own key MY_KEY is not checked: {lines}"
+    assert len(lines) == 1 and "`CODEX_API_KEY`" in lines[0], f"876: the worker's own key CODEX_API_KEY is not checked: {lines}"
 
 
 def test_unreadable_repo_secrets_say_why(record_property, tmp_path):
@@ -61,3 +61,17 @@ def test_the_install_docs_say_repo_secrets_not_the_keys_environment(record_prope
         text = open(os.path.join(ROOT, path)).read()
         assert not re.search(r"environment\W+named `keys`", text), f"876: {path} still says to use the keys environment"
         assert "repo secret" in text or "**repo** secrets" in text, f"876: {path} does not say to use repo secrets"
+
+
+def test_dokima_own_repo_keeps_its_keys_in_the_keys_environment(record_property, tmp_path):
+    """Dokima's own repo reads its keys from the keys environment, so none is reported."""
+    record_property("proves", "885")
+    a = audit("885")
+    g = GitHub()
+    g.secret_names = set()
+    os.makedirs(tmp_path / ".github" / "workflows")
+    (tmp_path / ".github" / "workflows" / "entry.yml").write_text("name: entry\n")
+    assert secret_lines(a.compare(g, REPO, root=str(tmp_path))) == [], "885: Dokima's own repo is told to add repo secrets"
+    assert secret_lines(a.compare(g, REPO, root=ROOT)) == [], "885: this repo's own audit reports its keys missing"
+    (tmp_path / ".github" / "workflows" / "entry.yml").unlink()
+    assert secret_lines(a.compare(g, REPO, root=str(tmp_path))), "885: an adopter's missing repo secrets are no longer reported"

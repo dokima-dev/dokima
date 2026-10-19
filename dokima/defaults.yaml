@@ -64,16 +64,21 @@ merge:
   queue: true
   # allow lets a pull request a person or Dependabot opened pass with no plan; any other value fails it (#857).
   unplanned_prs: allow
+# The repo where Dokima's own problems on this repo are filed, such as dokima-dev/dokima; empty keeps them here (#745).
+upstream:
+  repo: ""
 # Each of Dokima's labels by its key; the name is what the repo calls it.
 labels:
   autopilot: autopilot
   filed: filed-by-dokima
+  hotfix: hotfix
 # The colors the audit wants: labels by the keys above, as GitHub writes them (rrggbb), and board pills by field and
 # option, as GitHub names them.
 colors:
   labels:
     autopilot: "8250df"
     filed: "bfd4f2"
+    hotfix: "b60205"
   pills:
     Status:
       Backlog: GRAY
