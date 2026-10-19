@@ -18,9 +18,10 @@ import sys
 LABELS = {
     "autopilot": {"color": "8250df", "description": "Running on its own"},
     "filed-by-dokima": {"color": "bfd4f2", "description": "Created automatically, not by a person"},
+    "hotfix": {"color": "b60205", "description": "Built straight from its text, with no plan"},
 }
 # Each label's key in the settings' labels and colors.labels groups, by its shipped name.
-LABEL_KEYS = {"autopilot": "autopilot", "filed-by-dokima": "filed"}
+LABEL_KEYS = {"autopilot": "autopilot", "filed-by-dokima": "filed", "hotfix": "hotfix"}
 
 FIELDS = {
     "Status": {

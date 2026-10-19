@@ -71,12 +71,14 @@ upstream:
 labels:
   autopilot: autopilot
   filed: filed-by-dokima
+  hotfix: hotfix
 # The colors the audit wants: labels by the keys above, as GitHub writes them (rrggbb), and board pills by field and
 # option, as GitHub names them.
 colors:
   labels:
     autopilot: "8250df"
     filed: "bfd4f2"
+    hotfix: "b60205"
   pills:
     Status:
       Backlog: GRAY
