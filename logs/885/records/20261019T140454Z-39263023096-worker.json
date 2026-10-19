@@ -1,0 +1,36 @@
+{
+ "role": "worker",
+ "stage": null,
+ "run_id": "39263023096",
+ "commit_before": "41d5afb24ce003a1959236c8f97775023438df6e",
+ "started_by": "dokima-runtime[bot]",
+ "models": [
+  "claude-opus-5-5"
+ ],
+ "report": {
+  "duration_ms": 1061251,
+  "turns": 15,
+  "cost_usd": 0.3693794,
+  "tokens_in": 459209,
+  "tokens_out": 4721
+ },
+ "log": "https://github.com/dokima-dev/dokima/blob/logs/logs/885/39263023096-worker.md",
+ "run": "https://github.com/dokima-dev/dokima/actions/runs/39263023096",
+ "handback": {
+  "summary": "No change this round: the failed all tests run does not reproduce; every test passes here.",
+  "criteria": {
+   "ask": "`dokima/audit.py` `check` skips the repo secrets read when `own_repo(root)` finds `.github/workflows/entry.yml`."
+  },
+  "evidence": "`pytest -q -n 8` on 41d5afb: 1549 passed in 426s.",
+  "raises": [],
+  "answers": []
+ },
+ "check": {
+  "passed": true,
+  "problems": []
+ },
+ "dropped_by_fence": [],
+ "files_changed": [],
+ "branch": "try/issue-885",
+ "url": "https://github.com/dokima-dev/dokima/pull/905#issuecomment-6268739395"
+}
