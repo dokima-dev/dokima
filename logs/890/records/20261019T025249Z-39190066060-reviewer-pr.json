@@ -1,0 +1,68 @@
+{
+ "role": "reviewer",
+ "stage": "pr",
+ "run_id": "39190066060",
+ "commit_before": "59db113a877d065cf43708580bbdf694176c026b",
+ "started_by": "RezaSoleymanifar",
+ "models": [
+  "claude-opus-5-5"
+ ],
+ "report": {
+  "duration_ms": 3082,
+  "turns": 1,
+  "cost_usd": 0.37488059999999995,
+  "tokens_in": 41175,
+  "tokens_out": 145
+ },
+ "log": "https://github.com/dokima-dev/dokima/blob/logs/logs/890/39190066060-reviewer-pr.md",
+ "run": "https://github.com/dokima-dev/dokima/actions/runs/39190066060",
+ "handback": {
+  "previous_step": {
+   "did": [
+    "Added a v0.1.2 changelog section naming the five onboarding fixes.",
+    "Pointed the install file, README and install guide at v0.1.2.",
+    "Added a test that v0.1.2 is newest, naming all five fixes."
+   ],
+   "decided": [
+    "Changed the older changelog test so v0.1.1 need not be newest."
+   ],
+   "open": []
+  },
+  "verdict": "approve",
+  "summary": "The change ships exactly the ask, and #886 and #887 are now on main.",
+  "raises": [],
+  "answers": [],
+  "asks": [],
+  "behaviors": [],
+  "edge_cases": [],
+  "tests": [
+   {
+    "test": "tests/test_newest_release.py::test_changelog_has_v012_on_top",
+    "only_its_behavior": true,
+    "why": "Fails without the v0.1.2 section on top naming all five fixes."
+   }
+  ],
+  "size": "ok",
+  "boxes": {
+   "dropped": "none",
+   "added": [
+    {
+     "what": "Older changelog test now checks v0.1.1 sits above v0.1.0, not that it is newest",
+     "kind": "needed",
+     "serves": "ask"
+    }
+   ],
+   "superseded": "none",
+   "conflicts": "none",
+   "edges": {
+    "ask": "covered"
+   },
+   "poor_tests": "none"
+  }
+ },
+ "check": {
+  "passed": true,
+  "problems": []
+ },
+ "url": "https://github.com/dokima-dev/dokima/pull/891#issuecomment-6258359162"
+}
