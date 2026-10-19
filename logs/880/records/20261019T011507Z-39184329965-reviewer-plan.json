@@ -1,0 +1,168 @@
+{
+ "role": "reviewer",
+ "stage": "plan",
+ "run_id": "39184329965",
+ "commit_before": "d72afcf41b77cb0054dba65e1b643a0b5e0c69c9",
+ "started_by": "dokima-runtime[bot]",
+ "models": [
+  "claude-opus-5-5"
+ ],
+ "report": {
+  "duration_ms": 71985,
+  "turns": 9,
+  "cost_usd": 0.43869859999999994,
+  "tokens_in": 372250,
+  "tokens_out": 4146
+ },
+ "log": "https://github.com/dokima-dev/dokima/blob/logs/logs/880/39184329965-reviewer-plan.md",
+ "run": "https://github.com/dokima-dev/dokima/actions/runs/39184329965",
+ "handback": {
+  "previous_step": {
+   "did": [
+    "The planner added the two missing notice tests, each also checking one passing test.",
+    "The planner added a criterion keeping the tests folder setting with the new handling."
+   ],
+   "decided": [
+    "The tests folder test now reads the baseline step written on several lines; same checks."
+   ],
+   "open": []
+  },
+  "verdict": "approve",
+  "summary": "The plan carries every ask, including keeping the tests folder setting; each new test fails today for the right reason.",
+  "raises": [],
+  "answers": [],
+  "asks": [
+   {
+    "ask": "treat \"no tests collected\" as an empty baseline, not a crash, in the testmon baseline",
+    "source": "https://github.com/dokima-dev/dokima/issues/880",
+    "criterion": "S1.1"
+   },
+   {
+    "ask": "A test should run the baseline step on an empty tests folder and expect success.",
+    "source": "https://github.com/dokima-dev/dokima/issues/880",
+    "criterion": "S1.1"
+   },
+   {
+    "ask": "say on the run that the repo has no tests yet",
+    "source": "https://github.com/dokima-dev/dokima/issues/880",
+    "criterion": "S1.2"
+   },
+   {
+    "ask": "and wherever the full suite would hit the same exit code",
+    "source": "https://github.com/dokima-dev/dokima/issues/880",
+    "criterion": "S2.1"
+   },
+   {
+    "ask": "say on the run that the repo has no tests yet",
+    "source": "https://github.com/dokima-dev/dokima/issues/880",
+    "criterion": "S2.2"
+   },
+   {
+    "ask": "Keep that tests-folder argument and add the exit-5 handling on top, so both fixes stand.",
+    "source": "https://github.com/dokima-dev/dokima/issues/880#issuecomment-6257482677",
+    "criterion": "S1.3"
+   }
+  ],
+  "behaviors": [
+   {
+    "criterion": "S1.1",
+    "one_behavior": true,
+    "why": "The baseline passing on an empty folder; the saved cache is how it passes."
+   },
+   {
+    "criterion": "S1.2",
+    "one_behavior": true,
+    "why": "One notice on one case."
+   },
+   {
+    "criterion": "S1.3",
+    "one_behavior": true,
+    "why": "The baseline runs over the named tests folder."
+   },
+   {
+    "criterion": "S2.1",
+    "one_behavior": true,
+    "why": "One check passing on one case."
+   },
+   {
+    "criterion": "S2.2",
+    "one_behavior": true,
+    "why": "One notice on one case."
+   }
+  ],
+  "edge_cases": [
+   {
+    "criterion": "S1.1",
+    "cut": [],
+    "missing": []
+   },
+   {
+    "criterion": "S1.2",
+    "cut": [],
+    "missing": []
+   },
+   {
+    "criterion": "S1.3",
+    "cut": [],
+    "missing": []
+   },
+   {
+    "criterion": "S2.1",
+    "cut": [],
+    "missing": []
+   },
+   {
+    "criterion": "S2.2",
+    "cut": [],
+    "missing": []
+   }
+  ],
+  "tests": [
+   {
+    "test": "tests/test_no_tests_yet.py::test_the_baseline_passes_on_an_empty_tests_folder",
+    "only_its_behavior": true,
+    "why": "Runs the real baseline job on an empty folder; a crashing setup must still fail."
+   },
+   {
+    "test": "tests/test_no_tests_yet.py::test_the_baseline_says_the_repo_has_no_tests_yet",
+    "only_its_behavior": true,
+    "why": "Notice on an empty folder, none with one passing test."
+   },
+   {
+    "test": "tests/test_testmon.py::test_baseline_runs_only_the_tests_folder",
+    "only_its_behavior": true,
+    "why": "Runs the step's shell with a fake python and checks the folder it names."
+   },
+   {
+    "test": "tests/test_no_tests_yet.py::test_the_all_tests_check_passes_on_an_empty_tests_folder",
+    "only_its_behavior": true,
+    "why": "Runs the real all tests job on an empty folder; a crashing setup must still fail."
+   },
+   {
+    "test": "tests/test_no_tests_yet.py::test_the_all_tests_check_says_the_repo_has_no_tests_yet",
+    "only_its_behavior": true,
+    "why": "Notice on an empty folder, none with one passing test."
+   }
+  ],
+  "size": "ok",
+  "boxes": {
+   "dropped": "none",
+   "added": "none",
+   "superseded": "none",
+   "conflicts": "none",
+   "edges": {
+    "S1.1": "covered",
+    "S1.2": "covered",
+    "S1.3": "covered",
+    "S2.1": "covered",
+    "S2.2": "covered"
+   },
+   "poor_tests": "none"
+  }
+ },
+ "check": {
+  "passed": true,
+  "problems": []
+ },
+ "url": "https://github.com/dokima-dev/dokima/issues/880#issuecomment-6257549003"
+}
