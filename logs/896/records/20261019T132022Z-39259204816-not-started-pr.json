@@ -1,0 +1,16 @@
+{
+ "role": "not-started",
+ "attempt": "reviewer",
+ "stage": "pr",
+ "run_id": "39259204816",
+ "started_by": "dokima-runtime[bot]",
+ "run": "https://github.com/dokima-dev/dokima/actions/runs/39259204816",
+ "handback": {},
+ "check": {
+  "passed": false,
+  "problems": [
+   "try/issue-896 does not exist; run the planner first."
+  ]
+ },
+ "url": "https://github.com/dokima-dev/dokima/issues/896#issuecomment-6268197325"
+}
