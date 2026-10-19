@@ -43,7 +43,7 @@ from dokima.agent_checks import (  # noqa: F401
     failing_plan_tests, check, worker_docstring_caps)
 from dokima.agent_roles import (  # noqa: F401
     issue_text, open_issue_summary, reviewer_open_issues, pack_records, pack_issue, parent_words, pack_parent,
-    owner_words, pack, NEEDS, problems_pack, COMMANDS, command_of, autopilot_of, route, main)
+    owner_words, pack, NEEDS, problems_pack, COMMANDS, command_of, autopilot_of, route, HOTFIX_NO_PR, hotfix_route, main)
 from dokima.agent_autopilot import (  # noqa: F401
     story_body, file_split, AUTOPILOT, issue_tree, switch_autopilot, autopilot_comment, AUTOPILOT_LINE,
     AUTOPILOT_START_LINE, link_edges, loop_through, named, FILED_LABEL, file_issues, record_links, set_title,
