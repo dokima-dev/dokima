@@ -15,7 +15,7 @@ import sys
 
 import yaml
 
-from dokima import board, manifest, settings
+from dokima import agents, board, manifest, prompt, settings
 
 TITLE = "Setup"
 MARK = "<!-- dokima-setup -->"
@@ -122,6 +122,35 @@ def compare_permissions(live):
     return lines
 
 
+def needed_secrets(got):
+    """The repo secrets Dokima's jobs read: the app's key and each role's agent key.
+
+    The merged settings GOT name each role's key; a role they leave out takes today's key."""
+    section = got.get("agents") if isinstance(got.get("agents"), dict) else {}
+    roles = section.get("roles") if isinstance(section.get("roles"), dict) else {}
+    subs = section.get("subscriptions") if isinstance(section.get("subscriptions"), dict) else {}
+    needed = ["DOKIMA_APP_KEY"]
+    for role in prompt.ROLES:
+        given = roles.get(role)
+        if given is None:
+            key = agents.TODAY["key"]
+        else:
+            found = subs.get((given or {}).get("subscription", "")) if isinstance(given, dict) else None
+            key = found.get("key") if isinstance(found, dict) else None
+        if key and str(key) not in needed:
+            needed.append(str(key))
+    return needed
+
+
+def compare_secrets(live, needed):
+    """One line per secret in NEEDED that the repo's own secrets LIVE lack.
+
+    Dokima runs from its own repo, so its jobs see only repo secrets; a key kept in the `keys` environment never
+    reaches them (#876)."""
+    return [f"Repo secret `{name}` is missing; Dokima needs it as a repo secret, since a secret kept only in the "
+            f"`keys` environment never reaches its jobs." for name in needed if name not in live]
+
+
 def auto_merge(github, repo, rule, queue=True):
     """Whether auto-merge is on, read from main's two pull-request-only exemption lists: (drift lines, note).
 
@@ -177,6 +206,7 @@ def check(github, repo, root=".", has_board=True):
                lambda live, branch=branch, want=want: compare_rule(branch, live, want))
               for branch, want in manifest.branch_rules(got).items()]
     reads += [("App permissions", lambda: github.permissions(repo), compare_permissions)]
+    reads += [("Repo secrets", lambda: github.secrets(repo), lambda live: compare_secrets(live, needed_secrets(got)))]
     lines = []
     for what, read, check_live in reads:
         try:
@@ -310,6 +340,17 @@ class GitHub:
 
     def permissions(self, repo):
         return json.loads(gh("api", f"repos/{repo}/installation"))["permissions"]
+
+    def secrets(self, repo):
+        """The names of the repo's own secrets; GitHub never shows their values."""
+        out = gh("api", "--paginate", f"repos/{repo}/actions/secrets?per_page=100").strip()
+        decoder, names, i = json.JSONDecoder(), set(), 0
+        while i < len(out):  # gh prints one JSON object per page
+            page, i = decoder.raw_decode(out, i)
+            names |= {s["name"] for s in page.get("secrets") or []}
+            while i < len(out) and out[i].isspace():
+                i += 1
+        return names
 
     def rulesets(self, repo):
         listed = pages(gh("api", "--paginate", f"repos/{repo}/rulesets?per_page=100"))
