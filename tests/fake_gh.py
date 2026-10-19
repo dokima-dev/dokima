@@ -17,6 +17,8 @@ What it answers (OWNER/REPO is the state's repo; any other repo is logged as uns
     gh api [-X GET] repos/OWNER/REPO/rulesets/ID                        one of them in full; "fail" key "rulesets"
     gh api [-X GET] repos/OWNER/REPO/installation                       the app's {"app_id": 1, "permissions": {...}}
     gh api [-X GET] repos/OWNER/REPO/actions/variables/NAME             the state's "variables"[NAME]; 404 when unset
+    gh api [-X GET] repos/OWNER/REPO/actions/secrets[?...]              the state's "secrets" (names), Dokima's two keys
+                                                                        when absent; "fail" key "secrets"
     gh api [-X GET] repos/OWNER/REPO/issues[?state=...&labels=...]      issues (open unless state says otherwise)
     gh api [-X GET] repos/OWNER/REPO/issues/N[/comments]
     gh api [-X POST] repos/OWNER/REPO/issues -f title=.. -f body=.. [-f labels[]=..]   opens an issue
@@ -242,6 +244,12 @@ def rest(state, method, path, fields):
             refuse(state, "Not Found (HTTP 404)", {"message": "Not Found", "status": "404"})
         reply(state, {"name": m.group(1), "value": have[m.group(1)], "created_at": "2026-10-01T00:00:00Z",
                       "updated_at": "2026-10-01T00:00:00Z"})
+    if method == "GET" and rest_path == "actions/secrets":
+        if "secrets" in fail:
+            refuse(state, fail["secrets"])
+        names = state.get("secrets", ["DOKIMA_APP_KEY", "CLAUDE_CODE_OAUTH_TOKEN"])
+        reply(state, {"total_count": len(names), "secrets": [{"name": n, "created_at": "2026-10-01T00:00:00Z",
+                                                              "updated_at": "2026-10-01T00:00:00Z"} for n in names]})
     if rest_path == "issues":
         if method == "GET":
             want = params.get("state", "open")

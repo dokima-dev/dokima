@@ -424,3 +424,25 @@ def test_every_event_dokima_acts_on_starts_the_adopters_workflow(record_property
     names = set(on) if isinstance(on, dict) else set(on or []) if isinstance(on, list) else {on}
     missing = sorted(EVENTS - names)
     assert not missing, f"812.10: the adopter's workflow never starts on {missing}, so Dokima never runs on them"
+
+
+# 874 --------------------------------------------------------------------------------------------------------------
+
+def push_branches(on):
+    """The branch filters of the `push` trigger in ON; empty when every branch counts."""
+    push = on.get("push") if isinstance(on, dict) else None
+    if not isinstance(push, dict):
+        return {}
+    return {k: v for k, v in push.items() if k in ("branches", "branches-ignore")}
+
+
+def test_the_adopters_push_trigger_names_no_branch(record_property):
+    """The adopter's workflow starts on a push to any branch, whatever the default branch is.
+
+    Proves #874. entry.yml already gates its push jobs on the repo's default branch, so the install file must not
+    filter by name. Checks the real file names no branch, and that a `push` limited to main would be caught."""
+    record_property("proves", "874")
+    on = thin("874").get("on")
+    assert "push" in on, "874: the adopter's workflow never starts on a push"
+    assert push_branches(on) == {}, f"874: the adopter's push trigger names branches {push_branches(on)}"
+    assert push_branches({"push": {"branches": ["main"]}}) == {"branches": ["main"]}
