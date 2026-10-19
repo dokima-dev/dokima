@@ -1,0 +1,44 @@
+{
+ "role": "worker",
+ "stage": null,
+ "run_id": "39335668837",
+ "commit_before": "15845b6963244cc2f9f5770259609804987429b5",
+ "started_by": "dokima-runtime[bot]",
+ "models": [
+  "claude-opus-5-5"
+ ],
+ "report": {
+  "duration_ms": 139375,
+  "turns": 9,
+  "cost_usd": 0.30683439999999995,
+  "tokens_in": 300985,
+  "tokens_out": 2401
+ },
+ "log": "https://github.com/dokima-dev/dokima/blob/logs/logs/907/39335668837-worker.md",
+ "run": "https://github.com/dokima-dev/dokima/actions/runs/39335668837",
+ "handback": {
+  "summary": "The install file now hands Dokima the Codex and Kimi keys by name, so the audit receives them.",
+  "criteria": {
+   "907.1": "Each adapter reads its own error; `agents.rejected_key` matches a refusal and the record marks the run Model key rejected.",
+   "907.2": "The record names the secret `agents.adapter` reads from the settings for that role.",
+   "907.3": "`rejected_key_line` says the provider refused the key: make a new one and replace the repo secret.",
+   "907.4": "The card shows only the fixed line, never the provider's words, so no key part is printed.",
+   "907.5": "`audit.compare_keys` tries each set key once via `agents.try_key`; `audit.yml` installs the agents first.",
+   "907.6": "A refused key adds one audit line naming only its secret.",
+   "907.7": "A key with no `DOKIMA_KEY_<name>` value is skipped; no agent starts.",
+   "907.8": "`dokima/install/dokima.yml` maps all three keys by name; `entry.yml` passes them; `audit.yml` sets `DOKIMA_KEY_<name>`.",
+   "907.9": "Audit lines hold only secret names; the agent's own error output is silenced during the try."
+  },
+  "evidence": "`pytest -q tests/test_key_rejected.py tests/test_secrets_by_name.py` and install tests: 63 passed"
+ },
+ "check": {
+  "passed": true,
+  "problems": []
+ },
+ "dropped_by_fence": [],
+ "files_changed": [
+  "dokima/install/dokima.yml"
+ ],
+ "branch": "try/issue-907",
+ "url": "https://github.com/dokima-dev/dokima/pull/931#issuecomment-6278826880"
+}
