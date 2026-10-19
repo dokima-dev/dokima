@@ -1,0 +1,298 @@
+{
+ "role": "reviewer",
+ "stage": "plan",
+ "run_id": "39335428603",
+ "commit_before": "15845b6963244cc2f9f5770259609804987429b5",
+ "started_by": "dokima-runtime[bot]",
+ "models": [
+  "claude-opus-5-5"
+ ],
+ "report": {
+  "duration_ms": 60340,
+  "turns": 13,
+  "cost_usd": 0.6252325999999999,
+  "tokens_in": 646105,
+  "tokens_out": 3511
+ },
+ "log": "https://github.com/dokima-dev/dokima/blob/logs/logs/907/39335428603-reviewer-plan.md",
+ "run": "https://github.com/dokima-dev/dokima/actions/runs/39335428603",
+ "handback": {
+  "asks": [
+   {
+    "ask": "end the run as \"Model key rejected\" instead of checking for the hand-back file",
+    "source": "https://github.com/dokima-dev/dokima/issues/907",
+    "criterion": "907.1"
+   },
+   {
+    "ask": "A refused key for Claude Code, Codex and Kimi each ends as \"Model key rejected\"",
+    "source": "https://github.com/dokima-dev/dokima/issues/907#issuecomment-6278270923",
+    "criterion": "907.1"
+   },
+   {
+    "ask": "a run with a real missing plan still gives the missing-plan one",
+    "source": "https://github.com/dokima-dev/dokima/issues/907",
+    "criterion": "907.1"
+   },
+   {
+    "ask": "The issue comment names the secret the settings use for that agent",
+    "source": "https://github.com/dokima-dev/dokima/issues/907",
+    "criterion": "907.2"
+   },
+   {
+    "ask": "names that agent's secret",
+    "source": "https://github.com/dokima-dev/dokima/issues/907#issuecomment-6278270923",
+    "criterion": "907.2"
+   },
+   {
+    "ask": "says the provider refused it: make a new one and replace the repo secret",
+    "source": "https://github.com/dokima-dev/dokima/issues/907",
+    "criterion": "907.3"
+   },
+   {
+    "ask": "Never print any part of the key.",
+    "source": "https://github.com/dokima-dev/dokima/issues/907",
+    "criterion": "907.4"
+   },
+   {
+    "ask": "The setup audit checks the agent key once with a tiny call (when the key is present)",
+    "source": "https://github.com/dokima-dev/dokima/issues/907",
+    "criterion": "907.5"
+   },
+   {
+    "ask": "reports a rejected key as one line",
+    "source": "https://github.com/dokima-dev/dokima/issues/907",
+    "criterion": "907.6"
+   },
+   {
+    "ask": "A key that is not set is skipped",
+    "source": "https://github.com/dokima-dev/dokima/issues/907#issuecomment-6278270923",
+    "criterion": "907.7"
+   },
+   {
+    "ask": "The audit job gets the declared agent keys by name",
+    "source": "https://github.com/dokima-dev/dokima/issues/907#issuecomment-6278270923",
+    "criterion": "907.8"
+   },
+   {
+    "ask": "Never print any part of a key.",
+    "source": "https://github.com/dokima-dev/dokima/issues/907#issuecomment-6278270923",
+    "criterion": "907.9"
+   }
+  ],
+  "behaviors": [
+   {
+    "criterion": "907.1",
+    "one_behavior": true,
+    "why": "One result, the rejected-key ending, across the three agents."
+   },
+   {
+    "criterion": "907.2",
+    "one_behavior": true,
+    "why": "The card names one secret."
+   },
+   {
+    "criterion": "907.3",
+    "one_behavior": true,
+    "why": "One fixed message."
+   },
+   {
+    "criterion": "907.4",
+    "one_behavior": true,
+    "why": "No key piece on the card or record."
+   },
+   {
+    "criterion": "907.5",
+    "one_behavior": true,
+    "why": "One call per set key."
+   },
+   {
+    "criterion": "907.6",
+    "one_behavior": true,
+    "why": "One line per refused key."
+   },
+   {
+    "criterion": "907.7",
+    "one_behavior": true,
+    "why": "An unset key starts nothing."
+   },
+   {
+    "criterion": "907.8",
+    "one_behavior": true,
+    "why": "The audit job receives the keys."
+   },
+   {
+    "criterion": "907.9",
+    "one_behavior": true,
+    "why": "No key piece in the audit's output."
+   }
+  ],
+  "tests": [
+   {
+    "test": "tests/test_key_rejected.py::test_a_401_from_the_provider_reads_model_key_rejected",
+    "only_its_behavior": true,
+    "why": "Bad case plus the missing-plan good case beside it."
+   },
+   {
+    "test": "tests/test_key_rejected.py::test_a_403_from_the_provider_reads_model_key_rejected",
+    "only_its_behavior": true,
+    "why": "Fails today on the missing ending."
+   },
+   {
+    "test": "tests/test_key_rejected.py::test_an_expired_token_reads_model_key_rejected",
+    "only_its_behavior": true,
+    "why": "Fails today on the missing ending."
+   },
+   {
+    "test": "tests/test_key_rejected.py::test_a_refused_codex_key_reads_model_key_rejected",
+    "only_its_behavior": true,
+    "why": "Codex refusal and its missing-plan guard."
+   },
+   {
+    "test": "tests/test_key_rejected.py::test_a_refused_kimi_key_reads_model_key_rejected",
+    "only_its_behavior": true,
+    "why": "Kimi refusal and its missing-plan guard."
+   },
+   {
+    "test": "tests/test_key_rejected.py::test_the_record_names_the_secret_the_settings_use",
+    "only_its_behavior": true,
+    "why": "Default and settings-named secret both checked."
+   },
+   {
+    "test": "tests/test_key_rejected.py::test_each_agents_record_names_its_own_secret",
+    "only_its_behavior": true,
+    "why": "Each agent names only its own secret."
+   },
+   {
+    "test": "tests/test_key_rejected.py::test_the_record_says_to_make_a_new_key_and_replace_the_repo_secret",
+    "only_its_behavior": true,
+    "why": "Checks the message's parts."
+   },
+   {
+    "test": "tests/test_key_rejected.py::test_the_record_never_prints_any_part_of_the_key",
+    "only_its_behavior": true,
+    "why": "Claude refusal; card and record scanned for key pieces."
+   },
+   {
+    "test": "tests/test_key_rejected.py::test_a_codex_refusal_never_prints_the_keys_tail",
+    "only_its_behavior": true,
+    "why": "Codex echoes the key's tail; quoting it fails."
+   },
+   {
+    "test": "tests/test_key_rejected.py::test_the_audit_calls_each_set_key_once",
+    "only_its_behavior": true,
+    "why": "Counts calls; the install check is needed for any call."
+   },
+   {
+    "test": "tests/test_key_rejected.py::test_the_audit_reports_a_rejected_key_as_one_line",
+    "only_its_behavior": true,
+    "why": "One line, only the refused secret."
+   },
+   {
+    "test": "tests/test_key_rejected.py::test_the_audit_skips_a_key_that_is_not_set",
+    "only_its_behavior": true,
+    "why": "Unset keys start nothing; a set key still starts."
+   },
+   {
+    "test": "tests/test_key_rejected.py::test_the_audit_job_gets_each_declared_agent_key_by_name",
+    "only_its_behavior": true,
+    "why": "Checks all three keys through the install file and both workflows."
+   },
+   {
+    "test": "tests/test_key_rejected.py::test_the_audit_never_prints_any_part_of_a_key",
+    "only_its_behavior": true,
+    "why": "Three refusals, output scanned for key pieces."
+   }
+  ],
+  "edge_cases": [
+   {
+    "criterion": "907.1",
+    "cut": [],
+    "missing": []
+   },
+   {
+    "criterion": "907.2",
+    "cut": [],
+    "missing": []
+   },
+   {
+    "criterion": "907.3",
+    "cut": [],
+    "missing": []
+   },
+   {
+    "criterion": "907.4",
+    "cut": [],
+    "missing": []
+   },
+   {
+    "criterion": "907.5",
+    "cut": [],
+    "missing": []
+   },
+   {
+    "criterion": "907.6",
+    "cut": [],
+    "missing": []
+   },
+   {
+    "criterion": "907.7",
+    "cut": [],
+    "missing": []
+   },
+   {
+    "criterion": "907.8",
+    "cut": [],
+    "missing": []
+   },
+   {
+    "criterion": "907.9",
+    "cut": [],
+    "missing": []
+   }
+  ],
+  "boxes": {
+   "dropped": "none",
+   "added": [
+    {
+     "what": "The audit workflow installs the agents before the audit runs.",
+     "kind": "needed",
+     "serves": "907.5"
+    }
+   ],
+   "superseded": "none",
+   "conflicts": "none",
+   "edges": {
+    "907.1": "covered",
+    "907.2": "covered",
+    "907.3": "covered",
+    "907.4": "covered",
+    "907.5": "covered",
+    "907.6": "covered",
+    "907.7": "covered",
+    "907.8": "covered",
+    "907.9": "covered"
+   },
+   "poor_tests": "none"
+  },
+  "size": "ok",
+  "previous_step": {
+   "did": [
+    "The planner added the adopter's install file to the audit wiring criterion.",
+    "Its test now checks the install file hands Dokima each agent key by name."
+   ],
+   "decided": [
+    "The worker may now map the Codex and Kimi keys in the install file."
+   ],
+   "open": []
+  },
+  "verdict": "approve",
+  "summary": "The install file is now covered; all fifteen tests fail on main because the feature is missing.",
+  "raises": [],
+  "answers": []
+ },
+ "check": {
+  "passed": true,
+  "problems": []
+ },
+ "url": "https://github.com/dokima-dev/dokima/issues/907#issuecomment-6278796233"
+}
