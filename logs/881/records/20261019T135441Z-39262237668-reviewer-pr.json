@@ -1,0 +1,90 @@
+{
+ "role": "reviewer",
+ "stage": "pr",
+ "run_id": "39262237668",
+ "commit_before": "3652fc015e0ba0e026dc9fa9ce46bcee165b94b0",
+ "started_by": "dokima-runtime[bot]",
+ "models": [
+  "claude-opus-5-5"
+ ],
+ "report": {
+  "duration_ms": 734319,
+  "turns": 18,
+  "cost_usd": 0.5879148000000001,
+  "tokens_in": 730842,
+  "tokens_out": 6335
+ },
+ "log": "https://github.com/dokima-dev/dokima/blob/logs/logs/881/39262237668-reviewer-pr.md",
+ "run": "https://github.com/dokima-dev/dokima/actions/runs/39262237668",
+ "handback": {
+  "previous_step": {
+   "did": [
+    "Setup now creates each missing Dokima label with its color and description.",
+    "The hotfix label joins Dokima's labels, with a color and description.",
+    "A label whose color drifted is kept and gets one setup line."
+   ],
+   "decided": [
+    "A label GitHub refuses to create gets one setup line with GitHub's reason."
+   ],
+   "open": [
+    "Three older setup tests now fail on this branch."
+   ]
+  },
+  "verdict": "block",
+  "summary": "The labels work, but three older setup tests that pass on main now fail.",
+  "raises": [
+   {
+    "kind": "blocker",
+    "to": "worker",
+    "label": "Old tests fail",
+    "text": "Three setup tests passing on main fail here: they delete a label to open a Setup issue, and setup now recreates it. Fix: drift its color instead.",
+    "evidence": "`tests/test_up_to_date_rule.py:34` and `tests/test_adopter_check_names.py:36` delete `filed-by-dokima`; 3 failed here, 3 passed on main.",
+    "raised_by": "reviewer",
+    "id": "R1"
+   }
+  ],
+  "answers": [],
+  "asks": [],
+  "behaviors": [],
+  "edge_cases": [],
+  "tests": [
+   {
+    "test": "tests/test_audit_cli.py::test_the_audit_creates_every_missing_label_and_keeps_a_drifted_one",
+    "only_its_behavior": true,
+    "why": "Fails on main; catches a wrong color or an overwritten label."
+   },
+   {
+    "test": "tests/test_audit_cli.py::test_a_label_github_will_not_create_is_reported_with_its_reason",
+    "only_its_behavior": true,
+    "why": "Fails on main; checks the refused label's line gives GitHub's reason."
+   }
+  ],
+  "size": "ok",
+  "boxes": {
+   "dropped": "none",
+   "added": [
+    {
+     "what": "A refused label gets one setup line with GitHub's reason",
+     "kind": "needed",
+     "serves": "ask"
+    },
+    {
+     "what": "Older tests drift a label's color instead of deleting it",
+     "kind": "needed",
+     "serves": "ask"
+    }
+   ],
+   "superseded": "none",
+   "conflicts": "none",
+   "edges": {
+    "ask": "covered"
+   },
+   "poor_tests": "none"
+  }
+ },
+ "check": {
+  "passed": true,
+  "problems": []
+ },
+ "url": "https://github.com/dokima-dev/dokima/pull/908#issuecomment-6268629329"
+}
