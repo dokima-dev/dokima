@@ -1,0 +1,129 @@
+{
+ "role": "reviewer",
+ "stage": "pr",
+ "run_id": "39276456610",
+ "commit_before": "e4d3b876df31d8c82fb769318a31e74cf5cc2aec",
+ "started_by": "dokima-runtime[bot]",
+ "models": [
+  "claude-opus-5-5"
+ ],
+ "report": {
+  "duration_ms": 445222,
+  "turns": 2,
+  "cost_usd": 0.8522762,
+  "tokens_in": 141337,
+  "tokens_out": 471
+ },
+ "log": "https://github.com/dokima-dev/dokima/blob/logs/logs/896/39276456610-reviewer-pr.md",
+ "run": "https://github.com/dokima-dev/dokima/actions/runs/39276456610",
+ "handback": {
+  "previous_step": {
+   "did": [
+    "The worker kept the earlier build: jobs and the setup audit refuse undeclared agent keys.",
+    "The worker changed no file this round."
+   ],
+   "decided": [
+    "The plan now lists the Codex and Kimi test changes, so the build stands."
+   ],
+   "open": [
+    "GitHub's checks on the final commit still wait for the merge gate to run them."
+   ]
+  },
+  "verdict": "approve",
+  "summary": "The build delivers all four criteria, every test passes, and the last blocker is fixed.",
+  "raises": [],
+  "answers": [],
+  "asks": [],
+  "behaviors": [
+   {
+    "criterion": "896.1",
+    "one_behavior": true,
+    "why": "Only declared keys are accepted by a job."
+   },
+   {
+    "criterion": "896.2",
+    "one_behavior": true,
+    "why": "The audit reports an undeclared key in one line."
+   },
+   {
+    "criterion": "896.3",
+    "one_behavior": true,
+    "why": "A job fails with the audit's line."
+   },
+   {
+    "criterion": "896.4",
+    "one_behavior": true,
+    "why": "The docs state the rule."
+   }
+  ],
+  "edge_cases": [
+   {
+    "criterion": "896.1",
+    "cut": [],
+    "missing": []
+   },
+   {
+    "criterion": "896.2",
+    "cut": [],
+    "missing": []
+   },
+   {
+    "criterion": "896.3",
+    "cut": [],
+    "missing": []
+   },
+   {
+    "criterion": "896.4",
+    "cut": [],
+    "missing": []
+   }
+  ],
+  "tests": [
+   {
+    "test": "tests/test_declared_keys.py::test_only_the_agent_keys_entry_yml_declares_are_accepted",
+    "only_its_behavior": true,
+    "why": "Checks each declared key works and one other is refused."
+   },
+   {
+    "test": "tests/test_declared_keys.py::test_the_audit_reports_an_undeclared_key_in_one_line",
+    "only_its_behavior": true,
+    "why": "Checks the one line and silence for a declared key."
+   },
+   {
+    "test": "tests/test_declared_keys.py::test_a_job_naming_an_undeclared_key_fails_with_the_audit_line",
+    "only_its_behavior": true,
+    "why": "Checks the run fails with the audit's line, not as missing."
+   },
+   {
+    "test": "tests/test_declared_keys.py::test_the_install_docs_say_only_declared_keys_reach_the_jobs",
+    "only_its_behavior": true,
+    "why": "Checks both docs and the settings note state the rule."
+   }
+  ],
+  "size": "ok",
+  "boxes": {
+   "dropped": "none",
+   "added": [
+    {
+     "what": "The settings format note in the agents code also states the rule",
+     "kind": "needed",
+     "serves": "896.4"
+    }
+   ],
+   "superseded": "none",
+   "conflicts": "none",
+   "edges": {
+    "896.1": "covered",
+    "896.2": "covered",
+    "896.3": "covered",
+    "896.4": "covered"
+   },
+   "poor_tests": "none"
+  }
+ },
+ "check": {
+  "passed": true,
+  "problems": []
+ },
+ "url": "https://github.com/dokima-dev/dokima/pull/911#issuecomment-6270655163"
+}
