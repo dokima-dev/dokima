@@ -1,0 +1,73 @@
+{
+ "role": "reviewer",
+ "stage": "pr",
+ "run_id": "39265773078",
+ "commit_before": "41d5afb24ce003a1959236c8f97775023438df6e",
+ "started_by": "dokima-runtime[bot]",
+ "models": [
+  "claude-opus-5-5"
+ ],
+ "report": {
+  "duration_ms": 554853,
+  "turns": 16,
+  "cost_usd": 0.48369239999999997,
+  "tokens_in": 599757,
+  "tokens_out": 5185
+ },
+ "log": "https://github.com/dokima-dev/dokima/blob/logs/logs/885/39265773078-reviewer-pr.md",
+ "run": "https://github.com/dokima-dev/dokima/actions/runs/39265773078",
+ "handback": {
+  "previous_step": {
+   "did": [
+    "The worker changed no code this round.",
+    "The worker ran the whole suite on the same commit, and every test passed."
+   ],
+   "decided": [
+    "The worker treated the failed all tests run as a one-off on GitHub's side."
+   ],
+   "open": []
+  },
+  "verdict": "approve",
+  "summary": "The audit stops asking Dokima's own repo for repo secrets, other repos still get asked, and every check is green.",
+  "raises": [],
+  "answers": [],
+  "asks": [],
+  "behaviors": [
+   {
+    "criterion": "ask",
+    "one_behavior": true,
+    "why": "Skips only the repo secrets check, only on Dokima's own repo."
+   }
+  ],
+  "edge_cases": [
+   {
+    "criterion": "ask",
+    "cut": [],
+    "missing": []
+   }
+  ],
+  "tests": [
+   {
+    "test": "tests/test_audit_secrets.py::test_dokima_own_repo_keeps_its_keys_in_the_keys_environment",
+    "only_its_behavior": true,
+    "why": "Fails on main; also checks other repos still get missing secrets reported."
+   }
+  ],
+  "size": "ok",
+  "boxes": {
+   "dropped": "none",
+   "added": "none",
+   "superseded": "none",
+   "conflicts": "none",
+   "edges": {
+    "ask": "covered"
+   },
+   "poor_tests": "none"
+  }
+ },
+ "check": {
+  "passed": true,
+  "problems": []
+ },
+ "url": "https://github.com/dokima-dev/dokima/pull/905#issuecomment-6269126300"
+}
