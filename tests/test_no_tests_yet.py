@@ -33,6 +33,12 @@ def box(tmp, files):
     return b
 
 
+def notices(b):
+    """The run's notice lines that say the repo has no tests yet."""
+    lines = "\n".join(b.log).splitlines()
+    return [l for l in lines if l.strip().startswith("::notice") and "No tests yet" in l]
+
+
 def test_the_baseline_passes_on_an_empty_tests_folder(tmp_path, record_property):
     """The testmon baseline on an empty tests folder succeeds and saves an empty baseline.
 
@@ -51,15 +57,16 @@ def test_the_baseline_passes_on_an_empty_tests_folder(tmp_path, record_property)
 def test_the_baseline_says_the_repo_has_no_tests_yet(tmp_path, record_property):
     """The testmon baseline on an empty tests folder says the repo has no tests yet.
 
-    Proves 886.2. Runs the baseline job on an empty tests folder and expects the No tests yet notice; beside it, a repo with one
-    passing test must show no such notice, so a job that always prints it fails this test."""
+    Proves 886.2. Runs the baseline job on an empty tests folder and expects a `::notice` line, the run's notice, holding
+    No tests yet; plain words in the log do not count. Beside it, a repo with one passing test must show no such notice,
+    so a job that always prints it fails this test."""
     record_property("proves", "886.2")
     b = box(tmp_path / "empty", EMPTY)
     b.run("testmon.yml", "baseline", event="push")
-    assert "No tests yet" in "\n".join(b.log), f"886.2: the baseline does not say the repo has no tests yet:\n{b.tail()}"
+    assert notices(b), f"886.2: the baseline shows no notice that the repo has no tests yet:\n{b.tail()}"
     b = box(tmp_path / "one", ONE)
     assert b.run("testmon.yml", "baseline", event="push") == "success", \
         f"886.2: the baseline failed on a repo with one passing test:\n{b.tail()}"
-    assert "No tests yet" not in "\n".join(b.log), \
+    assert not notices(b), \
         f"886.2: the baseline says no tests yet on a repo with one passing test:\n{b.tail()}"
 
