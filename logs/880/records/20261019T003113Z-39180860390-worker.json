@@ -1,0 +1,39 @@
+{
+ "role": "worker",
+ "stage": null,
+ "run_id": "39180860390",
+ "commit_before": "053f89fb4948029591f8e945f9157ee752529953",
+ "started_by": "dokima-runtime[bot]",
+ "models": [
+  "claude-opus-5-5"
+ ],
+ "report": {
+  "duration_ms": 169039,
+  "turns": 20,
+  "cost_usd": 0.6764266,
+  "tokens_in": 797095,
+  "tokens_out": 8900
+ },
+ "log": "https://github.com/dokima-dev/dokima/blob/logs/logs/880/39180860390-worker.md",
+ "run": "https://github.com/dokima-dev/dokima/actions/runs/39180860390",
+ "handback": {
+  "summary": "A repo with no tests yet now passes the testmon baseline and all tests check, saying so.",
+  "criteria": {
+   "ask": "`testmon.yml` and `full-suite.yml` treat pytest exit 5 as success with a 'No tests yet' notice; `tests/test_no_tests_yet.py` pins both."
+  },
+  "evidence": "`pytest -q tests/test_no_tests_yet.py tests/test_settings_workflows.py tests/test_testmon.py`: 38 passed",
+  "raises": []
+ },
+ "check": {
+  "passed": true,
+  "problems": []
+ },
+ "dropped_by_fence": [],
+ "files_changed": [
+  ".github/workflows/full-suite.yml",
+  ".github/workflows/testmon.yml",
+  "tests/test_no_tests_yet.py"
+ ],
+ "branch": "try/issue-880",
+ "url": "https://github.com/dokima-dev/dokima/issues/880#issuecomment-6257079106"
+}
