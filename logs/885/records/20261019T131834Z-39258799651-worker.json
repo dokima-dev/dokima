@@ -1,0 +1,39 @@
+{
+ "role": "worker",
+ "stage": null,
+ "run_id": "39258799651",
+ "commit_before": "613764e92082c828f93d4995d2a3f066b4e4e5bc",
+ "started_by": "dokima-runtime[bot]",
+ "models": [
+  "claude-opus-5-5"
+ ],
+ "report": {
+  "duration_ms": 46602,
+  "turns": 11,
+  "cost_usd": 0.3644856,
+  "tokens_in": 360248,
+  "tokens_out": 4338
+ },
+ "log": "https://github.com/dokima-dev/dokima/blob/logs/logs/885/39258799651-worker.md",
+ "run": "https://github.com/dokima-dev/dokima/actions/runs/39258799651",
+ "handback": {
+  "summary": "The audit no longer asks Dokima's own repo for repo secrets, since its jobs read the keys environment.",
+  "criteria": {
+   "ask": "`dokima/audit.py` `own_repo` spots Dokima's own repo by its `entry.yml`; `check` then skips the repo secrets read."
+  },
+  "evidence": "`pytest -q tests/test_audit_secrets.py tests/test_audit.py`: 20 passed in 0.50s",
+  "raises": [],
+  "answers": []
+ },
+ "check": {
+  "passed": true,
+  "problems": []
+ },
+ "dropped_by_fence": [],
+ "files_changed": [
+  "dokima/audit.py",
+  "tests/test_audit_secrets.py"
+ ],
+ "branch": "try/issue-885",
+ "url": "https://github.com/dokima-dev/dokima/issues/885#issuecomment-6268145519"
+}
