@@ -1,0 +1,114 @@
+{
+ "role": "planner",
+ "stage": null,
+ "run_id": "39318466135",
+ "commit_before": "c43cb768ba7c3aa6aadca80996601146b66040e3",
+ "started_by": "dokima-runtime[bot]",
+ "models": [
+  "claude-opus-5-5"
+ ],
+ "report": {
+  "duration_ms": 173150,
+  "turns": 20,
+  "cost_usd": 1.0234109999999998,
+  "tokens_in": 986096,
+  "tokens_out": 16138
+ },
+ "log": "https://github.com/dokima-dev/dokima/blob/logs/logs/746/39318466135-planner.md",
+ "run": "https://github.com/dokima-dev/dokima/actions/runs/39318466135",
+ "handback": {
+  "kind": "user_story",
+  "title": "Problems filed publicly show none of the private code",
+  "summary": "Before the job-hunt trial, problems Dokima files in its public repo stop showing the private repo's code.",
+  "user_story": "When the trial files a Dokima problem publicly, the owner sees none of job-hunt's files or code there.",
+  "acceptance_criteria": [
+   {
+    "text": "When a filed problem names a file the private repo holds, Dokima's public repo shows no such path.",
+    "words": "job-hunt stays private: nothing from it (resumes, profile, leads, companies, people, its code) appears in Dokima's public repo",
+    "source": "https://github.com/dokima-dev/dokima/issues/746",
+    "files": [
+     "dokima/upstream.py",
+     "dokima/agent_autopilot.py"
+    ],
+    "edge_cases": [
+     {
+      "case": "Evidence also names a Dokima file the private repo does not hold: that path still shows.",
+      "test": "tests/test_upstream_private_code.py::test_a_private_file_path_never_reaches_dokimas_repo"
+     }
+    ]
+   },
+   {
+    "text": "When a filed problem quotes a line of the private repo's code, Dokima's public repo shows no such line.",
+    "words": "a filed problem names only what Dokima did wrong",
+    "source": "https://github.com/dokima-dev/dokima/issues/746",
+    "files": [
+     "dokima/upstream.py",
+     "dokima/agent_autopilot.py"
+    ],
+    "edge_cases": [
+     {
+      "case": "The same problem's own words around the quoted line still show.",
+      "test": "tests/test_upstream_private_code.py::test_a_line_of_the_private_code_never_reaches_dokimas_repo"
+     }
+    ]
+   }
+  ],
+  "non_functional": [],
+  "tests": {
+   "746.1": [
+    "tests/test_upstream_private_code.py::test_a_private_file_path_never_reaches_dokimas_repo"
+   ],
+   "746.2": [
+    "tests/test_upstream_private_code.py::test_a_line_of_the_private_code_never_reaches_dokimas_repo"
+   ]
+  },
+  "test_changes": {},
+  "links": {
+   "blocked_by": [],
+   "blocks": [
+    258,
+    309,
+    747,
+    748
+   ],
+   "relates_to": [
+    272
+   ]
+  },
+  "raises": [
+   {
+    "kind": "question",
+    "to": "owner",
+    "label": "Doubt: little code",
+    "text": "Most of the trial is running it on job-hunt. Should this plan carry only the privacy fix? Plan assumes so.",
+    "evidence": "Code already covers it: `plan.py` approvers without CODEOWNERS, `tests.exclude` setting, `upstream.py` filing.",
+    "raised_by": "planner",
+    "id": "P1"
+   },
+   {
+    "kind": "question",
+    "to": "owner",
+    "label": "Trial results untestable here",
+    "text": "Merges, zero manual fixes, two setup steps and approvals only show on the live trial. Sign off by hand?",
+    "evidence": "These happen on the private job-hunt repo; no test here can watch them.",
+    "raised_by": "planner",
+    "id": "P2"
+   },
+   {
+    "kind": "question",
+    "to": "owner",
+    "label": "Names need agent rule",
+    "text": "Code cannot spot companies, people or resume text in a filed problem. Is the agents' rule enough there?",
+    "evidence": "`upstream.py` scrub removes only the repo name, links and issue numbers; agents are told the rest.",
+    "raised_by": "planner",
+    "id": "P3"
+   }
+  ],
+  "answers": []
+ },
+ "check": {
+  "passed": true,
+  "problems": []
+ },
+ "url": "https://github.com/dokima-dev/dokima/issues/746#issuecomment-6276467323"
+}
