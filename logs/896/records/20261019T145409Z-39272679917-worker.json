@@ -1,0 +1,52 @@
+{
+ "role": "worker",
+ "stage": null,
+ "run_id": "39272679917",
+ "commit_before": "a517c64b38325f01a827fd10cc3f195fad271535",
+ "started_by": "dokima-runtime[bot]",
+ "models": [
+  "claude-opus-5-5"
+ ],
+ "report": {
+  "duration_ms": 115761,
+  "turns": 13,
+  "cost_usd": 0.4801396000000001,
+  "tokens_in": 510409,
+  "tokens_out": 4372
+ },
+ "log": "https://github.com/dokima-dev/dokima/blob/logs/logs/896/39272679917-worker.md",
+ "run": "https://github.com/dokima-dev/dokima/actions/runs/39272679917",
+ "handback": {
+  "summary": "Docs and the settings format now list the only three agent keys allowed; job and audit refusal kept.",
+  "criteria": {
+   "896.1": "`role_settings` in `dokima/agents.py` stops on any key outside `DECLARED`, the keys `entry.yml` declares.",
+   "896.2": "`compare_secrets` in `dokima/audit.py` gives the one line from `agents.undeclared` for an undeclared key.",
+   "896.3": "The job's key lookup raises `Stop` with that same line before checking whether the secret is present.",
+   "896.4": "`README.md`, `docs/wiki/Installing.md` and the `dokima/agents.py` docstring name the three keys and say others never reach jobs."
+  },
+  "evidence": "`pytest -q tests/test_declared_keys.py`: 4 passed.",
+  "raises": [
+   {
+    "kind": "blocker",
+    "to": "planner",
+    "label": "Tests left out",
+    "text": "Two older test files name undeclared keys and are not in the plan's test changes, so the full suite fails once they are restored.",
+    "evidence": "Main's `tests/test_agent_codex.py` (`CODEX_KEY`) and `tests/test_agent_kimi.py` (`KIMI_SIGN_IN`): 6 failed.",
+    "raised_by": "worker",
+    "id": "W3"
+   }
+  ]
+ },
+ "check": {
+  "passed": true,
+  "problems": []
+ },
+ "dropped_by_fence": [],
+ "files_changed": [
+  "README.md",
+  "docs/wiki/Installing.md",
+  "dokima/agents.py"
+ ],
+ "branch": "try/issue-896",
+ "url": "https://github.com/dokima-dev/dokima/pull/911#issuecomment-6270119044"
+}
