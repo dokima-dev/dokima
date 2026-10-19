@@ -1,0 +1,103 @@
+{
+ "role": "reviewer",
+ "stage": "pr",
+ "run_id": "39265817661",
+ "commit_before": "9f3a01ecf183954291d28532151ad1e4a40af8ee",
+ "started_by": "dokima-runtime[bot]",
+ "models": [
+  "claude-opus-5-5"
+ ],
+ "report": {
+  "duration_ms": 667866,
+  "turns": 18,
+  "cost_usd": 0.5825959999999999,
+  "tokens_in": 757134,
+  "tokens_out": 4821
+ },
+ "log": "https://github.com/dokima-dev/dokima/blob/logs/logs/896/39265817661-reviewer-pr.md",
+ "run": "https://github.com/dokima-dev/dokima/actions/runs/39265817661",
+ "handback": {
+  "previous_step": {
+   "did": [
+    "Settings may now name only the three declared agent keys.",
+    "The audit and a job name any other key in one line.",
+    "Install docs and earlier tests now use declared names."
+   ],
+   "decided": [
+    "The declared list is checked against the shared workflow's own list."
+   ],
+   "open": [
+    "Setup still accepts any key name; raised as its own issue."
+   ]
+  },
+  "verdict": "approve",
+  "summary": "Approve: undeclared agent keys are refused with one clear line in audit and jobs, and docs say so.",
+  "raises": [],
+  "answers": [
+   {
+    "raise": "W1",
+    "answer": "done",
+    "why": "The owner settled it: only declared names; earlier promises replaced. The pull request follows that."
+   },
+   {
+    "raise": "W2",
+    "answer": "done",
+    "why": "Confirmed: setup still saves any key name, so it can write one jobs refuse.",
+    "searched": [
+     896,
+     884,
+     885,
+     907
+    ],
+    "verdict": "new"
+   }
+  ],
+  "asks": [],
+  "behaviors": [],
+  "edge_cases": [],
+  "tests": [
+   {
+    "test": "tests/test_declared_keys.py::test_the_declared_keys_are_the_ones_entry_yml_declares",
+    "only_its_behavior": true,
+    "why": "Fails if the allowed list drifts from the declared secrets."
+   },
+   {
+    "test": "tests/test_declared_keys.py::test_a_job_naming_an_undeclared_key_fails_with_the_audit_line",
+    "only_its_behavior": true,
+    "why": "Fails without the guard: the key would be returned."
+   },
+   {
+    "test": "tests/test_declared_keys.py::test_a_job_naming_a_declared_key_runs",
+    "only_its_behavior": true,
+    "why": "Good case beside the refusal."
+   },
+   {
+    "test": "tests/test_declared_keys.py::test_the_audit_reports_an_undeclared_key_in_one_line",
+    "only_its_behavior": true,
+    "why": "Key is set, so only the new check reports it; declared key passes."
+   }
+  ],
+  "size": "ok",
+  "boxes": {
+   "dropped": "none",
+   "added": "none",
+   "superseded": [
+    {
+     "old": "Any secret name works for a role's key (698.3, 812.3).",
+     "new": "comment:RezaSoleymanifar 2026-10-19T13:56:47Z",
+     "retired": "812.3"
+    }
+   ],
+   "conflicts": "none",
+   "edges": {
+    "ask": "covered"
+   },
+   "poor_tests": "none"
+  }
+ },
+ "check": {
+  "passed": true,
+  "problems": []
+ },
+ "url": "https://github.com/dokima-dev/dokima/pull/911#issuecomment-6269132542"
+}
