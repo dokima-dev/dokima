@@ -1,0 +1,89 @@
+{
+ "role": "reviewer",
+ "stage": "pr",
+ "run_id": "39277178798",
+ "commit_before": "5277efe20f78388a20c327c1b81ca6c551ea64f0",
+ "started_by": "dokima-runtime[bot]",
+ "models": [
+  "claude-opus-5-5"
+ ],
+ "report": {
+  "duration_ms": 54573,
+  "turns": 6,
+  "cost_usd": 0.312709,
+  "tokens_in": 202080,
+  "tokens_out": 3362
+ },
+ "log": "https://github.com/dokima-dev/dokima/blob/logs/logs/917/39277178798-reviewer-pr.md",
+ "run": "https://github.com/dokima-dev/dokima/actions/runs/39277178798",
+ "handback": {
+  "previous_step": {
+   "did": [
+    "Saving the conversation now asks origin for the records branch with the app's key.",
+    "A save that cannot ask origin now stops and says why.",
+    "Two tests were added: two saves in a row, and origin out of reach."
+   ],
+   "decided": [
+    "The rebase and retry on a rejected push is kept as it was."
+   ],
+   "open": []
+  },
+  "verdict": "block",
+  "summary": "The fix looks right, but the test for two saves in a row passes without the fix too.",
+  "raises": [
+   {
+    "kind": "blocker",
+    "to": "worker",
+    "label": "Ask: weak test",
+    "text": "The two-saves test passes on main: the second save starts an orphan, is rejected, then the retry rescues it. Smallest fix: also assert the save log shows no rejected push.",
+    "evidence": "`test_a_second_runs_conversation_lands_on_top_of_the_first_on_the_records_branch` passes on main; its log shows `[rejected] HEAD -> logs (fetch first)`.",
+    "raised_by": "reviewer",
+    "id": "R1"
+   }
+  ],
+  "answers": [],
+  "asks": [],
+  "behaviors": [],
+  "edge_cases": [],
+  "tests": [
+   {
+    "test": "tests/test_private_repo_start.py::test_a_second_runs_conversation_lands_on_top_of_the_first_on_the_records_branch",
+    "only_its_behavior": false,
+    "why": "It passes on main, so it does not prove the keyed read."
+   },
+   {
+    "test": "tests/test_private_repo_start.py::test_a_records_branch_origin_cannot_be_asked_about_stops_the_save_and_says_why",
+    "only_its_behavior": true,
+    "why": "It fails on main and passes on the branch."
+   }
+  ],
+  "size": "ok",
+  "boxes": {
+   "dropped": "none",
+   "added": [
+    {
+     "what": "A save that cannot ask origin stops and says why",
+     "kind": "needed",
+     "serves": "ask"
+    }
+   ],
+   "superseded": "none",
+   "conflicts": "none",
+   "edges": {
+    "ask": "missing: a second save whose first push is not rejected"
+   },
+   "poor_tests": [
+    {
+     "test": "tests/test_private_repo_start.py::test_a_second_runs_conversation_lands_on_top_of_the_first_on_the_records_branch",
+     "passes_with": "the old anonymous read, rescued by the rebase and retry",
+     "fix": "assert the save log holds no rejected push"
+    }
+   ]
+  }
+ },
+ "check": {
+  "passed": true,
+  "problems": []
+ },
+ "url": "https://github.com/dokima-dev/dokima/pull/921#issuecomment-6270759587"
+}
