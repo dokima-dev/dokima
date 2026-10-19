@@ -1,0 +1,37 @@
+{
+ "role": "worker",
+ "stage": null,
+ "run_id": "39184859132",
+ "commit_before": "87f576014adaa290ada11b8424645ad112d9e302",
+ "started_by": "dokima-runtime[bot]",
+ "models": [
+  "claude-opus-5-5"
+ ],
+ "report": {
+  "duration_ms": 52370,
+  "turns": 9,
+  "cost_usd": 0.2638338,
+  "tokens_in": 249174,
+  "tokens_out": 2129
+ },
+ "log": "https://github.com/dokima-dev/dokima/blob/logs/logs/887/39184859132-worker.md",
+ "run": "https://github.com/dokima-dev/dokima/actions/runs/39184859132",
+ "handback": {
+  "summary": "The all tests check now passes on a repo with no tests, with a No tests yet notice.",
+  "criteria": {
+   "887.1": "`.github/workflows/full-suite.yml`: the final `eval \"$RUN_ALL\"` treats pytest exit 5 as success; other codes pass through.",
+   "887.2": "Same step prints `::notice title=No tests yet::` only on exit 5."
+  },
+  "evidence": "`pytest -q tests/test_all_tests_no_tests.py`: 2 passed in 4.63s"
+ },
+ "check": {
+  "passed": true,
+  "problems": []
+ },
+ "dropped_by_fence": [],
+ "files_changed": [
+  ".github/workflows/full-suite.yml"
+ ],
+ "branch": "try/issue-887",
+ "url": "https://github.com/dokima-dev/dokima/issues/887#issuecomment-6257624819"
+}
