@@ -1,0 +1,77 @@
+{
+ "role": "planner",
+ "stage": null,
+ "run_id": "39184558428",
+ "commit_before": "4a2752c205cd0dbb3174d7e97be3d1864f330e61",
+ "started_by": "dokima-runtime[bot]",
+ "models": [
+  "claude-opus-5-5"
+ ],
+ "report": {
+  "duration_ms": 81124,
+  "turns": 14,
+  "cost_usd": 0.5388678,
+  "tokens_in": 558658,
+  "tokens_out": 5583
+ },
+ "log": "https://github.com/dokima-dev/dokima/blob/logs/logs/887/39184558428-planner.md",
+ "run": "https://github.com/dokima-dev/dokima/actions/runs/39184558428",
+ "handback": {
+  "kind": "user_story",
+  "title": "The all tests check passes with no tests",
+  "summary": "A repo with no tests yet passes the all tests check, and the run says so.",
+  "user_story": "An owner with no tests yet sees the all tests check pass, told the repo has no tests yet.",
+  "acceptance_criteria": [
+   {
+    "text": "When the all tests check runs on a repo with no tests, it succeeds.",
+    "words": "treat \"no tests collected\" as an empty baseline, not a crash, in the testmon baseline and wherever the full suite would hit the same exit code",
+    "source": "https://github.com/dokima-dev/dokima/issues/880",
+    "files": [
+     ".github/workflows/full-suite.yml"
+    ],
+    "edge_cases": [
+     {
+      "case": "Tests whose setup crashes still fail the check.",
+      "test": "tests/test_all_tests_no_tests.py::test_the_all_tests_check_passes_on_an_empty_tests_folder"
+     }
+    ]
+   },
+   {
+    "text": "When the all tests check runs on a repo with no tests, the run shows a notice saying so.",
+    "words": "say on the run that the repo has no tests yet",
+    "source": "https://github.com/dokima-dev/dokima/issues/880",
+    "files": [
+     ".github/workflows/full-suite.yml"
+    ],
+    "edge_cases": [
+     {
+      "case": "A repo with one passing test shows no such notice.",
+      "test": "tests/test_all_tests_no_tests.py::test_the_all_tests_check_says_the_repo_has_no_tests_yet"
+     }
+    ]
+   }
+  ],
+  "non_functional": [],
+  "tests": {
+   "887.1": [
+    "tests/test_all_tests_no_tests.py::test_the_all_tests_check_passes_on_an_empty_tests_folder"
+   ],
+   "887.2": [
+    "tests/test_all_tests_no_tests.py::test_the_all_tests_check_says_the_repo_has_no_tests_yet"
+   ]
+  },
+  "test_changes": {},
+  "links": {
+   "blocked_by": [],
+   "blocks": [],
+   "relates_to": [
+    886
+   ]
+  }
+ },
+ "check": {
+  "passed": true,
+  "problems": []
+ },
+ "url": "https://github.com/dokima-dev/dokima/issues/887#issuecomment-6257583234"
+}
