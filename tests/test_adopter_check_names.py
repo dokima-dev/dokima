@@ -9,7 +9,7 @@ and `Acceptance criteria`. A branch rule requiring the plain names waits forever
 Each test copies the settings file the install ships (`dokima/install/settings.yaml`) into a temp repo as
 `.dokima/settings.yaml`, the way an adopter installs it, and runs the real audit command
 (`python3 -m dokima.audit OWNER/REPO`) from outside against the fake `gh` of tests/fake_gh.py, through
-tests/test_audit_cli.py's Audit helper. One label is always missing, so every run opens a Setup issue whose lines can
+tests/test_audit_cli.py's Audit helper. One label's color always drifts, so every run opens a Setup issue whose lines can
 be read. Dokima's own repo, with no settings file, keeps the plain names; older tests already prove that.
 """
 import os
@@ -30,17 +30,17 @@ ACCEPTANCE = "dokima / acceptance-criteria / Acceptance criteria"
 def setup_lines(tmp_path, name, required, criterion):
     """Runs the audit in an adopter's repo whose main requires REQUIRED; returns Setup issue lines.
 
-    The repo holds the settings file the install ships, and lacks one label, so a Setup issue always opens."""
+    The repo holds the settings file the install ships, and one label's color drifted, so a Setup issue always opens."""
     s = clean()
     s["protection"]["main"] = list(required)
-    del s["labels"]["filed-by-dokima"]
+    s["labels"]["filed-by-dokima"]["color"] = "000000"
     a = Audit(tmp_path / name, s)
     (a.root / ".dokima").mkdir()
     shutil.copy(INSTALL_SETTINGS, a.root / ".dokima" / "settings.yaml")
     a.run(criterion)
     st = a.state()
     made = [w["number"] for w in st["writes"] if w["kind"] == "create"]
-    assert len(made) == 1, f"{criterion}: a missing label should open one Setup issue, it opened {made}\n{a.why()}"
+    assert len(made) == 1, f"{criterion}: a drifted label should open one Setup issue, it opened {made}\n{a.why()}"
     return [l for l in body_lines(st["issues"][str(made[0])]["body"]) if l], a
 
 
