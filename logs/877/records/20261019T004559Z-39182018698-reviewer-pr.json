@@ -1,0 +1,69 @@
+{
+ "role": "reviewer",
+ "stage": "pr",
+ "run_id": "39182018698",
+ "commit_before": "cbcbf39ccfecb8b7ecad202bd999cccc7c666c55",
+ "started_by": "dokima-runtime[bot]",
+ "models": [
+  "claude-opus-5-5"
+ ],
+ "report": {
+  "duration_ms": 63403,
+  "turns": 13,
+  "cost_usd": 0.3061186,
+  "tokens_in": 478612,
+  "tokens_out": 3989
+ },
+ "log": "https://github.com/dokima-dev/dokima/blob/logs/logs/877/39182018698-reviewer-pr.md",
+ "run": "https://github.com/dokima-dev/dokima/actions/runs/39182018698",
+ "handback": {
+  "previous_step": {
+   "did": [
+    "The testmon baseline runs pytest only over the settings' tests folder, default tests.",
+    "A new test runs that line and checks the folder it names."
+   ],
+   "decided": [
+    "The All tests run was skipped for the draft, so no code changed this round."
+   ],
+   "open": [
+    "The card shows a skipped All tests run as failed, already filed."
+   ]
+  },
+  "verdict": "approve",
+  "summary": "The testmon baseline now runs only the tests folder, as asked, and a test proves it.",
+  "raises": [],
+  "answers": [
+   {
+    "raise": "W2",
+    "answer": "disagree",
+    "why": "Already open as #771 and #658, so no new issue is needed."
+   }
+  ],
+  "asks": [],
+  "behaviors": [],
+  "edge_cases": [],
+  "tests": [
+   {
+    "test": "tests/test_testmon.py::test_baseline_runs_only_the_tests_folder",
+    "only_its_behavior": true,
+    "why": "Fails on main's line, and on a fixed folder that ignores the setting."
+   }
+  ],
+  "size": "ok",
+  "boxes": {
+   "dropped": "none",
+   "added": "none",
+   "superseded": "none",
+   "conflicts": "none",
+   "edges": {
+    "ask": "covered"
+   },
+   "poor_tests": "none"
+  }
+ },
+ "check": {
+  "passed": true,
+  "problems": []
+ },
+ "url": "https://github.com/dokima-dev/dokima/pull/878#issuecomment-6257240806"
+}
