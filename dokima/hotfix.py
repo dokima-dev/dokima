@@ -6,6 +6,7 @@ review sends it back to planning, the planner runs and the issue follows the nor
 
     python3 -m dokima.hotfix labeled N         # exits 0 when issue N carries the hotfix label, 1 otherwise
     python3 -m dokima.hotfix prompt on|off F   # keeps the prompt's hotfix sections in file F, or drops them
+    python3 -m dokima.hotfix label             # prints the hotfix label's name
 """
 import json
 import os
@@ -64,16 +65,22 @@ def lane_prompt(text, on):
 def back_to_planning(repo, number, rec):
     """Say on the issue why its hotfix goes back to planning.
 
-    The comment lists the code review's blockers for the planner."""
+    The comment lists the blockers for the planner: the code review's, or the worker's when the ask needs a design
+    choice (#864)."""
+    why = "the worker found the ask needs a design choice" if rec.get("role") == "worker" else \
+        "code review found the change bigger than the ask"
     blockers = [r.get("text", "") for r in (rec.get("handback") or {}).get("raises") or []
                 if isinstance(r, dict) and r.get("kind") == "blocker" and r.get("to") == "planner"]
     lines = "\n".join(f"- {t}" for t in blockers if t)
     agent_github.gh("issue", "comment", str(number), "-R", repo, "--body",
-                    f"This hotfix goes back to normal planning: code review found the change bigger than the ask.\n\n{lines}\n")
+                    f"This hotfix goes back to normal planning: {why}.\n\n{lines}\n")
 
 
 def main(argv):
-    """labeled N | prompt on|off FILE."""
+    """labeled N | prompt on|off FILE | label."""
+    if argv == ["label"]:
+        print(label())
+        return 0
     if argv[:1] == ["labeled"] and len(argv) == 2:
         return 0 if labeled(os.environ["GITHUB_REPOSITORY"], argv[1]) else 1
     if argv[:1] == ["prompt"] and len(argv) == 3:

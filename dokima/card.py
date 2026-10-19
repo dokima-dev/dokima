@@ -569,11 +569,57 @@ def done_row(repo, found, all_tests, planned=False):
             f"Owner approval{required}")
 
 
+# The river's Next lines once the merge gate passed: the owner approves, or autopilot merges or tries to (#596).
+GATE_PASSED = ("All tests passed with main's newest commit.", "Autopilot merged PR", "is in the merge queue",
+               "waits for your approval before it merges", "Autopilot could not confirm PR",
+               "Autopilot did not merge the pull request")
+
+
+def gate_result(found, review):
+    """passed or failed: the merge gate, as code review's Next line says.
+
+    None before the gate ran on `review`."""
+    from dokima import agent
+    from dokima.agent_records import gate_failed
+    if (found.get("pr") or {}).get("merged"):
+        return "passed"
+    if not review:
+        return None
+    posted = [c for c in found.get("items") or [] if agent.records([c]) == [review]]
+    if not posted:
+        return None
+    if gate_failed(posted[-1]):
+        return "failed"
+    text = posted[-1].get("body") or ""
+    nxt = text.split("**Next:**", 1)[1] if "**Next:**" in text else ""
+    return "passed" if any(p in nxt for p in GATE_PASSED) else None
+
+
+def hotfix_line(repo, issue, found, page="issue"):
+    """A hotfix's one card line: state, ask, pull request, code review and gate.
+
+    The ask is the owner's, word for word, its lines joined into one."""
+    ask = " ".join(l.strip() for l in body.ask(issue.get("current_body") or "").splitlines() if l.strip())
+    parts = [status_line(repo, *status(issue, found)), escape(ask)]
+    if page == "pr":
+        parts.append(issue["url"])
+    pr = found.get("pr")
+    if pr:
+        parts.append(f"https://github.com/{repo}/pull/{pr['number']}")
+    review = code_review(found.get("recs") or [])
+    if review:
+        parts.append("code review " + ("approved" if review["handback"].get("verdict") == "approve" else "blocked"))
+    gate = gate_result(found, review)
+    if gate:
+        parts.append(f"merge gate {gate}")
+    return " · ".join(parts)
+
+
 def render(repo, issue, found, page="issue"):
     """The card for `issue`, drawn only from `found`: the agents' records, the PR, its latest commit's checks, its
     reviews, the code owners, the plan's tests and, when given, the latest worker run. It is the same on either `page`, but for the
     PR's top row, which also links the issue."""
-    from dokima import agent
+    from dokima import agent, hotfix
     recs, pr, check_runs, worker = found["recs"], found["pr"], found["check_runs"], found.get("worker")
     by_key = checks_by_key(check_runs)
     all_tests = next((r for r in plain(check_runs) if r["name"] == ALL_TESTS), None)
@@ -585,6 +631,9 @@ def render(repo, issue, found, page="issue"):
     gh_links = found.get("blocking")
     if gh_links is not None:
         lines += [f"<!-- dokima-blocking: {json.dumps(gh_links)} -->"]
+    if not h and hotfix.in_lane(repo, issue["number"], recs):
+        # A hotfix's card is one line: its state, the ask, the pull request, the code review and the merge gate (#864).
+        return "\n".join(lines + [hotfix_line(repo, issue, found, page), plan.CARD_END])
     if h and isinstance(h.get("summary"), str) and h["summary"].strip():
         lines += [escape(h["summary"].strip()), ""]
     lines += [status_line(repo, *status(issue, found)), ""]

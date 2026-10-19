@@ -64,4 +64,6 @@ Where this prompt speaks of the plan, its criteria or the planner's tests, read 
 - Your hand-back check takes `-` in place of the plan.
 - When the fix needs more than the ask, build only the ask and say so in your summary; the code review sends a change
   bigger than the ask back to planning.
+- When the ask needs a design choice (it can be read more than one way, or settling it is not a small fix), build
+  nothing and raise a blocker for the planner saying which choice; code sends the issue back to normal planning.
 <!-- /hotfix -->

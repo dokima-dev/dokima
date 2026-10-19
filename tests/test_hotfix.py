@@ -317,14 +317,18 @@ def test_a_finished_hotfix_worker_starts_code_review_on_its_pull_request(record_
     """When a hotfix worker finishes, its pull request opens and code review starts on it.
 
     Proves 863.5. After the hotfix worker's run on #57, a draft pull request must have been opened from
-    try/issue-57, and exactly one signal with Dokima's app key must start the reviewer at the pr stage for #57."""
+    try/issue-57, and exactly one signal with Dokima's app key must start the reviewer at the pr stage for #57.
+    Proves 864.9 too: that pull request's body must be `Closes #57`, so it links the issue it answers."""
     record_property("proves", "863.5")
+    record_property("proves", "864.9")
     r = Hotfix(tmp_path, "worker")
     assert not r.failed, f"863.5: the hotfix worker's run failed; {r.why()}"
     opened = [c for c in r.calls() if c[:2] == ["pr", "create"]]
     assert len(opened) == 1 and f"try/issue-{ts.N}" in opened[0] and "--draft" in opened[0], \
         f"863.5: the hotfix worker did not open one draft pull request from try/issue-57: {opened}"
     assert r.signals() == [("reviewer", "pr", ts.N)], f"863.5: code review did not start once on the pull request: {r.signals()}"
+    body = [c[i + 1] for c in opened for i, x in enumerate(c[:-1]) if x in ("--body", "-b")]
+    assert body == [f"Closes #{ts.N}"], f"864.9: the hotfix pull request does not link issue #57; its body: {body}"
 
 
 def test_code_review_of_a_hotfix_gets_the_issue_text_as_the_ask(record_property, tmp_path):
@@ -446,8 +450,10 @@ def test_hotfix_prompts_name_nothing_from_dokimas_own_repo(record_property, tmp_
     Proves 863.10. Runs the hotfix worker, then code review of its pull request, on #57 in repo o/r. Each agent must
     start with a prompt that points it to ask.md, so the hotfix lane's words are there to read. Neither prompt may
     name Dokima's GitHub home, a path into Dokima's code or topic files, its workflow file, or an issue number other
-    than #57, its pull request #60 and the shared example #164."""
+    than #57, its pull request #60 and the shared example #164. Proves 864.10 too: the same check covers every hotfix
+    word the later story adds to these prompts."""
     record_property("proves", "863.10")
+    record_property("proves", "864.10")
     worker = Hotfix(tmp_path / "worker", "worker")
     review = Hotfix(tmp_path / "review", "reviewer", "pr",
                     comments=[ts.record_comment(worker_record(), "2026-10-07T10:30:00Z")], review=APPROVE, built=True)
