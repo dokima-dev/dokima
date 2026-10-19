@@ -74,3 +74,14 @@ def test_a_build_starts_from_todays_main(record_property):
                   and '"$ROLE" = worker' in line), None)
     assert merge, "123.1: the worker's branch is not brought up to today's main"
     assert '"$ROLE" = worker' in merge, "123.1: the worker's branch is not brought up to today's main"
+
+
+def test_missing_key_errors_name_repo_secrets_not_the_keys_environment():
+    """A missing bot or model key points adopters at repo secrets, not an environment (#884)."""
+    text = TEXT["agent.yml"]
+    errors = [line for line in text.splitlines()
+              if line.rstrip().endswith("> /tmp/why.txt") and ("DOKIMA_APP_KEY" in line or "model key" in line)]
+    assert len(errors) == 2, errors
+    for line in errors:
+        assert "keys environment" not in line and "Environments, keys" not in line, line
+        assert "repo secret" in line, line
