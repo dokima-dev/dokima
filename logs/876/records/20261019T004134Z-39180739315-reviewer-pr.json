@@ -1,0 +1,110 @@
+{
+ "role": "reviewer",
+ "stage": "pr",
+ "run_id": "39180739315",
+ "commit_before": "797c5c2424b80fa44bf79de185a55056f30f568d",
+ "started_by": "dokima-runtime[bot]",
+ "models": [
+  "claude-opus-5-5"
+ ],
+ "report": {
+  "duration_ms": 59506,
+  "turns": 5,
+  "cost_usd": 0.6086801999999999,
+  "tokens_in": 213699,
+  "tokens_out": 1243
+ },
+ "log": "https://github.com/dokima-dev/dokima/blob/logs/logs/876/39180739315-reviewer-pr.md",
+ "run": "https://github.com/dokima-dev/dokima/actions/runs/39180739315",
+ "handback": {
+  "previous_step": {
+   "did": [
+    "The setup docs now tell adopters to add both keys as repo secrets.",
+    "The setup audit now reports each key missing from the repo secrets.",
+    "The app now asks to read secret names, never their values."
+   ],
+   "decided": [
+    "The audit also checks any other key the settings name for a role."
+   ],
+   "open": [
+    "Workflow error messages still point adopters at the keys environment."
+   ]
+  },
+  "verdict": "approve",
+  "summary": "The docs say repo secrets and the audit checks them there; tests prove both.",
+  "raises": [],
+  "answers": [
+   {
+    "raise": "W1",
+    "answer": "done",
+    "why": "Agreed: workflow messages still name the keys environment; worth its own issue, workflows are off limits here.",
+    "searched": [
+     876,
+     860,
+     326,
+     284,
+     280
+    ],
+    "verdict": "new"
+   },
+   {
+    "raise": "W2",
+    "answer": "done",
+    "why": "Agreed: this repo will see the new audit line until its keys are repo secrets too.",
+    "searched": [
+     876,
+     860,
+     326,
+     284,
+     280
+    ],
+    "verdict": "new"
+   }
+  ],
+  "asks": [],
+  "behaviors": [],
+  "edge_cases": [],
+  "tests": [
+   {
+    "test": "tests/test_audit_secrets.py::test_a_key_missing_from_the_repo_secrets_is_reported",
+    "only_its_behavior": true,
+    "why": "Fails on main; passes the good case and catches each missing key."
+   },
+   {
+    "test": "tests/test_audit_secrets.py::test_the_audit_checks_the_key_the_settings_name",
+    "only_its_behavior": true,
+    "why": "Fails on main; proves a role's own key is checked."
+   },
+   {
+    "test": "tests/test_audit_secrets.py::test_unreadable_repo_secrets_say_why",
+    "only_its_behavior": true,
+    "why": "Fails on main; a refused read says GitHub's reason."
+   },
+   {
+    "test": "tests/test_audit_secrets.py::test_the_install_docs_say_repo_secrets_not_the_keys_environment",
+    "only_its_behavior": true,
+    "why": "Fails on main; both install docs now say repo secrets."
+   }
+  ],
+  "size": "ok",
+  "boxes": {
+   "dropped": "none",
+   "added": [
+    {
+     "what": "App permission to read secret names",
+     "kind": "needed",
+     "serves": "audit checks repo secrets"
+    }
+   ],
+   "superseded": "none",
+   "conflicts": "none",
+   "edges": "covered",
+   "poor_tests": "none"
+  }
+ },
+ "check": {
+  "passed": true,
+  "problems": []
+ },
+ "url": "https://github.com/dokima-dev/dokima/pull/879#issuecomment-6257058521"
+}
