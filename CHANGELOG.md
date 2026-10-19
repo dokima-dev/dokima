@@ -2,6 +2,16 @@
 
 What each version of Dokima does.
 
+## v0.1.2
+
+Onboarding fixes for repos beyond Dokima's own.
+
+- The install file starts on a push to any branch, so repos whose default branch is not `main` work (#874).
+- Keys go in repo secrets, since environment secrets never reach jobs run from this repo; the audit reports a missing key by name (#876).
+- The testmon baseline runs only the tests folder the settings name (#877).
+- The testmon baseline passes on a repo with no tests yet (#886).
+- The all tests check passes on a repo with no tests yet (#887).
+
 ## v0.1.1
 
 Fixes merged since v0.1.0.

@@ -16,5 +16,5 @@ on:
 permissions: {contents: read, issues: write, pull-requests: read, actions: read, checks: read}
 jobs:
   dokima:
-    uses: dokima-dev/dokima/.github/workflows/entry.yml@v0.1.1
+    uses: dokima-dev/dokima/.github/workflows/entry.yml@v0.1.2
     secrets: inherit
