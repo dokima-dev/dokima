@@ -1,0 +1,70 @@
+{
+ "role": "reviewer",
+ "stage": "pr",
+ "run_id": "39265951748",
+ "commit_before": "7edbe673a1f3508881a2b00c4e47ffa7c6f28072",
+ "started_by": "dokima-runtime[bot]",
+ "models": [
+  "claude-opus-5-5"
+ ],
+ "report": {
+  "duration_ms": 19639,
+  "turns": 3,
+  "cost_usd": 0.6756684000000002,
+  "tokens_in": 180093,
+  "tokens_out": 846
+ },
+ "log": "https://github.com/dokima-dev/dokima/blob/logs/logs/745/39265951748-reviewer-pr.md",
+ "run": "https://github.com/dokima-dev/dokima/actions/runs/39265951748",
+ "handback": {
+  "previous_step": {
+   "did": [
+    "The assign and test baseline calls now get the App's key by name.",
+    "Both workflows now declare that key, as main's other calls do."
+   ],
+   "decided": [
+    "No code change was needed for the key test; it already passed."
+   ],
+   "open": []
+  },
+  "verdict": "approve",
+  "summary": "The build now hands keys over by name, as the owner asked, and every test passes.",
+  "raises": [],
+  "answers": [],
+  "asks": [],
+  "boxes": {
+   "dropped": "none",
+   "added": [
+    {
+     "what": "The assign and test baseline workflows declare the App's key and get it by name.",
+     "kind": "needed",
+     "serves": "745.10"
+    }
+   ],
+   "superseded": "none",
+   "conflicts": "none",
+   "edges": {
+    "745.1": "covered",
+    "745.2": "covered",
+    "745.3": "covered",
+    "745.4": "covered",
+    "745.5": "covered",
+    "745.6": "covered",
+    "745.7": "covered",
+    "745.8": "covered",
+    "745.9": "covered",
+    "745.10": "covered"
+   },
+   "poor_tests": "none"
+  },
+  "behaviors": [],
+  "edge_cases": [],
+  "tests": [],
+  "size": "ok"
+ },
+ "check": {
+  "passed": true,
+  "problems": []
+ },
+ "url": "https://github.com/dokima-dev/dokima/pull/872#issuecomment-6269151946"
+}
