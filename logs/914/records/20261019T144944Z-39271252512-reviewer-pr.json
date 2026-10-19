@@ -1,0 +1,92 @@
+{
+ "role": "reviewer",
+ "stage": "pr",
+ "run_id": "39271252512",
+ "commit_before": "9c78573f7411209dd5349149162f45dc37430398",
+ "started_by": "dokima-runtime[bot]",
+ "models": [
+  "claude-opus-5-5"
+ ],
+ "report": {
+  "duration_ms": 305518,
+  "turns": 18,
+  "cost_usd": 0.6807589999999999,
+  "tokens_in": 846623,
+  "tokens_out": 7589
+ },
+ "log": "https://github.com/dokima-dev/dokima/blob/logs/logs/914/39271252512-reviewer-pr.md",
+ "run": "https://github.com/dokima-dev/dokima/actions/runs/39271252512",
+ "handback": {
+  "previous_step": {
+   "did": [
+    "Runs now ask the repo for the issue's branch and main with the app's key.",
+    "A run stops and says why when the repo cannot answer.",
+    "Saving the conversation now retries as the bot, so no empty name error."
+   ],
+   "decided": [
+    "A short-lived key is made just for the branch step and revoked after it."
+   ],
+   "open": [
+    "Saving the conversation still asks for the records branch with no key."
+   ]
+  },
+  "verdict": "approve",
+  "summary": "The fix ships the ask: private repos keep the issue's branch, and a repo error stops the run.",
+  "raises": [],
+  "answers": [
+   {
+    "raise": "W1",
+    "answer": "done",
+    "why": "Agreed: that check runs after the push step, so it lies outside this ask and is worth its own issue.",
+    "searched": [
+     914,
+     825,
+     560
+    ],
+    "verdict": "new"
+   }
+  ],
+  "asks": [],
+  "behaviors": [],
+  "edge_cases": [],
+  "tests": [
+   {
+    "test": "tests/test_private_repo_start.py::test_a_planner_rerun_starts_from_the_existing_branch_and_its_push_lands_on_top",
+    "only_its_behavior": true,
+    "why": "Fails on main's branch step: the rerun starts from main."
+   },
+   {
+    "test": "tests/test_private_repo_start.py::test_a_plan_review_sees_the_plans_tests",
+    "only_its_behavior": true,
+    "why": "Fails on main's branch step: the review never sees the plan's test."
+   },
+   {
+    "test": "tests/test_private_repo_start.py::test_a_remote_error_is_reported_not_taken_for_no_branch",
+    "only_its_behavior": true,
+    "why": "Fails on main's step; also fails when the error prints the key."
+   }
+  ],
+  "size": "ok",
+  "boxes": {
+   "dropped": "none",
+   "added": [
+    {
+     "what": "Existing workflow tests now play the new key step before the branch step",
+     "kind": "needed",
+     "serves": "ask"
+    }
+   ],
+   "superseded": "none",
+   "conflicts": "none",
+   "edges": {
+    "ask": "covered"
+   },
+   "poor_tests": "none"
+  }
+ },
+ "check": {
+  "passed": true,
+  "problems": []
+ },
+ "url": "https://github.com/dokima-dev/dokima/pull/916#issuecomment-6269919480"
+}
