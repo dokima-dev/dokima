@@ -1,0 +1,106 @@
+{
+ "role": "reviewer",
+ "stage": "pr",
+ "run_id": "39198617141",
+ "commit_before": "36f824452f5f3f1e89c1addb39fe7f06af8acf45",
+ "started_by": "dokima-runtime[bot]",
+ "models": [
+  "claude-opus-5-5"
+ ],
+ "report": {
+  "duration_ms": 12521,
+  "turns": 3,
+  "cost_usd": 0.7828799999999998,
+  "tokens_in": 193075,
+  "tokens_out": 795
+ },
+ "log": "https://github.com/dokima-dev/dokima/blob/logs/logs/897/39198617141-reviewer-pr.md",
+ "run": "https://github.com/dokima-dev/dokima/actions/runs/39198617141",
+ "handback": {
+  "previous_step": {
+   "did": [
+    "Each shared workflow now declares the secrets it reads.",
+    "Every inner call now hands secrets over by name, not inherit.",
+    "Adds tests catching inherit or an undeclared secret; releases v0.1.4."
+   ],
+   "decided": [
+    "The assign call passes no secrets, since assign reads none."
+   ],
+   "open": [
+    "An older key safety test now fails on the branch."
+   ]
+  },
+  "verdict": "block",
+  "summary": "The fix is right, but one older key safety test now fails, so the full suite is red.",
+  "raises": [
+   {
+    "kind": "blocker",
+    "to": "worker",
+    "label": "Older test now red",
+    "text": "A test that passed on main now fails: the agent call inside commands names secrets outside the keys safe. Make every test pass, keeping the safe rule.",
+    "evidence": "`tests/test_keys.py::test_every_job_that_uses_a_key_takes_it_from_the_main_only_safe` fails on branch: `commands.yml:run reads a key outside the safe`; passes on main.",
+    "raised_by": "reviewer",
+    "id": "R1"
+   }
+  ],
+  "answers": [
+   {
+    "raise": "W1",
+    "answer": "disagree",
+    "why": "By design: the README tells adopters naming Codex or Kimi to add that key's line themselves."
+   }
+  ],
+  "asks": [],
+  "behaviors": [],
+  "edge_cases": [],
+  "tests": [
+   {
+    "test": "tests/test_secrets_by_name.py::test_entry_passes_secrets_by_name_to_every_inner_workflow",
+    "only_its_behavior": true,
+    "why": "Fails on main's entry file, which says inherit."
+   },
+   {
+    "test": "tests/test_secrets_by_name.py::test_inner_workflows_pass_secrets_by_name_too",
+    "only_its_behavior": true,
+    "why": "Fails on main, where commands calls agent with inherit."
+   },
+   {
+    "test": "tests/test_secrets_by_name.py::test_a_dropped_inner_secret_is_caught",
+    "only_its_behavior": true,
+    "why": "Shows inherit and undeclared secrets caught, by-name passes."
+   },
+   {
+    "test": "tests/test_newest_release.py::test_changelog_has_v014_on_top",
+    "only_its_behavior": true,
+    "why": "Checks v0.1.4 is the newest changelog heading."
+   }
+  ],
+  "size": "ok",
+  "boxes": {
+   "dropped": "none",
+   "added": [
+    {
+     "what": "Older tests adjusted for named secrets and the new newest version",
+     "kind": "needed",
+     "serves": "ask"
+    },
+    {
+     "what": "README and wiki name v0.1.4",
+     "kind": "needed",
+     "serves": "ask"
+    }
+   ],
+   "superseded": "none",
+   "conflicts": "none",
+   "edges": {
+    "ask": "covered"
+   },
+   "poor_tests": "none"
+  }
+ },
+ "check": {
+  "passed": true,
+  "problems": []
+ },
+ "url": "https://github.com/dokima-dev/dokima/pull/898#issuecomment-6259521251"
+}
