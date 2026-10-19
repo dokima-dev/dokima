@@ -1,0 +1,100 @@
+{
+ "role": "reviewer",
+ "stage": "plan",
+ "run_id": "39184734291",
+ "commit_before": "87f576014adaa290ada11b8424645ad112d9e302",
+ "started_by": "dokima-runtime[bot]",
+ "models": [
+  "claude-opus-5-5"
+ ],
+ "report": {
+  "duration_ms": 42257,
+  "turns": 8,
+  "cost_usd": 0.3353058,
+  "tokens_in": 245251,
+  "tokens_out": 3582
+ },
+ "log": "https://github.com/dokima-dev/dokima/blob/logs/logs/887/39184734291-reviewer-plan.md",
+ "run": "https://github.com/dokima-dev/dokima/actions/runs/39184734291",
+ "handback": {
+  "previous_step": {
+   "did": [
+    "The planner wrote two criteria: the check passes with no tests, and says so.",
+    "The planner added two tests that run the real all tests job on temp repos."
+   ],
+   "decided": [
+    "The baseline part of the ask is left to its sibling issue."
+   ],
+   "open": []
+  },
+  "verdict": "approve",
+  "summary": "The plan carries both asks for the all tests check, and both tests fail today for the right reason.",
+  "raises": [],
+  "answers": [],
+  "asks": [
+   {
+    "ask": "treat \"no tests collected\" as an empty baseline, not a crash, in the testmon baseline and wherever the full suite would hit the same exit code",
+    "source": "https://github.com/dokima-dev/dokima/issues/880",
+    "criterion": "887.1"
+   },
+   {
+    "ask": "say on the run that the repo has no tests yet",
+    "source": "https://github.com/dokima-dev/dokima/issues/880",
+    "criterion": "887.2"
+   }
+  ],
+  "behaviors": [
+   {
+    "criterion": "887.1",
+    "one_behavior": true,
+    "why": "One result: the check succeeds on a repo with no tests."
+   },
+   {
+    "criterion": "887.2",
+    "one_behavior": true,
+    "why": "One result: the run shows a notice that there are no tests."
+   }
+  ],
+  "edge_cases": [
+   {
+    "criterion": "887.1",
+    "cut": [],
+    "missing": []
+   },
+   {
+    "criterion": "887.2",
+    "cut": [],
+    "missing": []
+   }
+  ],
+  "tests": [
+   {
+    "test": "tests/test_all_tests_no_tests.py::test_the_all_tests_check_passes_on_an_empty_tests_folder",
+    "only_its_behavior": true,
+    "why": "Runs the real job; fails today on exit 5; a crashing setup must still fail."
+   },
+   {
+    "test": "tests/test_all_tests_no_tests.py::test_the_all_tests_check_says_the_repo_has_no_tests_yet",
+    "only_its_behavior": true,
+    "why": "Fails today with no notice; a repo with one test must show none."
+   }
+  ],
+  "size": "ok",
+  "boxes": {
+   "dropped": "none",
+   "added": "none",
+   "superseded": "none",
+   "conflicts": "none",
+   "edges": {
+    "887.1": "covered",
+    "887.2": "covered"
+   },
+   "poor_tests": "none"
+  }
+ },
+ "check": {
+  "passed": true,
+  "problems": []
+ },
+ "url": "https://github.com/dokima-dev/dokima/issues/887#issuecomment-6257606402"
+}
