@@ -1,0 +1,45 @@
+{
+ "role": "worker",
+ "stage": null,
+ "run_id": "39260806333",
+ "commit_before": "5695a04e7410571b3dc1bb3f11295a78131e5c35",
+ "started_by": "dokima-runtime[bot]",
+ "models": [
+  "claude-opus-5-5"
+ ],
+ "report": {
+  "duration_ms": 63328,
+  "turns": 15,
+  "cost_usd": 0.576464,
+  "tokens_in": 573470,
+  "tokens_out": 5392
+ },
+ "log": "https://github.com/dokima-dev/dokima/blob/logs/logs/907/39260806333-worker.md",
+ "run": "https://github.com/dokima-dev/dokima/actions/runs/39260806333",
+ "handback": {
+  "summary": "Built nothing: the setup audit's key check needs a workflow change and a design choice, so this goes to planning.",
+  "criteria": {
+   "ask": "Not built: the key check at setup cannot reach the key without changing the audit workflow."
+  },
+  "evidence": "No tests run; no code changed.",
+  "raises": [
+   {
+    "kind": "blocker",
+    "to": "planner",
+    "label": "Needs a design choice",
+    "text": "The setup audit cannot see the agent key, so checking it needs workflow changes and a choice of test call per agent.",
+    "evidence": "`.github/workflows/audit.yml` passes only `DOKIMA_APP_KEY` and installs no agent; `dokima/audit.py` reads secret names only.",
+    "raised_by": "worker",
+    "id": "W1"
+   }
+  ]
+ },
+ "check": {
+  "passed": true,
+  "problems": []
+ },
+ "dropped_by_fence": [],
+ "files_changed": [],
+ "branch": "try/issue-907",
+ "url": "https://github.com/dokima-dev/dokima/issues/907#issuecomment-6268431486"
+}
