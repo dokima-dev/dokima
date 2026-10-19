@@ -67,15 +67,21 @@ jobs:
       # non-zero exit is a crash and fails this job, so a missing baseline is never silent. testmon needs pytest's
       # cache plugin, so it is not turned off here. Only the tests folder the settings name, as the full suite runs:
       # test files elsewhere in the repo may need what the suite never installs (#877). No tests collected (exit 5) is a
-      # repo with no tests yet: its baseline is empty, and the run says so (#886).
-      - if: env.TESTS_AFFECTED != 'all'
+      # repo with no tests yet: its baseline is empty, and the run says so (#886). No tests folder at all records
+      # nothing and passes, as the all tests check does; the file pattern is the settings' too (#928).
+      - id: baseline
+        if: env.TESTS_AFFECTED != 'all'
         run: |
-          rc=0; python3 -m pytest -q --testmon "${TESTS_DIR:-tests}" || rc=$?
-          if [ "$rc" -eq 5 ]; then echo "::notice title=No tests yet::The repo has no tests yet, so the testmon baseline is empty."
+          dir=${TESTS_DIR:-tests}
+          rc=0; python3 -m pytest -q --testmon -o python_files="${TESTS_FILE_PATTERN:-test_*.py}" "$dir" || rc=$?
+          # pytest exits 4 when the folder is missing.
+          if [ ! -d "$dir" ] && [ "$rc" -eq 4 ]; then rm -f .testmondata; echo "recorded=no" >> "$GITHUB_OUTPUT"
+            echo "::notice title=No tests yet::No tests yet: no $dir folder, so no baseline"
+          elif [ "$rc" -eq 5 ]; then echo "::notice title=No tests yet::The repo has no tests yet, so the testmon baseline is empty."
           elif [ "$rc" -ne 0 ] && [ "$rc" -ne 1 ]; then exit "$rc"; fi
-      - if: env.TESTS_AFFECTED != 'all'
+      - if: env.TESTS_AFFECTED != 'all' && steps.baseline.outputs.recorded != 'no'
         run: test -s .testmondata || { echo "::error title=No testmon baseline::pytest --testmon wrote no .testmondata"; exit 1; }
-      - if: env.TESTS_AFFECTED != 'all'
+      - if: env.TESTS_AFFECTED != 'all' && steps.baseline.outputs.recorded != 'no'
         uses: actions/cache/save@v4
         with:
           path: .testmondata

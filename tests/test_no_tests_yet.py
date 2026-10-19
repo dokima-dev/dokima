@@ -70,3 +70,19 @@ def test_the_baseline_says_the_repo_has_no_tests_yet(tmp_path, record_property):
     assert not notices(b), \
         f"886.2: the baseline says no tests yet on a repo with one passing test:\n{b.tail()}"
 
+
+
+def test_the_baseline_passes_with_no_tests_folder_and_records_one_with_tests(tmp_path):
+    """#928: no tests folder passes with a notice; a repo with tests still records."""
+    settings = "tests:\n  dir: spec\n  file_pattern: check_*.py\n"
+    b = box(tmp_path / "none", {".dokima/settings.yaml": settings, "tests/test_one.py": ONE["tests/test_one.py"]})
+    assert b.run("testmon.yml", "baseline", event="push") == "success", \
+        f"a repo with no spec folder failed the baseline:\n{b.tail()}"
+    assert any("No tests yet: no spec folder, so no baseline" in l for l in notices(b)), \
+        f"no notice of no tests folder:\n{b.tail()}"
+    assert "cache-saved" not in b.lines(), f"a baseline was saved with no tests folder; log {b.lines()}"
+    b = box(tmp_path / "some", {".dokima/settings.yaml": settings, "spec/check_one.py": ONE["tests/test_one.py"]})
+    assert b.run("testmon.yml", "baseline", event="push") == "success", \
+        f"a repo with tests failed the baseline:\n{b.tail()}"
+    assert "1 passed" in "\n".join(b.log), f"the settings' file pattern collected no test:\n{b.tail()}"
+    assert "cache-saved" in b.lines(), f"a repo with tests saved no .testmondata; log {b.lines()}"
