@@ -74,15 +74,15 @@ def workflow_job_names():
 # 282.1: one manifest module declares every setting Dokima needs
 
 def test_the_manifest_declares_every_label_dokima_uses(record_property):
-    """The manifest declares exactly the labels Dokima uses: autopilot, filed-by-dokima.
+    """The manifest declares exactly the labels Dokima uses: autopilot, filed-by-dokima, hotfix.
 
     Proves 282.1. Each has a six-digit hex color and a description, and the board's own label name (autopilot) is among
     them. No label sets priority, so there is no high or parked label."""
     record_property("proves", "282.1")
     m = manifest("282.1")
     from dokima import board
-    assert set(m.LABELS) == {"autopilot", "filed-by-dokima"}, \
-        f"282.1: the manifest declares the labels {sorted(m.LABELS)}, not autopilot, filed-by-dokima"
+    assert set(m.LABELS) == {"autopilot", "filed-by-dokima", "hotfix"}, \
+        f"282.1: the manifest declares the labels {sorted(m.LABELS)}, not autopilot, filed-by-dokima, hotfix"
     for name, label in m.LABELS.items():
         color = label.get("color", "")
         assert len(color) == 6 and all(c in "0123456789abcdefABCDEF" for c in color), \

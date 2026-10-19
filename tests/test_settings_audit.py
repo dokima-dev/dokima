@@ -30,6 +30,7 @@ ROOT = os.path.abspath(os.path.join(os.path.dirname(__file__), ".."))
 sys.path.insert(0, ROOT)
 sys.path.insert(0, os.path.dirname(__file__))
 from test_audit_cli import Audit, FORBIDDEN, body_lines, clean, one_line  # noqa: E402
+from dokima import manifest  # noqa: E402
 
 APP = 1  # the fake gh's app id
 QUEUE = re.compile(r"merge queue", re.I)
@@ -92,7 +93,7 @@ def test_the_branch_rule_is_checked_against_the_required_checks_setting(record_p
 def test_with_the_merge_queue_off_the_audit_never_asks_for_one(record_property, tmp_path):
     """With the merge queue off in settings, the Setup issue never mentions a merge queue.
 
-    Dokima's app is on main's review exemption and the repo has no merge queue; one label is missing, so a Setup issue
+    Dokima's app is on main's review exemption and the repo has no merge queue; one label's color is off, so a Setup issue
     always opens. With the default settings the audit asks for the app on the merge queue's bypass list. With
     `merge.queue: false` no line of the Setup issue mentions a merge queue, and neither does it when GitHub refuses to
     list the repo's rulesets. Proves 784.2.
@@ -103,13 +104,13 @@ def test_with_the_merge_queue_off_the_audit_never_asks_for_one(record_property, 
         s = clean()
         s["review_bypass_apps"] = [APP]
         s["rulesets"] = []
-        del s["labels"]["filed-by-dokima"]
+        s["labels"]["filed-by-dokima"]["color"] = "000000"
         if fail:
             s["fail"] = {"rulesets": fail}
         return s
 
     a, lines = audit(tmp_path, "default", repo(), None, "784.2")
-    assert created(a), f"784.2: a missing label should open a Setup issue\n{a.why()}"
+    assert created(a), f"784.2: a label off in color should open a Setup issue\n{a.why()}"
     assert any(QUEUE.search(l) for l in lines), \
         f"784.2: with the default settings the audit should still ask about the merge queue: {lines}\n{a.why()}"
 
@@ -118,12 +119,12 @@ def test_with_the_merge_queue_off_the_audit_never_asks_for_one(record_property, 
           queue: false
         """
     a, lines = audit(tmp_path, "off", repo(), off, "784.2")
-    assert created(a), f"784.2: a missing label should open a Setup issue\n{a.why()}"
+    assert created(a), f"784.2: a label off in color should open a Setup issue\n{a.why()}"
     asked = [l for l in lines if QUEUE.search(l)]
     assert not asked, f"784.2: with the merge queue off in settings, the audit still asks about one: {asked}\n{a.why()}"
 
     a, lines = audit(tmp_path, "refused", repo(FORBIDDEN), off, "784.2")
-    assert created(a), f"784.2: a missing label should open a Setup issue\n{a.why()}"
+    assert created(a), f"784.2: a label off in color should open a Setup issue\n{a.why()}"
     asked = [l for l in lines if QUEUE.search(l)]
     assert not asked, (f"784.2: with the merge queue off, a refused rulesets list still made the audit talk of a "
                        f"merge queue: {asked}\n{a.why()}")
@@ -136,7 +137,8 @@ def test_the_audit_wants_each_label_under_its_name_in_settings(record_property, 
 
     The repo's settings name the autopilot label dokima-autopilot. A repo holding dokima-autopilot, with the autopilot
     label's color and description, and no label called autopilot, gets no line about labels. A repo holding only a
-    label called autopilot gets one line saying dokima-autopilot is missing. Proves 784.3.
+    label called autopilot ends the audit holding dokima-autopilot too, with the autopilot label's color and
+    description, and gets no line about it. Proves 784.3.
     """
     record_property("proves", "784.3")
     settings = """\
@@ -151,8 +153,11 @@ def test_the_audit_wants_each_label_under_its_name_in_settings(record_property, 
                          f"yet the audit flagged labels: {flagged}\n{a.why()}")
 
     a, lines = audit(tmp_path, "old-name", clean(), settings, "784.3")
-    line = one_line(lines, "784.3", "the missing dokima-autopilot label", "dokima-autopilot")
-    assert "missing" in line, f"784.3: the line about dokima-autopilot should say it is missing: {line}"
+    have = a.state()["labels"].get("dokima-autopilot")
+    assert have == manifest.LABELS["autopilot"], \
+        f"784.3: the audit should create dokima-autopilot as the autopilot label; the repo holds {have}\n{a.why()}"
+    flagged = [l for l in lines if "dokima-autopilot" in l]
+    assert not flagged, f"784.3: the created dokima-autopilot label is still flagged: {flagged}\n{a.why()}"
 
 
 # 784.4: label colors that match the repo's settings are not flagged
