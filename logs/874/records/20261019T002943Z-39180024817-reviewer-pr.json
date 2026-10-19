@@ -1,0 +1,76 @@
+{
+ "role": "reviewer",
+ "stage": "pr",
+ "run_id": "39180024817",
+ "commit_before": "64b1aa548d7b7ba15623a187a8d4d65c84216ff4",
+ "started_by": "dokima-runtime[bot]",
+ "models": [
+  "claude-opus-5-5"
+ ],
+ "report": {
+  "duration_ms": 647850,
+  "turns": 16,
+  "cost_usd": 0.446927,
+  "tokens_in": 564369,
+  "tokens_out": 4481
+ },
+ "log": "https://github.com/dokima-dev/dokima/blob/logs/logs/874/39180024817-reviewer-pr.md",
+ "run": "https://github.com/dokima-dev/dokima/actions/runs/39180024817",
+ "handback": {
+  "previous_step": {
+   "did": [
+    "The install file now starts Dokima on a push to any branch.",
+    "A new test reads the install file and checks its push names no branch."
+   ],
+   "decided": [
+    "No docs changed, since none quote the push trigger."
+   ],
+   "open": [
+    "The missing hotfix label is proposed as its own issue."
+   ]
+  },
+  "verdict": "approve",
+  "summary": "Ships exactly the ask: push starts on any branch, a test pins it; all tests must still go green.",
+  "raises": [],
+  "answers": [
+   {
+    "raise": "W1",
+    "answer": "done",
+    "why": "Confirmed: the setup checks never name a hotfix label, so it is worth its own issue.",
+    "searched": [
+     750,
+     864,
+     869,
+     870
+    ],
+    "verdict": "new"
+   }
+  ],
+  "asks": [],
+  "behaviors": [],
+  "edge_cases": [],
+  "tests": [
+   {
+    "test": "tests/test_thin_install.py::test_the_adopters_push_trigger_names_no_branch",
+    "only_its_behavior": true,
+    "why": "Fails when push is limited to main or any named branch; passes on plain push."
+   }
+  ],
+  "size": "ok",
+  "boxes": {
+   "dropped": "none",
+   "added": "none",
+   "superseded": "none",
+   "conflicts": "none",
+   "edges": {
+    "ask": "covered"
+   },
+   "poor_tests": "none"
+  }
+ },
+ "check": {
+  "passed": true,
+  "problems": []
+ },
+ "url": "https://github.com/dokima-dev/dokima/pull/875#issuecomment-6256953013"
+}
