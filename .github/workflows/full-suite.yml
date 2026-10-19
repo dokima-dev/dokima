@@ -102,4 +102,7 @@ jobs:
           elif [ "$MODE" = affected ]; then
             echo "::notice title=No baseline::No testmon baseline from main was restored, so every test runs."
           fi
-          eval "$RUN_ALL"
+          # pytest exits 5 when it collects no tests: a repo with no tests yet passes, and the run says so (#887).
+          code=0; eval "$RUN_ALL" || code=$?
+          if [ "$code" -eq 5 ]; then echo "::notice title=No tests yet::The repo has no tests yet, so none ran."; exit 0; fi
+          exit "$code"
