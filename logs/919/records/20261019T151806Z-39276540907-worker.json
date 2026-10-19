@@ -1,0 +1,41 @@
+{
+ "role": "worker",
+ "stage": null,
+ "run_id": "39276540907",
+ "commit_before": "4f641e7d0bbfc234c2cda5926e2720dd18c61f71",
+ "started_by": "dokima-runtime[bot]",
+ "models": [
+  "claude-opus-5-5"
+ ],
+ "report": {
+  "duration_ms": 43732,
+  "turns": 7,
+  "cost_usd": 0.279078,
+  "tokens_in": 209168,
+  "tokens_out": 3083
+ },
+ "log": "https://github.com/dokima-dev/dokima/blob/logs/logs/919/39276540907-worker.md",
+ "run": "https://github.com/dokima-dev/dokima/actions/runs/39276540907",
+ "handback": {
+  "summary": "Added the v0.1.5 changelog section and pointed the install file, README and wiki at the new release.",
+  "criteria": {
+   "ask": "New v0.1.5 section atop the changelog, one line per fix including #873; install file, README and wiki name v0.1.5; release test names v0.1.5."
+  },
+  "evidence": "`pytest -q tests/test_newest_release.py`: 12 passed in 0.40s",
+  "raises": []
+ },
+ "check": {
+  "passed": true,
+  "problems": []
+ },
+ "dropped_by_fence": [],
+ "files_changed": [
+  "CHANGELOG.md",
+  "README.md",
+  "docs/wiki/Installing.md",
+  "dokima/install/dokima.yml",
+  "tests/test_newest_release.py"
+ ],
+ "branch": "try/issue-919",
+ "url": "https://github.com/dokima-dev/dokima/issues/919#issuecomment-6270672343"
+}
