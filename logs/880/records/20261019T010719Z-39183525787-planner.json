@@ -1,0 +1,115 @@
+{
+ "role": "planner",
+ "stage": null,
+ "run_id": "39183525787",
+ "commit_before": "6a76a2abfd91647ef69022263898c08b8f04a9fa",
+ "started_by": "dokima-runtime[bot]",
+ "models": [
+  "claude-opus-5-5"
+ ],
+ "report": {
+  "duration_ms": 202810,
+  "turns": 20,
+  "cost_usd": 0.7869142000000001,
+  "tokens_in": 962406,
+  "tokens_out": 10801
+ },
+ "log": "https://github.com/dokima-dev/dokima/blob/logs/logs/880/39183525787-planner.md",
+ "run": "https://github.com/dokima-dev/dokima/actions/runs/39183525787",
+ "handback": {
+  "kind": "feature",
+  "title": "A repo with no tests yet passes its test checks",
+  "summary": "A repo with no tests yet passes the baseline and the all tests check, and the run says so.",
+  "feature": "A repo with no tests yet passes the baseline and the all tests check, and each run says the repo has no tests yet.",
+  "stories": [
+   {
+    "title": "The baseline passes on a repo with no tests",
+    "user_story": "An owner with no tests yet sees the baseline pass, told the repo has no tests yet.",
+    "task": "Treat no tests collected as an empty baseline in the testmon baseline, and say so on the run.",
+    "context": "testmon.yml's baseline step tolerates only pytest exit 1, so exit 5 (no tests collected) fails it, then the no .testmondata step fails too. Main now runs it over the TESTS_DIR folder (#877). Pull request #882 fixed it and clashed with that line; its tests/test_no_tests_yet.py runs the job on an empty tests folder through tests/test_settings_workflows.py's Box with real pytest.",
+    "acceptance_criteria": [
+     {
+      "text": "When the baseline runs on a repo with no tests, it succeeds and saves an empty baseline.",
+      "words": "treat \"no tests collected\" as an empty baseline, not a crash, in the testmon baseline",
+      "source": "https://github.com/dokima-dev/dokima/issues/880",
+      "files": [
+       ".github/workflows/testmon.yml"
+      ],
+      "edge_cases": [
+       {
+        "case": "Collecting the tests crashes: the baseline still fails.",
+        "test": "tests/test_no_tests_yet.py::test_the_baseline_passes_on_an_empty_tests_folder"
+       }
+      ]
+     },
+     {
+      "text": "When the baseline runs on a repo with no tests, the run shows a notice saying so.",
+      "words": "say on the run that the repo has no tests yet",
+      "source": "https://github.com/dokima-dev/dokima/issues/880",
+      "files": [
+       ".github/workflows/testmon.yml"
+      ],
+      "edge_cases": [
+       {
+        "case": "A repo with one passing test: no such notice.",
+        "test": "tests/test_no_tests_yet.py::test_the_baseline_says_the_repo_has_no_tests_yet"
+       }
+      ]
+     }
+    ],
+    "non_functional": [],
+    "depends_on": []
+   },
+   {
+    "title": "The all tests check passes with no tests",
+    "user_story": "An owner with no tests yet sees the all tests check pass, told the repo has no tests yet.",
+    "task": "Treat no tests collected as success in the all tests check, and say so on the run.",
+    "context": "full-suite.yml's all-tests step ends with eval \"$RUN_ALL\", so pytest exit 5 fails the check. Pull request #882 caught exit 5 there with a No tests yet notice; its tests/test_no_tests_yet.py runs the all-tests job on an empty tests folder through tests/test_settings_workflows.py's Box with real pytest.",
+    "acceptance_criteria": [
+     {
+      "text": "When the all tests check runs on a repo with no tests, it succeeds.",
+      "words": "wherever the full suite would hit the same exit code",
+      "source": "https://github.com/dokima-dev/dokima/issues/880",
+      "files": [
+       ".github/workflows/full-suite.yml"
+      ],
+      "edge_cases": [
+       {
+        "case": "Collecting the tests crashes: the check still fails.",
+        "test": "tests/test_no_tests_yet.py::test_the_all_tests_check_passes_on_an_empty_tests_folder"
+       }
+      ]
+     },
+     {
+      "text": "When the all tests check runs on a repo with no tests, the run shows a notice saying so.",
+      "words": "say on the run that the repo has no tests yet",
+      "source": "https://github.com/dokima-dev/dokima/issues/880",
+      "files": [
+       ".github/workflows/full-suite.yml"
+      ],
+      "edge_cases": [
+       {
+        "case": "A repo with one passing test: no such notice.",
+        "test": "tests/test_no_tests_yet.py::test_the_all_tests_check_says_the_repo_has_no_tests_yet"
+       }
+      ]
+     }
+    ],
+    "non_functional": [],
+    "depends_on": []
+   }
+  ],
+  "links": {
+   "blocked_by": [],
+   "blocks": [],
+   "relates_to": []
+  },
+  "raises": [],
+  "answers": []
+ },
+ "check": {
+  "passed": true,
+  "problems": []
+ },
+ "url": "https://github.com/dokima-dev/dokima/issues/880#issuecomment-6257445597"
+}
