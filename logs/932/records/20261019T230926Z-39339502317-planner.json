@@ -1,0 +1,123 @@
+{
+ "role": "planner",
+ "stage": null,
+ "run_id": "39339502317",
+ "commit_before": "d9aa3a2717d43ab8677d6064c8e86f45e642a6dc",
+ "started_by": "dokima-runtime[bot]",
+ "models": [
+  "claude-opus-5-5"
+ ],
+ "report": {
+  "duration_ms": 102503,
+  "turns": 17,
+  "cost_usd": 0.8158538,
+  "tokens_in": 915857,
+  "tokens_out": 9829
+ },
+ "log": "https://github.com/dokima-dev/dokima/blob/logs/logs/932/39339502317-planner.md",
+ "run": "https://github.com/dokima-dev/dokima/actions/runs/39339502317",
+ "handback": {
+  "kind": "user_story",
+  "title": "Release v0.1.7 with the test baseline and key fixes",
+  "summary": "Cut release v0.1.7 naming both fixes merged since v0.1.6, so adopters can pin them.",
+  "user_story": "Adopters pin v0.1.7 and get the test baseline fix and the rejected model key fix.",
+  "acceptance_criteria": [
+   {
+    "text": "When the changelog is read, its newest section is v0.1.7, right above v0.1.6.",
+    "words": "a `## v0.1.7` heading at the top of CHANGELOG.md, newest above v0.1.6",
+    "source": "https://github.com/dokima-dev/dokima/issues/932",
+    "files": [
+     "CHANGELOG.md",
+     "tests/test_newest_release.py"
+    ],
+    "no_edge_cases": "A fixed file in the repo; no input varies."
+   },
+   {
+    "text": "The v0.1.7 section has one line for the test baseline fix, naming its pull request and issue.",
+    "words": "#929 (#928): the test baseline passes, with a notice, on a repo that has no tests folder yet, and runs scoped to the settings' folder and file pattern.",
+    "source": "https://github.com/dokima-dev/dokima/issues/932",
+    "files": [
+     "CHANGELOG.md",
+     "tests/test_newest_release.py"
+    ],
+    "no_edge_cases": "A fixed file in the repo; the one test also checks the line names no other fix."
+   },
+   {
+    "text": "The v0.1.7 section has one line for the rejected model key fix, naming its pull request and issue.",
+    "words": "#931 (#907): a model key the provider refuses ends the run as \"Model key rejected\", naming the secret to replace, instead of a missing plan; the setup audit tries each set agent key once.",
+    "source": "https://github.com/dokima-dev/dokima/issues/932",
+    "files": [
+     "CHANGELOG.md",
+     "tests/test_newest_release.py"
+    ],
+    "no_edge_cases": "It merged to main before this plan, so the owner's fallback of leaving it out no longer applies."
+   },
+   {
+    "text": "The install file calls the entry workflow at v0.1.7.",
+    "words": "the install file `dokima/install/dokima.yml`, README and docs/wiki/Installing.md point at `entry.yml@v0.1.7`",
+    "source": "https://github.com/dokima-dev/dokima/issues/932",
+    "files": [
+     "dokima/install/dokima.yml",
+     "tests/test_newest_release.py"
+    ],
+    "no_edge_cases": "One fixed line; older tests already guard the agent keys it hands over."
+   },
+   {
+    "text": "The readme's install steps name v0.1.7 as the release, and no other version.",
+    "words": "the install file `dokima/install/dokima.yml`, README and docs/wiki/Installing.md point at `entry.yml@v0.1.7`",
+    "source": "https://github.com/dokima-dev/dokima/issues/932",
+    "files": [
+     "README.md",
+     "tests/test_newest_release.py"
+    ],
+    "no_edge_cases": "A fixed file in the repo; no input varies."
+   },
+   {
+    "text": "The wiki's install page names v0.1.7 as the release, and no other version.",
+    "words": "the install file `dokima/install/dokima.yml`, README and docs/wiki/Installing.md point at `entry.yml@v0.1.7`",
+    "source": "https://github.com/dokima-dev/dokima/issues/932",
+    "files": [
+     "docs/wiki/Installing.md",
+     "tests/test_newest_release.py"
+    ],
+    "no_edge_cases": "A fixed file in the repo; no input varies."
+   }
+  ],
+  "non_functional": [],
+  "tests": {
+   "932.1": [
+    "tests/test_newest_release.py::test_changelog_has_v017_on_top"
+   ],
+   "932.2": [
+    "tests/test_newest_release.py::test_changelog_v017_names_baseline_fix"
+   ],
+   "932.3": [
+    "tests/test_newest_release.py::test_changelog_v017_names_key_fix"
+   ],
+   "932.4": [
+    "tests/test_newest_release.py::test_install_file_calls_v017"
+   ],
+   "932.5": [
+    "tests/test_newest_release.py::test_readme_names_v017"
+   ],
+   "932.6": [
+    "tests/test_newest_release.py::test_wiki_names_v017"
+   ]
+  },
+  "test_changes": {
+   "tests/test_newest_release.py::test_changelog_has_v016_on_top": "v0.1.7 is now newest; still checks v0.1.6 sits above v0.1.5 with its fixes."
+  },
+  "links": {
+   "blocked_by": [],
+   "blocks": [],
+   "relates_to": []
+  },
+  "raises": [],
+  "answers": []
+ },
+ "check": {
+  "passed": true,
+  "problems": []
+ },
+ "url": "https://github.com/dokima-dev/dokima/issues/932#issuecomment-6279317170"
+}
