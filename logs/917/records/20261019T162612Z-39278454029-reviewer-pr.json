@@ -1,0 +1,69 @@
+{
+ "role": "reviewer",
+ "stage": "pr",
+ "run_id": "39278454029",
+ "commit_before": "ce3e6a60fc50bf958f9493e6d49625d00d5b7037",
+ "started_by": "dokima-runtime[bot]",
+ "models": [
+  "claude-opus-5-5"
+ ],
+ "report": {
+  "duration_ms": 531352,
+  "turns": 6,
+  "cost_usd": 0.23913900000000002,
+  "tokens_in": 183360,
+  "tokens_out": 1926
+ },
+ "log": "https://github.com/dokima-dev/dokima/blob/logs/logs/917/39278454029-reviewer-pr.md",
+ "run": "https://github.com/dokima-dev/dokima/actions/runs/39278454029",
+ "handback": {
+  "previous_step": {
+   "did": [
+    "The two-saves test now also fails when a save's push is rejected."
+   ],
+   "decided": [],
+   "open": []
+  },
+  "verdict": "approve",
+  "summary": "Saving the conversation now reads the records branch with the app's key, and both new tests fail without the fix.",
+  "raises": [],
+  "answers": [],
+  "asks": [],
+  "behaviors": [],
+  "edge_cases": [],
+  "tests": [
+   {
+    "test": "tests/test_private_repo_start.py::test_a_second_runs_conversation_lands_on_top_of_the_first_on_the_records_branch",
+    "only_its_behavior": true,
+    "why": "It now fails on main with a rejected push and passes on the branch."
+   },
+   {
+    "test": "tests/test_private_repo_start.py::test_a_records_branch_origin_cannot_be_asked_about_stops_the_save_and_says_why",
+    "only_its_behavior": true,
+    "why": "It fails on main and passes on the branch."
+   }
+  ],
+  "size": "ok",
+  "boxes": {
+   "dropped": "none",
+   "added": [
+    {
+     "what": "A save that cannot ask origin stops and says why",
+     "kind": "needed",
+     "serves": "ask"
+    }
+   ],
+   "superseded": "none",
+   "conflicts": "none",
+   "edges": {
+    "ask": "covered"
+   },
+   "poor_tests": "none"
+  }
+ },
+ "check": {
+  "passed": true,
+  "problems": []
+ },
+ "url": "https://github.com/dokima-dev/dokima/pull/921#issuecomment-6270942670"
+}
