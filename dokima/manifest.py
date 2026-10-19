@@ -61,6 +61,7 @@ PERMISSIONS = {
     "workflows": "write",
     "administration": "read",
     "organization_projects": "write",
+    "secrets": "read",  # the names of the repo secrets, never their values: the audit checks the keys are set (#876)
 }
 
 
@@ -121,6 +122,7 @@ REPO_PATHS = [
     (r"issues(/|$)|labels(/|$)|milestones(/|$)", "issues"),
     (r"pulls(/|$)", "pull_requests"),
     (r"actions/variables(/|$)", "actions_variables"),
+    (r"actions/secrets(/|$)", "secrets"),
     (r"actions/", "actions"),
     (r"commits(/|$)|compare/|contents/|git/|dispatches$|branches(/[^/]+)?$|merges$", "contents"),
     (r"installation$", NONE),  # the app's own installation: GitHub answers it to the app's key, not a permission
