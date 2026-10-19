@@ -1,0 +1,47 @@
+{
+ "role": "worker",
+ "stage": null,
+ "run_id": "39273974254",
+ "commit_before": "73ba7bf379defcd7bd36ae32273b1fe2e11d8ab2",
+ "started_by": "dokima-runtime[bot]",
+ "models": [
+  "claude-opus-5-5"
+ ],
+ "report": {
+  "duration_ms": 813814,
+  "turns": 41,
+  "cost_usd": 1.4845048000000003,
+  "tokens_in": 2276844,
+  "tokens_out": 25842
+ },
+ "log": "https://github.com/dokima-dev/dokima/blob/logs/logs/915/39273974254-worker.md",
+ "run": "https://github.com/dokima-dev/dokima/actions/runs/39273974254",
+ "handback": {
+  "summary": "Seeding test records now stops background git on the remote and keeps its scratch copy in each test's own folder.",
+  "criteria": {
+   "ask": "`tests/record_seed.py`: `seed` turns off gc and maintenance in the remote, clones beside it, removes the clone; pinned by `tests/test_record_seed.py`."
+  },
+  "evidence": "20 parallel runs of `test_blocked_worker.py` with `-n 4`: all 8 passed each time.",
+  "raises": [
+   {
+    "kind": "issue",
+    "label": "Background git in tests",
+    "text": "The test machine's pushes still start background git maintenance on its remote; the turned-off settings never reach that side.",
+    "evidence": "`tests/test_start.py` `git_env`; a traced local push still starts `git maintenance run --auto --detach`.",
+    "raised_by": "worker",
+    "id": "W1"
+   }
+  ]
+ },
+ "check": {
+  "passed": true,
+  "problems": []
+ },
+ "dropped_by_fence": [],
+ "files_changed": [
+  "tests/record_seed.py",
+  "tests/test_record_seed.py"
+ ],
+ "branch": "try/issue-915",
+ "url": "https://github.com/dokima-dev/dokima/issues/915#issuecomment-6270314275"
+}
