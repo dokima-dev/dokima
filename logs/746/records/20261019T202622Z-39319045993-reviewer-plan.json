@@ -1,0 +1,189 @@
+{
+ "role": "reviewer",
+ "stage": "plan",
+ "run_id": "39319045993",
+ "commit_before": "d00cb72aadd3208b2c0693da3afd49bb98102d80",
+ "started_by": "dokima-runtime[bot]",
+ "models": [
+  "claude-opus-5-5"
+ ],
+ "report": {
+  "duration_ms": 71022,
+  "turns": 8,
+  "cost_usd": 0.43266519999999997,
+  "tokens_in": 301705,
+  "tokens_out": 5820
+ },
+ "log": "https://github.com/dokima-dev/dokima/blob/logs/logs/746/39319045993-reviewer-plan.md",
+ "run": "https://github.com/dokima-dev/dokima/actions/runs/39319045993",
+ "handback": {
+  "previous_step": {
+   "did": [
+    "The planner wrote two tests: filed problems hide the private repo's paths and code."
+   ],
+   "decided": [
+    "The plan carries only the privacy fix and leaves the rest of the trial out."
+   ],
+   "open": [
+    "Three owner questions: privacy fix only, manual sign off, agent rule for names."
+   ]
+  },
+  "verdict": "block",
+  "summary": "Both privacy tests are sound, but seven of the owner's trial asks have no criterion, not even a manual one.",
+  "raises": [
+   {
+    "kind": "blocker",
+    "to": "planner",
+    "label": "Trial asks dropped",
+    "text": "Seven owner asks have no criterion: setup, install, no CI or CODEOWNERS, three merges, network tests, self filing, owner only approves. Add each, tested or manual.",
+    "evidence": "Issue body, Setup and Pass lists; `plan.json` holds only 746.1 and 746.2.",
+    "raised_by": "reviewer",
+    "id": "R1"
+   },
+   {
+    "kind": "blocker",
+    "to": "planner",
+    "label": "Sandbox ask dropped",
+    "text": "The owner says the nightly sandbox runs on a disposable copy, never on job-hunt. Add a criterion for it, or mark it not a requirement here because #258 carries it.",
+    "evidence": "Issue body, After the trial line; no criterion or plan note covers it.",
+    "raised_by": "reviewer",
+    "id": "R2"
+   }
+  ],
+  "answers": [],
+  "asks": [
+   {
+    "ask": "Onboard it through the thin workflow install only.",
+    "source": "https://github.com/dokima-dev/dokima/issues/746",
+    "criterion": "missing"
+   },
+   {
+    "ask": "Count every manual step; the target is two (install the App on the repo, add its key).",
+    "source": "https://github.com/dokima-dev/dokima/issues/746",
+    "criterion": "missing"
+   },
+   {
+    "ask": "The install must cope with no CI and no CODEOWNERS.",
+    "source": "https://github.com/dokima-dev/dokima/issues/746",
+    "criterion": "missing"
+   },
+   {
+    "ask": "All 3 merged with zero manual fixes after onboarding.",
+    "source": "https://github.com/dokima-dev/dokima/issues/746",
+    "criterion": "missing"
+   },
+   {
+    "ask": "Tests that hit the network stay off the merge gate through settings.",
+    "source": "https://github.com/dokima-dev/dokima/issues/746",
+    "criterion": "missing"
+   },
+   {
+    "ask": "Every problem hit lands in dokima-dev/dokima by itself.",
+    "source": "https://github.com/dokima-dev/dokima/issues/746",
+    "criterion": "missing"
+   },
+   {
+    "ask": "job-hunt stays private: nothing from it (resumes, profile, leads, companies, people, its code) appears in Dokima's public repo",
+    "source": "https://github.com/dokima-dev/dokima/issues/746",
+    "criterion": "746.1"
+   },
+   {
+    "ask": "a filed problem names only what Dokima did wrong",
+    "source": "https://github.com/dokima-dev/dokima/issues/746",
+    "criterion": "746.2"
+   },
+   {
+    "ask": "The owner's only actions are approving plans and merges.",
+    "source": "https://github.com/dokima-dev/dokima/issues/746",
+    "criterion": "missing"
+   },
+   {
+    "ask": "the nightly sandbox (#258) runs on a disposable copy, never on job-hunt itself.",
+    "source": "https://github.com/dokima-dev/dokima/issues/746",
+    "criterion": "missing"
+   }
+  ],
+  "behaviors": [
+   {
+    "criterion": "746.1",
+    "one_behavior": true,
+    "why": "One result: a private file path never shows in the public repo."
+   },
+   {
+    "criterion": "746.2",
+    "one_behavior": true,
+    "why": "One result: a private code line never shows in the public repo."
+   }
+  ],
+  "edge_cases": [
+   {
+    "criterion": "746.1",
+    "cut": [],
+    "missing": []
+   },
+   {
+    "criterion": "746.2",
+    "cut": [],
+    "missing": []
+   }
+  ],
+  "tests": [
+   {
+    "test": "tests/test_upstream_private_code.py::test_a_private_file_path_never_reaches_dokimas_repo",
+    "only_its_behavior": true,
+    "why": "Files a real problem through a fake GitHub; fails today on the private path."
+   },
+   {
+    "test": "tests/test_upstream_private_code.py::test_a_line_of_the_private_code_never_reaches_dokimas_repo",
+    "only_its_behavior": true,
+    "why": "Files a real problem through a fake GitHub; fails today on the private line."
+   }
+  ],
+  "size": "ok",
+  "boxes": {
+   "dropped": [
+    {
+     "words": "Onboard it through the thin workflow install only. Count every manual step; the target is two",
+     "source": "issue"
+    },
+    {
+     "words": "The install must cope with no CI and no CODEOWNERS.",
+     "source": "issue"
+    },
+    {
+     "words": "All 3 merged with zero manual fixes after onboarding.",
+     "source": "issue"
+    },
+    {
+     "words": "Tests that hit the network stay off the merge gate through settings.",
+     "source": "issue"
+    },
+    {
+     "words": "Every problem hit lands in dokima-dev/dokima by itself.",
+     "source": "issue"
+    },
+    {
+     "words": "The owner's only actions are approving plans and merges.",
+     "source": "issue"
+    },
+    {
+     "words": "the nightly sandbox (#258) runs on a disposable copy, never on job-hunt itself.",
+     "source": "issue"
+    }
+   ],
+   "added": "none",
+   "superseded": "none",
+   "conflicts": "none",
+   "edges": {
+    "746.1": "covered",
+    "746.2": "covered"
+   },
+   "poor_tests": "none"
+  }
+ },
+ "check": {
+  "passed": true,
+  "problems": []
+ },
+ "url": "https://github.com/dokima-dev/dokima/issues/746#issuecomment-6276537421"
+}
