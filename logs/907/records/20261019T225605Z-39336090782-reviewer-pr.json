@@ -1,0 +1,64 @@
+{
+ "role": "reviewer",
+ "stage": "pr",
+ "run_id": "39336090782",
+ "commit_before": "721f167f40a656ce12760b7bd77b9d3dd6726922",
+ "started_by": "dokima-runtime[bot]",
+ "models": [
+  "claude-opus-5-5"
+ ],
+ "report": {
+  "duration_ms": 37364,
+  "turns": 11,
+  "cost_usd": 0.46575620000000006,
+  "tokens_in": 451988,
+  "tokens_out": 3076
+ },
+ "log": "https://github.com/dokima-dev/dokima/blob/logs/logs/907/39336090782-reviewer-pr.md",
+ "run": "https://github.com/dokima-dev/dokima/actions/runs/39336090782",
+ "handback": {
+  "previous_step": {
+   "did": [
+    "The adopter's installed workflow now hands Dokima the Codex and Kimi keys by name."
+   ],
+   "decided": [
+    "The two keys stay on one line, keeping the install file within its line limit."
+   ],
+   "open": [
+    "The pull request changes workflow files, so it waits for the owner's approval."
+   ]
+  },
+  "verdict": "approve",
+  "summary": "A refused key now reads as Model key rejected, naming its secret; every plan test passes and fails on main.",
+  "raises": [],
+  "answers": [],
+  "asks": [],
+  "boxes": {
+   "dropped": "none",
+   "added": "none",
+   "superseded": "none",
+   "conflicts": "none",
+   "edges": {
+    "907.1": "covered",
+    "907.2": "covered",
+    "907.3": "covered",
+    "907.4": "covered",
+    "907.5": "covered",
+    "907.6": "covered",
+    "907.7": "covered",
+    "907.8": "covered",
+    "907.9": "covered"
+   },
+   "poor_tests": "none"
+  },
+  "behaviors": [],
+  "edge_cases": [],
+  "tests": [],
+  "size": "ok"
+ },
+ "check": {
+  "passed": true,
+  "problems": []
+ },
+ "url": "https://github.com/dokima-dev/dokima/pull/931#issuecomment-6278878589"
+}
