@@ -151,7 +151,7 @@ def env_lines(got):
     if "{test}" not in str(tests["run_one"]):
         raise ValueError(f"tests.run_one in {REPO_FILE} must name {{test}}, where each criterion's tests go")
     values = {"TESTS_RUN_ALL": run_all, "TESTS_RUN_ONE": tests["run_one"], "TESTS_AFFECTED": tests["affected"],
-              "TESTS_DIR": tests["dir"], "DEFAULT_BRANCH": got["branch"]["default"] or github_default_branch(),
+              "TESTS_DIR": tests["dir"], "TESTS_FILE_PATTERN": tests["file_pattern"], "DEFAULT_BRANCH": got["branch"]["default"] or github_default_branch(),
               "RECORDS_BRANCH": got["records"]["branch"], "BOT_SLUG": got["bot"]["slug"],
               "CO_AUTHOR": got["co_author"], "OWNER_DOCS": got["owner_docs"]}
     lines = []
