@@ -20,6 +20,7 @@ if [ "$1" = "-m" ] && [ "$2" = "pytest" ]; then shift 2; args=; mon=
 exec {real} "$@"
 '''
 EMPTY = {"tests/.gitkeep": ""}
+ONE = {"tests/test_one.py": "def test_one():\n    \"\"\"Passes.\"\"\"\n"}
 BROKEN = {"tests/conftest.py": "raise RuntimeError('broken conftest')\n"}
 
 
@@ -33,27 +34,58 @@ def box(tmp, files):
 
 
 def test_the_baseline_passes_on_an_empty_tests_folder(tmp_path):
-    """The testmon baseline on an empty tests folder succeeds and says so.
+    """The testmon baseline on an empty tests folder succeeds and saves an empty baseline.
 
-    It saves the empty baseline; a crash while collecting still fails it."""
+    Runs the baseline job on a repo whose tests folder is empty and expects success and a saved cache; beside it, a
+    repo whose test setup crashes must still fail, so a job that passes on anything fails this test."""
     b = box(tmp_path / "empty", EMPTY)
     result = b.run("testmon.yml", "baseline", event="push")
     assert result == "success", f"the baseline failed on a repo with no tests yet:\n{b.tail()}"
     assert "cache-saved" in b.lines(), f"no empty baseline was saved; log {b.lines()}"
-    assert "No tests yet" in "\n".join(b.log), f"the run does not say the repo has no tests yet:\n{b.tail()}"
     b = box(tmp_path / "broken", BROKEN)
     assert b.run("testmon.yml", "baseline", event="push") == "failure", \
         f"the baseline passed although collecting the tests crashed:\n{b.tail()}"
 
 
-def test_the_all_tests_check_passes_on_an_empty_tests_folder(tmp_path):
-    """The all tests check on an empty tests folder succeeds and says so.
+def test_the_baseline_says_the_repo_has_no_tests_yet(tmp_path):
+    """The testmon baseline on an empty tests folder says the repo has no tests yet.
 
-    A crash while collecting still fails it."""
+    Runs the baseline job on an empty tests folder and expects the No tests yet notice; beside it, a repo with one
+    passing test must show no such notice, so a job that always prints it fails this test."""
+    b = box(tmp_path / "empty", EMPTY)
+    b.run("testmon.yml", "baseline", event="push")
+    assert "No tests yet" in "\n".join(b.log), f"the baseline does not say the repo has no tests yet:\n{b.tail()}"
+    b = box(tmp_path / "one", ONE)
+    assert b.run("testmon.yml", "baseline", event="push") == "success", \
+        f"the baseline failed on a repo with one passing test:\n{b.tail()}"
+    assert "No tests yet" not in "\n".join(b.log), \
+        f"the baseline says no tests yet on a repo with one passing test:\n{b.tail()}"
+
+
+def test_the_all_tests_check_passes_on_an_empty_tests_folder(tmp_path):
+    """The all tests check on an empty tests folder succeeds.
+
+    Runs the all tests job on a repo whose tests folder is empty and expects success; beside it, a repo whose test
+    setup crashes must still fail, so a check that passes on anything fails this test."""
     b = box(tmp_path / "empty", EMPTY)
     result = b.run("full-suite.yml", "all-tests", event="merge_group")
     assert result == "success", f"the all tests check failed on a repo with no tests yet:\n{b.tail()}"
-    assert "No tests yet" in "\n".join(b.log), f"the run does not say the repo has no tests yet:\n{b.tail()}"
     b = box(tmp_path / "broken", BROKEN)
     assert b.run("full-suite.yml", "all-tests", event="merge_group") == "failure", \
         f"the all tests check passed although collecting the tests crashed:\n{b.tail()}"
+
+
+def test_the_all_tests_check_says_the_repo_has_no_tests_yet(tmp_path):
+    """The all tests check on an empty tests folder says the repo has no tests yet.
+
+    Runs the all tests job on an empty tests folder and expects the No tests yet notice; beside it, a repo with one
+    passing test must show no such notice, so a check that always prints it fails this test."""
+    b = box(tmp_path / "empty", EMPTY)
+    b.run("full-suite.yml", "all-tests", event="merge_group")
+    assert "No tests yet" in "\n".join(b.log), \
+        f"the all tests check does not say the repo has no tests yet:\n{b.tail()}"
+    b = box(tmp_path / "one", ONE)
+    assert b.run("full-suite.yml", "all-tests", event="merge_group") == "success", \
+        f"the all tests check failed on a repo with one passing test:\n{b.tail()}"
+    assert "No tests yet" not in "\n".join(b.log), \
+        f"the all tests check says no tests yet on a repo with one passing test:\n{b.tail()}"

@@ -213,14 +213,34 @@ def test_no_usable_baseline_runs_every_test(tmp_path, record_property):
         f"539.2: with a readable baseline the step still runs every test, so it never picks affected tests\n{out}"
 
 
+def baseline_step(lines):
+    """The shell of testmon.yml's step that runs `pytest --testmon`, written on one line or as a block; None if none."""
+    for i, line in enumerate(lines):
+        if not line.strip().startswith(("run:", "- run:")):
+            continue
+        head = line.split("run:", 1)[1].strip()
+        if head != "|":
+            body = head
+        else:
+            indent = len(line) - len(line.lstrip())
+            rest = []
+            for later in lines[i + 1:]:
+                if later.strip() and len(later) - len(later.lstrip()) <= indent:
+                    break
+                rest.append(later)
+            body = "\n".join(rest)
+        if "pytest" in body and "--testmon" in body:
+            return body
+    return None
+
+
 def test_baseline_runs_only_the_tests_folder(tmp_path):
     """The testmon baseline runs only the tests folder the settings name (#877).
 
-    Runs testmon.yml's `--testmon` line with a fake `python3` that logs its arguments: with `TESTS_DIR` set the
-    call names that folder, and with it unset it names `tests`, the default."""
-    line = next((l for l in workflow_lines(BASELINE) if "pytest" in l and "--testmon" in l), None)
-    assert line, "testmon.yml has no pytest --testmon line"
-    script = line.split("run:", 1)[1].strip()
+    Runs the shell of testmon.yml's `--testmon` step, one line or several, with a fake `python3` that logs its
+    arguments: with `TESTS_DIR` set the call names that folder, and with it unset it names `tests`, the default."""
+    script = baseline_step(workflow_lines(BASELINE))
+    assert script, "testmon.yml has no step running pytest --testmon"
     bin_dir = tmp_path / "bin"
     bin_dir.mkdir()
     log = tmp_path / "args.txt"
