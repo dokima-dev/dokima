@@ -20,6 +20,7 @@ What the faked GitHub offers, and the audit is expected to use (a read may raise
                               branch has no rule; review_bypass_apps lists the apps on the rule's review exemption, and
                               an absent key means none
     permissions(repo)         the app's {permission: "read" | "write"}
+    secrets(repo)             the names of the repo's own secrets, as a set
     rulesets(repo)            every ruleset of the repo, each as GitHub's REST answers one ruleset: {"name", "target",
                               "enforcement", "rules": [{"type": ...}, ...], "bypass_actors": [{"actor_id",
                               "actor_type", "bypass_mode"}, ...]}; the merge queue ruleset holds a rule of type
@@ -89,6 +90,7 @@ class GitHub:
         self.view_map = copy.deepcopy(manifest.VIEWS)
         self.rules = copy.deepcopy(manifest.BRANCH_RULES)
         self.perms = copy.deepcopy(manifest.PERMISSIONS)
+        self.secret_names = {"DOKIMA_APP_KEY", "CLAUDE_CODE_OAUTH_TOKEN"}
         self.ruleset_list = [merge_queue_ruleset(ADMIN_BYPASS)]
         self.fail = dict(fail or {})
         self.issues = {n: dict(i) for n, i in (issues or {}).items()}
@@ -114,6 +116,9 @@ class GitHub:
 
     def permissions(self, repo):
         return self._read("permissions", self.perms)
+
+    def secrets(self, repo):
+        return self._read("secrets", self.secret_names)
 
     def variable(self, repo, name):
         """No repo variable is set; the audit should not ask (#588)."""
