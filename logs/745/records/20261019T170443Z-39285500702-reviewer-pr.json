@@ -1,0 +1,64 @@
+{
+ "role": "reviewer",
+ "stage": "pr",
+ "run_id": "39285500702",
+ "commit_before": "c71f52c7655ef7cd009127dbd3a71fd9a89cc78b",
+ "started_by": "dokima-runtime[bot]",
+ "models": [
+  "claude-opus-5-5"
+ ],
+ "report": {
+  "duration_ms": 8453,
+  "turns": 2,
+  "cost_usd": 0.6913864000000002,
+  "tokens_in": 124984,
+  "tokens_out": 553
+ },
+ "log": "https://github.com/dokima-dev/dokima/blob/logs/logs/745/39285500702-reviewer-pr.md",
+ "run": "https://github.com/dokima-dev/dokima/actions/runs/39285500702",
+ "handback": {
+  "previous_step": {
+   "did": [
+    "The worker merged main into the pull request.",
+    "It settled the agent workflow clash, keeping main's push retry and upstream filing."
+   ],
+   "decided": [
+    "The rest of the earlier work stays as it was."
+   ],
+   "open": []
+  },
+  "verdict": "approve",
+  "summary": "Main is merged in with main's behaviour kept, the clash is gone, and every test passes.",
+  "raises": [],
+  "answers": [],
+  "asks": [],
+  "boxes": {
+   "dropped": "none",
+   "added": "none",
+   "superseded": "none",
+   "conflicts": "none",
+   "edges": {
+    "745.1": "covered",
+    "745.2": "covered",
+    "745.3": "covered",
+    "745.4": "covered",
+    "745.5": "covered",
+    "745.6": "covered",
+    "745.7": "covered",
+    "745.8": "covered",
+    "745.9": "covered",
+    "745.10": "covered"
+   },
+   "poor_tests": "none"
+  },
+  "behaviors": [],
+  "edge_cases": [],
+  "tests": [],
+  "size": "ok"
+ },
+ "check": {
+  "passed": true,
+  "problems": []
+ },
+ "url": "https://github.com/dokima-dev/dokima/pull/872#issuecomment-6271984313"
+}
