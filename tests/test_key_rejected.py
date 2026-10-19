@@ -239,6 +239,24 @@ def test_the_record_never_prints_any_part_of_the_key(record_property, tmp_path):
     assert not leaked, f"907.4: part of the key was printed on the card or its record: {leaked[:3]}"
 
 
+def test_a_codex_refusal_never_prints_the_keys_tail(record_property, tmp_path):
+    """A refused Codex key's card never repeats the key's tail the provider echoed.
+
+    Codex's refusal quotes the key masked, as `sk-proj-****efgh`. The planner runs on Codex with the key in its
+    environment; the card and record must hold neither the key's last 4 characters nor any 8 of it in a row, so
+    quoting the provider's message fails.
+
+    Proves 907.4."""
+    record_property("proves", "907.4")
+    comment, record = write_record(tmp_path, codex_output(CODEX_401), settings=planner_on("codex", "CODEX_API_KEY"),
+                                   extra_env={"DOKIMA_AGENT_KEY": CODEX_KEY, "CODEX_API_KEY": CODEX_KEY},
+                                   agent="codex")
+    assert_key_rejected(comment, "907.4", "a 401 refusing the Codex key")
+    pieces = {CODEX_KEY[-4:]} | {CODEX_KEY[i:i + 8] for i in range(len(CODEX_KEY) - 7)}
+    leaked = sorted(p for p in pieces if p in comment or p in record)
+    assert not leaked, f"907.4: part of the Codex key the provider echoed was printed on the card or record: {leaked[:3]}"
+
+
 THREE_AGENTS = """agents:
   subscriptions:
     c: {agent: claude, key: CLAUDE_CODE_OAUTH_TOKEN}
