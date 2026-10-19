@@ -1,0 +1,51 @@
+{
+ "role": "worker",
+ "stage": null,
+ "run_id": "39181879299",
+ "commit_before": "cbcbf39ccfecb8b7ecad202bd999cccc7c666c55",
+ "started_by": "dokima-runtime[bot]",
+ "models": [
+  "claude-opus-5-5"
+ ],
+ "report": {
+  "duration_ms": 49779,
+  "turns": 9,
+  "cost_usd": 0.264018,
+  "tokens_in": 263000,
+  "tokens_out": 2794
+ },
+ "log": "https://github.com/dokima-dev/dokima/blob/logs/logs/877/39181879299-worker.md",
+ "run": "https://github.com/dokima-dev/dokima/actions/runs/39181879299",
+ "handback": {
+  "summary": "No code change this round: the All tests run was skipped because the pull request is a draft, not failed.",
+  "criteria": {
+   "ask": "The testmon baseline line in the testmon workflow now runs pytest over the settings' tests folder, default tests; a test pins it."
+  },
+  "evidence": "`pytest -q tests/test_testmon.py`: 3 passed.",
+  "raises": [
+   {
+    "kind": "issue",
+    "label": "Skipped shown as failed",
+    "text": "The issue card shows a skipped All tests run as failed, sending workers to fix nothing.",
+    "evidence": "Run `39180487595` concluded `skipped` (draft PR #878); the card shows the failed icon.",
+    "raised_by": "worker",
+    "id": "W2"
+   }
+  ],
+  "answers": [
+   {
+    "raise": "R1",
+    "answer": "disagree",
+    "why": "Run 39180487595 was skipped, not failed: its job only runs on non-draft pull requests, and this one is a draft."
+   }
+  ]
+ },
+ "check": {
+  "passed": true,
+  "problems": []
+ },
+ "dropped_by_fence": [],
+ "files_changed": [],
+ "branch": "try/issue-877",
+ "url": "https://github.com/dokima-dev/dokima/pull/878#issuecomment-6257220972"
+}
