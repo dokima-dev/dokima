@@ -99,27 +99,46 @@ def test_release_newest_already_released(tmp_path, record_property):
     assert made(state) == [], f"867.1: v0.1.1, the newest version, is already released, yet the command made {made(state)}"
 
 
-def test_changelog_has_v011_on_top(record_property):
-    """The changelog's newest section is v0.1.1, naming the fixes #852, #856 and #861.
-
-    867.2: reads CHANGELOG.md, checks its top-most version heading is v0.1.1, sitting above v0.1.0, and that the
-    v0.1.1 section names each fix the issue lists as merged since v0.1.0 by its number: #852, #856 and #861."""
-    record_property("proves", "867.2")
+def section(crit, version):
+    """CHANGELOG.md's version headings in order, and the text of VERSION's section."""
     lines = read("CHANGELOG.md").splitlines()
     heads = [(i, m.group(1), m.group(2)) for i, line in enumerate(lines) if (m := HEADING.match(line))]
     names = [v for _, _, v in heads]
-    assert names and names[0] == "v0.1.1", f"867.2: CHANGELOG.md's newest version heading is not v0.1.1; its headings are {names}"
-    assert "v0.1.0" in names, "867.2: CHANGELOG.md lost its v0.1.0 section below v0.1.1"
-    i, level, _ = heads[0]
+    assert version in names, f"{crit}: CHANGELOG.md has no {version} section; its headings are {names}"
+    i, level, _ = heads[names.index(version)]
     body = []
     for later in lines[i + 1:]:
         h = re.match(r"^(#{1,6})\s", later)
         if h and len(h.group(1)) <= len(level):
             break
         body.append(later)
-    text = "\n".join(body)
-    missing = [n for n in ("#852", "#856", "#861") if not re.search(re.escape(n) + r"(?![0-9])", text)]
+    return names, "\n".join(body)
+
+
+def unnamed(text, numbers):
+    """The issue numbers TEXT never names."""
+    return [n for n in numbers if not re.search(re.escape(n) + r"(?![0-9])", text)]
+
+
+def test_changelog_has_v011_on_top(record_property):
+    """The changelog's v0.1.1 section, above v0.1.0, names the fixes #852, #856 and #861.
+
+    867.2: reads CHANGELOG.md, checks its v0.1.1 section sits above v0.1.0 and names each fix the issue lists as
+    merged since v0.1.0 by its number: #852, #856 and #861. Since #890, v0.1.2 sits above it as the newest."""
+    record_property("proves", "867.2")
+    names, text = section("867.2", "v0.1.1")
+    assert "v0.1.0" in names and names.index("v0.1.0") > names.index("v0.1.1"), \
+        f"867.2: CHANGELOG.md's v0.1.0 section is not below v0.1.1; its headings are {names}"
+    missing = unnamed(text, ("#852", "#856", "#861"))
     assert not missing, f"867.2: the v0.1.1 section does not name {missing}, fixes merged since v0.1.0"
+
+
+def test_changelog_has_v012_on_top():
+    """The changelog's newest section is v0.1.2, above v0.1.1, naming the onboarding fixes #890 lists."""
+    names, text = section("890", "v0.1.2")
+    assert names[:2] == ["v0.1.2", "v0.1.1"], f"890: CHANGELOG.md's newest headings are not v0.1.2 then v0.1.1: {names}"
+    missing = unnamed(text, ("#874", "#876", "#877", "#886", "#887"))
+    assert not missing, f"890: the v0.1.2 section does not name {missing}, fixes merged since v0.1.1"
 
 
 def test_install_file_calls_newest_version(record_property):

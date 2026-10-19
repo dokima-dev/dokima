@@ -38,7 +38,7 @@ Secrets are scrubbed from cards and saved conversations. Agents hold no GitHub k
 
 `.github/workflows/dokima.yml` and `.dokima/settings.yaml` are the only files you add; nothing else of δokima lands in your repo.
 
-1. Add [`dokima/install/dokima.yml`](https://github.com/dokima-dev/dokima/blob/main/dokima/install/dokima.yml) to your repo as `.github/workflows/dokima.yml`. It runs δokima from its own repo at the newest release, `v0.1.1`.
+1. Add [`dokima/install/dokima.yml`](https://github.com/dokima-dev/dokima/blob/main/dokima/install/dokima.yml) to your repo as `.github/workflows/dokima.yml`. It runs δokima from its own repo at the newest release, `v0.1.2`.
 2. Add [`dokima/install/settings.yaml`](https://github.com/dokima-dev/dokima/blob/main/dokima/install/settings.yaml) to your repo as `.dokima/settings.yaml`, naming only what differs from the defaults.
 
 Your repo's owner gives commands and approves. Optional: a `.github/CODEOWNERS` file with a `*` line names other approvers.

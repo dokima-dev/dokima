@@ -117,7 +117,7 @@ Requirements:
 
 Setup:
 
-1. Add [`dokima/install/dokima.yml`](dokima/install/dokima.yml) to the repo as `.github/workflows/dokima.yml`. It runs δokima from this repo at the newest release, `v0.1.1`; nothing else of δokima is copied.
+1. Add [`dokima/install/dokima.yml`](dokima/install/dokima.yml) to the repo as `.github/workflows/dokima.yml`. It runs δokima from this repo at the newest release, `v0.1.2`; nothing else of δokima is copied.
 2. Add [`dokima/install/settings.yaml`](dokima/install/settings.yaml) to the repo as `.dokima/settings.yaml`, naming only what differs from the defaults.
 3. Add the repo secrets `DOKIMA_APP_KEY` (the app's private key) and `CLAUDE_CODE_OAUTH_TOKEN`. Make them repo secrets: secrets kept only in an environment never reach δokima's jobs.
 4. Set the repo variable `DOKIMA_APP_ID`. Optionally set `DOKIMA_BOARD`.
