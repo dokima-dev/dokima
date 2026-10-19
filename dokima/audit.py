@@ -162,6 +162,31 @@ def needed_secrets(got):
     return needed
 
 
+def compare_keys():
+    """One line per agent key its provider refuses, or that could not be tried (#907).
+
+    Each key set as DOKIMA_KEY_<its secret> is tried once, by one tiny call to the first role's agent that uses it; a
+    key not set is skipped. No line holds any part of a key."""
+    lines, tried = [], set()
+    for role in prompt.ROLES:
+        try:
+            name = agents.key(role)
+        except agents.Stop:
+            continue  # the settings' own line says why
+        value = os.environ.get(f"DOKIMA_KEY_{name}")
+        if not value or name in tried:
+            continue
+        tried.add(name)
+        verdict = agents.try_key(role, value)
+        if verdict == "refused":
+            lines.append(f"Agent key `{name}` was refused by its provider: make a new one and replace the repo secret "
+                         f"`{name}`.")
+        elif verdict == "failed":
+            lines.append(f"Agent key `{name}` could not be checked: the {role}'s agent failed for a reason other than "
+                         f"the key; see the audit's run.")
+    return lines
+
+
 def own_repo(root):
     """Whether the repo at ROOT is Dokima's own, holding the shared workflows themselves.
 
@@ -252,6 +277,7 @@ def check(github, repo, root=".", has_board=True):
             lines.append(unverified(what, e))
             continue
         lines += check_live(live)
+    lines += compare_keys()
     notes = []
     if "main" in rules:  # an unreadable main rule already has its line
         drift, note = auto_merge(github, repo, rules["main"], (got.get("merge") or {}).get("queue", True) is not False)

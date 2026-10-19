@@ -69,6 +69,17 @@ def report(out):
             "tokens_out": sum((u.get("output_tokens") or 0) for u in usage)}
 
 
+def error(out):
+    """Every error Codex's stream ended with, one per line; empty when there was none."""
+    said = []
+    for e in events(out):
+        if e.get("type") == "error":
+            said.append(str(e.get("message") or ""))
+        elif e.get("type") == "turn.failed" and isinstance(e.get("error"), dict):
+            said.append(str(e["error"].get("message") or ""))
+    return "\n".join(said)
+
+
 def transcript(log_dir, secrets):
     """The readable transcript of Codex's stream, secrets removed."""
     lines = []

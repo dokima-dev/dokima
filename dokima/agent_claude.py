@@ -3,6 +3,7 @@
 It installs with npm, starts with today's command and flags, keeps its printed report as `claude.json` in the run's
 folder, and reads its models, stats and transcript from its own session logs and that report.
 """
+import json
 import os
 import subprocess
 
@@ -34,6 +35,15 @@ def models(out, log_dir):
 def report(out):
     """Claude's end-of-run report: time, turns, tokens and cost; empty when it printed none."""
     return run_report(os.path.join(str(out), "claude.json"))
+
+
+def error(out):
+    """The error Claude's report ended with; empty when it ended without one."""
+    try:
+        d = json.load(open(os.path.join(str(out), "claude.json")))
+    except (OSError, json.JSONDecodeError):
+        return ""
+    return str(d.get("result") or "") if isinstance(d, dict) and d.get("is_error") else ""
 
 
 def transcript(log_dir, secrets):
