@@ -1,0 +1,40 @@
+{
+ "role": "worker",
+ "stage": null,
+ "run_id": "39338486807",
+ "commit_before": "5583ee745ff96eb16430baaa4b3917bb739b328e",
+ "started_by": "dokima-runtime[bot]",
+ "models": [
+  "claude-opus-5-5"
+ ],
+ "report": {
+  "duration_ms": 26252,
+  "turns": 7,
+  "cost_usd": 0.26444680000000004,
+  "tokens_in": 210057,
+  "tokens_out": 2598
+ },
+ "log": "https://github.com/dokima-dev/dokima/blob/logs/logs/932/39338486807-worker.md",
+ "run": "https://github.com/dokima-dev/dokima/actions/runs/39338486807",
+ "handback": {
+  "summary": "Cut release v0.1.7 with the test baseline fix; the rejected key fix is not on main, so left out.",
+  "criteria": {
+   "ask": "New v0.1.7 section on top of `CHANGELOG.md` naming #929 (#928); install file, README and `docs/wiki/Installing.md` point at `entry.yml@v0.1.7`; `tests/test_newest_release.py` names v0.1.7 newest."
+  },
+  "evidence": "`pytest -q tests/test_newest_release.py`: 14 passed in 0.42s"
+ },
+ "check": {
+  "passed": true,
+  "problems": []
+ },
+ "dropped_by_fence": [],
+ "files_changed": [
+  "CHANGELOG.md",
+  "README.md",
+  "docs/wiki/Installing.md",
+  "dokima/install/dokima.yml",
+  "tests/test_newest_release.py"
+ ],
+ "branch": "try/issue-932",
+ "url": "https://github.com/dokima-dev/dokima/issues/932#issuecomment-6279187515"
+}
