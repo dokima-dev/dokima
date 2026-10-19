@@ -640,7 +640,13 @@ jobs:
         run: |
           W=/tmp/logs-branch; R="https://x-access-token:${GH_TOKEN}@github.com/${GITHUB_REPOSITORY}.git"
           B="$RECORDS_BRANCH"
-          if git ls-remote --exit-code --heads origin "$B" >/dev/null; then git clone -q --depth 1 -b "$B" "$R" "$W"
+          # Origin is asked with the app's key: on a private repo an anonymous ask fails and would start an orphan (#917).
+          # Exit 2 is git's "no such branch"; any other failure is a question origin could not answer, so nothing is saved.
+          rc=0; git ls-remote --exit-code --heads "$R" "$B" > /dev/null 2> /tmp/git-err.txt || rc=$?
+          if [ "$rc" != 0 ] && [ "$rc" != 2 ]; then
+            echo "::error title=Conversation not saved::could not ask whether $B exists: $(paste -sd' ' /tmp/git-err.txt | sed "s#${GH_TOKEN}#***#g")"; exit 1
+          fi
+          if [ "$rc" = 0 ]; then git clone -q --depth 1 -b "$B" "$R" "$W"
           else git init -q "$W" && git -C "$W" checkout -q --orphan "$B" && git -C "$W" remote add origin "$R"; fi
           mkdir -p "$W/$(dirname "$LOG")"
           { echo "# ${ROLE}${STAGE:+ ($STAGE)} for #$N"; echo; echo "Run: ${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }}"; echo
