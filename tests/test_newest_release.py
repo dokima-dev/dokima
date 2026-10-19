@@ -134,11 +134,19 @@ def test_changelog_has_v011_on_top(record_property):
 
 
 def test_changelog_has_v012_on_top():
-    """The changelog's newest section is v0.1.2, above v0.1.1, naming the onboarding fixes #890 lists."""
+    """The changelog's v0.1.2 section sits right above v0.1.1, naming the onboarding fixes #890 lists."""
     names, text = section("890", "v0.1.2")
-    assert names[:2] == ["v0.1.2", "v0.1.1"], f"890: CHANGELOG.md's newest headings are not v0.1.2 then v0.1.1: {names}"
+    i = names.index("v0.1.2")
+    assert names[i + 1:i + 2] == ["v0.1.1"], f"890: CHANGELOG.md's v0.1.2 section is not right above v0.1.1: {names}"
     missing = unnamed(text, ("#874", "#876", "#877", "#886", "#887"))
     assert not missing, f"890: the v0.1.2 section does not name {missing}, fixes merged since v0.1.1"
+
+
+def test_changelog_has_v013_on_top():
+    """The changelog's newest section is v0.1.3, above v0.1.2, naming the secrets fix #894."""
+    names, text = section("894", "v0.1.3")
+    assert names[:2] == ["v0.1.3", "v0.1.2"], f"894: CHANGELOG.md's newest headings are not v0.1.3 then v0.1.2: {names}"
+    assert not unnamed(text, ("#894",)), "894: the v0.1.3 section does not name #894"
 
 
 def test_install_file_calls_newest_version(record_property):
