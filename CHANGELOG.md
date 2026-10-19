@@ -2,6 +2,12 @@
 
 What each version of Dokima does.
 
+## v0.1.3
+
+Secrets reach Dokima's jobs in repos owned by another account.
+
+- The entry workflow declares the secrets it takes, and the install file hands each over by name (#894).
+
 ## v0.1.2
 
 Onboarding fixes for repos beyond Dokima's own.

@@ -32,13 +32,15 @@ Add these as **repo** secrets and variables (Settings, Secrets and variables, Ac
 | `CLAUDE_CODE_OAUTH_TOKEN` | secret | Claude Code token for the agents |
 | `DOKIMA_BOARD` | variable, optional | Project board as `org/number` |
 
+`dokima.yml` hands each secret to δokima by name. If your settings name another agent key (`CODEX_API_KEY` or `KIMI_API_KEY`), add its line under `secrets:` in `dokima.yml` too.
+
 Secrets are scrubbed from cards and saved conversations. Agents hold no GitHub key while they work.
 
 ## 3. Workflow and settings
 
 `.github/workflows/dokima.yml` and `.dokima/settings.yaml` are the only files you add; nothing else of δokima lands in your repo.
 
-1. Add [`dokima/install/dokima.yml`](https://github.com/dokima-dev/dokima/blob/main/dokima/install/dokima.yml) to your repo as `.github/workflows/dokima.yml`. It runs δokima from its own repo at the newest release, `v0.1.2`.
+1. Add [`dokima/install/dokima.yml`](https://github.com/dokima-dev/dokima/blob/main/dokima/install/dokima.yml) to your repo as `.github/workflows/dokima.yml`. It runs δokima from its own repo at the newest release, `v0.1.3`.
 2. Add [`dokima/install/settings.yaml`](https://github.com/dokima-dev/dokima/blob/main/dokima/install/settings.yaml) to your repo as `.dokima/settings.yaml`, naming only what differs from the defaults.
 
 Your repo's owner gives commands and approves. Optional: a `.github/CODEOWNERS` file with a `*` line names other approvers.
