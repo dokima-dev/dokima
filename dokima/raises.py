@@ -27,6 +27,9 @@ VERDICTS = MappingProxyType({"symptom": "Symptom of a known cause", "root cause"
 # A symptom names its cause, one open issue; a root cause names its symptoms, the open issues it explains (#623).
 CAUSE = "cause"
 SYMPTOMS = "symptoms"
+# An issue may say whose fault it is: Dokima's, filed in the upstream repo the settings name, or unclear (#745).
+FAULT = "fault"
+FAULTS = ("dokima", "unsure")
 STAMPED = ("raised_by", "id")
 ANSWERS = ("done", "disagree")
 PREFIX = MappingProxyType({"planner": "P", "worker": "W", "reviewer": "R"})
@@ -80,7 +83,7 @@ def check_raises(role, raises):
             if field in r:
                 problems.append(f"{where} carries {field}, which only code writes")
         extra = sorted(k for k in r if k not in FIELDS and k not in STAMPED
-                       and not (k in (SEARCHED, VERDICT, CAUSE, SYMPTOMS) and r.get("kind") == "issue"))
+                       and not (k in (SEARCHED, VERDICT, CAUSE, SYMPTOMS, FAULT) and r.get("kind") == "issue"))
         if extra:
             problems.append(f"{where} carries fields no raise has: {', '.join(map(str, extra))}")
         kind = r.get("kind")
@@ -95,6 +98,9 @@ def check_raises(role, raises):
                 problems.append(f"{where}: {SEARCHED} must be a list of issue numbers, not {r[SEARCHED]!r}")
             if VERDICT in r and r[VERDICT] not in VERDICTS:
                 problems.append(f"{where}: {VERDICT} must be {_verdicts()}, not {r[VERDICT]!r}")
+            if FAULT in r and r[FAULT] not in FAULTS:
+                problems.append(f"{where}: {FAULT} must be {' or '.join(FAULTS)}, or left out for the repo's own, "
+                                f"not {r[FAULT]!r}")
             continue
         if not isinstance(to, str) or not to.strip():
             problems.append(f"{where}: the {role}'s {kind} names no one; it must be sent to someone")
