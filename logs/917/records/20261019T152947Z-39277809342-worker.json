@@ -1,0 +1,43 @@
+{
+ "role": "worker",
+ "stage": null,
+ "run_id": "39277809342",
+ "commit_before": "5277efe20f78388a20c327c1b81ca6c551ea64f0",
+ "started_by": "dokima-runtime[bot]",
+ "models": [
+  "claude-opus-5-5"
+ ],
+ "report": {
+  "duration_ms": 25538,
+  "turns": 5,
+  "cost_usd": 0.2249812,
+  "tokens_in": 148828,
+  "tokens_out": 1533
+ },
+ "log": "https://github.com/dokima-dev/dokima/blob/logs/logs/917/39277809342-worker.md",
+ "run": "https://github.com/dokima-dev/dokima/actions/runs/39277809342",
+ "handback": {
+  "summary": "The two-saves test now also fails when a save's push is rejected, so it fails on main.",
+  "criteria": {
+   "ask": "`.github/workflows/agent.yml` Save the conversation asks origin with the app's key; `tests/test_private_repo_start.py` pins it."
+  },
+  "evidence": "`pytest -q tests/test_private_repo_start.py`: 5 passed.",
+  "answers": [
+   {
+    "raise": "R1",
+    "answer": "done",
+    "why": "The test now asserts no save log shows a rejected push; it fails against main's workflow."
+   }
+  ]
+ },
+ "check": {
+  "passed": true,
+  "problems": []
+ },
+ "dropped_by_fence": [],
+ "files_changed": [
+  "tests/test_private_repo_start.py"
+ ],
+ "branch": "try/issue-917",
+ "url": "https://github.com/dokima-dev/dokima/pull/921#issuecomment-6270845927"
+}
