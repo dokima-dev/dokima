@@ -1,0 +1,52 @@
+{
+ "role": "worker",
+ "stage": null,
+ "run_id": "39194343596",
+ "commit_before": "6f61000ad13c635abf90223ee4d3d7b06980b12c",
+ "started_by": "dokima-runtime[bot]",
+ "models": [
+  "claude-opus-5-5"
+ ],
+ "report": {
+  "duration_ms": 194257,
+  "turns": 20,
+  "cost_usd": 0.7742719999999998,
+  "tokens_in": 912053,
+  "tokens_out": 11383
+ },
+ "log": "https://github.com/dokima-dev/dokima/blob/logs/logs/894/39194343596-worker.md",
+ "run": "https://github.com/dokima-dev/dokima/actions/runs/39194343596",
+ "handback": {
+  "summary": "Entry workflow declares its secrets, install file maps them by name, docs updated, v0.1.3 changelog added.",
+  "criteria": {
+   "ask": "`entry.yml` declares secrets under `workflow_call`; `dokima/install/dokima.yml` maps them by name at `v0.1.3`; README, wiki, `CHANGELOG.md`, `tests/test_secrets_by_name.py`."
+  },
+  "evidence": "`pytest -q tests/test_secrets_by_name.py tests/test_newest_release.py tests/test_thin_install.py`: all passed",
+  "raises": [
+   {
+    "kind": "issue",
+    "label": "Free agent key names",
+    "text": "Settings may name any agent key, but only declared names reach jobs; others fail as a missing key.",
+    "evidence": "`dokima/agents.py` `key()` returns any name; `entry.yml` declares four, incl. `CODEX_API_KEY`, `KIMI_API_KEY`.",
+    "raised_by": "worker",
+    "id": "W1"
+   }
+  ]
+ },
+ "check": {
+  "passed": true,
+  "problems": []
+ },
+ "dropped_by_fence": [],
+ "files_changed": [
+  ".github/workflows/entry.yml",
+  "CHANGELOG.md",
+  "README.md",
+  "docs/wiki/Installing.md",
+  "dokima/install/dokima.yml",
+  "tests/test_newest_release.py",
+  "tests/test_secrets_by_name.py"
+ ],
+ "branch": "try/issue-894",
+ "url": "https://github.com/dokima-dev/dokima/issues/894#issuecomment-6258940753"
+}
