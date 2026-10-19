@@ -1,0 +1,170 @@
+{
+ "role": "planner",
+ "stage": null,
+ "run_id": "39261121079",
+ "commit_before": "5695a04e7410571b3dc1bb3f11295a78131e5c35",
+ "started_by": "dokima-runtime[bot]",
+ "models": [
+  "claude-opus-5-5"
+ ],
+ "report": {
+  "duration_ms": 262089,
+  "turns": 31,
+  "cost_usd": 1.6397026,
+  "tokens_in": 2067270,
+  "tokens_out": 24384
+ },
+ "log": "https://github.com/dokima-dev/dokima/blob/logs/logs/907/39261121079-planner.md",
+ "run": "https://github.com/dokima-dev/dokima/actions/runs/39261121079",
+ "handback": {
+  "kind": "user_story",
+  "title": "A rejected model key is reported as a rejected key",
+  "summary": "When the provider refuses the agent's key, the owner is told to replace the key, not shown a planner bug.",
+  "user_story": "When a model key stops working, the owner learns which secret to replace, at setup and on every failed run.",
+  "acceptance_criteria": [
+   {
+    "text": "When the agent's output shows a login or key failure, the run ends as Model key rejected, not missing hand-back.",
+    "words": "After the agent step, if its output shows a login or key failure (401/403, invalid or expired token, failed to authenticate), end the run as \"Model key rejected\" instead of checking for the hand-back file.",
+    "source": "https://github.com/dokima-dev/dokima/issues/907",
+    "files": [
+     "dokima/agent_roles.py",
+     "dokima/agent_records.py",
+     "dokima/agents.py"
+    ],
+    "edge_cases": [
+     {
+      "case": "The provider answers 403 instead of 401.",
+      "test": "tests/test_key_rejected.py::test_a_403_from_the_provider_reads_model_key_rejected"
+     },
+     {
+      "case": "The provider says the token expired.",
+      "test": "tests/test_key_rejected.py::test_an_expired_token_reads_model_key_rejected"
+     },
+     {
+      "case": "The agent ran fine but left no plan: the missing plan is still reported.",
+      "test": "tests/test_key_rejected.py::test_a_401_from_the_provider_reads_model_key_rejected"
+     }
+    ]
+   },
+   {
+    "text": "When a run ends as Model key rejected, its comment names the repo secret the settings use for that agent.",
+    "words": "The issue comment names the secret the settings use for that agent (e.g. `CLAUDE_CODE_OAUTH_TOKEN`)",
+    "source": "https://github.com/dokima-dev/dokima/issues/907",
+    "files": [
+     "dokima/agent_roles.py",
+     "dokima/agent_records.py",
+     "dokima/agents.py"
+    ],
+    "edge_cases": [
+     {
+      "case": "The settings name another secret for the planner.",
+      "test": "tests/test_key_rejected.py::test_the_record_names_the_secret_the_settings_use"
+     }
+    ]
+   },
+   {
+    "text": "When a run ends as Model key rejected, its comment says the provider refused the key: replace the secret.",
+    "words": "says the provider refused it: make a new one and replace the repo secret.",
+    "source": "https://github.com/dokima-dev/dokima/issues/907",
+    "files": [
+     "dokima/agent_roles.py",
+     "dokima/agent_records.py"
+    ],
+    "no_edge_cases": "It is one fixed message; the failure cases belong to the first criterion."
+   },
+   {
+    "text": "When a run ends as Model key rejected, no part of the key appears on its comment or record.",
+    "words": "Never print any part of the key.",
+    "source": "https://github.com/dokima-dev/dokima/issues/907",
+    "files": [
+     "dokima/agent_roles.py",
+     "dokima/agent_records.py"
+    ],
+    "edge_cases": [
+     {
+      "case": "No secret was given to the record step to remove.",
+      "test": "tests/test_key_rejected.py::test_the_record_never_prints_any_part_of_the_key"
+     }
+    ]
+   },
+   {
+    "text": "When the agent key is present, the setup audit makes one tiny call with it; when absent, none.",
+    "words": "The setup audit checks the agent key once with a tiny call (when the key is present)",
+    "source": "https://github.com/dokima-dev/dokima/issues/907",
+    "files": [
+     "dokima/audit.py",
+     "dokima/agents.py",
+     ".github/workflows/audit.yml",
+     ".github/workflows/entry.yml"
+    ],
+    "edge_cases": [
+     {
+      "case": "No key is given to the audit: no call is made.",
+      "test": "tests/test_key_rejected.py::test_the_audit_tries_a_present_key_once"
+     },
+     {
+      "case": "The provider accepts the key: nothing is reported.",
+      "test": "tests/test_key_rejected.py::test_the_audit_tries_a_present_key_once"
+     }
+    ]
+   },
+   {
+    "text": "When the provider rejects the key at setup, the audit reports it as one line naming its secret.",
+    "words": "reports a rejected key as one line, so an owner learns at install time, not on their first issue.",
+    "source": "https://github.com/dokima-dev/dokima/issues/907",
+    "files": [
+     "dokima/audit.py",
+     "dokima/agents.py"
+    ],
+    "no_edge_cases": "The accepted and absent key cases are covered under the criterion before."
+   }
+  ],
+  "non_functional": [],
+  "tests": {
+   "907.1": [
+    "tests/test_key_rejected.py::test_a_401_from_the_provider_reads_model_key_rejected",
+    "tests/test_key_rejected.py::test_a_403_from_the_provider_reads_model_key_rejected",
+    "tests/test_key_rejected.py::test_an_expired_token_reads_model_key_rejected"
+   ],
+   "907.2": [
+    "tests/test_key_rejected.py::test_the_record_names_the_secret_the_settings_use"
+   ],
+   "907.3": [
+    "tests/test_key_rejected.py::test_the_record_says_to_make_a_new_key_and_replace_the_repo_secret"
+   ],
+   "907.4": [
+    "tests/test_key_rejected.py::test_the_record_never_prints_any_part_of_the_key"
+   ],
+   "907.5": [
+    "tests/test_key_rejected.py::test_the_audit_tries_a_present_key_once"
+   ],
+   "907.6": [
+    "tests/test_key_rejected.py::test_the_audit_reports_a_rejected_key_as_one_line"
+   ]
+  },
+  "test_changes": {},
+  "links": {
+   "blocked_by": [],
+   "blocks": [],
+   "relates_to": [
+    896
+   ]
+  },
+  "raises": [
+   {
+    "kind": "question",
+    "to": "owner",
+    "label": "Workflow change",
+    "text": "The audit key check needs the audit workflows to pass the key. May the worker change them? Plan assumes yes.",
+    "evidence": "`.github/workflows/audit.yml` gets only `DOKIMA_APP_KEY`; `entry.yml` audit job passes only that.",
+    "raised_by": "planner",
+    "id": "P1"
+   }
+  ]
+ },
+ "check": {
+  "passed": true,
+  "problems": []
+ },
+ "url": "https://github.com/dokima-dev/dokima/issues/907#issuecomment-6268469826"
+}
