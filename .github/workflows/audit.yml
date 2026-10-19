@@ -10,6 +10,8 @@ on:
   workflow_dispatch:
   # Called by the one workflow an adopter installs (dokima/install/dokima.yml), through entry.yml (#812).
   workflow_call:
+    secrets:
+      DOKIMA_APP_KEY: {required: true}
 concurrency:
   group: audit
   cancel-in-progress: false
