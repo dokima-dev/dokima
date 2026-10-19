@@ -1,0 +1,74 @@
+{
+ "role": "reviewer",
+ "stage": "pr",
+ "run_id": "39187012042",
+ "commit_before": "0a688416c82458e61606b353a4e3bbeb67469f98",
+ "started_by": "dokima-runtime[bot]",
+ "models": [
+  "claude-opus-5-5"
+ ],
+ "report": {
+  "duration_ms": 2097,
+  "turns": 1,
+  "cost_usd": 0.5343894000000001,
+  "tokens_in": 51396,
+  "tokens_out": 103
+ },
+ "log": "https://github.com/dokima-dev/dokima/blob/logs/logs/890/39187012042-reviewer-pr.md",
+ "run": "https://github.com/dokima-dev/dokima/actions/runs/39187012042",
+ "handback": {
+  "previous_step": {
+   "did": [
+    "Added a v0.1.2 section atop the changelog naming #874, #876, #877, #886 and #887.",
+    "Pointed the install file, README and install wiki page at v0.1.2.",
+    "Changed the older changelog test so v0.1.1 need not be newest."
+   ],
+   "decided": [
+    "Added a test that v0.1.2 sits on top, naming all five fixes."
+   ],
+   "open": [
+    "The fix for #886 is not on main yet."
+   ]
+  },
+  "verdict": "block",
+  "summary": "The change matches the ask, but #886 has not landed, so merging now releases without it.",
+  "raises": [
+   {
+    "kind": "blocker",
+    "to": "owner",
+    "label": "Wait for #886",
+    "text": "You asked to merge only after #886 lands. It has not, and autopilot may merge this at once. Hold it until #886 merges.",
+    "evidence": "`git log main` has no #886 commit; branch `try/issue-886` is unmerged; issue card lists no blocker.",
+    "raised_by": "reviewer",
+    "id": "R1"
+   }
+  ],
+  "answers": [],
+  "asks": [],
+  "behaviors": [],
+  "edge_cases": [],
+  "tests": [],
+  "size": "ok",
+  "boxes": {
+   "dropped": "none",
+   "added": [
+    {
+     "what": "Older changelog test now checks v0.1.1 sits above v0.1.0, not that it is newest",
+     "kind": "needed",
+     "serves": "ask"
+    }
+   ],
+   "superseded": "none",
+   "conflicts": "none",
+   "edges": {
+    "ask": "covered"
+   },
+   "poor_tests": "none"
+  }
+ },
+ "check": {
+  "passed": true,
+  "problems": []
+ },
+ "url": "https://github.com/dokima-dev/dokima/pull/891#issuecomment-6257918312"
+}
