@@ -1,0 +1,47 @@
+{
+ "role": "worker",
+ "stage": null,
+ "run_id": "39179884361",
+ "commit_before": "053f89fb4948029591f8e945f9157ee752529953",
+ "started_by": "dokima-runtime[bot]",
+ "models": [
+  "claude-opus-5-5"
+ ],
+ "report": {
+  "duration_ms": 45245,
+  "turns": 13,
+  "cost_usd": 0.31316999999999995,
+  "tokens_in": 376242,
+  "tokens_out": 3340
+ },
+ "log": "https://github.com/dokima-dev/dokima/blob/logs/logs/874/39179884361-worker.md",
+ "run": "https://github.com/dokima-dev/dokima/actions/runs/39179884361",
+ "handback": {
+  "summary": "The install file now starts on a push to any branch; no docs quoted the old filter, so none changed.",
+  "criteria": {
+   "ask": "`dokima/install/dokima.yml` has plain `push:`; `test_the_adopters_push_trigger_names_no_branch` in `tests/test_thin_install.py` pins it."
+  },
+  "evidence": "`pytest -q tests/test_thin_install.py`: new test passes, fails on old file.",
+  "raises": [
+   {
+    "kind": "issue",
+    "label": "Missing hotfix label",
+    "text": "The setup audit does not create the hotfix label, so a new repo lacks it.",
+    "evidence": "Issue #874's text says the label was created by hand.",
+    "raised_by": "worker",
+    "id": "W1"
+   }
+  ]
+ },
+ "check": {
+  "passed": true,
+  "problems": []
+ },
+ "dropped_by_fence": [],
+ "files_changed": [
+  "dokima/install/dokima.yml",
+  "tests/test_thin_install.py"
+ ],
+ "branch": "try/issue-874",
+ "url": "https://github.com/dokima-dev/dokima/issues/874#issuecomment-6256935895"
+}
