@@ -14,6 +14,8 @@ import subprocess
 import sys
 import tarfile
 
+import yaml
+
 ROOT = os.path.abspath(os.path.join(os.path.dirname(__file__), ".."))
 sys.path.insert(0, ROOT)
 sys.path.insert(0, os.path.join(ROOT, "tests"))
@@ -389,11 +391,17 @@ def test_the_audit_reports_a_rejected_key_as_one_line(record_property, tmp_path,
 def test_the_audit_job_gets_each_declared_agent_key_by_name(record_property):
     """The audit job is handed every declared agent key by name.
 
-    `entry.yml` passes each of the three keys to the audit job, `audit.yml` declares each one, and the audit step
-    reads each as `DOKIMA_KEY_<NAME>` from the secret of that name.
+    The adopter's install file maps each of the three keys to Dokima by name, `entry.yml` passes each to the audit
+    job, `audit.yml` declares each one, and the audit step reads each as `DOKIMA_KEY_<NAME>` from the secret of that
+    name.
 
     Proves 907.8."""
     record_property("proves", "907.8")
+    install = yaml.safe_load(open(os.path.join(ROOT, "dokima", "install", "dokima.yml")).read()) or {}
+    given = {k: str(v).replace(" ", "") for j in (install.get("jobs") or {}).values()
+             if isinstance(j.get("secrets"), dict) for k, v in j["secrets"].items()}
+    missing = [k for k in DECLARED if given.get(k) != "${{secrets.%s}}" % k]
+    assert not missing, f"907.8: the adopter's install file never hands Dokima these agent keys by name: {missing}"
     entry = load_yaml(open(os.path.join(ROOT, ".github", "workflows", "entry.yml")).read())
     passed = str(entry["jobs"]["audit"].get("secrets"))
     missing = [k for k in DECLARED if f"secrets.{k}" not in passed]
