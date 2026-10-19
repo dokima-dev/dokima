@@ -1,0 +1,39 @@
+{
+ "role": "worker",
+ "stage": null,
+ "run_id": "39275885879",
+ "commit_before": "e4d3b876df31d8c82fb769318a31e74cf5cc2aec",
+ "started_by": "dokima-runtime[bot]",
+ "models": [
+  "claude-opus-5-5"
+ ],
+ "report": {
+  "duration_ms": 139468,
+  "turns": 9,
+  "cost_usd": 0.4095622,
+  "tokens_in": 378891,
+  "tokens_out": 2528
+ },
+ "log": "https://github.com/dokima-dev/dokima/blob/logs/logs/896/39275885879-worker.md",
+ "run": "https://github.com/dokima-dev/dokima/actions/runs/39275885879",
+ "handback": {
+  "summary": "No new code: the earlier build stands, and the plan now lists the Codex and Kimi test changes.",
+  "criteria": {
+   "896.1": "`role_settings` in `dokima/agents.py` stops on any key outside `DECLARED`, the keys `entry.yml` declares.",
+   "896.2": "`compare_secrets` in `dokima/audit.py` gives the one line from `agents.undeclared` for an undeclared key.",
+   "896.3": "The job's key lookup raises `Stop` with that same line before checking whether the secret is present.",
+   "896.4": "`README.md`, `docs/wiki/Installing.md` and the `dokima/agents.py` docstring name the three keys and say others never reach jobs."
+  },
+  "evidence": "`pytest -q` on the plan's eight test files: 68 passed.",
+  "raises": [],
+  "answers": []
+ },
+ "check": {
+  "passed": true,
+  "problems": []
+ },
+ "dropped_by_fence": [],
+ "files_changed": [],
+ "branch": "try/issue-896",
+ "url": "https://github.com/dokima-dev/dokima/pull/911#issuecomment-6270573805"
+}
