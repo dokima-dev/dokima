@@ -1,0 +1,85 @@
+{
+ "role": "reviewer",
+ "stage": "pr",
+ "run_id": "39180519581",
+ "commit_before": "cbcbf39ccfecb8b7ecad202bd999cccc7c666c55",
+ "started_by": "dokima-runtime[bot]",
+ "models": [
+  "claude-opus-5-5"
+ ],
+ "report": {
+  "duration_ms": 1024423,
+  "turns": 15,
+  "cost_usd": 0.3992504,
+  "tokens_in": 508321,
+  "tokens_out": 4578
+ },
+ "log": "https://github.com/dokima-dev/dokima/blob/logs/logs/877/39180519581-reviewer-pr.md",
+ "run": "https://github.com/dokima-dev/dokima/actions/runs/39180519581",
+ "handback": {
+  "previous_step": {
+   "did": [
+    "The testmon baseline now runs only the tests folder the settings name, default tests.",
+    "A new test runs the baseline line and checks the folder it names."
+   ],
+   "decided": [
+    "The baseline uses the same tests folder setting as the full suite."
+   ],
+   "open": [
+    "The worker flagged the code review's testmon run may also reach outside the tests folder."
+   ]
+  },
+  "verdict": "block",
+  "summary": "The change matches the ask, but the All tests check is red on GitHub, so it cannot pass yet.",
+  "raises": [
+   {
+    "kind": "blocker",
+    "to": "worker",
+    "label": "All tests red",
+    "text": "The All tests check failed on GitHub, though the full suite passes here. Find the failing test in that run and fix it, or rerun if unrelated.",
+    "evidence": "Card's All tests link, run `39180487595`, shows failed; `pytest -n auto tests` here: 1518 passed.",
+    "raised_by": "reviewer",
+    "id": "R1"
+   }
+  ],
+  "answers": [
+   {
+    "raise": "W1",
+    "answer": "done",
+    "why": "Confirmed: the code review's testmon run names no tests folder. It is outside this ask, so a separate issue.",
+    "searched": [
+     877,
+     799,
+     862
+    ],
+    "verdict": "new"
+   }
+  ],
+  "asks": [],
+  "behaviors": [],
+  "edge_cases": [],
+  "tests": [
+   {
+    "test": "tests/test_testmon.py::test_baseline_runs_only_the_tests_folder",
+    "only_its_behavior": true,
+    "why": "Runs the real baseline line; fails on main's line, which names no folder."
+   }
+  ],
+  "size": "ok",
+  "boxes": {
+   "dropped": "none",
+   "added": "none",
+   "superseded": "none",
+   "conflicts": "none",
+   "edges": {
+    "ask": "covered"
+   },
+   "poor_tests": "none"
+  }
+ },
+ "check": {
+  "passed": true,
+  "problems": []
+ },
+ "url": "https://github.com/dokima-dev/dokima/pull/878#issuecomment-6257026964"
+}
