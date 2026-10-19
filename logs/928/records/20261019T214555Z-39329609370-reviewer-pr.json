@@ -1,0 +1,74 @@
+{
+ "role": "reviewer",
+ "stage": "pr",
+ "run_id": "39329609370",
+ "commit_before": "683d409d65056c7080e38e6c33b77cfb2f2dd24d",
+ "started_by": "dokima-runtime[bot]",
+ "models": [
+  "claude-opus-5-5"
+ ],
+ "report": {
+  "duration_ms": 64477,
+  "turns": 7,
+  "cost_usd": 0.3220092,
+  "tokens_in": 244654,
+  "tokens_out": 2484
+ },
+ "log": "https://github.com/dokima-dev/dokima/blob/logs/logs/928/39329609370-reviewer-pr.md",
+ "run": "https://github.com/dokima-dev/dokima/actions/runs/39329609370",
+ "handback": {
+  "previous_step": {
+   "did": [
+    "The test baseline now passes with a notice when the settings' tests folder is missing.",
+    "The baseline now runs only on the settings' tests folder and file pattern.",
+    "A new test covers a repo with no tests folder and a repo with tests."
+   ],
+   "decided": [
+    "With no tests folder, the baseline saves nothing."
+   ],
+   "open": []
+  },
+  "verdict": "approve",
+  "summary": "The baseline passes with a notice on a repo with no tests folder, and still records one when tests exist.",
+  "raises": [],
+  "answers": [],
+  "asks": [],
+  "behaviors": [
+   {
+    "criterion": "ask",
+    "one_behavior": true,
+    "why": "A missing tests folder passes the baseline with a notice; otherwise it runs as before."
+   }
+  ],
+  "edge_cases": [
+   {
+    "criterion": "ask",
+    "cut": [],
+    "missing": []
+   }
+  ],
+  "tests": [
+   {
+    "test": "tests/test_no_tests_yet.py::test_the_baseline_passes_with_no_tests_folder_and_records_one_with_tests",
+    "only_its_behavior": true,
+    "why": "Fails on main's workflow; checks the notice, no saved baseline, and the settings' pattern."
+   }
+  ],
+  "size": "ok",
+  "boxes": {
+   "dropped": "none",
+   "added": "none",
+   "superseded": "none",
+   "conflicts": "none",
+   "edges": {
+    "ask": "covered"
+   },
+   "poor_tests": "none"
+  }
+ },
+ "check": {
+  "passed": true,
+  "problems": []
+ },
+ "url": "https://github.com/dokima-dev/dokima/pull/929#issuecomment-6278041267"
+}
