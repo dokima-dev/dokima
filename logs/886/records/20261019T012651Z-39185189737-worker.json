@@ -1,0 +1,40 @@
+{
+ "role": "worker",
+ "stage": null,
+ "run_id": "39185189737",
+ "commit_before": "00049165e0bcd30e7e5eb5bd9b9e8832664de0e5",
+ "started_by": "dokima-runtime[bot]",
+ "models": [
+  "claude-opus-5-5"
+ ],
+ "report": {
+  "duration_ms": 100251,
+  "turns": 8,
+  "cost_usd": 0.2833208,
+  "tokens_in": 234142,
+  "tokens_out": 2164
+ },
+ "log": "https://github.com/dokima-dev/dokima/blob/logs/logs/886/39185189737-worker.md",
+ "run": "https://github.com/dokima-dev/dokima/actions/runs/39185189737",
+ "handback": {
+  "summary": "The baseline now passes when no tests are collected, saves an empty baseline and shows a notice.",
+  "criteria": {
+   "886.1": "testmon.yml baseline step accepts pytest exit 5 as well as 0 and 1; other exits still fail.",
+   "886.2": "On exit 5 the step prints a No tests yet run notice.",
+   "886.3": "The step still runs pytest over the settings' tests folder, defaulting to tests; this test already passed before."
+  },
+  "evidence": "`pytest -q tests/test_no_tests_yet.py tests/test_testmon.py`: 5 passed",
+  "raises": [],
+  "answers": []
+ },
+ "check": {
+  "passed": true,
+  "problems": []
+ },
+ "dropped_by_fence": [],
+ "files_changed": [
+  ".github/workflows/testmon.yml"
+ ],
+ "branch": "try/issue-886",
+ "url": "https://github.com/dokima-dev/dokima/issues/886#issuecomment-6257669287"
+}
