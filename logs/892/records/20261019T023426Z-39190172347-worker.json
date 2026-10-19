@@ -1,0 +1,40 @@
+{
+ "role": "worker",
+ "stage": null,
+ "run_id": "39190172347",
+ "commit_before": "4000aaa1a1921e5d62fd9d0ea6781caba7edcdd8",
+ "started_by": "dokima-runtime[bot]",
+ "models": [
+  "claude-opus-5-5"
+ ],
+ "report": {
+  "duration_ms": 280873,
+  "turns": 22,
+  "cost_usd": 0.6777278,
+  "tokens_in": 916137,
+  "tokens_out": 7738
+ },
+ "log": "https://github.com/dokima-dev/dokima/blob/logs/logs/892/39190172347-worker.md",
+ "run": "https://github.com/dokima-dev/dokima/actions/runs/39190172347",
+ "handback": {
+  "summary": "Review on a hotfix issue now reviews its open pull request, or says why when none is open.",
+  "criteria": {
+   "ask": "`hotfix_route` in `dokima/agent_roles.py` turns a hotfix issue's plan review into code review, or posts why and starts nothing."
+  },
+  "evidence": "pytest -q tests/test_hotfix.py -k review_on: 4 passed",
+  "raises": [],
+  "answers": []
+ },
+ "check": {
+  "passed": true,
+  "problems": []
+ },
+ "dropped_by_fence": [],
+ "files_changed": [
+  "dokima/agent.py",
+  "dokima/agent_roles.py",
+  "tests/test_hotfix.py"
+ ],
+ "branch": "try/issue-892",
+ "url": "https://github.com/dokima-dev/dokima/issues/892#issuecomment-6258372138"
+}
