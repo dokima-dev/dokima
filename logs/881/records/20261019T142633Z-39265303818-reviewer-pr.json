@@ -1,0 +1,76 @@
+{
+ "role": "reviewer",
+ "stage": "pr",
+ "run_id": "39265303818",
+ "commit_before": "d7f82c95e41211f110f8dc563a82cbd22620c9f4",
+ "started_by": "dokima-runtime[bot]",
+ "models": [
+  "claude-opus-5-5"
+ ],
+ "report": {
+  "duration_ms": 2455,
+  "turns": 1,
+  "cost_usd": 0.45189419999999997,
+  "tokens_in": 44601,
+  "tokens_out": 114
+ },
+ "log": "https://github.com/dokima-dev/dokima/blob/logs/logs/881/39265303818-reviewer-pr.md",
+ "run": "https://github.com/dokima-dev/dokima/actions/runs/39265303818",
+ "handback": {
+  "previous_step": {
+   "did": [
+    "Three older setup tests now drift a label's color instead of deleting it."
+   ],
+   "decided": [
+    "Setup code is unchanged since the last review."
+   ],
+   "open": []
+  },
+  "verdict": "approve",
+  "summary": "Setup now creates the hotfix label and every other missing one; all tests pass.",
+  "raises": [],
+  "answers": [],
+  "asks": [],
+  "behaviors": [],
+  "edge_cases": [],
+  "tests": [
+   {
+    "test": "tests/test_audit_cli.py::test_the_audit_creates_every_missing_label_and_keeps_a_drifted_one",
+    "only_its_behavior": true,
+    "why": "Fails on main; catches a missing hotfix label or an overwritten one."
+   },
+   {
+    "test": "tests/test_audit_cli.py::test_a_label_github_will_not_create_is_reported_with_its_reason",
+    "only_its_behavior": true,
+    "why": "Fails on main; checks a refused label's line gives GitHub's reason."
+   }
+  ],
+  "size": "ok",
+  "boxes": {
+   "dropped": "none",
+   "added": [
+    {
+     "what": "A refused label gets one setup line with GitHub's reason",
+     "kind": "needed",
+     "serves": "ask"
+    },
+    {
+     "what": "Older tests drift a label's color instead of deleting it",
+     "kind": "needed",
+     "serves": "ask"
+    }
+   ],
+   "superseded": "none",
+   "conflicts": "none",
+   "edges": {
+    "ask": "covered"
+   },
+   "poor_tests": "none"
+  }
+ },
+ "check": {
+  "passed": true,
+  "problems": []
+ },
+ "url": "https://github.com/dokima-dev/dokima/pull/908#issuecomment-6269061170"
+}
