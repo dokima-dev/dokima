@@ -256,7 +256,7 @@ def test_a_run_with_no_bot_set_up_fails_saying_how_to_set_it_up(record_property,
 
     Proves 812.4. Runs agent.yml's planner run in a repo with no app id variable and no app key secret, then in one
     with the app id but no key. Each run must fail, with an error naming the DOKIMA_APP_ID variable, the
-    DOKIMA_APP_KEY secret and the keys environment they go in."""
+    DOKIMA_APP_KEY secret and that they go in as repo secrets, since an environment's never reach the jobs (#884)."""
     record_property("proves", "812.4")
     for case, drop_secrets, drop_vars in (("no bot", ("DOKIMA_APP_KEY",), ("DOKIMA_APP_ID",)),
                                           ("no app key", ("DOKIMA_APP_KEY",), ())):
@@ -265,9 +265,9 @@ def test_a_run_with_no_bot_set_up_fails_saying_how_to_set_it_up(record_property,
         result = box.run("agent.yml", "run", name="planner", role="planner")
         assert result == "failure", f"812.4: with {case} set up, the run did not fail; job {result}"
         errors = [l for l in "\n".join(box.log).splitlines() if "::error" in l]
-        said = [l for l in errors if "DOKIMA_APP_ID" in l and "DOKIMA_APP_KEY" in l and "keys" in l]
-        assert said, (f"812.4: with {case} set up, no error says to add DOKIMA_APP_ID and DOKIMA_APP_KEY to the keys "
-                      f"environment; its errors: {errors}")
+        said = [l for l in errors if "DOKIMA_APP_ID" in l and "DOKIMA_APP_KEY" in l and "repo secret" in l]
+        assert said, (f"812.4: with {case} set up, no error says to add DOKIMA_APP_ID and DOKIMA_APP_KEY as a repo "
+                      f"secret; its errors: {errors}")
 
 
 # 812.5 ------------------------------------------------------------------------------------------------------------
@@ -276,7 +276,7 @@ def test_a_run_with_no_model_key_fails_naming_the_secret_and_how_to_add_it(recor
     """A run with no model key fails, and says which secret to add and where.
 
     Proves 812.5. Runs agent.yml's planner run in a repo with no CLAUDE_CODE_OAUTH_TOKEN secret: it must fail, and the
-    run's log or its record on the issue must name that secret and the keys environment it goes in. Then settings
+    run's log or its record on the issue must name that secret and say it goes in as a repo secret (#884). Then settings
     naming the secret CODEX_API_KEY, which the repo lacks: the run fails naming CODEX_API_KEY."""
     record_property("proves", "812.5")
     for case, settings, secret in (("default", None, "CLAUDE_CODE_OAUTH_TOKEN"), ("named", CODEX_API_KEY, "CODEX_API_KEY")):
@@ -284,9 +284,9 @@ def test_a_run_with_no_model_key_fails_naming_the_secret_and_how_to_add_it(recor
         with_context(box, drop_secrets=("CLAUDE_CODE_OAUTH_TOKEN", "CODEX_API_KEY"))
         result = box.run("agent.yml", "run", name="planner", role="planner")
         assert result == "failure", f"812.5: with no {secret} secret, the run did not fail; job {result}"
-        said = [l for l in everything_said(box).splitlines() if secret in l and "keys" in l]
-        assert said, (f"812.5: with no {secret} secret, nothing the run said names {secret} and the keys environment "
-                      f"to add it to\n{box.tail()}")
+        said = [l for l in everything_said(box).splitlines() if secret in l and "repo secret" in l]
+        assert said, (f"812.5: with no {secret} secret, nothing the run said names {secret} and says to add it "
+                      f"as a repo secret\n{box.tail()}")
 
 
 # 812.6 ------------------------------------------------------------------------------------------------------------
