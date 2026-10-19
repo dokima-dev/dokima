@@ -1,0 +1,60 @@
+{
+ "role": "worker",
+ "stage": null,
+ "run_id": "39258700269",
+ "commit_before": "8079a33cb09982ce5a1e8764dbe917b4725566fa",
+ "started_by": "RezaSoleymanifar",
+ "models": [
+  "claude-opus-5-5"
+ ],
+ "report": {
+  "duration_ms": 4175,
+  "turns": 1,
+  "cost_usd": 0.6205528000000002,
+  "tokens_in": 53724,
+  "tokens_out": 203
+ },
+ "log": "https://github.com/dokima-dev/dokima/blob/logs/logs/745/39258700269-worker.md",
+ "run": "https://github.com/dokima-dev/dokima/actions/runs/39258700269",
+ "handback": {
+  "summary": "Merged main; assign and testmon now take the app key by name instead of inheriting secrets.",
+  "criteria": {
+   "745.1": "Unchanged from the approved build: `file_issues` in `dokima/agent_autopilot.py` files `fault: dokima` raises upstream when set.",
+   "745.2": "Unchanged: the record line for an upstream filing links the upstream issue.",
+   "745.3": "Unchanged: `dokima/roles/raising.md` says how to judge and tag fault.",
+   "745.4": "Unchanged: `upstream.file` comments on the open same-titled issue instead of opening another.",
+   "745.5": "Unchanged: `python3 -m dokima.upstream failed WORKFLOW JOB` files the failure; no upstream repo files nothing.",
+   "745.6": "Unchanged jobs; `assign.yml` and `testmon.yml` now declare `DOKIMA_APP_KEY`, and `entry.yml` passes it by name.",
+   "745.7": "Unchanged: one issue per workflow and job, one comment per failed run.",
+   "745.8": "Unchanged: a `fault: unsure` raise is filed locally, saying whose fault is unclear.",
+   "745.9": "Unchanged: `upstream.scrub` drops the repo's name, links and issue numbers.",
+   "745.10": "Filing steps mint `DOKIMA_UPSTREAM_TOKEN` from the App's key; the test still fails on main's own agent keys, raised."
+  },
+  "evidence": "`pytest tests/test_secrets_by_name.py tests/test_upstream.py`: 33 passed, 1 failed (745.10, raised).",
+  "raises": [
+   {
+    "kind": "blocker",
+    "to": "planner",
+    "label": "Test cannot pass",
+    "text": "The 745.10 test flags main's own agent keys as new secrets, so no code can pass it without dropping main's agents.",
+    "evidence": "`tests/test_upstream.py::test_filing_upstream_mints_its_key_from_the_apps_own_key`: main's `entry.yml` declares `CODEX_API_KEY`, `KIMI_API_KEY` (#894).",
+    "raised_by": "worker",
+    "id": "W4"
+   }
+  ]
+ },
+ "check": {
+  "passed": false,
+  "problems": [
+   "plan test fails: tests/test_upstream.py::test_filing_upstream_mints_its_key_from_the_apps_own_key"
+  ]
+ },
+ "dropped_by_fence": [],
+ "files_changed": [
+  ".github/workflows/assign.yml",
+  ".github/workflows/entry.yml",
+  ".github/workflows/testmon.yml"
+ ],
+ "branch": "try/issue-745",
+ "url": "https://github.com/dokima-dev/dokima/pull/872#issuecomment-6268133715"
+}
