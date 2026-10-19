@@ -1,0 +1,62 @@
+{
+ "role": "reviewer",
+ "stage": "pr",
+ "run_id": "39320505269",
+ "commit_before": "4de1a55426b7d3c19c408acd82e3e28073185efb",
+ "started_by": "dokima-runtime[bot]",
+ "models": [
+  "claude-opus-5-5"
+ ],
+ "report": {
+  "duration_ms": 61690,
+  "turns": 5,
+  "cost_usd": 0.2604572,
+  "tokens_in": 163849,
+  "tokens_out": 2033
+ },
+ "log": "https://github.com/dokima-dev/dokima/blob/logs/logs/925/39320505269-reviewer-pr.md",
+ "run": "https://github.com/dokima-dev/dokima/actions/runs/39320505269",
+ "handback": {
+  "previous_step": {
+   "did": [
+    "Added a v0.1.6 changelog section above v0.1.5, one line per fix.",
+    "Pointed the install file, README and install guide at v0.1.6.",
+    "Added a release test naming v0.1.6 and its five fixes."
+   ],
+   "decided": [
+    "The v0.1.5 test now checks v0.1.5 sits right above v0.1.4, like older releases."
+   ],
+   "open": []
+  },
+  "verdict": "approve",
+  "summary": "The release ships exactly the ask: every fix merged since v0.1.5 is listed and every pointer names v0.1.6.",
+  "raises": [],
+  "answers": [],
+  "asks": [],
+  "behaviors": [],
+  "edge_cases": [],
+  "tests": [
+   {
+    "test": "tests/test_newest_release.py::test_changelog_has_v016_on_top",
+    "only_its_behavior": true,
+    "why": "Fails on main with no v0.1.6 section; passes on the branch."
+   }
+  ],
+  "size": "ok",
+  "boxes": {
+   "dropped": "none",
+   "added": "none",
+   "superseded": "none",
+   "conflicts": "none",
+   "edges": {
+    "ask": "covered"
+   },
+   "poor_tests": "none"
+  }
+ },
+ "check": {
+  "passed": true,
+  "problems": []
+ },
+ "url": "https://github.com/dokima-dev/dokima/pull/926#issuecomment-6276734467"
+}
