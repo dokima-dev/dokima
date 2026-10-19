@@ -587,9 +587,14 @@ def main(argv):
                         elif held:
                             step = ("stop", f"Nothing is built: {turns.waits_line(held)} Say `/work` once #{held[0]} merges.")
                 pack_dir = os.environ.get("PACK", "")
-                if step[:2] == ("start", "planner") and rec.get("role") == "reviewer" and (rec.get("stage") or "") == "pr" \
-                        and pack_dir and os.path.isfile(os.path.join(pack_dir, hotfix.ASK)) \
-                        and not os.path.exists(os.path.join(pack_dir, "plan.json")):
+                lane = pack_dir and os.path.isfile(os.path.join(pack_dir, hotfix.ASK)) \
+                    and not os.path.exists(os.path.join(pack_dir, "plan.json"))
+                if lane and rec.get("role") == "worker" and rec.get("check", {}).get("passed") \
+                        and for_planner(rec.get("handback") or {}):
+                    # A hotfix worker that finds the ask needs a design choice sends it back to planning (#864).
+                    step = ("start", "planner", "")
+                if step[:2] == ("start", "planner") and lane and (rec.get("role") == "worker"
+                                                                   or rec.get("role") == "reviewer" and (rec.get("stage") or "") == "pr"):
                     # A hotfix sent back to planning says why on the issue itself, not only on its pull request (#863).
                     hotfix.back_to_planning(repo, number, rec)
         except subprocess.CalledProcessError as e:
@@ -769,7 +774,7 @@ from dokima.agent_github import (
 from dokima.agent_records import (
     MARK, saved_records, save_record, RecordsUnreadable, name_of, records, latest, approved, raises_for, stamp_record, build_record, not_started, cancelled, live_card,
     unrecorded_run, unrecorded, queue, who, files_changed, render, jsonl_files, scrub, transcript, run_report,
-    with_next, models_used, first_sentence, GATE_FAILED)
+    with_next, models_used, first_sentence, GATE_FAILED, for_planner)
 from dokima.agent_checks import problems_round, issue_url, check
 from dokima.agent_autopilot import (
     file_split, AUTOPILOT, autopilot_label, issue_tree, switch_autopilot, autopilot_comment, AUTOPILOT_START_LINE, named,
