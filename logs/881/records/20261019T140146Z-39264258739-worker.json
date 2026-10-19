@@ -1,0 +1,44 @@
+{
+ "role": "worker",
+ "stage": null,
+ "run_id": "39264258739",
+ "commit_before": "a596d17f790a3156fc99ffd6484de779cc74f8bf",
+ "started_by": "dokima-runtime[bot]",
+ "models": [
+  "claude-opus-5-5"
+ ],
+ "report": {
+  "duration_ms": 356903,
+  "turns": 11,
+  "cost_usd": 0.3138158000000001,
+  "tokens_in": 359464,
+  "tokens_out": 2684
+ },
+ "log": "https://github.com/dokima-dev/dokima/blob/logs/logs/881/39264258739-worker.md",
+ "run": "https://github.com/dokima-dev/dokima/actions/runs/39264258739",
+ "handback": {
+  "summary": "Setup now creates every missing Dokima label, hotfix included; three old tests now drift a label's color instead.",
+  "criteria": {
+   "ask": "`dokima/audit.py` creates missing labels before comparing; `hotfix` joins `manifest.LABELS`; two old tests drift `filed-by-dokima` color."
+  },
+  "evidence": "`pytest -q` on every audit, manifest and fake gh test: 344 passed.",
+  "answers": [
+   {
+    "raise": "R1",
+    "answer": "done",
+    "why": "Both old tests now change the label's color instead of deleting it, so a Setup issue still opens."
+   }
+  ]
+ },
+ "check": {
+  "passed": true,
+  "problems": []
+ },
+ "dropped_by_fence": [],
+ "files_changed": [
+  "tests/test_adopter_check_names.py",
+  "tests/test_up_to_date_rule.py"
+ ],
+ "branch": "try/issue-881",
+ "url": "https://github.com/dokima-dev/dokima/pull/908#issuecomment-6268916812"
+}
