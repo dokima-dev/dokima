@@ -2,6 +2,12 @@
 
 What each version of Dokima does.
 
+## v0.1.4
+
+Secrets reach Dokima's inner jobs in repos owned by another account.
+
+- Every shared workflow declares the secrets it reads, and each call hands them over by name (#897).
+
 ## v0.1.3
 
 Secrets reach Dokima's jobs in repos owned by another account.
