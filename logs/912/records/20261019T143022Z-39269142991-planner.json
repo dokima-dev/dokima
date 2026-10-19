@@ -1,0 +1,155 @@
+{
+ "role": "planner",
+ "stage": null,
+ "run_id": "39269142991",
+ "commit_before": "3c9f6353daae2174a22c4f64f827417a836580a2",
+ "started_by": "dokima-runtime[bot]",
+ "models": [
+  "claude-opus-5-5"
+ ],
+ "report": {
+  "duration_ms": 81758,
+  "turns": 6,
+  "cost_usd": 0.3242446,
+  "tokens_in": 223509,
+  "tokens_out": 2636
+ },
+ "log": "https://github.com/dokima-dev/dokima/blob/logs/logs/912/39269142991-planner.md",
+ "run": "https://github.com/dokima-dev/dokima/actions/runs/39269142991",
+ "handback": {
+  "kind": "user_story",
+  "title": "A run keeps its work when its branch moved",
+  "summary": "A run whose branch or logs branch moved while it ran catches up and keeps its work and log.",
+  "user_story": "A run whose branch moved while it worked still saves its work and log, and names any clashing files.",
+  "acceptance_criteria": [
+   {
+    "text": "When the run's branch moved during the run, the run's commit still ends on top of it.",
+    "words": "When a push of the run's branch or of `logs` is rejected because the remote moved, fetch, rebase the run's own commits onto the new tip, and push again (a few tries).",
+    "source": "https://github.com/dokima-dev/dokima/issues/912",
+    "files": [
+     ".github/workflows/agent.yml",
+     "dokima/push.py"
+    ],
+    "edge_cases": [
+     {
+      "case": "The branch moves again while the run catches up.",
+      "test": "tests/test_push_moved_remote.py::test_a_branch_that_moves_again_during_the_retry_still_gets_the_runs_commit"
+     },
+     {
+      "case": "The planner merged main in at its start; main stays merged once, never copied.",
+      "test": "tests/test_push_moved_remote.py::test_a_planner_that_merged_main_keeps_main_merged_after_catching_up"
+     }
+    ]
+   },
+   {
+    "text": "When the run's changes clash with the moved branch, the failed run's record names the clashing files.",
+    "words": "Only if the rebase conflicts does the run fail, and then the record names the conflicting files.",
+    "source": "https://github.com/dokima-dev/dokima/issues/912",
+    "files": [
+     ".github/workflows/agent.yml",
+     "dokima/push.py"
+    ],
+    "edge_cases": [
+     {
+      "case": "Two files clash, and the record names both.",
+      "test": "tests/test_push_moved_remote.py::test_a_clash_in_two_files_names_both"
+     }
+    ]
+   },
+   {
+    "text": "When the logs branch moved during the run, the run's conversation log still lands on top of it.",
+    "words": "When a push of the run's branch or of `logs` is rejected because the remote moved, fetch, rebase the run's own commits onto the new tip, and push again (a few tries).",
+    "source": "https://github.com/dokima-dev/dokima/issues/912",
+    "files": [
+     ".github/workflows/agent.yml",
+     "dokima/push.py"
+    ],
+    "edge_cases": [
+     {
+      "case": "The logs branch moves again while the run catches up.",
+      "test": "tests/test_push_moved_remote.py::test_a_logs_branch_that_moves_again_during_the_retry_still_gets_the_runs_log"
+     }
+    ]
+   },
+   {
+    "text": "When one of the run's own pushes did not land, the run starts no next agent.",
+    "words": "The run that dispatches the next agent does so only after its own pushes have landed.",
+    "source": "https://github.com/dokima-dev/dokima/issues/912",
+    "files": [
+     ".github/workflows/agent.yml"
+    ],
+    "edge_cases": [
+     {
+      "case": "Only the conversation log push failed.",
+      "test": "tests/test_push_moved_remote.py::test_a_conversation_that_never_landed_starts_no_next_agent"
+     },
+     {
+      "case": "Only the record push failed.",
+      "test": "tests/test_push_moved_remote.py::test_a_record_that_never_landed_starts_no_next_agent"
+     }
+    ]
+   }
+  ],
+  "non_functional": [],
+  "tests": {
+   "912.1": [
+    "tests/test_push_moved_remote.py::test_a_branch_that_moved_ends_with_the_runs_commit_on_top",
+    "tests/test_push_moved_remote.py::test_a_branch_that_moves_again_during_the_retry_still_gets_the_runs_commit",
+    "tests/test_push_moved_remote.py::test_a_planner_that_merged_main_keeps_main_merged_after_catching_up"
+   ],
+   "912.2": [
+    "tests/test_push_moved_remote.py::test_a_clash_with_the_moved_branch_fails_the_run_naming_the_file",
+    "tests/test_push_moved_remote.py::test_a_clash_in_two_files_names_both"
+   ],
+   "912.3": [
+    "tests/test_push_moved_remote.py::test_a_logs_branch_that_moved_still_gets_the_runs_log",
+    "tests/test_push_moved_remote.py::test_a_logs_branch_that_moves_again_during_the_retry_still_gets_the_runs_log"
+   ],
+   "912.4": [
+    "tests/test_push_moved_remote.py::test_the_next_agent_starts_only_once_the_runs_pushes_landed",
+    "tests/test_push_moved_remote.py::test_a_conversation_that_never_landed_starts_no_next_agent",
+    "tests/test_push_moved_remote.py::test_a_record_that_never_landed_starts_no_next_agent"
+   ]
+  },
+  "test_changes": {},
+  "links": {
+   "blocked_by": [],
+   "blocks": [],
+   "relates_to": [
+    442,
+    825
+   ]
+  },
+  "answers": [
+   {
+    "raise": "R1",
+    "answer": "disagree",
+    "why": "The checker refuses a plan with no criteria, so the plan stays unbuilt; the owner confirms dropping it."
+   }
+  ],
+  "raises": [
+   {
+    "kind": "question",
+    "to": "owner",
+    "label": "Ask withdrawn",
+    "text": "You withdrew this ask and closed the issue. Should this plan and its tests be dropped? The plan assumes so.",
+    "evidence": "Owner comment of 2026-10-19T14:24:29Z on #912 names #914 as the real fix.",
+    "raised_by": "planner",
+    "id": "P3"
+   },
+   {
+    "kind": "issue",
+    "label": "Closed issue still runs",
+    "text": "A closed issue still starts agent runs: plan review and this planner ran after the owner closed it.",
+    "evidence": "#912 closed 14:24:29Z; plan review ran 14:25:30Z, planner 14:27:37Z.",
+    "raised_by": "planner",
+    "id": "P4"
+   }
+  ]
+ },
+ "check": {
+  "passed": true,
+  "problems": []
+ },
+ "url": "https://github.com/dokima-dev/dokima/issues/912#issuecomment-6269622050"
+}
