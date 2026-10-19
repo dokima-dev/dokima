@@ -105,6 +105,8 @@ def test_a_second_runs_conversation_lands_on_top_of_the_first_on_the_records_bra
                  f'printf "RECORDS_BRANCH=logs\\nLOG=logs/{ts.N}/{run}-planner.md\\n" >> "$GITHUB_ENV"\n'}
         result = m.run_as("planner", "", m.head + [REFUSE, given, m.app, save], f"save{run}")
         assert result == "success", f"run {run} failed at {m.failed_step}:\n" + "\n".join(m.log)
+        said = "\n".join(m.log)
+        assert "[rejected]" not in said, f"run {run} started the records branch fresh and its push was rejected:\n{said}"
         tips.append(ts.sh(logs, "git", "rev-parse", "logs"))
     ancestor = subprocess.run(["git", "merge-base", "--is-ancestor", tips[0], tips[1]], cwd=logs).returncode
     assert tips[1] != tips[0] and ancestor == 0, "the second run's conversation did not land on top of the first"
