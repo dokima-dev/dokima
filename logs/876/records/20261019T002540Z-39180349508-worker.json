@@ -1,0 +1,61 @@
+{
+ "role": "worker",
+ "stage": null,
+ "run_id": "39180349508",
+ "commit_before": "053f89fb4948029591f8e945f9157ee752529953",
+ "started_by": "dokima-runtime[bot]",
+ "models": [
+  "claude-opus-5-5"
+ ],
+ "report": {
+  "duration_ms": 261127,
+  "turns": 33,
+  "cost_usd": 1.1553638000000002,
+  "tokens_in": 1608452,
+  "tokens_out": 15444
+ },
+ "log": "https://github.com/dokima-dev/dokima/blob/logs/logs/876/39180349508-worker.md",
+ "run": "https://github.com/dokima-dev/dokima/actions/runs/39180349508",
+ "handback": {
+  "summary": "Docs now say repo secrets; the setup audit reports each key missing from the repo secrets, reading names only.",
+  "criteria": {
+   "ask": "`README.md` and `docs/wiki/Installing.md` say repo secrets; `dokima/audit.py` lists repo secret names, needing new app permission `secrets: read`."
+  },
+  "evidence": "`pytest -q` on audit, manifest, app, docs and install tests: 160 passed.",
+  "raises": [
+   {
+    "kind": "issue",
+    "label": "Workflows still say environment",
+    "text": "Workflow error messages still tell adopters to put missing keys in the keys environment, which never reaches their jobs.",
+    "evidence": "`.github/workflows/agent.yml` lines 138 and 162; workflows are outside a worker's reach.",
+    "raised_by": "worker",
+    "id": "W1"
+   },
+   {
+    "kind": "issue",
+    "label": "Own repo will flag",
+    "text": "This repo keeps its keys in the keys environment, so its own audit will now report them missing until they are repo secrets too.",
+    "evidence": "`dokima/audit.py` `compare_secrets`; every job here declares `environment: keys`.",
+    "raised_by": "worker",
+    "id": "W2"
+   }
+  ]
+ },
+ "check": {
+  "passed": true,
+  "problems": []
+ },
+ "dropped_by_fence": [],
+ "files_changed": [
+  "README.md",
+  "docs/wiki/Installing.md",
+  "dokima/app.json",
+  "dokima/audit.py",
+  "dokima/manifest.py",
+  "tests/fake_gh.py",
+  "tests/test_audit.py",
+  "tests/test_audit_secrets.py"
+ ],
+ "branch": "try/issue-876",
+ "url": "https://github.com/dokima-dev/dokima/issues/876#issuecomment-6257003348"
+}
