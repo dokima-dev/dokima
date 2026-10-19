@@ -37,12 +37,13 @@ from dokima import agent, prompt, raises, settings  # noqa: E402
 TRIAL, UPSTREAM = "o/r", "dokima-dev/dokima"
 LOCAL_KEY, UPSTREAM_KEY = "trial-key", "upstream-key"
 WORKFLOWS = os.path.join(ROOT, ".github", "workflows")
-# The secrets the workflows name before #745; no new credential may join them.
 # The test checks: their failures are usually the repo's own code or tests, so they file nothing upstream by themselves.
 TEST_CHECKS = {"full-suite.yml": "all-tests", "acceptance-criteria.yml": "check"}
 # The review relay runs the pull request's own copy, so it holds no key (#396.3) and files nothing upstream.
 RELAY = "reviews.yml"
-SECRETS_BEFORE = {"CLAUDE_CODE_OAUTH_TOKEN", "DOKIMA_APP_KEY", "SANDBOX_TOKEN", "GITHUB_TOKEN"}
+# The secrets main's workflows already name or declare, the agent keys of #894 among them; filing upstream adds none.
+SECRETS_ON_MAIN = {"CLAUDE_CODE_OAUTH_TOKEN", "CODEX_API_KEY", "DOKIMA_APP_KEY", "KIMI_API_KEY", "SANDBOX_TOKEN",
+                   "GITHUB_TOKEN"}
 
 TAGGED = {"kind": "issue", "label": "Card drops a line", "fault": "dokima",
           "text": "The card drops the last line of a long plan.", "evidence": "`dokima/card.py` cuts the plan fold.",
@@ -410,8 +411,8 @@ def test_filing_upstream_mints_its_key_from_the_apps_own_key(record_property):
 
     Reads every workflow file. Each step that files a failure upstream, and the agent workflow's step that files the
     review's problems, takes DOKIMA_UPSTREAM_TOKEN from an earlier step of its job that mints it with
-    actions/create-github-app-token from the App's id and key, for the upstream repo's owner. The workflows name no
-    secret beyond those named before. Proves 745.10."""
+    actions/create-github-app-token from the App's id and key, for the upstream repo's owner. The workflows name or
+    declare no secret beyond those main's workflows already have. Proves 745.10."""
     record_property("proves", "745.10")
     seen, wrong, secrets = 0, [], set()
     for name in sorted(os.listdir(WORKFLOWS)):
@@ -420,7 +421,11 @@ def test_filing_upstream_mints_its_key_from_the_apps_own_key(record_property):
         with open(os.path.join(WORKFLOWS, name)) as f:
             text = f.read()
         secrets |= set(re.findall(r"secrets\.([A-Za-z_][A-Za-z0-9_]*)", text))
-        for k, job in (yaml.safe_load(text).get("jobs") or {}).items():
+        flow = yaml.safe_load(text)
+        trigger = flow.get(True, flow.get("on"))  # YAML reads a bare `on:` key as True
+        call = trigger.get("workflow_call") if isinstance(trigger, dict) else None
+        secrets |= set((call or {}).get("secrets") or {})
+        for k, job in (flow.get("jobs") or {}).items():
             steps = job.get("steps") or []
             for at, step in enumerate(steps):
                 run = str(step.get("run", ""))
@@ -438,5 +443,6 @@ def test_filing_upstream_mints_its_key_from_the_apps_own_key(record_property):
     assert seen, "745.10: no workflow step files anything upstream yet"
     assert not wrong, ("745.10: these steps file upstream without DOKIMA_UPSTREAM_TOKEN minted from the App's own key "
                        f"for the upstream repo's owner: {'; '.join(wrong)}")
-    new = sorted(secrets - SECRETS_BEFORE)
-    assert not new, f"745.10: filing upstream should need no new credential, yet the workflows name new secrets: {new}"
+    new = sorted(secrets - SECRETS_ON_MAIN)
+    assert not new, ("745.10: filing upstream should need no new credential, yet the workflows name secrets main's "
+                     f"workflows do not have: {new}")
