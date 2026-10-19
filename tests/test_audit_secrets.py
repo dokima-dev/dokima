@@ -61,3 +61,17 @@ def test_the_install_docs_say_repo_secrets_not_the_keys_environment(record_prope
         text = open(os.path.join(ROOT, path)).read()
         assert not re.search(r"environment\W+named `keys`", text), f"876: {path} still says to use the keys environment"
         assert "repo secret" in text or "**repo** secrets" in text, f"876: {path} does not say to use repo secrets"
+
+
+def test_dokima_own_repo_keeps_its_keys_in_the_keys_environment(record_property, tmp_path):
+    """Dokima's own repo reads its keys from the keys environment, so none is reported."""
+    record_property("proves", "885")
+    a = audit("885")
+    g = GitHub()
+    g.secret_names = set()
+    os.makedirs(tmp_path / ".github" / "workflows")
+    (tmp_path / ".github" / "workflows" / "entry.yml").write_text("name: entry\n")
+    assert secret_lines(a.compare(g, REPO, root=str(tmp_path))) == [], "885: Dokima's own repo is told to add repo secrets"
+    assert secret_lines(a.compare(g, REPO, root=ROOT)) == [], "885: this repo's own audit reports its keys missing"
+    (tmp_path / ".github" / "workflows" / "entry.yml").unlink()
+    assert secret_lines(a.compare(g, REPO, root=str(tmp_path))), "885: an adopter's missing repo secrets are no longer reported"

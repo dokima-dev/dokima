@@ -142,6 +142,13 @@ def needed_secrets(got):
     return needed
 
 
+def own_repo(root):
+    """Whether the repo at ROOT is Dokima's own, holding the shared workflows themselves.
+
+    Its jobs run in its `keys` environment, so its keys reach them from there and need not be repo secrets (#885)."""
+    return os.path.isfile(os.path.join(root, ".github", "workflows", "entry.yml"))
+
+
 def compare_secrets(live, needed):
     """One line per secret in NEEDED that the repo's own secrets LIVE lack.
 
@@ -206,7 +213,9 @@ def check(github, repo, root=".", has_board=True):
                lambda live, branch=branch, want=want: compare_rule(branch, live, want))
               for branch, want in manifest.branch_rules(got).items()]
     reads += [("App permissions", lambda: github.permissions(repo), compare_permissions)]
-    reads += [("Repo secrets", lambda: github.secrets(repo), lambda live: compare_secrets(live, needed_secrets(got)))]
+    if not own_repo(root):
+        reads += [("Repo secrets", lambda: github.secrets(repo),
+                   lambda live: compare_secrets(live, needed_secrets(got)))]
     lines = []
     for what, read, check_live in reads:
         try:
