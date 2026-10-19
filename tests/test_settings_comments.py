@@ -29,13 +29,13 @@ def test_inline_comment_not_in_value(tmp_path, monkeypatch, record_property):
         subscriptions:
           fast:
             agent: codex  # the fast one
-            key: CODEX_KEY # stored by setup
+            key: CODEX_API_KEY # stored by setup
         roles:
           planner:
             subscription: fast
             model: gpt-5  # newest
         """)
-    assert got == {"agent": "codex", "model": "gpt-5", "key": "CODEX_KEY"}, (
+    assert got == {"agent": "codex", "model": "gpt-5", "key": "CODEX_API_KEY"}, (
         f"721.1: a comment after a value was kept as part of it; the planner reads {got}")
 
 
@@ -48,7 +48,7 @@ def test_quoted_value_with_comment(tmp_path, monkeypatch, record_property):
         subscriptions:
           fast:
             agent: "codex"  # note
-            key: CODEX_KEY
+            key: CODEX_API_KEY
         roles:
           planner:
             subscription: fast
@@ -68,11 +68,11 @@ def test_comment_on_section_line(tmp_path, monkeypatch, record_property):
         subscriptions:  # where keys live
           fast:
             agent: codex
-            key: CODEX_KEY
+            key: CODEX_API_KEY
         roles:  # who runs what
           planner:
             subscription: fast
             model: gpt-5
         """)
-    assert got == {"agent": "codex", "model": "gpt-5", "key": "CODEX_KEY"}, (
+    assert got == {"agent": "codex", "model": "gpt-5", "key": "CODEX_API_KEY"}, (
         f"721.1: a comment on a section line hid the roles under it; the planner reads {got}")

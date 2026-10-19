@@ -32,7 +32,7 @@ Add these as **repo** secrets and variables (Settings, Secrets and variables, Ac
 | `CLAUDE_CODE_OAUTH_TOKEN` | secret | Claude Code token for the agents |
 | `DOKIMA_BOARD` | variable, optional | Project board as `org/number` |
 
-`dokima.yml` hands each secret to δokima by name. If your settings name another agent key (`CODEX_API_KEY` or `KIMI_API_KEY`), add its line under `secrets:` in `dokima.yml` too.
+`dokima.yml` hands each secret to δokima by name. If your settings name another agent key (`CODEX_API_KEY` or `KIMI_API_KEY`), add its line under `secrets:` in `dokima.yml` too. Settings may name only these agent keys: `CLAUDE_CODE_OAUTH_TOKEN`, `CODEX_API_KEY`, `KIMI_API_KEY`. Any other never reaches the jobs; the audit and the run say so. Use a declared name, or ask for yours to be declared in a release.
 
 Secrets are scrubbed from cards and saved conversations. Agents hold no GitHub key while they work.
 

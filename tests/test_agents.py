@@ -219,7 +219,7 @@ def test_settings_come_from_one_file_in_the_dokima_folder(record_property, tmp_p
     and checks it is no longer read: the planner is back on today's model."""
     record_property("proves", "698.1")
     box = Box(tmp_path)
-    text = settings({"team": ("claude", "TEAM_KEY")}, {"planner": ("team", "claude-sonnet-5-5")})
+    text = settings({"team": ("claude", "CODEX_API_KEY")}, {"planner": ("team", "claude-sonnet-5-5")})
     box.write_settings(text)
     p = box.cli("model", "planner")
     assert p.returncode == 0 and p.stdout.strip() == "claude-sonnet-5-5", \
@@ -235,16 +235,16 @@ def test_a_run_gets_its_key_from_the_secret_its_subscription_names(record_proper
     """A run's agent gets the key held in the secret its role's subscription names.
 
     Proves 698.2. Runs the agent workflow for a plan review, with a settings file on main putting the reviewer on a
-    subscription whose key is the repo secret TEAM_CLAUDE_KEY. The fake Claude Code must start with that secret's
+    subscription whose key is the repo secret CODEX_API_KEY. The fake Claude Code must start with that secret's
     value as its key, not the value of today's CLAUDE_CODE_OAUTH_TOKEN."""
     record_property("proves", "698.2")
-    files = {".dokima/agents.yml": workflow_settings("team", "claude", "TEAM_CLAUDE_KEY", TODAY_MODEL)}
+    files = {".dokima/agents.yml": workflow_settings("team", "claude", "CODEX_API_KEY", TODAY_MODEL)}
     r = Run(tmp_path / "run", "reviewer", "plan", SPLIT_PROPOSED, files=files,
-            secrets={"TEAM_CLAUDE_KEY": "team-key-value-698"})
+            secrets={"CODEX_API_KEY": "team-key-value-698"})
     assert r.agent_started(), f"698.2: the agent never started; the run stopped at '{r.failed_step}':\n{r.tail()}"
     env = fake_claude_saw(r, "env") or {}
     assert env.get(TODAY_KEY) == "team-key-value-698", \
-        (f"698.2: Claude Code started with key {env.get(TODAY_KEY)!r}, not the value of TEAM_CLAUDE_KEY, the secret "
+        (f"698.2: Claude Code started with key {env.get(TODAY_KEY)!r}, not the value of CODEX_API_KEY, the secret "
          f"the reviewer's subscription names")
 
 
@@ -256,11 +256,11 @@ def test_each_role_has_its_own_subscription_and_model(record_property, tmp_path)
     record_property("proves", "698.3")
     box = Box(tmp_path)
     box.write_settings(settings(
-        {"plan-sub": ("claude", "PLAN_KEY"), "work-sub": ("claude", "WORK_KEY"), "review-sub": ("claude", "REVIEW_KEY")},
+        {"plan-sub": ("claude", "CLAUDE_CODE_OAUTH_TOKEN"), "work-sub": ("claude", "CODEX_API_KEY"), "review-sub": ("claude", "KIMI_API_KEY")},
         {"planner": ("plan-sub", "claude-sonnet-5-5"), "worker": ("work-sub", "claude-haiku-5-5"),
          "reviewer": ("review-sub", "claude-fable-5-1")}))
-    for role, model, key in (("planner", "claude-sonnet-5-5", "PLAN_KEY"), ("worker", "claude-haiku-5-5", "WORK_KEY"),
-                             ("reviewer", "claude-fable-5-1", "REVIEW_KEY")):
+    for role, model, key in (("planner", "claude-sonnet-5-5", "CLAUDE_CODE_OAUTH_TOKEN"), ("worker", "claude-haiku-5-5", "CODEX_API_KEY"),
+                             ("reviewer", "claude-fable-5-1", "KIMI_API_KEY")):
         p = box.cli("model", role)
         assert p.returncode == 0 and p.stdout.strip() == model, f"698.3: the {role}'s model should be {model}: {said(p)}"
         p = box.cli("key", role)
@@ -275,7 +275,7 @@ def test_any_model_the_role_names_is_passed_to_its_agent(record_property, tmp_pa
     and checks Claude Code was started with exactly that model and the run did not stop."""
     record_property("proves", "698.4")
     box = Box(tmp_path)
-    box.write_settings(settings({"team": ("claude", "TEAM_KEY")}, {"planner": ("team", "claude-unreleased-9-9")}))
+    box.write_settings(settings({"team": ("claude", "CODEX_API_KEY")}, {"planner": ("team", "claude-unreleased-9-9")}))
     p = box.run("planner")
     claude = [c for c in box.calls() if c["cmd"] == "claude"]
     assert p.returncode == 0 and len(claude) == 1, \
@@ -326,7 +326,7 @@ def test_a_role_the_file_leaves_out_starts_claude_code_as_today(record_property,
     file's model, so the file is read."""
     record_property("proves", "698.7")
     box = Box(tmp_path)
-    box.write_settings(settings({"team": ("claude", "TEAM_KEY")}, {"worker": ("team", "claude-haiku-5-5")}))
+    box.write_settings(settings({"team": ("claude", "CODEX_API_KEY")}, {"worker": ("team", "claude-haiku-5-5")}))
     p = box.cli("model", "worker")
     assert p.returncode == 0 and p.stdout.strip() == "claude-haiku-5-5", \
         f"698.7: the worker the file names should run on claude-haiku-5-5: {said(p)}"
@@ -404,7 +404,7 @@ def test_an_unknown_agent_stops_before_any_agent(record_property, tmp_path):
     not refusing everything."""
     record_property("proves", "698.10")
     box = Box(tmp_path)
-    box.write_settings(settings({"odd": ("no-such-agent", "ODD_KEY"), "team": ("claude", TODAY_KEY)},
+    box.write_settings(settings({"odd": ("no-such-agent", "KIMI_API_KEY"), "team": ("claude", TODAY_KEY)},
                                 {"planner": ("odd", "m-1"), "worker": ("team", TODAY_MODEL)}))
     p = box.run("planner")
     assert p.returncode == 1, f"698.10: an unknown agent did not stop the planner with exit 1: {said(p)}"
@@ -453,8 +453,8 @@ def zeta_run(tmp_path, monkeypatch, broken=None):
     zeta's adapter, dokima/agent_zeta.py, is in Dokima's own code and the repo's settings file names zeta, so the
     run's runtime holds it. Returns the run and every call zeta's adapter got, as {call, model, prompt}."""
     zeta_in_dokima(monkeypatch)
-    files = {".dokima/agents.yml": workflow_settings("z", "zeta", "ZETA_KEY", "zeta-1")}
-    r = Run(tmp_path / "run", "reviewer", "plan", SPLIT_PROPOSED, files=files, secrets={"ZETA_KEY": "zeta-key"},
+    files = {".dokima/agents.yml": workflow_settings("z", "zeta", "KIMI_API_KEY", "zeta-1")}
+    r = Run(tmp_path / "run", "reviewer", "plan", SPLIT_PROPOSED, files=files, secrets={"KIMI_API_KEY": "zeta-key"},
             broken=broken)
     log = os.path.join(r.tmp, "gh", "zeta-calls.jsonl")
     return r, [json.loads(l) for l in open(log)] if os.path.exists(log) else []
@@ -538,7 +538,7 @@ def test_a_runs_record_reads_its_agent_through_the_interface(record_property, tm
     zeta's stats, not what Claude Code's logs would say."""
     record_property("proves", "698.15")
     box = Box(tmp_path)
-    box.write_settings(settings({"z": ("zeta", "ZETA_KEY")}, {"planner": ("z", "zeta-1")}))
+    box.write_settings(settings({"z": ("zeta", "KIMI_API_KEY")}, {"planner": ("z", "zeta-1")}))
     for k in ("PACK", "BASE", "LOG_URL", "DOKIMA_SETTINGS"):
         monkeypatch.delenv(k, raising=False)
     monkeypatch.chdir(box.repo)
@@ -647,19 +647,19 @@ def test_moving_a_role_takes_one_edit_of_its_own_lines(record_property, tmp_path
     secret, while the planner keeps the first's."""
     record_property("proves", "698.20")
     box = Box(tmp_path)
-    subs = {"first": ("claude", "FIRST_KEY"), "second": ("claude", "SECOND_KEY")}
+    subs = {"first": ("claude", "CODEX_API_KEY"), "second": ("claude", "KIMI_API_KEY")}
     before = settings(subs, {"planner": ("first", TODAY_MODEL), "worker": ("first", "claude-haiku-5-5")})
     box.write_settings(before)
     p = box.cli("key", "worker")
-    assert p.returncode == 0 and p.stdout.strip() == "FIRST_KEY", f"698.20: the worker should start on FIRST_KEY: {said(p)}"
+    assert p.returncode == 0 and p.stdout.strip() == "CODEX_API_KEY", f"698.20: the worker should start on CODEX_API_KEY: {said(p)}"
     after = before.replace("  worker:\n    subscription: first\n", "  worker:\n    subscription: second\n")
     assert after != before and after.count("\n") == before.count("\n")
     box.write_settings(after)
     p = box.cli("key", "worker")
-    assert p.returncode == 0 and p.stdout.strip() == "SECOND_KEY", \
-        f"698.20: after editing only its line the worker should use SECOND_KEY: {said(p)}"
+    assert p.returncode == 0 and p.stdout.strip() == "KIMI_API_KEY", \
+        f"698.20: after editing only its line the worker should use KIMI_API_KEY: {said(p)}"
     p = box.cli("key", "planner")
-    assert p.returncode == 0 and p.stdout.strip() == "FIRST_KEY", \
+    assert p.returncode == 0 and p.stdout.strip() == "CODEX_API_KEY", \
         f"698.20: moving the worker moved the planner too: {said(p)}"
 
 
@@ -670,7 +670,7 @@ def test_a_failed_agent_fails_the_run_with_no_fallback(record_property, tmp_path
     starting the planner through the interface must fail with that exit code, after exactly one agent start."""
     record_property("proves", "698.21")
     box = Box(tmp_path)
-    box.write_settings(settings({"first": ("claude", "FIRST_KEY"), "spare": ("claude", "SPARE_KEY")},
+    box.write_settings(settings({"first": ("claude", "CODEX_API_KEY"), "spare": ("claude", "KIMI_API_KEY")},
                                 {"planner": ("first", TODAY_MODEL), "worker": ("spare", TODAY_MODEL)}))
     p = box.run("planner", FAKE_EXIT="3")
     calls = box.calls()
@@ -687,12 +687,12 @@ def test_other_sections_can_join_the_settings_file(record_property, tmp_path):
     record_property("proves", "698.22")
     box = Box(tmp_path)
     box.write_settings(settings(
-        {"team": ("claude", "TEAM_KEY")}, {"planner": ("team", "claude-sonnet-5-5")},
+        {"team": ("claude", "CODEX_API_KEY")}, {"planner": ("team", "claude-sonnet-5-5")},
         before="later:\n  planner:\n    model: not-this-one\n",
         after="checks:\n  planner:\n    subscription: not-this-one\n    model: nor-this-one\n"))
     p = box.cli("model", "planner")
     assert p.returncode == 0 and p.stdout.strip() == "claude-sonnet-5-5", \
         f"698.22: another section changed the planner's model: {said(p)}"
     p = box.cli("key", "planner")
-    assert p.returncode == 0 and p.stdout.strip() == "TEAM_KEY", \
+    assert p.returncode == 0 and p.stdout.strip() == "CODEX_API_KEY", \
         f"698.22: another section changed the planner's secret: {said(p)}"

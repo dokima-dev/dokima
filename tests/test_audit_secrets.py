@@ -39,10 +39,10 @@ def test_the_audit_checks_the_key_the_settings_name(record_property, tmp_path):
     a = audit("876")
     os.makedirs(tmp_path / ".dokima")
     (tmp_path / ".dokima" / "settings.yaml").write_text(
-        "agents:\n  subscriptions:\n    mine:\n      agent: claude\n      key: MY_KEY\n"
+        "agents:\n  subscriptions:\n    mine:\n      agent: claude\n      key: CODEX_API_KEY\n"
         "  roles:\n    worker:\n      subscription: mine\n      model: claude-opus-5-5\n")
     lines = secret_lines(a.compare(GitHub(), REPO, root=str(tmp_path)))
-    assert len(lines) == 1 and "`MY_KEY`" in lines[0], f"876: the worker's own key MY_KEY is not checked: {lines}"
+    assert len(lines) == 1 and "`CODEX_API_KEY`" in lines[0], f"876: the worker's own key CODEX_API_KEY is not checked: {lines}"
 
 
 def test_unreadable_repo_secrets_say_why(record_property, tmp_path):
