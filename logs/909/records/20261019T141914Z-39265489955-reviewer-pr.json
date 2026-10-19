@@ -1,0 +1,66 @@
+{
+ "role": "reviewer",
+ "stage": "pr",
+ "run_id": "39265489955",
+ "commit_before": "b69eebad918e5d675b55b8755cdd5a4cab878c1f",
+ "started_by": "dokima-runtime[bot]",
+ "models": [
+  "claude-opus-5-5"
+ ],
+ "report": {
+  "duration_ms": 766882,
+  "turns": 16,
+  "cost_usd": 0.4267637999999999,
+  "tokens_in": 579235,
+  "tokens_out": 4197
+ },
+ "log": "https://github.com/dokima-dev/dokima/blob/logs/logs/909/39265489955-reviewer-pr.md",
+ "run": "https://github.com/dokima-dev/dokima/actions/runs/39265489955",
+ "handback": {
+  "previous_step": {
+   "did": [
+    "Autopilot now waits for the owner when a worker changes nothing and no branch exists.",
+    "Tests cover no change, a change, and no change on an existing branch."
+   ],
+   "decided": [
+    "A later round with no change on a branch that exists is still reviewed."
+   ],
+   "open": []
+  },
+  "verdict": "approve",
+  "summary": "Approved: a worker that changes nothing with no branch now starts no review; normal hand-backs still do.",
+  "raises": [],
+  "answers": [],
+  "asks": [],
+  "behaviors": [],
+  "edge_cases": [],
+  "tests": [
+   {
+    "test": "tests/test_hotfix_no_change.py::test_a_worker_with_no_change_and_no_branch_starts_no_reviewer",
+    "only_its_behavior": true,
+    "why": "It fails on main and checks a hand-back with a branch still starts review."
+   },
+   {
+    "test": "tests/test_hotfix_no_change.py::test_a_worker_with_no_change_on_an_existing_branch_still_starts_code_review",
+    "only_its_behavior": true,
+    "why": "It shows a later round on a pushed branch is still reviewed."
+   }
+  ],
+  "size": "ok",
+  "boxes": {
+   "dropped": "none",
+   "added": "none",
+   "superseded": "none",
+   "conflicts": "none",
+   "edges": {
+    "ask": "covered"
+   },
+   "poor_tests": "none"
+  }
+ },
+ "check": {
+  "passed": true,
+  "problems": []
+ },
+ "url": "https://github.com/dokima-dev/dokima/pull/910#issuecomment-6269087320"
+}
