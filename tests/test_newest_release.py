@@ -159,11 +159,20 @@ def test_changelog_has_v014_on_top():
 
 
 def test_changelog_has_v015_on_top():
-    """The changelog's newest section is v0.1.5, above v0.1.4, naming every fix merged since v0.1.4."""
+    """The changelog's v0.1.5 section sits right above v0.1.4, naming every fix merged since v0.1.4."""
     names, text = section("919", "v0.1.5")
-    assert names[:2] == ["v0.1.5", "v0.1.4"], f"919: CHANGELOG.md's newest headings are not v0.1.5 then v0.1.4: {names}"
+    i = names.index("v0.1.5")
+    assert names[i + 1:i + 2] == ["v0.1.4"], f"919: CHANGELOG.md's v0.1.5 section is not right above v0.1.4: {names}"
     missing = unnamed(text, ("#916", "#908", "#910", "#906", "#905", "#873"))
     assert not missing, f"919: the v0.1.5 section does not name {missing}, fixes merged since v0.1.4"
+
+
+def test_changelog_has_v016_on_top():
+    """The changelog's newest section is v0.1.6, above v0.1.5, naming every fix merged since v0.1.5."""
+    names, text = section("925", "v0.1.6")
+    assert names[:2] == ["v0.1.6", "v0.1.5"], f"925: CHANGELOG.md's newest headings are not v0.1.6 then v0.1.5: {names}"
+    missing = unnamed(text, ("#924", "#921", "#918", "#911", "#872"))
+    assert not missing, f"925: the v0.1.6 section does not name {missing}, fixes merged since v0.1.5"
 
 
 def test_install_file_calls_newest_version(record_property):
