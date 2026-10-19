@@ -2,6 +2,17 @@
 
 What each version of Dokima does.
 
+## v0.1.5
+
+Private repos, labels and key errors.
+
+- In a private repo, runs read the issue's branch with the app's key; a remote that cannot answer stops the run (#916, #914).
+- The setup audit creates every label δokima needs that a repo lacks: autopilot, filed-by-dokima and hotfix (#908, #881).
+- Autopilot starts no code review after a worker hands back with no change and no branch (#910, #909).
+- Missing-key errors tell adopters to add a repo secret, not the keys environment (#906, #884).
+- δokima's own repo is no longer told to add repo secrets it keeps in its keys environment (#905, #885).
+- Hotfix pull requests are labeled, hotfix asks needing a design choice go back to planning, and cards are one line (#873, #864).
+
 ## v0.1.4
 
 Secrets reach Dokima's inner jobs in repos owned by another account.
