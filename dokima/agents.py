@@ -14,7 +14,9 @@ in DOKIMA_SETTINGS, where the workflow keeps main's copy, so a branch never pick
           model: MODEL
 
 When that file has no agents section, the old `agents.yml` beside it is read instead, holding the same two groups at
-its top. With neither, or for a role they leave out, the role runs on Claude Code with today's model and secret.
+its top. A key may be only one of CLAUDE_CODE_OAUTH_TOKEN, CODEX_API_KEY or KIMI_API_KEY, the agent keys entry.yml
+declares; any other never reaches the jobs, so the run stops naming it (#896). With neither, or for a role they leave
+out, the role runs on Claude Code with today's model and secret.
 There is no fallback: a bad name stops the run before any agent starts, and a failed agent fails it. Any model name
 passes; the agent itself refuses one it lacks.
 
