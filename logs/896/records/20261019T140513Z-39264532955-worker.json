@@ -1,0 +1,57 @@
+{
+ "role": "worker",
+ "stage": null,
+ "run_id": "39264532955",
+ "commit_before": "5695a04e7410571b3dc1bb3f11295a78131e5c35",
+ "started_by": "RezaSoleymanifar",
+ "models": [
+  "claude-opus-5-5"
+ ],
+ "report": {
+  "duration_ms": 431747,
+  "turns": 29,
+  "cost_usd": 0.9716261999999999,
+  "tokens_in": 1396198,
+  "tokens_out": 13443
+ },
+ "log": "https://github.com/dokima-dev/dokima/blob/logs/logs/896/39264532955-worker.md",
+ "run": "https://github.com/dokima-dev/dokima/actions/runs/39264532955",
+ "handback": {
+  "summary": "Settings may name only declared agent keys; audit and jobs report any other in one line; docs updated.",
+  "criteria": {
+   "ask": "`DECLARED` and `undeclared()` in `dokima/agents.py`; `role_settings()` stops with that line; `compare_secrets()` in `dokima/audit.py` reports it; README and `Installing.md` say so; older tests now use declared names."
+  },
+  "evidence": "`pytest -q` on the new test, audit and agent test files: 33 passed.",
+  "raises": [
+   {
+    "kind": "issue",
+    "label": "Setup takes any name",
+    "text": "Setup still stores and writes any secret name the owner gives, so it can write a key the jobs refuse.",
+    "evidence": "`dokima/setup.py` `add` takes `--secret` unchecked; `tests/test_setup.py` uses `CODEX_KEY`.",
+    "raised_by": "worker",
+    "id": "W2"
+   }
+  ]
+ },
+ "check": {
+  "passed": true,
+  "problems": []
+ },
+ "dropped_by_fence": [],
+ "files_changed": [
+  "README.md",
+  "docs/wiki/Installing.md",
+  "dokima/agents.py",
+  "dokima/audit.py",
+  "tests/test_agent_codex.py",
+  "tests/test_agent_kimi.py",
+  "tests/test_agents.py",
+  "tests/test_audit_secrets.py",
+  "tests/test_declared_keys.py",
+  "tests/test_settings_comments.py",
+  "tests/test_settings_setup.py",
+  "tests/test_thin_install.py"
+ ],
+ "branch": "try/issue-896",
+ "url": "https://github.com/dokima-dev/dokima/issues/896#issuecomment-6268964328"
+}
