@@ -1,0 +1,60 @@
+{
+ "role": "reviewer",
+ "stage": "pr",
+ "run_id": "39340239924",
+ "commit_before": "6cb5ec59e935b6803118b424085382fa9e2c50bf",
+ "started_by": "dokima-runtime[bot]",
+ "models": [
+  "claude-opus-5-5"
+ ],
+ "report": {
+  "duration_ms": 30573,
+  "turns": 10,
+  "cost_usd": 0.39244320000000005,
+  "tokens_in": 404951,
+  "tokens_out": 2732
+ },
+ "log": "https://github.com/dokima-dev/dokima/blob/logs/logs/932/39340239924-reviewer-pr.md",
+ "run": "https://github.com/dokima-dev/dokima/actions/runs/39340239924",
+ "handback": {
+  "previous_step": {
+   "did": [
+    "The worker settled the install file clash, keeping main's agent keys and calling v0.1.7.",
+    "The worker added a v0.1.7 changelog line for the rejected model key fix."
+   ],
+   "decided": [
+    "The readme and wiki stay as last round, already naming v0.1.7 only."
+   ],
+   "open": []
+  },
+  "verdict": "approve",
+  "summary": "Release v0.1.7 names both fixes and points every install step at v0.1.7; all tests pass.",
+  "raises": [],
+  "answers": [],
+  "asks": [],
+  "behaviors": [],
+  "edge_cases": [],
+  "tests": [],
+  "size": "ok",
+  "boxes": {
+   "dropped": "none",
+   "added": "none",
+   "superseded": "none",
+   "conflicts": "none",
+   "edges": {
+    "932.1": "covered",
+    "932.2": "covered",
+    "932.3": "covered",
+    "932.4": "covered",
+    "932.5": "covered",
+    "932.6": "covered"
+   },
+   "poor_tests": "none"
+  }
+ },
+ "check": {
+  "passed": true,
+  "problems": []
+ },
+ "url": "https://github.com/dokima-dev/dokima/pull/933#issuecomment-6279419330"
+}
