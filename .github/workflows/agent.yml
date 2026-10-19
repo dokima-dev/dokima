@@ -134,14 +134,15 @@ jobs:
               if [ -f "$f" ]; then cp --parents "$f" /tmp/runtime/; fi
             done
           fi
-      # The bot is the repo's Dokima app: its id a variable and its key a secret, both in the keys environment.
+      # The bot is the repo's Dokima app: its id a repo variable and its key a repo secret; secrets kept only in an
+      # environment never reach a shared workflow's jobs (#884).
       - name: The bot is set up
         env:
           APP_ID: ${{ vars.DOKIMA_APP_ID }}
           HAS_APP_KEY: ${{ secrets.DOKIMA_APP_KEY != '' }}
         run: |
           [ -n "$APP_ID" ] && [ "$HAS_APP_KEY" = true ] && exit 0
-          echo "No bot is set up: add the app's id as the variable DOKIMA_APP_ID and its private key as the secret DOKIMA_APP_KEY, both in the repo's keys environment (Settings, Environments, keys)." > /tmp/why.txt
+          echo "No bot is set up: add the app's id as the variable DOKIMA_APP_ID and its private key as the repo secret DOKIMA_APP_KEY (Settings, Secrets and variables, Actions), not only in an environment, which never reaches these jobs." > /tmp/why.txt
           echo "::error title=No bot::$(cat /tmp/why.txt)"; exit 1
       - name: Only a code owner starts an agent
         env:
@@ -165,7 +166,7 @@ jobs:
           HAS_KEY: ${{ secrets[env.AGENT_KEY || 'CLAUDE_CODE_OAUTH_TOKEN'] != '' }}
         run: |
           [ "$HAS_KEY" = true ] && exit 0
-          echo "The secret ${AGENT_KEY:-CLAUDE_CODE_OAUTH_TOKEN}, which holds the $ROLE's model key, is missing: add it to the repo's keys environment (Settings, Environments, keys)." > /tmp/why.txt
+          echo "The secret ${AGENT_KEY:-CLAUDE_CODE_OAUTH_TOKEN}, which holds the $ROLE's model key, is missing: add it as a repo secret (Settings, Secrets and variables, Actions), not only in an environment, which never reaches these jobs." > /tmp/why.txt
           echo "::error title=No model key::$(cat /tmp/why.txt)"; exit 1
       # The run's card moves through its stages (queued, setting up, agent working, checking, then its record), each
       # written by this job's own steps, each with a key made for that one call and revoked at once: no bot key stays
