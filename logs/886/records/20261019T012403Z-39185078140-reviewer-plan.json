@@ -1,0 +1,120 @@
+{
+ "role": "reviewer",
+ "stage": "plan",
+ "run_id": "39185078140",
+ "commit_before": "00049165e0bcd30e7e5eb5bd9b9e8832664de0e5",
+ "started_by": "dokima-runtime[bot]",
+ "models": [
+  "claude-opus-5-5"
+ ],
+ "report": {
+  "duration_ms": 32915,
+  "turns": 6,
+  "cost_usd": 0.2994184,
+  "tokens_in": 209292,
+  "tokens_out": 2327
+ },
+ "log": "https://github.com/dokima-dev/dokima/blob/logs/logs/886/39185078140-reviewer-plan.md",
+ "run": "https://github.com/dokima-dev/dokima/actions/runs/39185078140",
+ "handback": {
+  "previous_step": {
+   "did": [
+    "The planner made the notice test need a real run notice, not plain words."
+   ],
+   "decided": [
+    "The full suite part of the ask stays with its sibling issue."
+   ],
+   "open": []
+  },
+  "verdict": "approve",
+  "summary": "The plan carries every ask, and each new test fails today because the feature is missing.",
+  "raises": [],
+  "answers": [],
+  "asks": [
+   {
+    "ask": "treat \"no tests collected\" as an empty baseline, not a crash, in the testmon baseline",
+    "source": "https://github.com/dokima-dev/dokima/issues/880",
+    "criterion": "886.1"
+   },
+   {
+    "ask": "say on the run that the repo has no tests yet",
+    "source": "https://github.com/dokima-dev/dokima/issues/880",
+    "criterion": "886.2"
+   },
+   {
+    "ask": "Keep that tests-folder argument and add the exit-5 handling on top, so both fixes stand.",
+    "source": "https://github.com/dokima-dev/dokima/issues/880#issuecomment-6257482677",
+    "criterion": "886.3"
+   }
+  ],
+  "behaviors": [
+   {
+    "criterion": "886.1",
+    "one_behavior": true,
+    "why": "Baseline passes on no tests; the saved file is that same outcome."
+   },
+   {
+    "criterion": "886.2",
+    "one_behavior": true,
+    "why": "One notice in one case."
+   },
+   {
+    "criterion": "886.3",
+    "one_behavior": true,
+    "why": "Only the named tests folder runs."
+   }
+  ],
+  "edge_cases": [
+   {
+    "criterion": "886.1",
+    "cut": [],
+    "missing": []
+   },
+   {
+    "criterion": "886.2",
+    "cut": [],
+    "missing": []
+   },
+   {
+    "criterion": "886.3",
+    "cut": [],
+    "missing": []
+   }
+  ],
+  "tests": [
+   {
+    "test": "tests/test_no_tests_yet.py::test_the_baseline_passes_on_an_empty_tests_folder",
+    "only_its_behavior": true,
+    "why": "Fails today on exit 5; a crashing setup must still fail."
+   },
+   {
+    "test": "tests/test_no_tests_yet.py::test_the_baseline_says_the_repo_has_no_tests_yet",
+    "only_its_behavior": true,
+    "why": "Needs a run notice line; fails today, and a repo with a test shows none."
+   },
+   {
+    "test": "tests/test_testmon.py::test_baseline_runs_only_the_tests_folder",
+    "only_its_behavior": true,
+    "why": "Same checks as before, now reads a step of several lines."
+   }
+  ],
+  "size": "ok",
+  "boxes": {
+   "dropped": "none",
+   "added": "none",
+   "superseded": "none",
+   "conflicts": "none",
+   "edges": {
+    "886.1": "covered",
+    "886.2": "covered",
+    "886.3": "covered"
+   },
+   "poor_tests": "none"
+  }
+ },
+ "check": {
+  "passed": true,
+  "problems": []
+ },
+ "url": "https://github.com/dokima-dev/dokima/issues/886#issuecomment-6257654514"
+}
