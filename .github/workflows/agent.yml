@@ -411,11 +411,13 @@ jobs:
         run: |
           # With a baseline testmon picks the affected tests; with none, or one it cannot read, every test runs, and
           # so with affected tests set to all in the settings (#795).
-          code=0; every=
+          # Only the settings' tests folder and file pattern, as the all tests check collects them (#923).
+          code=0; every=; scope=()
+          if [ -d "${TESTS_DIR:-tests}" ]; then scope=(-o "python_files=${TESTS_FILE_PATTERN:-test_*.py}" "${TESTS_DIR:-tests}"); fi
           if [ "$TESTS_AFFECTED" = all ]; then every="affected tests are set to all in the settings"
           elif [ ! -f .testmondata ]; then every="no baseline from main was restored"
           else
-            PYTHONPATH= PYTHONSAFEPATH= python3 -m pytest -q -rA --testmon --junitxml="$PACK/tests.xml" > "$PACK/tests.txt" 2>&1 || code=$?
+            PYTHONPATH= PYTHONSAFEPATH= python3 -m pytest -q -rA --testmon --junitxml="$PACK/tests.xml" "${scope[@]}" > "$PACK/tests.txt" 2>&1 || code=$?
             # Exit 0, 1 (a test failed) and 5 (no test affected) are testmon's real answers; anything else is a crash.
             if [ "$code" -gt 1 ] && [ "$code" -ne 5 ]; then
               echo "::warning title=No usable baseline::testmon stopped with exit $code; running every test"
@@ -426,7 +428,7 @@ jobs:
             # The code review's record reads this note and says every test ran, and why.
             echo "$every" > "$PACK/no-baseline.txt"
             rm -f "$PACK/tests.xml"
-            PYTHONPATH= PYTHONSAFEPATH= python3 -m pytest -q -rA --junitxml="$PACK/tests.xml" > "$PACK/tests.txt" 2>&1 || true
+            PYTHONPATH= PYTHONSAFEPATH= python3 -m pytest -q -rA --junitxml="$PACK/tests.xml" "${scope[@]}" > "$PACK/tests.txt" 2>&1 || true
           fi
           tail -5 "$PACK/tests.txt"
       - name: Code checks the pack has everything this role needs
