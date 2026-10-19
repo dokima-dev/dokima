@@ -1,0 +1,42 @@
+{
+ "role": "worker",
+ "stage": null,
+ "run_id": "39339995237",
+ "commit_before": "7849242e2693728e3f7b4cbe15c746d3b0d9851a",
+ "started_by": "dokima-runtime[bot]",
+ "models": [
+  "claude-opus-5-5"
+ ],
+ "report": {
+  "duration_ms": 76679,
+  "turns": 7,
+  "cost_usd": 0.24704959999999998,
+  "tokens_in": 209960,
+  "tokens_out": 2139
+ },
+ "log": "https://github.com/dokima-dev/dokima/blob/logs/logs/932/39339995237-worker.md",
+ "run": "https://github.com/dokima-dev/dokima/actions/runs/39339995237",
+ "handback": {
+  "summary": "Fixed the install file clash and added the rejected model key line to the v0.1.7 changelog.",
+  "criteria": {
+   "932.1": "`CHANGELOG.md` has `## v0.1.7` on top, right above v0.1.6.",
+   "932.2": "`CHANGELOG.md` v0.1.7 keeps one line for the test baseline fix (#929, #928).",
+   "932.3": "`CHANGELOG.md` v0.1.7 adds one line for the rejected model key fix (#931, #907).",
+   "932.4": "`dokima/install/dokima.yml` clash resolved: main's agent keys kept, entry.yml at v0.1.7.",
+   "932.5": "`README.md` already names v0.1.7 only; unchanged this round.",
+   "932.6": "`docs/wiki/Installing.md` already names v0.1.7 only; unchanged this round."
+  },
+  "evidence": "`pytest -q tests/test_newest_release.py`: 19 passed in 0.43s"
+ },
+ "check": {
+  "passed": true,
+  "problems": []
+ },
+ "dropped_by_fence": [],
+ "files_changed": [
+  "CHANGELOG.md",
+  "dokima/install/dokima.yml"
+ ],
+ "branch": "try/issue-932",
+ "url": "https://github.com/dokima-dev/dokima/pull/933#issuecomment-6279386195"
+}
