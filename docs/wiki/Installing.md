@@ -17,13 +17,13 @@ Create an app from `dokima/app.json` and install it on the repo. Permissions it 
 | Permission | Level |
 |---|---|
 | contents, pull requests, issues, actions, workflows, organization projects | write |
-| checks, statuses, metadata, administration | read |
+| checks, statuses, metadata, administration, secrets | read |
 
 The app posts every comment, card and PR. It never approves.
 
-## 2. Environment, secrets, variables
+## 2. Secrets and variables
 
-Create an Actions **environment** named `keys`. Every job holding a key runs in it.
+Add these as **repo** secrets and variables (Settings, Secrets and variables, Actions). δokima runs from its own repo, so a secret kept only in an environment never reaches its jobs.
 
 | Name | Kind | Holds |
 |---|---|---|
@@ -63,7 +63,7 @@ A Project with single-select fields:
 
 ## Checking your setup
 
-`python3 -m dokima.manifest` lists every label, field, check and permission the code relies on. The **audit** workflow reports drift on a pinned **Setup** issue.
+`python3 -m dokima.manifest` lists every label, field, check and permission the code relies on. The **audit** workflow reports drift on a pinned **Setup** issue, including a key missing from the repo secrets. The app reads secret names only, never their values.
 
 ## Cost
 
