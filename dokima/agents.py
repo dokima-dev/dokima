@@ -26,15 +26,18 @@ passes; the agent itself refuses one it lacks.
     python3 -m dokima.agents run ROLE PROMPT_FILE OUT
 
 An agent's adapter is the module dokima.agent_AGENT, offering install(), run(prompt, model, out), models(out, log_dir),
-report(out) and transcript(log_dir, secrets). Claude Code's is dokima/agent_claude.py.
+report(out) and transcript(log_dir, secrets), and error(out), the error the agent ended with, whose words say when its
+provider refused the key (#907). Claude Code's is dokima/agent_claude.py.
 """
 import importlib
 import os
 import re
 import sys
+import tempfile
 
 import yaml
 
+from dokima.agent_records import key_refused
 from dokima.setup import SETTINGS, read_settings
 
 TODAY = {"agent": "claude", "model": "claude-opus-5-5", "key": "CLAUDE_CODE_OAUTH_TOKEN"}
@@ -154,6 +157,53 @@ def report(role, out):
 def transcript(role, log_dir, secrets=()):
     """The role's agent's readable transcript, secrets removed."""
     return adapter(role)[0].transcript(log_dir, list(secrets))
+
+
+def refused(m, out):
+    """True when adapter M's agent, run into OUT, says its provider refused the key."""
+    error = getattr(m, "error", None)
+    return callable(error) and key_refused(error(out))
+
+
+def rejected_key(role, out):
+    """The secret holding the role's key when its run into OUT was refused; else None."""
+    try:
+        m, s = adapter(role)
+    except Stop:
+        return None
+    return s["key"] if refused(m, out) else None
+
+
+TRY = "Reply with the one word OK."
+
+
+def try_key(role, value):
+    """Start the role's agent once with the key VALUE: "refused", "failed" or "ok".
+
+    The agent's own printing is kept from the log, which may echo part of the key; only the verdict comes back."""
+    m, s = adapter(role)
+    saved, err = dict(os.environ), os.dup(2)
+    try:
+        for k in [k for k in os.environ if k.startswith("DOKIMA_KEY_")]:
+            del os.environ[k]
+        os.environ["DOKIMA_AGENT_KEY"] = value
+        with tempfile.TemporaryDirectory() as out:
+            devnull = os.open(os.devnull, os.O_WRONLY)
+            os.dup2(devnull, 2)
+            os.close(devnull)
+            try:
+                code = m.run(TRY, s["model"], out)
+            except OSError:
+                code = 127
+            finally:
+                os.dup2(err, 2)
+            if refused(m, out):
+                return "refused"
+            return "ok" if code == 0 else "failed"
+    finally:
+        os.close(err)
+        os.environ.clear()
+        os.environ.update(saved)
 
 
 def main(argv):

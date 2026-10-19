@@ -374,6 +374,10 @@ def main(argv):
                 print(f"::warning title=Record not read::{name} in the pack could not be read")
         # Code stamps each raise with who raised it and an ID no raise on the issue has yet.
         rec = stamp_record(build_record(role, stage, out, text, passed == "true", meta), earlier)
+        secret = agents.rejected_key(role, out) if passed != "true" else None
+        if secret:
+            # The provider refused the key: the owner replaces the secret; no planner bug is shown (#907).
+            rec = key_rejected(rec, secret)
         note = os.path.join(os.environ.get("PACK", ""), "no-baseline.txt")
         if role == "reviewer" and stage == "pr" and os.environ.get("PACK") and os.path.isfile(note):
             # The test step ran every test because no baseline was usable; the record says so, and why.
@@ -774,7 +778,7 @@ from dokima.agent_github import (
 from dokima.agent_records import (
     MARK, saved_records, save_record, RecordsUnreadable, name_of, records, latest, approved, raises_for, stamp_record, build_record, not_started, cancelled, live_card,
     unrecorded_run, unrecorded, queue, who, files_changed, render, jsonl_files, scrub, transcript, run_report,
-    with_next, models_used, first_sentence, GATE_FAILED, for_planner)
+    with_next, models_used, first_sentence, GATE_FAILED, for_planner, key_rejected)
 from dokima.agent_checks import problems_round, issue_url, check
 from dokima.agent_autopilot import (
     file_split, AUTOPILOT, autopilot_label, issue_tree, switch_autopilot, autopilot_comment, AUTOPILOT_START_LINE, named,

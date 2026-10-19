@@ -12,6 +12,10 @@ on:
   workflow_call:
     secrets:
       DOKIMA_APP_KEY: {required: true}
+      # The agent keys the settings can name; each one set is tried once with its agent (#907).
+      CLAUDE_CODE_OAUTH_TOKEN: {required: false}
+      CODEX_API_KEY: {required: false}
+      KIMI_API_KEY: {required: false}
 concurrency:
   group: audit
   cancel-in-progress: false
@@ -45,10 +49,19 @@ jobs:
           app-id: ${{ vars.DOKIMA_APP_ID }}
           private-key: ${{ secrets.DOKIMA_APP_KEY }}
       - run: python3 -m pip install -q pyyaml  # the settings reader (#794)
+      # Each role's agent, so the audit can try each key once; a failed install shows as a key it could not check.
+      - name: Install each role's agent
+        run: |
+          for role in planner worker reviewer; do
+            python3 -m dokima.agents install "$role" || echo "::warning::The $role's agent could not be installed."
+          done
       - name: Compare the repo's settings with the manifest and report what is off
         env:
           GH_TOKEN: ${{ steps.app.outputs.token }}
           DOKIMA_BOARD: ${{ vars.DOKIMA_BOARD }}
+          DOKIMA_KEY_CLAUDE_CODE_OAUTH_TOKEN: ${{ secrets.CLAUDE_CODE_OAUTH_TOKEN }}
+          DOKIMA_KEY_CODEX_API_KEY: ${{ secrets.CODEX_API_KEY }}
+          DOKIMA_KEY_KIMI_API_KEY: ${{ secrets.KIMI_API_KEY }}
         run: python3 -m dokima.audit "$GITHUB_REPOSITORY"
   upstream:
     # A failed job files its failure in the upstream repo the settings name, naming this workflow and the job, with a

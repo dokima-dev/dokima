@@ -30,6 +30,26 @@ LIVE = "<!-- dokima-live -->"
 
 
 HANDBACK = {"planner": "plan.json", "reviewer": "review.json", "worker": "work.json"}
+# What an agent's provider says when it refuses the key: a 401 or 403, or a token or key it calls invalid or expired.
+REFUSED = re.compile(r"\b(401|403)\b|unauthori[sz]ed|forbidden|invalid authentication|failed to authenticate"
+                     r"|(token|key)\b.{0,40}\b(invalid|expired)|(invalid|incorrect|expired) (api key|token)", re.I)
+KEY_REJECTED = "Model key rejected"
+
+
+def key_refused(text):
+    """True when an agent's error TEXT says its provider refused the key."""
+    return bool(REFUSED.search(text or ""))
+
+
+def rejected_key_line(secret):
+    """What to do about a refused key in SECRET; never any part of it."""
+    return (f"The provider refused the key in the repo secret `{secret}`: make a new one and replace the repo "
+            f"secret `{secret}`.")
+
+
+def key_rejected(rec, secret):
+    """REC ended as Model key rejected: its one problem is the key in SECRET."""
+    return {**rec, "key_rejected": secret, "check": {**rec["check"], "problems": [rejected_key_line(secret)]}}
 
 
 def name_of(r, i):
@@ -618,6 +638,8 @@ def opening(rec):
     role, h, passed = rec["role"], rec["handback"], rec["check"]["passed"]
     if rec.get("unrecorded"):
         return f"{who(role, rec.get('stage'))}'s run ended before posting its record."
+    if not passed and rec.get("key_rejected"):
+        return f"{who(role, rec.get('stage'))}'s run ended as {KEY_REJECTED}."
     if not passed and role == "worker" and any(str(p).startswith(PLAN_TEST_FAILS) for p in rec["check"]["problems"]):
         return "The worker is blocked: its plan tests still fail."
     if not passed and role == "worker":

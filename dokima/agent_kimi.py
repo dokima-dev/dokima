@@ -90,6 +90,11 @@ def report(out):
     return {"turns": turns} if turns else {}
 
 
+def error(out):
+    """Every error Kimi's stream holds, one per line; empty when there was none."""
+    return "\n".join(str(m.get("message") or "") for m in messages(out) if m.get("type") == "error")
+
+
 def transcript(log_dir, secrets):
     """The readable transcript of Kimi's stream, secrets removed."""
     lines = []
