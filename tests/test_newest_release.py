@@ -168,12 +168,21 @@ def test_changelog_has_v015_on_top():
 
 
 def test_changelog_has_v016_on_top():
-    """The changelog's newest section is v0.1.6, above v0.1.5, naming every fix merged since v0.1.5."""
+    """The changelog's v0.1.6 section sits right above v0.1.5, naming every fix merged since v0.1.5."""
     names, text = section("925", "v0.1.6")
-    assert names[:2] == ["v0.1.6", "v0.1.5"], f"925: CHANGELOG.md's newest headings are not v0.1.6 then v0.1.5: {names}"
+    i = names.index("v0.1.6")
+    assert names[i + 1:i + 2] == ["v0.1.5"], f"925: CHANGELOG.md's v0.1.6 section is not right above v0.1.5: {names}"
     missing = unnamed(text, ("#924", "#921", "#918", "#911", "#872"))
     assert not missing, f"925: the v0.1.6 section does not name {missing}, fixes merged since v0.1.5"
 
+
+
+def test_changelog_has_v017_on_top():
+    """The changelog's newest section is v0.1.7, above v0.1.6, naming every fix merged since v0.1.6."""
+    names, text = section("932", "v0.1.7")
+    assert names[:2] == ["v0.1.7", "v0.1.6"], f"932: CHANGELOG.md's newest headings are not v0.1.7 then v0.1.6: {names}"
+    missing = unnamed(text, ("#929", "#928"))
+    assert not missing, f"932: the v0.1.7 section does not name {missing}, fixes merged since v0.1.6"
 
 def test_install_file_calls_newest_version(record_property):
     """The install file calls Dokima at the changelog's newest version, newer than v0.1.0.

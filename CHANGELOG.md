@@ -2,6 +2,12 @@
 
 What each version of Dokima does.
 
+## v0.1.7
+
+Test baseline on repos with no tests yet.
+
+- The test baseline passes, with a notice, on a repo with no tests folder yet, and runs scoped to the settings' tests folder and file pattern (#929, #928).
+
 ## v0.1.6
 
 Scoped test runs, private-repo logs, declared keys and upstream filing.
