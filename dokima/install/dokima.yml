@@ -7,7 +7,7 @@ on:
   pull_request_review:
   pull_request_review_comment:
   merge_group:
-  push: {branches: [main]}
+  push:
   schedule: [{cron: "*/15 * * * *"}, {cron: "17 6 * * *"}]
   # Every workflow, the repo's own CI included, so the card redraws when it finishes (#859).
   workflow_run: {workflows: ["*"], types: [in_progress, completed]}
