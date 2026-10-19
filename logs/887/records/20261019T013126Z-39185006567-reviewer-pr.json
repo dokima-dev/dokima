@@ -1,0 +1,91 @@
+{
+ "role": "reviewer",
+ "stage": "pr",
+ "run_id": "39185006567",
+ "commit_before": "437c38b8613176b1e1ce93c5cf925adef96b2b34",
+ "started_by": "dokima-runtime[bot]",
+ "models": [
+  "claude-opus-5-5"
+ ],
+ "report": {
+  "duration_ms": 426919,
+  "turns": 8,
+  "cost_usd": 0.35122960000000003,
+  "tokens_in": 280864,
+  "tokens_out": 3822
+ },
+ "log": "https://github.com/dokima-dev/dokima/blob/logs/logs/887/39185006567-reviewer-pr.md",
+ "run": "https://github.com/dokima-dev/dokima/actions/runs/39185006567",
+ "handback": {
+  "previous_step": {
+   "did": [
+    "The worker made the all tests check pass when the repo has no tests.",
+    "The run now shows a No tests yet notice in that case."
+   ],
+   "decided": [
+    "Only the no tests answer passes; every other failure still fails the check."
+   ],
+   "open": [
+    "GitHub's checks on the pull request showed failed when this review started."
+   ]
+  },
+  "verdict": "approve",
+  "summary": "The change does what both criteria ask; every test passes here, and GitHub's red checks are left to code.",
+  "raises": [],
+  "answers": [],
+  "asks": [],
+  "behaviors": [
+   {
+    "criterion": "887.1",
+    "one_behavior": true,
+    "why": "One run on an empty repo, one result: success."
+   },
+   {
+    "criterion": "887.2",
+    "one_behavior": true,
+    "why": "One run on an empty repo, one result: the notice."
+   }
+  ],
+  "edge_cases": [
+   {
+    "criterion": "887.1",
+    "cut": [],
+    "missing": []
+   },
+   {
+    "criterion": "887.2",
+    "cut": [],
+    "missing": []
+   }
+  ],
+  "tests": [
+   {
+    "test": "tests/test_all_tests_no_tests.py::test_the_all_tests_check_passes_on_an_empty_tests_folder",
+    "only_its_behavior": true,
+    "why": "Fails on main, passes on the branch; a crashing setup still fails."
+   },
+   {
+    "test": "tests/test_all_tests_no_tests.py::test_the_all_tests_check_says_the_repo_has_no_tests_yet",
+    "only_its_behavior": true,
+    "why": "Fails on main, passes on the branch; one passing test shows no notice."
+   }
+  ],
+  "size": "ok",
+  "boxes": {
+   "dropped": "none",
+   "added": "none",
+   "superseded": "none",
+   "conflicts": "none",
+   "edges": {
+    "887.1": "covered",
+    "887.2": "covered"
+   },
+   "poor_tests": "none"
+  }
+ },
+ "check": {
+  "passed": true,
+  "problems": []
+ },
+ "url": "https://github.com/dokima-dev/dokima/pull/888#issuecomment-6257644538"
+}
