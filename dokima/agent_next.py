@@ -102,6 +102,13 @@ def replan_pending(recs):
     return at is not None and at > plan and clash_pending(recs)
 
 
+def branched(recs):
+    """Whether the branch may exist: a planner ran, or a worker changed files.
+
+    A worker record that cannot say counts as changed."""
+    return any(r.get("role") == "planner" or r.get("role") == "worker" and r.get("files_changed") != [] for r in recs)
+
+
 # More questions for the owner than this and a plan is not ready: it stops for the owner, whatever else says go.
 MAX_QUESTIONS = 3
 
@@ -141,6 +148,10 @@ def next_step(items, rec, owners, rounds=3, autopilot=lambda: False, body="", nu
                 return ("stop", f"{UNREAD} {asked}")
             return ("start", "reviewer", "plan") if on else ("stop", asked)
         return ("start", "reviewer", "plan")
+    if role == "worker" and rec.get("files_changed") == [] and not branched(records(items)):
+        # A worker that changed nothing on an issue with no branch yet (a hotfix handing back) has nothing to review.
+        return ("stop", "The worker changed nothing and opened no branch, so nothing is reviewed. "
+                        "Answer its hand-back with `/work` or `/plan` and your words.")
     if role == "worker":
         return ("start", "reviewer", "pr")
     if role == "updater":
