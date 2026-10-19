@@ -4,9 +4,10 @@ What each version of Dokima does.
 
 ## v0.1.7
 
-Test baseline on repos with no tests yet.
+Test baseline on repos with no tests yet, and rejected model keys.
 
 - The test baseline passes, with a notice, on a repo with no tests folder yet, and runs scoped to the settings' tests folder and file pattern (#929, #928).
+- A model key the provider refuses ends the run as "Model key rejected", naming the secret to replace, instead of a missing plan; the setup audit tries each set agent key once (#931, #907).
 
 ## v0.1.6
 

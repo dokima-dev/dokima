@@ -16,10 +16,5 @@ on:
 permissions: {contents: read, issues: write, pull-requests: read, actions: read, checks: read}
 jobs:
   dokima:
-<<<<<<< HEAD
     uses: dokima-dev/dokima/.github/workflows/entry.yml@v0.1.7
-    secrets: {DOKIMA_APP_KEY: "${{ secrets.DOKIMA_APP_KEY }}", CLAUDE_CODE_OAUTH_TOKEN: "${{ secrets.CLAUDE_CODE_OAUTH_TOKEN }}"}
-=======
-    uses: dokima-dev/dokima/.github/workflows/entry.yml@v0.1.6
     secrets: {DOKIMA_APP_KEY: "${{ secrets.DOKIMA_APP_KEY }}", CLAUDE_CODE_OAUTH_TOKEN: "${{ secrets.CLAUDE_CODE_OAUTH_TOKEN }}", CODEX_API_KEY: "${{ secrets.CODEX_API_KEY }}", KIMI_API_KEY: "${{ secrets.KIMI_API_KEY }}"}
->>>>>>> origin/main
