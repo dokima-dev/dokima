@@ -1,0 +1,231 @@
+{
+ "role": "reviewer",
+ "stage": "plan",
+ "run_id": "39261912639",
+ "commit_before": "6090ea725e5592c9cb814767d2cc79e841a37b22",
+ "started_by": "dokima-runtime[bot]",
+ "models": [
+  "claude-opus-5-5"
+ ],
+ "report": {
+  "duration_ms": 82424,
+  "turns": 10,
+  "cost_usd": 0.6277094000000001,
+  "tokens_in": 470622,
+  "tokens_out": 8246
+ },
+ "log": "https://github.com/dokima-dev/dokima/blob/logs/logs/907/39261912639-reviewer-plan.md",
+ "run": "https://github.com/dokima-dev/dokima/actions/runs/39261912639",
+ "handback": {
+  "previous_step": {
+   "did": [
+    "The planner wrote six criteria and eight failing tests from the issue.",
+    "The planner asked the owner whether the worker may change the audit workflows."
+   ],
+   "decided": [
+    "The audit checks one key with one call to the Claude agent.",
+    "Rejected-key detection reads the Claude agent's printed report."
+   ],
+   "open": [
+    "The owner's answer on changing the audit workflows."
+   ]
+  },
+  "verdict": "block",
+  "summary": "The plan proves a rejected key only for the Claude agent; Codex and Kimi runs stay untested.",
+  "raises": [
+   {
+    "kind": "blocker",
+    "to": "planner",
+    "label": "907.1: other agents",
+    "text": "907.1 tests fake only Claude's report, so a refused Codex key can still read as a missing plan. Fix: add a Codex 401 case naming its secret.",
+    "evidence": "`tests/test_key_rejected.py::write_record` writes only `claude.json`; `dokima/agent_codex.py` keeps output as `codex.jsonl`; `README.md:122` lists `CODEX_API_KEY` and `KIMI_API_KEY` as supported keys.",
+    "raised_by": "reviewer",
+    "id": "R1"
+   }
+  ],
+  "answers": [
+   {
+    "raise": "W1",
+    "answer": "done",
+    "why": "The plan picks the call and how the key reaches the audit, and asks the owner about the workflow change."
+   }
+  ],
+  "asks": [
+   {
+    "ask": "After the agent step, if its output shows a login or key failure (401/403, invalid or expired token, failed to authenticate), end the run as \"Model key rejected\" instead of checking for the hand-back file.",
+    "source": "https://github.com/dokima-dev/dokima/issues/907",
+    "criterion": "907.1"
+   },
+   {
+    "ask": "The issue comment names the secret the settings use for that agent (e.g. `CLAUDE_CODE_OAUTH_TOKEN`)",
+    "source": "https://github.com/dokima-dev/dokima/issues/907",
+    "criterion": "907.2"
+   },
+   {
+    "ask": "says the provider refused it: make a new one and replace the repo secret.",
+    "source": "https://github.com/dokima-dev/dokima/issues/907",
+    "criterion": "907.3"
+   },
+   {
+    "ask": "Never print any part of the key.",
+    "source": "https://github.com/dokima-dev/dokima/issues/907",
+    "criterion": "907.4"
+   },
+   {
+    "ask": "The setup audit checks the agent key once with a tiny call (when the key is present)",
+    "source": "https://github.com/dokima-dev/dokima/issues/907",
+    "criterion": "907.5"
+   },
+   {
+    "ask": "reports a rejected key as one line, so an owner learns at install time, not on their first issue.",
+    "source": "https://github.com/dokima-dev/dokima/issues/907",
+    "criterion": "907.6"
+   },
+   {
+    "ask": "a fake agent run that prints a 401 gives the key-rejected record, not the missing-plan one",
+    "source": "https://github.com/dokima-dev/dokima/issues/907",
+    "criterion": "907.1"
+   },
+   {
+    "ask": "a run with a real missing plan still gives the missing-plan one.",
+    "source": "https://github.com/dokima-dev/dokima/issues/907",
+    "criterion": "907.1"
+   }
+  ],
+  "behaviors": [
+   {
+    "criterion": "907.1",
+    "one_behavior": true,
+    "why": "One result: a refused key ends the run as Model key rejected."
+   },
+   {
+    "criterion": "907.2",
+    "one_behavior": true,
+    "why": "The card names the one secret the settings use."
+   },
+   {
+    "criterion": "907.3",
+    "one_behavior": true,
+    "why": "One fixed message telling the owner to replace the secret."
+   },
+   {
+    "criterion": "907.4",
+    "one_behavior": true,
+    "why": "No part of the key on the card or record."
+   },
+   {
+    "criterion": "907.5",
+    "one_behavior": true,
+    "why": "The audit calls only when the key is present; the absent case is its guard."
+   },
+   {
+    "criterion": "907.6",
+    "one_behavior": true,
+    "why": "A refused key at setup gives one line naming its secret."
+   }
+  ],
+  "edge_cases": [
+   {
+    "criterion": "907.1",
+    "cut": [],
+    "missing": [
+     "A Codex or Kimi run whose key is refused."
+    ]
+   },
+   {
+    "criterion": "907.2",
+    "cut": [],
+    "missing": []
+   },
+   {
+    "criterion": "907.3",
+    "cut": [],
+    "missing": []
+   },
+   {
+    "criterion": "907.4",
+    "cut": [],
+    "missing": []
+   },
+   {
+    "criterion": "907.5",
+    "cut": [],
+    "missing": []
+   },
+   {
+    "criterion": "907.6",
+    "cut": [],
+    "missing": []
+   }
+  ],
+  "tests": [
+   {
+    "test": "tests/test_key_rejected.py::test_a_401_from_the_provider_reads_model_key_rejected",
+    "only_its_behavior": true,
+    "why": "A 401 run and a plain missing plan, both through the real record step."
+   },
+   {
+    "test": "tests/test_key_rejected.py::test_a_403_from_the_provider_reads_model_key_rejected",
+    "only_its_behavior": true,
+    "why": "A 403 ends as a rejected key."
+   },
+   {
+    "test": "tests/test_key_rejected.py::test_an_expired_token_reads_model_key_rejected",
+    "only_its_behavior": true,
+    "why": "An expired token ends as a rejected key."
+   },
+   {
+    "test": "tests/test_key_rejected.py::test_the_record_names_the_secret_the_settings_use",
+    "only_its_behavior": true,
+    "why": "Default and custom secret names, so a fixed name fails."
+   },
+   {
+    "test": "tests/test_key_rejected.py::test_the_record_says_to_make_a_new_key_and_replace_the_repo_secret",
+    "only_its_behavior": true,
+    "why": "Checks the message's parts on the rejected-key card."
+   },
+   {
+    "test": "tests/test_key_rejected.py::test_the_record_never_prints_any_part_of_the_key",
+    "only_its_behavior": true,
+    "why": "Key in the run's environment, no scrubbing, no 8-character piece allowed."
+   },
+   {
+    "test": "tests/test_key_rejected.py::test_the_audit_tries_a_present_key_once",
+    "only_its_behavior": true,
+    "why": "Counts calls of a fake agent with and without the key, plus the wiring that passes it."
+   },
+   {
+    "test": "tests/test_key_rejected.py::test_the_audit_reports_a_rejected_key_as_one_line",
+    "only_its_behavior": true,
+    "why": "A refused key gives exactly one line naming its secret."
+   }
+  ],
+  "size": "ok",
+  "boxes": {
+   "dropped": "none",
+   "added": "none",
+   "superseded": "none",
+   "conflicts": "none",
+   "edges": {
+    "907.1": "missing: a Codex or Kimi run whose key is refused",
+    "907.2": "covered",
+    "907.3": "covered",
+    "907.4": "covered",
+    "907.5": "covered",
+    "907.6": "covered"
+   },
+   "poor_tests": [
+    {
+     "test": "tests/test_key_rejected.py::test_a_401_from_the_provider_reads_model_key_rejected",
+     "passes_with": "code that reads only Claude's report and ignores Codex and Kimi output",
+     "fix": "add a refused-key case for a Codex run"
+    }
+   ]
+  }
+ },
+ "check": {
+  "passed": true,
+  "problems": []
+ },
+ "url": "https://github.com/dokima-dev/dokima/issues/907#issuecomment-6268583480"
+}
