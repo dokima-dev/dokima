@@ -1,0 +1,71 @@
+{
+ "role": "reviewer",
+ "stage": "pr",
+ "run_id": "39259318876",
+ "commit_before": "eb818a0489558221094a386440a96a96384f9af7",
+ "started_by": "dokima-runtime[bot]",
+ "models": [
+  "claude-opus-5-5"
+ ],
+ "report": {
+  "duration_ms": 2609,
+  "turns": 1,
+  "cost_usd": 0.44930840000000005,
+  "tokens_in": 43067,
+  "tokens_out": 135
+ },
+ "log": "https://github.com/dokima-dev/dokima/blob/logs/logs/884/39259318876-reviewer-pr.md",
+ "run": "https://github.com/dokima-dev/dokima/actions/runs/39259318876",
+ "handback": {
+  "previous_step": {
+   "did": [
+    "Missing bot and model key errors now say add a repo secret.",
+    "A new test pins both errors; two older tests now expect the repo secret wording."
+   ],
+   "decided": [
+    "Two older missing key tests were changed to expect the new wording."
+   ],
+   "open": []
+  },
+  "verdict": "approve",
+  "summary": "Both missing key errors now point adopters at repo secrets; all tests pass here, new checks fail on main.",
+  "raises": [],
+  "answers": [],
+  "asks": [],
+  "behaviors": [],
+  "edge_cases": [],
+  "tests": [
+   {
+    "test": "tests/test_keys.py::test_missing_key_errors_name_repo_secrets_not_the_keys_environment",
+    "only_its_behavior": true,
+    "why": "Fails on main's workflow; checks only the two missing key messages."
+   },
+   {
+    "test": "tests/test_thin_install.py::test_a_run_with_no_bot_set_up_fails_saying_how_to_set_it_up",
+    "only_its_behavior": true,
+    "why": "Runs the workflow with no bot; fails on main, passes on the branch."
+   },
+   {
+    "test": "tests/test_thin_install.py::test_a_run_with_no_model_key_fails_naming_the_secret_and_how_to_add_it",
+    "only_its_behavior": true,
+    "why": "Runs the workflow with no model key; fails on main, passes on the branch."
+   }
+  ],
+  "size": "ok",
+  "boxes": {
+   "dropped": "none",
+   "added": "none",
+   "superseded": "none",
+   "conflicts": "none",
+   "edges": {
+    "ask": "covered"
+   },
+   "poor_tests": "none"
+  }
+ },
+ "check": {
+  "passed": true,
+  "problems": []
+ },
+ "url": "https://github.com/dokima-dev/dokima/pull/906#issuecomment-6268213268"
+}
