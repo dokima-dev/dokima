@@ -1,0 +1,74 @@
+{
+ "role": "reviewer",
+ "stage": "pr",
+ "run_id": "39259091627",
+ "commit_before": "ae39cd6de04dbe640000791b478fb3494d8f2443",
+ "started_by": "dokima-runtime[bot]",
+ "models": [
+  "claude-opus-5-5"
+ ],
+ "report": {
+  "duration_ms": 1278298,
+  "turns": 26,
+  "cost_usd": 0.6427942000000001,
+  "tokens_in": 1029877,
+  "tokens_out": 6483
+ },
+ "log": "https://github.com/dokima-dev/dokima/blob/logs/logs/885/39259091627-reviewer-pr.md",
+ "run": "https://github.com/dokima-dev/dokima/actions/runs/39259091627",
+ "handback": {
+  "previous_step": {
+   "did": [
+    "The worker made the audit skip the repo secrets check on Dokima's own repo.",
+    "The worker added a test that this repo's audit reports no missing keys."
+   ],
+   "decided": [
+    "Dokima's own repo is spotted by holding the shared entry workflow.",
+    "Other repos still get missing repo secrets reported."
+   ],
+   "open": []
+  },
+  "verdict": "approve",
+  "summary": "The audit no longer reports Dokima's own keys missing, and other repos still get the check.",
+  "raises": [],
+  "answers": [],
+  "asks": [],
+  "behaviors": [
+   {
+    "criterion": "ask",
+    "one_behavior": true,
+    "why": "Only the repo secrets check, skipped only on Dokima's own repo."
+   }
+  ],
+  "edge_cases": [
+   {
+    "criterion": "ask",
+    "cut": [],
+    "missing": []
+   }
+  ],
+  "tests": [
+   {
+    "test": "tests/test_audit_secrets.py::test_dokima_own_repo_keeps_its_keys_in_the_keys_environment",
+    "only_its_behavior": true,
+    "why": "Fails on main; also proves other repos still get missing secrets reported."
+   }
+  ],
+  "size": "ok",
+  "boxes": {
+   "dropped": "none",
+   "added": "none",
+   "superseded": "none",
+   "conflicts": "none",
+   "edges": {
+    "ask": "covered"
+   },
+   "poor_tests": "none"
+  }
+ },
+ "check": {
+  "passed": true,
+  "problems": []
+ },
+ "url": "https://github.com/dokima-dev/dokima/pull/905#issuecomment-6268180728"
+}
