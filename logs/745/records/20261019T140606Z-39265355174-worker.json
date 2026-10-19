@@ -1,0 +1,49 @@
+{
+ "role": "worker",
+ "stage": null,
+ "run_id": "39265355174",
+ "commit_before": "0889dd6a0c9c1d482050fcdfb41d1cf61c9023e2",
+ "started_by": "dokima-runtime[bot]",
+ "models": [
+  "claude-opus-5-5"
+ ],
+ "report": {
+  "duration_ms": 155127,
+  "turns": 11,
+  "cost_usd": 0.3977646,
+  "tokens_in": 406985,
+  "tokens_out": 3303
+ },
+ "log": "https://github.com/dokima-dev/dokima/blob/logs/logs/745/39265355174-worker.md",
+ "run": "https://github.com/dokima-dev/dokima/actions/runs/39265355174",
+ "handback": {
+  "summary": "The assign and testmon calls now get the App key by name, declared, instead of inheriting secrets.",
+  "criteria": {
+   "745.1": "Unchanged: `file_issues` in `dokima/agent_autopilot.py` files `fault: dokima` raises upstream when set.",
+   "745.2": "Unchanged: the record line for an upstream filing links the upstream issue.",
+   "745.3": "Unchanged: `dokima/roles/raising.md` says how to judge and tag fault.",
+   "745.4": "Unchanged: `upstream.file` comments on the open same-titled issue instead of opening another.",
+   "745.5": "Unchanged: `python3 -m dokima.upstream failed WORKFLOW JOB` files the failure; no upstream repo files nothing.",
+   "745.6": "Unchanged jobs; `assign.yml` and `testmon.yml` declare `DOKIMA_APP_KEY`, and `entry.yml` passes it by name.",
+   "745.7": "Unchanged: one issue per workflow and job, one comment per failed run.",
+   "745.8": "Unchanged: a `fault: unsure` raise is filed locally, saying whose fault is unclear.",
+   "745.9": "Unchanged: `upstream.scrub` drops the repo's name, links and issue numbers.",
+   "745.10": "Filing steps mint their token from `DOKIMA_APP_KEY`; no `secrets: inherit` is left. The test already passed before my change."
+  },
+  "evidence": "`pytest` on the 20 workflow and upstream test files: 153 passed.",
+  "raises": [],
+  "answers": []
+ },
+ "check": {
+  "passed": true,
+  "problems": []
+ },
+ "dropped_by_fence": [],
+ "files_changed": [
+  ".github/workflows/assign.yml",
+  ".github/workflows/entry.yml",
+  ".github/workflows/testmon.yml"
+ ],
+ "branch": "try/issue-745",
+ "url": "https://github.com/dokima-dev/dokima/pull/872#issuecomment-6269067539"
+}
