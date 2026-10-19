@@ -1,0 +1,48 @@
+{
+ "role": "worker",
+ "stage": null,
+ "run_id": "39258949831",
+ "commit_before": "613764e92082c828f93d4995d2a3f066b4e4e5bc",
+ "started_by": "dokima-runtime[bot]",
+ "models": [
+  "claude-opus-5-5"
+ ],
+ "report": {
+  "duration_ms": 1313327,
+  "turns": 43,
+  "cost_usd": 1.5749190000000008,
+  "tokens_in": 2973369,
+  "tokens_out": 17028
+ },
+ "log": "https://github.com/dokima-dev/dokima/blob/logs/logs/881/39258949831-worker.md",
+ "run": "https://github.com/dokima-dev/dokima/actions/runs/39258949831",
+ "handback": {
+  "summary": "The setup audit now creates every missing Dokima label, hotfix included, and still reports labels that drifted.",
+  "criteria": {
+   "ask": "`dokima/audit.py` `create_labels()` creates each missing label before comparing; `hotfix` joins `manifest.LABELS` and `defaults.yaml`."
+  },
+  "evidence": "`pytest -q` on the audit, manifest and settings tests: 130 passed.",
+  "raises": []
+ },
+ "check": {
+  "passed": true,
+  "problems": []
+ },
+ "dropped_by_fence": [],
+ "files_changed": [
+  "docs/wiki/Installing.md",
+  "dokima/audit.py",
+  "dokima/defaults.yaml",
+  "dokima/manifest.py",
+  "tests/fake_gh.py",
+  "tests/test_audit.py",
+  "tests/test_audit_auto_merge.py",
+  "tests/test_audit_cli.py",
+  "tests/test_audit_no_board.py",
+  "tests/test_manifest.py",
+  "tests/test_settings_audit.py",
+  "tests/test_settings_merge.py"
+ ],
+ "branch": "try/issue-881",
+ "url": "https://github.com/dokima-dev/dokima/issues/881#issuecomment-6268167135"
+}
