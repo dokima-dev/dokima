@@ -1,0 +1,84 @@
+{
+ "role": "reviewer",
+ "stage": "pr",
+ "run_id": "39190623485",
+ "commit_before": "0ab87b7def248f932fe1a55c450e650cb9d6060a",
+ "started_by": "dokima-runtime[bot]",
+ "models": [
+  "claude-opus-5-5"
+ ],
+ "report": {
+  "duration_ms": 80166,
+  "turns": 8,
+  "cost_usd": 0.3256318,
+  "tokens_in": 280737,
+  "tokens_out": 2956
+ },
+ "log": "https://github.com/dokima-dev/dokima/blob/logs/logs/892/39190623485-reviewer-pr.md",
+ "run": "https://github.com/dokima-dev/dokima/actions/runs/39190623485",
+ "handback": {
+  "previous_step": {
+   "did": [
+    "Review on a hotfix issue with an open pull request now starts its code review.",
+    "With no pull request, it starts nothing and says on the issue why.",
+    "Three tests post review on a hotfix issue, with and without a pull request."
+   ],
+   "decided": [
+    "A planned or unlabeled issue still gets a plan review."
+   ],
+   "open": []
+  },
+  "verdict": "approve",
+  "summary": "Review on a hotfix issue now reviews its pull request, or says why when there is none.",
+  "raises": [],
+  "answers": [],
+  "asks": [],
+  "behaviors": [
+   {
+    "criterion": "ask",
+    "one_behavior": true,
+    "why": "One routing change for review on a hotfix issue."
+   }
+  ],
+  "edge_cases": [
+   {
+    "criterion": "ask",
+    "cut": [],
+    "missing": []
+   }
+  ],
+  "tests": [
+   {
+    "test": "tests/test_hotfix.py::test_review_on_a_hotfix_issue_reviews_its_pull_request",
+    "only_its_behavior": true,
+    "why": "Fails on main, where the route stays a plan review."
+   },
+   {
+    "test": "tests/test_hotfix.py::test_review_on_a_hotfix_issue_with_no_pull_request_says_why",
+    "only_its_behavior": true,
+    "why": "Fails on main; checks no run starts and the issue is told why."
+   },
+   {
+    "test": "tests/test_hotfix.py::test_review_on_a_planned_or_unlabeled_issue_still_reviews_the_plan",
+    "only_its_behavior": true,
+    "why": "Guards the normal flow so the change cannot reroute every issue."
+   }
+  ],
+  "size": "ok",
+  "boxes": {
+   "dropped": "none",
+   "added": "none",
+   "superseded": "none",
+   "conflicts": "none",
+   "edges": {
+    "ask": "covered"
+   },
+   "poor_tests": "none"
+  }
+ },
+ "check": {
+  "passed": true,
+  "problems": []
+ },
+ "url": "https://github.com/dokima-dev/dokima/pull/893#issuecomment-6258429303"
+}
