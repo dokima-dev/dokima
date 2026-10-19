@@ -6,7 +6,8 @@ name: entry
 # stands in for the finished checks and reviews the board and the card wait for; only runs the checks or reviews
 # started count, so a redraw never starts another.
 # A reusable workflow in another account's repo gets only the secrets it declares and its caller maps by name;
-# `secrets: inherit` carries none across (#894). The jobs below pass these on with `secrets: inherit`.
+# `secrets: inherit` carries none across (#894). So the jobs below, and the shared workflows' own calls, pass each
+# secret by name, only those the called workflow declares (#897).
 on:
   workflow_call:
     secrets:
@@ -19,7 +20,7 @@ jobs:
   agent:
     if: github.event_name == 'repository_dispatch' && github.event.action == 'dokima-next'
     uses: ./.github/workflows/agent.yml
-    secrets: inherit
+    secrets: {DOKIMA_APP_KEY: "${{ secrets.DOKIMA_APP_KEY }}", CLAUDE_CODE_OAUTH_TOKEN: "${{ secrets.CLAUDE_CODE_OAUTH_TOKEN }}", CODEX_API_KEY: "${{ secrets.CODEX_API_KEY }}", KIMI_API_KEY: "${{ secrets.KIMI_API_KEY }}"}
     with:
       role: ${{ github.event.client_payload.role }}
       stage: ${{ github.event.client_payload.stage || 'plan' }}
@@ -30,18 +31,17 @@ jobs:
       (github.event_name == 'issue_comment' && github.event.action == 'created') ||
       (github.event_name == 'pull_request_review' && github.event.action == 'submitted')
     uses: ./.github/workflows/commands.yml
-    secrets: inherit
+    secrets: {DOKIMA_APP_KEY: "${{ secrets.DOKIMA_APP_KEY }}", CLAUDE_CODE_OAUTH_TOKEN: "${{ secrets.CLAUDE_CODE_OAUTH_TOKEN }}", CODEX_API_KEY: "${{ secrets.CODEX_API_KEY }}", KIMI_API_KEY: "${{ secrets.KIMI_API_KEY }}"}
   reviews:
     if: github.event_name == 'pull_request_review' || github.event_name == 'pull_request_review_comment'
     uses: ./.github/workflows/reviews.yml
   assign:
     if: github.event_name == 'issues' && github.event.action == 'opened'
     uses: ./.github/workflows/assign.yml
-    secrets: inherit
   autopilot:
     if: github.event_name == 'issues' && contains(fromJSON('["closed", "labeled"]'), github.event.action)
     uses: ./.github/workflows/autopilot.yml
-    secrets: inherit
+    secrets: {DOKIMA_APP_KEY: "${{ secrets.DOKIMA_APP_KEY }}"}
   board:
     if: >-
       (github.event_name == 'issues' &&
@@ -53,7 +53,7 @@ jobs:
       (github.event_name == 'workflow_run' && github.event.action == 'completed' &&
        contains(fromJSON('["pull_request_target", "merge_group", "pull_request_review", "pull_request_review_comment"]'), github.event.workflow_run.event))
     uses: ./.github/workflows/board.yml
-    secrets: inherit
+    secrets: {DOKIMA_APP_KEY: "${{ secrets.DOKIMA_APP_KEY }}"}
   card:
     if: >-
       (github.event_name == 'issues' && github.event.action != 'deleted' && github.event.action != 'transferred') ||
@@ -65,7 +65,7 @@ jobs:
        contains(fromJSON('["pull_request_target", "merge_group", "push", "pull_request_review", "pull_request_review_comment"]'), github.event.workflow_run.event)) ||
       (github.event_name == 'workflow_run' && github.event.action == 'completed' && github.event.workflow_run.event == 'pull_request')
     uses: ./.github/workflows/card.yml
-    secrets: inherit
+    secrets: {DOKIMA_APP_KEY: "${{ secrets.DOKIMA_APP_KEY }}"}
   acceptance-criteria:
     if: >-
       github.event_name == 'merge_group' ||
@@ -86,7 +86,7 @@ jobs:
       always() && github.event_name == 'merge_group' &&
       (needs.full-suite.result == 'failure' || needs.acceptance-criteria.result == 'failure')
     uses: ./.github/workflows/autopilot.yml
-    secrets: inherit
+    secrets: {DOKIMA_APP_KEY: "${{ secrets.DOKIMA_APP_KEY }}"}
   testmon:
     if: github.event_name == 'push' && github.ref == format('refs/heads/{0}', github.event.repository.default_branch)
     uses: ./.github/workflows/testmon.yml
@@ -95,8 +95,8 @@ jobs:
   uptodate:
     if: github.event_name == 'push' && github.ref == format('refs/heads/{0}', github.event.repository.default_branch)
     uses: ./.github/workflows/uptodate.yml
-    secrets: inherit
+    secrets: {DOKIMA_APP_KEY: "${{ secrets.DOKIMA_APP_KEY }}"}
   audit:
     if: github.event_name == 'workflow_dispatch' || (github.event_name == 'schedule' && github.event.schedule == '17 6 * * *')
     uses: ./.github/workflows/audit.yml
-    secrets: inherit
+    secrets: {DOKIMA_APP_KEY: "${{ secrets.DOKIMA_APP_KEY }}"}

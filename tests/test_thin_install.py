@@ -197,7 +197,8 @@ def test_every_shared_job_that_reads_a_key_takes_it_from_the_keys_environment(re
             f"812.2: {name} is reached by the adopter's workflow but cannot be called from another repo"
         for job_name, job in (wf.get("jobs") or {}).items():
             text = yaml.safe_dump(job)
-            if "secrets." not in text and "secrets[" not in text:
+            # A job calling another workflow only passes its keys on by name (#897); the called jobs read them.
+            if "uses" in job or ("secrets." not in text and "secrets[" not in text):
                 continue
             keyed.append(f"{name}:{job_name}")
             env = job.get("environment")

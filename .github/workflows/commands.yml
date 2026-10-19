@@ -18,6 +18,12 @@ on:
     types: [submitted]
   # Called by the one workflow an adopter installs (dokima/install/dokima.yml), through entry.yml (#812).
   workflow_call:
+    secrets:
+      DOKIMA_APP_KEY: {required: true}
+      # The agent keys the settings can name: Claude Code's, and one each for the other shipped agents.
+      CLAUDE_CODE_OAUTH_TOKEN: {required: false}
+      CODEX_API_KEY: {required: false}
+      KIMI_API_KEY: {required: false}
 permissions:
   contents: read
   issues: read
@@ -378,7 +384,7 @@ jobs:
     needs: [route, queue]
     if: always() && needs.route.result == 'success' && needs.route.outputs.role != '' && needs.route.outputs.role != 'split'
     uses: ./.github/workflows/agent.yml
-    secrets: inherit
+    secrets: {DOKIMA_APP_KEY: "${{ secrets.DOKIMA_APP_KEY }}", CLAUDE_CODE_OAUTH_TOKEN: "${{ secrets.CLAUDE_CODE_OAUTH_TOKEN }}", CODEX_API_KEY: "${{ secrets.CODEX_API_KEY }}", KIMI_API_KEY: "${{ secrets.KIMI_API_KEY }}"}
     with:
       role: ${{ needs.route.outputs.role }}
       stage: ${{ needs.route.outputs.stage }}
