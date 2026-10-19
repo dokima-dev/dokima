@@ -1,0 +1,142 @@
+{
+ "role": "planner",
+ "stage": null,
+ "run_id": "39267812531",
+ "commit_before": "9f3a01ecf183954291d28532151ad1e4a40af8ee",
+ "started_by": "dokima-runtime[bot]",
+ "models": [
+  "claude-opus-5-5"
+ ],
+ "report": {
+  "duration_ms": 239250,
+  "turns": 21,
+  "cost_usd": 1.2425828,
+  "tokens_in": 1314786,
+  "tokens_out": 18549
+ },
+ "log": "https://github.com/dokima-dev/dokima/blob/logs/logs/896/39267812531-planner.md",
+ "run": "https://github.com/dokima-dev/dokima/actions/runs/39267812531",
+ "handback": {
+  "kind": "user_story",
+  "title": "Settings may name only declared agent keys",
+  "summary": "A setting naming an agent key the shared workflow never receives is refused with one clear line.",
+  "user_story": "Owners who name an unusable agent key learn why in one line, from the audit and the run.",
+  "acceptance_criteria": [
+   {
+    "text": "Settings may name only the agent keys the entry workflow declares; a job refuses any other.",
+    "words": "The settings may name only agent keys `entry.yml` declares",
+    "source": "https://github.com/dokima-dev/dokima/issues/896#issuecomment-6268955634",
+    "files": [
+     "dokima/agents.py"
+    ],
+    "edge_cases": [
+     {
+      "case": "A declared key other than Claude's still works.",
+      "test": "tests/test_declared_keys.py::test_only_the_agent_keys_entry_yml_declares_are_accepted"
+     }
+    ]
+   },
+   {
+    "text": "When settings name an undeclared key, the setup audit reports it in one line saying what to do.",
+    "words": "The setup audit reports, in one line, a setting that names any other key: it will never reach the jobs; use a declared name, or ask for that name to be declared in a release.",
+    "source": "https://github.com/dokima-dev/dokima/issues/896#issuecomment-6268955634",
+    "files": [
+     "dokima/audit.py",
+     "dokima/agents.py"
+    ],
+    "edge_cases": [
+     {
+      "case": "The undeclared key is set as a repo secret: still reported.",
+      "test": "tests/test_declared_keys.py::test_the_audit_reports_an_undeclared_key_in_one_line"
+     },
+     {
+      "case": "A declared key that is set gets no line.",
+      "test": "tests/test_declared_keys.py::test_the_audit_reports_an_undeclared_key_in_one_line"
+     }
+    ]
+   },
+   {
+    "text": "When a job's settings name an undeclared key, the job fails with the audit's line, not as missing.",
+    "words": "A job whose settings name an undeclared key fails with that same message, not as a missing key.",
+    "source": "https://github.com/dokima-dev/dokima/issues/896#issuecomment-6268955634",
+    "files": [
+     "dokima/agents.py"
+    ],
+    "edge_cases": [
+     {
+      "case": "The undeclared secret is absent, as GitHub never passes it.",
+      "test": "tests/test_declared_keys.py::test_a_job_naming_an_undeclared_key_fails_with_the_audit_line"
+     }
+    ]
+   },
+   {
+    "text": "The docs say settings may name only the declared agent keys, and any other never reaches jobs.",
+    "words": "Docs say the same",
+    "source": "https://github.com/dokima-dev/dokima/issues/896#issuecomment-6268955634",
+    "files": [
+     "README.md",
+     "docs/wiki/Installing.md",
+     "dokima/agents.py"
+    ],
+    "no_edge_cases": "Docs are fixed text; no input varies."
+   }
+  ],
+  "non_functional": [],
+  "tests": {
+   "896.1": [
+    "tests/test_declared_keys.py::test_only_the_agent_keys_entry_yml_declares_are_accepted"
+   ],
+   "896.2": [
+    "tests/test_declared_keys.py::test_the_audit_reports_an_undeclared_key_in_one_line"
+   ],
+   "896.3": [
+    "tests/test_declared_keys.py::test_a_job_naming_an_undeclared_key_fails_with_the_audit_line"
+   ],
+   "896.4": [
+    "tests/test_declared_keys.py::test_the_install_docs_say_only_declared_keys_reach_the_jobs"
+   ]
+  },
+  "test_changes": {
+   "tests/test_agents.py::test_settings_come_from_one_file_in_the_dokima_folder": "Same checks; key renamed to a declared name, since the owner now refuses others.",
+   "tests/test_agents.py::test_a_run_gets_its_key_from_the_secret_its_subscription_names": "Same checks; key renamed to a declared name, since the owner now refuses others.",
+   "tests/test_agents.py::test_any_model_the_role_names_is_passed_to_its_agent": "Same checks; key renamed to a declared name, since the owner now refuses others.",
+   "tests/test_agents.py::test_a_role_the_file_leaves_out_starts_claude_code_as_today": "Same checks; key renamed to a declared name, since the owner now refuses others.",
+   "tests/test_agents.py::test_an_unknown_agent_stops_before_any_agent": "Same checks; key renamed to a declared name, since the owner now refuses others.",
+   "tests/test_agents.py::test_a_runs_record_reads_its_agent_through_the_interface": "Same checks; key renamed to a declared name, since the owner now refuses others.",
+   "tests/test_agents.py::test_moving_a_role_takes_one_edit_of_its_own_lines": "Same checks; key renamed to a declared name, since the owner now refuses others.",
+   "tests/test_agents.py::test_a_failed_agent_fails_the_run_with_no_fallback": "Same checks; key renamed to a declared name, since the owner now refuses others.",
+   "tests/test_agents.py::test_other_sections_can_join_the_settings_file": "Same checks; key renamed to a declared name, since the owner now refuses others.",
+   "tests/test_audit_secrets.py::test_the_audit_checks_the_key_the_settings_name": "Same checks; key renamed to a declared name, since the owner now refuses others.",
+   "tests/test_settings_comments.py::test_inline_comment_not_in_value": "Same checks; key renamed to a declared name, since the owner now refuses others.",
+   "tests/test_settings_comments.py::test_quoted_value_with_comment": "Same checks; key renamed to a declared name, since the owner now refuses others.",
+   "tests/test_settings_comments.py::test_comment_on_section_line": "Same checks; key renamed to a declared name, since the owner now refuses others.",
+   "tests/test_settings_setup.py::test_the_agents_section_picks_each_roles_agent_and_model": "Same checks; key renamed to a declared name, since the owner now refuses others.",
+   "tests/test_settings_setup.py::test_a_run_on_github_starts_the_model_the_agents_section_names": "Same checks; key renamed to a declared name, since the owner now refuses others.",
+   "tests/test_thin_install.py::test_a_run_with_no_model_key_fails_naming_the_secret_and_how_to_add_it": "Same checks; key renamed to a declared name, since the owner now refuses others.",
+   "tests/test_agents.py::test_each_role_has_its_own_subscription_and_model": "Three distinct declared keys replace three made-up ones; per-role keys still proven.",
+   "tests/test_thin_install.py::test_each_role_reads_its_model_key_from_the_secret_its_settings_name": "Owner retired the any-name promise; still proves the named secret reaches the agent."
+  },
+  "links": {
+   "blocked_by": [],
+   "blocks": [
+    913
+   ],
+   "relates_to": [
+    884
+   ]
+  },
+  "raises": [],
+  "answers": [
+   {
+    "raise": "RW1",
+    "answer": "done",
+    "why": "The owner chose declared names only; older tests now use declared names, and the any-name promise is retired."
+   }
+  ]
+ },
+ "check": {
+  "passed": true,
+  "problems": []
+ },
+ "url": "https://github.com/dokima-dev/dokima/issues/896#issuecomment-6269428223"
+}
