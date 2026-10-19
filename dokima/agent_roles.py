@@ -290,6 +290,26 @@ def route(body, on_pr, number, head="", pr_body=""):
     return {"role": role, "stage": stage, "issue": issue}
 
 
+HOTFIX_NO_PR = ("A hotfix has no plan to review. Code review starts once its pull request opens; "
+                "then say `/review` here or on the pull request.")
+
+
+def hotfix_route(repo, r):
+    """A hotfix issue's /review goes to code review, never plan review (#892).
+
+    A hotfix has no plan: with an open pull request, /review on the issue reviews that pull request; with none, it starts
+    nothing and says why on the issue. Any other route comes back as it was."""
+    if not r or r.get("role") != "reviewer" or r.get("stage") != "plan":
+        return r
+    number = r["issue"]
+    if not hotfix.labeled(repo, number) or hotfix.planned(saved_records(repo, number)):
+        return r
+    if open_pr(repo, number):
+        return {**r, "stage": "pr"}
+    agent_github.gh("issue", "comment", str(number), "-R", repo, "--body", HOTFIX_NO_PR)
+    return None
+
+
 def scrubbed(value, secrets):
     """value with every secret removed from each string it holds, in the same shape."""
     if isinstance(value, str):
@@ -738,7 +758,8 @@ def main(argv):
         if on_pr:
             p = json.loads(agent_github.gh("pr", "view", os.environ["NUMBER"], "-R", os.environ["GITHUB_REPOSITORY"], "--json", "headRefName,body"))
             head, pr_body = p["headRefName"], p["body"]
-        r = route(os.environ.get("BODY", ""), on_pr, os.environ.get("NUMBER", ""), head, pr_body)
+        r = hotfix_route(os.environ.get("GITHUB_REPOSITORY", ""),
+                         route(os.environ.get("BODY", ""), on_pr, os.environ.get("NUMBER", ""), head, pr_body))
         for k, v in (r or {}).items():
             print(f"{k}={v}")
         return 0

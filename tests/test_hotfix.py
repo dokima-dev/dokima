@@ -465,3 +465,53 @@ def test_hotfix_prompts_name_nothing_from_dokimas_own_repo(record_property, tmp_
         assert not own, f"863.10: the hotfix {name}'s prompt names Dokima's own repo: {own}"
         numbers = sorted({int(n) for n in re.findall(r"(?<![\w&])#(\d+)\b", text)} - OWN_NUMBERS)
         assert not numbers, f"863.10: the hotfix {name}'s prompt names Dokima's own issues: {numbers}"
+
+
+def review_on_issue(monkeypatch, capsys, labels, pr="", recs=()):
+    """Route `/review` on issue #57 as the command workflow does.
+
+    Returns what it printed and the comments it posted.
+
+    The fake GitHub gives the issue these labels and, from `gh pr list`, the open pull request `pr` ('' for none)."""
+    import record_seed
+    record_seed.use(monkeypatch, ISSUE, list(recs))
+    said = []
+
+    def gh(*args, **kw):
+        if args[:2] == ("api", f"repos/o/r/issues/{ISSUE}"):
+            return json.dumps({"labels": [{"name": n} for n in labels]})
+        if args[:2] == ("pr", "list"):
+            return f"{pr}\n"
+        if args[:2] == ("issue", "comment"):
+            said.append(args[args.index("--body") + 1])
+            return ""
+        raise AssertionError(f"unexpected gh call: {args}")
+
+    monkeypatch.setattr(agent_github, "gh", gh)
+    for k, v in {"GITHUB_REPOSITORY": "o/r", "BODY": "/review", "NUMBER": str(ISSUE), "ON_PR": "false"}.items():
+        monkeypatch.setenv(k, v)
+    assert agent.main(["agent", "route"]) == 0
+    return dict(line.split("=", 1) for line in capsys.readouterr().out.split()), said
+
+
+def test_review_on_a_hotfix_issue_reviews_its_pull_request(monkeypatch, capsys):
+    """`/review` on a hotfix issue with an open pull request starts code review (#892)."""
+    out, said = review_on_issue(monkeypatch, capsys, [HOTFIX], pr=ts.PR)
+    assert out == {"role": "reviewer", "stage": "pr", "issue": str(ISSUE)}, f"892: not a code review: {out}"
+    assert said == []
+
+
+def test_review_on_a_hotfix_issue_with_no_pull_request_says_why(monkeypatch, capsys):
+    """`/review` on a hotfix issue with no pull request starts nothing and says why (#892)."""
+    out, said = review_on_issue(monkeypatch, capsys, [HOTFIX])
+    assert out == {}, f"892: a run started with no pull request: {out}"
+    assert len(said) == 1 and "no plan to review" in said[0] and "pull request opens" in said[0], said
+
+
+def test_review_on_a_planned_or_unlabeled_issue_still_reviews_the_plan(monkeypatch, capsys):
+    """`/review` on an issue outside the hotfix lane still starts a plan review (#892)."""
+    out, _ = review_on_issue(monkeypatch, capsys, [], pr=ts.PR)
+    assert out["stage"] == "plan", f"892: an unlabeled issue's /review left plan review: {out}"
+    planner = {"role": "planner", "stage": None, "run_id": "2", "handback": {}, "check": {"passed": True, "problems": []}}
+    out, _ = review_on_issue(monkeypatch, capsys, [HOTFIX], pr=ts.PR, recs=[planner])
+    assert out["stage"] == "plan", f"892: a planned hotfix's /review left plan review: {out}"
