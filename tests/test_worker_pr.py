@@ -24,7 +24,7 @@ def push_steps(change=None):
     app = next(i for i, s in enumerate(steps) if s.get("id") == "app")
     end = next(i for i, s in enumerate(steps) if s.get("name") == "Write this run's record")
     picked = [named["Dokima's code from Dokima's own repo"], named["Copy the runtime from main before touching any branch"],
-              named["Starting branch"]]
+              next(s for s in steps if s.get("id") == "start-key"), named["Starting branch"]]
     if change:
         picked.append({"name": "The agent changes the code", "run": change})
     return wf, job, picked + steps[app:end]
