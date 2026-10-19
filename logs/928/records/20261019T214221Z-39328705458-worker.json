@@ -1,0 +1,38 @@
+{
+ "role": "worker",
+ "stage": null,
+ "run_id": "39328705458",
+ "commit_before": "d40191a9f36834837b493424c797a44e1cb7f2f2",
+ "started_by": "dokima-runtime[bot]",
+ "models": [
+  "claude-opus-5-5"
+ ],
+ "report": {
+  "duration_ms": 352078,
+  "turns": 20,
+  "cost_usd": 0.6518586000000002,
+  "tokens_in": 864159,
+  "tokens_out": 7304
+ },
+ "log": "https://github.com/dokima-dev/dokima/blob/logs/logs/928/39328705458-worker.md",
+ "run": "https://github.com/dokima-dev/dokima/actions/runs/39328705458",
+ "handback": {
+  "summary": "The test baseline passes with a notice when the tests folder is missing, and uses the file pattern setting.",
+  "criteria": {
+   "ask": "In `.github/workflows/testmon.yml` the baseline step runs pytest on `TESTS_DIR` with `TESTS_FILE_PATTERN`; exit 4 with no folder posts the notice, skips saving."
+  },
+  "evidence": "`pytest -q tests/test_no_tests_yet.py` and four neighbour files: 39 passed.",
+  "raises": []
+ },
+ "check": {
+  "passed": true,
+  "problems": []
+ },
+ "dropped_by_fence": [],
+ "files_changed": [
+  ".github/workflows/testmon.yml",
+  "tests/test_no_tests_yet.py"
+ ],
+ "branch": "try/issue-928",
+ "url": "https://github.com/dokima-dev/dokima/issues/928#issuecomment-6277893619"
+}
