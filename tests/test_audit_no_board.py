@@ -48,7 +48,7 @@ def bullets(issue):
 def no_board_drift():
     """A fake repo with board fields, views and one label off."""
     s = clean()
-    del s["labels"]["filed-by-dokima"]
+    s["labels"]["filed-by-dokima"]["color"] = "000000"
     del s["fields"]["Action"]
     s["views"]["Autopilot"]["filter"] = "label:autopilot"
     return s
@@ -79,20 +79,20 @@ def test_a_check_the_repo_added_gets_no_line(record_property, tmp_path):
 def test_the_audit_with_no_board_exits_0(record_property, tmp_path):
     """With no board set, the audit finishes with exit code 0 and still reports drift.
 
-    Proves 858.2. The repo is missing the filed-by-dokima label. The command runs once with DOKIMA_BOARD empty, as the
+    Proves 858.2. The repo's filed-by-dokima label has another color. The command runs once with DOKIMA_BOARD empty, as the
     workflow passes an unset variable, and once with it not set at all. Each run exits 0 and the Setup issue lists the
-    missing label, so the audit really ran."""
+    label, so the audit really ran."""
     record_property("proves", "858.2")
     for board, how in (("", "empty"), (None, "not set")):
         s = clean()
-        del s["labels"]["filed-by-dokima"]
+        s["labels"]["filed-by-dokima"]["color"] = "000000"
         a = Audit(tmp_path / how.replace(" ", "-"), s)
         p = run(a, "858.2", board)
         assert p.returncode == 0, (f"858.2: with DOKIMA_BOARD {how}, the audit exited {p.returncode}, not 0\n"
                                    f"stdout: {p.stdout}\nstderr: {p.stderr}")
         lines = bullets(setup_issue(a, "858.2", p))
         assert any("filed-by-dokima" in l for l in lines), \
-            f"858.2: with DOKIMA_BOARD {how}, the missing label is not listed: {lines}"
+            f"858.2: with DOKIMA_BOARD {how}, the label is not listed: {lines}"
 
 
 # 858.3: with no board, no line about board fields or views
@@ -101,13 +101,13 @@ def test_the_audit_with_no_board_lists_no_board_lines(record_property, tmp_path)
     """With no board set, the Setup issue lists no line about board fields or views.
 
     Proves 858.3. DOKIMA_BOARD is empty. The fake GitHub would answer a board read with a board lacking the Action field
-    and with a wrong Autopilot view filter; the repo is also missing the filed-by-dokima label. The Setup issue lists
-    the missing label, and no line names a board, a board field or a view."""
+    and with a wrong Autopilot view filter; the repo's filed-by-dokima label also has another color. The Setup issue lists
+    that label, and no line names a board, a board field or a view."""
     record_property("proves", "858.3")
     a = Audit(tmp_path, no_board_drift())
     p = run(a, "858.3", "")
     lines = bullets(setup_issue(a, "858.3", p))
-    assert any("filed-by-dokima" in l for l in lines), f"858.3: the missing label is not listed: {lines}"
+    assert any("filed-by-dokima" in l for l in lines), f"858.3: the label is not listed: {lines}"
     about = [l for l in lines if "board" in l.lower() or "view" in l.lower() or "Action" in l]
     assert not about, f"858.3: with no board set, the Setup issue still lists board lines: {about}"
 

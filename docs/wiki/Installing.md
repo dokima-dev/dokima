@@ -61,7 +61,7 @@ A Project with single-select fields:
 
 ## 6. Labels
 
-`autopilot` is created on first use. `filed-by-dokima` marks issues δokima files itself. The manifest also declares `plan` and `work` labels, so the audit expects them, but they start nothing: commands do.
+The audit creates every label δokima needs that the repo lacks: `autopilot`, `filed-by-dokima` (issues δokima files itself) and `hotfix` (built from the issue's text, with no plan). A label you changed is kept; the audit reports it.
 
 ## Checking your setup
 

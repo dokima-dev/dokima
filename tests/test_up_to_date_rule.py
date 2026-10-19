@@ -25,13 +25,13 @@ def up_to_date_lines(issue):
 def test_setup_issue_names_main_not_demanding_an_up_to_date_branch(record_property, tmp_path):
     """The Setup issue says when main's rule does not demand an up-to-date branch.
 
-    Proves 600.1. Runs the audit twice. First main's rule demands an up-to-date branch and one label is missing, so a Setup issue
+    Proves 600.1. Runs the audit twice. First main's rule demands an up-to-date branch and one label's color drifted, so a Setup issue
     opens: none of its lines may talk about being up to date. Then main's rule drops that demand and nothing else is
     off: the audit must open a Setup issue with exactly one line naming `main` and being up to date."""
     record_property("proves", "600.1")
     good = clean()
     good["strict"] = {"main": True}
-    del good["labels"]["filed-by-dokima"]
+    good["labels"]["filed-by-dokima"]["color"] = "000000"
     a = Audit(tmp_path / "good", good)
     a.run("600.1")
     _, issue = created(a, "600.1")
