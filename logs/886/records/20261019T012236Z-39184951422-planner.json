@@ -1,0 +1,103 @@
+{
+ "role": "planner",
+ "stage": null,
+ "run_id": "39184951422",
+ "commit_before": "1bc6fdf9349e1f456c1310416340db9aa29f4f19",
+ "started_by": "dokima-runtime[bot]",
+ "models": [
+  "claude-opus-5-5"
+ ],
+ "report": {
+  "duration_ms": 43585,
+  "turns": 8,
+  "cost_usd": 0.30591,
+  "tokens_in": 281704,
+  "tokens_out": 2188
+ },
+ "log": "https://github.com/dokima-dev/dokima/blob/logs/logs/886/39184951422-planner.md",
+ "run": "https://github.com/dokima-dev/dokima/actions/runs/39184951422",
+ "handback": {
+  "kind": "user_story",
+  "title": "The baseline passes on a repo with no tests",
+  "summary": "A repo with no tests yet passes the testmon baseline, and the run says so.",
+  "user_story": "An owner with no tests yet sees the baseline pass, told the repo has no tests yet.",
+  "acceptance_criteria": [
+   {
+    "text": "When the baseline runs on a repo with no tests, it succeeds and saves an empty baseline.",
+    "words": "treat \"no tests collected\" as an empty baseline, not a crash, in the testmon baseline",
+    "source": "https://github.com/dokima-dev/dokima/issues/880",
+    "files": [
+     ".github/workflows/testmon.yml"
+    ],
+    "edge_cases": [
+     {
+      "case": "A repo whose test setup crashes still fails the baseline.",
+      "test": "tests/test_no_tests_yet.py::test_the_baseline_passes_on_an_empty_tests_folder"
+     }
+    ]
+   },
+   {
+    "text": "When the baseline runs on a repo with no tests, the run shows a notice saying so.",
+    "words": "say on the run that the repo has no tests yet",
+    "source": "https://github.com/dokima-dev/dokima/issues/880",
+    "files": [
+     ".github/workflows/testmon.yml"
+    ],
+    "edge_cases": [
+     {
+      "case": "A repo with one passing test shows no such notice.",
+      "test": "tests/test_no_tests_yet.py::test_the_baseline_says_the_repo_has_no_tests_yet"
+     }
+    ]
+   },
+   {
+    "text": "When the baseline runs, it still runs only the tests folder the settings name.",
+    "words": "Keep that tests-folder argument and add the exit-5 handling on top, so both fixes stand.",
+    "source": "https://github.com/dokima-dev/dokima/issues/880#issuecomment-6257482677",
+    "files": [
+     ".github/workflows/testmon.yml"
+    ],
+    "edge_cases": [
+     {
+      "case": "With no folder in the settings, it runs the default tests folder.",
+      "test": "tests/test_testmon.py::test_baseline_runs_only_the_tests_folder"
+     }
+    ]
+   }
+  ],
+  "non_functional": [],
+  "tests": {
+   "886.1": [
+    "tests/test_no_tests_yet.py::test_the_baseline_passes_on_an_empty_tests_folder"
+   ],
+   "886.2": [
+    "tests/test_no_tests_yet.py::test_the_baseline_says_the_repo_has_no_tests_yet"
+   ],
+   "886.3": [
+    "tests/test_testmon.py::test_baseline_runs_only_the_tests_folder"
+   ]
+  },
+  "test_changes": {
+   "tests/test_testmon.py::test_baseline_runs_only_the_tests_folder": "Same checks, now reading a step of one line or several; names 886.3."
+  },
+  "links": {
+   "blocked_by": [],
+   "blocks": [],
+   "relates_to": [
+    887
+   ]
+  },
+  "answers": [
+   {
+    "raise": "R1",
+    "answer": "done",
+    "why": "The test now needs a run notice line holding No tests yet; plain words in the log fail."
+   }
+  ]
+ },
+ "check": {
+  "passed": true,
+  "problems": []
+ },
+ "url": "https://github.com/dokima-dev/dokima/issues/886#issuecomment-6257652687"
+}
