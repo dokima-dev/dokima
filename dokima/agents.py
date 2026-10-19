@@ -7,14 +7,16 @@ in DOKIMA_SETTINGS, where the workflow keeps main's copy, so a branch never pick
       subscriptions:
         SUB:
           agent: AGENT      # the adapter dokima/agent_AGENT.py runs it
-          key: SECRET       # the repo secret holding the subscription's key or sign-in
+          key: SECRET       # the repo secret holding the key or sign-in; one of DECLARED (#896)
       roles:
         ROLE:               # planner, worker or reviewer
           subscription: SUB
           model: MODEL
 
 When that file has no agents section, the old `agents.yml` beside it is read instead, holding the same two groups at
-its top. With neither, or for a role they leave out, the role runs on Claude Code with today's model and secret.
+its top. A key may be only one of CLAUDE_CODE_OAUTH_TOKEN, CODEX_API_KEY or KIMI_API_KEY, the agent keys entry.yml
+declares; any other never reaches the jobs, so the run stops naming it (#896). With neither, or for a role they leave
+out, the role runs on Claude Code with today's model and secret.
 There is no fallback: a bad name stops the run before any agent starts, and a failed agent fails it. Any model name
 passes; the agent itself refuses one it lacks.
 
@@ -37,10 +39,21 @@ from dokima.setup import SETTINGS, read_settings
 
 TODAY = {"agent": "claude", "model": "claude-opus-5-5", "key": "CLAUDE_CODE_OAUTH_TOKEN"}
 ADAPTER = ("install", "run", "models", "report", "transcript")
+# The agent keys entry.yml declares: GitHub hands a workflow in another account's repo only the secrets it declares
+# by name, so a setting naming any other key never reaches the jobs (#896).
+DECLARED = ("CLAUDE_CODE_OAUTH_TOKEN", "CODEX_API_KEY", "KIMI_API_KEY")
 
 
 class Stop(Exception):
     """The settings name something Dokima cannot run; the message names it."""
+
+
+def undeclared(key):
+    """The line saying KEY is no declared agent key; None when it is."""
+    if key in DECLARED:
+        return None
+    return (f"The settings name the agent key `{key}`, which will never reach the jobs: use a declared name ("
+            + ", ".join(f"`{d}`" for d in DECLARED) + f"), or ask for `{key}` to be declared in a release.")
 
 
 def settings_path():
@@ -87,6 +100,8 @@ def role_settings(role):
         raise Stop(f"The {role} names the subscription '{sub}', which {path} does not list.")
     if not found.get("agent") or not found.get("key"):
         raise Stop(f"The subscription '{sub}' in {path} needs both an agent and a key line.")
+    if undeclared(str(found["key"])):
+        raise Stop(undeclared(str(found["key"])))
     return {"agent": str(found["agent"]), "model": str(given["model"]), "key": str(found["key"])}
 
 

@@ -170,12 +170,18 @@ def own_repo(root):
 
 
 def compare_secrets(live, needed):
-    """One line per secret in NEEDED that the repo's own secrets LIVE lack.
+    """One line per secret in NEEDED that LIVE lacks or that is undeclared (#896).
 
     Dokima runs from its own repo, so its jobs see only repo secrets; a key kept in the `keys` environment never
     reaches them (#876)."""
-    return [f"Repo secret `{name}` is missing; Dokima needs it as a repo secret, since a secret kept only in the "
-            f"`keys` environment never reaches its jobs." for name in needed if name not in live]
+    lines = []
+    for name in needed:
+        if name != "DOKIMA_APP_KEY" and agents.undeclared(name):
+            lines.append(agents.undeclared(name))
+        elif name not in live:
+            lines.append(f"Repo secret `{name}` is missing; Dokima needs it as a repo secret, since a secret kept "
+                         f"only in the `keys` environment never reaches its jobs.")
+    return lines
 
 
 def auto_merge(github, repo, rule, queue=True):

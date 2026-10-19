@@ -119,7 +119,7 @@ class Repo:
 
     def add_team_planner(self):
         """Save through setup a Codex subscription named team, the planner on it with gpt-test-1."""
-        return self.run("setup", "add", "team", "--agent", "codex", "--secret", "TEAM_KEY", "--model", "gpt-test-1",
+        return self.run("setup", "add", "team", "--agent", "codex", "--secret", "CODEX_API_KEY", "--model", "gpt-test-1",
                         "--role", "planner", "--key", stdin="sk-test-key\n")
 
     def calls(self):
@@ -140,7 +140,7 @@ def with_team_planner(settings):
     """SETTINGS as they should read once setup saved the team subscription and planner."""
     want = json.loads(json.dumps(settings))
     agents = want.setdefault("agents", {})
-    agents.setdefault("subscriptions", {})["team"] = {"agent": "codex", "key": "TEAM_KEY"}
+    agents.setdefault("subscriptions", {})["team"] = {"agent": "codex", "key": "CODEX_API_KEY"}
     agents.setdefault("roles", {})["planner"] = {"subscription": "team", "model": "gpt-test-1"}
     return want
 
@@ -152,7 +152,7 @@ def saved_the_setting(crit, repo, p):
     got = yaml.safe_load(text) or {} if text else {}
     agents = got.get("agents") if isinstance(got, dict) else None
     agents = agents if isinstance(agents, dict) else {}
-    assert (agents.get("subscriptions") or {}).get("team") == {"agent": "codex", "key": "TEAM_KEY"} \
+    assert (agents.get("subscriptions") or {}).get("team") == {"agent": "codex", "key": "CODEX_API_KEY"} \
         and (agents.get("roles") or {}).get("planner") == {"subscription": "team", "model": "gpt-test-1"}, \
         (f"{crit}: setup did not save the team subscription and the planner into the agents section of "
          f".dokima/settings.yaml; the file now reads:\n{text}")
@@ -312,7 +312,7 @@ AGENTS_SECTION = textwrap.dedent('''\
       subscriptions:
         team:
           agent: codex
-          key: TEAM_KEY
+          key: CODEX_API_KEY
       roles:
         planner:
           subscription: team
@@ -324,7 +324,7 @@ def test_the_agents_section_picks_each_roles_agent_and_model(record_property, tm
     """The agents section of the settings file decides each role's agent and model.
 
     Proves 794.5. With only .dokima/settings.yaml in the repo, its agents section putting the planner on Codex with
-    model gpt-test-1 and key TEAM_KEY, checks the interface names that model and key, and that installing the
+    model gpt-test-1 and key CODEX_API_KEY, checks the interface names that model and key, and that installing the
     planner's agent installs Codex. The reviewer, left out, stays on today's Claude Code model."""
     record_property("proves", "794.5")
     repo = Repo(tmp_path)
@@ -333,8 +333,8 @@ def test_the_agents_section_picks_each_roles_agent_and_model(record_property, tm
     assert p.returncode == 0 and p.stdout.strip() == "gpt-test-1", \
         f"794.5: the planner's model should be gpt-test-1, from the agents section: {said(p)}"
     p = repo.run("agents", "key", "planner")
-    assert p.returncode == 0 and p.stdout.strip() == "TEAM_KEY", \
-        f"794.5: the planner's key should be TEAM_KEY, from the agents section: {said(p)}"
+    assert p.returncode == 0 and p.stdout.strip() == "CODEX_API_KEY", \
+        f"794.5: the planner's key should be CODEX_API_KEY, from the agents section: {said(p)}"
     p = repo.run("agents", "install", "planner")
     npm = [c["argv"] for c in repo.calls() if c["cmd"] == "npm"]
     assert p.returncode == 0 and npm and "@openai/codex" in npm[-1], \
@@ -348,14 +348,14 @@ def test_a_run_on_github_starts_the_model_the_agents_section_names(record_proper
     """A workflow run starts the agent on the model main's agents section names.
 
     Proves 794.5. Runs the agent workflow for a plan review, the way GitHub runs it, with only .dokima/settings.yaml
-    on main putting the reviewer on claude-sonnet-5-5, and the key secret it names (TEAM_KEY) set on the repo, as a
+    on main putting the reviewer on claude-sonnet-5-5, and the key secret it names (CODEX_API_KEY) set on the repo, as a
     run that starts needs since #812. The fake Claude Code must start with that model."""
     record_property("proves", "794.5")
     text = AGENTS_SECTION.replace("codex", "claude").replace("planner:", "reviewer:").replace("gpt-test-1",
                                                                                                "claude-sonnet-5-5")
-    assert "TEAM_KEY" in text, "test setup: the agents section no longer names the TEAM_KEY secret"
+    assert "CODEX_API_KEY" in text, "test setup: the agents section no longer names the CODEX_API_KEY secret"
     r = Run(tmp_path / "run", "reviewer", "plan", SPLIT_PROPOSED, files={".dokima/settings.yaml": text},
-            secrets={"TEAM_KEY": "team-key"})
+            secrets={"CODEX_API_KEY": "team-key"})
     assert r.agent_started(), f"794.5: the agent never started; the run stopped at '{r.failed_step}':\n{r.tail()}"
     path = os.path.join(r.tmp, "gh", "agent-argv.json")
     argv = json.load(open(path)) if os.path.exists(path) else []

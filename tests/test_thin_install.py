@@ -224,9 +224,9 @@ def agent_step_env(tmp, settings, secrets):
 
 # 812.3 ------------------------------------------------------------------------------------------------------------
 
-MY_KEY = """agents:
+CODEX_API_KEY = """agents:
   subscriptions:
-    mine: {agent: claude, key: MY_KEY}
+    mine: {agent: claude, key: CODEX_API_KEY}
   roles:
     planner: {subscription: mine, model: claude-opus-5-5}
 """
@@ -236,14 +236,14 @@ def test_each_role_reads_its_model_key_from_the_secret_its_settings_name(record_
     """A role's agent gets its key from the secret the adopter's settings name.
 
     Proves 812.3. The adopter's repo holds no Dokima code; its settings give the planner a subscription whose key is the
-    secret MY_KEY. Runs agent.yml's planner run up to its agent and checks the agent got MY_KEY's value, not the
+    secret CODEX_API_KEY. Runs agent.yml's planner run up to its agent and checks the agent got CODEX_API_KEY's value, not the
     default secret's. Then settings naming no agents: the agent gets the default secret's value."""
     record_property("proves", "812.3")
-    env = agent_step_env(tmp_path / "named", MY_KEY, {"MY_KEY": "fake-my-key"})
+    env = agent_step_env(tmp_path / "named", CODEX_API_KEY, {"CODEX_API_KEY": "fake-my-key"})
     assert env.get("CLAUDE_CODE_OAUTH_TOKEN") == "fake-my-key", \
-        (f"812.3: the planner's agent did not get the key from MY_KEY, the secret its settings name; "
+        (f"812.3: the planner's agent did not get the key from CODEX_API_KEY, the secret its settings name; "
          f"it got {env.get('CLAUDE_CODE_OAUTH_TOKEN')!r}")
-    env = agent_step_env(tmp_path / "default", None, {"MY_KEY": "fake-my-key"})
+    env = agent_step_env(tmp_path / "default", None, {"CODEX_API_KEY": "fake-my-key"})
     assert env.get("CLAUDE_CODE_OAUTH_TOKEN") == "fake-claude-token", \
         (f"812.3: with no agents in the settings, the agent did not get the default secret's key; "
          f"it got {env.get('CLAUDE_CODE_OAUTH_TOKEN')!r}")
@@ -277,11 +277,11 @@ def test_a_run_with_no_model_key_fails_naming_the_secret_and_how_to_add_it(recor
 
     Proves 812.5. Runs agent.yml's planner run in a repo with no CLAUDE_CODE_OAUTH_TOKEN secret: it must fail, and the
     run's log or its record on the issue must name that secret and say it goes in as a repo secret (#884). Then settings
-    naming the secret MY_KEY, which the repo lacks: the run fails naming MY_KEY."""
+    naming the secret CODEX_API_KEY, which the repo lacks: the run fails naming CODEX_API_KEY."""
     record_property("proves", "812.5")
-    for case, settings, secret in (("default", None, "CLAUDE_CODE_OAUTH_TOKEN"), ("named", MY_KEY, "MY_KEY")):
+    for case, settings, secret in (("default", None, "CLAUDE_CODE_OAUTH_TOKEN"), ("named", CODEX_API_KEY, "CODEX_API_KEY")):
         box = sw.Box(tmp_path / case, settings)
-        with_context(box, drop_secrets=("CLAUDE_CODE_OAUTH_TOKEN", "MY_KEY"))
+        with_context(box, drop_secrets=("CLAUDE_CODE_OAUTH_TOKEN", "CODEX_API_KEY"))
         result = box.run("agent.yml", "run", name="planner", role="planner")
         assert result == "failure", f"812.5: with no {secret} secret, the run did not fail; job {result}"
         said = [l for l in everything_said(box).splitlines() if secret in l and "repo secret" in l]

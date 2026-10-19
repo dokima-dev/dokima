@@ -47,7 +47,7 @@ SETTINGS = textwrap.dedent('''\
     subscriptions:
       moon:
         agent: kimi
-        key: KIMI_SIGN_IN
+        key: KIMI_API_KEY
     roles:
       planner:
         subscription: moon
