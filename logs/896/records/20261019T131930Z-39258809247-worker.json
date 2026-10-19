@@ -1,0 +1,45 @@
+{
+ "role": "worker",
+ "stage": null,
+ "run_id": "39258809247",
+ "commit_before": "613764e92082c828f93d4995d2a3f066b4e4e5bc",
+ "started_by": "dokima-runtime[bot]",
+ "models": [
+  "claude-opus-5-5"
+ ],
+ "report": {
+  "duration_ms": 107023,
+  "turns": 14,
+  "cost_usd": 0.4789344,
+  "tokens_in": 510833,
+  "tokens_out": 5295
+ },
+ "log": "https://github.com/dokima-dev/dokima/blob/logs/logs/896/39258809247-worker.md",
+ "run": "https://github.com/dokima-dev/dokima/actions/runs/39258809247",
+ "handback": {
+  "summary": "No change: refusing undeclared key names breaks earlier decided behavior, so this goes back for a decision.",
+  "criteria": {
+   "ask": "Not built: a guard in `key()` in `dokima/agents.py` breaks ten tests of decided criteria."
+  },
+  "evidence": "Guard tried in `key()`: `pytest -q` on five agent test files, 10 failed, 46 passed.",
+  "raises": [
+   {
+    "kind": "blocker",
+    "to": "planner",
+    "label": "Ask conflicts",
+    "text": "The ask limits keys to four declared names, but earlier criteria promise any secret name works, adopters included. Owner must pick one.",
+    "evidence": "Guard in `key()` fails `test_each_role_reads_its_model_key_from_the_secret_its_settings_name` (812.3), `test_each_role_has_its_own_subscription_and_model` (698.3).",
+    "raised_by": "worker",
+    "id": "W1"
+   }
+  ]
+ },
+ "check": {
+  "passed": true,
+  "problems": []
+ },
+ "dropped_by_fence": [],
+ "files_changed": [],
+ "branch": "try/issue-896",
+ "url": "https://github.com/dokima-dev/dokima/issues/896#issuecomment-6268147529"
+}
