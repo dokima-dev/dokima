@@ -1,0 +1,79 @@
+{
+ "role": "reviewer",
+ "stage": "pr",
+ "run_id": "39276202887",
+ "commit_before": "af395ef402e95fb24f3d5ea852e9e15591520124",
+ "started_by": "dokima-runtime[bot]",
+ "models": [
+  "claude-opus-5-5"
+ ],
+ "report": {
+  "duration_ms": 269309,
+  "turns": 16,
+  "cost_usd": 0.5989755999999999,
+  "tokens_in": 646349,
+  "tokens_out": 7263
+ },
+ "log": "https://github.com/dokima-dev/dokima/blob/logs/logs/915/39276202887-reviewer-pr.md",
+ "run": "https://github.com/dokima-dev/dokima/actions/runs/39276202887",
+ "handback": {
+  "previous_step": {
+   "did": [
+    "Test record seeding now turns off background git tidying on each test's remote.",
+    "Seeding keeps its scratch copy in the test's own folder and removes it after.",
+    "A new test pins both; the flaky file ran 20 times in parallel, green."
+   ],
+   "decided": [
+    "The likely cause: background git tidying racing the seed's next write."
+   ],
+   "open": [
+    "The worker could not reproduce the failure, so the cause is likely, not seen."
+   ]
+  },
+  "verdict": "approve",
+  "summary": "Test setup no longer leaves background git work on a test's remote; parallel reruns stay green.",
+  "raises": [],
+  "answers": [
+   {
+    "raise": "W1",
+    "answer": "done",
+    "why": "Confirmed: a push with the shared test settings still starts background maintenance on the remote. Likely cause of #836.",
+    "searched": [
+     836,
+     883,
+     799
+    ],
+    "verdict": "root cause",
+    "symptoms": [
+     836
+    ]
+   }
+  ],
+  "asks": [],
+  "behaviors": [],
+  "edge_cases": [],
+  "tests": [
+   {
+    "test": "tests/test_record_seed.py::test_seeding_a_remote_starts_no_background_git_and_keeps_its_scratch_in_the_tests_folder",
+    "only_its_behavior": true,
+    "why": "Fails on main's helper with background maintenance started, passes on the branch."
+   }
+  ],
+  "size": "ok",
+  "boxes": {
+   "dropped": "none",
+   "added": "none",
+   "superseded": "none",
+   "conflicts": "none",
+   "edges": {
+    "ask": "covered"
+   },
+   "poor_tests": "none"
+  }
+ },
+ "check": {
+  "passed": true,
+  "problems": []
+ },
+ "url": "https://github.com/dokima-dev/dokima/pull/918#issuecomment-6270619541"
+}
