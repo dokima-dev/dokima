@@ -176,13 +176,76 @@ def test_changelog_has_v016_on_top():
     assert not missing, f"925: the v0.1.6 section does not name {missing}, fixes merged since v0.1.5"
 
 
+def test_changelog_has_v017_on_top(record_property):
+    """The changelog's newest section is v0.1.7, right above v0.1.6.
 
-def test_changelog_has_v017_on_top():
-    """The changelog's newest section is v0.1.7, above v0.1.6, naming every fix merged since v0.1.6."""
-    names, text = section("932", "v0.1.7")
-    assert names[:2] == ["v0.1.7", "v0.1.6"], f"932: CHANGELOG.md's newest headings are not v0.1.7 then v0.1.6: {names}"
-    missing = unnamed(text, ("#929", "#928"))
-    assert not missing, f"932: the v0.1.7 section does not name {missing}, fixes merged since v0.1.6"
+    Proves 932.1: reads CHANGELOG.md's version headings in order and checks the first two are v0.1.7 then v0.1.6."""
+    record_property("proves", "932.1")
+    names, _ = section("932.1", "v0.1.7")
+    assert names[:2] == ["v0.1.7", "v0.1.6"], \
+        f"932.1: CHANGELOG.md's newest headings are not v0.1.7 then v0.1.6: {names}"
+
+
+def fix_line(crit, numbers, others):
+    """The one v0.1.7 line naming every number in NUMBERS, and none in OTHERS."""
+    _, text = section(crit, "v0.1.7")
+    lines = [line for line in text.splitlines() if not unnamed(line, numbers)]
+    assert len(lines) == 1, \
+        f"{crit}: the v0.1.7 section has {len(lines)} lines naming {' and '.join(numbers)}, not one: {lines}"
+    mixed = [n for n in others if n not in unnamed(lines[0], others)]
+    assert not mixed, f"{crit}: the v0.1.7 line for {' and '.join(numbers)} also names {mixed}, another fix"
+    return lines[0]
+
+
+def test_changelog_v017_names_baseline_fix(record_property):
+    """The v0.1.7 section has one line for the test baseline fix, naming #929 and #928.
+
+    Proves 932.2: finds the v0.1.7 section's lines naming both #929 and #928, and checks there is exactly one and it
+    names no other fix, so each fix keeps its own line."""
+    record_property("proves", "932.2")
+    fix_line("932.2", ("#929", "#928"), ("#931", "#907"))
+
+
+def test_changelog_v017_names_key_fix(record_property):
+    """The v0.1.7 section has one line for the rejected key fix, naming #931 and #907.
+
+    Proves 932.3: finds the v0.1.7 section's lines naming both #931 and #907, and checks there is exactly one and it
+    names no other fix. #931 merged to main before this release, so it is listed."""
+    record_property("proves", "932.3")
+    fix_line("932.3", ("#931", "#907"), ("#929", "#928"))
+
+
+def test_install_file_calls_v017(record_property):
+    """The install file calls Dokima's entry workflow at v0.1.7.
+
+    Proves 932.4: reads every job of `dokima/install/dokima.yml` and checks the one calling Dokima's entry workflow
+    names the tag v0.1.7."""
+    record_property("proves", "932.4")
+    flow = yaml.safe_load(read("dokima/install/dokima.yml"))
+    uses = [job.get("uses", "") for job in (flow.get("jobs") or {}).values()]
+    assert "dokima-dev/dokima/.github/workflows/entry.yml@v0.1.7" in uses, \
+        f"932.4: the install file does not call entry.yml@v0.1.7; its jobs use {uses}"
+
+
+def test_readme_names_v017(record_property):
+    """The README's install steps name v0.1.7 as the release to run.
+
+    Proves 932.5: reads the README's Install section and checks the only version it names is v0.1.7."""
+    record_property("proves", "932.5")
+    match = re.search(r"^## Install\s*$(.*?)(?=^## |\Z)", read("README.md"), re.S | re.M)
+    assert match, "932.5: README.md has no '## Install' section"
+    named = sorted({m.group(0) for m in VERSION.finditer(match.group(1))})
+    assert named == ["v0.1.7"], f"932.5: the README's Install section names {named}, not v0.1.7 alone"
+
+
+def test_wiki_names_v017(record_property):
+    """The wiki's install page names v0.1.7 as the release to run.
+
+    Proves 932.6: reads `docs/wiki/Installing.md` and checks the only version it names is v0.1.7."""
+    record_property("proves", "932.6")
+    named = sorted({m.group(0) for m in VERSION.finditer(read("docs/wiki/Installing.md"))})
+    assert named == ["v0.1.7"], f"932.6: the wiki's Installing page names {named}, not v0.1.7 alone"
+
 
 def test_install_file_calls_newest_version(record_property):
     """The install file calls Dokima at the changelog's newest version, newer than v0.1.0.
