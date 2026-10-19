@@ -92,3 +92,33 @@ def test_a_remote_error_is_reported_not_taken_for_no_branch(tmp_path):
     assert result == "failure" and m.failed_step == "Starting branch", f"the run did not stop at its start: {m.failed_step}"
     assert not os.path.exists(f"{tmp_path}/started"), "the run went on from main after origin could not be asked"
     assert "could not" in m.why().lower() and "fake-token" not in m.why(), f"the run did not say why: {m.why()!r}"
+
+
+def test_a_second_runs_conversation_lands_on_top_of_the_first_on_the_records_branch(tmp_path):
+    """Saving the conversation reads the records branch with the app's key, not anonymously (#917)."""
+    m = Private(tmp_path)
+    save = next(s for s in m.job["steps"] if str(s.get("name", "")).startswith("Save the conversation"))
+    logs = f"{tmp_path}/origin.git"
+    tips = []
+    for run in ("1", "2"):
+        given = {"name": "The run so far", "run": "rm -rf /tmp/logs-branch\n"
+                 f'printf "RECORDS_BRANCH=logs\\nLOG=logs/{ts.N}/{run}-planner.md\\n" >> "$GITHUB_ENV"\n'}
+        result = m.run_as("planner", "", m.head + [REFUSE, given, m.app, save], f"save{run}")
+        assert result == "success", f"run {run} failed at {m.failed_step}:\n" + "\n".join(m.log)
+        said = "\n".join(m.log)
+        assert "[rejected]" not in said, f"run {run} started the records branch fresh and its push was rejected:\n{said}"
+        tips.append(ts.sh(logs, "git", "rev-parse", "logs"))
+    ancestor = subprocess.run(["git", "merge-base", "--is-ancestor", tips[0], tips[1]], cwd=logs).returncode
+    assert tips[1] != tips[0] and ancestor == 0, "the second run's conversation did not land on top of the first"
+    files = ts.sh(logs, "git", "ls-tree", "-r", "--name-only", "logs").split()
+    assert {f"logs/{ts.N}/1-planner.md", f"logs/{ts.N}/2-planner.md"} <= set(files), f"the records branch holds {files}"
+
+
+def test_a_records_branch_origin_cannot_be_asked_about_stops_the_save_and_says_why(tmp_path):
+    m = Private(tmp_path)
+    save = next(s for s in m.job["steps"] if str(s.get("name", "")).startswith("Save the conversation"))
+    given = {"name": "The run so far", "run": f'printf "RECORDS_BRANCH=logs\\nLOG=logs/{ts.N}/1-planner.md\\n" >> "$GITHUB_ENV"\n'}
+    result = m.run_as("planner", "", m.head + [REFUSE, UNREACHABLE, given, m.app, save], "save")
+    assert result == "failure" and m.failed_step == save["name"], f"the save did not stop: {m.failed_step}"
+    said = m.log[-1]
+    assert "could not ask whether logs exists" in said and "fake-token" not in said, f"the save did not say why: {said}"
