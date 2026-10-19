@@ -1,0 +1,62 @@
+{
+ "role": "reviewer",
+ "stage": "pr",
+ "run_id": "39338651748",
+ "commit_before": "702b3d7e378fe5b679f7a325499513e36dae6aa3",
+ "started_by": "dokima-runtime[bot]",
+ "models": [
+  "claude-opus-5-5"
+ ],
+ "report": {
+  "duration_ms": 19769,
+  "turns": 6,
+  "cost_usd": 0.24863960000000002,
+  "tokens_in": 191225,
+  "tokens_out": 1799
+ },
+ "log": "https://github.com/dokima-dev/dokima/blob/logs/logs/932/39338651748-reviewer-pr.md",
+ "run": "https://github.com/dokima-dev/dokima/actions/runs/39338651748",
+ "handback": {
+  "previous_step": {
+   "did": [
+    "Added a v0.1.7 section on top of the changelog naming the test baseline fix.",
+    "Pointed the install file, readme and install guide at v0.1.7.",
+    "Made the newest release test name v0.1.7."
+   ],
+   "decided": [
+    "Left out the rejected key fix, since it is not on main yet."
+   ],
+   "open": []
+  },
+  "verdict": "approve",
+  "summary": "Release v0.1.7 ships as earlier releases did, naming the only fix merged since v0.1.6.",
+  "raises": [],
+  "answers": [],
+  "asks": [],
+  "behaviors": [],
+  "edge_cases": [],
+  "tests": [
+   {
+    "test": "tests/test_newest_release.py::test_changelog_has_v017_on_top",
+    "only_its_behavior": true,
+    "why": "Checks v0.1.7 is newest, above v0.1.6, naming the merged fix."
+   }
+  ],
+  "size": "ok",
+  "boxes": {
+   "dropped": "none",
+   "added": "none",
+   "superseded": "none",
+   "conflicts": "none",
+   "edges": {
+    "ask": "covered"
+   },
+   "poor_tests": "none"
+  }
+ },
+ "check": {
+  "passed": true,
+  "problems": []
+ },
+ "url": "https://github.com/dokima-dev/dokima/pull/933#issuecomment-6279205564"
+}
