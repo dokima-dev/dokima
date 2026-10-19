@@ -1,0 +1,47 @@
+{
+ "role": "worker",
+ "stage": null,
+ "run_id": "39180371775",
+ "commit_before": "053f89fb4948029591f8e945f9157ee752529953",
+ "started_by": "dokima-runtime[bot]",
+ "models": [
+  "claude-opus-5-5"
+ ],
+ "report": {
+  "duration_ms": 54126,
+  "turns": 9,
+  "cost_usd": 0.35023840000000006,
+  "tokens_in": 303709,
+  "tokens_out": 3466
+ },
+ "log": "https://github.com/dokima-dev/dokima/blob/logs/logs/877/39180371775-worker.md",
+ "run": "https://github.com/dokima-dev/dokima/actions/runs/39180371775",
+ "handback": {
+  "summary": "The testmon baseline now runs only the tests folder the settings name, default tests.",
+  "criteria": {
+   "ask": "`.github/workflows/testmon.yml` runs `pytest -q --testmon \"${TESTS_DIR:-tests}\"`; `tests/test_testmon.py::test_baseline_runs_only_the_tests_folder` runs that line and checks the folder."
+  },
+  "evidence": "`pytest -q tests/test_testmon.py`: 3 passed; new test fails without the fix.",
+  "raises": [
+   {
+    "kind": "issue",
+    "label": "Review run too",
+    "text": "The code review's testmon run in agent.yml may also collect tests outside the tests folder.",
+    "evidence": "`.github/workflows/agent.yml` line 384 runs `pytest --testmon` without `$TESTS_DIR`.",
+    "raised_by": "worker",
+    "id": "W1"
+   }
+  ]
+ },
+ "check": {
+  "passed": true,
+  "problems": []
+ },
+ "dropped_by_fence": [],
+ "files_changed": [
+  ".github/workflows/testmon.yml",
+  "tests/test_testmon.py"
+ ],
+ "branch": "try/issue-877",
+ "url": "https://github.com/dokima-dev/dokima/issues/877#issuecomment-6257007143"
+}
