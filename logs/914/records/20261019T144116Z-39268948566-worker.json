@@ -1,0 +1,51 @@
+{
+ "role": "worker",
+ "stage": null,
+ "run_id": "39268948566",
+ "commit_before": "d9061dad2a63fc8602b0c23db23053bf72160fba",
+ "started_by": "dokima-runtime[bot]",
+ "models": [
+  "claude-opus-5-5"
+ ],
+ "report": {
+  "duration_ms": 829037,
+  "turns": 42,
+  "cost_usd": 1.6474684,
+  "tokens_in": 2875679,
+  "tokens_out": 21038
+ },
+ "log": "https://github.com/dokima-dev/dokima/blob/logs/logs/914/39268948566-worker.md",
+ "run": "https://github.com/dokima-dev/dokima/actions/runs/39268948566",
+ "handback": {
+  "summary": "Runs read the branch with the app's key, stop when the repo cannot answer, and rebase records as the bot.",
+  "criteria": {
+   "ask": "In the agent workflow, a new key step feeds Starting branch; it fetches main and the branch with that key, telling exit 2 from errors."
+  },
+  "evidence": "`pytest -n 8` on 59 test files loading the agent workflow: 505 passed.",
+  "raises": [
+   {
+    "kind": "issue",
+    "label": "Records branch check",
+    "text": "Saving the conversation still asks origin for the records branch with no key, so private repos start an orphan branch each run.",
+    "evidence": "`.github/workflows/agent.yml`, step Save the conversation, `git ls-remote --heads origin \"$B\"`",
+    "raised_by": "worker",
+    "id": "W1"
+   }
+  ]
+ },
+ "check": {
+  "passed": true,
+  "problems": []
+ },
+ "dropped_by_fence": [],
+ "files_changed": [
+  ".github/workflows/agent.yml",
+  "tests/test_clash.py",
+  "tests/test_planner_starts_with_main.py",
+  "tests/test_private_repo_start.py",
+  "tests/test_test_clash_planner.py",
+  "tests/test_worker_pr.py"
+ ],
+ "branch": "try/issue-914",
+ "url": "https://github.com/dokima-dev/dokima/issues/914#issuecomment-6269602616"
+}
