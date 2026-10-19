@@ -1,0 +1,188 @@
+{
+ "role": "reviewer",
+ "stage": "plan",
+ "run_id": "39183889722",
+ "commit_before": "6a76a2abfd91647ef69022263898c08b8f04a9fa",
+ "started_by": "dokima-runtime[bot]",
+ "models": [
+  "claude-opus-5-5"
+ ],
+ "report": {
+  "duration_ms": 72164,
+  "turns": 10,
+  "cost_usd": 0.47314120000000004,
+  "tokens_in": 381696,
+  "tokens_out": 6588
+ },
+ "log": "https://github.com/dokima-dev/dokima/blob/logs/logs/880/39183889722-reviewer-plan.md",
+ "run": "https://github.com/dokima-dev/dokima/actions/runs/39183889722",
+ "handback": {
+  "previous_step": {
+   "did": [
+    "The planner split the work into two stories: the baseline and the all tests check."
+   ],
+   "decided": [
+    "Each check passes on a repo with no tests, showing a no tests yet notice.",
+    "A crash while collecting tests still fails both checks."
+   ],
+   "open": [
+    "The plan was written before the owner asked to keep the tests folder setting."
+   ]
+  },
+  "verdict": "block",
+  "summary": "The plan drops the owner's ask to keep the tests folder setting, and two criteria name missing tests.",
+  "raises": [
+   {
+    "kind": "blocker",
+    "to": "planner",
+    "label": "S1.2, S2.2: no test",
+    "text": "Criteria S1.2 and S2.2 name tests that do not exist. Fix: add both, each also running a repo with one passing test and expecting no notice.",
+    "evidence": "`tests/test_no_tests_yet.py` holds only two tests; `grep says_the_repo tests` finds nothing.",
+    "raised_by": "reviewer",
+    "id": "R1"
+   },
+   {
+    "kind": "blocker",
+    "to": "planner",
+    "label": "No criterion: folder",
+    "text": "The owner asked to keep the tests folder setting with the new handling, and no criterion carries it. Fix: add that criterion, its test reading a multi-line step.",
+    "evidence": "Owner's /work comment of 2026-10-19 01:06. `tests/test_testmon.py::test_baseline_runs_only_the_tests_folder` fails on this branch: IndexError at line 223.",
+    "raised_by": "reviewer",
+    "id": "R2"
+   }
+  ],
+  "answers": [],
+  "asks": [
+   {
+    "ask": "treat \"no tests collected\" as an empty baseline, not a crash, in the testmon baseline",
+    "source": "https://github.com/dokima-dev/dokima/issues/880",
+    "criterion": "S1.1"
+   },
+   {
+    "ask": "and wherever the full suite would hit the same exit code",
+    "source": "https://github.com/dokima-dev/dokima/issues/880",
+    "criterion": "S2.1"
+   },
+   {
+    "ask": "say on the run that the repo has no tests yet",
+    "source": "https://github.com/dokima-dev/dokima/issues/880",
+    "criterion": "S1.2"
+   },
+   {
+    "ask": "A test should run the baseline step on an empty tests folder and expect success.",
+    "source": "https://github.com/dokima-dev/dokima/issues/880",
+    "criterion": "S1.1"
+   },
+   {
+    "ask": "Keep that tests-folder argument and add the exit-5 handling on top, so both fixes stand.",
+    "source": "https://github.com/dokima-dev/dokima/issues/880",
+    "criterion": "missing"
+   }
+  ],
+  "behaviors": [
+   {
+    "criterion": "S1.1",
+    "one_behavior": true,
+    "why": "The job passing needs the saved baseline; one outcome."
+   },
+   {
+    "criterion": "S1.2",
+    "one_behavior": true,
+    "why": "One notice on one case."
+   },
+   {
+    "criterion": "S2.1",
+    "one_behavior": true,
+    "why": "One check passing on one case."
+   },
+   {
+    "criterion": "S2.2",
+    "one_behavior": true,
+    "why": "One notice on one case."
+   }
+  ],
+  "edge_cases": [
+   {
+    "criterion": "S1.1",
+    "cut": [],
+    "missing": []
+   },
+   {
+    "criterion": "S1.2",
+    "cut": [],
+    "missing": [
+     "A repo with one passing test shows no notice: named but untested."
+    ]
+   },
+   {
+    "criterion": "S2.1",
+    "cut": [],
+    "missing": []
+   },
+   {
+    "criterion": "S2.2",
+    "cut": [],
+    "missing": [
+     "A repo with one passing test shows no notice: named but untested."
+    ]
+   }
+  ],
+  "tests": [
+   {
+    "test": "tests/test_no_tests_yet.py::test_the_baseline_passes_on_an_empty_tests_folder",
+    "only_its_behavior": false,
+    "why": "Also checks the notice, which is 1.2's behavior."
+   },
+   {
+    "test": "tests/test_no_tests_yet.py::test_the_baseline_says_the_repo_has_no_tests_yet",
+    "only_its_behavior": false,
+    "why": "The test does not exist."
+   },
+   {
+    "test": "tests/test_no_tests_yet.py::test_the_all_tests_check_passes_on_an_empty_tests_folder",
+    "only_its_behavior": false,
+    "why": "Also checks the notice, which is 2.2's behavior."
+   },
+   {
+    "test": "tests/test_no_tests_yet.py::test_the_all_tests_check_says_the_repo_has_no_tests_yet",
+    "only_its_behavior": false,
+    "why": "The test does not exist."
+   }
+  ],
+  "size": "Two tests also check the notice criteria, and two named tests do not exist.",
+  "boxes": {
+   "dropped": [
+    {
+     "words": "Keep that tests-folder argument and add the exit-5 handling on top, so both fixes stand.",
+     "source": "comment:owner /work of 2026-10-19T01:06:55Z"
+    }
+   ],
+   "added": "none",
+   "superseded": "none",
+   "conflicts": "none",
+   "edges": {
+    "S1.1": "covered",
+    "S1.2": "missing: a repo with one passing test shows no notice",
+    "S2.1": "covered",
+    "S2.2": "missing: a repo with one passing test shows no notice"
+   },
+   "poor_tests": [
+    {
+     "test": "tests/test_no_tests_yet.py::test_the_baseline_passes_on_an_empty_tests_folder",
+     "passes_with": "a baseline that prints the notice on every run, tests or not",
+     "fix": "Move the notice check to 1.2's own test, with a no-notice case."
+    },
+    {
+     "test": "tests/test_no_tests_yet.py::test_the_all_tests_check_passes_on_an_empty_tests_folder",
+     "passes_with": "a check that prints the notice on every run, tests or not",
+     "fix": "Move the notice check to 2.2's own test, with a no-notice case."
+    }
+   ]
+  }
+ },
+ "check": {
+  "passed": true,
+  "problems": []
+ },
+ "url": "https://github.com/dokima-dev/dokima/issues/880#issuecomment-6257489592"
+}
