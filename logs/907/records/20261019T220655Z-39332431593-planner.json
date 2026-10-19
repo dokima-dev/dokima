@@ -1,0 +1,241 @@
+{
+ "role": "planner",
+ "stage": null,
+ "run_id": "39332431593",
+ "commit_before": "12cc0499867989b24e238d37dba88c92d938d14a",
+ "started_by": "dokima-runtime[bot]",
+ "models": [
+  "claude-opus-5-5"
+ ],
+ "report": {
+  "duration_ms": 41090,
+  "turns": 7,
+  "cost_usd": 0.49331020000000003,
+  "tokens_in": 333808,
+  "tokens_out": 3446
+ },
+ "log": "https://github.com/dokima-dev/dokima/blob/logs/logs/907/39332431593-planner.md",
+ "run": "https://github.com/dokima-dev/dokima/actions/runs/39332431593",
+ "handback": {
+  "kind": "user_story",
+  "title": "A rejected model key is reported as a rejected key",
+  "summary": "When the provider refuses an agent's key, the owner is told which secret to replace, not shown a planner bug.",
+  "user_story": "When a model key stops working, the owner learns which secret to replace, at setup and on every failed run.",
+  "acceptance_criteria": [
+   {
+    "text": "When Claude Code, Codex or Kimi is refused its key, the run ends as Model key rejected.",
+    "words": "A refused key for Claude Code, Codex and Kimi each ends as \"Model key rejected\"",
+    "source": "https://github.com/dokima-dev/dokima/issues/907#issuecomment-6278270923",
+    "files": [
+     "dokima/agent_roles.py",
+     "dokima/agent_records.py",
+     "dokima/agents.py",
+     "dokima/agent_claude.py",
+     "dokima/agent_codex.py",
+     "dokima/agent_kimi.py"
+    ],
+    "edge_cases": [
+     {
+      "case": "The provider answers 403 instead of 401.",
+      "test": "tests/test_key_rejected.py::test_a_403_from_the_provider_reads_model_key_rejected"
+     },
+     {
+      "case": "The provider says the token expired.",
+      "test": "tests/test_key_rejected.py::test_an_expired_token_reads_model_key_rejected"
+     },
+     {
+      "case": "A Codex key is refused.",
+      "test": "tests/test_key_rejected.py::test_a_refused_codex_key_reads_model_key_rejected"
+     },
+     {
+      "case": "A Kimi sign-in is refused.",
+      "test": "tests/test_key_rejected.py::test_a_refused_kimi_key_reads_model_key_rejected"
+     },
+     {
+      "case": "The agent ran fine but left no plan: the missing plan is still reported.",
+      "test": "tests/test_key_rejected.py::test_a_401_from_the_provider_reads_model_key_rejected"
+     }
+    ]
+   },
+   {
+    "text": "When a run ends as Model key rejected, its comment names the repo secret the settings use for that agent.",
+    "words": "names that agent's secret",
+    "source": "https://github.com/dokima-dev/dokima/issues/907#issuecomment-6278270923",
+    "files": [
+     "dokima/agent_roles.py",
+     "dokima/agent_records.py",
+     "dokima/agents.py",
+     "dokima/agent_claude.py",
+     "dokima/agent_codex.py",
+     "dokima/agent_kimi.py"
+    ],
+    "edge_cases": [
+     {
+      "case": "The settings name another declared secret for the planner.",
+      "test": "tests/test_key_rejected.py::test_the_record_names_the_secret_the_settings_use"
+     },
+     {
+      "case": "Codex names its own secret; Kimi names its own.",
+      "test": "tests/test_key_rejected.py::test_each_agents_record_names_its_own_secret"
+     }
+    ]
+   },
+   {
+    "text": "When a run ends as Model key rejected, its comment says the provider refused the key: replace the secret.",
+    "words": "says the provider refused it: make a new one and replace the repo secret.",
+    "source": "https://github.com/dokima-dev/dokima/issues/907",
+    "files": [
+     "dokima/agent_roles.py",
+     "dokima/agent_records.py"
+    ],
+    "no_edge_cases": "It is one fixed message; the failure cases belong to the first criterion."
+   },
+   {
+    "text": "When a run ends as Model key rejected, no part of the key appears on its comment or record.",
+    "words": "Never print any part of the key.",
+    "source": "https://github.com/dokima-dev/dokima/issues/907",
+    "files": [
+     "dokima/agent_roles.py",
+     "dokima/agent_records.py",
+     "dokima/agents.py",
+     "dokima/agent_codex.py"
+    ],
+    "edge_cases": [
+     {
+      "case": "Codex's refusal echoes the key's last characters.",
+      "test": "tests/test_key_rejected.py::test_a_codex_refusal_never_prints_the_keys_tail"
+     }
+    ]
+   },
+   {
+    "text": "When a key the settings use is set, the setup audit starts that key's agent once.",
+    "words": "for each key the settings use it makes one tiny call to that agent",
+    "source": "https://github.com/dokima-dev/dokima/issues/907#issuecomment-6278270923",
+    "files": [
+     "dokima/audit.py",
+     "dokima/agents.py",
+     ".github/workflows/audit.yml"
+    ],
+    "edge_cases": [
+     {
+      "case": "All three roles share one key: one call only.",
+      "test": "tests/test_key_rejected.py::test_the_audit_calls_each_set_key_once"
+     },
+     {
+      "case": "The provider accepts the key: nothing is reported.",
+      "test": "tests/test_key_rejected.py::test_the_audit_calls_each_set_key_once"
+     }
+    ]
+   },
+   {
+    "text": "When the provider refuses a key at setup, the audit reports it as one line naming its secret.",
+    "words": "reporting a refused key as one line",
+    "source": "https://github.com/dokima-dev/dokima/issues/907#issuecomment-6278270923",
+    "files": [
+     "dokima/audit.py",
+     "dokima/agents.py",
+     ".github/workflows/audit.yml"
+    ],
+    "edge_cases": [
+     {
+      "case": "Only one of three keys is refused: one line, naming only that secret.",
+      "test": "tests/test_key_rejected.py::test_the_audit_reports_a_rejected_key_as_one_line"
+     }
+    ]
+   },
+   {
+    "text": "When a key the settings use is not set, the setup audit starts no agent for it.",
+    "words": "A key that is not set is skipped",
+    "source": "https://github.com/dokima-dev/dokima/issues/907#issuecomment-6278270923",
+    "files": [
+     "dokima/audit.py",
+     "dokima/agents.py",
+     ".github/workflows/audit.yml"
+    ],
+    "edge_cases": [
+     {
+      "case": "No key is set at all.",
+      "test": "tests/test_key_rejected.py::test_the_audit_skips_a_key_that_is_not_set"
+     }
+    ]
+   },
+   {
+    "text": "When the audit runs from an adopter's workflow, it receives each declared agent key by name.",
+    "words": "The audit job gets the declared agent keys by name",
+    "source": "https://github.com/dokima-dev/dokima/issues/907#issuecomment-6278270923",
+    "files": [
+     ".github/workflows/audit.yml",
+     ".github/workflows/entry.yml"
+    ],
+    "no_edge_cases": "A fixed wiring of three named keys; there is no input to vary."
+   },
+   {
+    "text": "When the audit reports refused keys, no part of any key appears in what it prints.",
+    "words": "Never print any part of a key.",
+    "source": "https://github.com/dokima-dev/dokima/issues/907#issuecomment-6278270923",
+    "files": [
+     "dokima/audit.py",
+     "dokima/agents.py",
+     ".github/workflows/audit.yml"
+    ],
+    "no_edge_cases": "The test refuses all three agents' keys at once, the case with most to leak."
+   }
+  ],
+  "non_functional": [],
+  "tests": {
+   "907.1": [
+    "tests/test_key_rejected.py::test_a_401_from_the_provider_reads_model_key_rejected",
+    "tests/test_key_rejected.py::test_a_403_from_the_provider_reads_model_key_rejected",
+    "tests/test_key_rejected.py::test_an_expired_token_reads_model_key_rejected",
+    "tests/test_key_rejected.py::test_a_refused_codex_key_reads_model_key_rejected",
+    "tests/test_key_rejected.py::test_a_refused_kimi_key_reads_model_key_rejected"
+   ],
+   "907.2": [
+    "tests/test_key_rejected.py::test_the_record_names_the_secret_the_settings_use",
+    "tests/test_key_rejected.py::test_each_agents_record_names_its_own_secret"
+   ],
+   "907.3": [
+    "tests/test_key_rejected.py::test_the_record_says_to_make_a_new_key_and_replace_the_repo_secret"
+   ],
+   "907.4": [
+    "tests/test_key_rejected.py::test_the_record_never_prints_any_part_of_the_key",
+    "tests/test_key_rejected.py::test_a_codex_refusal_never_prints_the_keys_tail"
+   ],
+   "907.5": [
+    "tests/test_key_rejected.py::test_the_audit_calls_each_set_key_once"
+   ],
+   "907.6": [
+    "tests/test_key_rejected.py::test_the_audit_reports_a_rejected_key_as_one_line"
+   ],
+   "907.7": [
+    "tests/test_key_rejected.py::test_the_audit_skips_a_key_that_is_not_set"
+   ],
+   "907.8": [
+    "tests/test_key_rejected.py::test_the_audit_job_gets_each_declared_agent_key_by_name"
+   ],
+   "907.9": [
+    "tests/test_key_rejected.py::test_the_audit_never_prints_any_part_of_a_key"
+   ]
+  },
+  "test_changes": {},
+  "links": {
+   "blocked_by": [],
+   "blocks": [],
+   "relates_to": [
+    860
+   ]
+  },
+  "answers": [
+   {
+    "raise": "R2",
+    "answer": "done",
+    "why": "A Codex refusal case now checks the card never shows the key's tail the provider echoed."
+   }
+  ]
+ },
+ "check": {
+  "passed": true,
+  "problems": []
+ },
+ "url": "https://github.com/dokima-dev/dokima/issues/907#issuecomment-6278406502"
+}
