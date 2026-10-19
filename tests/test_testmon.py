@@ -211,3 +211,29 @@ def test_no_usable_baseline_runs_every_test(tmp_path, record_property):
     calls, _, _, out = run_tests_step(tmp_path / "good", "good")
     assert calls and calls[-1]["mode"] == "affected", \
         f"539.2: with a readable baseline the step still runs every test, so it never picks affected tests\n{out}"
+
+
+def test_baseline_runs_only_the_tests_folder(tmp_path):
+    """The testmon baseline runs only the tests folder the settings name (#877).
+
+    Runs testmon.yml's `--testmon` line with a fake `python3` that logs its arguments: with `TESTS_DIR` set the
+    call names that folder, and with it unset it names `tests`, the default."""
+    line = next((l for l in workflow_lines(BASELINE) if "pytest" in l and "--testmon" in l), None)
+    assert line, "testmon.yml has no pytest --testmon line"
+    script = line.split("run:", 1)[1].strip()
+    bin_dir = tmp_path / "bin"
+    bin_dir.mkdir()
+    log = tmp_path / "args.txt"
+    (bin_dir / "python3").write_text(f'#!/bin/sh\nprintf "%s\\n" "$@" > "{log}"\n')
+    (bin_dir / "python3").chmod(0o755)
+    for tests_dir, want in (("checks", "checks"), (None, "tests")):
+        env = {**os.environ, "PATH": f"{bin_dir}{os.pathsep}{os.environ['PATH']}"}
+        env.pop("TESTS_DIR", None)
+        if tests_dir:
+            env["TESTS_DIR"] = tests_dir
+        p = subprocess.run(["bash", "-e", "-c", script], cwd=tmp_path, env=env, capture_output=True, text=True,
+                           timeout=30)
+        assert p.returncode == 0, f"the baseline line failed: {p.stdout}{p.stderr}"
+        args = log.read_text().splitlines()
+        assert args[:2] == ["-m", "pytest"] and want in args[2:], \
+            f"with TESTS_DIR={tests_dir} the baseline runs pytest {args}, not over the {want} folder"
