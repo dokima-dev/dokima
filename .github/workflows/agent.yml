@@ -219,10 +219,28 @@ jobs:
           gh api -X PATCH "repos/$GITHUB_REPOSITORY/issues/comments/$CARD_ID" -F body=@/tmp/card.md --silent \
             || echo "::warning title=Card not updated::the card could not say setting up"
           gh api -X DELETE installation/token --silent || echo "::warning title=Key not revoked::the card's key could not be revoked"
+      # Git asks origin with the app's key, as the push does: on a private repo an anonymous ask fails (#914). The key
+      # is made for this one step and revoked when it ends, before the branch's code or the agent run.
+      - id: start-key
+        continue-on-error: true
+        uses: actions/create-github-app-token@v2
+        with:
+          app-id: ${{ vars.DOKIMA_APP_ID }}
+          private-key: ${{ secrets.DOKIMA_APP_KEY }}
+          skip-token-revoke: true
       - name: Starting branch
         env:
           GH_TOKEN: ${{ github.token }}
+          ORIGIN_TOKEN: ${{ steps.start-key.outputs.token }}
         run: |
+          [ -n "$ORIGIN_TOKEN" ] || { echo "No key to read the repo with: the app's key could not be made." > /tmp/why.txt
+                                      echo "::error title=No key::$(cat /tmp/why.txt)"; exit 1; }
+          trap 'GH_TOKEN="$ORIGIN_TOKEN" gh api -X DELETE installation/token --silent || echo "::warning title=Key not revoked::the starting key could not be revoked"' EXIT
+          R="https://x-access-token:${ORIGIN_TOKEN}@github.com/${GITHUB_REPOSITORY}.git"
+          said() { paste -sd' ' /tmp/git-err.txt | sed "s#${ORIGIN_TOKEN}#***#g"; }
+          git fetch -q "$R" "+refs/heads/$DEFAULT_BRANCH:refs/remotes/origin/$DEFAULT_BRANCH" 2> /tmp/git-err.txt \
+            || { echo "Main could not be fetched: $(said)" > /tmp/why.txt
+                 echo "::error title=Fetch failed::$(cat /tmp/why.txt)"; exit 1; }
           # Merges of the default branch commit as the bot the settings name.
           SLUG="$BOT_SLUG"
           BOT_ID=$(gh api "users/${SLUG}[bot]" --jq .id) \
@@ -239,8 +257,17 @@ jobs:
           if { [ "$ROLE" = worker ] || [ "$STAGE" = pr ]; } && python3 -m dokima.hotfix labeled "$N"; then
             HOTFIX_LABEL=true; echo "HOTFIX_LABEL=true" >> "$GITHUB_ENV"
           fi
-          if git ls-remote --exit-code --heads origin "try/issue-$N" >/dev/null; then
-            git fetch -q origin "try/issue-$N" && git checkout -q -B "try/issue-$N" FETCH_HEAD
+          # Exit 2 is git's "no such branch"; any other failure is a question origin could not answer, so the run stops.
+          rc=0; git ls-remote --exit-code --heads "$R" "try/issue-$N" > /dev/null 2> /tmp/git-err.txt || rc=$?
+          if [ "$rc" != 0 ] && [ "$rc" != 2 ]; then
+            echo "Could not ask whether try/issue-$N exists: $(said)" > /tmp/why.txt
+            echo "::error title=Branch unknown::$(cat /tmp/why.txt)"; exit 1
+          fi
+          if [ "$rc" = 0 ]; then
+            git fetch -q "$R" "try/issue-$N" 2> /tmp/git-err.txt \
+              || { echo "try/issue-$N could not be fetched: $(said)" > /tmp/why.txt
+                   echo "::error title=Fetch failed::$(cat /tmp/why.txt)"; exit 1; }
+            git checkout -q -B "try/issue-$N" FETCH_HEAD
             BRANCH_TIP=$(git rev-parse HEAD); echo "BRANCH_TIP=$BRANCH_TIP" >> "$GITHUB_ENV"
             # A worker's branch that clashes with main still starts: the merge is committed with its conflict markers,
             # the clashed files are listed for the fence, and the worker resolves them. Main's changes are in BASE.
@@ -621,6 +648,7 @@ jobs:
           BOT_ID=$(gh api "users/${SLUG}[bot]" --jq .id)
           git -C "$W" -c user.name="${SLUG}[bot]" -c user.email="${BOT_ID}+${SLUG}[bot]@users.noreply.github.com" add -A
           git -C "$W" -c user.name="${SLUG}[bot]" -c user.email="${BOT_ID}+${SLUG}[bot]@users.noreply.github.com" commit -qm "Conversation of run ${{ github.run_id }}"
+<<<<<<< HEAD
           for i in 1 2 3; do git -C "$W" push -q origin "HEAD:$B" && break; git -C "$W" pull -q --rebase origin "$B" || true; done
       # Dokima's own problems a review confirms file in the upstream repo the settings name, with a key the App's own
       # key mints for that repo's owner; with none set, no key is minted (#745).
@@ -637,6 +665,9 @@ jobs:
           app-id: ${{ vars.DOKIMA_APP_ID }}
           private-key: ${{ secrets.DOKIMA_APP_KEY }}
           owner: ${{ steps.upstream-owner.outputs.owner }}
+=======
+          for i in 1 2 3; do git -C "$W" push -q origin "HEAD:$B" && break; git -C "$W" -c user.name="${SLUG}[bot]" -c user.email="${BOT_ID}+${SLUG}[bot]@users.noreply.github.com" pull -q --rebase origin "$B" || true; done
+>>>>>>> origin/main
       # On autopilot, a code review's approval with every check green merges the pull request here, so this step
       # holds the app's key (minted after the agent finished).
       - name: Decide what follows, merge on autopilot, and say it on the card
