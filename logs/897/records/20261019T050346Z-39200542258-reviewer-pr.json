@@ -1,0 +1,84 @@
+{
+ "role": "reviewer",
+ "stage": "pr",
+ "run_id": "39200542258",
+ "commit_before": "e0cfc57480d96da926a700f6e77e4abfd16979e3",
+ "started_by": "dokima-runtime[bot]",
+ "models": [
+  "claude-opus-5-5"
+ ],
+ "report": {
+  "duration_ms": 3759,
+  "turns": 1,
+  "cost_usd": 0.45005780000000006,
+  "tokens_in": 46860,
+  "tokens_out": 141
+ },
+ "log": "https://github.com/dokima-dev/dokima/blob/logs/logs/897/39200542258-reviewer-pr.md",
+ "run": "https://github.com/dokima-dev/dokima/actions/runs/39200542258",
+ "handback": {
+  "previous_step": {
+   "did": [
+    "Each shared workflow now declares the secrets it reads.",
+    "Every inner call hands secrets over by name, not inherit.",
+    "The release is v0.1.4, and the install file points at it.",
+    "The old key-safe test now lets a call hand keys on by name."
+   ],
+   "decided": [
+    "The assign call passes no secrets, since assign reads none."
+   ],
+   "open": []
+  },
+  "verdict": "approve",
+  "summary": "Every inner call now hands secrets over by name, and the new tests prove it.",
+  "raises": [],
+  "answers": [],
+  "asks": [],
+  "behaviors": [],
+  "edge_cases": [],
+  "tests": [
+   {
+    "test": "tests/test_secrets_by_name.py::test_entry_passes_secrets_by_name_to_every_inner_workflow",
+    "only_its_behavior": true,
+    "why": "Fails on main, where every entry call inherits; passes on branch."
+   },
+   {
+    "test": "tests/test_secrets_by_name.py::test_inner_workflows_pass_secrets_by_name_too",
+    "only_its_behavior": true,
+    "why": "Fails on main on the commands call to agent; passes on branch."
+   },
+   {
+    "test": "tests/test_secrets_by_name.py::test_a_dropped_inner_secret_is_caught",
+    "only_its_behavior": true,
+    "why": "Shows the check catches inherit, extra and missing secrets, and passes a good call."
+   },
+   {
+    "test": "tests/test_newest_release.py::test_changelog_has_v014_on_top",
+    "only_its_behavior": true,
+    "why": "Pins the v0.1.4 heading on top, naming this issue."
+   }
+  ],
+  "boxes": {
+   "dropped": "none",
+   "added": [
+    {
+     "what": "Key-safe tests skip a call's by-name secrets line, since a call cannot name an environment.",
+     "kind": "needed",
+     "serves": "ask"
+    }
+   ],
+   "superseded": "none",
+   "conflicts": "none",
+   "edges": {
+    "ask": "covered"
+   },
+   "poor_tests": "none"
+  },
+  "size": "ok"
+ },
+ "check": {
+  "passed": true,
+  "problems": []
+ },
+ "url": "https://github.com/dokima-dev/dokima/pull/898#issuecomment-6259789483"
+}
