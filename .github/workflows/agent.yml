@@ -15,6 +15,12 @@ on:
   repository_dispatch:
     types: [dokima-next]
   workflow_call:
+    secrets:
+      DOKIMA_APP_KEY: {required: true}
+      # The agent keys the settings can name: Claude Code's, and one each for the other shipped agents.
+      CLAUDE_CODE_OAUTH_TOKEN: {required: false}
+      CODEX_API_KEY: {required: false}
+      KIMI_API_KEY: {required: false}
     inputs:
       role: {type: string, required: true}
       stage: {type: string, default: plan}

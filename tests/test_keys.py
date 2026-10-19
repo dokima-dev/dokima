@@ -40,9 +40,15 @@ def test_agents_may_push_workflow_files_and_no_extra_approval_exists(record_prop
 
 
 def test_every_job_that_uses_a_key_takes_it_from_the_main_only_safe(record_property):
-    """Any job that mentions a secret declares the "keys" environment; no other job does."""
+    """Any job that mentions a secret declares the "keys" environment; no other job does.
+
+    A job calling a shared workflow cannot declare an environment, so its one `secrets:` line handing keys on by
+    name (#897) opens none itself: the called job reads them under the keys environment, whose secrets win.
+    """
     record_property("proves", "126.2")
     for name, job_name, job in jobs():
+        if re.search(r"(?m)^    uses: \./\.github/workflows/", job):
+            job = re.sub(r"(?m)^    secrets: \{.*$", "", job)
         if "secrets." in job:
             assert "\n    environment: keys\n" in "\n" + job, f"126.2: {name}:{job_name} reads a key outside the safe"
 

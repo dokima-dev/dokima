@@ -1,4 +1,4 @@
-"""Tests for #894: every secret Dokima's shared jobs read reaches them from an adopter's repo.
+"""Tests for #894, #897: each secret shared jobs read reaches them in adopters' repos.
 
 A reusable workflow in another account's repo gets only the secrets it declares under `on.workflow_call.secrets`,
 each mapped by name by its caller; `secrets: inherit` carries none across. So `entry.yml` declares every secret a
@@ -39,7 +39,9 @@ def shared_reads():
         name = os.path.basename(path)
         if name in OWN or name == "entry.yml":
             continue
-        for s in read_secrets(open(path).read()):
+        # A job's `secrets:` passing them on to an inner workflow (#897) reads none itself.
+        text = re.sub(r"(?m)^    secrets: \{.*$", "", open(path).read())
+        for s in read_secrets(text):
             found.setdefault(s, []).append(name)
     return found
 
@@ -79,13 +81,64 @@ def test_entry_declares_every_secret_a_shared_job_reads():
     assert not optional, f"894: entry.yml requires agent keys that should be optional: {optional}"
 
 
-def test_entry_passes_secrets_to_every_shared_workflow_reading_one():
-    """Each `entry.yml` job calling a shared workflow that reads a secret passes the secrets on."""
-    reading = {w for ws in shared_reads().values() for w in ws}
-    jobs = load(ENTRY)["jobs"]
-    dropped = [n for n, j in jobs.items()
-               if os.path.basename(j.get("uses", "")) in reading and j.get("secrets") != "inherit"]
-    assert not dropped, f"894: entry.yml jobs call workflows reading secrets without passing them: {dropped}"
+def inner_calls(path):
+    """Each job at PATH calling a workflow here: name, target and secrets given."""
+    return [(n, os.path.basename(j["uses"]), j.get("secrets"))
+            for n, j in (load(path).get("jobs") or {}).items() if str(j.get("uses", "")).startswith("./.github/workflows/")]
+
+
+def call_faults(path):
+    """Each way the calls in the workflow at PATH drop a secret (#897).
+
+    `inherit`, a secret the target does not declare, or one the target reads that is not passed by name."""
+    faults = []
+    for job, target, given in inner_calls(path):
+        if given == "inherit":
+            faults.append(f"{job} says `secrets: inherit`")
+            continue
+        given = given or {}
+        takes = declared(load(os.path.join(WORKFLOWS, target)))
+        if set(given) - takes:
+            faults.append(f"{job} passes {sorted(set(given) - takes)}, which {target} does not declare")
+        reads = read_secrets(open(os.path.join(WORKFLOWS, target)).read())
+        if reads - takes:
+            faults.append(f"{target} reads {sorted(reads - takes)} without declaring them")
+        unmapped = [s for s in takes if str(given.get(s, "")).replace(" ", "") != "${{secrets.%s}}" % s]
+        if unmapped:
+            faults.append(f"{job} does not pass {sorted(unmapped)} to {target} by name")
+    return faults
+
+
+def test_entry_passes_secrets_by_name_to_every_inner_workflow():
+    """No `entry.yml` call inherits; each passes by name exactly what its target declares."""
+    calls = inner_calls(ENTRY)
+    assert any(t == "uptodate.yml" for _, t, _ in calls), f"897: entry.yml calls only {calls}"
+    faults = call_faults(ENTRY)
+    assert not faults, f"897: entry.yml's inner calls drop secrets: {faults}"
+
+
+def test_inner_workflows_pass_secrets_by_name_too():
+    """A shared workflow calling another, as `commands.yml` calls `agent.yml`, passes its secrets by name too."""
+    faults = {os.path.basename(p): f for p in sorted(glob.glob(os.path.join(WORKFLOWS, "*.yml")))
+              if os.path.basename(p) not in OWN and (f := call_faults(p))}
+    assert not faults, f"897: shared workflows' inner calls drop secrets: {faults}"
+
+
+def test_a_dropped_inner_secret_is_caught(tmp_path, monkeypatch):
+    """Inherit, an undeclared secret or a missing one is caught; passing by name passes."""
+    monkeypatch.setattr(__import__(__name__), "WORKFLOWS", str(tmp_path))
+    (tmp_path / "inner.yml").write_text(
+        "on:\n  workflow_call:\n    secrets:\n      DOKIMA_APP_KEY: {required: true}\n"
+        "jobs:\n  a:\n    steps:\n      - run: echo ${{ secrets.DOKIMA_APP_KEY }}\n")
+    caller = tmp_path / "caller.yml"
+    def faults(given):
+        caller.write_text("jobs:\n  x:\n    uses: ./.github/workflows/inner.yml\n    secrets: " + given + "\n")
+        return call_faults(str(caller))
+    assert faults("inherit") == ["x says `secrets: inherit`"]
+    assert "x passes ['KIMI_API_KEY'], which inner.yml does not declare" in faults(
+        '{DOKIMA_APP_KEY: "${{ secrets.DOKIMA_APP_KEY }}", KIMI_API_KEY: "${{ secrets.KIMI_API_KEY }}"}')
+    assert faults("{}") == ["x does not pass ['DOKIMA_APP_KEY'] to inner.yml by name"]
+    assert faults('{DOKIMA_APP_KEY: "${{ secrets.DOKIMA_APP_KEY }}"}') == []
 
 
 def test_install_maps_every_secret_by_name():
