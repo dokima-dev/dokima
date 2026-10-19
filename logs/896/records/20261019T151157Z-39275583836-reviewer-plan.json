@@ -1,0 +1,158 @@
+{
+ "role": "reviewer",
+ "stage": "plan",
+ "run_id": "39275583836",
+ "commit_before": "e4d3b876df31d8c82fb769318a31e74cf5cc2aec",
+ "started_by": "dokima-runtime[bot]",
+ "models": [
+  "claude-opus-5-5"
+ ],
+ "report": {
+  "duration_ms": 30829,
+  "turns": 8,
+  "cost_usd": 0.39340820000000004,
+  "tokens_in": 322540,
+  "tokens_out": 2159
+ },
+ "log": "https://github.com/dokima-dev/dokima/blob/logs/logs/896/39275583836-reviewer-plan.md",
+ "run": "https://github.com/dokima-dev/dokima/actions/runs/39275583836",
+ "handback": {
+  "previous_step": {
+   "did": [
+    "The planner added six older Codex and Kimi tests to its list of test changes.",
+    "Each now uses a declared key name, with the same checks."
+   ],
+   "decided": [
+    "The four criteria and their tests stay as approved before."
+   ],
+   "open": []
+  },
+  "verdict": "approve",
+  "summary": "The plan now lists every older test it changes; all four new tests still fail on main correctly.",
+  "raises": [],
+  "answers": [],
+  "asks": [
+   {
+    "ask": "The settings may name only agent keys `entry.yml` declares (today `CLAUDE_CODE_OAUTH_TOKEN`, `CODEX_API_KEY`, `KIMI_API_KEY`).",
+    "source": "https://github.com/dokima-dev/dokima/issues/896#issuecomment-6268955634",
+    "criterion": "896.1"
+   },
+   {
+    "ask": "The setup audit reports, in one line, a setting that names any other key: it will never reach the jobs; use a declared name, or ask for that name to be declared in a release.",
+    "source": "https://github.com/dokima-dev/dokima/issues/896#issuecomment-6268955634",
+    "criterion": "896.2"
+   },
+   {
+    "ask": "A job whose settings name an undeclared key fails with that same message, not as a missing key.",
+    "source": "https://github.com/dokima-dev/dokima/issues/896#issuecomment-6268955634",
+    "criterion": "896.3"
+   },
+   {
+    "ask": "Docs say the same",
+    "source": "https://github.com/dokima-dev/dokima/issues/896#issuecomment-6268955634",
+    "criterion": "896.4"
+   },
+   {
+    "ask": "update the earlier criteria that promised any name.",
+    "source": "https://github.com/dokima-dev/dokima/issues/896#issuecomment-6268955634",
+    "criterion": "896.1"
+   },
+   {
+    "ask": "Settings may name any agent key, but only declared names reach jobs; others fail as a missing key.",
+    "source": "https://github.com/dokima-dev/dokima/issues/896",
+    "criterion": "896.3"
+   }
+  ],
+  "behaviors": [
+   {
+    "criterion": "896.1",
+    "one_behavior": true,
+    "why": "One rule: a declared key is accepted, any other refused."
+   },
+   {
+    "criterion": "896.2",
+    "one_behavior": true,
+    "why": "One audit line for an undeclared key."
+   },
+   {
+    "criterion": "896.3",
+    "one_behavior": true,
+    "why": "The job fails with the audit's line, not a missing-key line."
+   },
+   {
+    "criterion": "896.4",
+    "one_behavior": true,
+    "why": "The docs state the declared-keys rule."
+   }
+  ],
+  "edge_cases": [
+   {
+    "criterion": "896.1",
+    "cut": [],
+    "missing": []
+   },
+   {
+    "criterion": "896.2",
+    "cut": [],
+    "missing": []
+   },
+   {
+    "criterion": "896.3",
+    "cut": [],
+    "missing": []
+   },
+   {
+    "criterion": "896.4",
+    "cut": [],
+    "missing": []
+   }
+  ],
+  "tests": [
+   {
+    "test": "tests/test_declared_keys.py::test_only_the_agent_keys_entry_yml_declares_are_accepted",
+    "only_its_behavior": true,
+    "why": "Each declared key accepted, MY_KEY refused; fails on main: MY_KEY accepted."
+   },
+   {
+    "test": "tests/test_declared_keys.py::test_the_audit_reports_an_undeclared_key_in_one_line",
+    "only_its_behavior": true,
+    "why": "One line in the owner's wording, none for a declared key; fails on main."
+   },
+   {
+    "test": "tests/test_declared_keys.py::test_a_job_naming_an_undeclared_key_fails_with_the_audit_line",
+    "only_its_behavior": true,
+    "why": "Runs the job; needs the audit's line, no missing wording; fails on main."
+   },
+   {
+    "test": "tests/test_declared_keys.py::test_the_install_docs_say_only_declared_keys_reach_the_jobs",
+    "only_its_behavior": true,
+    "why": "Both install docs and the settings format must state the rule; fails on main."
+   }
+  ],
+  "size": "ok",
+  "boxes": {
+   "dropped": "none",
+   "added": [
+    {
+     "what": "The settings format note in the agents code also states the rule",
+     "kind": "needed",
+     "serves": "896.4"
+    }
+   ],
+   "superseded": "none",
+   "conflicts": "none",
+   "edges": {
+    "896.1": "covered",
+    "896.2": "covered",
+    "896.3": "covered",
+    "896.4": "covered"
+   },
+   "poor_tests": "none"
+  }
+ },
+ "check": {
+  "passed": true,
+  "problems": []
+ },
+ "url": "https://github.com/dokima-dev/dokima/issues/896#issuecomment-6270518095"
+}
