@@ -5,8 +5,16 @@ name: entry
 # environment. In an adopter's repo every shared workflow runs inside the one `dokima` run, so a finished run of it
 # stands in for the finished checks and reviews the board and the card wait for; only runs the checks or reviews
 # started count, so a redraw never starts another.
+# A reusable workflow in another account's repo gets only the secrets it declares and its caller maps by name;
+# `secrets: inherit` carries none across (#894). The jobs below pass these on with `secrets: inherit`.
 on:
   workflow_call:
+    secrets:
+      DOKIMA_APP_KEY: {required: true}
+      # The agent keys the settings can name: Claude Code's, and one each for the other shipped agents.
+      CLAUDE_CODE_OAUTH_TOKEN: {required: false}
+      CODEX_API_KEY: {required: false}
+      KIMI_API_KEY: {required: false}
 jobs:
   agent:
     if: github.event_name == 'repository_dispatch' && github.event.action == 'dokima-next'
