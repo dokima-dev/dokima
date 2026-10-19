@@ -1,0 +1,82 @@
+{
+ "role": "reviewer",
+ "stage": "pr",
+ "run_id": "39333572163",
+ "commit_before": "5eb104d84ec12a8d8ac64a467e2f49650407a72e",
+ "started_by": "dokima-runtime[bot]",
+ "models": [
+  "claude-opus-5-5"
+ ],
+ "report": {
+  "duration_ms": 49493,
+  "turns": 11,
+  "cost_usd": 0.4453346,
+  "tokens_in": 413162,
+  "tokens_out": 4486
+ },
+ "log": "https://github.com/dokima-dev/dokima/blob/logs/logs/907/39333572163-reviewer-pr.md",
+ "run": "https://github.com/dokima-dev/dokima/actions/runs/39333572163",
+ "handback": {
+  "previous_step": {
+   "did": [
+    "A refused key now ends the run as Model key rejected, naming its secret.",
+    "The setup audit tries each set key once, reporting a refused one in one line."
+   ],
+   "decided": [
+    "The audit job is handed the three agent keys by name."
+   ],
+   "open": [
+    "An older test fails: the installed workflow omits the Codex and Kimi keys."
+   ]
+  },
+  "verdict": "block",
+  "summary": "The key checks work, but an older test now fails; the plan must also cover the adopter's installed workflow.",
+  "raises": [
+   {
+    "kind": "blocker",
+    "to": "planner",
+    "label": "907.8: install file missing",
+    "text": "907.8 says the adopter's workflow hands the audit each key, but the plan omits the install file, so an older test fails. Fix: add `dokima/install/dokima.yml` to 907.8.",
+    "evidence": "`pytest -q tests/test_secrets_by_name.py`: `test_install_maps_every_secret_by_name` fails, missing `CODEX_API_KEY`, `KIMI_API_KEY`; passes on main.",
+    "raised_by": "reviewer",
+    "id": "R3"
+   }
+  ],
+  "answers": [
+   {
+    "raise": "W2",
+    "answer": "done",
+    "why": "Agreed and confirmed by rerunning the older test; sent to the planner as a blocker on criterion 907.8."
+   }
+  ],
+  "boxes": {
+   "dropped": "none",
+   "added": "none",
+   "superseded": "none",
+   "conflicts": "none",
+   "edges": {
+    "907.1": "covered",
+    "907.2": "covered",
+    "907.3": "covered",
+    "907.4": "covered",
+    "907.5": "covered",
+    "907.6": "covered",
+    "907.7": "covered",
+    "907.8": "missing: the adopter's installed workflow hands the Codex and Kimi keys to Dokima",
+    "907.9": "covered"
+   },
+   "poor_tests": [
+    {
+     "test": "tests/test_key_rejected.py::test_the_audit_job_gets_each_declared_agent_key_by_name",
+     "passes_with": "An install file that hands Dokima only the Claude Code key, so adopters' Codex and Kimi keys never reach the audit.",
+     "fix": "Also check `dokima/install/dokima.yml` maps each declared agent key by name."
+    }
+   ]
+  }
+ },
+ "check": {
+  "passed": true,
+  "problems": []
+ },
+ "url": "https://github.com/dokima-dev/dokima/pull/931#issuecomment-6278554210"
+}
