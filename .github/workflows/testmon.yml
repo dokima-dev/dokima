@@ -61,11 +61,15 @@ jobs:
           else echo "TESTS_AFFECTED=testmon" >> "$GITHUB_ENV"; fi
       - if: env.TESTS_AFFECTED == 'all'
         run: echo "::notice title=No baseline::Affected tests are set to all, so no testmon baseline is saved."
-      # A failing test still records its baseline (exit 1): testmon runs it again on the next review. Any other
-      # non-zero exit is a crash and fails this job, so a missing baseline is never silent. testmon needs pytest's
-      # cache plugin, so it is not turned off here.
+      # A failing test still records its baseline (exit 1): testmon runs it again on the next review. No tests
+      # collected (exit 5) is a repo with no tests yet: an empty baseline, said on the run (#880). Any other non-zero
+      # exit is a crash and fails this job, so a missing baseline is never silent. testmon needs pytest's cache
+      # plugin, so it is not turned off here.
       - if: env.TESTS_AFFECTED != 'all'
-        run: python3 -m pytest -q --testmon || [ $? -eq 1 ]
+        run: |
+          code=0; python3 -m pytest -q --testmon || code=$?
+          if [ "$code" -eq 5 ]; then echo "::notice title=No tests yet::The repo has no tests yet, so the baseline is empty."; exit 0; fi
+          [ "$code" -le 1 ]
       - if: env.TESTS_AFFECTED != 'all'
         run: test -s .testmondata || { echo "::error title=No testmon baseline::pytest --testmon wrote no .testmondata"; exit 1; }
       - if: env.TESTS_AFFECTED != 'all'

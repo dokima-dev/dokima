@@ -102,4 +102,7 @@ jobs:
           elif [ "$MODE" = affected ]; then
             echo "::notice title=No baseline::No testmon baseline from main was restored, so every test runs."
           fi
-          eval "$RUN_ALL"
+          # No tests collected (exit 5) is a repo with no tests yet: nothing failed, said on the run (#880).
+          code=0; eval "$RUN_ALL" || code=$?
+          if [ "$code" -eq 5 ]; then echo "::notice title=No tests yet::The repo has no tests yet, so no test ran."; exit 0; fi
+          exit "$code"
