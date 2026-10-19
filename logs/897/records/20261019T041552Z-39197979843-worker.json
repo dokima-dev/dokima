@@ -1,0 +1,60 @@
+{
+ "role": "worker",
+ "stage": null,
+ "run_id": "39197979843",
+ "commit_before": "b30a3fefb8dd53d68d4a1f91ff2642cc238c5594",
+ "started_by": "dokima-runtime[bot]",
+ "models": [
+  "claude-opus-5-5"
+ ],
+ "report": {
+  "duration_ms": 394923,
+  "turns": 22,
+  "cost_usd": 0.8676909999999998,
+  "tokens_in": 1058728,
+  "tokens_out": 12856
+ },
+ "log": "https://github.com/dokima-dev/dokima/blob/logs/logs/897/39197979843-worker.md",
+ "run": "https://github.com/dokima-dev/dokima/actions/runs/39197979843",
+ "handback": {
+  "summary": "Shared workflows declare their secrets, every inner call passes them by name; older tests adjusted; v0.1.4.",
+  "criteria": {
+   "ask": "Inner workflows declare secrets; entry and commands pass each by name; tests catch inherit or undeclared; v0.1.4 tagged."
+  },
+  "evidence": "`pytest -q tests/test_thin_install.py tests/test_secrets_by_name.py tests/test_newest_release.py`: 32 passed",
+  "raises": [
+   {
+    "kind": "issue",
+    "label": "Install skips agent keys",
+    "text": "The install file hands over only the app key and Claude's key, so Codex or Kimi adopters get no model key.",
+    "evidence": "`dokima/install/dokima.yml` maps `DOKIMA_APP_KEY` and `CLAUDE_CODE_OAUTH_TOKEN` only; `entry.yml` declares `CODEX_API_KEY`, `KIMI_API_KEY`.",
+    "raised_by": "worker",
+    "id": "W1"
+   }
+  ]
+ },
+ "check": {
+  "passed": true,
+  "problems": []
+ },
+ "dropped_by_fence": [],
+ "files_changed": [
+  ".github/workflows/agent.yml",
+  ".github/workflows/audit.yml",
+  ".github/workflows/autopilot.yml",
+  ".github/workflows/board.yml",
+  ".github/workflows/card.yml",
+  ".github/workflows/commands.yml",
+  ".github/workflows/entry.yml",
+  ".github/workflows/uptodate.yml",
+  "CHANGELOG.md",
+  "README.md",
+  "docs/wiki/Installing.md",
+  "dokima/install/dokima.yml",
+  "tests/test_newest_release.py",
+  "tests/test_secrets_by_name.py",
+  "tests/test_thin_install.py"
+ ],
+ "branch": "try/issue-897",
+ "url": "https://github.com/dokima-dev/dokima/issues/897#issuecomment-6259437944"
+}
