@@ -1,0 +1,47 @@
+{
+ "role": "worker",
+ "stage": null,
+ "run_id": "39278113613",
+ "commit_before": "e8e48010eaebdd0847a1d415658ec169e96c4865",
+ "started_by": "RezaSoleymanifar",
+ "models": [
+  "claude-opus-5-5"
+ ],
+ "report": {
+  "duration_ms": 660266,
+  "turns": 17,
+  "cost_usd": 0.7448438000000001,
+  "tokens_in": 945802,
+  "tokens_out": 4444
+ },
+ "log": "https://github.com/dokima-dev/dokima/blob/logs/logs/745/39278113613-worker.md",
+ "run": "https://github.com/dokima-dev/dokima/actions/runs/39278113613",
+ "handback": {
+  "summary": "Merged main in and resolved the one agent workflow clash, keeping main's push loop and the upstream filing steps.",
+  "criteria": {
+   "745.1": "Unchanged: `file_issues` in `dokima/agent_autopilot.py` files `fault: dokima` raises upstream when set.",
+   "745.2": "Unchanged: the record line for an upstream filing links the upstream issue.",
+   "745.3": "Unchanged: `dokima/roles/raising.md` says how to judge and tag fault.",
+   "745.4": "Unchanged: `upstream.file` comments on the open same-titled issue instead of opening another.",
+   "745.5": "Unchanged: `python3 -m dokima.upstream failed WORKFLOW JOB` files the failure; no upstream repo files nothing.",
+   "745.6": "Unchanged jobs; the clash in `agent.yml` resolved so its upstream steps and job parse again.",
+   "745.7": "Unchanged: one issue per workflow and job, one comment per failed run.",
+   "745.8": "Unchanged: a `fault: unsure` raise is filed locally, saying whose fault is unclear.",
+   "745.9": "Unchanged: `upstream.scrub` drops the repo's name, links and issue numbers.",
+   "745.10": "Unchanged: filing steps mint their token from `DOKIMA_APP_KEY`; secrets go by name, as on main."
+  },
+  "evidence": "`pytest tests/test_upstream.py` and main's changed tests: 67 passed.",
+  "raises": [],
+  "answers": []
+ },
+ "check": {
+  "passed": true,
+  "problems": []
+ },
+ "dropped_by_fence": [],
+ "files_changed": [
+  ".github/workflows/agent.yml"
+ ],
+ "branch": "try/issue-745",
+ "url": "https://github.com/dokima-dev/dokima/pull/872#issuecomment-6271004206"
+}
