@@ -1,0 +1,210 @@
+{
+ "role": "reviewer",
+ "stage": "plan",
+ "run_id": "39339800128",
+ "commit_before": "9f9ec289f5dec61faf5c310dde435d53a6bef75e",
+ "started_by": "dokima-runtime[bot]",
+ "models": [
+  "claude-opus-5-5"
+ ],
+ "report": {
+  "duration_ms": 46622,
+  "turns": 7,
+  "cost_usd": 0.4375202,
+  "tokens_in": 276933,
+  "tokens_out": 4706
+ },
+ "log": "https://github.com/dokima-dev/dokima/blob/logs/logs/932/39339800128-reviewer-plan.md",
+ "run": "https://github.com/dokima-dev/dokima/actions/runs/39339800128",
+ "handback": {
+  "previous_step": {
+   "did": [
+    "The planner re-planned after the rejected key fix merged to main.",
+    "It added a criterion for the rejected key fix line in the changelog."
+   ],
+   "decided": [
+    "Both fixes get their own changelog line, since both are now on main.",
+    "The old newest-release check now lets v0.1.7 sit above v0.1.6."
+   ],
+   "open": []
+  },
+  "verdict": "approve",
+  "summary": "The plan covers every ask for release v0.1.7, and each test fails today for the right reason.",
+  "raises": [],
+  "answers": [],
+  "asks": [
+   {
+    "ask": "Cut release v0.1.7 with the fixes merged since v0.1.6",
+    "source": "https://github.com/dokima-dev/dokima/issues/932",
+    "criterion": "932.1"
+   },
+   {
+    "ask": "#929 (#928): the test baseline passes, with a notice, on a repo that has no tests folder yet",
+    "source": "https://github.com/dokima-dev/dokima/issues/932",
+    "criterion": "932.2"
+   },
+   {
+    "ask": "#931 (#907): a model key the provider refuses ends the run as \"Model key rejected\"",
+    "source": "https://github.com/dokima-dev/dokima/issues/932",
+    "criterion": "932.3"
+   },
+   {
+    "ask": "Anything else merged to main by the time this is built.",
+    "source": "https://github.com/dokima-dev/dokima/issues/932",
+    "criterion": "932.1"
+   },
+   {
+    "ask": "a `## v0.1.7` heading at the top of CHANGELOG.md, newest above v0.1.6",
+    "source": "https://github.com/dokima-dev/dokima/issues/932",
+    "criterion": "932.1"
+   },
+   {
+    "ask": "one line per fix",
+    "source": "https://github.com/dokima-dev/dokima/issues/932",
+    "criterion": "932.2"
+   },
+   {
+    "ask": "the install file `dokima/install/dokima.yml`",
+    "source": "https://github.com/dokima-dev/dokima/issues/932",
+    "criterion": "932.4"
+   },
+   {
+    "ask": "README",
+    "source": "https://github.com/dokima-dev/dokima/issues/932",
+    "criterion": "932.5"
+   },
+   {
+    "ask": "docs/wiki/Installing.md point at `entry.yml@v0.1.7`",
+    "source": "https://github.com/dokima-dev/dokima/issues/932",
+    "criterion": "932.6"
+   },
+   {
+    "ask": "the newest-release test names v0.1.7",
+    "source": "https://github.com/dokima-dev/dokima/issues/932",
+    "criterion": "932.1"
+   },
+   {
+    "ask": "#931 must be on main before this is built; if it is not yet, list only what is.",
+    "source": "https://github.com/dokima-dev/dokima/issues/932",
+    "criterion": "932.3"
+   }
+  ],
+  "behaviors": [
+   {
+    "criterion": "932.1",
+    "one_behavior": true,
+    "why": "One heading order: v0.1.7 first, v0.1.6 next."
+   },
+   {
+    "criterion": "932.2",
+    "one_behavior": true,
+    "why": "One changelog line for one fix."
+   },
+   {
+    "criterion": "932.3",
+    "one_behavior": true,
+    "why": "One changelog line for one fix."
+   },
+   {
+    "criterion": "932.4",
+    "one_behavior": true,
+    "why": "One tag in the install file."
+   },
+   {
+    "criterion": "932.5",
+    "one_behavior": true,
+    "why": "The readme install steps name only the new release."
+   },
+   {
+    "criterion": "932.6",
+    "one_behavior": true,
+    "why": "The wiki install page names only the new release."
+   }
+  ],
+  "edge_cases": [
+   {
+    "criterion": "932.1",
+    "cut": [],
+    "missing": []
+   },
+   {
+    "criterion": "932.2",
+    "cut": [],
+    "missing": []
+   },
+   {
+    "criterion": "932.3",
+    "cut": [],
+    "missing": []
+   },
+   {
+    "criterion": "932.4",
+    "cut": [],
+    "missing": []
+   },
+   {
+    "criterion": "932.5",
+    "cut": [],
+    "missing": []
+   },
+   {
+    "criterion": "932.6",
+    "cut": [],
+    "missing": []
+   }
+  ],
+  "tests": [
+   {
+    "test": "tests/test_newest_release.py::test_changelog_has_v017_on_top",
+    "only_its_behavior": true,
+    "why": "Checks only the first two headings; fails on main with no v0.1.7."
+   },
+   {
+    "test": "tests/test_newest_release.py::test_changelog_v017_names_baseline_fix",
+    "only_its_behavior": true,
+    "why": "Needs exactly one line naming #929 and #928, and not the other fix."
+   },
+   {
+    "test": "tests/test_newest_release.py::test_changelog_v017_names_key_fix",
+    "only_its_behavior": true,
+    "why": "Fails on this branch today: no line names #931 and #907."
+   },
+   {
+    "test": "tests/test_newest_release.py::test_install_file_calls_v017",
+    "only_its_behavior": true,
+    "why": "Reads the parsed install file's job uses for entry.yml@v0.1.7."
+   },
+   {
+    "test": "tests/test_newest_release.py::test_readme_names_v017",
+    "only_its_behavior": true,
+    "why": "Reads only the README Install section; v0.1.7 must be the sole version."
+   },
+   {
+    "test": "tests/test_newest_release.py::test_wiki_names_v017",
+    "only_its_behavior": true,
+    "why": "Reads the wiki install page; v0.1.7 must be the sole version."
+   }
+  ],
+  "size": "ok",
+  "boxes": {
+   "dropped": "none",
+   "added": "none",
+   "superseded": "none",
+   "conflicts": "none",
+   "edges": {
+    "932.1": "covered",
+    "932.2": "covered",
+    "932.3": "covered",
+    "932.4": "covered",
+    "932.5": "covered",
+    "932.6": "covered"
+   },
+   "poor_tests": "none"
+  }
+ },
+ "check": {
+  "passed": true,
+  "problems": []
+ },
+ "url": "https://github.com/dokima-dev/dokima/issues/932#issuecomment-6279356077"
+}
