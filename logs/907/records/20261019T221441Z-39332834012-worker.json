@@ -1,0 +1,63 @@
+{
+ "role": "worker",
+ "stage": null,
+ "run_id": "39332834012",
+ "commit_before": "0f0a4a769a785a482debb24adb3afd4d22026910",
+ "started_by": "dokima-runtime[bot]",
+ "models": [
+  "claude-opus-5-5"
+ ],
+ "report": {
+  "duration_ms": 302026,
+  "turns": 30,
+  "cost_usd": 1.4167118000000005,
+  "tokens_in": 2185116,
+  "tokens_out": 16167
+ },
+ "log": "https://github.com/dokima-dev/dokima/blob/logs/logs/907/39332834012-worker.md",
+ "run": "https://github.com/dokima-dev/dokima/actions/runs/39332834012",
+ "handback": {
+  "summary": "A refused model key now ends the run as Model key rejected; the setup audit tries each set key.",
+  "criteria": {
+   "907.1": "Each adapter reads its own error; `agents.rejected_key` matches a refusal and the record step marks the run Model key rejected.",
+   "907.2": "The record names the secret `agents.adapter` reads from the settings for that role.",
+   "907.3": "`rejected_key_line` says the provider refused the key: make a new one and replace the repo secret.",
+   "907.4": "The card shows only the fixed line, never the provider's words, so no key part is printed.",
+   "907.5": "`audit.compare_keys` tries each set key once via `agents.try_key`; `audit.yml` installs the agents first.",
+   "907.6": "A refused key adds one audit line naming only its secret.",
+   "907.7": "A key with no `DOKIMA_KEY_<name>` value is skipped; no agent starts.",
+   "907.8": "`entry.yml` passes the three keys to the audit; `audit.yml` declares them and sets `DOKIMA_KEY_<name>`.",
+   "907.9": "Audit lines hold only secret names; the agent's own error output is silenced during the try."
+  },
+  "evidence": "`pytest -q tests/test_key_rejected.py`: 15 passed in 1.16s",
+  "raises": [
+   {
+    "kind": "blocker",
+    "to": "planner",
+    "label": "Tests conflict",
+    "text": "Test 907.8 makes the audit read the Codex and Kimi keys, so an older test fails unless the install file maps them, which is outside scope.",
+    "evidence": "`tests/test_secrets_by_name.py::test_install_maps_every_secret_by_name` fails: `dokima/install/dokima.yml` lacks `CODEX_API_KEY`, `KIMI_API_KEY`; passes on main. See #930.",
+    "raised_by": "worker",
+    "id": "W2"
+   }
+  ]
+ },
+ "check": {
+  "passed": true,
+  "problems": []
+ },
+ "dropped_by_fence": [],
+ "files_changed": [
+  ".github/workflows/audit.yml",
+  ".github/workflows/entry.yml",
+  "dokima/agent_claude.py",
+  "dokima/agent_codex.py",
+  "dokima/agent_kimi.py",
+  "dokima/agent_records.py",
+  "dokima/agent_roles.py",
+  "dokima/agents.py",
+  "dokima/audit.py"
+ ],
+ "branch": "try/issue-907",
+ "url": "https://github.com/dokima-dev/dokima/issues/907#issuecomment-6278457144"
+}
