@@ -1,0 +1,77 @@
+{
+ "role": "reviewer",
+ "stage": "pr",
+ "run_id": "39368358393",
+ "commit_before": "949a59ed594abaec4a27265e7e855c8ec4b71e91",
+ "started_by": "dokima-runtime[bot]",
+ "models": [
+  "claude-opus-5-5"
+ ],
+ "report": {
+  "duration_ms": 31731,
+  "turns": 6,
+  "cost_usd": 0.32314679999999996,
+  "tokens_in": 215395,
+  "tokens_out": 2555
+ },
+ "log": "https://github.com/dokima-dev/dokima/blob/logs/logs/939/39368358393-reviewer-pr.md",
+ "run": "https://github.com/dokima-dev/dokima/actions/runs/39368358393",
+ "handback": {
+  "previous_step": {
+   "did": [
+    "Added a v0.1.8 changelog section above v0.1.7 with one line naming the self-approve fix.",
+    "Pointed the install file, README and wiki at v0.1.8.",
+    "Moved the newest-release tests from v0.1.7 to v0.1.8."
+   ],
+   "decided": [
+    "Only the self-approve fix merged since v0.1.7, so v0.1.8 lists it alone."
+   ],
+   "open": []
+  },
+  "verdict": "approve",
+  "summary": "Release v0.1.8 ships as asked: changelog, install file, README and wiki all name it, and tests pass.",
+  "raises": [],
+  "answers": [],
+  "asks": [],
+  "behaviors": [],
+  "edge_cases": [],
+  "tests": [
+   {
+    "test": "tests/test_newest_release.py::test_changelog_has_v018_on_top",
+    "only_its_behavior": true,
+    "why": "Checks v0.1.8 heads the changelog above v0.1.7 and names the fix."
+   },
+   {
+    "test": "tests/test_newest_release.py::test_install_file_calls_v018",
+    "only_its_behavior": true,
+    "why": "Checks the install file calls the entry workflow at v0.1.8."
+   },
+   {
+    "test": "tests/test_newest_release.py::test_readme_names_v018",
+    "only_its_behavior": true,
+    "why": "Checks the README install steps name only v0.1.8."
+   },
+   {
+    "test": "tests/test_newest_release.py::test_wiki_names_v018",
+    "only_its_behavior": true,
+    "why": "Checks the wiki install page names only v0.1.8."
+   }
+  ],
+  "size": "ok",
+  "boxes": {
+   "dropped": "none",
+   "added": "none",
+   "superseded": "none",
+   "conflicts": "none",
+   "edges": {
+    "ask": "covered"
+   },
+   "poor_tests": "none"
+  }
+ },
+ "check": {
+  "passed": true,
+  "problems": []
+ },
+ "url": "https://github.com/dokima-dev/dokima/pull/940#issuecomment-6283199983"
+}
