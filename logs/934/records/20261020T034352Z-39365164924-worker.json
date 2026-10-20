@@ -1,0 +1,58 @@
+{
+ "role": "worker",
+ "stage": null,
+ "run_id": "39365164924",
+ "commit_before": "56ebd4e426159c499a67e3a8ef0a3a6ec19b276f",
+ "started_by": "dokima-runtime[bot]",
+ "models": [
+  "claude-opus-5-5"
+ ],
+ "report": {
+  "duration_ms": 385446,
+  "turns": 36,
+  "cost_usd": 1.4526996000000005,
+  "tokens_in": 2488707,
+  "tokens_out": 14897
+ },
+ "log": "https://github.com/dokima-dev/dokima/blob/logs/logs/934/39365164924-worker.md",
+ "run": "https://github.com/dokima-dev/dokima/actions/runs/39365164924",
+ "handback": {
+  "summary": "Added an opt-in auto approve setting: Dokima notes, approves and merges its own reviewed, green pull requests.",
+  "criteria": {
+   "934.1": "`dokima/agent_roles.py` next: a passed gate with `merge.auto_approve` on merges via `automerge`, as autopilot does; prints `merged`.",
+   "934.2": "`approval_note` in `dokima/agent_autopilot.py` posts one line linking the record's run and naming main's green checks.",
+   "934.3": "A blocking review never reaches the merge gate, so nothing is noted or merged.",
+   "934.4": "The note and merge happen only when `merge_gate` passed on the tested, up-to-date head.",
+   "934.5": "`dokima/defaults.yaml` adds `merge.auto_approve: false`; off, the gate still stops for the owner.",
+   "934.6": "Unchanged: the `integrity` lock in `dokima/settings.py` still refuses owner approval.",
+   "934.7": "`merge.auto_approve` is a known default, so a repo's true reads with no warning.",
+   "934.8": "`bot_review` in `dokima/audit.py` adds one drift line when main needs a review the app cannot bypass.",
+   "934.9": "`python3 -m dokima.setup auto-approve REPO` adds the app to main's review bypass, then saves the setting."
+  },
+  "evidence": "`pytest -q tests/test_auto_approve.py tests/test_setup.py tests/test_settings_merge.py`: 36 passed",
+  "raises": [
+   {
+    "kind": "issue",
+    "label": "Merge line says autopilot",
+    "text": "With auto approve on, the issue line still says Autopilot merged the pull request, though autopilot is off.",
+    "evidence": "`AUTOPILOT_MERGE` in `dokima/agent_autopilot.py`, posted by `automerge`.",
+    "raised_by": "worker",
+    "id": "W1"
+   }
+  ]
+ },
+ "check": {
+  "passed": true,
+  "problems": []
+ },
+ "dropped_by_fence": [],
+ "files_changed": [
+  "dokima/agent_autopilot.py",
+  "dokima/agent_roles.py",
+  "dokima/audit.py",
+  "dokima/defaults.yaml",
+  "dokima/setup.py"
+ ],
+ "branch": "try/issue-934",
+ "url": "https://github.com/dokima-dev/dokima/issues/934#issuecomment-6282736924"
+}
