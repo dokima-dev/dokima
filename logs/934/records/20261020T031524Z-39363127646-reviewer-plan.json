@@ -1,0 +1,306 @@
+{
+ "role": "reviewer",
+ "stage": "plan",
+ "run_id": "39363127646",
+ "commit_before": "a3960ab8ae196da3a1e68d37408b09d200143891",
+ "started_by": "dokima-runtime[bot]",
+ "models": [
+  "claude-opus-5-5"
+ ],
+ "report": {
+  "duration_ms": 94148,
+  "turns": 12,
+  "cost_usd": 0.7563002000000001,
+  "tokens_in": 651125,
+  "tokens_out": 9155
+ },
+ "log": "https://github.com/dokima-dev/dokima/blob/logs/logs/934/39363127646-reviewer-plan.md",
+ "run": "https://github.com/dokima-dev/dokima/actions/runs/39363127646",
+ "handback": {
+  "previous_step": {
+   "did": [
+    "The planner wrote eight criteria, each with a test that fails today."
+   ],
+   "decided": [
+    "Auto approve works off autopilot too, and owner approval stays locked for every repo."
+   ],
+   "open": [
+    "Asks the owner whether a note can stand in for the bot's own approval.",
+    "Asks whether opted-in repos still cannot set owner approval directly."
+   ]
+  },
+  "verdict": "block",
+  "summary": "Close plan, but two tests miss a normal case and one criterion holds two behaviors.",
+  "raises": [
+   {
+    "kind": "blocker",
+    "to": "planner",
+    "label": "Audit: off not tested",
+    "text": "934.7 says the audit reports only with auto approve on. Its test never runs with it off, and never with a plain review. Add both cases.",
+    "evidence": "`tests/test_auto_approve.py::test_the_audit_says_when_main_needs_a_review_the_bot_cannot_give` runs both cases with `auto_approve: True`.",
+    "raised_by": "reviewer",
+    "id": "R1"
+   },
+   {
+    "kind": "blocker",
+    "to": "planner",
+    "label": "Setup: checks kept",
+    "text": "934.8: owner said protection still requires the checks. Setup could drop main's required checks and pass. Assert they are kept.",
+    "evidence": "`test_setup_turns_auto_approve_on_and_lets_the_app_bypass_reviews` checks only bypass and `dokima-runtime` in the write, never `all tests`.",
+    "raised_by": "reviewer",
+    "id": "R2"
+   },
+   {
+    "kind": "blocker",
+    "to": "planner",
+    "label": "934.6 holds two",
+    "text": "934.6 bundles the lock still failing and auto approve being a known setting. Split it in two, one test each.",
+    "evidence": "`test_owner_approval_stays_locked_and_auto_approve_is_the_opt_in` asserts `settings.Locked` and then a clean read of `auto_approve`.",
+    "raised_by": "reviewer",
+    "id": "R3"
+   },
+   {
+    "kind": "blocker",
+    "to": "planner",
+    "label": "934.4 checks extra",
+    "text": "The 934.4 test also asserts the worker starts again, which 934.4 does not promise. Drop that assert.",
+    "evidence": "`tests/test_auto_approve.py::test_red_checks_are_never_approved` asserts `said == \"start worker\"`.",
+    "raised_by": "reviewer",
+    "id": "R4"
+   }
+  ],
+  "answers": [
+   {
+    "raise": "P2",
+    "answer": "done",
+    "why": "The owner names auto approve as the opt-in, so owner approval stays locked for everyone.",
+    "words": "turning on `merge.auto_approve` is the explicit opt-in",
+    "source": "https://github.com/dokima-dev/dokima/issues/934",
+    "changes": false
+   },
+   {
+    "raise": "P3",
+    "answer": "done",
+    "why": "Agreed: the identity rule needs its own update once this lands; worth its own issue.",
+    "searched": [
+     747,
+     677,
+     363
+    ],
+    "verdict": "new"
+   }
+  ],
+  "asks": [
+   {
+    "ask": "Add an opt-in setting, off by default, e.g. `merge.auto_approve: true`",
+    "source": "https://github.com/dokima-dev/dokima/issues/934",
+    "criterion": "934.5"
+   },
+   {
+    "ask": "When it is on, a pull request \u03b4okima built is approved and queued by \u03b4okima itself as soon as its code review has passed and the required checks (`gates.required`) are green. No person is waited on.",
+    "source": "https://github.com/dokima-dev/dokima/issues/934",
+    "criterion": "934.1"
+   },
+   {
+    "ask": "Branch protection still requires the checks.",
+    "source": "https://github.com/dokima-dev/dokima/issues/934",
+    "criterion": "934.8"
+   },
+   {
+    "ask": "The approval is visibly \u03b4okima's (its bot), with a one-line comment naming the code review record and the green checks",
+    "source": "https://github.com/dokima-dev/dokima/issues/934",
+    "criterion": "934.2"
+   },
+   {
+    "ask": "The audit reports, in one line, when branch protection still requires a human or code-owner review that the bot's approval cannot satisfy, and says what to change",
+    "source": "https://github.com/dokima-dev/dokima/issues/934",
+    "criterion": "934.7"
+   },
+   {
+    "ask": "Setup can apply that change when the owner turns the setting on.",
+    "source": "https://github.com/dokima-dev/dokima/issues/934",
+    "criterion": "934.8"
+   },
+   {
+    "ask": "`integrity.owner_approval` stays locked for repos that do not opt in; turning on `merge.auto_approve` is the explicit opt-in.",
+    "source": "https://github.com/dokima-dev/dokima/issues/934",
+    "criterion": "934.6"
+   },
+   {
+    "ask": "a PR whose review blocked",
+    "source": "https://github.com/dokima-dev/dokima/issues/934",
+    "criterion": "934.3"
+   },
+   {
+    "ask": "or whose checks are red is never approved",
+    "source": "https://github.com/dokima-dev/dokima/issues/934",
+    "criterion": "934.4"
+   }
+  ],
+  "behaviors": [
+   {
+    "criterion": "934.1",
+    "one_behavior": true,
+    "why": "A passed gate merges with the setting on."
+   },
+   {
+    "criterion": "934.2",
+    "one_behavior": true,
+    "why": "One note naming review and checks."
+   },
+   {
+    "criterion": "934.3",
+    "one_behavior": true,
+    "why": "A blocked review is never approved."
+   },
+   {
+    "criterion": "934.4",
+    "one_behavior": true,
+    "why": "A red check is never approved."
+   },
+   {
+    "criterion": "934.5",
+    "one_behavior": true,
+    "why": "Off by default, so the owner still approves."
+   },
+   {
+    "criterion": "934.6",
+    "one_behavior": false,
+    "why": "The lock still failing, and auto approve read as known: two results."
+   },
+   {
+    "criterion": "934.7",
+    "one_behavior": true,
+    "why": "One audit line when a review blocks the bot."
+   },
+   {
+    "criterion": "934.8",
+    "one_behavior": true,
+    "why": "Setup lets the bot past main's review."
+   }
+  ],
+  "edge_cases": [
+   {
+    "criterion": "934.1",
+    "cut": [],
+    "missing": []
+   },
+   {
+    "criterion": "934.2",
+    "cut": [],
+    "missing": []
+   },
+   {
+    "criterion": "934.3",
+    "cut": [],
+    "missing": []
+   },
+   {
+    "criterion": "934.4",
+    "cut": [],
+    "missing": []
+   },
+   {
+    "criterion": "934.5",
+    "cut": [],
+    "missing": []
+   },
+   {
+    "criterion": "934.6",
+    "cut": [],
+    "missing": []
+   },
+   {
+    "criterion": "934.7",
+    "cut": [],
+    "missing": [
+     "With auto approve off, a required review writes no line.",
+     "Main requires a plain human review, not a code owner one."
+    ]
+   },
+   {
+    "criterion": "934.8",
+    "cut": [],
+    "missing": [
+     "Main's required checks are still required after setup."
+    ]
+   }
+  ],
+  "tests": [
+   {
+    "test": "tests/test_auto_approve.py::test_with_auto_approve_on_a_passed_gate_merges_with_no_person",
+    "only_its_behavior": true,
+    "why": "Merge on, behind main, and off beside it."
+   },
+   {
+    "test": "tests/test_auto_approve.py::test_the_approval_leaves_one_line_naming_the_review_and_the_green_checks",
+    "only_its_behavior": true,
+    "why": "One line, both checks, run link; off posts none."
+   },
+   {
+    "test": "tests/test_auto_approve.py::test_a_blocked_code_review_is_never_approved",
+    "only_its_behavior": true,
+    "why": "Blocked stays unmerged; approved beside it merges."
+   },
+   {
+    "test": "tests/test_auto_approve.py::test_red_checks_are_never_approved",
+    "only_its_behavior": false,
+    "why": "Also asserts the worker restarts, not part of 934.4."
+   },
+   {
+    "test": "tests/test_auto_approve.py::test_auto_approve_is_off_by_default_and_the_owner_still_approves",
+    "only_its_behavior": true,
+    "why": "Default false, and the owner is asked."
+   },
+   {
+    "test": "tests/test_auto_approve.py::test_owner_approval_stays_locked_and_auto_approve_is_the_opt_in",
+    "only_its_behavior": false,
+    "why": "Proves two behaviors of a bundled criterion."
+   },
+   {
+    "test": "tests/test_auto_approve.py::test_the_audit_says_when_main_needs_a_review_the_bot_cannot_give",
+    "only_its_behavior": true,
+    "why": "Checks its behavior, but misses the off case."
+   },
+   {
+    "test": "tests/test_auto_approve.py::test_setup_turns_auto_approve_on_and_lets_the_app_bypass_reviews",
+    "only_its_behavior": true,
+    "why": "Checks bypass and refusal, but not kept checks."
+   }
+  ],
+  "size": "934.6 bundles two behaviors, and its test and 934.4's check more than their criterion.",
+  "boxes": {
+   "dropped": "none",
+   "added": "none",
+   "superseded": "none",
+   "conflicts": "none",
+   "edges": {
+    "934.1": "covered",
+    "934.2": "covered",
+    "934.3": "covered",
+    "934.4": "covered",
+    "934.5": "covered",
+    "934.6": "covered",
+    "934.7": "missing: auto approve off; a plain human review",
+    "934.8": "missing: required checks kept"
+   },
+   "poor_tests": [
+    {
+     "test": "tests/test_auto_approve.py::test_the_audit_says_when_main_needs_a_review_the_bot_cannot_give",
+     "passes_with": "an audit that reports the review whatever the setting",
+     "fix": "add a case with auto_approve off expecting no line"
+    },
+    {
+     "test": "tests/test_auto_approve.py::test_setup_turns_auto_approve_on_and_lets_the_app_bypass_reviews",
+     "passes_with": "a setup that replaces main's protection and drops its required checks",
+     "fix": "assert every protection write keeps both required checks or touches only the reviews part"
+    }
+   ]
+  }
+ },
+ "check": {
+  "passed": true,
+  "problems": []
+ },
+ "url": "https://github.com/dokima-dev/dokima/issues/934#issuecomment-6282468012"
+}
