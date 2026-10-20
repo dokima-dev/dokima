@@ -1,0 +1,67 @@
+{
+ "role": "reviewer",
+ "stage": "pr",
+ "run_id": "39370782052",
+ "commit_before": "409f0394851df9aeea69afabc72d957616e26983",
+ "started_by": "dokima-runtime[bot]",
+ "models": [
+  "claude-opus-5-5"
+ ],
+ "report": {
+  "duration_ms": 2810,
+  "turns": 1,
+  "cost_usd": 0.38023700000000005,
+  "tokens_in": 41680,
+  "tokens_out": 175
+ },
+ "log": "https://github.com/dokima-dev/dokima/blob/logs/logs/942/39370782052-reviewer-pr.md",
+ "run": "https://github.com/dokima-dev/dokima/actions/runs/39370782052",
+ "handback": {
+  "previous_step": {
+   "did": [
+    "Setup reads the review bypass back after saving it and stops when GitHub dropped it.",
+    "On personal repos, setup and the audit say to remove the required review.",
+    "Two tests use a fake GitHub that drops the bypass."
+   ],
+   "decided": [
+    "When the bypass is dropped, auto approve is not turned on."
+   ],
+   "open": []
+  },
+  "verdict": "approve",
+  "summary": "Setup and the audit now tell a personal repo's owner to remove the required review; both tests prove it.",
+  "raises": [],
+  "answers": [],
+  "asks": [],
+  "behaviors": [],
+  "edge_cases": [],
+  "tests": [
+   {
+    "test": "tests/test_auto_approve.py::test_setup_says_so_when_github_drops_the_bypass_on_a_personal_repo",
+    "only_its_behavior": true,
+    "why": "Fails with main's setup, which reports success; passes on the branch."
+   },
+   {
+    "test": "tests/test_auto_approve.py::test_the_audit_says_a_personal_repo_needs_the_review_removed",
+    "only_its_behavior": true,
+    "why": "Fails with main's audit, which still names the bypass; passes on the branch."
+   }
+  ],
+  "size": "ok",
+  "boxes": {
+   "dropped": "none",
+   "added": "none",
+   "superseded": "none",
+   "conflicts": "none",
+   "edges": {
+    "ask": "covered"
+   },
+   "poor_tests": "none"
+  }
+ },
+ "check": {
+  "passed": true,
+  "problems": []
+ },
+ "url": "https://github.com/dokima-dev/dokima/pull/943#issuecomment-6283525306"
+}
