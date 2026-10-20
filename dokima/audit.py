@@ -245,7 +245,9 @@ def auto_merge(github, repo, rule, queue=True):
 
 
 def bot_review(github, repo, rule):
-    """The line saying main requires a review Dokima's app cannot give, and the fix (#934)."""
+    """The line saying main requires a review Dokima's app cannot give, and the fix (#934).
+
+    On a personal account's repo GitHub drops a review bypass, so the fix there is removing the review (#942)."""
     need = (rule or {}).get("required_review")
     if not need:
         return []
@@ -255,6 +257,13 @@ def bot_review(github, repo, rule):
         return [f"Auto approve is not verified: GitHub said `{reason(e)}` when the audit read Dokima's app."]
     if app in ((rule or {}).get("review_bypass_apps") or []):
         return []
+    try:
+        personal = github.owner_type(repo) == "User"
+    except FAILED as e:
+        return [f"Auto approve is not verified: GitHub said `{reason(e)}` when the audit read the repo's owner."]
+    if personal:  # GitHub keeps a review bypass only on an organization's repo (#942)
+        return ["Auto approve is on, but `main` requires a review Dokima's app cannot give, and this personal account's "
+                "repo cannot keep a review bypass: remove main's required review, keeping its required checks."]
     if need == "code owners":
         return ["Auto approve is on, but `main` requires a review from code owners that Dokima's app cannot give: turn "
                 "off \"Require review from Code Owners\" or let the app bypass pull request reviews "
@@ -449,6 +458,10 @@ class GitHub:
 
     def app_id(self, repo):
         return json.loads(gh("api", f"repos/{repo}/installation"))["app_id"]
+
+    def owner_type(self, repo):
+        """"User" for a personal account's repo, "Organization" for an organization's."""
+        return json.loads(gh("api", f"repos/{repo}"))["owner"]["type"]
 
     def setup_issue(self, repo):
         listed = json.loads(gh("issue", "list", "--repo", repo, "--state", "open", "--limit", "1000", "--json",
