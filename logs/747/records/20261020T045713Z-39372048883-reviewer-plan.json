@@ -1,0 +1,624 @@
+{
+ "role": "reviewer",
+ "stage": "plan",
+ "run_id": "39372048883",
+ "commit_before": "829d0a83ed00558084751341fafa9821951c6f98",
+ "started_by": "dokima-runtime[bot]",
+ "models": [
+  "claude-opus-5-5"
+ ],
+ "report": {
+  "duration_ms": 122714,
+  "turns": 14,
+  "cost_usd": 0.7733239999999999,
+  "tokens_in": 672072,
+  "tokens_out": 12774
+ },
+ "log": "https://github.com/dokima-dev/dokima/blob/logs/logs/747/39372048883-reviewer-plan.md",
+ "run": "https://github.com/dokima-dev/dokima/actions/runs/39372048883",
+ "handback": {
+  "previous_step": {
+   "did": [
+    "The planner proposed splitting the issue into eight stories with 31 criteria.",
+    "It left each story's tests and edge cases to that story's own planner."
+   ],
+   "decided": [
+    "Installing the App onboards the repo directly, with no setup pull request.",
+    "The command line path stays; the chat tool path stays parked."
+   ],
+   "open": [
+    "Three questions wait for the owner: manifest, setup as pull request, bug report contents."
+   ]
+  },
+  "verdict": "block",
+  "summary": "Blocked: eight criteria bundle two results, one names the wrong key, docs are missing, one criterion misses a file.",
+  "raises": [
+   {
+    "kind": "blocker",
+    "to": "planner",
+    "label": "Two results bundled",
+    "text": "Criteria S1.3, S2.3, S2.5, S4.6, S4.8, S5.4, S6.4 and S8.1 each hold two results or cases. Split each into one criterion per result.",
+    "evidence": "S4.6: `every label ... exists, and labels already there are unchanged`; S2.3: `forged, expired or for another repo`.",
+    "raised_by": "reviewer",
+    "id": "R1"
+   },
+   {
+    "kind": "blocker",
+    "to": "planner",
+    "label": "S2.4 wrong key",
+    "text": "S2.4 says the service returns a key for the run's repo. Filing upstream needs a key for Dokima's own repo, as the owner describes. Reword S2.4 to that.",
+    "evidence": "Comment 6254370728: #872 mints a key `for the upstream owner`; S2.4 says `a key for that repo`.",
+    "raised_by": "reviewer",
+    "id": "R2"
+   },
+   {
+    "kind": "blocker",
+    "to": "planner",
+    "label": "No criterion: docs",
+    "text": "The owner lists docs as part of this work, and no criterion carries them. Add one: the install guide describes the one-click install, keeping self-made App steps as fallback.",
+    "evidence": "Comment 6254370728: `the bug-report checkbox and docs`. `docs/wiki/Installing.md` still says create your own App.",
+    "raised_by": "reviewer",
+    "id": "R3"
+   },
+   {
+    "kind": "blocker",
+    "to": "planner",
+    "label": "S1.1 misses a file",
+    "text": "S1.1 changes the App's permissions, but the permission list also lives in the manifest, and an older test pins administration to read. Add that file to S1.1.",
+    "evidence": "`dokima/manifest.py:54` PERMISSIONS; `tests/test_manifest.py:468` (282.4) asserts administration read, equal to `dokima/app.json`.",
+    "raised_by": "reviewer",
+    "id": "R4"
+   }
+  ],
+  "answers": [],
+  "asks": [
+   {
+    "ask": "Everything it does shows as `dokima[bot]` on every repo: comments, PRs, cards, commits.",
+    "source": "https://github.com/dokima-dev/dokima/issues/747",
+    "criterion": "S3.1"
+   },
+   {
+    "ask": "the adopter's workflow requests GitHub's signed identity token (OIDC) and exchanges it with a small service dokima-dev hosts",
+    "source": "https://github.com/dokima-dev/dokima/issues/747",
+    "criterion": "S3.1"
+   },
+   {
+    "ask": "which checks the run really is that repo with Dokima installed and returns a short-lived token scoped to it",
+    "source": "https://github.com/dokima-dev/dokima/issues/747",
+    "criterion": "S2.1"
+   },
+   {
+    "ask": "checks the run really is that repo with Dokima installed",
+    "source": "https://github.com/dokima-dev/dokima/issues/747",
+    "criterion": "S2.2"
+   },
+   {
+    "ask": "checks the run really is that repo",
+    "source": "https://github.com/dokima-dev/dokima/issues/747",
+    "criterion": "S2.3"
+   },
+   {
+    "ask": "The App's private key never leaves the service.",
+    "source": "https://github.com/dokima-dev/dokima/issues/747",
+    "criterion": "S2.5"
+   },
+   {
+    "ask": "keeping self-made Apps as a fallback for teams that refuse a shared one",
+    "source": "https://github.com/dokima-dev/dokima/issues/747",
+    "criterion": "S3.2"
+   },
+   {
+    "ask": "acceptance item 13 on #272 passes under the shared App, and the self-made App path still works",
+    "source": "https://github.com/dokima-dev/dokima/issues/747",
+    "criterion": "S3.3"
+   },
+   {
+    "ask": "Model keys stay the adopter's own API keys, pasted as secrets.",
+    "source": "https://github.com/dokima-dev/dokima/issues/747",
+    "criterion": "S6.4"
+   },
+   {
+    "ask": "CLI path: `gh dokima init <repo>` style, needs GitHub CLI logged in. Adds the repo to the existing installation",
+    "source": "https://github.com/dokima-dev/dokima/issues/747#issuecomment-6203494000",
+    "criterion": "S8.1"
+   },
+   {
+    "ask": "sets the secret",
+    "source": "https://github.com/dokima-dev/dokima/issues/747#issuecomment-6203494000",
+    "criterion": "S8.2"
+   },
+   {
+    "ask": "Installing the App onboards everything with no setup PR. Our service adds the workflow and `settings.yaml`",
+    "source": "https://github.com/dokima-dev/dokima/issues/747#issuecomment-6254370728",
+    "criterion": "S4.1"
+   },
+   {
+    "ask": "protects the default branch with the two check names",
+    "source": "https://github.com/dokima-dev/dokima/issues/747#issuecomment-6254370728",
+    "criterion": "S5.1"
+   },
+   {
+    "ask": "and opens a first issue",
+    "source": "https://github.com/dokima-dev/dokima/issues/747#issuecomment-6254370728",
+    "criterion": "S4.2"
+   },
+   {
+    "ask": "The cost is broader App permissions (workflows, secrets, administration)",
+    "source": "https://github.com/dokima-dev/dokima/issues/747#issuecomment-6254370728",
+    "criterion": "S1.1"
+   },
+   {
+    "ask": "the setup page links the customer straight to their repo's GitHub secrets page",
+    "source": "https://github.com/dokima-dev/dokima/issues/747#issuecomment-6254370728",
+    "criterion": "S6.1"
+   },
+   {
+    "ask": "The model key never touches Dokima's service.",
+    "source": "https://github.com/dokima-dev/dokima/issues/747#issuecomment-6254370728",
+    "criterion": "S6.4"
+   },
+   {
+    "ask": "The setup page has a checkbox, \"Send Dokima's own bugs to the Dokima team\". It writes the upstream-repo setting from #745",
+    "source": "https://github.com/dokima-dev/dokima/issues/747#issuecomment-6254370728",
+    "criterion": "S6.2"
+   },
+   {
+    "ask": "which stays off by default",
+    "source": "https://github.com/dokima-dev/dokima/issues/747#issuecomment-6254370728",
+    "criterion": "S6.3"
+   },
+   {
+    "ask": "a prefilled App manifest, so the owner clicks Create once",
+    "source": "https://github.com/dokima-dev/dokima/issues/747#issuecomment-6254370728",
+    "criterion": "S1.2"
+   },
+   {
+    "ask": "GitHub hands the App's private key straight to the setup script, which stores it in the service.",
+    "source": "https://github.com/dokima-dev/dokima/issues/747#issuecomment-6254370728",
+    "criterion": "S1.3"
+   },
+   {
+    "ask": "Under the shared App, the service must mint that key instead.",
+    "source": "https://github.com/dokima-dev/dokima/issues/747#issuecomment-6254370728",
+    "criterion": "S7.1"
+   },
+   {
+    "ask": "Recommended: send only Dokima's step, its error from Dokima's own code and the version; drop code blocks and non-Dokima paths.",
+    "source": "https://github.com/dokima-dev/dokima/issues/747#issuecomment-6254370728",
+    "criterion": "S7.2"
+   },
+   {
+    "ask": "the bug-report checkbox and docs",
+    "source": "https://github.com/dokima-dev/dokima/issues/747#issuecomment-6254370728",
+    "criterion": "missing"
+   },
+   {
+    "ask": "App key and model key placed where the thin install can read them: repo secrets, not the `keys` environment (#876).",
+    "source": "https://github.com/dokima-dev/dokima/issues/747#issuecomment-6257060752",
+    "criterion": "S8.2"
+   },
+   {
+    "ask": "**App id** set as the repo variable.",
+    "source": "https://github.com/dokima-dev/dokima/issues/747#issuecomment-6257060752",
+    "criterion": "S4.5"
+   },
+   {
+    "ask": "**Default branch** read from the repo, never assumed to be `main` (#874).",
+    "source": "https://github.com/dokima-dev/dokima/issues/747#issuecomment-6257060752",
+    "criterion": "S4.3"
+   },
+   {
+    "ask": "**CODEOWNERS** naming the owner who may give commands and approve.",
+    "source": "https://github.com/dokima-dev/dokima/issues/747#issuecomment-6257060752",
+    "criterion": "S4.4"
+   },
+   {
+    "ask": "**Labels** Dokima uses created up front",
+    "source": "https://github.com/dokima-dev/dokima/issues/747#issuecomment-6257060752",
+    "criterion": "S4.6"
+   },
+   {
+    "ask": "**Tests folder** found or asked for, and Dokima's test runs scoped to it (#877).",
+    "source": "https://github.com/dokima-dev/dokima/issues/747#issuecomment-6257060752",
+    "criterion": "S4.7"
+   },
+   {
+    "ask": "Handle a repo with no tests yet without failing the baseline.",
+    "source": "https://github.com/dokima-dev/dokima/issues/747#issuecomment-6257060752",
+    "criterion": "S4.8"
+   },
+   {
+    "ask": "**Required checks always on** (`all tests`, `Acceptance criteria`)",
+    "source": "https://github.com/dokima-dev/dokima/issues/747#issuecomment-6257614785",
+    "criterion": "S5.1"
+   },
+   {
+    "ask": "**Owner (code-owner) approval on by default**; a repo can opt into autopilot merging.",
+    "source": "https://github.com/dokima-dev/dokima/issues/747#issuecomment-6257614785",
+    "criterion": "S5.2"
+   },
+   {
+    "ask": "**Admin enforcement off**, so the owner can still push an emergency fix.",
+    "source": "https://github.com/dokima-dev/dokima/issues/747#issuecomment-6257614785",
+    "criterion": "S5.3"
+   },
+   {
+    "ask": "Setup must detect that and say so plainly (what is lost, how to get it), not fail.",
+    "source": "https://github.com/dokima-dev/dokima/issues/747#issuecomment-6257614785",
+    "criterion": "S5.4"
+   }
+  ],
+  "behaviors": [
+   {
+    "criterion": "S1.1",
+    "one_behavior": true,
+    "why": "One action, one result the owner can see."
+   },
+   {
+    "criterion": "S1.2",
+    "one_behavior": true,
+    "why": "One action, one result the owner can see."
+   },
+   {
+    "criterion": "S1.3",
+    "one_behavior": false,
+    "why": "Two results: the key is stored in the service, and never saved to disk."
+   },
+   {
+    "criterion": "S2.1",
+    "one_behavior": true,
+    "why": "One action, one result the owner can see."
+   },
+   {
+    "criterion": "S2.2",
+    "one_behavior": true,
+    "why": "One action, one result the owner can see."
+   },
+   {
+    "criterion": "S2.3",
+    "one_behavior": false,
+    "why": "Three cases in one: forged, expired and another repo's identity."
+   },
+   {
+    "criterion": "S2.4",
+    "one_behavior": true,
+    "why": "One action, one result the owner can see."
+   },
+   {
+    "criterion": "S2.5",
+    "one_behavior": false,
+    "why": "Two results: the key is read only in the service, and no reply carries it."
+   },
+   {
+    "criterion": "S3.1",
+    "one_behavior": true,
+    "why": "One action, one result the owner can see."
+   },
+   {
+    "criterion": "S3.2",
+    "one_behavior": true,
+    "why": "One action, one result the owner can see."
+   },
+   {
+    "criterion": "S3.3",
+    "one_behavior": true,
+    "why": "One action, one result the owner can see."
+   },
+   {
+    "criterion": "S4.1",
+    "one_behavior": true,
+    "why": "One action, one result the owner can see."
+   },
+   {
+    "criterion": "S4.2",
+    "one_behavior": true,
+    "why": "One action, one result the owner can see."
+   },
+   {
+    "criterion": "S4.3",
+    "one_behavior": true,
+    "why": "One action, one result the owner can see."
+   },
+   {
+    "criterion": "S4.4",
+    "one_behavior": true,
+    "why": "One action, one result the owner can see."
+   },
+   {
+    "criterion": "S4.5",
+    "one_behavior": true,
+    "why": "One action, one result the owner can see."
+   },
+   {
+    "criterion": "S4.6",
+    "one_behavior": false,
+    "why": "Two results: missing labels are made, and existing labels stay unchanged."
+   },
+   {
+    "criterion": "S4.7",
+    "one_behavior": true,
+    "why": "One action, one result the owner can see."
+   },
+   {
+    "criterion": "S4.8",
+    "one_behavior": false,
+    "why": "Two results: onboarding finishes, and the first issue asks where tests live."
+   },
+   {
+    "criterion": "S5.1",
+    "one_behavior": true,
+    "why": "One action, one result the owner can see."
+   },
+   {
+    "criterion": "S5.2",
+    "one_behavior": true,
+    "why": "One action, one result the owner can see."
+   },
+   {
+    "criterion": "S5.3",
+    "one_behavior": true,
+    "why": "One action, one result the owner can see."
+   },
+   {
+    "criterion": "S5.4",
+    "one_behavior": false,
+    "why": "Two results: onboarding finishes unprotected, and it says what is lost and how to get it."
+   },
+   {
+    "criterion": "S6.1",
+    "one_behavior": true,
+    "why": "One action, one result the owner can see."
+   },
+   {
+    "criterion": "S6.2",
+    "one_behavior": true,
+    "why": "One action, one result the owner can see."
+   },
+   {
+    "criterion": "S6.3",
+    "one_behavior": true,
+    "why": "One action, one result the owner can see."
+   },
+   {
+    "criterion": "S6.4",
+    "one_behavior": false,
+    "why": "Two results: the page has no key field, and the service never receives one."
+   },
+   {
+    "criterion": "S7.1",
+    "one_behavior": true,
+    "why": "One action, one result the owner can see."
+   },
+   {
+    "criterion": "S7.2",
+    "one_behavior": true,
+    "why": "One action, one result the owner can see."
+   },
+   {
+    "criterion": "S8.1",
+    "one_behavior": false,
+    "why": "Two results: the repo joins the install, and it gets onboarded."
+   },
+   {
+    "criterion": "S8.2",
+    "one_behavior": true,
+    "why": "One action, one result the owner can see."
+   }
+  ],
+  "edge_cases": [
+   {
+    "criterion": "S1.1",
+    "cut": [],
+    "missing": []
+   },
+   {
+    "criterion": "S1.2",
+    "cut": [],
+    "missing": []
+   },
+   {
+    "criterion": "S1.3",
+    "cut": [],
+    "missing": []
+   },
+   {
+    "criterion": "S2.1",
+    "cut": [],
+    "missing": []
+   },
+   {
+    "criterion": "S2.2",
+    "cut": [],
+    "missing": []
+   },
+   {
+    "criterion": "S2.3",
+    "cut": [],
+    "missing": []
+   },
+   {
+    "criterion": "S2.4",
+    "cut": [],
+    "missing": []
+   },
+   {
+    "criterion": "S2.5",
+    "cut": [],
+    "missing": []
+   },
+   {
+    "criterion": "S3.1",
+    "cut": [],
+    "missing": []
+   },
+   {
+    "criterion": "S3.2",
+    "cut": [],
+    "missing": []
+   },
+   {
+    "criterion": "S3.3",
+    "cut": [],
+    "missing": []
+   },
+   {
+    "criterion": "S4.1",
+    "cut": [],
+    "missing": []
+   },
+   {
+    "criterion": "S4.2",
+    "cut": [],
+    "missing": []
+   },
+   {
+    "criterion": "S4.3",
+    "cut": [],
+    "missing": []
+   },
+   {
+    "criterion": "S4.4",
+    "cut": [],
+    "missing": []
+   },
+   {
+    "criterion": "S4.5",
+    "cut": [],
+    "missing": []
+   },
+   {
+    "criterion": "S4.6",
+    "cut": [],
+    "missing": []
+   },
+   {
+    "criterion": "S4.7",
+    "cut": [],
+    "missing": []
+   },
+   {
+    "criterion": "S4.8",
+    "cut": [],
+    "missing": []
+   },
+   {
+    "criterion": "S5.1",
+    "cut": [],
+    "missing": []
+   },
+   {
+    "criterion": "S5.2",
+    "cut": [],
+    "missing": []
+   },
+   {
+    "criterion": "S5.3",
+    "cut": [],
+    "missing": []
+   },
+   {
+    "criterion": "S5.4",
+    "cut": [],
+    "missing": []
+   },
+   {
+    "criterion": "S6.1",
+    "cut": [],
+    "missing": []
+   },
+   {
+    "criterion": "S6.2",
+    "cut": [],
+    "missing": []
+   },
+   {
+    "criterion": "S6.3",
+    "cut": [],
+    "missing": []
+   },
+   {
+    "criterion": "S6.4",
+    "cut": [],
+    "missing": []
+   },
+   {
+    "criterion": "S7.1",
+    "cut": [],
+    "missing": []
+   },
+   {
+    "criterion": "S7.2",
+    "cut": [],
+    "missing": []
+   },
+   {
+    "criterion": "S8.1",
+    "cut": [],
+    "missing": []
+   },
+   {
+    "criterion": "S8.2",
+    "cut": [],
+    "missing": []
+   }
+  ],
+  "tests": [],
+  "size": "Eight criteria bundle two results or cases: S1.3, S2.3, S2.5, S4.6, S4.8, S5.4, S6.4, S8.1.",
+  "boxes": {
+   "dropped": [
+    {
+     "words": "the bug-report checkbox and docs",
+     "source": "https://github.com/dokima-dev/dokima/issues/747#issuecomment-6254370728"
+    }
+   ],
+   "added": "none",
+   "superseded": "none",
+   "conflicts": [
+    {
+     "a": "a prefilled App manifest, so the owner clicks Create once (comment 6254370728)",
+     "b": "the shared App is registered as `dokima-dev` (App ID 5373929) (comment 6257060752)",
+     "ask": "The App is already registered. Is the prefilled manifest still wanted? (the planner's question P1)"
+    }
+   ],
+   "edges": {
+    "S1.1": "covered",
+    "S1.2": "covered",
+    "S1.3": "covered",
+    "S2.1": "covered",
+    "S2.2": "covered",
+    "S2.3": "covered",
+    "S2.4": "covered",
+    "S2.5": "covered",
+    "S3.1": "covered",
+    "S3.2": "covered",
+    "S3.3": "covered",
+    "S4.1": "covered",
+    "S4.2": "covered",
+    "S4.3": "covered",
+    "S4.4": "covered",
+    "S4.5": "covered",
+    "S4.6": "covered",
+    "S4.7": "covered",
+    "S4.8": "covered",
+    "S5.1": "covered",
+    "S5.2": "covered",
+    "S5.3": "covered",
+    "S5.4": "covered",
+    "S6.1": "covered",
+    "S6.2": "covered",
+    "S6.3": "covered",
+    "S6.4": "covered",
+    "S7.1": "covered",
+    "S7.2": "covered",
+    "S8.1": "covered",
+    "S8.2": "covered"
+   },
+   "poor_tests": "none"
+  }
+ },
+ "check": {
+  "passed": true,
+  "problems": []
+ },
+ "url": "https://github.com/dokima-dev/dokima/issues/747#issuecomment-6283695459"
+}
