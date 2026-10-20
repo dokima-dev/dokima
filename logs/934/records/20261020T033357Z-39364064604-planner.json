@@ -1,0 +1,235 @@
+{
+ "role": "planner",
+ "stage": null,
+ "run_id": "39364064604",
+ "commit_before": "a3960ab8ae196da3a1e68d37408b09d200143891",
+ "started_by": "RezaSoleymanifar",
+ "models": [
+  "claude-opus-5-5"
+ ],
+ "report": {
+  "duration_ms": 491690,
+  "turns": 18,
+  "cost_usd": 0.947463,
+  "tokens_in": 1025928,
+  "tokens_out": 13037
+ },
+ "log": "https://github.com/dokima-dev/dokima/blob/logs/logs/934/39364064604-planner.md",
+ "run": "https://github.com/dokima-dev/dokima/actions/runs/39364064604",
+ "handback": {
+  "kind": "user_story",
+  "title": "Opt in: Dokima approves and merges its own pull requests",
+  "summary": "A repo can opt in so Dokima approves and merges its own pull requests once review and checks pass.",
+  "user_story": "Owners who opt in see finished pull requests merge on their own, with a note saying why.",
+  "acceptance_criteria": [
+   {
+    "text": "When auto approve is on, a pull request whose code review and checks passed merges with no person waited on.",
+    "words": "When it is on, a pull request \u03b4okima built is approved and queued by \u03b4okima itself as soon as its code review has passed and the required checks (`gates.required`) are green. No person is waited on.",
+    "source": "https://github.com/dokima-dev/dokima/issues/934",
+    "files": [
+     "dokima/agent_roles.py",
+     "dokima/agent_autopilot.py",
+     "dokima/defaults.yaml"
+    ],
+    "edge_cases": [
+     {
+      "case": "A branch behind main merges only at the head brought up to date and green.",
+      "test": "tests/test_auto_approve.py::test_with_auto_approve_on_a_passed_gate_merges_with_no_person"
+     },
+     {
+      "case": "With the setting off, nothing merges by itself.",
+      "test": "tests/test_auto_approve.py::test_with_auto_approve_on_a_passed_gate_merges_with_no_person"
+     }
+    ]
+   },
+   {
+    "text": "When Dokima approves, the pull request gets one line naming the code review record and the green checks.",
+    "words": "The approval is visibly \u03b4okima's (its bot), with a one-line comment naming the code review record and the green checks, so the owner can read it afterwards.",
+    "source": "https://github.com/dokima-dev/dokima/issues/934",
+    "files": [
+     "dokima/agent_roles.py",
+     "dokima/agent_autopilot.py",
+     "dokima/defaults.yaml"
+    ],
+    "edge_cases": [
+     {
+      "case": "With the setting off, no such line is posted.",
+      "test": "tests/test_auto_approve.py::test_the_approval_leaves_one_line_naming_the_review_and_the_green_checks"
+     }
+    ]
+   },
+   {
+    "text": "When the code review blocks, the pull request is never approved, even with auto approve on.",
+    "words": "a PR whose review blocked or whose checks are red is never approved.",
+    "source": "https://github.com/dokima-dev/dokima/issues/934",
+    "files": [
+     "dokima/agent_roles.py",
+     "dokima/agent_autopilot.py",
+     "dokima/defaults.yaml"
+    ],
+    "no_edge_cases": "The one case is the blocking review; an approving review is tested beside it."
+   },
+   {
+    "text": "When a required check is red, the pull request is never approved, even with auto approve on.",
+    "words": "a PR whose review blocked or whose checks are red is never approved.",
+    "source": "https://github.com/dokima-dev/dokima/issues/934",
+    "files": [
+     "dokima/agent_roles.py",
+     "dokima/agent_autopilot.py",
+     "dokima/defaults.yaml"
+    ],
+    "edge_cases": [
+     {
+      "case": "A check green before but red once brought up to date with main.",
+      "test": "tests/test_auto_approve.py::test_red_checks_are_never_approved"
+     }
+    ]
+   },
+   {
+    "text": "Auto approve is off by default, so a passed merge gate still waits for the owner's approval.",
+    "words": "Add an opt-in setting, off by default, e.g. `merge.auto_approve: true`",
+    "source": "https://github.com/dokima-dev/dokima/issues/934",
+    "files": [
+     "dokima/agent_roles.py",
+     "dokima/agent_autopilot.py",
+     "dokima/defaults.yaml"
+    ],
+    "edge_cases": [
+     {
+      "case": "A repo with no settings file at all.",
+      "test": "tests/test_auto_approve.py::test_auto_approve_is_off_by_default_and_the_owner_still_approves"
+     }
+    ]
+   },
+   {
+    "text": "A repo setting owner approval itself still fails as locked, even with auto approve on.",
+    "words": "Owner approval stays locked for every repo; auto approve is the only opt-in.",
+    "source": "https://github.com/dokima-dev/dokima/issues/934#issuecomment-6282591897",
+    "files": [
+     "dokima/defaults.yaml"
+    ],
+    "no_edge_cases": "The one case is an opted-in repo setting owner approval; open settings pass beside it."
+   },
+   {
+    "text": "When a repo sets auto approve on, it reads as on, with no unknown setting warning.",
+    "words": "turning on `merge.auto_approve` is the explicit opt-in",
+    "source": "https://github.com/dokima-dev/dokima/issues/934",
+    "files": [
+     "dokima/defaults.yaml"
+    ],
+    "no_edge_cases": "One setting read once; the off value is proven by 934.5."
+   },
+   {
+    "text": "With auto approve on, the audit says in one line which review blocks the bot, and how to fix it.",
+    "words": "The audit reports, in one line, when branch protection still requires a human or code-owner review that the bot's approval cannot satisfy, and says what to change",
+    "source": "https://github.com/dokima-dev/dokima/issues/934",
+    "files": [
+     "dokima/audit.py",
+     "dokima/defaults.yaml"
+    ],
+    "edge_cases": [
+     {
+      "case": "The app is already on main's review exemption, so no line is written.",
+      "test": "tests/test_auto_approve.py::test_the_audit_says_when_main_needs_a_review_the_bot_cannot_give"
+     },
+     {
+      "case": "Main requires a plain review, not from code owners.",
+      "test": "tests/test_auto_approve.py::test_the_audit_says_when_main_needs_a_review_the_bot_cannot_give"
+     },
+     {
+      "case": "With auto approve off, no line is written.",
+      "test": "tests/test_auto_approve.py::test_the_audit_says_when_main_needs_a_review_the_bot_cannot_give"
+     }
+    ]
+   },
+   {
+    "text": "When the owner turns auto approve on through setup, setup lets the bot bypass main's required review.",
+    "words": "Setup can apply that change when the owner turns the setting on.",
+    "source": "https://github.com/dokima-dev/dokima/issues/934",
+    "files": [
+     "dokima/setup.py",
+     "dokima/defaults.yaml"
+    ],
+    "edge_cases": [
+     {
+      "case": "GitHub refuses the change for lack of admin rights; setup fails showing GitHub's reason.",
+      "test": "tests/test_auto_approve.py::test_setup_turns_auto_approve_on_and_lets_the_app_bypass_reviews"
+     },
+     {
+      "case": "Main still requires its checks after setup.",
+      "test": "tests/test_auto_approve.py::test_setup_turns_auto_approve_on_and_lets_the_app_bypass_reviews"
+     }
+    ]
+   }
+  ],
+  "non_functional": [],
+  "tests": {
+   "934.1": [
+    "tests/test_auto_approve.py::test_with_auto_approve_on_a_passed_gate_merges_with_no_person"
+   ],
+   "934.2": [
+    "tests/test_auto_approve.py::test_the_approval_leaves_one_line_naming_the_review_and_the_green_checks"
+   ],
+   "934.3": [
+    "tests/test_auto_approve.py::test_a_blocked_code_review_is_never_approved"
+   ],
+   "934.4": [
+    "tests/test_auto_approve.py::test_red_checks_are_never_approved"
+   ],
+   "934.5": [
+    "tests/test_auto_approve.py::test_auto_approve_is_off_by_default_and_the_owner_still_approves"
+   ],
+   "934.6": [
+    "tests/test_settings_merge.py::test_setting_a_locked_setting_fails_the_run_naming_it"
+   ],
+   "934.7": [
+    "tests/test_auto_approve.py::test_auto_approve_is_the_setting_a_repo_opts_in_with"
+   ],
+   "934.8": [
+    "tests/test_auto_approve.py::test_the_audit_says_when_main_needs_a_review_the_bot_cannot_give"
+   ],
+   "934.9": [
+    "tests/test_auto_approve.py::test_setup_turns_auto_approve_on_and_lets_the_app_bypass_reviews"
+   ]
+  },
+  "test_changes": {
+   "tests/test_settings_merge.py::test_setting_a_locked_setting_fails_the_run_naming_it": "Adds a case: owner approval stays locked with auto approve on; the old checks stay."
+  },
+  "links": {
+   "blocked_by": [],
+   "blocks": [],
+   "relates_to": [
+    686,
+    378,
+    363
+   ]
+  },
+  "answers": [
+   {
+    "raise": "R1",
+    "answer": "done",
+    "why": "The audit test now also runs with auto approve off and with a plain review."
+   },
+   {
+    "raise": "R2",
+    "answer": "done",
+    "why": "The setup test now checks main still requires all tests and Acceptance criteria."
+   },
+   {
+    "raise": "R3",
+    "answer": "done",
+    "why": "Split into two criteria, the lock and the opt-in, each with its own test."
+   },
+   {
+    "raise": "R4",
+    "answer": "done",
+    "why": "The worker restart check is gone from the red checks test."
+   }
+  ]
+ },
+ "check": {
+  "passed": true,
+  "problems": []
+ },
+ "url": "https://github.com/dokima-dev/dokima/issues/934#issuecomment-6282598720"
+}
