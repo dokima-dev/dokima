@@ -1,0 +1,72 @@
+{
+ "role": "reviewer",
+ "stage": "pr",
+ "run_id": "39372231173",
+ "commit_before": "0e29c966e7f13733bd15d7478bf200c96c3fda7a",
+ "started_by": "dokima-runtime[bot]",
+ "models": [
+  "claude-opus-5-5"
+ ],
+ "report": {
+  "duration_ms": 3498,
+  "turns": 1,
+  "cost_usd": 0.5534384,
+  "tokens_in": 50580,
+  "tokens_out": 50
+ },
+ "log": "https://github.com/dokima-dev/dokima/blob/logs/logs/944/39372231173-reviewer-pr.md",
+ "run": "https://github.com/dokima-dev/dokima/actions/runs/39372231173",
+ "handback": {
+  "previous_step": {
+   "did": [
+    "The board now reads an organization's or a personal account's project.",
+    "The audit checks the board fields the same way on both.",
+    "The install docs say personal repos get the board."
+   ],
+   "decided": [
+    "A personal account's board is written as user, login and number."
+   ],
+   "open": []
+  },
+  "verdict": "approve",
+  "summary": "The board now works for personal accounts too, and the tests prove both kinds.",
+  "raises": [],
+  "answers": [],
+  "asks": [],
+  "behaviors": [],
+  "edge_cases": [],
+  "tests": [
+   {
+    "test": "tests/test_user_board.py::test_every_board_read_asks_for_the_project_under_its_owner",
+    "only_its_behavior": true,
+    "why": "Fails on main for the user board; pins every board read and the view path."
+   },
+   {
+    "test": "tests/test_user_board.py::test_the_audit_checks_the_board_fields_the_same_way_on_both",
+    "only_its_behavior": true,
+    "why": "Fails on main for the user board; the org case passes on both."
+   },
+   {
+    "test": "tests/test_user_board.py::test_a_board_spec_with_an_unknown_owner_type_is_refused",
+    "only_its_behavior": true,
+    "why": "A wrong owner type gets a clear error."
+   }
+  ],
+  "size": "ok",
+  "boxes": {
+   "dropped": "none",
+   "added": "none",
+   "superseded": "none",
+   "conflicts": "none",
+   "edges": {
+    "ask": "covered"
+   },
+   "poor_tests": "none"
+  }
+ },
+ "check": {
+  "passed": true,
+  "problems": []
+ },
+ "url": "https://github.com/dokima-dev/dokima/pull/945#issuecomment-6283720204"
+}
