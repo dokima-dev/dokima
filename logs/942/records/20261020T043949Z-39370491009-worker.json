@@ -1,0 +1,40 @@
+{
+ "role": "worker",
+ "stage": null,
+ "run_id": "39370491009",
+ "commit_before": "829d0a83ed00558084751341fafa9821951c6f98",
+ "started_by": "dokima-runtime[bot]",
+ "models": [
+  "claude-opus-5-5"
+ ],
+ "report": {
+  "duration_ms": 131280,
+  "turns": 15,
+  "cost_usd": 0.7105448,
+  "tokens_in": 695692,
+  "tokens_out": 9299
+ },
+ "log": "https://github.com/dokima-dev/dokima/blob/logs/logs/942/39370491009-worker.md",
+ "run": "https://github.com/dokima-dev/dokima/actions/runs/39370491009",
+ "handback": {
+  "summary": "Setup reads the bypass back and names the working route on personal repos; the audit line says the same.",
+  "criteria": {
+   "ask": "`dokima/setup.py` `auto_approve` reads the bypass back after the PATCH and fails via `dropped_bypass`, saving nothing; `dokima/audit.py` `bot_review` checks `owner_type`; tests in `tests/test_auto_approve.py`."
+  },
+  "evidence": "`pytest -q tests/test_auto_approve.py`: 10 passed in 3.07s",
+  "raises": []
+ },
+ "check": {
+  "passed": true,
+  "problems": []
+ },
+ "dropped_by_fence": [],
+ "files_changed": [
+  "dokima/audit.py",
+  "dokima/setup.py",
+  "tests/fake_gh.py",
+  "tests/test_auto_approve.py"
+ ],
+ "branch": "try/issue-942",
+ "url": "https://github.com/dokima-dev/dokima/issues/942#issuecomment-6283489153"
+}
