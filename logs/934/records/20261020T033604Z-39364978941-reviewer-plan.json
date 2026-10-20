@@ -1,0 +1,267 @@
+{
+ "role": "reviewer",
+ "stage": "plan",
+ "run_id": "39364978941",
+ "commit_before": "56ebd4e426159c499a67e3a8ef0a3a6ec19b276f",
+ "started_by": "dokima-runtime[bot]",
+ "models": [
+  "claude-opus-5-5"
+ ],
+ "report": {
+  "duration_ms": 69395,
+  "turns": 12,
+  "cost_usd": 0.6178904000000001,
+  "tokens_in": 537111,
+  "tokens_out": 6130
+ },
+ "log": "https://github.com/dokima-dev/dokima/blob/logs/logs/934/39364978941-reviewer-plan.md",
+ "run": "https://github.com/dokima-dev/dokima/actions/runs/39364978941",
+ "handback": {
+  "previous_step": {
+   "did": [
+    "The planner fixed all four blockers from the last review.",
+    "Owner approval and the opt-in are now two criteria, each with a test."
+   ],
+   "decided": [
+    "Dokima's one-line note counts as its approval, as the owner said."
+   ],
+   "open": []
+  },
+  "verdict": "approve",
+  "summary": "Every ask has a criterion and a test that fails today for the right reason.",
+  "raises": [],
+  "answers": [],
+  "asks": [
+   {
+    "ask": "Add an opt-in setting, off by default, e.g. `merge.auto_approve: true`",
+    "source": "https://github.com/dokima-dev/dokima/issues/934",
+    "criterion": "934.5"
+   },
+   {
+    "ask": "When it is on, a pull request \u03b4okima built is approved and queued by \u03b4okima itself as soon as its code review has passed and the required checks (`gates.required`) are green. No person is waited on.",
+    "source": "https://github.com/dokima-dev/dokima/issues/934",
+    "criterion": "934.1"
+   },
+   {
+    "ask": "Branch protection still requires the checks.",
+    "source": "https://github.com/dokima-dev/dokima/issues/934",
+    "criterion": "934.9"
+   },
+   {
+    "ask": "The approval is visibly \u03b4okima's (its bot), with a one-line comment naming the code review record and the green checks",
+    "source": "https://github.com/dokima-dev/dokima/issues/934",
+    "criterion": "934.2"
+   },
+   {
+    "ask": "The audit reports, in one line, when branch protection still requires a human or code-owner review that the bot's approval cannot satisfy, and says what to change",
+    "source": "https://github.com/dokima-dev/dokima/issues/934",
+    "criterion": "934.8"
+   },
+   {
+    "ask": "Setup can apply that change when the owner turns the setting on.",
+    "source": "https://github.com/dokima-dev/dokima/issues/934",
+    "criterion": "934.9"
+   },
+   {
+    "ask": "`integrity.owner_approval` stays locked for repos that do not opt in",
+    "source": "https://github.com/dokima-dev/dokima/issues/934",
+    "criterion": "934.6"
+   },
+   {
+    "ask": "turning on `merge.auto_approve` is the explicit opt-in",
+    "source": "https://github.com/dokima-dev/dokima/issues/934",
+    "criterion": "934.7"
+   },
+   {
+    "ask": "with it off, nothing changes",
+    "source": "https://github.com/dokima-dev/dokima/issues/934",
+    "criterion": "934.5"
+   },
+   {
+    "ask": "a PR whose review blocked ... is never approved",
+    "source": "https://github.com/dokima-dev/dokima/issues/934",
+    "criterion": "934.3"
+   },
+   {
+    "ask": "a PR ... whose checks are red is never approved",
+    "source": "https://github.com/dokima-dev/dokima/issues/934",
+    "criterion": "934.4"
+   },
+   {
+    "ask": "yes, the one-line note counts as \u03b4okima's approval",
+    "source": "https://github.com/dokima-dev/dokima/issues/934#issuecomment-6282591897",
+    "criterion": "934.2"
+   },
+   {
+    "ask": "Owner approval stays locked for every repo; auto approve is the only opt-in.",
+    "source": "https://github.com/dokima-dev/dokima/issues/934#issuecomment-6282591897",
+    "criterion": "934.6"
+   }
+  ],
+  "behaviors": [
+   {
+    "criterion": "934.1",
+    "one_behavior": true,
+    "why": "A passed pull request merges by itself when the setting is on."
+   },
+   {
+    "criterion": "934.2",
+    "one_behavior": true,
+    "why": "One note naming the review and the green checks."
+   },
+   {
+    "criterion": "934.3",
+    "one_behavior": true,
+    "why": "A blocked review is never approved."
+   },
+   {
+    "criterion": "934.4",
+    "one_behavior": true,
+    "why": "A red check is never approved."
+   },
+   {
+    "criterion": "934.5",
+    "one_behavior": true,
+    "why": "Off by default, so the owner still approves."
+   },
+   {
+    "criterion": "934.6",
+    "one_behavior": true,
+    "why": "Owner approval set by a repo still fails as locked."
+   },
+   {
+    "criterion": "934.7",
+    "one_behavior": true,
+    "why": "The setting reads as on, with no warning."
+   },
+   {
+    "criterion": "934.8",
+    "one_behavior": true,
+    "why": "The audit writes one line naming the blocking review and fix."
+   },
+   {
+    "criterion": "934.9",
+    "one_behavior": true,
+    "why": "Setup lets the bot past main's required review."
+   }
+  ],
+  "edge_cases": [
+   {
+    "criterion": "934.1",
+    "cut": [],
+    "missing": []
+   },
+   {
+    "criterion": "934.2",
+    "cut": [],
+    "missing": []
+   },
+   {
+    "criterion": "934.3",
+    "cut": [],
+    "missing": []
+   },
+   {
+    "criterion": "934.4",
+    "cut": [],
+    "missing": []
+   },
+   {
+    "criterion": "934.5",
+    "cut": [],
+    "missing": []
+   },
+   {
+    "criterion": "934.6",
+    "cut": [],
+    "missing": []
+   },
+   {
+    "criterion": "934.7",
+    "cut": [],
+    "missing": []
+   },
+   {
+    "criterion": "934.8",
+    "cut": [],
+    "missing": []
+   },
+   {
+    "criterion": "934.9",
+    "cut": [],
+    "missing": []
+   }
+  ],
+  "tests": [
+   {
+    "test": "tests/test_auto_approve.py::test_with_auto_approve_on_a_passed_gate_merges_with_no_person",
+    "only_its_behavior": true,
+    "why": "Merges when on, at the updated head, and not when off."
+   },
+   {
+    "test": "tests/test_auto_approve.py::test_the_approval_leaves_one_line_naming_the_review_and_the_green_checks",
+    "only_its_behavior": true,
+    "why": "Checks one line, the review link and both checks; none when off."
+   },
+   {
+    "test": "tests/test_auto_approve.py::test_a_blocked_code_review_is_never_approved",
+    "only_its_behavior": true,
+    "why": "Blocked stays unmerged; approved merges beside it."
+   },
+   {
+    "test": "tests/test_auto_approve.py::test_red_checks_are_never_approved",
+    "only_its_behavior": true,
+    "why": "Red stays unmerged, also after update; green merges beside it."
+   },
+   {
+    "test": "tests/test_auto_approve.py::test_auto_approve_is_off_by_default_and_the_owner_still_approves",
+    "only_its_behavior": true,
+    "why": "No file: default false, nothing merges, owner is asked."
+   },
+   {
+    "test": "tests/test_settings_merge.py::test_setting_a_locked_setting_fails_the_run_naming_it",
+    "only_its_behavior": true,
+    "why": "Adds the opted-in case; old checks kept. Passes today as a guard."
+   },
+   {
+    "test": "tests/test_auto_approve.py::test_auto_approve_is_the_setting_a_repo_opts_in_with",
+    "only_its_behavior": true,
+    "why": "Reads true with no warning; today it warns and drops it."
+   },
+   {
+    "test": "tests/test_auto_approve.py::test_the_audit_says_when_main_needs_a_review_the_bot_cannot_give",
+    "only_its_behavior": true,
+    "why": "Code owner and plain review cases, exempt and off write nothing."
+   },
+   {
+    "test": "tests/test_auto_approve.py::test_setup_turns_auto_approve_on_and_lets_the_app_bypass_reviews",
+    "only_its_behavior": true,
+    "why": "Setting written, bypass asked, checks kept, refusal shown."
+   }
+  ],
+  "size": "ok",
+  "boxes": {
+   "dropped": "none",
+   "added": "none",
+   "superseded": "none",
+   "conflicts": "none",
+   "edges": {
+    "934.1": "covered",
+    "934.2": "covered",
+    "934.3": "covered",
+    "934.4": "covered",
+    "934.5": "covered",
+    "934.6": "covered",
+    "934.7": "covered",
+    "934.8": "covered",
+    "934.9": "covered"
+   },
+   "poor_tests": "none"
+  }
+ },
+ "check": {
+  "passed": true,
+  "problems": []
+ },
+ "url": "https://github.com/dokima-dev/dokima/issues/934#issuecomment-6282712022"
+}
