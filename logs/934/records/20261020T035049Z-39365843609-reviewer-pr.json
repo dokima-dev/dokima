@@ -1,0 +1,238 @@
+{
+ "role": "reviewer",
+ "stage": "pr",
+ "run_id": "39365843609",
+ "commit_before": "481ae46bb288ab3cabca25379a245e3294d3f6a5",
+ "started_by": "dokima-runtime[bot]",
+ "models": [
+  "claude-opus-5-5"
+ ],
+ "report": {
+  "duration_ms": 127081,
+  "turns": 17,
+  "cost_usd": 0.6244062,
+  "tokens_in": 736188,
+  "tokens_out": 6628
+ },
+ "log": "https://github.com/dokima-dev/dokima/blob/logs/logs/934/39365843609-reviewer-pr.md",
+ "run": "https://github.com/dokima-dev/dokima/actions/runs/39365843609",
+ "handback": {
+  "previous_step": {
+   "did": [
+    "Added an off by default setting that merges reviewed, green pull requests unaided.",
+    "Posts one approval line naming the code review record and the green checks.",
+    "The audit flags a review the bot cannot give; setup lets the bot bypass it."
+   ],
+   "decided": [
+    "A blocked review or a red check never reaches the approval, so nothing merges."
+   ],
+   "open": [
+    "The merge line on the issue still says autopilot merged it."
+   ]
+  },
+  "verdict": "approve",
+  "summary": "The worker built all nine criteria; every new test fails on main and passes on the branch.",
+  "raises": [
+   {
+    "kind": "issue",
+    "label": "Merge line says autopilot",
+    "fault": "dokima",
+    "text": "With auto approve on and autopilot off, the issue and card still say Autopilot merged the pull request.",
+    "evidence": "`dokima/agent_roles.py` step text `Autopilot merged PR`; `AUTOPILOT_MERGE` in `dokima/agent_autopilot.py`.",
+    "searched": [
+     594,
+     544,
+     869
+    ],
+    "verdict": "new",
+    "raised_by": "reviewer",
+    "id": "R5"
+   }
+  ],
+  "answers": [
+   {
+    "raise": "W1",
+    "answer": "done",
+    "why": "Agreed it is misleading but outside this issue's criteria; raised as its own issue.",
+    "searched": [
+     594,
+     544,
+     869
+    ],
+    "verdict": "new"
+   }
+  ],
+  "boxes": {
+   "dropped": "none",
+   "added": [
+    {
+     "what": "The run prints merged or queued instead of stop when a pull request merges by itself.",
+     "kind": "needed",
+     "serves": "934.1"
+    }
+   ],
+   "superseded": "none",
+   "conflicts": "none",
+   "edges": {
+    "934.1": "covered",
+    "934.2": "covered",
+    "934.3": "covered",
+    "934.4": "covered",
+    "934.5": "covered",
+    "934.6": "covered",
+    "934.7": "covered",
+    "934.8": "covered",
+    "934.9": "covered"
+   },
+   "poor_tests": "none"
+  },
+  "asks": [],
+  "behaviors": [
+   {
+    "criterion": "934.1",
+    "one_behavior": true,
+    "why": "On, a passed gate merges with no person."
+   },
+   {
+    "criterion": "934.2",
+    "one_behavior": true,
+    "why": "One approval line naming record and checks."
+   },
+   {
+    "criterion": "934.3",
+    "one_behavior": true,
+    "why": "A blocked review is never approved."
+   },
+   {
+    "criterion": "934.4",
+    "one_behavior": true,
+    "why": "A red check is never approved."
+   },
+   {
+    "criterion": "934.5",
+    "one_behavior": true,
+    "why": "Off by default, the owner still approves."
+   },
+   {
+    "criterion": "934.6",
+    "one_behavior": true,
+    "why": "Owner approval stays locked."
+   },
+   {
+    "criterion": "934.7",
+    "one_behavior": true,
+    "why": "The setting reads as on with no warning."
+   },
+   {
+    "criterion": "934.8",
+    "one_behavior": true,
+    "why": "The audit writes one line with the fix."
+   },
+   {
+    "criterion": "934.9",
+    "one_behavior": true,
+    "why": "Setup lets the bot bypass the review."
+   }
+  ],
+  "edge_cases": [
+   {
+    "criterion": "934.1",
+    "cut": [],
+    "missing": []
+   },
+   {
+    "criterion": "934.2",
+    "cut": [],
+    "missing": []
+   },
+   {
+    "criterion": "934.3",
+    "cut": [],
+    "missing": []
+   },
+   {
+    "criterion": "934.4",
+    "cut": [],
+    "missing": []
+   },
+   {
+    "criterion": "934.5",
+    "cut": [],
+    "missing": []
+   },
+   {
+    "criterion": "934.6",
+    "cut": [],
+    "missing": []
+   },
+   {
+    "criterion": "934.7",
+    "cut": [],
+    "missing": []
+   },
+   {
+    "criterion": "934.8",
+    "cut": [],
+    "missing": []
+   },
+   {
+    "criterion": "934.9",
+    "cut": [],
+    "missing": []
+   }
+  ],
+  "tests": [
+   {
+    "test": "tests/test_auto_approve.py::test_with_auto_approve_on_a_passed_gate_merges_with_no_person",
+    "only_its_behavior": true,
+    "why": "Fails on main: nothing merges."
+   },
+   {
+    "test": "tests/test_auto_approve.py::test_the_approval_leaves_one_line_naming_the_review_and_the_green_checks",
+    "only_its_behavior": true,
+    "why": "Fails on main: no line posted."
+   },
+   {
+    "test": "tests/test_auto_approve.py::test_a_blocked_code_review_is_never_approved",
+    "only_its_behavior": true,
+    "why": "Its approving case fails on main."
+   },
+   {
+    "test": "tests/test_auto_approve.py::test_red_checks_are_never_approved",
+    "only_its_behavior": true,
+    "why": "Its green case fails on main."
+   },
+   {
+    "test": "tests/test_auto_approve.py::test_auto_approve_is_off_by_default_and_the_owner_still_approves",
+    "only_its_behavior": true,
+    "why": "Fails on main: no such setting."
+   },
+   {
+    "test": "tests/test_settings_merge.py::test_setting_a_locked_setting_fails_the_run_naming_it",
+    "only_its_behavior": true,
+    "why": "Guards the lock; passes on both."
+   },
+   {
+    "test": "tests/test_auto_approve.py::test_auto_approve_is_the_setting_a_repo_opts_in_with",
+    "only_its_behavior": true,
+    "why": "Fails on main: setting warned and dropped."
+   },
+   {
+    "test": "tests/test_auto_approve.py::test_the_audit_says_when_main_needs_a_review_the_bot_cannot_give",
+    "only_its_behavior": true,
+    "why": "Fails on main: no audit line."
+   },
+   {
+    "test": "tests/test_auto_approve.py::test_setup_turns_auto_approve_on_and_lets_the_app_bypass_reviews",
+    "only_its_behavior": true,
+    "why": "Fails on main: no setup command."
+   }
+  ],
+  "size": "ok"
+ },
+ "check": {
+  "passed": true,
+  "problems": []
+ },
+ "url": "https://github.com/dokima-dev/dokima/pull/936#issuecomment-6282829365"
+}
