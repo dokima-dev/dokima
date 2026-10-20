@@ -2,3 +2,6 @@
 co_author: Reza Soleymanifar <34189616+RezaSoleymanifar@users.noreply.github.com>
 # Dokima's own prompts are never the worker's to change.
 protected_paths: [.github/, dokima/roles/]
+# Dokima approves and merges its own pull requests once code review and the checks pass (#934).
+merge:
+  auto_approve: true
