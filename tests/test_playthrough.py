@@ -271,7 +271,8 @@ def test_the_key_is_minted_for_the_sandbox_repo_only(record_property):
     Proves 437.6.
     Reads playthrough.yml: every app token step names owner dokima-dev and repositories card-gallery and nothing else,
     there is at least one, none asks for permission to write workflows (Dokima's app never gets it; the install uses
-    SANDBOX_TOKEN), and the workflow's own GitHub token may write nothing."""
+    SANDBOX_TOKEN), and the workflow's own GitHub token may write nothing but issues, which it needs to file the bug
+    of a failed journey on Dokima's own repo (#258)."""
     record_property("proves", "437.6")
     wf = workflow("437.6")
     tokens = [s for s in steps_of(wf) if "create-github-app-token" in str(s.get("uses"))]
@@ -286,7 +287,8 @@ def test_the_key_is_minted_for_the_sandbox_repo_only(record_property):
     perms = [wf.get("permissions")] + [j.get("permissions") for j in (wf.get("jobs") or {}).values()]
     for p in perms:
         if isinstance(p, dict):
-            assert "write" not in p.values(), f"437.6: playthrough.yml's own token may write: {p}"
+            writes = {k: v for k, v in p.items() if v == "write" and k != "issues"}
+            assert not writes, f"437.6: playthrough.yml's own token may write more than issues: {writes}"
         else:
             assert p in (None, "read-all", "{}"), f"437.6: playthrough.yml's own token has permissions {p!r}"
     assert wf.get("permissions") is not None, "437.6: playthrough.yml sets no permissions, so its own token gets the defaults"
