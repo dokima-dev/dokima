@@ -1,0 +1,351 @@
+{
+ "role": "planner",
+ "stage": null,
+ "run_id": "39371739920",
+ "commit_before": "829d0a83ed00558084751341fafa9821951c6f98",
+ "started_by": "dokima-runtime[bot]",
+ "models": [
+  "claude-opus-5-5"
+ ],
+ "report": {
+  "duration_ms": 215909,
+  "turns": 20,
+  "cost_usd": 1.1123008,
+  "tokens_in": 1051751,
+  "tokens_out": 20135
+ },
+ "log": "https://github.com/dokima-dev/dokima/blob/logs/logs/748/39371739920-planner.md",
+ "run": "https://github.com/dokima-dev/dokima/actions/runs/39371739920",
+ "handback": {
+  "kind": "feature",
+  "title": "Commands become mentions of Dokima instead of slash words",
+  "summary": "Owners start Dokima by mentioning it with a verb, and every shipped text says so.",
+  "feature": "Owners talk to Dokima by mention and verb, get fixed replies on mistakes, and no shipped text names an old slash command.",
+  "stories": [
+   {
+    "title": "Mentions start Dokima's stages",
+    "user_story": "Owners start each stage by mentioning Dokima with a verb, and old slash commands still work.",
+    "task": "Route the mention and its verb, the bot name and the old forms.",
+    "context": "Today a command is the first word of a code owner's comment or PR review summary: `COMMANDS` and `autopilot_of` in `dokima/agent_roles.py` (around line 259) route `/plan`, `/work`, `/review`, `/autopilot start|stop`; `route()` is called by `python3 -m dokima.agent route` from the `route` job of `.github/workflows/commands.yml`, whose `if:` only lets bodies starting with `/` through, so it must also let `@` through. Keep the rule that the command opens the comment's first line, matched case-blind. The configured bot name is the settings' `bot.slug` (`dokima/defaults.yaml`, default `dokima-runtime`), exported as `BOT_SLUG` by `dokima/settings.py`. `stop` and `status` are new: the plan assumes stop cancels the issue's running agent run and status replies with the issue's stage (questions to the owner). `review` is not in the owner's verb table; the plan assumes it keeps today's behavior as a verb (question). Old slash commands keep routing for one version. A comment with no mention already starts nothing today, so its test must pair the bad case with a mention that does start something, or it passes today (#718). Edge cases normal use hits: a PR review summary, upper case, a mention not on the first line, a non-owner's mention.",
+    "acceptance_criteria": [
+     {
+      "text": "When a code owner's comment starts with the Dokima mention and plan, the planner starts.",
+      "words": "| `plan` | yes | planner |",
+      "source": "https://github.com/dokima-dev/dokima/issues/748",
+      "files": [
+       "dokima/agent_roles.py",
+       ".github/workflows/commands.yml"
+      ],
+      "no_edge_cases": "Its story's planner lists them, each with its test; see the story's context."
+     },
+     {
+      "text": "When a code owner's comment starts with the Dokima mention and work, the worker starts.",
+      "words": "| `work` | yes | worker |",
+      "source": "https://github.com/dokima-dev/dokima/issues/748",
+      "files": [
+       "dokima/agent_roles.py",
+       ".github/workflows/commands.yml"
+      ],
+      "no_edge_cases": "Its story's planner lists them, each with its test; see the story's context."
+     },
+     {
+      "text": "When a code owner's comment starts with the Dokima mention and review, the reviewer starts.",
+      "words": "the `@dokima` lexicon applies everywhere",
+      "source": "https://github.com/dokima-dev/dokima/issues/748#issuecomment-6203610802",
+      "files": [
+       "dokima/agent_roles.py",
+       ".github/workflows/commands.yml"
+      ],
+      "no_edge_cases": "Its story's planner lists them, each with its test; see the story's context."
+     },
+     {
+      "text": "When a code owner's comment starts with the Dokima mention and autopilot start, the issue's tree goes on autopilot.",
+      "words": "| `autopilot start` | yes | the next agent, then dropped |",
+      "source": "https://github.com/dokima-dev/dokima/issues/748",
+      "files": [
+       "dokima/agent_roles.py",
+       ".github/workflows/commands.yml"
+      ],
+      "no_edge_cases": "Its story's planner lists them, each with its test; see the story's context."
+     },
+     {
+      "text": "When a code owner's comment starts with the Dokima mention and autopilot stop, the issue's tree leaves autopilot.",
+      "words": "| `autopilot stop` | no | |",
+      "source": "https://github.com/dokima-dev/dokima/issues/748",
+      "files": [
+       "dokima/agent_roles.py",
+       ".github/workflows/commands.yml"
+      ],
+      "no_edge_cases": "Its story's planner lists them, each with its test; see the story's context."
+     },
+     {
+      "text": "When a code owner's comment starts with the Dokima mention and stop, the run going on the issue is cancelled.",
+      "words": "| `stop` | no | |",
+      "source": "https://github.com/dokima-dev/dokima/issues/748",
+      "files": [
+       "dokima/agent_roles.py",
+       ".github/workflows/commands.yml"
+      ],
+      "no_edge_cases": "Its story's planner lists them, each with its test; see the story's context."
+     },
+     {
+      "text": "When a code owner's comment starts with the Dokima mention and status, Dokima replies with the issue's stage.",
+      "words": "| `status` | no | |",
+      "source": "https://github.com/dokima-dev/dokima/issues/748",
+      "files": [
+       "dokima/agent_roles.py",
+       ".github/workflows/commands.yml"
+      ],
+      "no_edge_cases": "Its story's planner lists them, each with its test; see the story's context."
+     },
+     {
+      "text": "When a code owner uses the configured bot name instead of the Dokima mention, every command works the same.",
+      "words": "the parser accepts both the configured bot name and `@dokima`",
+      "source": "https://github.com/dokima-dev/dokima/issues/748#issuecomment-6203610802",
+      "files": [
+       "dokima/agent_roles.py",
+       ".github/workflows/commands.yml"
+      ],
+      "no_edge_cases": "Its story's planner lists them, each with its test; see the story's context."
+     },
+     {
+      "text": "When a code owner's comment holds no Dokima mention and no old command, nothing starts and nothing replies.",
+      "words": "A comment with no `@dokima` triggers nothing.",
+      "source": "https://github.com/dokima-dev/dokima/issues/748",
+      "files": [
+       "dokima/agent_roles.py",
+       ".github/workflows/commands.yml"
+      ],
+      "no_edge_cases": "Its story's planner lists them, each with its test; see the story's context."
+     },
+     {
+      "text": "When a code owner writes an old slash command, it starts the same thing as its new form.",
+      "words": "`/plan`, `/work`, `/autopilot` keep working for one version with a reply pointing to the new form, then go.",
+      "source": "https://github.com/dokima-dev/dokima/issues/748#issuecomment-6203610802",
+      "files": [
+       "dokima/agent_roles.py",
+       ".github/workflows/commands.yml"
+      ],
+      "no_edge_cases": "Its story's planner lists them, each with its test; see the story's context."
+     }
+    ],
+    "non_functional": [],
+    "depends_on": []
+   },
+   {
+    "title": "Fixed replies and where text after a command goes",
+    "user_story": "Owners get a fixed reply on a wrong command, and their text reaches the agent it is for.",
+    "task": "Post fixed replies and deliver prose to the right agent.",
+    "context": "Replies need a new path: `route` today prints only `role/stage/issue` or `autopilot/issue`; a reply line and a step in `.github/workflows/commands.yml` that posts it with the App token are new. No reply calls a model. No-prose commands: `autopilot stop`, `stop`, `status`. Prose: `owner_words()` in `dokima/agent_roles.py` already puts every code owner's comment in every pack (`owner_words.json`), so plan and work prose likely reach their agent today; the tests must prove the text lands in that agent's pack. Autopilot start prose must reach only the next agent: today `owner_words()` keeps it forever, so it must leave packs built after the next agent's record. Keep #738 in mind: comments with no mention stay the owner's words.",
+    "acceptance_criteria": [
+     {
+      "text": "When a comment is the Dokima mention alone, Dokima's only response is a reply listing the verbs.",
+      "words": "`@dokima` alone or with an unknown verb: a fixed reply listing the verbs. No model call.",
+      "source": "https://github.com/dokima-dev/dokima/issues/748",
+      "files": [
+       "dokima/agent_roles.py",
+       ".github/workflows/commands.yml"
+      ],
+      "no_edge_cases": "Its story's planner lists them, each with its test; see the story's context."
+     },
+     {
+      "text": "When the Dokima mention is followed by an unknown verb, Dokima's only response is a reply listing the verbs.",
+      "words": "`@dokima` alone or with an unknown verb: a fixed reply listing the verbs. No model call.",
+      "source": "https://github.com/dokima-dev/dokima/issues/748",
+      "files": [
+       "dokima/agent_roles.py",
+       ".github/workflows/commands.yml"
+      ],
+      "no_edge_cases": "Its story's planner lists them, each with its test; see the story's context."
+     },
+     {
+      "text": "When text follows a command that takes none, Dokima replies that it takes no text and does nothing else.",
+      "words": "Prose after a no-prose command: Dokima replies that the command takes no text and does nothing.",
+      "source": "https://github.com/dokima-dev/dokima/issues/748",
+      "files": [
+       "dokima/agent_roles.py",
+       ".github/workflows/commands.yml"
+      ],
+      "no_edge_cases": "Its story's planner lists them, each with its test; see the story's context."
+     },
+     {
+      "text": "When a code owner writes an old slash command, Dokima replies naming its new form.",
+      "words": "`/plan`, `/work`, `/autopilot` keep working for one version with a reply pointing to the new form, then go.",
+      "source": "https://github.com/dokima-dev/dokima/issues/748#issuecomment-6203610802",
+      "files": [
+       "dokima/agent_roles.py",
+       ".github/workflows/commands.yml"
+      ],
+      "no_edge_cases": "Its story's planner lists them, each with its test; see the story's context."
+     },
+     {
+      "text": "When text follows the plan command, the planner receives that text.",
+      "words": "Prose is accepted only where an agent is about to run, so it has somewhere to go.",
+      "source": "https://github.com/dokima-dev/dokima/issues/748",
+      "files": [
+       "dokima/agent_roles.py"
+      ],
+      "no_edge_cases": "Its story's planner lists them, each with its test; see the story's context."
+     },
+     {
+      "text": "When text follows the work command, the worker receives that text.",
+      "words": "| `work` | yes | worker |",
+      "source": "https://github.com/dokima-dev/dokima/issues/748",
+      "files": [
+       "dokima/agent_roles.py"
+      ],
+      "no_edge_cases": "Its story's planner lists them, each with its test; see the story's context."
+     },
+     {
+      "text": "When text follows autopilot start, the next agent to run receives that text.",
+      "words": "| `autopilot start` | yes | the next agent, then dropped |",
+      "source": "https://github.com/dokima-dev/dokima/issues/748",
+      "files": [
+       "dokima/agent_roles.py",
+       "dokima/agent_autopilot.py"
+      ],
+      "no_edge_cases": "Its story's planner lists them, each with its test; see the story's context."
+     },
+     {
+      "text": "When text follows autopilot start, agents after the next one no longer receive that text.",
+      "words": "| `autopilot start` | yes | the next agent, then dropped |",
+      "source": "https://github.com/dokima-dev/dokima/issues/748",
+      "files": [
+       "dokima/agent_roles.py",
+       "dokima/agent_autopilot.py"
+      ],
+      "no_edge_cases": "Its story's planner lists them, each with its test; see the story's context."
+     }
+    ],
+    "non_functional": [],
+    "depends_on": [
+     0
+    ]
+   },
+   {
+    "title": "Every shipped text names the mention, never slash commands",
+    "user_story": "Owners read only the mention form of commands, on cards, replies, prompts, rules and docs.",
+    "task": "Rewrite every old slash command in shipped files and add a scan test.",
+    "context": "Old forms found on main, outside tests: the workflows `agent.yml`, `autopilot.yml`, `commands.yml`; `dokima/agent_autopilot.py`, `agent_next.py`, `agent_records.py`, `agent_roles.py`, `card.py`, `playthrough.py`; `dokima/roles/planner.md`, `raising.md`; the rules files `board`, `commands`, `flow`, `raising`, `scope`, `specs`, `splitting`; `README.md`, `docs/index.html` and seven `docs/wiki` pages. `agent.py`, `planner.py`, `worker.md` and `reviewer.md` match only as paths (`dokima/planner.py`), so the scan must not flag paths. Past entries of `CHANGELOG.md` are history and stay. The scan must allow the one place the parser keeps the old forms for the migration. The owner names `dokima/card.py`, `dokima/roles/` and the workflows, so changing them is asked. The rules files describe the new grammar, including stop, status and the fixed replies.",
+    "acceptance_criteria": [
+     {
+      "text": "Every card names a command by its new form, never an old slash command.",
+      "words": "Card text, bot replies and fixed messages say `@dokima plan`, never `/plan`.",
+      "source": "https://github.com/dokima-dev/dokima/issues/748#issuecomment-6203610802",
+      "files": [
+       "dokima/card.py",
+       "dokima/agent_records.py"
+      ],
+      "no_edge_cases": "Its story's planner lists them, each with its test; see the story's context."
+     },
+     {
+      "text": "Every reply and fixed message Dokima posts names a command by its new form, never an old slash command.",
+      "words": "Card text, bot replies and fixed messages say `@dokima plan`, never `/plan`.",
+      "source": "https://github.com/dokima-dev/dokima/issues/748#issuecomment-6203610802",
+      "files": [
+       "dokima/agent.py",
+       "dokima/agent_next.py",
+       "dokima/agent_autopilot.py",
+       "dokima/agent_roles.py",
+       "dokima/agent_records.py",
+       "dokima/planner.py",
+       "dokima/playthrough.py",
+       ".github/workflows/commands.yml",
+       ".github/workflows/autopilot.yml",
+       ".github/workflows/agent.yml"
+      ],
+      "no_edge_cases": "Its story's planner lists them, each with its test; see the story's context."
+     },
+     {
+      "text": "When any shipped file holds an old slash command, a test fails naming that file.",
+      "words": "A static test scans every shipped file and fails on any `/plan`, `/work`, `/autopilot`, `/review` left behind.",
+      "source": "https://github.com/dokima-dev/dokima/issues/748#issuecomment-6203610802",
+      "files": [
+       ".github/workflows/agent.yml",
+       ".github/workflows/autopilot.yml",
+       ".github/workflows/commands.yml",
+       "README.md",
+       "docs/index.html",
+       "docs/wiki/Autopilot.md",
+       "docs/wiki/Commands.md",
+       "docs/wiki/FAQ.md",
+       "docs/wiki/Home.md",
+       "docs/wiki/How-it-works.md",
+       "docs/wiki/The-card.md",
+       "docs/wiki/Writing-issues.md",
+       "dokima/agent.py",
+       "dokima/agent_autopilot.py",
+       "dokima/agent_next.py",
+       "dokima/agent_records.py",
+       "dokima/agent_roles.py",
+       "dokima/card.py",
+       "dokima/planner.py",
+       "dokima/playthrough.py",
+       "dokima/roles/planner.md",
+       "dokima/roles/raising.md",
+       "dokima/roles/reviewer.md",
+       "dokima/roles/worker.md",
+       "rules/board.md",
+       "rules/commands.md",
+       "rules/flow.md",
+       "rules/raising.md",
+       "rules/scope.md",
+       "rules/specs.md",
+       "rules/splitting.md",
+       "tests/test_no_slash_commands.py"
+      ],
+      "no_edge_cases": "Its story's planner lists them, each with its test; see the story's context."
+     }
+    ],
+    "non_functional": [],
+    "depends_on": [
+     1
+    ]
+   }
+  ],
+  "links": {
+   "blocked_by": [],
+   "blocks": [],
+   "relates_to": [
+    738,
+    870,
+    308
+   ]
+  },
+  "raises": [
+   {
+    "kind": "question",
+    "to": "owner",
+    "label": "Stop is undefined",
+    "text": "What should the stop command stop? The plan assumes it cancels the agent run going on the issue.",
+    "evidence": "The issue's table lists stop with no target; `dokima/agent_roles.py` has no stop command today.",
+    "raised_by": "planner",
+    "id": "P1"
+   },
+   {
+    "kind": "question",
+    "to": "owner",
+    "label": "Status is undefined",
+    "text": "What should the status command reply? The plan assumes the issue's stage, as its card shows it.",
+    "evidence": "The issue's table lists status with no reply text; no status command exists today.",
+    "raised_by": "planner",
+    "id": "P2"
+   },
+   {
+    "kind": "question",
+    "to": "owner",
+    "label": "Review verb missing",
+    "text": "The verb table has no review. Should today's review command become a review verb? The plan assumes it does.",
+    "evidence": "`COMMANDS` in `dokima/agent_roles.py` holds `/review`; the table and migration name no review.",
+    "raised_by": "planner",
+    "id": "P3"
+   }
+  ],
+  "answers": []
+ },
+ "check": {
+  "passed": true,
+  "problems": []
+ },
+ "url": "https://github.com/dokima-dev/dokima/issues/748#issuecomment-6283656026"
+}
