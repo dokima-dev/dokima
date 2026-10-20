@@ -1,0 +1,43 @@
+{
+ "role": "worker",
+ "stage": null,
+ "run_id": "39371849633",
+ "commit_before": "829d0a83ed00558084751341fafa9821951c6f98",
+ "started_by": "dokima-runtime[bot]",
+ "models": [
+  "claude-opus-5-5"
+ ],
+ "report": {
+  "duration_ms": 192906,
+  "turns": 17,
+  "cost_usd": 0.6742468,
+  "tokens_in": 739852,
+  "tokens_out": 9528
+ },
+ "log": "https://github.com/dokima-dev/dokima/blob/logs/logs/944/39371849633-worker.md",
+ "run": "https://github.com/dokima-dev/dokima/actions/runs/39371849633",
+ "handback": {
+  "summary": "The board now reads an organization's or a user's project, and the install docs say personal repos get it.",
+  "criteria": {
+   "ask": "`dokima/board.py` `parse` and `project` read `org/number` or `user:login/number` for every board query; `audit.py` reuses them; docs updated; `tests/test_user_board.py`."
+  },
+  "evidence": "`pytest -q tests/test_user_board.py tests/test_board*.py tests/test_audit*.py`: all passed.",
+  "raises": [],
+  "answers": []
+ },
+ "check": {
+  "passed": true,
+  "problems": []
+ },
+ "dropped_by_fence": [],
+ "files_changed": [
+  "README.md",
+  "docs/wiki/Installing.md",
+  "dokima/audit.py",
+  "dokima/board.py",
+  "dokima/scan.py",
+  "tests/test_user_board.py"
+ ],
+ "branch": "try/issue-944",
+ "url": "https://github.com/dokima-dev/dokima/issues/944#issuecomment-6283671977"
+}
