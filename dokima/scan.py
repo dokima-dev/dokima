@@ -84,7 +84,7 @@ def check(b, repo, owners, c, places):
 def main():
     spec, repo = os.environ.get("DOKIMA_BOARD", "").strip(), (os.environ.get("REPO") or os.environ.get("GITHUB_REPOSITORY") or "").strip()
     if not spec or not repo:
-        print("Set DOKIMA_BOARD (org/number) and REPO (owner/name) to say which board and repo to scan.")
+        print("Set DOKIMA_BOARD (org/number or user:login/number) and REPO (owner/name) to say which board and repo to scan.")
         return 1
     try:
         b = board.Board(spec, repo)

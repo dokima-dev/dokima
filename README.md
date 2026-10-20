@@ -91,7 +91,7 @@ On an issue on autopilot, an approved plan starts the worker and an approved spl
 
 ### The board (optional)
 
-Set the repo variable `DOKIMA_BOARD` to a GitHub Project (`org/number`) and code keeps it current: columns Backlog, Plan, Work, Review, Done; a **Needs you** or **Autopilot** pill on each card; a Blocker priority from blocked-by links. Without it, everything still works on the issues themselves.
+Set the repo variable `DOKIMA_BOARD` to a GitHub Project (`org/number`, or `user:login/number` for a personal account's) and code keeps it current: columns Backlog, Plan, Work, Review, Done; a **Needs you** or **Autopilot** pill on each card; a Blocker priority from blocked-by links. Without it, everything still works on the issues themselves.
 
 ## δokima builds itself
 

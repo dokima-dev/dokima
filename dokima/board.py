@@ -3,7 +3,7 @@
 Each event about an issue or its pull request, and a sweep every 15 minutes, put its cards where the issue's state
 says now. Priority is Blocker on an open issue blocking an open issue (blocked-by links), else its label's.
 
-    python3 -m dokima.board         # reads GITHUB_EVENT_NAME, GITHUB_EVENT_PATH and DOKIMA_BOARD ("org/number"), if set
+    python3 -m dokima.board         # reads GITHUB_EVENT_NAME, GITHUB_EVENT_PATH and DOKIMA_BOARD ("org/number" or "user:login/number"), if set
     python3 -m dokima.board queue   # writes the event's board queue, whether it runs and its waiting queue to GITHUB_OUTPUT
 """
 import json
@@ -35,13 +35,31 @@ def api(method, path, **fields):
     return json.loads(out) if out.strip() else {}
 
 
+def parse(spec):
+    """(owner type, login, number) of a board spec: "org/number" (or "org:org/number") for an organization's project,
+    "user:login/number" for a user's own."""
+    kind, _, rest = spec.rpartition(":")
+    if kind not in ("", "org", "user"):
+        raise ValueError(f"board {spec!r} is not org/number or user:login/number")
+    owner, number = rest.split("/")
+    return ("user" if kind == "user" else "organization"), owner, int(number)
+
+
+def project(q, spec, inner, args="", **variables):
+    """The board's projectV2 node, read as an organization's or a user's project.
+
+    inner is what to read of it; args declares any variables it takes beyond the owner and number."""
+    kind, owner, number = parse(spec)
+    return q(f'query($o:String!,$n:Int!{args}){{{kind}(login:$o){{projectV2(number:$n){{{inner}}}}}}}', o=owner, n=number,
+             **variables)[kind]["projectV2"]
+
+
 class Board:
     def __init__(self, spec, repo, q=gql, rest=api):
-        self.q, self.rest = q, rest
-        owner, number = spec.split("/")
-        self.owner, self.number = owner, int(number)
+        self.q, self.rest, self.spec = q, rest, spec
+        self.kind, self.owner, self.number = parse(spec)
         self.repo_owner, self.repo_name = repo.split("/")
-        p = q('query($o:String!,$n:Int!){organization(login:$o){projectV2(number:$n){id fields(first:50){nodes{... on ProjectV2SingleSelectField{id name options{id name}}}}}}}', o=owner, n=int(number))["organization"]["projectV2"]
+        p = project(q, spec, 'id fields(first:50){nodes{... on ProjectV2SingleSelectField{id name options{id name}}}}')
         self.id = p["id"]
         self.fields = {f["name"]: (f["id"], {o["name"]: o["id"] for o in f["options"]}) for f in p["fields"]["nodes"] if f}
 
@@ -137,7 +155,7 @@ class Board:
         out, cursor, name = [], None, agent_autopilot.autopilot_label()
         while True:
             more = {"c": cursor} if cursor else {}
-            items = self.q('query($o:String!,$n:Int!,$c:String){organization(login:$o){projectV2(number:$n){items(first:100,after:$c){pageInfo{hasNextPage endCursor} nodes{fieldValueByName(name:"Action"){... on ProjectV2ItemFieldSingleSelectValue{name}} status:fieldValueByName(name:"Status"){... on ProjectV2ItemFieldSingleSelectValue{name}} content{__typename ... on Issue{number state labels(first:100){nodes{name}}} ... on PullRequest{number state labels(first:100){nodes{name}}}}}}}}}', o=self.owner, n=self.number, **more)["organization"]["projectV2"]["items"]
+            items = project(self.q, self.spec, 'items(first:100,after:$c){pageInfo{hasNextPage endCursor} nodes{fieldValueByName(name:"Action"){... on ProjectV2ItemFieldSingleSelectValue{name}} status:fieldValueByName(name:"Status"){... on ProjectV2ItemFieldSingleSelectValue{name}} content{__typename ... on Issue{number state labels(first:100){nodes{name}}} ... on PullRequest{number state labels(first:100){nodes{name}}}}}}', ",$c:String", **more)["items"]
             for it in items["nodes"]:
                 c = it.get("content") or {}
                 if c.get("__typename") not in ("Issue", "PullRequest"):
@@ -155,14 +173,14 @@ class Board:
 
     def view_nodes(self):
         """The board's views, each as {id, name, filter}."""
-        p = self.q('query($o:String!,$n:Int!){organization(login:$o){projectV2(number:$n){views(first:50){nodes{id name filter}}}}}', o=self.owner, n=self.number)["organization"]["projectV2"]
+        p = project(self.q, self.spec, 'views(first:50){nodes{id name filter}}')
         return p["views"]["nodes"]
 
     def set_view_filter(self, view_id, filter):
         self.q('mutation($v:ID!,$f:String!){updateProjectV2View(input:{viewId:$v,filter:$f}){projectV2View{id}}}', v=view_id, f=filter)
 
     def add_view(self, name, layout, filter):
-        self.rest("POST", f"orgs/{self.owner}/projectsV2/{self.number}/views", name=name, layout=layout, filter=filter)
+        self.rest("POST", f"{'users' if self.kind == 'user' else 'orgs'}/{self.owner}/projectsV2/{self.number}/views", name=name, layout=layout, filter=filter)
 
 
 def about(event, p):
