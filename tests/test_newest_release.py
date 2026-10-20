@@ -177,13 +177,14 @@ def test_changelog_has_v016_on_top():
 
 
 def test_changelog_has_v017_on_top(record_property):
-    """The changelog's newest section is v0.1.7, right above v0.1.6.
+    """The changelog's v0.1.7 section sits right above v0.1.6.
 
-    Proves 932.1: reads CHANGELOG.md's version headings in order and checks the first two are v0.1.7 then v0.1.6."""
+    Proves 932.1: reads CHANGELOG.md's version headings in order and checks v0.1.7 comes right before v0.1.6."""
     record_property("proves", "932.1")
     names, _ = section("932.1", "v0.1.7")
-    assert names[:2] == ["v0.1.7", "v0.1.6"], \
-        f"932.1: CHANGELOG.md's newest headings are not v0.1.7 then v0.1.6: {names}"
+    i = names.index("v0.1.7")
+    assert names[i + 1:i + 2] == ["v0.1.6"], \
+        f"932.1: CHANGELOG.md's v0.1.7 section is not right above v0.1.6: {names}"
 
 
 def fix_line(crit, numbers, others):
@@ -215,36 +216,34 @@ def test_changelog_v017_names_key_fix(record_property):
     fix_line("932.3", ("#931", "#907"), ("#929", "#928"))
 
 
-def test_install_file_calls_v017(record_property):
-    """The install file calls Dokima's entry workflow at v0.1.7.
+def test_changelog_has_v018_on_top():
+    """The newest changelog section is v0.1.8, above v0.1.7, naming #936 and #934."""
+    names, text = section("939", "v0.1.8")
+    assert names[:2] == ["v0.1.8", "v0.1.7"], f"939: CHANGELOG.md's newest headings are not v0.1.8 then v0.1.7: {names}"
+    missing = unnamed(text, ("#936", "#934"))
+    assert not missing, f"939: the v0.1.8 section does not name {missing}, fixes merged since v0.1.7"
 
-    Proves 932.4: reads every job of `dokima/install/dokima.yml` and checks the one calling Dokima's entry workflow
-    names the tag v0.1.7."""
-    record_property("proves", "932.4")
+
+def test_install_file_calls_v018():
+    """The install file calls Dokima's entry workflow at v0.1.8."""
     flow = yaml.safe_load(read("dokima/install/dokima.yml"))
     uses = [job.get("uses", "") for job in (flow.get("jobs") or {}).values()]
-    assert "dokima-dev/dokima/.github/workflows/entry.yml@v0.1.7" in uses, \
-        f"932.4: the install file does not call entry.yml@v0.1.7; its jobs use {uses}"
+    assert "dokima-dev/dokima/.github/workflows/entry.yml@v0.1.8" in uses, \
+        f"939: the install file does not call entry.yml@v0.1.8; its jobs use {uses}"
 
 
-def test_readme_names_v017(record_property):
-    """The README's install steps name v0.1.7 as the release to run.
-
-    Proves 932.5: reads the README's Install section and checks the only version it names is v0.1.7."""
-    record_property("proves", "932.5")
+def test_readme_names_v018():
+    """The README's install steps name v0.1.8 as the release to run, and no other version."""
     match = re.search(r"^## Install\s*$(.*?)(?=^## |\Z)", read("README.md"), re.S | re.M)
-    assert match, "932.5: README.md has no '## Install' section"
+    assert match, "939: README.md has no '## Install' section"
     named = sorted({m.group(0) for m in VERSION.finditer(match.group(1))})
-    assert named == ["v0.1.7"], f"932.5: the README's Install section names {named}, not v0.1.7 alone"
+    assert named == ["v0.1.8"], f"939: the README's Install section names {named}, not v0.1.8 alone"
 
 
-def test_wiki_names_v017(record_property):
-    """The wiki's install page names v0.1.7 as the release to run.
-
-    Proves 932.6: reads `docs/wiki/Installing.md` and checks the only version it names is v0.1.7."""
-    record_property("proves", "932.6")
+def test_wiki_names_v018():
+    """The wiki's install page names v0.1.8 as the release to run, and no other version."""
     named = sorted({m.group(0) for m in VERSION.finditer(read("docs/wiki/Installing.md"))})
-    assert named == ["v0.1.7"], f"932.6: the wiki's Installing page names {named}, not v0.1.7 alone"
+    assert named == ["v0.1.8"], f"939: the wiki's Installing page names {named}, not v0.1.8 alone"
 
 
 def test_install_file_calls_newest_version(record_property):

@@ -2,6 +2,12 @@
 
 What each version of Dokima does.
 
+## v0.1.8
+
+δokima can approve and merge its own pull requests.
+
+- An opt-in setting, `merge.auto_approve`, off by default, lets δokima approve and merge its own pull requests once code review passed and required checks are green, with a one-line note; the audit says when main requires a review the app cannot give, and `python3 -m dokima.setup auto-approve OWNER/REPO` lets the app bypass that review while keeping required checks (#936, #934).
+
 ## v0.1.7
 
 Test baseline on repos with no tests yet, and rejected model keys.
