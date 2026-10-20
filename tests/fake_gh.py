@@ -14,7 +14,8 @@ What it answers (OWNER/REPO is the state's repo; any other repo is logged as uns
                                                                         main's rule; 404 "Branch not protected" if none
                                         its "strict" (must be up to date) is the state's "strict"[branch], true when absent
                                         the full rule lists the state's "review_bypass_apps" (app ids) as
-                                        required_pull_request_reviews.bypass_pull_request_allowances.apps
+                                        required_pull_request_reviews.bypass_pull_request_allowances.apps,
+                                        requiring code owners unless the state's "code_owner_reviews" is false
     gh api [-X GET] repos/OWNER/REPO/rulesets[?...]                     the state's "rulesets" (none when absent), listed
     gh api [-X GET] repos/OWNER/REPO/rulesets/ID                        one of them in full; "fail" key "rulesets"
     gh api [-X GET] repos/OWNER/REPO/installation                       the app's {"app_id": 1, "permissions": {...}}
@@ -223,7 +224,8 @@ def rest(state, method, path, fields):
         apps = state.get("review_bypass_apps")
         if apps is not None:
             full["required_pull_request_reviews"] = {
-                "required_approving_review_count": 1, "require_code_owner_reviews": True,
+                "required_approving_review_count": 1,
+                "require_code_owner_reviews": state.get("code_owner_reviews", True),
                 "bypass_pull_request_allowances": {"users": [], "teams": [],
                                                    "apps": [{"id": a, "slug": f"app-{a}", "name": f"App {a}"}
                                                             for a in apps]}}

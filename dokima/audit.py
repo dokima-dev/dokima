@@ -244,6 +244,25 @@ def auto_merge(github, repo, rule, queue=True):
             f"it off the other list to keep your approval."], None
 
 
+def bot_review(github, repo, rule):
+    """The line saying main requires a review Dokima's app cannot give, and the fix (#934)."""
+    need = (rule or {}).get("required_review")
+    if not need:
+        return []
+    try:
+        app = github.app_id(repo)
+    except FAILED as e:
+        return [f"Auto approve is not verified: GitHub said `{reason(e)}` when the audit read Dokima's app."]
+    if app in ((rule or {}).get("review_bypass_apps") or []):
+        return []
+    if need == "code owners":
+        return ["Auto approve is on, but `main` requires a review from code owners that Dokima's app cannot give: turn "
+                "off \"Require review from Code Owners\" or let the app bypass pull request reviews "
+                "(`python3 -m dokima.setup auto-approve` does the bypass)."]
+    return ["Auto approve is on, but `main` requires an approving review that Dokima's app cannot give: let the app "
+            "bypass pull request reviews (`python3 -m dokima.setup auto-approve` does it)."]
+
+
 def check(github, repo, root=".", has_board=True):
     """(lines, notes): compare()'s lines, and the auto-merge state, which is no drift.
 
@@ -283,6 +302,8 @@ def check(github, repo, root=".", has_board=True):
         drift, note = auto_merge(github, repo, rules["main"], (got.get("merge") or {}).get("queue", True) is not False)
         lines += drift
         notes += [note] if note else []
+        if (got.get("merge") or {}).get("auto_approve") is True:
+            lines += bot_review(github, repo, rules["main"])
     return lines, notes
 
 
@@ -401,8 +422,11 @@ class GitHub:
             raise
         checks = rule.get("required_status_checks") or {}
         exempt = ((rule.get("required_pull_request_reviews") or {}).get("bypass_pull_request_allowances") or {})
+        reviews = rule.get("required_pull_request_reviews")
         return {"required_checks": checks.get("contexts") or [c["context"] for c in checks.get("checks") or []],
                 "review_bypass_apps": [a["id"] for a in exempt.get("apps") or []],
+                "required_review": "code owners" if (reviews or {}).get("require_code_owner_reviews") else
+                                   "approving" if reviews is not None else None,
                 "up_to_date": bool(checks.get("strict"))}
 
     def permissions(self, repo):

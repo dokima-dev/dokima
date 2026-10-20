@@ -320,8 +320,10 @@ def test_setting_a_locked_setting_fails_the_run_naming_it(tmp_path, record_prope
     """Each of the five locked settings, set by a repo, fails the run naming it.
 
     Sets each locked setting in turn and checks the reader exits non-zero and names it; a repo setting an open
-    setting beside it still passes, so the check is not a refusal of every file. Proves 793.10."""
+    setting beside it still passes, so the check is not a refusal of every file. Proves 793.10. Owner approval stays
+    locked for a repo with auto approve on too. Proves 934.6."""
     record_property("proves", "793.10")
+    record_property("proves", "934.6")
     merged("793.10", str(tmp_path / "open"), "records:\n  branch: history\n")
     missed = []
     for key in LOCKED:
@@ -329,3 +331,7 @@ def test_setting_a_locked_setting_fails_the_run_naming_it(tmp_path, record_prope
         if code == 0 or f"integrity.{key}" not in err:
             missed.append(f"integrity.{key}: exit {code}, said {err.strip()[-300:]!r}")
     assert not missed, "793.10: a locked setting did not fail the run, naming it:\n" + "\n".join(missed)
+    code, _, err = settings(str(tmp_path / "opted"), "merge:\n  auto_approve: true\nintegrity:\n  owner_approval: false\n")
+    assert code != 0 and "integrity.owner_approval" in err, \
+        (f"934.6: a repo with auto approve on set owner approval itself, and the run did not fail naming it: "
+         f"exit {code}, said {err.strip()[-300:]!r}")

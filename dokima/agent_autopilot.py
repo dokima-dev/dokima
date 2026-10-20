@@ -929,6 +929,21 @@ def merge_outcome(repo, pr):
                            f"(merge state {st.get('mergeStateStatus') or 'unknown'})")
 
 
+def auto_approve():
+    """True when the repo opted in to Dokima approving its own pull requests (`merge.auto_approve`, #934)."""
+    return (settings.read().get("merge") or {}).get("auto_approve") is True
+
+
+def approval_note(repo, pr, rec, tested):
+    """Posts Dokima's one-line approval on the pull request (#934).
+
+    It links the code review's record and names the checks green on the tested head."""
+    checks = ", ".join(f"`{c}`" for c in sorted(required_checks(repo, default_branch(repo))))
+    agent_github.gh("pr", "comment", str(pr), "-R", repo, "--body",
+                    f"Dokima approved this pull request: its code review passed ([record]({rec.get('run', '')})) and "
+                    f"{checks} are green on {tested[:7]}.")
+
+
 def automerge(repo, number, tested=None):
     """On autopilot, merge the open pull request built for the issue.
 

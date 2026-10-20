@@ -12,6 +12,10 @@ with no agents section yet gets one, starting from the old `.dokima/agents.yml` 
     python3 -m dokima.setup needs
     python3 -m dokima.setup add SUB --agent AGENT --secret SECRET --model MODEL --role ROLE [--role ROLE ...] --key
     python3 -m dokima.setup add SUB --agent AGENT --secret SECRET --model MODEL --role ROLE --sign-in --region REGION
+    python3 -m dokima.setup auto-approve OWNER/REPO
+
+auto-approve turns on `merge.auto_approve` (#934): it lets Dokima's app bypass the required review of `branch.default`
+(main when empty), keeping its required checks, then saves the setting.
 """
 import argparse
 import base64
@@ -26,6 +30,7 @@ import tarfile
 
 import yaml
 
+from dokima import settings
 from dokima.settings import REPO_FILE as SETTINGS
 
 OLD_SETTINGS = os.path.join(".dokima", "agents.yml")  # where the agents section lived before #794
@@ -111,6 +116,8 @@ def value_and_comment(rest):
 
 def scalar(value):
     """VALUE written so YAML reads it back as the same string."""
+    if isinstance(value, bool):
+        return "true" if value else "false"
     plain = str(value)
     try:
         if plain.strip() == plain and yaml.safe_load(f"k: {plain}") == {"k": plain}:
@@ -217,8 +224,42 @@ def add(a):
     print(f"Stored {a.secret} and wrote {a.name} into {SETTINGS}.")
 
 
+def gh_json(*args, stdin=None):
+    """`gh api ARGS` read as JSON, or fail with GitHub's reason."""
+    p = subprocess.run(["gh", "api", *args], input=stdin, capture_output=True, text=True)
+    if p.returncode:
+        raise Failed(f"GitHub refused `gh api {' '.join(args)}`: {p.stderr.strip() or p.stdout.strip()}")
+    return json.loads(p.stdout or "{}")
+
+
+def auto_approve(repo):
+    """Let Dokima's app bypass the default branch's required review, then save `merge.auto_approve: true`.
+
+    Only the rule's review part is written, so the checks the branch requires stay."""
+    got = settings.read()
+    branch = (got.get("branch") or {}).get("default") or "main"
+    app = (got.get("bot") or {}).get("slug") or "dokima-runtime"
+    path = f"repos/{repo}/branches/{branch}/protection/required_pull_request_reviews"
+    allowed = gh_json(path).get("bypass_pull_request_allowances") or {}
+    bypass = {"users": [u["login"] for u in allowed.get("users") or []],
+              "teams": [t["slug"] for t in allowed.get("teams") or []],
+              "apps": [a["slug"] for a in allowed.get("apps") or []]}
+    if app not in bypass["apps"]:
+        bypass["apps"].append(app)
+        gh_json("-X", "PATCH", path, "--input", "-", stdin=json.dumps({"bypass_pull_request_allowances": bypass}))
+    text = open(SETTINGS).read() if os.path.exists(SETTINGS) else ""
+    try:
+        text = saved_text(text, [(["merge", "auto_approve"], True)])
+    except (ValueError, yaml.YAMLError) as e:
+        raise Failed(f"Setup could not read {SETTINGS}, so auto approve was not saved: {e}")
+    os.makedirs(os.path.dirname(SETTINGS), exist_ok=True)
+    with open(SETTINGS, "w") as f:
+        f.write(text)
+    print(f"{app} may now bypass {branch}'s required review, and {SETTINGS} turns auto approve on.")
+
+
 def main(argv):
-    """needs | add SUB ...: list a subscription's inputs, or store one.
+    """needs | add SUB ... | auto-approve REPO: list inputs, store one, or opt in.
 
     Exits 1 saying why a step failed."""
     parser = argparse.ArgumentParser(prog="python3 -m dokima.setup")
@@ -234,12 +275,14 @@ def main(argv):
     how.add_argument("--key", action="store_true", help="read the key from standard input")
     how.add_argument("--sign-in", action="store_true", help="sign in through the agent's own login")
     p.add_argument("--region")
+    p = sub.add_parser("auto-approve", help="let Dokima approve and merge its own pull requests")
+    p.add_argument("repo", help="OWNER/REPO")
     a = parser.parse_args(argv)
     if a.cmd == "needs":
         print(NEEDS, end="")
         return 0
     try:
-        add(a)
+        auto_approve(a.repo) if a.cmd == "auto-approve" else add(a)
     except Failed as e:
         print(e, file=sys.stderr)
         return 1

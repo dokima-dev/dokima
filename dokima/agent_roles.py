@@ -537,11 +537,15 @@ def main(argv):
                         step = ("stop", "All tests passed with main's newest commit. Approve the pull request on GitHub "
                                         "to merge it, or review it with a command to send it back.")
                 if gate == "passed":
-                    # On autopilot the code review's approval stands in for the owner's: the pull request merges by itself.
-                    on = autopilot()
+                    # On autopilot, or with auto approve on (#934), the code review's approval stands in for the owner's:
+                    # the pull request merges by itself.
+                    auto = auto_approve()
+                    on = True if auto else autopilot()
                     if on is None:
                         step = ("stop", f"{UNREAD} {step[1]}")
                     elif on:
+                        if auto:
+                            approval_note(repo, pr, rec, tested)
                         pr, how, why = automerge(repo, number, tested)
                         if how == "merged":
                             step = ("merged", f"Autopilot merged PR #{pr}; what it unblocks starts when the issue closes.")
@@ -637,7 +641,8 @@ def main(argv):
         if undecided:
             # GitHub refused the decision, so the board step must not wait on GitHub's state to show Needs you.
             open(os.path.join(out, "undecided"), "w").write("")
-        print(" ".join(step[:3]) if step[0] == "start" else "stop")
+        # A pull request merged or queued by itself waited on no one, so it is not said as a stop.
+        print(" ".join(step[:3]) if step[0] == "start" else step[0] if step[0] in ("merged", "queued") else "stop")
         return 0
     if argv[1] == "recheck":
         rec = json.load(open(os.path.join(argv[3], "record.json")))
@@ -784,6 +789,7 @@ from dokima.agent_autopilot import (
     file_split, AUTOPILOT, autopilot_label, issue_tree, switch_autopilot, autopilot_comment, AUTOPILOT_START_LINE, named,
     file_issues, record_links, set_title, rerun_checks, start_waiting, open_on_autopilot, open_blockers_of, close_done_parents,
     autopilot_closed, AUTOPILOT_LINES, UNREAD, on_autopilot, approves_work, merge_gate, open_pr, automerge,
+    auto_approve, approval_note,
     unconfirmed_comment, merge_tree, queue_failed)
 from dokima.plan import repo_approvers
 from dokima.agent_next import next_step, waiting, board_place, next_line, blocks_since_owner
