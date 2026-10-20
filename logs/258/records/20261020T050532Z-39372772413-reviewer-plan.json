@@ -1,0 +1,293 @@
+{
+ "role": "reviewer",
+ "stage": "plan",
+ "run_id": "39372772413",
+ "commit_before": "437dcacb55b6ac8f84ef1d35543d8bf0cd6c8016",
+ "started_by": "dokima-runtime[bot]",
+ "models": [
+  "claude-opus-5-5"
+ ],
+ "report": {
+  "duration_ms": 118116,
+  "turns": 14,
+  "cost_usd": 0.7650561999999999,
+  "tokens_in": 693084,
+  "tokens_out": 9564
+ },
+ "log": "https://github.com/dokima-dev/dokima/blob/logs/logs/258/39372772413-reviewer-plan.md",
+ "run": "https://github.com/dokima-dev/dokima/actions/runs/39372772413",
+ "handback": {
+  "previous_step": {
+   "did": [
+    "The planner wrote nine criteria and nine failing tests for nightly journeys on the sandbox.",
+    "The planner let the run's own key write issues, to file bugs."
+   ],
+   "decided": [
+    "Journeys keep stand-in agents that call no model.",
+    "Bugs are filed on Dokima's own repo every night a journey fails."
+   ],
+   "open": [
+    "Three owner questions wait: real agents, repeat bugs, planning a parked issue."
+   ]
+  },
+  "verdict": "block",
+  "summary": "The plan proves only the issue opening is the test account's; the owner's start of a split is unproven.",
+  "raises": [
+   {
+    "kind": "blocker",
+    "to": "planner",
+    "label": "258.2: owner's start unproven",
+    "text": "258.2 proves only the issue opening. The split's /work is the owner's step too; bot comments start nothing. Fix: test that /work also uses the test account's key.",
+    "evidence": "`rules/identity.md:6` says bot comments never start anything; `test_the_owners_steps_are_taken_by_the_test_account` plays only `issue opened`.",
+    "raised_by": "reviewer",
+    "id": "R1"
+   },
+   {
+    "kind": "blocker",
+    "to": "planner",
+    "label": "258.4, 258.5: unplayed",
+    "text": "Question and split steps run only on a fake sandbox, so a real one posting nothing passes. Fix: also play them on the real sandbox against the fake gh.",
+    "evidence": "`tests/test_nightly_journeys.py` uses `NightSandbox` for 258.4 and 258.5; no test calls `Sandbox.do` with `question posted` or `split posted`.",
+    "raised_by": "reviewer",
+    "id": "R2"
+   }
+  ],
+  "answers": [],
+  "asks": [
+   {
+    "ask": "it gates nothing and never shows on cards",
+    "source": "https://github.com/dokima-dev/dokima/issues/258",
+    "criterion": "258.9"
+   },
+   {
+    "ask": "A sandbox repo running the same Dokima app and workflows from main",
+    "source": "https://github.com/dokima-dev/dokima/issues/258",
+    "criterion": "258.1"
+   },
+   {
+    "ask": "a test account standing in for me, with a token limited to that repo",
+    "source": "https://github.com/dokima-dev/dokima/issues/258",
+    "criterion": "258.2"
+   },
+   {
+    "ask": "A nightly workflow plays me through a few real journeys",
+    "source": "https://github.com/dokima-dev/dokima/issues/258",
+    "criterion": "258.1"
+   },
+   {
+    "ask": "a new issue to merged",
+    "source": "https://github.com/dokima-dev/dokima/issues/258",
+    "criterion": "258.3"
+   },
+   {
+    "ask": "a question that stops for me",
+    "source": "https://github.com/dokima-dev/dokima/issues/258",
+    "criterion": "258.4"
+   },
+   {
+    "ask": "a split that files its stories",
+    "source": "https://github.com/dokima-dev/dokima/issues/258",
+    "criterion": "258.5"
+   },
+   {
+    "ask": "It checks what I would see",
+    "source": "https://github.com/dokima-dev/dokima/issues/258",
+    "criterion": "258.3"
+   },
+   {
+    "ask": "then cleans up",
+    "source": "https://github.com/dokima-dev/dokima/issues/258",
+    "criterion": "258.6"
+   },
+   {
+    "ask": "A journey that fails files a bug like any other issue.",
+    "source": "https://github.com/dokima-dev/dokima/issues/258",
+    "criterion": "258.8"
+   }
+  ],
+  "behaviors": [
+   {
+    "criterion": "258.1",
+    "one_behavior": true,
+    "why": "The schedule plays main's newest commit."
+   },
+   {
+    "criterion": "258.2",
+    "one_behavior": true,
+    "why": "One key opens the issue."
+   },
+   {
+    "criterion": "258.3",
+    "one_behavior": true,
+    "why": "One journey judged step by step."
+   },
+   {
+    "criterion": "258.4",
+    "one_behavior": true,
+    "why": "One step passes only on Needs you."
+   },
+   {
+    "criterion": "258.5",
+    "one_behavior": true,
+    "why": "One step passes only when stories are listed."
+   },
+   {
+    "criterion": "258.6",
+    "one_behavior": true,
+    "why": "Opened issues and pull requests end closed."
+   },
+   {
+    "criterion": "258.7",
+    "one_behavior": true,
+    "why": "Pushed branches are deleted."
+   },
+   {
+    "criterion": "258.8",
+    "one_behavior": true,
+    "why": "One bug per failed journey, with its content."
+   },
+   {
+    "criterion": "258.9",
+    "one_behavior": true,
+    "why": "Only schedule or hand starts it."
+   }
+  ],
+  "edge_cases": [
+   {
+    "criterion": "258.1",
+    "cut": [],
+    "missing": []
+   },
+   {
+    "criterion": "258.2",
+    "cut": [],
+    "missing": [
+     "The owner's start of the split posted with the test account's key."
+    ]
+   },
+   {
+    "criterion": "258.3",
+    "cut": [],
+    "missing": []
+   },
+   {
+    "criterion": "258.4",
+    "cut": [],
+    "missing": []
+   },
+   {
+    "criterion": "258.5",
+    "cut": [],
+    "missing": []
+   },
+   {
+    "criterion": "258.6",
+    "cut": [],
+    "missing": []
+   },
+   {
+    "criterion": "258.7",
+    "cut": [],
+    "missing": []
+   },
+   {
+    "criterion": "258.8",
+    "cut": [],
+    "missing": []
+   },
+   {
+    "criterion": "258.9",
+    "cut": [],
+    "missing": []
+   }
+  ],
+  "tests": [
+   {
+    "test": "tests/test_nightly_journeys.py::test_every_night_the_play_through_runs_on_mains_newest_commit",
+    "only_its_behavior": true,
+    "why": "Evaluates a scheduled run's played commit."
+   },
+   {
+    "test": "tests/test_nightly_journeys.py::test_the_owners_steps_are_taken_by_the_test_account",
+    "only_its_behavior": true,
+    "why": "Checks the key on the issue opening only."
+   },
+   {
+    "test": "tests/test_nightly_journeys.py::test_the_nightly_run_plays_a_new_issue_to_merged",
+    "only_its_behavior": true,
+    "why": "Plays the merge journey, right and stale cards."
+   },
+   {
+    "test": "tests/test_nightly_journeys.py::test_the_nightly_run_checks_a_question_stops_for_the_owner",
+    "only_its_behavior": true,
+    "why": "Question step passes or fails on Needs you."
+   },
+   {
+    "test": "tests/test_nightly_journeys.py::test_the_nightly_run_checks_a_split_files_its_stories",
+    "only_its_behavior": true,
+    "why": "Split step passes or fails on listed stories."
+   },
+   {
+    "test": "tests/test_nightly_journeys.py::test_after_the_journeys_every_issue_and_pull_request_they_opened_is_closed",
+    "only_its_behavior": true,
+    "why": "Real clean-up closes only play-through items."
+   },
+   {
+    "test": "tests/test_nightly_journeys.py::test_after_the_journeys_every_branch_they_pushed_is_deleted",
+    "only_its_behavior": true,
+    "why": "Real clean-up deletes only play-through branches."
+   },
+   {
+    "test": "tests/test_nightly_journeys.py::test_a_failed_journey_files_a_bug_on_dokimas_repo",
+    "only_its_behavior": true,
+    "why": "One bug filed per failed journey, none when all pass."
+   },
+   {
+    "test": "tests/test_nightly_journeys.py::test_the_nightly_run_gates_nothing",
+    "only_its_behavior": true,
+    "why": "Reads the triggers only."
+   }
+  ],
+  "size": "ok",
+  "boxes": {
+   "dropped": "none",
+   "added": [
+    {
+     "what": "The run's own key may write issues, loosening an older test.",
+     "kind": "needed",
+     "serves": "258.8"
+    }
+   ],
+   "superseded": "none",
+   "conflicts": "none",
+   "edges": {
+    "258.1": "covered",
+    "258.2": "missing: the owner's start of the split",
+    "258.3": "covered",
+    "258.4": "covered",
+    "258.5": "covered",
+    "258.6": "covered",
+    "258.7": "covered",
+    "258.8": "covered",
+    "258.9": "covered"
+   },
+   "poor_tests": [
+    {
+     "test": "tests/test_nightly_journeys.py::test_the_owners_steps_are_taken_by_the_test_account",
+     "passes_with": "A sandbox posting the split's start with the app key.",
+     "fix": "Also play the split's start and check its key."
+    },
+    {
+     "test": "tests/test_nightly_journeys.py::test_the_nightly_run_checks_a_split_files_its_stories",
+     "passes_with": "A real sandbox whose split steps post nothing.",
+     "fix": "Also play the split steps on the real sandbox against the fake gh."
+    }
+   ]
+  }
+ },
+ "check": {
+  "passed": true,
+  "problems": []
+ },
+ "url": "https://github.com/dokima-dev/dokima/issues/258#issuecomment-6283792013"
+}
