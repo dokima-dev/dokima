@@ -1,0 +1,448 @@
+{
+ "role": "planner",
+ "stage": null,
+ "run_id": "39371735874",
+ "commit_before": "829d0a83ed00558084751341fafa9821951c6f98",
+ "started_by": "dokima-runtime[bot]",
+ "models": [
+  "claude-opus-5-5"
+ ],
+ "report": {
+  "duration_ms": 158614,
+  "turns": 15,
+  "cost_usd": 1.1333544000000002,
+  "tokens_in": 939118,
+  "tokens_out": 17102
+ },
+ "log": "https://github.com/dokima-dev/dokima/blob/logs/logs/747/39371735874-planner.md",
+ "run": "https://github.com/dokima-dev/dokima/actions/runs/39371735874",
+ "handback": {
+  "kind": "feature",
+  "title": "One shared Dokima App with a one-click install",
+  "summary": "Every repo runs Dokima through one shared App, set up fully by its install.",
+  "feature": "Installing one shared App onboards a repo fully; runs get tokens from a small service, and self-made Apps still work.",
+  "stories": [
+   {
+    "title": "Register the shared App from a prefilled manifest",
+    "user_story": "The owner registers Dokima's shared App with one click, and never handles its private key.",
+    "acceptance_criteria": [
+     {
+      "text": "The shared App's manifest asks for write access to workflows, secrets and administration.",
+      "words": "The cost is broader App permissions (workflows, secrets, administration)",
+      "source": "https://github.com/dokima-dev/dokima/issues/747#issuecomment-6254370728",
+      "files": [
+       "dokima/app.json",
+       "dokima/register.py"
+      ],
+      "no_edge_cases": "Its own planner lists them with its tests."
+     },
+     {
+      "text": "When the owner runs registration, GitHub's new App page opens prefilled, so one Create click registers it.",
+      "words": "a prefilled App manifest, so the owner clicks Create once",
+      "source": "https://github.com/dokima-dev/dokima/issues/747#issuecomment-6254370728",
+      "files": [
+       "dokima/app.json",
+       "dokima/register.py"
+      ],
+      "no_edge_cases": "Its own planner lists them with its tests."
+     },
+     {
+      "text": "When the owner clicks Create, the App's private key is stored in the service and never saved to disk.",
+      "words": "GitHub hands the App's private key straight to the setup script, which stores it in the service. No download, and no customer ever holds it.",
+      "source": "https://github.com/dokima-dev/dokima/issues/747#issuecomment-6254370728",
+      "files": [
+       "dokima/app.json",
+       "dokima/register.py"
+      ],
+      "no_edge_cases": "Its own planner lists them with its tests."
+     }
+    ],
+    "non_functional": [],
+    "depends_on": []
+   },
+   {
+    "title": "A small service trades a run's identity for a token",
+    "user_story": "Runs on any repo act as Dokima's shared bot, while its private key stays in one place.",
+    "acceptance_criteria": [
+     {
+      "text": "When a run sends its signed identity, the service returns a short-lived token for that repo only.",
+      "words": "exchanges it with a small service dokima-dev hosts, which checks the run really is that repo with Dokima installed and returns a short-lived token scoped to it",
+      "source": "https://github.com/dokima-dev/dokima/issues/747",
+      "files": [
+       "dokima/service.py"
+      ],
+      "no_edge_cases": "Its own planner lists them with its tests."
+     },
+     {
+      "text": "When the run's repo does not have the shared App installed, the service refuses and returns no token.",
+      "words": "checks the run really is that repo with Dokima installed",
+      "source": "https://github.com/dokima-dev/dokima/issues/747",
+      "files": [
+       "dokima/service.py"
+      ],
+      "no_edge_cases": "Its own planner lists them with its tests."
+     },
+     {
+      "text": "When the signed identity is forged, expired or for another repo, the service refuses and returns no token.",
+      "words": "checks the run really is that repo",
+      "source": "https://github.com/dokima-dev/dokima/issues/747",
+      "files": [
+       "dokima/service.py"
+      ],
+      "no_edge_cases": "Its own planner lists them with its tests."
+     },
+     {
+      "text": "When a shared App run files a Dokima bug upstream, the service returns a key for that repo.",
+      "words": "Under the shared App, the service must mint that key instead.",
+      "source": "https://github.com/dokima-dev/dokima/issues/747#issuecomment-6254370728",
+      "files": [
+       "dokima/service.py"
+      ],
+      "no_edge_cases": "Its own planner lists them with its tests."
+     }
+    ],
+    "non_functional": [
+     {
+      "text": "The App's private key is read only inside the service, and no reply ever carries it.",
+      "why": "Anyone holding it could act as Dokima everywhere.",
+      "words": "The App's private key never leaves the service.",
+      "source": "https://github.com/dokima-dev/dokima/issues/747",
+      "files": [
+       "dokima/service.py"
+      ],
+      "no_edge_cases": "Its own planner lists them with its tests."
+     }
+    ],
+    "depends_on": [
+     0
+    ]
+   },
+   {
+    "title": "Runs get their GitHub token from the service",
+    "user_story": "An adopter's runs act as Dokima's shared bot with no App key stored in their repo.",
+    "acceptance_criteria": [
+     {
+      "text": "When a repo holds no App key of its own, each run gets its GitHub token from the service.",
+      "words": "the adopter's workflow requests GitHub's signed identity token (OIDC) and exchanges it with a small service dokima-dev hosts",
+      "source": "https://github.com/dokima-dev/dokima/issues/747",
+      "files": [
+       "dokima/install/dokima.yml",
+       ".github/workflows/entry.yml",
+       "dokima/apptoken.py"
+      ],
+      "no_edge_cases": "Its own planner lists them with its tests."
+     },
+     {
+      "text": "When a repo holds its own App key, runs act as that self-made App, as they do today.",
+      "words": "keeping self-made Apps as a fallback for teams that refuse a shared one",
+      "source": "https://github.com/dokima-dev/dokima/issues/747",
+      "files": [
+       "dokima/install/dokima.yml",
+       ".github/workflows/entry.yml",
+       "dokima/apptoken.py"
+      ],
+      "no_edge_cases": "Its own planner lists them with its tests."
+     },
+     {
+      "text": "(manual) A fresh repo on the shared App takes a first issue from autopilot start to merged; needs real GitHub.",
+      "words": "acceptance item 13 on #272 passes under the shared App, and the self-made App path still works",
+      "source": "https://github.com/dokima-dev/dokima/issues/747",
+      "files": [
+       "dokima/install/dokima.yml",
+       ".github/workflows/entry.yml",
+       "dokima/apptoken.py"
+      ],
+      "no_edge_cases": "Its own planner lists them with its tests."
+     }
+    ],
+    "non_functional": [],
+    "depends_on": [
+     1
+    ]
+   },
+   {
+    "title": "Installing the App onboards the repo",
+    "user_story": "Installing the App sets up each picked repo fully, with no manual step left for the owner.",
+    "acceptance_criteria": [
+     {
+      "text": "Installing the App puts the Dokima workflow and settings file on the default branch, with no pull request.",
+      "words": "Installing the App onboards everything with no setup PR. Our service adds the workflow and `settings.yaml`",
+      "source": "https://github.com/dokima-dev/dokima/issues/747#issuecomment-6254370728",
+      "files": [
+       "dokima/onboard.py"
+      ],
+      "no_edge_cases": "Its own planner lists them with its tests."
+     },
+     {
+      "text": "When onboarding finishes, a first issue is open on the repo.",
+      "words": "and opens a first issue",
+      "source": "https://github.com/dokima-dev/dokima/issues/747#issuecomment-6254370728",
+      "files": [
+       "dokima/onboard.py"
+      ],
+      "no_edge_cases": "Its own planner lists them with its tests."
+     },
+     {
+      "text": "When the repo's default branch is not main, onboarding writes to that branch.",
+      "words": "**Default branch** read from the repo, never assumed to be `main` (#874).",
+      "source": "https://github.com/dokima-dev/dokima/issues/747#issuecomment-6257060752",
+      "files": [
+       "dokima/onboard.py"
+      ],
+      "no_edge_cases": "Its own planner lists them with its tests."
+     },
+     {
+      "text": "When onboarding finishes, the repo holds a code owners file naming the owner who installed the App.",
+      "words": "**CODEOWNERS** naming the owner who may give commands and approve.",
+      "source": "https://github.com/dokima-dev/dokima/issues/747#issuecomment-6257060752",
+      "files": [
+       "dokima/onboard.py"
+      ],
+      "no_edge_cases": "Its own planner lists them with its tests."
+     },
+     {
+      "text": "When onboarding finishes, the repo variable holds the App's id.",
+      "words": "**App id** set as the repo variable.",
+      "source": "https://github.com/dokima-dev/dokima/issues/747#issuecomment-6257060752",
+      "files": [
+       "dokima/onboard.py"
+      ],
+      "no_edge_cases": "Its own planner lists them with its tests."
+     },
+     {
+      "text": "When onboarding finishes, every label Dokima uses exists on the repo, and labels already there are unchanged.",
+      "words": "**Labels** Dokima uses created up front",
+      "source": "https://github.com/dokima-dev/dokima/issues/747#issuecomment-6257060752",
+      "files": [
+       "dokima/onboard.py"
+      ],
+      "no_edge_cases": "Its own planner lists them with its tests."
+     },
+     {
+      "text": "When the repo has a tests folder, onboarding names it in the settings, so test runs stay inside it.",
+      "words": "**Tests folder** found or asked for, and Dokima's test runs scoped to it (#877).",
+      "source": "https://github.com/dokima-dev/dokima/issues/747#issuecomment-6257060752",
+      "files": [
+       "dokima/onboard.py"
+      ],
+      "no_edge_cases": "Its own planner lists them with its tests."
+     },
+     {
+      "text": "When the repo has no tests yet, onboarding still finishes and the first issue asks where tests will live.",
+      "words": "Handle a repo with no tests yet without failing the baseline.",
+      "source": "https://github.com/dokima-dev/dokima/issues/747#issuecomment-6257060752",
+      "files": [
+       "dokima/onboard.py"
+      ],
+      "no_edge_cases": "Its own planner lists them with its tests."
+     }
+    ],
+    "non_functional": [],
+    "depends_on": [
+     0
+    ]
+   },
+   {
+    "title": "Onboarding protects the default branch",
+    "user_story": "Nothing merges unproven on an onboarded repo, while the owner can still push an emergency fix.",
+    "acceptance_criteria": [
+     {
+      "text": "When onboarding finishes, the default branch requires the all tests and Acceptance criteria checks.",
+      "words": "**Required checks always on** (`all tests`, `Acceptance criteria`): nothing merges unproven",
+      "source": "https://github.com/dokima-dev/dokima/issues/747#issuecomment-6257614785",
+      "files": [
+       "dokima/protect.py"
+      ],
+      "no_edge_cases": "Its own planner lists them with its tests."
+     },
+     {
+      "text": "When onboarding finishes, the default branch requires a code owner's approval.",
+      "words": "**Owner (code-owner) approval on by default**",
+      "source": "https://github.com/dokima-dev/dokima/issues/747#issuecomment-6257614785",
+      "files": [
+       "dokima/protect.py"
+      ],
+      "no_edge_cases": "Its own planner lists them with its tests."
+     },
+     {
+      "text": "When onboarding finishes, the rules do not bind admins, so the owner can push directly.",
+      "words": "**Admin enforcement off**, so the owner can still push an emergency fix.",
+      "source": "https://github.com/dokima-dev/dokima/issues/747#issuecomment-6257614785",
+      "files": [
+       "dokima/protect.py"
+      ],
+      "no_edge_cases": "Its own planner lists them with its tests."
+     },
+     {
+      "text": "On a free private repo, onboarding finishes without protection and says what is lost and how to get it.",
+      "words": "Setup must detect that and say so plainly (what is lost, how to get it), not fail.",
+      "source": "https://github.com/dokima-dev/dokima/issues/747#issuecomment-6257614785",
+      "files": [
+       "dokima/protect.py"
+      ],
+      "no_edge_cases": "Its own planner lists them with its tests."
+     }
+    ],
+    "non_functional": [],
+    "depends_on": [
+     0
+    ]
+   },
+   {
+    "title": "The setup page after install",
+    "user_story": "After installing, the owner adds their model key on GitHub and chooses whether Dokima's bugs reach its team.",
+    "acceptance_criteria": [
+     {
+      "text": "After install, the setup page links straight to the repo's secrets page on GitHub.",
+      "words": "After Install, the setup page links the customer straight to their repo's GitHub secrets page, and they paste the key there.",
+      "source": "https://github.com/dokima-dev/dokima/issues/747#issuecomment-6254370728",
+      "files": [
+       "dokima/setup_page.py"
+      ],
+      "no_edge_cases": "Its own planner lists them with its tests."
+     },
+     {
+      "text": "When the owner ticks the bug report box, the repo's upstream setting names Dokima's repo.",
+      "words": "The setup page has a checkbox, \"Send Dokima's own bugs to the Dokima team\". It writes the upstream-repo setting from #745",
+      "source": "https://github.com/dokima-dev/dokima/issues/747#issuecomment-6254370728",
+      "files": [
+       "dokima/setup_page.py"
+      ],
+      "no_edge_cases": "Its own planner lists them with its tests."
+     },
+     {
+      "text": "When the owner leaves the bug report box unticked, the upstream setting stays off.",
+      "words": "which stays off by default",
+      "source": "https://github.com/dokima-dev/dokima/issues/747#issuecomment-6254370728",
+      "files": [
+       "dokima/setup_page.py"
+      ],
+      "no_edge_cases": "Its own planner lists them with its tests."
+     }
+    ],
+    "non_functional": [
+     {
+      "text": "The setup page has no field for the model key, and the service never receives one.",
+      "why": "The key stays with the owner and GitHub.",
+      "words": "The model key never touches Dokima's service.",
+      "source": "https://github.com/dokima-dev/dokima/issues/747#issuecomment-6254370728",
+      "files": [
+       "dokima/setup_page.py"
+      ],
+      "no_edge_cases": "Its own planner lists them with its tests."
+     }
+    ],
+    "depends_on": [
+     3
+    ]
+   },
+   {
+    "title": "Bug reports filed home under the shared App",
+    "user_story": "Dokima's own bugs reach its team from any repo, carrying nothing of the repo's own code.",
+    "acceptance_criteria": [
+     {
+      "text": "When a run on the shared App files a Dokima bug upstream, the issue opens using the service's key.",
+      "words": "Under the shared App, the service must mint that key instead.",
+      "source": "https://github.com/dokima-dev/dokima/issues/747#issuecomment-6254370728",
+      "files": [
+       "dokima/upstream.py"
+      ],
+      "no_edge_cases": "Its own planner lists them with its tests."
+     },
+     {
+      "text": "When a raise is filed upstream, it carries only Dokima's step, its error and the version, no code blocks.",
+      "words": "Recommended: send only Dokima's step, its error from Dokima's own code and the version; drop code blocks and non-Dokima paths.",
+      "source": "https://github.com/dokima-dev/dokima/issues/747#issuecomment-6254370728",
+      "files": [
+       "dokima/upstream.py"
+      ],
+      "no_edge_cases": "Its own planner lists them with its tests."
+     }
+    ],
+    "non_functional": [],
+    "depends_on": [
+     1
+    ]
+   },
+   {
+    "title": "Onboard a repo from the command line",
+    "user_story": "An owner with the GitHub command line onboards another repo with one command.",
+    "acceptance_criteria": [
+     {
+      "text": "When the owner runs the init command on a repo, it joins the existing install and gets onboarded.",
+      "words": "Adds the repo to the existing installation",
+      "source": "https://github.com/dokima-dev/dokima/issues/747#issuecomment-6203494000",
+      "files": [
+       "dokima/init.py",
+       "gh-dokima"
+      ],
+      "no_edge_cases": "Its own planner lists them with its tests."
+     },
+     {
+      "text": "When the init command is given the model key, it is stored as a repo secret, not in an environment.",
+      "words": "App key and model key placed where the thin install can read them: repo secrets, not the `keys` environment (#876).",
+      "source": "https://github.com/dokima-dev/dokima/issues/747#issuecomment-6257060752",
+      "files": [
+       "dokima/init.py",
+       "gh-dokima"
+      ],
+      "no_edge_cases": "Its own planner lists them with its tests."
+     }
+    ],
+    "non_functional": [],
+    "depends_on": [
+     3
+    ]
+   }
+  ],
+  "links": {
+   "blocked_by": [],
+   "blocks": [
+    749
+   ],
+   "relates_to": [
+    41,
+    272,
+    273,
+    363,
+    930,
+    942
+   ]
+  },
+  "raises": [
+   {
+    "kind": "question",
+    "to": "owner",
+    "label": "App already registered",
+    "text": "The App is already registered. Is the prefilled manifest still wanted? The plan keeps it, to set its permissions.",
+    "evidence": "The 2026-10-18 comment names App ID 5373929, already registered as dokima-dev.",
+    "raised_by": "planner",
+    "id": "P1"
+   },
+   {
+    "kind": "question",
+    "to": "owner",
+    "label": "Setup as pull request",
+    "text": "Should teams refusing the broad permissions get the setup as a pull request instead? The plan leaves this out.",
+    "evidence": "The 2026-10-18 comment marks it Open: offer review as a PR instead.",
+    "raised_by": "planner",
+    "id": "P2"
+   },
+   {
+    "kind": "question",
+    "to": "owner",
+    "label": "What bug reports carry",
+    "text": "Should bug reports filed home carry only Dokima's step, its error and the version? The plan assumes so.",
+    "evidence": "The 2026-10-18 comment leaves this open for Reza, with that recommendation.",
+    "raised_by": "planner",
+    "id": "P3"
+   }
+  ],
+  "answers": []
+ },
+ "check": {
+  "passed": true,
+  "problems": []
+ },
+ "url": "https://github.com/dokima-dev/dokima/issues/747#issuecomment-6283655791"
+}
