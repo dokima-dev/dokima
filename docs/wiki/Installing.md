@@ -6,7 +6,7 @@ Nothing to host: it all runs in GitHub Actions. You do need a GitHub App, secret
 
 ## Requirements
 
-- A GitHub repo, ideally in an **organization** (the project board and merge queue need one; on personal repos those extras are skipped).
+- A GitHub repo, ideally in an **organization** (the merge queue needs one; on personal repos it is skipped). The project board works on both.
 - A Claude subscription: runs use Claude Code with an OAuth token.
 - Python 3.12 and `pytest`. Other languages are **Planned**.
 
@@ -30,7 +30,7 @@ Add these as **repo** secrets and variables (Settings, Secrets and variables, Ac
 | `DOKIMA_APP_ID` | variable | The app's ID |
 | `DOKIMA_APP_KEY` | secret | The app's private key |
 | `CLAUDE_CODE_OAUTH_TOKEN` | secret | Claude Code token for the agents |
-| `DOKIMA_BOARD` | variable, optional | Project board as `org/number` |
+| `DOKIMA_BOARD` | variable, optional | Project board as `org/number`, or `user:login/number` for a personal account's project |
 
 `dokima.yml` hands each secret to δokima by name. If your settings name another agent key (`CODEX_API_KEY` or `KIMI_API_KEY`), add its line under `secrets:` in `dokima.yml` too. Settings may name only the agent keys `CLAUDE_CODE_OAUTH_TOKEN`, `CODEX_API_KEY` and `KIMI_API_KEY`. Any other never reaches the jobs, and the audit and the run say so. Use a declared name, or ask for yours to be declared in a release.
 
@@ -51,7 +51,7 @@ Require these checks: **`dokima / full-suite / all tests`** and **`dokima / acce
 
 ## 5. Board (optional)
 
-A Project with single-select fields:
+An organization's or a personal account's Project with single-select fields:
 
 | Field | Options |
 |---|---|

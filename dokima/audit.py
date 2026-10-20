@@ -1,6 +1,6 @@
 """Compare the repo's live settings with the manifest; report drift on one pinned Setup issue.
 
-    python3 -m dokima.audit OWNER/REPO   # reads DOKIMA_BOARD ("org/number", optional) and .github/CODEOWNERS where it runs
+    python3 -m dokima.audit OWNER/REPO   # reads DOKIMA_BOARD ("org/number" or "user:login/number", optional) and .github/CODEOWNERS where it runs
 
 compare() first creates every label Dokima needs that the repo lacks, then gives one plain line per setting that
 differs from dokima/manifest.py or could not be read; run() puts them
@@ -375,7 +375,7 @@ def pages(out):
     return items
 
 
-BOARD_QUERY = 'query($o:String!,$n:Int!){organization(login:$o){projectV2(number:$n){id fields(first:50){nodes{... on ProjectV2SingleSelectField{id name options{id name color description}}}} views(first:50){nodes{id name layout filter}}}}}'
+BOARD_QUERY = 'id fields(first:50){nodes{... on ProjectV2SingleSelectField{id name options{id name color description}}}} views(first:50){nodes{id name layout filter}}'
 
 
 class GitHub:
@@ -383,13 +383,11 @@ class GitHub:
 
     def __init__(self, spec):
         self.spec = spec
-        self.owner, number = spec.split("/") if spec else ("", "0")
-        self.number = int(number)
         self.project = None
 
     def board(self):
         if self.project is None:
-            p = board.gql(BOARD_QUERY, o=self.owner, n=self.number)["organization"]["projectV2"]
+            p = board.project(board.gql, self.spec, BOARD_QUERY)
             if p is None:
                 raise RuntimeError(f"no board {self.spec}")
             self.project = p
