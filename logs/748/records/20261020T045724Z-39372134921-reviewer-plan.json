@@ -1,0 +1,430 @@
+{
+ "role": "reviewer",
+ "stage": "plan",
+ "run_id": "39372134921",
+ "commit_before": "829d0a83ed00558084751341fafa9821951c6f98",
+ "started_by": "dokima-runtime[bot]",
+ "models": [
+  "claude-opus-5-5"
+ ],
+ "report": {
+  "duration_ms": 71404,
+  "turns": 8,
+  "cost_usd": 0.5298226,
+  "tokens_in": 326734,
+  "tokens_out": 8430
+ },
+ "log": "https://github.com/dokima-dev/dokima/blob/logs/logs/748/39372134921-reviewer-plan.md",
+ "run": "https://github.com/dokima-dev/dokima/actions/runs/39372134921",
+ "handback": {
+  "previous_step": {
+   "did": [
+    "The planner split the issue into three stories with 21 criteria in all."
+   ],
+   "decided": [
+    "Review stays a verb, stop cancels the running agent, status replies with the stage.",
+    "Old command forms stay only where the parser keeps them for the move."
+   ],
+   "open": [
+    "Three questions for the owner: what stop does, what status says, whether review stays."
+   ]
+  },
+  "verdict": "block",
+  "summary": "The plan drops one ask: a comment with no mention must still count as the owner's words.",
+  "raises": [
+   {
+    "kind": "blocker",
+    "to": "planner",
+    "label": "No criterion: owner's words",
+    "text": "The owner asked that a comment with no mention stays the owner's words. No criterion carries it, yet S2.8 changes what reaches agents. Add one, with a test.",
+    "evidence": "Issue text: `It is still the owner's words and still part of the contract (#738).`",
+    "raised_by": "reviewer",
+    "id": "R1"
+   }
+  ],
+  "answers": [],
+  "asks": [
+   {
+    "ask": "The verb is required. Code routes on it; there is no verb-less chat mode.",
+    "source": "https://github.com/dokima-dev/dokima/issues/748",
+    "criterion": "S2.1"
+   },
+   {
+    "ask": "Prose is accepted only where an agent is about to run, so it has somewhere to go.",
+    "source": "https://github.com/dokima-dev/dokima/issues/748",
+    "criterion": "S2.3"
+   },
+   {
+    "ask": "| `plan` | yes | planner |",
+    "source": "https://github.com/dokima-dev/dokima/issues/748",
+    "criterion": "S1.1"
+   },
+   {
+    "ask": "| `plan` | yes | planner | (prose goes to the planner)",
+    "source": "https://github.com/dokima-dev/dokima/issues/748",
+    "criterion": "S2.5"
+   },
+   {
+    "ask": "| `work` | yes | worker |",
+    "source": "https://github.com/dokima-dev/dokima/issues/748",
+    "criterion": "S1.2"
+   },
+   {
+    "ask": "| `work` | yes | worker | (prose goes to the worker)",
+    "source": "https://github.com/dokima-dev/dokima/issues/748",
+    "criterion": "S2.6"
+   },
+   {
+    "ask": "| `autopilot start` | yes | the next agent, then dropped |",
+    "source": "https://github.com/dokima-dev/dokima/issues/748",
+    "criterion": "S1.4"
+   },
+   {
+    "ask": "the next agent",
+    "source": "https://github.com/dokima-dev/dokima/issues/748",
+    "criterion": "S2.7"
+   },
+   {
+    "ask": "then dropped",
+    "source": "https://github.com/dokima-dev/dokima/issues/748",
+    "criterion": "S2.8"
+   },
+   {
+    "ask": "| `autopilot stop` | no | |",
+    "source": "https://github.com/dokima-dev/dokima/issues/748",
+    "criterion": "S1.5"
+   },
+   {
+    "ask": "| `stop` | no | |",
+    "source": "https://github.com/dokima-dev/dokima/issues/748",
+    "criterion": "S1.6"
+   },
+   {
+    "ask": "| `status` | no | |",
+    "source": "https://github.com/dokima-dev/dokima/issues/748",
+    "criterion": "S1.7"
+   },
+   {
+    "ask": "`@dokima` alone ... a fixed reply listing the verbs. No model call.",
+    "source": "https://github.com/dokima-dev/dokima/issues/748",
+    "criterion": "S2.1"
+   },
+   {
+    "ask": "or with an unknown verb: a fixed reply listing the verbs. No model call.",
+    "source": "https://github.com/dokima-dev/dokima/issues/748",
+    "criterion": "S2.2"
+   },
+   {
+    "ask": "Prose after a no-prose command: Dokima replies that the command takes no text and does nothing.",
+    "source": "https://github.com/dokima-dev/dokima/issues/748",
+    "criterion": "S2.3"
+   },
+   {
+    "ask": "A comment with no `@dokima` triggers nothing.",
+    "source": "https://github.com/dokima-dev/dokima/issues/748",
+    "criterion": "S1.9"
+   },
+   {
+    "ask": "It is still the owner's words and still part of the contract (#738).",
+    "source": "https://github.com/dokima-dev/dokima/issues/748",
+    "criterion": "missing"
+   },
+   {
+    "ask": "`/plan`, `/work`, `/autopilot` keep working for one version",
+    "source": "https://github.com/dokima-dev/dokima/issues/748#issuecomment-6203610802",
+    "criterion": "S1.10"
+   },
+   {
+    "ask": "with a reply pointing to the new form",
+    "source": "https://github.com/dokima-dev/dokima/issues/748#issuecomment-6203610802",
+    "criterion": "S2.4"
+   },
+   {
+    "ask": "the `@dokima` lexicon applies everywhere, not only the parser",
+    "source": "https://github.com/dokima-dev/dokima/issues/748#issuecomment-6203610802",
+    "criterion": "S1.3"
+   },
+   {
+    "ask": "Every place slash commands appear today (22 files on main) ... plus README and the wiki.",
+    "source": "https://github.com/dokima-dev/dokima/issues/748#issuecomment-6203610802",
+    "criterion": "S3.3"
+   },
+   {
+    "ask": "Card text ... say `@dokima plan`, never `/plan`.",
+    "source": "https://github.com/dokima-dev/dokima/issues/748#issuecomment-6203610802",
+    "criterion": "S3.1"
+   },
+   {
+    "ask": "bot replies and fixed messages say `@dokima plan`, never `/plan`.",
+    "source": "https://github.com/dokima-dev/dokima/issues/748#issuecomment-6203610802",
+    "criterion": "S3.2"
+   },
+   {
+    "ask": "the parser accepts both the configured bot name and `@dokima`.",
+    "source": "https://github.com/dokima-dev/dokima/issues/748#issuecomment-6203610802",
+    "criterion": "S1.8"
+   },
+   {
+    "ask": "A static test scans every shipped file and fails on any `/plan`, `/work`, `/autopilot`, `/review` left behind.",
+    "source": "https://github.com/dokima-dev/dokima/issues/748#issuecomment-6203610802",
+    "criterion": "S3.3"
+   }
+  ],
+  "behaviors": [
+   {
+    "criterion": "S1.1",
+    "one_behavior": true,
+    "why": "Mention plus plan starts the planner."
+   },
+   {
+    "criterion": "S1.2",
+    "one_behavior": true,
+    "why": "Mention plus work starts the worker."
+   },
+   {
+    "criterion": "S1.3",
+    "one_behavior": true,
+    "why": "Mention plus review starts the reviewer; rests on question P3."
+   },
+   {
+    "criterion": "S1.4",
+    "one_behavior": true,
+    "why": "Mention plus autopilot start turns autopilot on."
+   },
+   {
+    "criterion": "S1.5",
+    "one_behavior": true,
+    "why": "Mention plus autopilot stop turns autopilot off."
+   },
+   {
+    "criterion": "S1.6",
+    "one_behavior": true,
+    "why": "Stop cancels the running agent; rests on question P1."
+   },
+   {
+    "criterion": "S1.7",
+    "one_behavior": true,
+    "why": "Status replies with the stage; rests on question P2."
+   },
+   {
+    "criterion": "S1.8",
+    "one_behavior": true,
+    "why": "The bot name works like the mention."
+   },
+   {
+    "criterion": "S1.9",
+    "one_behavior": true,
+    "why": "No mention triggers nothing."
+   },
+   {
+    "criterion": "S1.10",
+    "one_behavior": true,
+    "why": "An old command still starts the same thing."
+   },
+   {
+    "criterion": "S2.1",
+    "one_behavior": true,
+    "why": "A bare mention gets the fixed verb list."
+   },
+   {
+    "criterion": "S2.2",
+    "one_behavior": true,
+    "why": "An unknown verb gets the fixed verb list."
+   },
+   {
+    "criterion": "S2.3",
+    "one_behavior": true,
+    "why": "Text after a no-text command gets one fixed reply only."
+   },
+   {
+    "criterion": "S2.4",
+    "one_behavior": true,
+    "why": "An old command gets a reply naming the new form."
+   },
+   {
+    "criterion": "S2.5",
+    "one_behavior": true,
+    "why": "Plan text reaches the planner."
+   },
+   {
+    "criterion": "S2.6",
+    "one_behavior": true,
+    "why": "Work text reaches the worker."
+   },
+   {
+    "criterion": "S2.7",
+    "one_behavior": true,
+    "why": "Autopilot text reaches the next agent."
+   },
+   {
+    "criterion": "S2.8",
+    "one_behavior": true,
+    "why": "Autopilot text is gone for later agents."
+   },
+   {
+    "criterion": "S3.1",
+    "one_behavior": true,
+    "why": "Cards name only the new form."
+   },
+   {
+    "criterion": "S3.2",
+    "one_behavior": true,
+    "why": "Replies and fixed messages name only the new form."
+   },
+   {
+    "criterion": "S3.3",
+    "one_behavior": true,
+    "why": "A scan fails naming a file with an old form."
+   }
+  ],
+  "edge_cases": [
+   {
+    "criterion": "S1.1",
+    "cut": [],
+    "missing": []
+   },
+   {
+    "criterion": "S1.2",
+    "cut": [],
+    "missing": []
+   },
+   {
+    "criterion": "S1.3",
+    "cut": [],
+    "missing": []
+   },
+   {
+    "criterion": "S1.4",
+    "cut": [],
+    "missing": []
+   },
+   {
+    "criterion": "S1.5",
+    "cut": [],
+    "missing": []
+   },
+   {
+    "criterion": "S1.6",
+    "cut": [],
+    "missing": []
+   },
+   {
+    "criterion": "S1.7",
+    "cut": [],
+    "missing": []
+   },
+   {
+    "criterion": "S1.8",
+    "cut": [],
+    "missing": []
+   },
+   {
+    "criterion": "S1.9",
+    "cut": [],
+    "missing": []
+   },
+   {
+    "criterion": "S1.10",
+    "cut": [],
+    "missing": []
+   },
+   {
+    "criterion": "S2.1",
+    "cut": [],
+    "missing": []
+   },
+   {
+    "criterion": "S2.2",
+    "cut": [],
+    "missing": []
+   },
+   {
+    "criterion": "S2.3",
+    "cut": [],
+    "missing": []
+   },
+   {
+    "criterion": "S2.4",
+    "cut": [],
+    "missing": []
+   },
+   {
+    "criterion": "S2.5",
+    "cut": [],
+    "missing": []
+   },
+   {
+    "criterion": "S2.6",
+    "cut": [],
+    "missing": []
+   },
+   {
+    "criterion": "S2.7",
+    "cut": [],
+    "missing": []
+   },
+   {
+    "criterion": "S2.8",
+    "cut": [],
+    "missing": []
+   },
+   {
+    "criterion": "S3.1",
+    "cut": [],
+    "missing": []
+   },
+   {
+    "criterion": "S3.2",
+    "cut": [],
+    "missing": []
+   },
+   {
+    "criterion": "S3.3",
+    "cut": [],
+    "missing": []
+   }
+  ],
+  "tests": [],
+  "size": "ok",
+  "boxes": {
+   "dropped": [
+    {
+     "words": "It is still the owner's words and still part of the contract (#738).",
+     "source": "https://github.com/dokima-dev/dokima/issues/748"
+    }
+   ],
+   "added": "none",
+   "superseded": "none",
+   "conflicts": "none",
+   "edges": {
+    "S1.1": "covered",
+    "S1.2": "covered",
+    "S1.3": "covered",
+    "S1.4": "covered",
+    "S1.5": "covered",
+    "S1.6": "covered",
+    "S1.7": "covered",
+    "S1.8": "covered",
+    "S1.9": "covered",
+    "S1.10": "covered",
+    "S2.1": "covered",
+    "S2.2": "covered",
+    "S2.3": "covered",
+    "S2.4": "covered",
+    "S2.5": "covered",
+    "S2.6": "covered",
+    "S2.7": "covered",
+    "S2.8": "covered",
+    "S3.1": "covered",
+    "S3.2": "covered",
+    "S3.3": "covered"
+   },
+   "poor_tests": "none"
+  }
+ },
+ "check": {
+  "passed": true,
+  "problems": []
+ },
+ "url": "https://github.com/dokima-dev/dokima/issues/748#issuecomment-6283707071"
+}
