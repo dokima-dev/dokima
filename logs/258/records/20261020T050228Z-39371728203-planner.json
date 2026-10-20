@@ -1,0 +1,225 @@
+{
+ "role": "planner",
+ "stage": null,
+ "run_id": "39371728203",
+ "commit_before": "829d0a83ed00558084751341fafa9821951c6f98",
+ "started_by": "dokima-runtime[bot]",
+ "models": [
+  "claude-opus-5-5"
+ ],
+ "report": {
+  "duration_ms": 635744,
+  "turns": 27,
+  "cost_usd": 2.4903258,
+  "tokens_in": 2048015,
+  "tokens_out": 58266
+ },
+ "log": "https://github.com/dokima-dev/dokima/blob/logs/logs/258/39371728203-planner.md",
+ "run": "https://github.com/dokima-dev/dokima/actions/runs/39371728203",
+ "handback": {
+  "kind": "user_story",
+  "title": "Nightly journeys on the sandbox file what breaks",
+  "summary": "Every night, Dokima plays the owner's main journeys on a sandbox repo, cleans up, and files what breaks.",
+  "user_story": "The owner learns each morning which of their usual journeys broke overnight, as a filed bug.",
+  "acceptance_criteria": [
+   {
+    "text": "When the nightly schedule fires, the play-through plays main's newest commit on the sandbox.",
+    "words": "A nightly workflow plays me through a few real journeys",
+    "source": "https://github.com/dokima-dev/dokima/issues/258",
+    "files": [
+     ".github/workflows/playthrough.yml"
+    ],
+    "no_edge_cases": "A schedule has one shape: it always fires on main."
+   },
+   {
+    "text": "When a journey opens its issue, the test account's key opens it, not Dokima's app key.",
+    "words": "a test account standing in for me, with a token limited to that repo",
+    "source": "https://github.com/dokima-dev/dokima/issues/258",
+    "files": [
+     "dokima/playthrough.py"
+    ],
+    "no_edge_cases": "One key opens the issue; a missing key already fails the install."
+   },
+   {
+    "text": "When the nightly run plays, a new issue goes from opened to merged, each step's card judged.",
+    "words": "a new issue to merged",
+    "source": "https://github.com/dokima-dev/dokima/issues/258",
+    "files": [
+     "dokima/playthrough.py"
+    ],
+    "edge_cases": [
+     {
+      "case": "A card not redrawn fails its step and the run.",
+      "test": "tests/test_nightly_journeys.py::test_the_nightly_run_plays_a_new_issue_to_merged"
+     }
+    ]
+   },
+   {
+    "text": "When a stand-in plan asks the owner a question, that step passes only if the card shows Needs you.",
+    "words": "a question that stops for me",
+    "source": "https://github.com/dokima-dev/dokima/issues/258",
+    "files": [
+     "dokima/playthrough.py"
+    ],
+    "edge_cases": [
+     {
+      "case": "The card shows no Needs you after the question: the step fails.",
+      "test": "tests/test_nightly_journeys.py::test_the_nightly_run_checks_a_question_stops_for_the_owner"
+     }
+    ]
+   },
+   {
+    "text": "When the owner starts an approved split, that step passes only if the card lists every story.",
+    "words": "a split that files its stories",
+    "source": "https://github.com/dokima-dev/dokima/issues/258",
+    "files": [
+     "dokima/playthrough.py"
+    ],
+    "edge_cases": [
+     {
+      "case": "The card lists no stories: the step fails.",
+      "test": "tests/test_nightly_journeys.py::test_the_nightly_run_checks_a_split_files_its_stories"
+     }
+    ]
+   },
+   {
+    "text": "When the journeys end, every issue and pull request they opened is closed.",
+    "words": "then cleans up",
+    "source": "https://github.com/dokima-dev/dokima/issues/258",
+    "files": [
+     "dokima/playthrough.py"
+    ],
+    "edge_cases": [
+     {
+      "case": "A journey failed midway: clean-up still runs.",
+      "test": "tests/test_nightly_journeys.py::test_after_the_journeys_every_issue_and_pull_request_they_opened_is_closed"
+     },
+     {
+      "case": "The gallery's own issue and pull request stay open.",
+      "test": "tests/test_nightly_journeys.py::test_after_the_journeys_every_issue_and_pull_request_they_opened_is_closed"
+     }
+    ]
+   },
+   {
+    "text": "When the journeys end, every branch they pushed is deleted.",
+    "words": "then cleans up",
+    "source": "https://github.com/dokima-dev/dokima/issues/258",
+    "files": [
+     "dokima/playthrough.py"
+    ],
+    "edge_cases": [
+     {
+      "case": "A merged pull request's branch is deleted too.",
+      "test": "tests/test_nightly_journeys.py::test_after_the_journeys_every_branch_they_pushed_is_deleted"
+     },
+     {
+      "case": "The gallery's own branch is kept.",
+      "test": "tests/test_nightly_journeys.py::test_after_the_journeys_every_branch_they_pushed_is_deleted"
+     }
+    ]
+   },
+   {
+    "text": "When a journey fails, one bug is filed on Dokima's repo, naming the journey and quoting what failed.",
+    "words": "A journey that fails files a bug like any other issue.",
+    "source": "https://github.com/dokima-dev/dokima/issues/258",
+    "files": [
+     "dokima/playthrough.py",
+     ".github/workflows/playthrough.yml"
+    ],
+    "edge_cases": [
+     {
+      "case": "Every journey passes: no bug is filed.",
+      "test": "tests/test_nightly_journeys.py::test_a_failed_journey_files_a_bug_on_dokimas_repo"
+     }
+    ]
+   }
+  ],
+  "non_functional": [
+   {
+    "text": "The nightly run starts only on its schedule or by hand, never on a pull request.",
+    "why": "The owner said it gates nothing and never shows on cards.",
+    "words": "it gates nothing and never shows on cards",
+    "source": "https://github.com/dokima-dev/dokima/issues/258",
+    "files": [
+     ".github/workflows/playthrough.yml"
+    ],
+    "no_edge_cases": "Triggers are a fixed list in one file."
+   }
+  ],
+  "tests": {
+   "258.1": [
+    "tests/test_nightly_journeys.py::test_every_night_the_play_through_runs_on_mains_newest_commit"
+   ],
+   "258.2": [
+    "tests/test_nightly_journeys.py::test_the_owners_steps_are_taken_by_the_test_account"
+   ],
+   "258.3": [
+    "tests/test_nightly_journeys.py::test_the_nightly_run_plays_a_new_issue_to_merged"
+   ],
+   "258.4": [
+    "tests/test_nightly_journeys.py::test_the_nightly_run_checks_a_question_stops_for_the_owner"
+   ],
+   "258.5": [
+    "tests/test_nightly_journeys.py::test_the_nightly_run_checks_a_split_files_its_stories"
+   ],
+   "258.6": [
+    "tests/test_nightly_journeys.py::test_after_the_journeys_every_issue_and_pull_request_they_opened_is_closed"
+   ],
+   "258.7": [
+    "tests/test_nightly_journeys.py::test_after_the_journeys_every_branch_they_pushed_is_deleted"
+   ],
+   "258.8": [
+    "tests/test_nightly_journeys.py::test_a_failed_journey_files_a_bug_on_dokimas_repo"
+   ],
+   "258.9": [
+    "tests/test_nightly_journeys.py::test_the_nightly_run_gates_nothing"
+   ]
+  },
+  "test_changes": {
+   "tests/test_playthrough.py::test_the_key_is_minted_for_the_sandbox_repo_only": "Owner asks failed journeys to file bugs, so the run may write issues only."
+  },
+  "links": {
+   "blocked_by": [],
+   "blocks": [],
+   "relates_to": [
+    517,
+    862
+   ]
+  },
+  "raises": [
+   {
+    "kind": "question",
+    "to": "owner",
+    "label": "Stand-ins or real agents",
+    "text": "Should journeys run real agents that call a model? The plan keeps today's stand-ins, which cost nothing.",
+    "evidence": "`playthrough.yml` says stand-in agents call no model; the issue asks for real journeys.",
+    "raised_by": "planner",
+    "id": "P1"
+   },
+   {
+    "kind": "question",
+    "to": "owner",
+    "label": "Repeat bugs",
+    "text": "A journey broken for days files a bug every night. Skip while one is open? The plan files nightly.",
+    "evidence": "The issue says a failing journey files a bug, and names no repeat case.",
+    "raised_by": "planner",
+    "id": "P2"
+   },
+   {
+    "kind": "question",
+    "to": "owner",
+    "label": "Doubt: parked",
+    "text": "The issue says parked for later, yet autopilot started it. Plan it now? The plan assumes yes.",
+    "evidence": "The issue opens with Parked for later; autopilot started planning on 2026-10-20.",
+    "raised_by": "planner",
+    "id": "P3"
+   }
+  ],
+  "answers": []
+ },
+ "check": {
+  "passed": true,
+  "problems": []
+ },
+ "url": "https://github.com/dokima-dev/dokima/issues/258#issuecomment-6283655075"
+}
