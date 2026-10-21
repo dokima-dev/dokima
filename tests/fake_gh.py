@@ -18,6 +18,8 @@ What it answers (OWNER/REPO is the state's repo; any other repo is logged as uns
                                         requiring code owners unless the state's "code_owner_reviews" is false
     gh api [-X GET] repos/OWNER/REPO/rulesets[?...]                     the state's "rulesets" (none when absent), listed
     gh api [-X GET] repos/OWNER/REPO/rulesets/ID                        one of them in full; "fail" key "rulesets"
+    gh api [-X GET] repos/OWNER/REPO                                    the repo, its owner's type the state's "owner_type",
+                                                                        "Organization" when absent
     gh api [-X GET] repos/OWNER/REPO/installation                       the app's {"app_id": 1, "permissions": {...}}
     gh api [-X GET] repos/OWNER/REPO/actions/variables/NAME             the state's "variables"[NAME]; 404 when unset
     gh api [-X GET] repos/OWNER/REPO/actions/secrets[?...]              the state's "secrets" (names), Dokima's two keys
@@ -186,6 +188,9 @@ def rest(state, method, path, fields):
     path, _, query = path.lstrip("/").partition("?")
     params = dict(p.partition("=")[::2] for p in query.split("&") if p)
     prefix = f"repos/{state['repo']}/"
+    if method == "GET" and path == prefix.rstrip("/"):
+        reply(state, {"full_name": state["repo"], "owner": {"login": state["repo"].split("/")[0],
+                                                            "type": state.get("owner_type", "Organization")}})
     if not path.startswith(prefix):
         unsupported(state, f"{method} {path} is not on the repo {state['repo']}")
     rest_path, fail = path[len(prefix):], state.get("fail", {})

@@ -315,9 +315,16 @@ if a[:2] == ["repo", "view"]:
     sys.exit(0)
 state_file = log + ".checks"
 checks = json.load(open(state_file)) if os.path.exists(state_file) else ["all tests", "Acceptance criteria"]
+apps_file = log + ".apps"
+apps = json.load(open(apps_file)) if os.path.exists(apps_file) else []
+if path == "repos/acme/widgets" and method == "GET":
+    print(json.dumps({"full_name": "acme/widgets",
+                      "owner": {"login": "acme", "type": "User" if os.environ.get("FAKE_GH_DROP") else "Organization"}}))
+    sys.exit(0)
 if path.startswith("repos/acme/widgets/branches/main/protection") and method == "GET":
     reviews = {"required_approving_review_count": 1, "require_code_owner_reviews": True,
-               "bypass_pull_request_allowances": {"users": [], "teams": [], "apps": []}}
+               "bypass_pull_request_allowances": {"users": [], "teams": [],
+                                                  "apps": [{"slug": a, "name": a} for a in apps]}}
     if path.endswith("required_pull_request_reviews"):
         print(json.dumps(reviews))
     else:
@@ -330,6 +337,10 @@ if path.startswith("repos/acme/widgets/branches/main/protection") and method in 
         sys.exit(1)
     # Keeps main's required checks as GitHub would: a write to the whole rule or to its checks replaces them.
     sub = path[len("repos/acme/widgets/branches/main/protection"):].strip("/")
+    if sub == "required_pull_request_reviews" and not os.environ.get("FAKE_GH_DROP"):
+        # A personal account's repo (FAKE_GH_DROP) accepts the bypass and drops it, as GitHub does (#942).
+        body = json.loads(stdin) if stdin.strip() else {}
+        json.dump((body.get("bypass_pull_request_allowances") or {}).get("apps") or [], open(apps_file, "w"))
     if sub in ("", "required_status_checks"):
         try:
             body = json.loads(stdin) if stdin.strip() else {}
@@ -353,7 +364,7 @@ sys.exit(1)
 '''
 
 
-def run_setup(tmp_path, name, refuse=False):
+def run_setup(tmp_path, name, refuse=False, drop=False):
     """Runs `python3 -m dokima.setup auto-approve acme/widgets` in a temp repo.
 
     Returns (process, repo folder, gh calls, the checks main requires afterwards)."""
@@ -368,8 +379,11 @@ def run_setup(tmp_path, name, refuse=False):
     env = dict(os.environ, PATH=f"{bindir}{os.pathsep}{os.environ.get('PATH', '')}", PYTHONPATH=ROOT,
                FAKE_GH_LOG=str(log), GH_TOKEN="fake")
     env.pop("FAKE_GH_REFUSE", None)
+    env.pop("FAKE_GH_DROP", None)
     if refuse:
         env["FAKE_GH_REFUSE"] = "1"
+    if drop:
+        env["FAKE_GH_DROP"] = "1"
     p = subprocess.run([sys.executable, "-m", "dokima.setup", "auto-approve", "acme/widgets"], cwd=repo, env=env,
                        capture_output=True, text=True, timeout=60, stdin=subprocess.DEVNULL)
     calls = [json.loads(l) for l in log.read_text().splitlines()] if log.exists() else []
@@ -407,3 +421,39 @@ def test_setup_turns_auto_approve_on_and_lets_the_app_bypass_reviews(record_prop
     assert p.returncode != 0 and "Must have admin rights" in p.stdout + p.stderr, \
         (f"934.9: GitHub refused the protection change, and setup did not fail with GitHub's reason: exit "
          f"{p.returncode}, said {p.stdout}{p.stderr}")
+
+
+# #942: on a personal account's repo GitHub accepts the review bypass and drops it
+
+def test_setup_says_so_when_github_drops_the_bypass_on_a_personal_repo(tmp_path):
+    """On a personal repo, setup says the bypass was dropped and names the working route.
+
+    The fake accepts the bypass and drops it. Setup must exit non-zero, name the personal account and the removal of
+    the required review, and leave auto approve unsaved. Beside it, an organization's repo that keeps it succeeds."""
+    p, repo, calls, checks = run_setup(tmp_path, "personal", drop=True)
+    said = p.stdout + p.stderr
+    assert p.returncode != 0, f"#942: GitHub dropped the bypass, yet setup succeeded: {said}"
+    assert "personal account" in said and "required_pull_request_reviews" in said and "DELETE" in said, \
+        f"#942: setup did not say the bypass is dropped on a personal repo and how to remove the review: {said}"
+    got = settings.read(str(repo), warn=lambda m: None)
+    assert (got.get("merge") or {}).get("auto_approve") is not True, \
+        f"#942: setup saved auto approve though the bypass was dropped; merge is {got.get('merge')}"
+    assert checks == ["all tests", "Acceptance criteria"], f"#942: setup changed main's required checks: {checks}"
+
+    p, repo, calls, checks = run_setup(tmp_path, "org")
+    assert p.returncode == 0, f"#942: the bypass was kept, yet setup failed: {p.stdout}{p.stderr}"
+
+
+def test_the_audit_says_a_personal_repo_needs_the_review_removed(tmp_path):
+    """On a personal repo, the audit asks to remove the review, not add a bypass.
+
+    Beside it, the same rule on an organization's repo still names the bypass setup adds."""
+    on = {"auto_approve": True, "queue": False}
+    lines, bodies, a = audit_review_lines(tmp_path, "personal", on, review_bypass_apps=[42], owner_type="User")
+    assert len(lines) == 1, f"#942: expected one auto approve line on a personal repo; found {lines} in {bodies}\n{a.why()}"
+    assert "personal" in lines[0] and "remove" in lines[0] and "setup auto-approve" not in lines[0], \
+        f"#942: on a personal repo the line should ask to remove the review, not add a bypass: {lines[0]}"
+
+    lines, bodies, a = audit_review_lines(tmp_path, "org", on, review_bypass_apps=[42])
+    assert len(lines) == 1 and "setup auto-approve" in lines[0], \
+        f"#942: on an organization's repo the line should still name the bypass: {lines} in {bodies}\n{a.why()}"

@@ -232,10 +232,23 @@ def gh_json(*args, stdin=None):
     return json.loads(p.stdout or "{}")
 
 
+def dropped_bypass(repo, branch, app):
+    """Why GitHub did not keep the app's review bypass, and the route that works (#942)."""
+    if (gh_json(f"repos/{repo}").get("owner") or {}).get("type") == "User":
+        why = (f"{repo} belongs to a personal account, and GitHub keeps a review bypass only on an organization's "
+               f"repo, so {app}'s own approval can never count there.")
+    else:
+        why = f"GitHub did not keep {app} on {branch}'s review bypass."
+    return (f"{why} Auto approve was not saved. To use it, remove {branch}'s required review, keeping its required "
+            f"checks: `gh api -X DELETE repos/{repo}/branches/{branch}/protection/required_pull_request_reviews`, "
+            f"then set `merge.auto_approve: true` in {SETTINGS}.")
+
+
 def auto_approve(repo):
     """Let Dokima's app bypass the default branch's required review, then save `merge.auto_approve: true`.
 
-    Only the rule's review part is written, so the checks the branch requires stay."""
+    Only the rule's review part is written, so the checks the branch requires stay. GitHub drops the bypass on a
+    personal account's repo, so it is read back; when it is gone, nothing is saved and the route that works is named."""
     got = settings.read()
     branch = (got.get("branch") or {}).get("default") or "main"
     app = (got.get("bot") or {}).get("slug") or "dokima-runtime"
@@ -247,6 +260,9 @@ def auto_approve(repo):
     if app not in bypass["apps"]:
         bypass["apps"].append(app)
         gh_json("-X", "PATCH", path, "--input", "-", stdin=json.dumps({"bypass_pull_request_allowances": bypass}))
+        kept = (gh_json(path).get("bypass_pull_request_allowances") or {}).get("apps") or []
+        if app not in [a["slug"] for a in kept]:
+            raise Failed(dropped_bypass(repo, branch, app))
     text = open(SETTINGS).read() if os.path.exists(SETTINGS) else ""
     try:
         text = saved_text(text, [(["merge", "auto_approve"], True)])
