@@ -1,0 +1,114 @@
+{
+ "role": "planner",
+ "stage": null,
+ "run_id": "39539304474",
+ "commit_before": "0e29c966e7f13733bd15d7478bf200c96c3fda7a",
+ "started_by": "dokima-runtime[bot]",
+ "models": [
+  "claude-opus-5-5"
+ ],
+ "report": {
+  "duration_ms": 161173,
+  "turns": 21,
+  "cost_usd": 1.0207495999999998,
+  "tokens_in": 1145760,
+  "tokens_out": 14920
+ },
+ "log": "https://github.com/dokima-dev/dokima/blob/logs/logs/944/39539304474-planner.md",
+ "run": "https://github.com/dokima-dev/dokima/actions/runs/39539304474",
+ "handback": {
+  "kind": "feature",
+  "title": "The board works on personal accounts too",
+  "summary": "The board works with a personal account's project, not only an organization's.",
+  "links": {
+   "blocked_by": [],
+   "blocks": [],
+   "relates_to": [
+    942,
+    946
+   ]
+  },
+  "raises": [
+   {
+    "kind": "question",
+    "to": "owner",
+    "label": "Doubt: app access",
+    "text": "GitHub may refuse the app access to a personal account's board. Build it as asked anyway? The plan assumes yes.",
+    "evidence": "`.github/workflows/board.yml` uses the app token; `dokima/manifest.py` grants only `organization_projects`.",
+    "raised_by": "planner",
+    "id": "P1"
+   }
+  ],
+  "answers": [],
+  "feature": "Personal account boards work like organization boards: the board code reads them, then the install guide says so.",
+  "stories": [
+   {
+    "title": "Board code reads a personal account's project",
+    "user_story": "Owners on a personal account get card moves and a passing board audit, as organizations do.",
+    "context": "`dokima/board.py` and `dokima/audit.py` read the board only under `organization(login:)`, and `add_view` posts to `orgs/`. Every other caller (`scan.py`, `card.py`, `agent_roles.py`) goes through `board.Board`. PR #945 holds a working build: a `parse` of `org/number` or `user:login/number` and one `project()` reader both modules share; reuse it.",
+    "acceptance_criteria": [
+     {
+      "text": "When the board setting names a personal account's project, every board read finds that project.",
+      "words": "`DOKIMA_BOARD` names either an organization's project or a user's project (for example `user:<login>/<number>`, or found by owner type), and every board query reads it either way.",
+      "source": "https://github.com/dokima-dev/dokima/issues/944",
+      "files": [
+       "dokima/board.py"
+      ],
+      "edge_cases": [
+       {
+        "case": "A board setting naming neither an organization nor a user is refused with an error naming it.",
+        "test": "tests/test_user_board.py::test_a_board_setting_with_an_unknown_owner_type_is_refused"
+       }
+      ]
+     },
+     {
+      "text": "When a board view is missing, it is created on the project's own owner, organization or personal account.",
+      "words": "every board query reads it either way",
+      "source": "https://github.com/dokima-dev/dokima/issues/944",
+      "files": [
+       "dokima/board.py"
+      ],
+      "no_edge_cases": "One call to one place; the bad setting case is covered under the first criterion."
+     },
+     {
+      "text": "The audit checks the board fields Status, Action and Priority the same way on both kinds of board.",
+      "words": "The board fields (Status, Action, Priority) are checked the same way on both.",
+      "source": "https://github.com/dokima-dev/dokima/issues/944",
+      "files": [
+       "dokima/audit.py",
+       "dokima/board.py"
+      ],
+      "no_edge_cases": "A missing board already fails the audit with its reason today; nothing new to cover."
+     }
+    ],
+    "non_functional": [],
+    "depends_on": []
+   },
+   {
+    "title": "Install guide stops saying personal repos skip the board",
+    "user_story": "Owners on a personal account read in the install guide that the board works for them.",
+    "context": "`docs/wiki/Installing.md` Requirements says the board needs an organization and is skipped on personal repos; its `DOKIMA_BOARD` row names only `org/number`. The README on main no longer says either.",
+    "acceptance_criteria": [
+     {
+      "text": "The install guide no longer says personal repos skip the board.",
+      "words": "The install docs stop saying personal repos skip the board.",
+      "source": "https://github.com/dokima-dev/dokima/issues/944",
+      "files": [
+       "docs/wiki/Installing.md"
+      ],
+      "no_edge_cases": "A fixed page of text; there is no input to vary."
+     }
+    ],
+    "non_functional": [],
+    "depends_on": [
+     0
+    ]
+   }
+  ]
+ },
+ "check": {
+  "passed": true,
+  "problems": []
+ },
+ "url": "https://github.com/dokima-dev/dokima/issues/944#issuecomment-6307380443"
+}
