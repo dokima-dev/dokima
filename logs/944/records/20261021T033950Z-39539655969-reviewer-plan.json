@@ -1,0 +1,129 @@
+{
+ "role": "reviewer",
+ "stage": "plan",
+ "run_id": "39539655969",
+ "commit_before": "0e29c966e7f13733bd15d7478bf200c96c3fda7a",
+ "started_by": "dokima-runtime[bot]",
+ "models": [
+  "claude-opus-5-5"
+ ],
+ "report": {
+  "duration_ms": 48236,
+  "turns": 9,
+  "cost_usd": 0.42576020000000003,
+  "tokens_in": 343339,
+  "tokens_out": 4677
+ },
+ "log": "https://github.com/dokima-dev/dokima/blob/logs/logs/944/39539655969-reviewer-plan.md",
+ "run": "https://github.com/dokima-dev/dokima/actions/runs/39539655969",
+ "handback": {
+  "previous_step": {
+   "did": [
+    "The planner re-planned after the pull request clashed with main.",
+    "It split the work into two stories: board code, then the install guide."
+   ],
+   "decided": [
+    "A personal account's board is named as user, login and number."
+   ],
+   "open": [
+    "The owner is asked whether the app can reach a personal account's board."
+   ]
+  },
+  "verdict": "approve",
+  "summary": "The plan carries every ask; only the owner's question on app access stays open.",
+  "raises": [],
+  "answers": [],
+  "asks": [
+   {
+    "ask": "`DOKIMA_BOARD` names either an organization's project or a user's project (for example `user:<login>/<number>`, or found by owner type), and every board query reads it either way.",
+    "source": "https://github.com/dokima-dev/dokima/issues/944",
+    "criterion": "S1.1"
+   },
+   {
+    "ask": "The board fields (Status, Action, Priority) are checked the same way on both.",
+    "source": "https://github.com/dokima-dev/dokima/issues/944",
+    "criterion": "S1.3"
+   },
+   {
+    "ask": "The install docs stop saying personal repos skip the board.",
+    "source": "https://github.com/dokima-dev/dokima/issues/944",
+    "criterion": "S2.1"
+   },
+   {
+    "ask": "Tests for an org board and a user board.",
+    "source": "https://github.com/dokima-dev/dokima/issues/944",
+    "criterion": "S1.1"
+   }
+  ],
+  "behaviors": [
+   {
+    "criterion": "S1.1",
+    "one_behavior": true,
+    "why": "One setting form, one result: board reads find the personal project."
+   },
+   {
+    "criterion": "S1.2",
+    "one_behavior": true,
+    "why": "One case, a missing view, created under the right owner."
+   },
+   {
+    "criterion": "S1.3",
+    "one_behavior": true,
+    "why": "One check, the audit's field check, alike on both board kinds."
+   },
+   {
+    "criterion": "S2.1",
+    "one_behavior": true,
+    "why": "One sentence removed from the install guide."
+   }
+  ],
+  "edge_cases": [
+   {
+    "criterion": "S1.1",
+    "cut": [],
+    "missing": []
+   },
+   {
+    "criterion": "S1.2",
+    "cut": [],
+    "missing": []
+   },
+   {
+    "criterion": "S1.3",
+    "cut": [],
+    "missing": []
+   },
+   {
+    "criterion": "S2.1",
+    "cut": [],
+    "missing": []
+   }
+  ],
+  "tests": [],
+  "size": "ok",
+  "boxes": {
+   "dropped": "none",
+   "added": [
+    {
+     "what": "A missing view is created under the board's own owner.",
+     "kind": "needed",
+     "serves": "S1.2"
+    }
+   ],
+   "superseded": "none",
+   "conflicts": "none",
+   "edges": {
+    "S1.1": "covered",
+    "S1.2": "covered",
+    "S1.3": "covered",
+    "S2.1": "covered"
+   },
+   "poor_tests": "none"
+  }
+ },
+ "check": {
+  "passed": true,
+  "problems": []
+ },
+ "url": "https://github.com/dokima-dev/dokima/issues/944#issuecomment-6307427275"
+}
